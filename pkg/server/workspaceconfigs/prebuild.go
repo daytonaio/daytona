@@ -4,22 +4,23 @@
 package workspaceconfigs
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"sort"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	build_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceConfigService) SetPrebuild(workspaceConfigName string, createPrebuildDto dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error) {
-	workspaceConfig, err := s.Find(&WorkspaceConfigFilter{
+	ctx := context.Background()
+
+	workspaceConfig, err := s.Find(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfigName,
 	})
 	if err != nil {
@@ -38,14 +39,7 @@ func (s *WorkspaceConfigService) SetPrebuild(workspaceConfigName string, createP
 		return nil, errors.New("either the commit interval or trigger files must be specified")
 	}
 
-	gitProvider, gitProviderId, err := s.gitProviderService.GetGitProviderForUrl(workspaceConfig.RepositoryUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	repository, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-		Url: workspaceConfig.RepositoryUrl,
-	})
+	repository, gitProviderId, err := s.getRepositoryContext(ctx, workspaceConfig.RepositoryUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -74,13 +68,13 @@ func (s *WorkspaceConfigService) SetPrebuild(workspaceConfigName string, createP
 	// Remember the new webhook ID in case config saving fails
 	newWebhookId := ""
 
-	existingWebhookId, err := s.gitProviderService.GetPrebuildWebhook(gitProviderId, repository, s.prebuildWebhookEndpoint)
+	existingWebhookId, err := s.findPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
 	if err != nil {
 		return nil, err
 	}
 
 	if existingWebhookId == nil {
-		newWebhookId, err = s.gitProviderService.RegisterPrebuildWebhook(gitProviderId, repository, s.prebuildWebhookEndpoint)
+		newWebhookId, err = s.registerPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +83,7 @@ func (s *WorkspaceConfigService) SetPrebuild(workspaceConfigName string, createP
 	err = s.configStore.Save(workspaceConfig)
 	if err != nil {
 		if newWebhookId != "" {
-			err = s.gitProviderService.UnregisterPrebuildWebhook(gitProviderId, repository, newWebhookId)
+			err = s.unregisterPrebuildWebhook(ctx, gitProviderId, repository, newWebhookId)
 			if err != nil {
 				log.Error(err)
 			}
@@ -108,10 +102,10 @@ func (s *WorkspaceConfigService) SetPrebuild(workspaceConfigName string, createP
 	}, nil
 }
 
-func (s *WorkspaceConfigService) FindPrebuild(workspaceConfigFilter *WorkspaceConfigFilter, prebuildFilter *PrebuildFilter) (*dto.PrebuildDTO, error) {
+func (s *WorkspaceConfigService) FindPrebuild(workspaceConfigFilter *stores.WorkspaceConfigFilter, prebuildFilter *stores.PrebuildFilter) (*dto.PrebuildDTO, error) {
 	wc, err := s.configStore.Find(workspaceConfigFilter)
 	if err != nil {
-		return nil, ErrWorkspaceConfigNotFound
+		return nil, stores.ErrWorkspaceConfigNotFound
 	}
 
 	prebuild, err := wc.FindPrebuild(&models.MatchParams{
@@ -135,11 +129,11 @@ func (s *WorkspaceConfigService) FindPrebuild(workspaceConfigFilter *WorkspaceCo
 	}, nil
 }
 
-func (s *WorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *WorkspaceConfigFilter, prebuildFilter *PrebuildFilter) ([]*dto.PrebuildDTO, error) {
+func (s *WorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *stores.WorkspaceConfigFilter, prebuildFilter *stores.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
 	var result []*dto.PrebuildDTO
 	wcs, err := s.configStore.List(workspaceConfigFilter)
 	if err != nil {
-		return nil, ErrWorkspaceConfigNotFound
+		return nil, stores.ErrWorkspaceConfigNotFound
 	}
 
 	for _, wc := range wcs {
@@ -159,7 +153,9 @@ func (s *WorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *WorkspaceC
 }
 
 func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id string, force bool) []error {
-	workspaceConfig, err := s.Find(&WorkspaceConfigFilter{
+	ctx := context.Background()
+
+	workspaceConfig, err := s.Find(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfigName,
 	})
 	if err != nil {
@@ -168,7 +164,7 @@ func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id s
 
 	// Get all prebuilds for this workspace config's repository URL and
 	// if this is the last prebuild, unregister the Git provider webhook
-	prebuilds, err := s.ListPrebuilds(&WorkspaceConfigFilter{
+	prebuilds, err := s.ListPrebuilds(&stores.WorkspaceConfigFilter{
 		Url: &workspaceConfig.RepositoryUrl,
 	}, nil)
 	if err != nil {
@@ -176,19 +172,12 @@ func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id s
 	}
 
 	if len(prebuilds) == 1 {
-		gitProvider, gitProviderId, err := s.gitProviderService.GetGitProviderForUrl(workspaceConfig.RepositoryUrl)
+		repository, gitProviderId, err := s.getRepositoryContext(ctx, workspaceConfig.RepositoryUrl)
 		if err != nil {
 			return []error{err}
 		}
 
-		repository, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-			Url: workspaceConfig.RepositoryUrl,
-		})
-		if err != nil {
-			return []error{err}
-		}
-
-		existingWebhookId, err := s.gitProviderService.GetPrebuildWebhook(gitProviderId, repository, s.prebuildWebhookEndpoint)
+		existingWebhookId, err := s.findPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
 		if err != nil {
 			if force {
 				log.Error(err)
@@ -198,7 +187,7 @@ func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id s
 		}
 
 		if existingWebhookId != nil {
-			err = s.gitProviderService.UnregisterPrebuildWebhook(gitProviderId, repository, *existingWebhookId)
+			err = s.unregisterPrebuildWebhook(ctx, gitProviderId, repository, *existingWebhookId)
 			if err != nil {
 				if force {
 					log.Error(err)
@@ -209,9 +198,7 @@ func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id s
 		}
 	}
 
-	errs := s.buildService.MarkForDeletion(&builds.BuildFilter{
-		PrebuildIds: &[]string{id},
-	}, force)
+	errs := s.deleteBuilds(ctx, &id, nil, force)
 	if len(errs) > 0 {
 		if force {
 			for _, err := range errs {
@@ -235,23 +222,19 @@ func (s *WorkspaceConfigService) DeletePrebuild(workspaceConfigName string, id s
 	return nil
 }
 
+// TODO: revise build trigger strategy
+// We should discuss if the function should throw if the build can not be created or move on to the next one
 func (s *WorkspaceConfigService) ProcessGitEvent(data gitprovider.GitEventData) error {
-	var buildsToTrigger []models.Build
+	ctx := context.Background()
 
-	workspaceConfigs, err := s.List(&WorkspaceConfigFilter{
+	workspaceConfigs, err := s.List(&stores.WorkspaceConfigFilter{
 		Url: &data.Url,
 	})
 	if err != nil {
 		return err
 	}
-	gitProvider, _, err := s.gitProviderService.GetGitProviderForUrl(data.Url)
-	if err != nil {
-		return fmt.Errorf("failed to get git provider for URL: %s", err)
-	}
 
-	repo, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-		Url: data.Url,
-	})
+	repo, _, err := s.getRepositoryContext(ctx, data.Url)
 	if err != nil {
 		return fmt.Errorf("failed to get repository context: %s", err)
 	}
@@ -267,71 +250,34 @@ func (s *WorkspaceConfigService) ProcessGitEvent(data gitprovider.GitEventData) 
 		// Check if the commit's affected files and prebuild config's trigger files have any overlap
 		if len(prebuild.TriggerFiles) > 0 {
 			if slicesHaveCommonEntry(prebuild.TriggerFiles, data.AffectedFiles) {
-				buildsToTrigger = append(buildsToTrigger, models.Build{
-					ContainerConfig: models.ContainerConfig{
-						Image: workspaceConfig.Image,
-						User:  workspaceConfig.User,
-					},
-					BuildConfig: workspaceConfig.BuildConfig,
-					Repository:  repo,
-					EnvVars:     workspaceConfig.EnvVars,
-					PrebuildId:  prebuild.Id,
-				})
+				err := s.createBuild(ctx, workspaceConfig, repo, prebuild.Id)
+				if err != nil {
+					return fmt.Errorf("failed to create build: %s", err)
+				}
 				continue
 			}
 		}
 
-		newestBuild, err := s.buildService.Find(&builds.BuildFilter{
-			PrebuildIds: &[]string{prebuild.Id},
-			GetNewest:   util.Pointer(true),
-		})
+		newestBuild, err := s.findNewestBuild(ctx, prebuild.Id)
 		if err != nil {
-			buildsToTrigger = append(buildsToTrigger, models.Build{
-				ContainerConfig: models.ContainerConfig{
-					Image: workspaceConfig.Image,
-					User:  workspaceConfig.User,
-				},
-				BuildConfig: workspaceConfig.BuildConfig,
-				Repository:  repo,
-				EnvVars:     workspaceConfig.EnvVars,
-				PrebuildId:  prebuild.Id,
-			})
+			err := s.createBuild(ctx, workspaceConfig, repo, prebuild.Id)
+			if err != nil {
+				return fmt.Errorf("failed to create build: %s", err)
+			}
 			continue
 		}
 
-		commitsRange, err := gitProvider.GetCommitsRange(repo, newestBuild.Repository.Sha, data.Sha)
+		commitsRange, err := s.getCommitsRange(ctx, repo, newestBuild.Repository.Sha, data.Sha)
 		if err != nil {
 			return fmt.Errorf("failed to get commits range: %s", err)
 		}
 
 		// Check if the commit interval has been reached
 		if prebuild.CommitInterval != nil && commitsRange >= *prebuild.CommitInterval {
-			buildsToTrigger = append(buildsToTrigger, models.Build{
-				ContainerConfig: models.ContainerConfig{
-					Image: workspaceConfig.Image,
-					User:  workspaceConfig.User,
-				},
-				BuildConfig: workspaceConfig.BuildConfig,
-				Repository:  repo,
-				EnvVars:     workspaceConfig.EnvVars,
-				PrebuildId:  prebuild.Id,
-			})
-		}
-	}
-
-	for _, build := range buildsToTrigger {
-		createBuildDto := build_dto.BuildCreationData{
-			Image:       build.ContainerConfig.Image,
-			User:        build.ContainerConfig.User,
-			BuildConfig: build.BuildConfig,
-			Repository:  build.Repository,
-			EnvVars:     build.EnvVars,
-			PrebuildId:  build.PrebuildId,
-		}
-
-		_, err = s.buildService.Create(createBuildDto)
-		if err != nil {
-			return fmt.Errorf("failed to create build: %s", err)
+			err := s.createBuild(ctx, workspaceConfig, repo, prebuild.Id)
+			if err != nil {
+				return fmt.Errorf("failed to create build: %s", err)
+			}
 		}
 	}
 
@@ -340,14 +286,14 @@ func (s *WorkspaceConfigService) ProcessGitEvent(data gitprovider.GitEventData) 
 
 // Marks the [retention] oldest published builds for deletion for each prebuild
 func (s *WorkspaceConfigService) EnforceRetentionPolicy() error {
+	ctx := context.Background()
+
 	prebuilds, err := s.ListPrebuilds(nil, nil)
 	if err != nil {
 		return err
 	}
 
-	existingBuilds, err := s.buildService.List(&builds.BuildFilter{
-		States: &[]models.BuildState{models.BuildStatePublished},
-	})
+	existingBuilds, err := s.listPublishedBuilds(ctx)
 	if err != nil {
 		return err
 	}
@@ -373,9 +319,7 @@ func (s *WorkspaceConfigService) EnforceRetentionPolicy() error {
 
 			// Mark the oldest builds for deletion
 			for i := 0; i < numToDelete; i++ {
-				errs := s.buildService.MarkForDeletion(&builds.BuildFilter{
-					Id: &associatedBuilds[i].Id,
-				}, false)
+				errs := s.deleteBuilds(ctx, &associatedBuilds[i].Id, nil, false)
 				if len(errs) > 0 {
 					for _, err := range errs {
 						log.Error(err)

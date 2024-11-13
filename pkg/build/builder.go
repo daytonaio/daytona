@@ -10,7 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type IBuilder interface {
@@ -25,7 +25,7 @@ type Builder struct {
 	workspaceDir          string
 	image                 string
 	containerRegistry     *models.ContainerRegistry
-	buildStore            builds.BuildStore
+	buildStore            stores.BuildStore
 	buildImageNamespace   string
 	loggerFactory         logs.LoggerFactory
 	defaultWorkspaceImage string

@@ -9,6 +9,8 @@ import (
 	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -53,8 +55,8 @@ var expectedConfigMap map[string]*models.TargetConfig
 
 type TargetConfigServiceTestSuite struct {
 	suite.Suite
-	targetConfigService targetconfigs.ITargetConfigService
-	targetConfigStore   targetconfigs.TargetConfigStore
+	targetConfigService services.ITargetConfigService
+	targetConfigStore   stores.TargetConfigStore
 }
 
 func NewTargetConfigServiceTestSuite() *TargetConfigServiceTestSuite {
@@ -105,7 +107,7 @@ func (s *TargetConfigServiceTestSuite) TestMap() {
 func (s *TargetConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	targetConfig, err := s.targetConfigService.Find(&targetconfigs.TargetConfigFilter{
+	targetConfig, err := s.targetConfigService.Find(&stores.TargetConfigFilter{
 		Name: &targetConfig1.Name,
 	})
 	require.Nil(err)

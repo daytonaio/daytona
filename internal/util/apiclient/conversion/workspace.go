@@ -8,7 +8,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
 	wc_dto "github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
-	workspace_dto "github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 )
 
 func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
@@ -164,26 +163,4 @@ func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO)
 	}
 
 	return result
-}
-
-func CreateDtoToWorkspace(createWorkspaceDto workspace_dto.CreateWorkspaceDTO) *models.Workspace {
-	w := &models.Workspace{
-		Id:                  createWorkspaceDto.Id,
-		Name:                createWorkspaceDto.Name,
-		BuildConfig:         createWorkspaceDto.BuildConfig,
-		Repository:          createWorkspaceDto.Source.Repository,
-		EnvVars:             createWorkspaceDto.EnvVars,
-		TargetId:            createWorkspaceDto.TargetId,
-		GitProviderConfigId: createWorkspaceDto.GitProviderConfigId,
-	}
-
-	if createWorkspaceDto.Image != nil {
-		w.Image = *createWorkspaceDto.Image
-	}
-
-	if createWorkspaceDto.User != nil {
-		w.User = *createWorkspaceDto.User
-	}
-
-	return w
 }

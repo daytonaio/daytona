@@ -4,73 +4,79 @@
 package workspaceconfigs
 
 import (
+	"context"
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
-
-type IWorkspaceConfigService interface {
-	Save(workspaceConfig *models.WorkspaceConfig) error
-	Find(filter *WorkspaceConfigFilter) (*models.WorkspaceConfig, error)
-	List(filter *WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error)
-	SetDefault(workspaceConfigName string) error
-	Delete(workspaceConfigName string, force bool) []error
-
-	SetPrebuild(workspaceConfigName string, createPrebuildDto dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error)
-	FindPrebuild(workspaceConfigFilter *WorkspaceConfigFilter, prebuildFilter *PrebuildFilter) (*dto.PrebuildDTO, error)
-	ListPrebuilds(workspaceConfigFilter *WorkspaceConfigFilter, prebuildFilter *PrebuildFilter) ([]*dto.PrebuildDTO, error)
-	DeletePrebuild(workspaceConfigName string, id string, force bool) []error
-
-	StartRetentionPoller() error
-	EnforceRetentionPolicy() error
-	ProcessGitEvent(gitprovider.GitEventData) error
-}
 
 type WorkspaceConfigServiceConfig struct {
 	PrebuildWebhookEndpoint string
-	ConfigStore             WorkspaceConfigStore
-	BuildService            builds.IBuildService
-	GitProviderService      gitproviders.IGitProviderService
+	ConfigStore             stores.WorkspaceConfigStore
+
+	FindNewestBuild           func(ctx context.Context, prebuildId string) (*models.Build, error)
+	ListPublishedBuilds       func(ctx context.Context) ([]*models.Build, error)
+	CreateBuild               func(ctx context.Context, wc *models.WorkspaceConfig, repo *gitprovider.GitRepository, prebuildId string) error
+	DeleteBuilds              func(ctx context.Context, id, prebuildId *string, force bool) []error
+	GetRepositoryContext      func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error)
+	FindPrebuildWebhook       func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
+	UnregisterPrebuildWebhook func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error
+	RegisterPrebuildWebhook   func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
+	GetCommitsRange           func(ctx context.Context, repo *gitprovider.GitRepository, initialSha string, currentSha string) (int, error)
 }
 
 type WorkspaceConfigService struct {
 	prebuildWebhookEndpoint string
-	configStore             WorkspaceConfigStore
-	buildService            builds.IBuildService
-	gitProviderService      gitproviders.IGitProviderService
+	configStore             stores.WorkspaceConfigStore
+
+	findNewestBuild           func(ctx context.Context, prebuildId string) (*models.Build, error)
+	listPublishedBuilds       func(ctx context.Context) ([]*models.Build, error)
+	createBuild               func(ctx context.Context, wc *models.WorkspaceConfig, repo *gitprovider.GitRepository, prebuildId string) error
+	deleteBuilds              func(ctx context.Context, id, prebuildId *string, force bool) []error
+	getRepositoryContext      func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error)
+	getCommitsRange           func(ctx context.Context, repo *gitprovider.GitRepository, initialSha string, currentSha string) (int, error)
+	findPrebuildWebhook       func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
+	unregisterPrebuildWebhook func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error
+	registerPrebuildWebhook   func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
 }
 
-func NewWorkspaceConfigService(config WorkspaceConfigServiceConfig) IWorkspaceConfigService {
+func NewWorkspaceConfigService(config WorkspaceConfigServiceConfig) services.IWorkspaceConfigService {
 	return &WorkspaceConfigService{
-		prebuildWebhookEndpoint: config.PrebuildWebhookEndpoint,
-		configStore:             config.ConfigStore,
-		buildService:            config.BuildService,
-		gitProviderService:      config.GitProviderService,
+		prebuildWebhookEndpoint:   config.PrebuildWebhookEndpoint,
+		configStore:               config.ConfigStore,
+		findNewestBuild:           config.FindNewestBuild,
+		listPublishedBuilds:       config.ListPublishedBuilds,
+		createBuild:               config.CreateBuild,
+		deleteBuilds:              config.DeleteBuilds,
+		getRepositoryContext:      config.GetRepositoryContext,
+		findPrebuildWebhook:       config.FindPrebuildWebhook,
+		unregisterPrebuildWebhook: config.UnregisterPrebuildWebhook,
+		registerPrebuildWebhook:   config.RegisterPrebuildWebhook,
+		getCommitsRange:           config.GetCommitsRange,
 	}
 }
 
-func (s *WorkspaceConfigService) List(filter *WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
+func (s *WorkspaceConfigService) List(filter *stores.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
 	return s.configStore.List(filter)
 }
 
 func (s *WorkspaceConfigService) SetDefault(workspaceConfigName string) error {
-	workspaceConfig, err := s.Find(&WorkspaceConfigFilter{
+	workspaceConfig, err := s.Find(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfigName,
 	})
 	if err != nil {
 		return err
 	}
 
-	defaultWorkspaceConfig, err := s.Find(&WorkspaceConfigFilter{
+	defaultWorkspaceConfig, err := s.Find(&stores.WorkspaceConfigFilter{
 		Url:     &workspaceConfig.RepositoryUrl,
 		Default: util.Pointer(true),
 	})
-	if err != nil && !IsWorkspaceConfigNotFound(err) {
+	if err != nil && !stores.IsWorkspaceConfigNotFound(err) {
 		return err
 	}
 
@@ -86,7 +92,7 @@ func (s *WorkspaceConfigService) SetDefault(workspaceConfigName string) error {
 	return s.configStore.Save(workspaceConfig)
 }
 
-func (s *WorkspaceConfigService) Find(filter *WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
+func (s *WorkspaceConfigService) Find(filter *stores.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
 	if filter != nil && filter.Url != nil {
 		cleanedUrl := util.CleanUpRepositoryUrl(*filter.Url)
 		if !strings.HasSuffix(cleanedUrl, ".git") {
@@ -109,7 +115,7 @@ func (s *WorkspaceConfigService) Save(workspaceConfig *models.WorkspaceConfig) e
 }
 
 func (s *WorkspaceConfigService) Delete(workspaceConfigName string, force bool) []error {
-	wc, err := s.Find(&WorkspaceConfigFilter{
+	wc, err := s.Find(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfigName,
 	})
 	if err != nil {

@@ -13,8 +13,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 )
@@ -35,7 +35,7 @@ func GetWorkspaceConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceConfig, err := server.WorkspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
+	workspaceConfig, err := server.WorkspaceConfigService.Find(&stores.WorkspaceConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -68,13 +68,13 @@ func GetDefaultWorkspaceConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceConfigs, err := server.WorkspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
+	workspaceConfigs, err := server.WorkspaceConfigService.Find(&stores.WorkspaceConfigFilter{
 		Url:     &decodedURLParam,
 		Default: util.Pointer(true),
 	})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if workspaceconfigs.IsWorkspaceConfigNotFound(err) {
+		if stores.IsWorkspaceConfigNotFound(err) {
 			statusCode = http.StatusNotFound
 			ctx.AbortWithStatus(statusCode)
 			log.Debugf("Workspace config not added for git url: %s", decodedURLParam)
@@ -193,7 +193,7 @@ func DeleteWorkspaceConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceConfig, err := server.WorkspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
+	workspaceConfig, err := server.WorkspaceConfigService.Find(&stores.WorkspaceConfigFilter{
 		Name: &configName,
 	})
 	if err != nil {
@@ -203,7 +203,7 @@ func DeleteWorkspaceConfig(ctx *gin.Context) {
 
 	errs := server.WorkspaceConfigService.Delete(workspaceConfig.Name, force)
 	if len(errs) > 0 {
-		if workspaceconfigs.IsWorkspaceConfigNotFound(errs[0]) {
+		if stores.IsWorkspaceConfigNotFound(errs[0]) {
 			ctx.AbortWithError(http.StatusNotFound, errors.New("workspace config not found"))
 			return
 		}

@@ -15,7 +15,7 @@ import (
 	t_gitprovider "github.com/daytonaio/daytona/pkg/build/mocks"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
@@ -35,7 +35,7 @@ type BuildRunnerTestSuite struct {
 	mockScheduler              mocks.MockScheduler
 	mockGitService             git_mocks.MockGitService
 	loggerFactory              logs.LoggerFactory
-	mockBuildStore             builds.BuildStore
+	mockBuildStore             stores.BuildStore
 	mockGitProviderConfigStore t_gitprovider.MockGitProviderConfigStore
 	Runner                     build.BuildRunner
 }

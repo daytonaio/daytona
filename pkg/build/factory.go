@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/docker/docker/pkg/stringid"
 )
 
@@ -22,7 +22,7 @@ type IBuilderFactory interface {
 type BuilderFactory struct {
 	containerRegistry     *models.ContainerRegistry
 	buildImageNamespace   string
-	buildStore            builds.BuildStore
+	buildStore            stores.BuildStore
 	loggerFactory         logs.LoggerFactory
 	image                 string
 	defaultWorkspaceImage string
@@ -32,7 +32,7 @@ type BuilderFactory struct {
 type BuilderFactoryConfig struct {
 	Image                 string
 	ContainerRegistry     *models.ContainerRegistry
-	BuildStore            builds.BuildStore
+	BuildStore            stores.BuildStore
 	BuildImageNamespace   string // Namespace to be used when tagging and pushing the build image
 	LoggerFactory         logs.LoggerFactory
 	DefaultWorkspaceImage string
@@ -61,7 +61,7 @@ func (f *BuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, erro
 		return nil, errors.New("repository must be set")
 	}
 
-	build, err := f.buildStore.Find(&builds.BuildFilter{
+	build, err := f.buildStore.Find(&stores.BuildFilter{
 		Branch:        &b.Repository.Branch,
 		RepositoryUrl: &b.Repository.Url,
 		BuildConfig:   b.BuildConfig,

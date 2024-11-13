@@ -16,9 +16,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -52,11 +52,11 @@ var tg = &models.Target{
 	Options: "test-options",
 }
 
-var createWorkspaceDTO = dto.CreateWorkspaceDTO{
+var createWorkspaceDTO = services.CreateWorkspaceDTO{
 	Id:                  "123",
 	Name:                "workspace1",
 	GitProviderConfigId: &gitProviderConfig.Id,
-	Source: dto.CreateWorkspaceSourceDTO{
+	Source: services.CreateWorkspaceSourceDTO{
 		Repository: &gitprovider.GitRepository{
 			Id:     "123",
 			Url:    "https://github.com/daytonaio/daytona",
@@ -121,23 +121,50 @@ func TestTargetService(t *testing.T) {
 	buildLogsDir := t.TempDir()
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
-		TargetStore:              targetStore,
-		WorkspaceStore:           workspaceStore,
-		ServerApiUrl:             serverApiUrl,
-		ServerUrl:                serverUrl,
-		ContainerRegistryService: containerRegistryService,
-		DefaultWorkspaceImage:    defaultWorkspaceImage,
-		DefaultWorkspaceUser:     defaultWorkspaceUser,
-		ApiKeyService:            apiKeyService,
-		Provisioner:              provisioner,
-		LoggerFactory:            logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
-		GitProviderService:       gitProviderService,
+		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
+			t, err := targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
+			if err != nil {
+				return nil, err
+			}
+			return t, nil
+		},
+		FindContainerRegistry: func(ctx context.Context, image string) (*models.ContainerRegistry, error) {
+			return containerRegistryService.FindByImageName(image)
+		},
+		FindCachedBuild: func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error) {
+			return nil, nil
+		},
+		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Generate(models.ApiKeyTypeWorkspace, name)
+		},
+		RevokeApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Revoke(name)
+		},
+		ListGitProviderConfigs: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
+			return gitProviderService.ListConfigsForUrl(repoUrl)
+		},
+		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
+			return gitProviderService.GetConfig(id)
+		},
+		GetLastCommitSha: func(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
+			return gitProviderService.GetLastCommitSha(repo)
+		},
+		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
+			return nil
+		},
+		WorkspaceStore:        workspaceStore,
+		ServerApiUrl:          serverApiUrl,
+		ServerUrl:             serverUrl,
+		DefaultWorkspaceImage: defaultWorkspaceImage,
+		DefaultWorkspaceUser:  defaultWorkspaceUser,
+		Provisioner:           provisioner,
+		LoggerFactory:         logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
 		var containerRegistry *models.ContainerRegistry
 
-		containerRegistryService.On("FindByImageName", defaultWorkspaceImage).Return(containerRegistry, containerregistries.ErrContainerRegistryNotFound)
+		containerRegistryService.On("FindByImageName", defaultWorkspaceImage).Return(containerRegistry, stores.ErrContainerRegistryNotFound)
 
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
@@ -295,7 +322,7 @@ func workspaceEquals(t *testing.T, ws1, ws2 *models.Workspace, workspaceImage st
 	require.Equal(t, ws1.Repository.Name, ws2.Repository.Name)
 }
 
-func workspaceDtoEquals(t *testing.T, req dto.CreateWorkspaceDTO, workspace dto.WorkspaceDTO, workspaceInfo models.WorkspaceInfo, workspaceImage string, verbose bool) {
+func workspaceDtoEquals(t *testing.T, req services.CreateWorkspaceDTO, workspace services.WorkspaceDTO, workspaceInfo models.WorkspaceInfo, workspaceImage string, verbose bool) {
 	t.Helper()
 
 	require.Equal(t, req.Id, workspace.Id)
