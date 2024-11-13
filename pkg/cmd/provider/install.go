@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -189,13 +190,7 @@ func GetProviderListFromManifest(manifest *manager.ProvidersManifest) []apiclien
 	}
 
 	slices.SortFunc(providerList, func(a, b apiclient.Provider) int {
-		if a.Name < b.Name {
-			return -1
-		}
-		if a.Name > b.Name {
-			return 1
-		}
-		return 0
+		return strings.Compare(a.Name, b.Name)
 	})
 
 	return providerList
