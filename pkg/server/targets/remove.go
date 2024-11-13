@@ -8,12 +8,13 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, target, ErrTargetNotFound)
 	}
@@ -26,7 +27,7 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 	}
 
 	// Should not fail the whole operation if the API key cannot be revoked
-	err = s.apiKeyService.Revoke(target.Id)
+	err = s.revokeApiKey(ctx, target.Id)
 	if err != nil {
 		log.Error(err)
 	}
@@ -45,7 +46,7 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 
 // ForceRemoveTarget ignores provider errors and makes sure the target is removed from storage.
 func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleRemoveError(ctx, nil, ErrTargetNotFound)
 	}
@@ -57,7 +58,7 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		log.Error(err)
 	}
 
-	err = s.apiKeyService.Revoke(target.Id)
+	err = s.revokeApiKey(ctx, target.Id)
 	if err != nil {
 		log.Error(err)
 	}

@@ -7,14 +7,14 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type ContainerRegistryStore struct {
 	db *gorm.DB
 }
 
-func NewContainerRegistryStore(db *gorm.DB) (*ContainerRegistryStore, error) {
+func NewContainerRegistryStore(db *gorm.DB) (stores.ContainerRegistryStore, error) {
 	err := db.AutoMigrate(&models.ContainerRegistry{})
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (s *ContainerRegistryStore) Find(server string) (*models.ContainerRegistry,
 	tx := s.db.Where("server = ?", server).First(containerRegistry)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, containerregistries.ErrContainerRegistryNotFound
+			return nil, stores.ErrContainerRegistryNotFound
 		}
 		return nil, tx.Error
 	}
@@ -61,7 +61,7 @@ func (s *ContainerRegistryStore) Delete(cr *models.ContainerRegistry) error {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return containerregistries.ErrContainerRegistryNotFound
+		return stores.ErrContainerRegistryNotFound
 	}
 
 	return nil

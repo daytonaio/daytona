@@ -9,12 +9,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/daytonaio/daytona/pkg/api/controllers/build/dto"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	builds_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
 
@@ -30,7 +27,7 @@ import (
 //
 //	@id				CreateBuild
 func CreateBuild(ctx *gin.Context) {
-	var createBuildDto dto.CreateBuildDTO
+	var createBuildDto services.CreateBuildDTO
 	err := ctx.BindJSON(&createBuildDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))
@@ -39,42 +36,7 @@ func CreateBuild(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	workspaceConfig, err := s.WorkspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
-		Name: &createBuildDto.WorkspaceConfigName,
-	})
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace config: %s", err.Error()))
-		return
-	}
-
-	gitProvider, _, err := s.GitProviderService.GetGitProviderForUrl(workspaceConfig.RepositoryUrl)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %s", err.Error()))
-		return
-	}
-
-	repo, err := gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
-		Url:    workspaceConfig.RepositoryUrl,
-		Branch: &createBuildDto.Branch,
-	})
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get repository: %s", err.Error()))
-		return
-	}
-
-	newBuildDto := builds_dto.BuildCreationData{
-		Image:       workspaceConfig.Image,
-		User:        workspaceConfig.User,
-		BuildConfig: workspaceConfig.BuildConfig,
-		Repository:  repo,
-		EnvVars:     createBuildDto.EnvVars,
-	}
-
-	if createBuildDto.PrebuildId != nil {
-		newBuildDto.PrebuildId = *createBuildDto.PrebuildId
-	}
-
-	buildId, err := s.BuildService.Create(newBuildDto)
+	buildId, err := s.BuildService.Create(createBuildDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create build: %s", err.Error()))
 		return
@@ -99,12 +61,12 @@ func GetBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	b, err := server.BuildService.Find(&builds.BuildFilter{
+	b, err := server.BuildService.Find(&stores.BuildFilter{
 		Id: &buildId,
 	})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if builds.IsBuildNotFound(err) {
+		if stores.IsBuildNotFound(err) {
 			statusCode = http.StatusNotFound
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find build: %w", err))
@@ -200,7 +162,7 @@ func DeleteBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.MarkForDeletion(&builds.BuildFilter{
+	errs := server.BuildService.MarkForDeletion(&stores.BuildFilter{
 		Id: &buildId,
 	}, force)
 	if len(errs) > 0 {
@@ -242,7 +204,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	// Fail if prebuild does not exist
-	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &workspaceconfigs.PrebuildFilter{
+	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &stores.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {
@@ -250,7 +212,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 		return
 	}
 
-	errs := server.BuildService.MarkForDeletion(&builds.BuildFilter{
+	errs := server.BuildService.MarkForDeletion(&stores.BuildFilter{
 		PrebuildIds: &[]string{prebuildId},
 	}, force)
 	if len(errs) > 0 {

@@ -8,13 +8,14 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type TargetStore struct {
 	db *gorm.DB
 }
 
-func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
+func NewTargetStore(db *gorm.DB) (stores.TargetStore, error) {
 	err := db.AutoMigrate(&models.Target{})
 	if err != nil {
 		return nil, err
@@ -23,7 +24,7 @@ func NewTargetStore(db *gorm.DB) (*TargetStore, error) {
 	return &TargetStore{db: db}, nil
 }
 
-func (s *TargetStore) List(filter *targets.TargetFilter) ([]*models.Target, error) {
+func (s *TargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error) {
 	targets := []*models.Target{}
 
 	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targets)
@@ -33,7 +34,7 @@ func (s *TargetStore) List(filter *targets.TargetFilter) ([]*models.Target, erro
 	return targets, nil
 }
 
-func (s *TargetStore) Find(filter *targets.TargetFilter) (*models.Target, error) {
+func (s *TargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) {
 	tg := &models.Target{}
 
 	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(tg)
@@ -71,7 +72,7 @@ func (s *TargetStore) Delete(t *models.Target) error {
 	return nil
 }
 
-func processTargetFilters(tx *gorm.DB, filter *targets.TargetFilter) *gorm.DB {
+func processTargetFilters(tx *gorm.DB, filter *stores.TargetFilter) *gorm.DB {
 	if filter != nil {
 		if filter.IdOrName != nil {
 			tx = tx.Where("id = ? OR name = ?", *filter.IdOrName, *filter.IdOrName)

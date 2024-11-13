@@ -17,7 +17,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	os_util "github.com/daytonaio/daytona/pkg/os"
 	. "github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/hashicorp/go-hclog"
 	"github.com/hashicorp/go-plugin"
 	"github.com/shirou/gopsutil/process"
@@ -50,15 +49,16 @@ type IProviderManager interface {
 }
 
 type ProviderManagerConfig struct {
+	GetTargetConfigMap       func(ctx context.Context) (map[string]*models.TargetConfig, error)
+	CreateTargetConfig       func(ctx context.Context, targetConfig *models.TargetConfig) error
+	CreateProviderNetworkKey func(ctx context.Context, providerName string) (string, error)
 	DaytonaDownloadUrl       string
 	ServerUrl                string
 	ServerVersion            string
 	ApiUrl                   string
 	LogsDir                  string
-	TargetConfigService      targetconfigs.ITargetConfigService
 	RegistryUrl              string
 	BaseDir                  string
-	CreateProviderNetworkKey func(providerName string) (string, error)
 	ServerPort               uint32
 	ApiPort                  uint32
 }
@@ -71,7 +71,8 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 		serverVersion:            config.ServerVersion,
 		apiUrl:                   config.ApiUrl,
 		logsDir:                  config.LogsDir,
-		targetConfigService:      config.TargetConfigService,
+		getTargetConfigMap:       config.GetTargetConfigMap,
+		createTargetConfig:       config.CreateTargetConfig,
 		registryUrl:              config.RegistryUrl,
 		baseDir:                  config.BaseDir,
 		createProviderNetworkKey: config.CreateProviderNetworkKey,
@@ -82,6 +83,9 @@ func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
 
 type ProviderManager struct {
 	pluginRefs               map[string]*pluginRef
+	getTargetConfigMap       func(ctx context.Context) (map[string]*models.TargetConfig, error)
+	createTargetConfig       func(ctx context.Context, targetConfig *models.TargetConfig) error
+	createProviderNetworkKey func(ctx context.Context, providerName string) (string, error)
 	daytonaDownloadUrl       string
 	serverUrl                string
 	serverVersion            string
@@ -89,10 +93,8 @@ type ProviderManager struct {
 	serverPort               uint32
 	apiPort                  uint32
 	logsDir                  string
-	targetConfigService      targetconfigs.ITargetConfigService
 	registryUrl              string
 	baseDir                  string
-	createProviderNetworkKey func(providerName string) (string, error)
 }
 
 func (m *ProviderManager) GetProvider(name string) (*Provider, error) {
@@ -134,6 +136,8 @@ func (m *ProviderManager) GetProviders() map[string]Provider {
 }
 
 func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool) error {
+	ctx := context.Background()
+
 	pluginRef, err := m.initializeProvider(pluginPath)
 	if err != nil {
 		return err
@@ -154,7 +158,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 			return err
 		}
 
-		existingTargetConfigs, err := m.targetConfigService.Map()
+		existingTargetConfigs, err := m.getTargetConfigMap(ctx)
 		if err != nil {
 			return errors.New("failed to get target configs: " + err.Error())
 		}
@@ -171,7 +175,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 				continue
 			}
 
-			err = m.targetConfigService.Save(&models.TargetConfig{
+			err = m.createTargetConfig(ctx, &models.TargetConfig{
 				Name: targetConfig.Name,
 				ProviderInfo: models.ProviderInfo{
 					Name:    providerInfo.Name,
@@ -268,6 +272,8 @@ func (m *ProviderManager) Purge() error {
 }
 
 func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, error) {
+	ctx := context.Background()
+
 	pluginName := filepath.Base(pluginPath)
 	pluginBasePath := filepath.Dir(pluginPath)
 
@@ -304,7 +310,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 		return nil, errors.New("failed to initialize provider: " + err.Error())
 	}
 
-	networkKey, err := m.createProviderNetworkKey(pluginName)
+	networkKey, err := m.createProviderNetworkKey(ctx, pluginName)
 	if err != nil {
 		return nil, errors.New("failed to create network key: " + err.Error())
 	}

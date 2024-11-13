@@ -8,15 +8,7 @@ import (
 	"os/signal"
 
 	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/profiledata"
-	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
-	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/hashicorp/go-plugin"
 
@@ -27,17 +19,17 @@ type ServerInstanceConfig struct {
 	Config                   Config
 	Version                  string
 	TailscaleServer          TailscaleServer
-	TargetConfigService      targetconfigs.ITargetConfigService
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfigs.IWorkspaceConfigService
-	WorkspaceService         workspaces.IWorkspaceService
+	TargetConfigService      services.ITargetConfigService
+	ContainerRegistryService services.IContainerRegistryService
+	BuildService             services.IBuildService
+	WorkspaceConfigService   services.IWorkspaceConfigService
+	WorkspaceService         services.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
-	TargetService            targets.ITargetService
-	ApiKeyService            apikeys.IApiKeyService
-	GitProviderService       gitproviders.IGitProviderService
+	TargetService            services.ITargetService
+	ApiKeyService            services.IApiKeyService
+	GitProviderService       services.IGitProviderService
 	ProviderManager          manager.IProviderManager
-	ProfileDataService       profiledata.IProfileDataService
+	ProfileDataService       services.IProfileDataService
 	TelemetryService         telemetry.TelemetryService
 }
 
@@ -80,17 +72,17 @@ type Server struct {
 	config                   Config
 	Version                  string
 	TailscaleServer          TailscaleServer
-	TargetConfigService      targetconfigs.ITargetConfigService
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	WorkspaceConfigService   workspaceconfigs.IWorkspaceConfigService
-	WorkspaceService         workspaces.IWorkspaceService
+	TargetConfigService      services.ITargetConfigService
+	ContainerRegistryService services.IContainerRegistryService
+	BuildService             services.IBuildService
+	WorkspaceConfigService   services.IWorkspaceConfigService
+	WorkspaceService         services.IWorkspaceService
 	LocalContainerRegistry   ILocalContainerRegistry
-	TargetService            targets.ITargetService
-	ApiKeyService            apikeys.IApiKeyService
-	GitProviderService       gitproviders.IGitProviderService
+	TargetService            services.ITargetService
+	ApiKeyService            services.IApiKeyService
+	GitProviderService       services.IGitProviderService
 	ProviderManager          manager.IProviderManager
-	ProfileDataService       profiledata.IProfileDataService
+	ProfileDataService       services.IProfileDataService
 	TelemetryService         telemetry.TelemetryService
 }
 

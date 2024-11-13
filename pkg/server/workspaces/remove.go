@@ -26,7 +26,7 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	err = s.apiKeyService.Revoke(fmt.Sprintf("ws-%s", ws.Id))
+	err = s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", ws.Id))
 	if err != nil {
 		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
@@ -57,7 +57,7 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		log.Error(err)
 	}
 
-	err = s.apiKeyService.Revoke(fmt.Sprintf("ws-%s", ws.Id))
+	err = s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", ws.Id))
 	if err != nil {
 		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
@@ -87,7 +87,7 @@ func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Work
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceDestroyError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(err)
 	}

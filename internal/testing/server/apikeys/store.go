@@ -7,14 +7,14 @@ package apikeys
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryApiKeyStore struct {
 	apiKeys map[string]*models.ApiKey
 }
 
-func NewInMemoryApiKeyStore() apikeys.ApiKeyStore {
+func NewInMemoryApiKeyStore() stores.ApiKeyStore {
 	return &InMemoryApiKeyStore{
 		apiKeys: make(map[string]*models.ApiKey),
 	}
@@ -32,7 +32,7 @@ func (s *InMemoryApiKeyStore) List() ([]*models.ApiKey, error) {
 func (s *InMemoryApiKeyStore) Find(key string) (*models.ApiKey, error) {
 	apiKey, ok := s.apiKeys[key]
 	if !ok {
-		return nil, apikeys.ErrApiKeyNotFound
+		return nil, stores.ErrApiKeyNotFound
 	}
 
 	return apiKey, nil

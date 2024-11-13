@@ -8,8 +8,8 @@ package mocks
 import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -26,12 +26,12 @@ func (m *mockWorkspaceConfigService) Delete(name string, force bool) []error {
 	return args.Get(0).([]error)
 }
 
-func (m *mockWorkspaceConfigService) Find(filter *workspaceconfigs.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
+func (m *mockWorkspaceConfigService) Find(filter *stores.WorkspaceConfigFilter) (*models.WorkspaceConfig, error) {
 	args := m.Called(filter)
 	return args.Get(0).(*models.WorkspaceConfig), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) List(filter *workspaceconfigs.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
+func (m *mockWorkspaceConfigService) List(filter *stores.WorkspaceConfigFilter) ([]*models.WorkspaceConfig, error) {
 	args := m.Called(filter)
 	return args.Get(0).([]*models.WorkspaceConfig), args.Error(1)
 }
@@ -51,12 +51,12 @@ func (m *mockWorkspaceConfigService) SetPrebuild(workspaceConfigName string, cre
 	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) FindPrebuild(workspaceConfigFilter *workspaceconfigs.WorkspaceConfigFilter, prebuildFilter *workspaceconfigs.PrebuildFilter) (*dto.PrebuildDTO, error) {
+func (m *mockWorkspaceConfigService) FindPrebuild(workspaceConfigFilter *stores.WorkspaceConfigFilter, prebuildFilter *stores.PrebuildFilter) (*dto.PrebuildDTO, error) {
 	args := m.Called(workspaceConfigFilter, prebuildFilter)
 	return args.Get(0).(*dto.PrebuildDTO), args.Error(1)
 }
 
-func (m *mockWorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *workspaceconfigs.WorkspaceConfigFilter, prebuildFilter *workspaceconfigs.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
+func (m *mockWorkspaceConfigService) ListPrebuilds(workspaceConfigFilter *stores.WorkspaceConfigFilter, prebuildFilter *stores.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
 	args := m.Called(workspaceConfigFilter, prebuildFilter)
 	return args.Get(0).([]*dto.PrebuildDTO), args.Error(1)
 }

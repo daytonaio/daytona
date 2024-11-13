@@ -10,8 +10,8 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,13 +32,13 @@ func GetPrebuild(ctx *gin.Context) {
 	prebuildId := ctx.Param("prebuildId")
 
 	server := server.GetInstance(nil)
-	res, err := server.WorkspaceConfigService.FindPrebuild(&workspaceconfigs.WorkspaceConfigFilter{
+	res, err := server.WorkspaceConfigService.FindPrebuild(&stores.WorkspaceConfigFilter{
 		Name: &configName,
-	}, &workspaceconfigs.PrebuildFilter{
+	}, &stores.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {
-		if workspaceconfigs.IsPrebuildNotFound(err) {
+		if stores.IsPrebuildNotFound(err) {
 			ctx.AbortWithError(http.StatusNotFound, errors.New("prebuild not found"))
 			return
 		}
@@ -116,10 +116,10 @@ func ListPrebuilds(ctx *gin.Context) {
 func ListPrebuildsForWorkspaceConfig(ctx *gin.Context) {
 	configName := ctx.Param("configName")
 
-	var workspaceConfigFilter *workspaceconfigs.WorkspaceConfigFilter
+	var workspaceConfigFilter *stores.WorkspaceConfigFilter
 
 	if configName != "" {
-		workspaceConfigFilter = &workspaceconfigs.WorkspaceConfigFilter{
+		workspaceConfigFilter = &stores.WorkspaceConfigFilter{
 			Name: &configName,
 		}
 	}
@@ -166,7 +166,7 @@ func DeletePrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 	errs := server.WorkspaceConfigService.DeletePrebuild(configName, prebuildId, force)
 	if len(errs) > 0 {
-		if workspaceconfigs.IsPrebuildNotFound(errs[0]) {
+		if stores.IsPrebuildNotFound(errs[0]) {
 			ctx.AbortWithError(http.StatusNotFound, errors.New("prebuild not found"))
 			return
 		}

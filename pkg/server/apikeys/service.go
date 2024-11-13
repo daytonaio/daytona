@@ -3,27 +3,21 @@
 
 package apikeys
 
-import "github.com/daytonaio/daytona/pkg/models"
-
-type IApiKeyService interface {
-	Generate(keyType models.ApiKeyType, name string) (string, error)
-	IsWorkspaceApiKey(apiKey string) bool
-	IsTargetApiKey(apiKey string) bool
-	IsValidApiKey(apiKey string) bool
-	ListClientKeys() ([]*models.ApiKey, error)
-	Revoke(name string) error
-}
+import (
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
+)
 
 type ApiKeyServiceConfig struct {
-	ApiKeyStore ApiKeyStore
+	ApiKeyStore stores.ApiKeyStore
 }
 
-func NewApiKeyService(config ApiKeyServiceConfig) IApiKeyService {
+func NewApiKeyService(config ApiKeyServiceConfig) services.IApiKeyService {
 	return &ApiKeyService{
 		apiKeyStore: config.ApiKeyStore,
 	}
 }
 
 type ApiKeyService struct {
-	apiKeyStore ApiKeyStore
+	apiKeyStore stores.ApiKeyStore
 }
