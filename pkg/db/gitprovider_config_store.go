@@ -7,14 +7,14 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type GitProviderConfigStore struct {
 	db *gorm.DB
 }
 
-func NewGitProviderConfigStore(db *gorm.DB) (*GitProviderConfigStore, error) {
+func NewGitProviderConfigStore(db *gorm.DB) (stores.GitProviderConfigStore, error) {
 	err := db.AutoMigrate(&models.GitProviderConfig{})
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func (p *GitProviderConfigStore) Find(id string) (*models.GitProviderConfig, err
 	tx := p.db.Where("id = ?", id).First(gitProvider)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, gitproviders.ErrGitProviderConfigNotFound
+			return nil, stores.ErrGitProviderConfigNotFound
 		}
 		return nil, tx.Error
 	}
@@ -61,7 +61,7 @@ func (p *GitProviderConfigStore) Delete(gitProvider *models.GitProviderConfig) e
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return gitproviders.ErrGitProviderConfigNotFound
+		return stores.ErrGitProviderConfigNotFound
 	}
 
 	return nil

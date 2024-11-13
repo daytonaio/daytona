@@ -11,21 +11,21 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error) {
+func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]services.WorkspaceDTO, error) {
 	workspaces, err := s.workspaceStore.List()
 	if err != nil {
 		return nil, err
 	}
 
 	var wg sync.WaitGroup
-	response := []dto.WorkspaceDTO{}
+	response := []services.WorkspaceDTO{}
 
 	for i, ws := range workspaces {
-		response = append(response, dto.WorkspaceDTO{Workspace: *ws})
+		response = append(response, services.WorkspaceDTO{Workspace: *ws})
 		if !verbose {
 			continue
 		}

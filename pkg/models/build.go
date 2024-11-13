@@ -38,6 +38,11 @@ type Build struct {
 	UpdatedAt       time.Time                  `json:"updatedAt" validate:"required"`
 } // @name Build
 
+type ContainerConfig struct {
+	Image string `json:"image" validate:"required"`
+	User  string `json:"user" validate:"required"`
+} // @name ContainerConfig
+
 func (b *Build) Compare(other *Build) (bool, error) {
 	if b.BuildConfig != nil && *b.BuildConfig == (BuildConfig{}) {
 		buildHash, err := b.getBuildHashWithoutBuildConfig()
