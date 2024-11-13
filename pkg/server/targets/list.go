@@ -12,10 +12,11 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) ListTargets(ctx context.Context, filter *TargetFilter, verbose bool) ([]dto.TargetDTO, error) {
+func (s *TargetService) ListTargets(ctx context.Context, filter *stores.TargetFilter, verbose bool) ([]dto.TargetDTO, error) {
 	targets, err := s.targetStore.List(filter)
 	if err != nil {
 		return nil, err

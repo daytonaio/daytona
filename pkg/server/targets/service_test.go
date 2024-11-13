@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -77,13 +78,20 @@ func TestTargetService(t *testing.T) {
 	buildLogsDir := t.TempDir()
 
 	service := targets.NewTargetService(targets.TargetServiceConfig{
-		TargetStore:       targetStore,
-		TargetConfigStore: targetConfigStore,
-		ServerApiUrl:      serverApiUrl,
-		ServerUrl:         serverUrl,
-		ApiKeyService:     apiKeyService,
-		Provisioner:       mockProvisioner,
-		LoggerFactory:     logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
+		TargetStore: targetStore,
+		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
+			return targetConfigStore.Find(&stores.TargetConfigFilter{Name: &name})
+		},
+		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)
+		},
+		RevokeApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Revoke(name)
+		},
+		ServerApiUrl:  serverApiUrl,
+		ServerUrl:     serverUrl,
+		Provisioner:   mockProvisioner,
+		LoggerFactory: logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {
@@ -115,7 +123,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("GetTarget", func(t *testing.T) {
 		mockProvisioner.On("GetTargetInfo", mock.Anything, tg).Return(&targetInfo, nil)
 
-		target, err := service.GetTarget(ctx, &targets.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
+		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -124,7 +132,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetTarget fails when target not found", func(t *testing.T) {
-		_, err := service.GetTarget(ctx, &targets.TargetFilter{IdOrName: util.Pointer("invalid-id")}, true)
+		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, true)
 		require.NotNil(t, err)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
@@ -184,7 +192,7 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &targets.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
 
@@ -199,7 +207,7 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &targets.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
 		require.Equal(t, targets.ErrTargetNotFound, err)
 	})
 

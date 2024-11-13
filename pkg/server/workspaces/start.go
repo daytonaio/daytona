@@ -11,8 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
@@ -35,7 +34,7 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err = s.startWorkspace(workspaceToStart, workspaceLogger)
+	err = s.startWorkspace(ctx, workspaceToStart, workspaceLogger)
 	if err != nil {
 		return s.handleStartError(ctx, ws, err)
 	}
@@ -43,24 +42,24 @@ func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId strin
 	return s.handleStartError(ctx, ws, err)
 }
 
-func (s *WorkspaceService) startWorkspace(w *models.Workspace, logger io.Writer) error {
+func (s *WorkspaceService) startWorkspace(ctx context.Context, w *models.Workspace, logger io.Writer) error {
 	logger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
-	cr, err := s.containerRegistryService.FindByImageName(w.Image)
-	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
+	cr, err := s.findContainerRegistry(ctx, w.Image)
+	if err != nil && !stores.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
-	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
-	if err != nil && !containerregistries.IsContainerRegistryNotFound(err) {
+	builderCr, err := s.findContainerRegistry(ctx, s.builderImage)
+	if err != nil && !stores.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
 	var gc *models.GitProviderConfig
 
 	if w.GitProviderConfigId != nil {
-		gc, err = s.gitProviderService.GetConfig(*w.GitProviderConfigId)
-		if err != nil && !gitproviders.IsGitProviderNotFound(err) {
+		gc, err = s.findGitProviderConfig(ctx, *w.GitProviderConfigId)
+		if err != nil && !stores.IsGitProviderNotFound(err) {
 			return err
 		}
 	}
@@ -94,7 +93,7 @@ func (s *WorkspaceService) handleStartError(ctx context.Context, w *models.Works
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceStartError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(err)
 	}

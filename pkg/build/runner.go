@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/scheduler"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/client"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -28,7 +28,7 @@ type BuildRunnerInstanceConfig struct {
 	BuildRunnerId     string
 	ContainerRegistry *models.ContainerRegistry
 	GitProviderStore  GitProviderStore
-	BuildStore        builds.BuildStore
+	BuildStore        stores.BuildStore
 	BuilderFactory    IBuilderFactory
 	LoggerFactory     logs.LoggerFactory
 	BasePath          string
@@ -42,7 +42,7 @@ type BuildRunner struct {
 	runInterval       string
 	containerRegistry *models.ContainerRegistry
 	gitProviderStore  GitProviderStore
-	buildStore        builds.BuildStore
+	buildStore        stores.BuildStore
 	builderFactory    IBuilderFactory
 	loggerFactory     logs.LoggerFactory
 	basePath          string
@@ -100,7 +100,7 @@ func (r *BuildRunner) Stop() {
 }
 
 func (r *BuildRunner) RunBuilds() {
-	builds, err := r.buildStore.List(&builds.BuildFilter{
+	builds, err := r.buildStore.List(&stores.BuildFilter{
 		States: &[]models.BuildState{models.BuildStatePendingRun, models.BuildStatePublished},
 	})
 	if err != nil {
@@ -171,7 +171,7 @@ func (r *BuildRunner) RunBuilds() {
 }
 
 func (r *BuildRunner) DeleteBuilds() {
-	markedForDeletionBuilds, err := r.buildStore.List(&builds.BuildFilter{
+	markedForDeletionBuilds, err := r.buildStore.List(&stores.BuildFilter{
 		States: &[]models.BuildState{models.BuildStatePendingDelete, models.BuildStatePendingForcedDelete},
 	})
 	if err != nil {

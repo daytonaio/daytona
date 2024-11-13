@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/models"
 	log "github.com/sirupsen/logrus"
@@ -94,7 +95,7 @@ var AgentCmd = &cobra.Command{
 
 		tailscaleHostname := c.TargetId
 		if agentMode == config.ModeWorkspace {
-			tailscaleHostname = ws.Hostname()
+			tailscaleHostname = common.GetWorkspaceHostname(ws.Id)
 		}
 
 		toolBoxServer := &toolbox.Server{

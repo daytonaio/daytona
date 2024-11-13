@@ -9,6 +9,8 @@ import (
 	t_apikeys "github.com/daytonaio/daytona/internal/testing/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -17,8 +19,8 @@ var workspaceKeyNames []string = []string{"workspace1", "workspace2"}
 
 type ApiKeyServiceTestSuite struct {
 	suite.Suite
-	apiKeyService apikeys.IApiKeyService
-	apiKeyStore   apikeys.ApiKeyStore
+	apiKeyService services.IApiKeyService
+	apiKeyStore   stores.ApiKeyStore
 }
 
 func NewApiKeyServiceTestSuite() *ApiKeyServiceTestSuite {
