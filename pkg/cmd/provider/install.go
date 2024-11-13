@@ -188,6 +188,16 @@ func GetProviderListFromManifest(manifest *manager.ProvidersManifest) []apiclien
 		}
 	}
 
+	slices.SortFunc(providerList, func(a, b apiclient.Provider) int {
+		if a.Name < b.Name {
+			return -1
+		}
+		if a.Name > b.Name {
+			return 1
+		}
+		return 0
+	})
+
 	return providerList
 }
 
