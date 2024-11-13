@@ -10,7 +10,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/builds/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -77,8 +78,8 @@ var expectedFilteredBuildsMap map[string]*models.Build
 
 type BuildServiceTestSuite struct {
 	suite.Suite
-	buildService builds.IBuildService
-	buildStore   builds.BuildStore
+	buildService services.IBuildService
+	buildStore   stores.BuildStore
 }
 
 func NewBuildServiceTestSuite() *BuildServiceTestSuite {
@@ -130,7 +131,7 @@ func (s *BuildServiceTestSuite) TestList() {
 func (s *BuildServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	build, err := s.buildService.Find(&builds.BuildFilter{
+	build, err := s.buildService.Find(&stores.BuildFilter{
 		Id: &build1.Id,
 	})
 	require.Nil(err)
@@ -142,13 +143,12 @@ func (s *BuildServiceTestSuite) TestSave() {
 
 	require := s.Require()
 
-	createBuildDto := dto.BuildCreationData{
-		Image:       build4.ContainerConfig.Image,
-		User:        build4.ContainerConfig.User,
-		BuildConfig: build4.BuildConfig,
-		Repository:  build4.Repository,
-		EnvVars:     build4.EnvVars,
-		PrebuildId:  build4.PrebuildId,
+	// FIXME: fix me
+	createBuildDto := services.CreateBuildDTO{
+		WorkspaceConfigName: "workspaceConfigName",
+		Branch:              "branch",
+		PrebuildId:          &build4.PrebuildId,
+		EnvVars:             build4.EnvVars,
 	}
 
 	_, err := s.buildService.Create(createBuildDto)
@@ -164,12 +164,12 @@ func (s *BuildServiceTestSuite) TestMarkForDeletion() {
 
 	require := s.Require()
 
-	err := s.buildService.MarkForDeletion(&builds.BuildFilter{
+	err := s.buildService.MarkForDeletion(&stores.BuildFilter{
 		Id: &build3.Id,
 	}, false)
 	require.Nil(err)
 
-	b, errs := s.buildService.Find(&builds.BuildFilter{
+	b, errs := s.buildService.Find(&stores.BuildFilter{
 		Id: &build3.Id,
 	})
 	require.Nil(errs)

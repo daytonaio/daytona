@@ -9,10 +9,9 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	build_dto "github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 var prebuild1 = &models.PrebuildConfig{
@@ -78,7 +77,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestSetPrebuild() {
 	})
 	require.Nil(err)
 
-	prebuildDtos, err := s.workspaceConfigService.ListPrebuilds(&workspaceconfigs.WorkspaceConfigFilter{
+	prebuildDtos, err := s.workspaceConfigService.ListPrebuilds(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfig1.Name,
 	}, nil)
 	require.Nil(err)
@@ -88,9 +87,9 @@ func (s *WorkspaceConfigServiceTestSuite) TestSetPrebuild() {
 func (s *WorkspaceConfigServiceTestSuite) TestFindPrebuild() {
 	require := s.Require()
 
-	prebuild, err := s.workspaceConfigService.FindPrebuild(&workspaceconfigs.WorkspaceConfigFilter{
+	prebuild, err := s.workspaceConfigService.FindPrebuild(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfig1.Name,
-	}, &workspaceconfigs.PrebuildFilter{
+	}, &stores.PrebuildFilter{
 		Id: &prebuild1.Id,
 	})
 	require.Nil(err)
@@ -99,7 +98,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestFindPrebuild() {
 func (s *WorkspaceConfigServiceTestSuite) TestListPrebuilds() {
 	require := s.Require()
 
-	prebuildDtos, err := s.workspaceConfigService.ListPrebuilds(&workspaceconfigs.WorkspaceConfigFilter{
+	prebuildDtos, err := s.workspaceConfigService.ListPrebuilds(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfig1.Name,
 	}, nil)
 	require.Nil(err)
@@ -112,14 +111,14 @@ func (s *WorkspaceConfigServiceTestSuite) TestDeletePrebuild() {
 
 	require := s.Require()
 
-	s.buildService.On("MarkForDeletion", &builds.BuildFilter{
+	s.buildService.On("MarkForDeletion", &stores.BuildFilter{
 		PrebuildIds: &[]string{prebuild2.Id},
 	}, false).Return([]error{})
 
 	err := s.workspaceConfigService.DeletePrebuild(workspaceConfig1.Name, prebuild2.Id, false)
 	require.Nil(err)
 
-	prebuildDtos, errs := s.workspaceConfigService.ListPrebuilds(&workspaceconfigs.WorkspaceConfigFilter{
+	prebuildDtos, errs := s.workspaceConfigService.ListPrebuilds(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfig1.Name,
 	}, nil)
 	require.Nil(errs)
@@ -136,14 +135,14 @@ func (s *WorkspaceConfigServiceTestSuite) TestProcessGitEventCommitInterval() {
 		Url: repository1.Url,
 	}).Return(repository1, nil)
 
-	s.buildService.On("Create", build_dto.BuildCreationData{
-		PrebuildId: prebuild1.Id,
-		Repository: repository1,
-		User:       workspaceConfig1.User,
-		Image:      workspaceConfig1.Image,
+	s.buildService.On("Create", services.CreateBuildDTO{
+		PrebuildId:          &prebuild1.Id,
+		Branch:              repository1.Branch,
+		WorkspaceConfigName: workspaceConfig1.Name,
+		EnvVars:             workspaceConfig1.EnvVars,
 	}).Return("", nil)
 
-	s.buildService.On("Find", &builds.BuildFilter{
+	s.buildService.On("Find", &stores.BuildFilter{
 		PrebuildIds: &[]string{prebuild1.Id},
 		GetNewest:   util.Pointer(true),
 	}).Return(&models.Build{
@@ -174,11 +173,11 @@ func (s *WorkspaceConfigServiceTestSuite) TestProcessGitEventTriggerFiles() {
 		Url: repository1.Url,
 	}).Return(repository1, nil)
 
-	s.buildService.On("Create", build_dto.BuildCreationData{
-		PrebuildId: prebuild1.Id,
-		Repository: repository1,
-		User:       workspaceConfig1.User,
-		Image:      workspaceConfig1.Image,
+	s.buildService.On("Create", services.CreateBuildDTO{
+		PrebuildId:          &prebuild1.Id,
+		Branch:              repository1.Branch,
+		WorkspaceConfigName: workspaceConfig1.Name,
+		EnvVars:             workspaceConfig1.EnvVars,
 	}).Return("", nil)
 
 	data := gitprovider.GitEventData{
@@ -198,7 +197,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestProcessGitEventTriggerFiles() {
 func (s *WorkspaceConfigServiceTestSuite) TestEnforceRetentionPolicy() {
 	require := s.Require()
 
-	s.buildService.On("List", &builds.BuildFilter{
+	s.buildService.On("List", &stores.BuildFilter{
 		States: &[]models.BuildState{models.BuildStatePublished},
 	}).Return([]*models.Build{
 		{
@@ -227,7 +226,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestEnforceRetentionPolicy() {
 		},
 	}, nil)
 
-	s.buildService.On("MarkForDeletion", &builds.BuildFilter{
+	s.buildService.On("MarkForDeletion", &stores.BuildFilter{
 		Id: util.Pointer("1"),
 	}, false).Return([]error{})
 

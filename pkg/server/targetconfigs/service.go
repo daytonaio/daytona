@@ -5,31 +5,25 @@ package targetconfigs
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-type ITargetConfigService interface {
-	Delete(targetConfig *models.TargetConfig) error
-	Find(filter *TargetConfigFilter) (*models.TargetConfig, error)
-	List(filter *TargetConfigFilter) ([]*models.TargetConfig, error)
-	Map() (map[string]*models.TargetConfig, error)
-	Save(targetConfig *models.TargetConfig) error
-}
-
 type TargetConfigServiceConfig struct {
-	TargetConfigStore TargetConfigStore
+	TargetConfigStore stores.TargetConfigStore
 }
 
 type TargetConfigService struct {
-	targetConfigStore TargetConfigStore
+	targetConfigStore stores.TargetConfigStore
 }
 
-func NewTargetConfigService(config TargetConfigServiceConfig) ITargetConfigService {
+func NewTargetConfigService(config TargetConfigServiceConfig) services.ITargetConfigService {
 	return &TargetConfigService{
 		targetConfigStore: config.TargetConfigStore,
 	}
 }
 
-func (s *TargetConfigService) List(filter *TargetConfigFilter) ([]*models.TargetConfig, error) {
+func (s *TargetConfigService) List(filter *stores.TargetConfigFilter) ([]*models.TargetConfig, error) {
 	return s.targetConfigStore.List(filter)
 }
 
@@ -47,7 +41,7 @@ func (s *TargetConfigService) Map() (map[string]*models.TargetConfig, error) {
 	return targetConfigs, nil
 }
 
-func (s *TargetConfigService) Find(filter *TargetConfigFilter) (*models.TargetConfig, error) {
+func (s *TargetConfigService) Find(filter *stores.TargetConfigFilter) (*models.TargetConfig, error) {
 	return s.targetConfigStore.Find(filter)
 }
 

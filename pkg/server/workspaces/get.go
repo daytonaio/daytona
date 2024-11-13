@@ -10,17 +10,17 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error) {
+func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*services.WorkspaceDTO, error) {
 	ws, err := s.workspaceStore.Find(workspaceId)
 	if err != nil {
 		return nil, ErrWorkspaceNotFound
 	}
 
-	response := &dto.WorkspaceDTO{
+	response := &services.WorkspaceDTO{
 		Workspace: *ws,
 	}
 

@@ -10,23 +10,24 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryTargetStore struct {
 	targets map[string]*models.Target
 }
 
-func NewInMemoryTargetStore() targets.TargetStore {
+func NewInMemoryTargetStore() stores.TargetStore {
 	return &InMemoryTargetStore{
 		targets: make(map[string]*models.Target),
 	}
 }
 
-func (s *InMemoryTargetStore) List(filter *targets.TargetFilter) ([]*models.Target, error) {
+func (s *InMemoryTargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetStore) Find(filter *targets.TargetFilter) (*models.Target, error) {
+func (s *InMemoryTargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) {
 	t, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -53,7 +54,7 @@ func (s *InMemoryTargetStore) Delete(target *models.Target) error {
 	return nil
 }
 
-func (s *InMemoryTargetStore) processFilters(filter *targets.TargetFilter) ([]*models.Target, error) {
+func (s *InMemoryTargetStore) processFilters(filter *stores.TargetFilter) ([]*models.Target, error) {
 	var result []*models.Target
 	filteredTargets := make(map[string]*models.Target)
 	for k, v := range s.targets {

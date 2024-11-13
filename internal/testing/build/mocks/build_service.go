@@ -7,7 +7,7 @@ package mocks
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -34,7 +34,7 @@ func (m *MockBuildService) Find(id string) (*models.Build, error) {
 	return args.Get(0).(*models.Build), args.Error(1)
 }
 
-func (m *MockBuildService) List(filter *builds.BuildFilter) ([]*models.Build, error) {
+func (m *MockBuildService) List(filter *stores.BuildFilter) ([]*models.Build, error) {
 	args := m.Called(filter)
 	return args.Get(0).([]*models.Build), args.Error(1)
 }

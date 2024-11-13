@@ -10,8 +10,8 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 
@@ -36,12 +36,12 @@ func isValidTargetName(name string) bool {
 }
 
 func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*models.Target, error) {
-	_, err := s.targetStore.Find(&TargetFilter{IdOrName: &req.Id})
+	_, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &req.Id})
 	if err == nil {
 		return nil, ErrTargetAlreadyExists
 	}
 
-	tc, err := s.targetConfigStore.Find(&targetconfigs.TargetConfigFilter{Name: &req.TargetConfigName})
+	tc, err := s.findTargetConfig(ctx, req.TargetConfigName)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
@@ -58,7 +58,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 		Options:      tc.Options,
 	}
 
-	apiKey, err := s.apiKeyService.Generate(models.ApiKeyTypeTarget, tg.Id)
+	apiKey, err := s.generateApiKey(ctx, tg.Id)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}

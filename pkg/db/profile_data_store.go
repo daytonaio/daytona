@@ -5,7 +5,7 @@ package db
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"gorm.io/gorm"
 )
 
@@ -27,7 +27,7 @@ func (p *ProfileDataStore) Get(id string) (*models.ProfileData, error) {
 	tx := p.db.Where("id = ?", id).First(profileData)
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, profiledata.ErrProfileDataNotFound
+			return nil, stores.ErrProfileDataNotFound
 		}
 		return nil, tx.Error
 	}
@@ -50,7 +50,7 @@ func (p *ProfileDataStore) Delete(id string) error {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return profiledata.ErrProfileDataNotFound
+		return stores.ErrProfileDataNotFound
 	}
 
 	return nil

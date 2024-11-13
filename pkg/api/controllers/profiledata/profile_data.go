@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,7 +27,7 @@ func GetProfileData(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 	profileData, err := server.ProfileDataService.Get("")
 	if err != nil {
-		if profiledata.IsProfileDataNotFound(err) {
+		if stores.IsProfileDataNotFound(err) {
 			ctx.JSON(200, &models.ProfileData{})
 			return
 		}
@@ -80,7 +80,7 @@ func DeleteProfileData(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 	err := server.ProfileDataService.Delete("")
 	if err != nil {
-		if profiledata.IsProfileDataNotFound(err) {
+		if stores.IsProfileDataNotFound(err) {
 			ctx.Status(204)
 			return
 		}

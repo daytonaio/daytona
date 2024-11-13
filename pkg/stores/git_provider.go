@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package gitproviders
+package stores
 
 import (
 	"errors"
@@ -14,11 +14,6 @@ type GitProviderConfigStore interface {
 	Find(id string) (*models.GitProviderConfig, error)
 	Save(*models.GitProviderConfig) error
 	Delete(*models.GitProviderConfig) error
-}
-
-type WorkspaceConfigStore interface {
-	Save(workspaceConfig *models.WorkspaceConfig) error
-	List(gitProviderConfigId string) ([]*models.WorkspaceConfig, error)
 }
 
 var (

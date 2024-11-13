@@ -9,13 +9,15 @@ import (
 	t_profiledata "github.com/daytonaio/daytona/internal/testing/server/profiledata"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/profiledata"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/suite"
 )
 
 type ProfileDataServiceTestSuite struct {
 	suite.Suite
-	profileDataService profiledata.IProfileDataService
-	profileDataStore   profiledata.ProfileDataStore
+	profileDataService services.IProfileDataService
+	profileDataStore   stores.ProfileDataStore
 }
 
 func NewApiKeyServiceTestSuite() *ProfileDataServiceTestSuite {
@@ -36,7 +38,7 @@ func TestApiKeyService(t *testing.T) {
 func (s *ProfileDataServiceTestSuite) TestReturnsProfileDataNotFound() {
 	profileData, err := s.profileDataService.Get("")
 	s.Require().Nil(profileData)
-	s.Require().True(profiledata.IsProfileDataNotFound(err))
+	s.Require().True(stores.IsProfileDataNotFound(err))
 }
 
 func (s *ProfileDataServiceTestSuite) TestSaveProfileData() {
@@ -70,5 +72,5 @@ func (s *ProfileDataServiceTestSuite) TestDeleteProfileData() {
 
 	profileDataFromStore, err := s.profileDataStore.Get("")
 	s.Require().Nil(profileDataFromStore)
-	s.Require().True(profiledata.IsProfileDataNotFound(err))
+	s.Require().True(stores.IsProfileDataNotFound(err))
 }

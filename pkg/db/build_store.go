@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"gorm.io/gorm"
 )
 
@@ -19,7 +19,7 @@ type BuildStore struct {
 	Lock sync.Mutex
 }
 
-func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
+func NewBuildStore(db *gorm.DB) (stores.BuildStore, error) {
 	err := db.AutoMigrate(&models.Build{})
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
 	return &BuildStore{db: db}, nil
 }
 
-func (b *BuildStore) Find(filter *builds.BuildFilter) (*models.Build, error) {
+func (b *BuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
@@ -37,7 +37,7 @@ func (b *BuildStore) Find(filter *builds.BuildFilter) (*models.Build, error) {
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, builds.ErrBuildNotFound
+			return nil, stores.ErrBuildNotFound
 		}
 		return nil, tx.Error
 	}
@@ -45,7 +45,7 @@ func (b *BuildStore) Find(filter *builds.BuildFilter) (*models.Build, error) {
 	return build, nil
 }
 
-func (b *BuildStore) List(filter *builds.BuildFilter) ([]*models.Build, error) {
+func (b *BuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
@@ -80,13 +80,13 @@ func (b *BuildStore) Delete(id string) error {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return builds.ErrBuildNotFound
+		return stores.ErrBuildNotFound
 	}
 
 	return nil
 }
 
-func processBuildFilters(tx *gorm.DB, filter *builds.BuildFilter) *gorm.DB {
+func processBuildFilters(tx *gorm.DB, filter *stores.BuildFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Id != nil {
 			tx = tx.Where("id = ?", *filter.Id)
