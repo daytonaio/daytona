@@ -4,49 +4,32 @@
 package gitproviders
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-type IGitProviderService interface {
-	GetConfig(id string) (*models.GitProviderConfig, error)
-	ListConfigsForUrl(url string) ([]*models.GitProviderConfig, error)
-	GetGitProvider(id string) (gitprovider.GitProvider, error)
-	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
-	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
-	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
-	GetNamespaces(gitProviderId string, options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error)
-	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error)
-	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error)
-	GetRepositories(gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error)
-	ListConfigs() ([]*models.GitProviderConfig, error)
-	RemoveGitProvider(gitProviderId string) error
-	SetGitProviderConfig(providerConfig *models.GitProviderConfig) error
-	GetLastCommitSha(repo *gitprovider.GitRepository) (string, error)
-	RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
-	GetPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
-	UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error
-}
-
 type GitProviderServiceConfig struct {
-	ConfigStore          GitProviderConfigStore
-	WorkspaceConfigStore WorkspaceConfigStore
+	ConfigStore stores.GitProviderConfigStore
+
+	DetachWorkspaceConfigs func(ctx context.Context, gitProviderConfigId string) error
 }
 
 type GitProviderService struct {
-	configStore          GitProviderConfigStore
-	workspaceConfigStore WorkspaceConfigStore
+	configStore            stores.GitProviderConfigStore
+	detachWorkspaceConfigs func(ctx context.Context, gitProviderConfigId string) error
 }
 
-func NewGitProviderService(config GitProviderServiceConfig) IGitProviderService {
+func NewGitProviderService(config GitProviderServiceConfig) services.IGitProviderService {
 	return &GitProviderService{
-		configStore:          config.ConfigStore,
-		workspaceConfigStore: config.WorkspaceConfigStore,
+		configStore:            config.ConfigStore,
+		detachWorkspaceConfigs: config.DetachWorkspaceConfigs,
 	}
 }
 
@@ -56,7 +39,7 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	providerConfig, err := s.configStore.Find(id)
 	if err != nil {
 		// If config is not defined, use the default (public) client without token
-		if IsGitProviderNotFound(err) {
+		if stores.IsGitProviderNotFound(err) {
 			providerConfig = &models.GitProviderConfig{
 				Id:         id,
 				ProviderId: id,

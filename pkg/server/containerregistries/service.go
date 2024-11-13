@@ -7,26 +7,19 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-type IContainerRegistryService interface {
-	Delete(server string) error
-	Find(server string) (*models.ContainerRegistry, error)
-	FindByImageName(imageName string) (*models.ContainerRegistry, error)
-	List() ([]*models.ContainerRegistry, error)
-	Map() (map[string]*models.ContainerRegistry, error)
-	Save(cr *models.ContainerRegistry) error
-}
-
 type ContainerRegistryServiceConfig struct {
-	Store ContainerRegistryStore
+	Store stores.ContainerRegistryStore
 }
 
 type ContainerRegistryService struct {
-	store ContainerRegistryStore
+	store stores.ContainerRegistryStore
 }
 
-func NewContainerRegistryService(config ContainerRegistryServiceConfig) IContainerRegistryService {
+func NewContainerRegistryService(config ContainerRegistryServiceConfig) services.IContainerRegistryService {
 	return &ContainerRegistryService{
 		store: config.Store,
 	}

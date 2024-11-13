@@ -9,31 +9,31 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryTargetConfigStore struct {
 	targetConfigs map[string]*models.TargetConfig
 }
 
-func NewInMemoryTargetConfigStore() targetconfigs.TargetConfigStore {
+func NewInMemoryTargetConfigStore() stores.TargetConfigStore {
 	return &InMemoryTargetConfigStore{
 		targetConfigs: make(map[string]*models.TargetConfig),
 	}
 }
 
-func (s *InMemoryTargetConfigStore) List(filter *targetconfigs.TargetConfigFilter) ([]*models.TargetConfig, error) {
+func (s *InMemoryTargetConfigStore) List(filter *stores.TargetConfigFilter) ([]*models.TargetConfig, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetConfigStore) Find(filter *targetconfigs.TargetConfigFilter) (*models.TargetConfig, error) {
+func (s *InMemoryTargetConfigStore) Find(filter *stores.TargetConfigFilter) (*models.TargetConfig, error) {
 	targets, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(targets) == 0 {
-		return nil, targetconfigs.ErrTargetConfigNotFound
+		return nil, stores.ErrTargetConfigNotFound
 	}
 
 	return targets[0], nil
@@ -49,7 +49,7 @@ func (s *InMemoryTargetConfigStore) Delete(targetConfig *models.TargetConfig) er
 	return nil
 }
 
-func (s *InMemoryTargetConfigStore) processFilters(filter *targetconfigs.TargetConfigFilter) ([]*models.TargetConfig, error) {
+func (s *InMemoryTargetConfigStore) processFilters(filter *stores.TargetConfigFilter) ([]*models.TargetConfig, error) {
 	var result []*models.TargetConfig
 
 	if filter != nil {

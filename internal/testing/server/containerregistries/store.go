@@ -7,14 +7,14 @@ package containerregistries
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryContainerRegistryStore struct {
 	crs map[string]*models.ContainerRegistry
 }
 
-func NewInMemoryContainerRegistryStore() containerregistries.ContainerRegistryStore {
+func NewInMemoryContainerRegistryStore() stores.ContainerRegistryStore {
 	return &InMemoryContainerRegistryStore{
 		crs: make(map[string]*models.ContainerRegistry),
 	}
@@ -32,7 +32,7 @@ func (s *InMemoryContainerRegistryStore) List() ([]*models.ContainerRegistry, er
 func (s *InMemoryContainerRegistryStore) Find(server string) (*models.ContainerRegistry, error) {
 	cr, ok := s.crs[server]
 	if !ok {
-		return nil, containerregistries.ErrContainerRegistryNotFound
+		return nil, stores.ErrContainerRegistryNotFound
 	}
 
 	return cr, nil
@@ -46,7 +46,7 @@ func (s *InMemoryContainerRegistryStore) Save(cr *models.ContainerRegistry) erro
 func (s *InMemoryContainerRegistryStore) Delete(cr *models.ContainerRegistry) error {
 	_, ok := s.crs[cr.Server]
 	if !ok {
-		return containerregistries.ErrContainerRegistryNotFound
+		return stores.ErrContainerRegistryNotFound
 	}
 	delete(s.crs, cr.Server)
 	return nil

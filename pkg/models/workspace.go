@@ -4,9 +4,6 @@
 package models
 
 import (
-	"fmt"
-	"strings"
-
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
@@ -32,22 +29,19 @@ func (w *Workspace) WorkspaceFolderName() string {
 	return w.Name
 }
 
-func (w Workspace) Hostname() string {
-	// Replace special chars with hyphen to form valid hostname
-	// String resulting in consecutive hyphens is also valid
-	workspaceId := w.Id
-	workspaceId = strings.ReplaceAll(workspaceId, "_", "-")
-	workspaceId = strings.ReplaceAll(workspaceId, "*", "-")
-	workspaceId = strings.ReplaceAll(workspaceId, ".", "-")
+type BuildConfig struct {
+	Devcontainer *DevcontainerConfig `json:"devcontainer,omitempty" validate:"optional"`
+	CachedBuild  *CachedBuild        `json:"cachedBuild,omitempty" validate:"optional"`
+} // @name BuildConfig
 
-	hostname := fmt.Sprintf("ws-%s", workspaceId)
+type DevcontainerConfig struct {
+	FilePath string `json:"filePath" validate:"required"`
+} // @name DevcontainerConfig
 
-	if len(hostname) > 63 {
-		return hostname[:63]
-	}
-
-	return hostname
-}
+type CachedBuild struct {
+	User  string `json:"user" validate:"required"`
+	Image string `json:"image" validate:"required"`
+} // @name CachedBuild
 
 type WorkspaceInfo struct {
 	Name             string `json:"name" validate:"required"`

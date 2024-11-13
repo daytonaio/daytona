@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	log "github.com/sirupsen/logrus"
@@ -18,7 +19,7 @@ import (
 )
 
 func (s *TargetService) StartTarget(ctx context.Context, targetId string) error {
-	t, err := s.targetStore.Find(&TargetFilter{IdOrName: &targetId})
+	t, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStartError(ctx, nil, ErrTargetNotFound)
 	}

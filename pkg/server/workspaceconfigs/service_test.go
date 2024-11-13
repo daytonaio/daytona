@@ -4,14 +4,18 @@
 package workspaceconfigs_test
 
 import (
+	"context"
 	"testing"
 
 	git_provider_mock "github.com/daytonaio/daytona/internal/testing/gitprovider/mocks"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	workspaceconfig_internal "github.com/daytonaio/daytona/internal/testing/server/workspaceconfig"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -63,8 +67,8 @@ var expectedFilteredWorkspaceConfigsMap map[string]*models.WorkspaceConfig
 
 type WorkspaceConfigServiceTestSuite struct {
 	suite.Suite
-	workspaceConfigService workspaceconfigs.IWorkspaceConfigService
-	workspaceConfigStore   workspaceconfigs.WorkspaceConfigStore
+	workspaceConfigService services.IWorkspaceConfigService
+	workspaceConfigStore   stores.WorkspaceConfigStore
 	gitProviderService     mocks.MockGitProviderService
 	buildService           mocks.MockBuildService
 	gitProvider            git_provider_mock.MockGitProvider
@@ -113,9 +117,69 @@ func (s *WorkspaceConfigServiceTestSuite) SetupTest() {
 
 	s.workspaceConfigStore = workspaceconfig_internal.NewInMemoryWorkspaceConfigStore()
 	s.workspaceConfigService = workspaceconfigs.NewWorkspaceConfigService(workspaceconfigs.WorkspaceConfigServiceConfig{
-		ConfigStore:        s.workspaceConfigStore,
-		GitProviderService: &s.gitProviderService,
-		BuildService:       &s.buildService,
+		ConfigStore: s.workspaceConfigStore,
+		FindNewestBuild: func(ctx context.Context, prebuildId string) (*models.Build, error) {
+			return s.buildService.Find(&stores.BuildFilter{
+				PrebuildIds: &[]string{prebuildId},
+				GetNewest:   util.Pointer(true),
+			})
+		},
+		ListPublishedBuilds: func(ctx context.Context) ([]*models.Build, error) {
+			return s.buildService.List(&stores.BuildFilter{
+				States: &[]models.BuildState{models.BuildStatePublished},
+			})
+		},
+		CreateBuild: func(ctx context.Context, workspaceConfig *models.WorkspaceConfig, repo *gitprovider.GitRepository, prebuildId string) error {
+			createBuildDto := services.CreateBuildDTO{
+				WorkspaceConfigName: workspaceConfig.Name,
+				Branch:              repo.Branch,
+				PrebuildId:          &prebuildId,
+				EnvVars:             workspaceConfig.EnvVars,
+			}
+
+			_, err := s.buildService.Create(createBuildDto)
+			return err
+		},
+		DeleteBuilds: func(ctx context.Context, id, prebuildId *string, force bool) []error {
+			var prebuildIds *[]string
+			if prebuildId != nil {
+				prebuildIds = &[]string{*prebuildId}
+			}
+
+			return s.buildService.MarkForDeletion(&stores.BuildFilter{
+				Id:          id,
+				PrebuildIds: prebuildIds,
+			}, force)
+		},
+		GetRepositoryContext: func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error) {
+			gitProvider, gitProviderId, err := s.gitProviderService.GetGitProviderForUrl(url)
+			if err != nil {
+				return nil, "", err
+			}
+
+			repo, err = gitProvider.GetRepositoryContext(gitprovider.GetRepositoryContext{
+				Url: url,
+			})
+
+			return repo, gitProviderId, err
+		},
+		FindPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error) {
+			return s.gitProviderService.GetPrebuildWebhook(gitProviderId, repo, endpointUrl)
+		},
+		UnregisterPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error {
+			return s.gitProviderService.UnregisterPrebuildWebhook(gitProviderId, repo, id)
+		},
+		RegisterPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error) {
+			return s.gitProviderService.RegisterPrebuildWebhook(gitProviderId, repo, endpointUrl)
+		},
+		GetCommitsRange: func(ctx context.Context, repo *gitprovider.GitRepository, initialSha string, currentSha string) (int, error) {
+			gitProvider, _, err := s.gitProviderService.GetGitProviderForUrl(repo.Url)
+			if err != nil {
+				return 0, err
+			}
+
+			return gitProvider.GetCommitsRange(repo, initialSha, currentSha)
+		},
 	})
 
 	for _, wc := range expectedWorkspaceConfigs {
@@ -138,7 +202,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestList() {
 func (s *WorkspaceConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	workspaceConfig, err := s.workspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
+	workspaceConfig, err := s.workspaceConfigService.Find(&stores.WorkspaceConfigFilter{
 		Name: &workspaceConfig1.Name,
 	})
 	require.Nil(err)
@@ -150,7 +214,7 @@ func (s *WorkspaceConfigServiceTestSuite) TestSetDefault() {
 	err := s.workspaceConfigService.SetDefault(workspaceConfig2.Name)
 	require.Nil(err)
 
-	workspaceConfig, err := s.workspaceConfigService.Find(&workspaceconfigs.WorkspaceConfigFilter{
+	workspaceConfig, err := s.workspaceConfigService.Find(&stores.WorkspaceConfigFilter{
 		Url:     util.Pointer(workspaceConfig1.RepositoryUrl),
 		Default: util.Pointer(true),
 	})

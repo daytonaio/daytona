@@ -46,7 +46,7 @@ func (s *WorkspaceService) handleStopError(ctx context.Context, w *models.Worksp
 		telemetryProps["error"] = err.Error()
 		event = telemetry.ServerEventWorkspaceStopError
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
 	if telemetryError != nil {
 		log.Trace(err)
 	}

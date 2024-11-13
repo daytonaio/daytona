@@ -9,32 +9,32 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryBuildStore struct {
 	builds map[string]*models.Build
 }
 
-func NewInMemoryBuildStore() builds.BuildStore {
+func NewInMemoryBuildStore() stores.BuildStore {
 	return &InMemoryBuildStore{
 		builds: make(map[string]*models.Build),
 	}
 }
 
-func (s *InMemoryBuildStore) Find(filter *builds.BuildFilter) (*models.Build, error) {
+func (s *InMemoryBuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
 	b, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
 	if len(b) == 0 {
-		return nil, builds.ErrBuildNotFound
+		return nil, stores.ErrBuildNotFound
 	}
 
 	return b[0], nil
 }
 
-func (s *InMemoryBuildStore) List(filter *builds.BuildFilter) ([]*models.Build, error) {
+func (s *InMemoryBuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
 	builds, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func (s *InMemoryBuildStore) Delete(id string) error {
 	return nil
 }
 
-func (s *InMemoryBuildStore) processFilters(filter *builds.BuildFilter) ([]*models.Build, error) {
+func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*models.Build, error) {
 	var result []*models.Build
 	filteredBuilds := make(map[string]*models.Build)
 	for k, v := range s.builds {
