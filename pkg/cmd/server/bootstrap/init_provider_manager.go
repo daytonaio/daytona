@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
+	"github.com/daytonaio/daytona/pkg/services"
 )
 
 func InitProviderManager(c *server.Config, configDir string) error {
@@ -73,8 +74,13 @@ func InitProviderManager(c *server.Config, configDir string) error {
 		GetTargetConfigMap: func(ctx context.Context) (map[string]*models.TargetConfig, error) {
 			return targetConfigService.Map()
 		},
-		CreateTargetConfig: func(ctx context.Context, targetConfig *models.TargetConfig) error {
-			return targetConfigService.Save(targetConfig)
+		CreateTargetConfig: func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error {
+			_, err := targetConfigService.Add(services.AddTargetConfigDTO{
+				Name:         name,
+				Options:      options,
+				ProviderInfo: providerInfo,
+			})
+			return err
 		},
 	})
 

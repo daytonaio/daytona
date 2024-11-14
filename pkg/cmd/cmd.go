@@ -192,7 +192,7 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 	case "git-provider add":
 		return GitProviderAddCmd.RunE(cmd, []string{})
 	case "target-config set":
-		return TargetConfigSetCmd.RunE(cmd, []string{})
+		return TargetConfigAddCmd.RunE(cmd, []string{})
 	case "docs":
 		return DocsCmd.RunE(cmd, []string{})
 	case "help":

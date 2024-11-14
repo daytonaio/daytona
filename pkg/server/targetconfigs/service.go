@@ -7,6 +7,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/docker/docker/pkg/stringid"
 )
 
 type TargetConfigServiceConfig struct {
@@ -23,12 +24,12 @@ func NewTargetConfigService(config TargetConfigServiceConfig) services.ITargetCo
 	}
 }
 
-func (s *TargetConfigService) List(filter *stores.TargetConfigFilter) ([]*models.TargetConfig, error) {
-	return s.targetConfigStore.List(filter)
+func (s *TargetConfigService) List() ([]*models.TargetConfig, error) {
+	return s.targetConfigStore.List(false)
 }
 
 func (s *TargetConfigService) Map() (map[string]*models.TargetConfig, error) {
-	list, err := s.targetConfigStore.List(nil)
+	list, err := s.targetConfigStore.List(false)
 	if err != nil {
 		return nil, err
 	}
@@ -41,14 +42,36 @@ func (s *TargetConfigService) Map() (map[string]*models.TargetConfig, error) {
 	return targetConfigs, nil
 }
 
-func (s *TargetConfigService) Find(filter *stores.TargetConfigFilter) (*models.TargetConfig, error) {
-	return s.targetConfigStore.Find(filter)
+func (s *TargetConfigService) Find(idOrName string) (*models.TargetConfig, error) {
+	return s.targetConfigStore.Find(idOrName, false)
 }
 
-func (s *TargetConfigService) Save(targetConfig *models.TargetConfig) error {
+func (s *TargetConfigService) Add(addTargetConfig services.AddTargetConfigDTO) (*models.TargetConfig, error) {
+	persistedTargetConfig, err := s.targetConfigStore.Find(addTargetConfig.Name, false)
+	if err != nil && !stores.IsTargetConfigNotFound(err) {
+		return nil, err
+	}
+	if persistedTargetConfig != nil && !persistedTargetConfig.Deleted {
+		return nil, stores.ErrTargetConfigAlreadyExists
+	}
+
+	targetConfig := &models.TargetConfig{
+		Id:           stringid.GenerateRandomID(),
+		Name:         addTargetConfig.Name,
+		ProviderInfo: addTargetConfig.ProviderInfo,
+		Options:      addTargetConfig.Options,
+		Deleted:      false,
+	}
+
+	return targetConfig, s.targetConfigStore.Save(targetConfig)
+}
+
+func (s *TargetConfigService) Delete(targetConfigId string) error {
+	targetConfig, err := s.targetConfigStore.Find(targetConfigId, false)
+	if err != nil {
+		return err
+	}
+	targetConfig.Deleted = true
+
 	return s.targetConfigStore.Save(targetConfig)
-}
-
-func (s *TargetConfigService) Delete(targetConfig *models.TargetConfig) error {
-	return s.targetConfigStore.Delete(targetConfig)
 }

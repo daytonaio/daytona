@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
-	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
 )
 
@@ -44,18 +43,18 @@ var providerListCmd = &cobra.Command{
 	},
 }
 
-func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.Provider, ctx context.Context) ([]provider_view.ProviderView, error) {
-	var result []provider_view.ProviderView
+func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.Provider, ctx context.Context) ([]provider.ProviderView, error) {
+	var result []provider.ProviderView
 
 	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providerMap := make(map[string]provider_view.ProviderView)
+	providerMap := make(map[string]provider.ProviderView)
 
 	for _, installedProvider := range installedProviders {
-		providerMap[installedProvider.Name] = provider_view.ProviderView{
+		providerMap[installedProvider.Name] = provider.ProviderView{
 			Name:      installedProvider.Name,
 			Label:     installedProvider.Label,
 			Version:   installedProvider.Version,
@@ -65,7 +64,7 @@ func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []ap
 
 	for _, latestProvider := range latestProviders {
 		if _, exists := providerMap[latestProvider.Name]; !exists {
-			providerMap[latestProvider.Name] = provider_view.ProviderView{
+			providerMap[latestProvider.Name] = provider.ProviderView{
 				Name:      latestProvider.Name,
 				Label:     latestProvider.Label,
 				Version:   latestProvider.Version,

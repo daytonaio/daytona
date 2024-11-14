@@ -17,7 +17,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/provider"
-	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/docker/docker/pkg/stringid"
@@ -106,7 +105,7 @@ var providerInstallCmd = &cobra.Command{
 		}
 
 		if slices.ContainsFunc(targets, func(t apiclient.TargetDTO) bool {
-			return t.ProviderInfo.Name == providerToInstall.Name
+			return t.TargetConfig.ProviderInfo.Name == providerToInstall.Name
 		}) {
 			return nil
 		}
@@ -202,7 +201,7 @@ func ConvertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string
 	return stringMap
 }
 
-func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider_view.ProviderView, providersManifest *manager.ProvidersManifest) error {
+func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider.ProviderView, providersManifest *manager.ProvidersManifest) error {
 	downloadUrls := ConvertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
 	err := views_util.WithInlineSpinner("Installing", func() error {
 		res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{

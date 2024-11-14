@@ -18,6 +18,7 @@ import (
 const NewTargetConfigName = "+ New Target Config"
 
 type TargetConfigView struct {
+	Id           string
 	Name         string
 	Options      string
 	ProviderInfo ProviderInfo
