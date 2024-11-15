@@ -422,6 +422,26 @@ definitions:
     - downloadUrls
     - name
     type: object
+  LogFileConfig:
+    properties:
+      compress:
+        type: boolean
+      localTime:
+        type: boolean
+      maxAge:
+        type: integer
+      maxBackups:
+        type: integer
+      maxSize:
+        type: integer
+      path:
+        type: string
+    required:
+    - maxAge
+    - maxBackups
+    - maxSize
+    - path
+    type: object
   NetworkKey:
     properties:
       key:
@@ -656,8 +676,8 @@ definitions:
         type: string
       localBuilderRegistryPort:
         type: integer
-      logFilePath:
-        type: string
+      logFile:
+        $ref: '#/definitions/LogFileConfig'
       providersDir:
         type: string
       registryUrl:
@@ -677,7 +697,7 @@ definitions:
     - id
     - localBuilderRegistryImage
     - localBuilderRegistryPort
-    - logFilePath
+    - logFile
     - providersDir
     - registryUrl
     - serverDownloadUrl

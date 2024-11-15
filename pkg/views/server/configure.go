@@ -54,6 +54,10 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: cr.Server, Value: cr.Server})
 	}
 
+	logFileMaxSize := strconv.Itoa(int(m.config.LogFile.MaxSize))
+	logFileMaxBackups := strconv.Itoa(int(m.config.LogFile.MaxBackups))
+	logFileMaxAge := strconv.Itoa(int(m.config.LogFile.MaxAge))
+
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -120,10 +124,12 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
 				Value(&m.config.BinariesPath),
+		),
+		huh.NewGroup(
 			huh.NewInput().
 				Title("Log File Path").
 				Description("File will be created if it does not exist").
-				Value(&m.config.LogFilePath).
+				Value(&m.config.LogFile.Path).
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
@@ -132,6 +138,27 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 
 					return err
 				}),
+			huh.NewInput().
+				Title("Log File Max Size").
+				Description("In megabytes").
+				Value(&logFileMaxSize).
+				Validate(createIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
+			huh.NewInput().
+				Title("Log File Max Backups").
+				Value(&logFileMaxBackups).
+				Validate(createIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
+			huh.NewInput().
+				Title("Log File Max Age").
+				Description("In days").
+				Value(&logFileMaxAge).
+				Validate(createIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
+			huh.NewConfirm().
+				Title("Log File Local Time").
+				Description("Used for timestamping files. Default is UTC time.").
+				Value(m.config.LogFile.LocalTime),
+			huh.NewConfirm().
+				Title("Log File Compress").
+				Value(m.config.LogFile.Compress),
 		),
 		huh.NewGroup(
 			huh.NewInput().
@@ -235,6 +262,23 @@ func createPortValidator(config *apiclient.ServerConfig, portView *string, port 
 		if config.ApiPort == config.HeadscalePort {
 			return errors.New("port conflict")
 		}
+
+		return nil
+	}
+}
+
+func createIntValidator(viewValue *string, value *int32) func(string) error {
+	return func(string) error {
+		validateInt, err := strconv.Atoi(*viewValue)
+		if err != nil {
+			return errors.New("failed to parse int")
+		}
+
+		if validateInt <= 0 {
+			return errors.New("int out of range")
+		}
+
+		*value = int32(validateInt)
 
 		return nil
 	}

@@ -9,11 +9,12 @@ import (
 
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 type logFormatter struct {
 	textFormatter *log.TextFormatter
-	file          *os.File
+	writer        io.Writer
 }
 
 func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
@@ -22,9 +23,9 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 		return nil, err
 	}
 
-	if f.file != nil {
+	if f.writer != nil {
 		// Write to file
-		_, err = f.file.Write(formatted)
+		_, err = f.writer.Write(formatted)
 		if err != nil {
 			return nil, err
 		}
@@ -34,18 +35,20 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 }
 
 func (s *Server) initLogs() error {
-	filePath := s.config.LogFilePath
-
-	file, err := os.OpenFile(filePath, os.O_TRUNC|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
+	rotatedLogFile := &lumberjack.Logger{
+		Filename:   s.config.LogFile.Path,
+		MaxSize:    s.config.LogFile.MaxSize, // megabytes
+		MaxBackups: s.config.LogFile.MaxBackups,
+		MaxAge:     s.config.LogFile.MaxAge, // days
+		LocalTime:  s.config.LogFile.LocalTime,
+		Compress:   s.config.LogFile.Compress,
 	}
 
 	logFormatter := &logFormatter{
 		textFormatter: &log.TextFormatter{
 			ForceColors: true,
 		},
-		file: file,
+		writer: rotatedLogFile,
 	}
 
 	log.SetFormatter(logFormatter)
@@ -55,7 +58,7 @@ func (s *Server) initLogs() error {
 		frpLogLevel = os.Getenv("FRP_LOG_LEVEL")
 	}
 
-	frpOutput := filePath
+	frpOutput := s.config.LogFile.Path
 	if os.Getenv("FRP_LOG_OUTPUT") != "" {
 		frpOutput = os.Getenv("FRP_LOG_OUTPUT")
 	}
@@ -66,7 +69,7 @@ func (s *Server) initLogs() error {
 }
 
 func (s *Server) GetLogReader() (io.Reader, error) {
-	file, err := os.Open(s.config.LogFilePath)
+	file, err := os.Open(s.config.LogFile.Path)
 	if err != nil {
 		return nil, err
 	}

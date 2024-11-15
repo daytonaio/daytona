@@ -21,23 +21,23 @@ var _ MappedNullable = &ServerConfig{}
 
 // ServerConfig struct for ServerConfig
 type ServerConfig struct {
-	ApiPort                   int32       `json:"apiPort"`
-	BinariesPath              string      `json:"binariesPath"`
-	BuildImageNamespace       *string     `json:"buildImageNamespace,omitempty"`
-	BuilderImage              string      `json:"builderImage"`
-	BuilderRegistryServer     string      `json:"builderRegistryServer"`
-	DefaultProjectImage       string      `json:"defaultProjectImage"`
-	DefaultProjectUser        string      `json:"defaultProjectUser"`
-	Frps                      *FRPSConfig `json:"frps,omitempty"`
-	HeadscalePort             int32       `json:"headscalePort"`
-	Id                        string      `json:"id"`
-	LocalBuilderRegistryImage string      `json:"localBuilderRegistryImage"`
-	LocalBuilderRegistryPort  int32       `json:"localBuilderRegistryPort"`
-	LogFilePath               string      `json:"logFilePath"`
-	ProvidersDir              string      `json:"providersDir"`
-	RegistryUrl               string      `json:"registryUrl"`
-	SamplesIndexUrl           *string     `json:"samplesIndexUrl,omitempty"`
-	ServerDownloadUrl         string      `json:"serverDownloadUrl"`
+	ApiPort                   int32         `json:"apiPort"`
+	BinariesPath              string        `json:"binariesPath"`
+	BuildImageNamespace       *string       `json:"buildImageNamespace,omitempty"`
+	BuilderImage              string        `json:"builderImage"`
+	BuilderRegistryServer     string        `json:"builderRegistryServer"`
+	DefaultProjectImage       string        `json:"defaultProjectImage"`
+	DefaultProjectUser        string        `json:"defaultProjectUser"`
+	Frps                      *FRPSConfig   `json:"frps,omitempty"`
+	HeadscalePort             int32         `json:"headscalePort"`
+	Id                        string        `json:"id"`
+	LocalBuilderRegistryImage string        `json:"localBuilderRegistryImage"`
+	LocalBuilderRegistryPort  int32         `json:"localBuilderRegistryPort"`
+	LogFile                   LogFileConfig `json:"logFile"`
+	ProvidersDir              string        `json:"providersDir"`
+	RegistryUrl               string        `json:"registryUrl"`
+	SamplesIndexUrl           *string       `json:"samplesIndexUrl,omitempty"`
+	ServerDownloadUrl         string        `json:"serverDownloadUrl"`
 }
 
 type _ServerConfig ServerConfig
@@ -46,7 +46,7 @@ type _ServerConfig ServerConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFilePath string, providersDir string, registryUrl string, serverDownloadUrl string) *ServerConfig {
+func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string) *ServerConfig {
 	this := ServerConfig{}
 	this.ApiPort = apiPort
 	this.BinariesPath = binariesPath
@@ -58,7 +58,7 @@ func NewServerConfig(apiPort int32, binariesPath string, builderImage string, bu
 	this.Id = id
 	this.LocalBuilderRegistryImage = localBuilderRegistryImage
 	this.LocalBuilderRegistryPort = localBuilderRegistryPort
-	this.LogFilePath = logFilePath
+	this.LogFile = logFile
 	this.ProvidersDir = providersDir
 	this.RegistryUrl = registryUrl
 	this.ServerDownloadUrl = serverDownloadUrl
@@ -377,28 +377,28 @@ func (o *ServerConfig) SetLocalBuilderRegistryPort(v int32) {
 	o.LocalBuilderRegistryPort = v
 }
 
-// GetLogFilePath returns the LogFilePath field value
-func (o *ServerConfig) GetLogFilePath() string {
+// GetLogFile returns the LogFile field value
+func (o *ServerConfig) GetLogFile() LogFileConfig {
 	if o == nil {
-		var ret string
+		var ret LogFileConfig
 		return ret
 	}
 
-	return o.LogFilePath
+	return o.LogFile
 }
 
-// GetLogFilePathOk returns a tuple with the LogFilePath field value
+// GetLogFileOk returns a tuple with the LogFile field value
 // and a boolean to check if the value has been set.
-func (o *ServerConfig) GetLogFilePathOk() (*string, bool) {
+func (o *ServerConfig) GetLogFileOk() (*LogFileConfig, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.LogFilePath, true
+	return &o.LogFile, true
 }
 
-// SetLogFilePath sets field value
-func (o *ServerConfig) SetLogFilePath(v string) {
-	o.LogFilePath = v
+// SetLogFile sets field value
+func (o *ServerConfig) SetLogFile(v LogFileConfig) {
+	o.LogFile = v
 }
 
 // GetProvidersDir returns the ProvidersDir field value
@@ -531,7 +531,7 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["localBuilderRegistryImage"] = o.LocalBuilderRegistryImage
 	toSerialize["localBuilderRegistryPort"] = o.LocalBuilderRegistryPort
-	toSerialize["logFilePath"] = o.LogFilePath
+	toSerialize["logFile"] = o.LogFile
 	toSerialize["providersDir"] = o.ProvidersDir
 	toSerialize["registryUrl"] = o.RegistryUrl
 	if !IsNil(o.SamplesIndexUrl) {
@@ -556,7 +556,7 @@ func (o *ServerConfig) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"localBuilderRegistryImage",
 		"localBuilderRegistryPort",
-		"logFilePath",
+		"logFile",
 		"providersDir",
 		"registryUrl",
 		"serverDownloadUrl",
