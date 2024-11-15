@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package projectconfig
 
 import (
@@ -8,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"os/exec"
 
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -251,6 +249,20 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		newProjectConfig.User = &apiServerConfig.DefaultProjectUser
 	}
 
+	// Detect devfile.yaml in the repository
+	devfileDetected, err := detectDevfile(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	if devfileDetected {
+		// Configure the project using Devfile
+		err = configureProjectUsingDevfile(repoUrl)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
@@ -272,6 +284,24 @@ func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, er
 	}
 
 	return existingProjectConfigNames, nil
+}
+
+func detectDevfile(repoUrl string) (bool, error) {
+	cmd := exec.Command("git", "ls-remote", repoUrl, "HEAD:devfile.yaml")
+	err := cmd.Run()
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func configureProjectUsingDevfile(repoUrl string) error {
+	cmd := exec.Command("odo", "init", "--devfile", repoUrl)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to configure project using Devfile: %w", err)
+	}
+	return nil
 }
 
 var nameFlag string

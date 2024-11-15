@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package workspace
 
 import (
@@ -463,6 +460,20 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 		Repository: *repo,
 	}
 
+	// Detect devfile.yaml in the repository
+	devfileDetected, err := detectDevfile(repoUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	if devfileDetected {
+		// Configure the project using Devfile
+		err = configureProjectUsingDevfile(repoUrl)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	*projects = append(*projects, *project)
 
 	return nil, nil
@@ -564,4 +575,22 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, p
 	}
 
 	return gpgKey, nil
+}
+
+func detectDevfile(repoUrl string) (bool, error) {
+	cmd := exec.Command("git", "ls-remote", repoUrl, "HEAD:devfile.yaml")
+	err := cmd.Run()
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
+func configureProjectUsingDevfile(repoUrl string) error {
+	cmd := exec.Command("odo", "init", "--devfile", repoUrl)
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("failed to configure project using Devfile: %w", err)
+	}
+	return nil
 }
