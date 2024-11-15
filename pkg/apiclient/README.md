@@ -172,6 +172,7 @@ Class | Method | HTTP request | Description
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
+ - [LogFileConfig](docs/LogFileConfig.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
