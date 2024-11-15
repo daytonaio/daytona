@@ -20,8 +20,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -61,6 +61,11 @@ var CodeCmd = &cobra.Command{
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(true)
+				return nil
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
@@ -186,6 +191,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
 		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
+	case "zed":
+		return ide.OpenZed(activeProfile, workspaceId, projectName, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {

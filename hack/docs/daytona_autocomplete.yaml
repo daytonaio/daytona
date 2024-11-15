@@ -1,5 +1,5 @@
 name: daytona autocomplete
-synopsis: Adds completion script for your shell enviornment
+synopsis: Adds a completion script for your shell environment
 usage: daytona autocomplete [bash|zsh|fish|powershell] [flags]
 inherited_options:
     - name: help

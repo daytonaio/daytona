@@ -320,6 +320,8 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, works
 
 	suggestedName := workspace_util.GetSuggestedName(initialSuggestion, workspaceNames)
 
+	dedupProjectNames(projects)
+
 	submissionFormConfig := create.SubmissionFormConfig{
 		ChosenName:    workspaceName,
 		SuggestedName: suggestedName,
@@ -431,19 +433,24 @@ func processGitURL(ctx context.Context, repoUrl string, apiClient *apiclient.API
 		return nil, err
 	}
 
-	gitProviderConfigs, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(repoUrl)).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
+	if projectConfigurationFlags.GitProviderConfig == nil || *projectConfigurationFlags.GitProviderConfig == "" {
+		gitProviderConfigs, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url.QueryEscape(repoUrl)).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
 
-	if len(gitProviderConfigs) == 1 {
-		projectConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
-	} else if len(gitProviderConfigs) > 1 {
-		gp := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
-			GitProviderConfigs: gitProviderConfigs,
-			ActionVerb:         "Use",
-		})
-		projectConfigurationFlags.GitProviderConfig = &gp.Id
+		if len(gitProviderConfigs) == 1 {
+			projectConfigurationFlags.GitProviderConfig = &gitProviderConfigs[0].Id
+		} else if len(gitProviderConfigs) > 1 {
+			gp := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+				GitProviderConfigs: gitProviderConfigs,
+				ActionVerb:         "Use",
+			})
+			if gp == nil {
+				return nil, common.ErrCtrlCAbort
+			}
+			projectConfigurationFlags.GitProviderConfig = &gp.Id
+		}
 	}
 
 	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)

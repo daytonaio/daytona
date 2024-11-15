@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -33,7 +34,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 		}
 
 		if len(gitProviders) == 0 {
-			views.RenderInfoMessage("No git providers registered")
+			views_util.NotifyEmptyGitProviderList(true)
 			return nil
 		}
 

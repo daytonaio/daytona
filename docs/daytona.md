@@ -20,7 +20,7 @@ daytona [flags]
 ### SEE ALSO
 
 * [daytona api-key](daytona_api-key.md)	 - Api Key commands
-* [daytona autocomplete](daytona_autocomplete.md)	 - Adds completion script for your shell enviornment
+* [daytona autocomplete](daytona_autocomplete.md)	 - Adds a completion script for your shell environment
 * [daytona build](daytona_build.md)	 - Manage builds
 * [daytona code](daytona_code.md)	 - Open a workspace in your preferred IDE
 * [daytona config](daytona_config.md)	 - Output Daytona configuration

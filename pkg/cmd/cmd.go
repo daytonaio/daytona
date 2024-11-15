@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	. "github.com/daytonaio/daytona/pkg/cmd/build"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"

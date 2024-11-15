@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/projectconfig/info"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -39,6 +40,11 @@ var projectConfigInfoCmd = &cobra.Command{
 			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(projectConfigList) == 0 {
+				views_util.NotifyEmptyProjectConfigList(true)
+				return nil
 			}
 
 			if format.FormatFlag != "" {

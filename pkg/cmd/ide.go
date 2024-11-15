@@ -55,6 +55,11 @@ var ideCmd = &cobra.Command{
 			if err := ide_util.CheckFleetInstallation(); err != nil {
 				log.Error(err)
 			}
+		case "zed":
+			_, err := ide_util.GetZedBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 		jetbrainsIdes := jetbrains.GetIdes()

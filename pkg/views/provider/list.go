@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/util"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type rowData struct {
@@ -18,6 +19,11 @@ type rowData struct {
 }
 
 func List(providerList []apiclient.Provider) {
+	if len(providerList) == 0 {
+		views_util.NotifyEmptyProviderList(true)
+		return
+	}
+
 	data := [][]string{}
 
 	for _, provider := range providerList {

@@ -22,6 +22,11 @@ type rowData struct {
 }
 
 func ListProjectConfigs(projectConfigList []apiclient.ProjectConfig, apiServerConfig *apiclient.ServerConfig, specifyGitProviders bool) {
+	if len(projectConfigList) == 0 {
+		views_util.NotifyEmptyProjectConfigList(true)
+		return
+	}
+
 	data := [][]string{}
 
 	for _, pc := range projectConfigList {

@@ -6,8 +6,10 @@ package tailscale
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"tailscale.com/tsnet"
 )
 
@@ -45,7 +47,7 @@ func GetConnection(config *TsnetConnConfig) (*tsnet.Server, error) {
 
 	_, err := conn.Up(timeoutCtx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%w. %w", err, common.ErrConnection)
 	}
 
 	return conn, nil

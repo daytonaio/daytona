@@ -63,6 +63,11 @@ var StopCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(true)
+				return nil
+			}
+
 			selectedWorkspaces := selection.GetWorkspacesFromPrompt(workspaceList, "Stop")
 
 			for _, workspace := range selectedWorkspaces {

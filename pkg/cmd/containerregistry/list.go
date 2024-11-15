@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/views"
 	containerregistry_view "github.com/daytonaio/daytona/pkg/views/containerregistry/list"
 	"github.com/spf13/cobra"
 )
@@ -28,11 +27,6 @@ var containerRegistryListCmd = &cobra.Command{
 		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		if len(containerRegistries) == 0 {
-			views.RenderInfoMessage("No container registries found. Set a new container registry by running 'daytona container-registry set'")
-			return nil
 		}
 
 		if format.FormatFlag != "" {

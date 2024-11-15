@@ -8,8 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	"github.com/google/uuid"
 )
 
@@ -37,8 +39,6 @@ type Ide struct {
 	Name string
 }
 
-const DefaultIdeId = "vscode"
-
 type GitProvider struct {
 	Id   string
 	Name string
@@ -52,9 +52,12 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
+		// Setup autocompletion when adding initial config
+		_ = autocomplete.DetectShellAndSetupAutocompletion(autocomplete.AutoCompleteCmd.Root())
+
 		config := &Config{
 			Id:               uuid.NewString(),
-			DefaultIdeId:     DefaultIdeId,
+			DefaultIdeId:     getInitialDefaultIde(),
 			TelemetryEnabled: true,
 		}
 		return config, config.Save()
@@ -261,4 +264,12 @@ func GetErrorLogsDir() (string, error) {
 	}
 
 	return errorLogsDir, nil
+}
+
+func getInitialDefaultIde() string {
+	_, err := exec.LookPath("code")
+	if err == nil {
+		return "vscode"
+	}
+	return "browser"
 }
