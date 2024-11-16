@@ -4,10 +4,13 @@
 package server
 
 import (
+	"archive/zip"
 	"context"
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -93,15 +96,41 @@ func readServerLogFile() error {
 		return fmt.Errorf("failed to get server config: %w", err)
 	}
 
-	file, err := os.Open(cfg.LogFile.Path)
+	// file, err := os.Open(cfg.LogFile.Path)
+	// if err != nil {
+	// 	return fmt.Errorf("while opening server logs: %w", err)
+	// }
+	// defer file.Close()
+
+	logDir := filepath.Dir(cfg.LogFile.Path)
+	logFiles, err := getLogFiles(logDir)
 	if err != nil {
-		return fmt.Errorf("while opening server logs: %w", err)
+		return fmt.Errorf("failed to get log files: %w", err)
 	}
-	defer file.Close()
+
+	if len(logFiles) == 0 {
+		return fmt.Errorf("no log files found in %s", logDir)
+	}
+
+	selectedFile, err := selectLogFile(logFiles)
+	fmt.Println("ODE:", selectedFile)
+	if err != nil {
+		return fmt.Errorf("failed to select log file: %w", err)
+	}
+
+	var reader io.Reader
+	if strings.HasSuffix(selectedFile, ".zip") {
+		reader, err = readCompressedFile(selectedFile)
+	} else {
+		reader, err = os.Open(selectedFile)
+	}
+	if err != nil {
+		return fmt.Errorf("failed to open log file: %w", err)
+	}
 	msgChan := make(chan []byte)
 	errChan := make(chan error)
 
-	go util.ReadLog(context.Background(), file, followFlag, msgChan, errChan)
+	go util.ReadLog(context.Background(), reader, followFlag, msgChan, errChan)
 
 	for {
 		select {
@@ -123,4 +152,59 @@ func readServerLogFile() error {
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
+}
+
+func getLogFiles(dir string) ([]string, error) {
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return nil, err
+	}
+
+	var logFiles []string
+	for _, file := range files {
+		if file.Name() == "daytona.log" || strings.HasPrefix(file.Name(), "daytona-") && (strings.HasSuffix(file.Name(), ".log") || strings.HasSuffix(file.Name(), ".zip")) {
+			logFiles = append(logFiles, filepath.Join(dir, file.Name()))
+		}
+	}
+
+	return logFiles, nil
+}
+
+func selectLogFile(files []string) (string, error) {
+	var options []huh.Option[string]
+	for _, file := range files {
+		options = append(options, huh.Option[string]{Key: filepath.Base(file), Value: filepath.Base(file)})
+	}
+
+	var selected string
+	prompt := huh.NewSelect[string]().
+		Title("Select a log file to read").
+		Options(options...).
+		Value(&selected)
+
+	err := prompt.Run()
+	if err != nil {
+		return "", err
+	}
+
+	for _, file := range files {
+		if filepath.Base(file) == selected {
+			return file, nil
+		}
+	}
+
+	return "", fmt.Errorf("selected file not found")
+}
+
+func readCompressedFile(filePath string) (io.Reader, error) {
+	zipFile, err := zip.OpenReader(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(zipFile.File) == 0 {
+		return nil, fmt.Errorf("empty zip file")
+	}
+
+	return zipFile.File[0].Open()
 }
