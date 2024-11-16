@@ -25,6 +25,11 @@ import (
 var followFlag bool
 var fileFlag bool
 
+func init() {
+	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
+	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
+}
+
 var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Server logs",
@@ -96,12 +101,6 @@ func readServerLogFile() error {
 		return fmt.Errorf("failed to get server config: %w", err)
 	}
 
-	// file, err := os.Open(cfg.LogFile.Path)
-	// if err != nil {
-	// 	return fmt.Errorf("while opening server logs: %w", err)
-	// }
-	// defer file.Close()
-
 	logDir := filepath.Dir(cfg.LogFile.Path)
 	logFiles, err := getLogFiles(logDir)
 	if err != nil {
@@ -113,7 +112,6 @@ func readServerLogFile() error {
 	}
 
 	selectedFile, err := selectLogFile(logFiles)
-	fmt.Println("ODE:", selectedFile)
 	if err != nil {
 		return fmt.Errorf("failed to select log file: %w", err)
 	}
@@ -127,6 +125,7 @@ func readServerLogFile() error {
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
 	}
+
 	msgChan := make(chan []byte)
 	errChan := make(chan error)
 
@@ -147,11 +146,6 @@ func readServerLogFile() error {
 			fmt.Println(string(msg))
 		}
 	}
-}
-
-func init() {
-	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
 }
 
 func getLogFiles(dir string) ([]string, error) {
