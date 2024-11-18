@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package workspace
 
 import (
@@ -16,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	ssh_config "github.com.daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -253,6 +250,7 @@ var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
 	EnvVars:           new([]string),
 	Manual:            new(bool),
 	GitProviderConfig: new(string),
+	WindowsImage:      new(bool), // Added for Windows image support
 }
 
 func init() {
@@ -271,6 +269,7 @@ func init() {
 	CreateCmd.Flags().BoolVar(&multiProjectFlag, "multi-project", false, "Workspace with multiple projects/repos")
 	CreateCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 	CreateCmd.Flags().StringSliceVar(projectConfigurationFlags.Branches, "branch", []string{}, "Specify the Git branches to use in the projects")
+	CreateCmd.Flags().BoolVar(projectConfigurationFlags.WindowsImage, "windows-image", false, "Use a Windows image for the workspace") // Added for Windows image support
 
 	workspace_util.AddProjectConfigurationFlags(CreateCmd, projectConfigurationFlags, true)
 }
@@ -300,6 +299,12 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, works
 		Image:                &apiServerConfig.DefaultProjectImage,
 		ImageUser:            &apiServerConfig.DefaultProjectUser,
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
+	}
+
+	// Handle Windows image option
+	if *projectConfigurationFlags.WindowsImage {
+		projectDefaults.Image = &apiServerConfig.WindowsImage
+		projectDefaults.ImageUser = &apiServerConfig.WindowsImageUser
 	}
 
 	*projects, err = workspace_util.GetProjectsCreationDataFromPrompt(workspace_util.ProjectsDataPromptConfig{

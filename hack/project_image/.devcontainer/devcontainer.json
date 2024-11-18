@@ -47,7 +47,8 @@
     "ghcr.io/devcontainers/features/nix:1.2.0": {},
     "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
       "command1": "npm install -g @devcontainers/cli"
-    }
+    },
+    "ghcr.io/devcontainers/features/windows:1": {}
   },
   "overrideFeatureInstallOrder": [
     "ghcr.io/devcontainers/features/docker-in-docker:2",
@@ -55,7 +56,8 @@
     "ghcr.io/devcontainers/features/node:1",
     "ghcr.io/devcontainers-contrib/features/typescript:2",
     "ghcr.io/devcontainers/features/common-utils:1",
-    "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest"
+    "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest",
+    "ghcr.io/devcontainers/features/windows:1"
   ],
   "remoteUser": "daytona"
 }

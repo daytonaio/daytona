@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package util
 
 import (
@@ -98,8 +95,8 @@ func GetProjectsCreationDataFromPrompt(config ProjectsDataPromptConfig) ([]apicl
 						Repository: *configRepo,
 					},
 					BuildConfig: projectConfig.BuildConfig,
-					Image:       config.Defaults.Image,
-					User:        config.Defaults.ImageUser,
+					Image:       projectConfig.Image,
+					User:        projectConfig.User,
 					EnvVars:     projectConfig.EnvVars,
 				}
 

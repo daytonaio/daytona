@@ -1,6 +1,3 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package server
 
 import (
@@ -34,6 +31,11 @@ var configureCmd = &cobra.Command{
 		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig, containerRegistries)
 		if err != nil {
 			return err
+		}
+
+		// Add Windows image configuration
+		if apiServerConfig.WindowsImage == nil {
+			apiServerConfig.WindowsImage = new(string)
 		}
 
 		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
