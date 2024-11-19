@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -25,32 +26,35 @@ import (
 const registryContainerName = "daytona-registry"
 
 type LocalContainerRegistryConfig struct {
-	DataPath string
-	Port     uint32
-	Image    string
-	Logger   io.Writer
-	Frps     *server.FRPSConfig
-	ServerId string
+	DataPath          string
+	Port              uint32
+	Image             string
+	ContainerRegistry *containerregistry.ContainerRegistry
+	Logger            io.Writer
+	Frps              *server.FRPSConfig
+	ServerId          string
 }
 
 func NewLocalContainerRegistry(config *LocalContainerRegistryConfig) *LocalContainerRegistry {
 	return &LocalContainerRegistry{
-		dataPath: config.DataPath,
-		port:     config.Port,
-		image:    config.Image,
-		logger:   config.Logger,
-		frps:     config.Frps,
-		serverId: config.ServerId,
+		dataPath:          config.DataPath,
+		port:              config.Port,
+		image:             config.Image,
+		containerRegistry: config.ContainerRegistry,
+		logger:            config.Logger,
+		frps:              config.Frps,
+		serverId:          config.ServerId,
 	}
 }
 
 type LocalContainerRegistry struct {
-	dataPath string
-	port     uint32
-	image    string
-	logger   io.Writer
-	frps     *server.FRPSConfig
-	serverId string
+	dataPath          string
+	port              uint32
+	image             string
+	containerRegistry *containerregistry.ContainerRegistry
+	logger            io.Writer
+	frps              *server.FRPSConfig
+	serverId          string
 }
 
 func (s *LocalContainerRegistry) Start() error {
@@ -91,7 +95,7 @@ func (s *LocalContainerRegistry) Start() error {
 	}
 
 	// Pull the image
-	err = dockerClient.PullImage(s.image, nil, s.logger)
+	err = dockerClient.PullImage(s.image, s.containerRegistry, s.logger)
 	if err != nil {
 		return err
 	}

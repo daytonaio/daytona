@@ -42,14 +42,16 @@ type DevcontainerPaths struct {
 type CreateDevcontainerOptions struct {
 	ProjectDir string
 	// Name of the project inside the devcontainer
-	ProjectName       string
-	BuildConfig       *buildconfig.BuildConfig
-	LogWriter         io.Writer
-	SshClient         *ssh.Client
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Prebuild          bool
-	EnvVars           map[string]string
-	IdLabels          map[string]string
+	ProjectName              string
+	BuildConfig              *buildconfig.BuildConfig
+	LogWriter                io.Writer
+	SshClient                *ssh.Client
+	ContainerRegistry        *containerregistry.ContainerRegistry
+	Prebuild                 bool
+	EnvVars                  map[string]string
+	IdLabels                 map[string]string
+	BuilderImage             string
+	BuilderContainerRegistry *containerregistry.ContainerRegistry
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
@@ -66,7 +68,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		}
 	}
 
-	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return "", "", err
 	}
@@ -285,7 +287,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	return result.ContainerId, RemoteUser(result.RemoteUser), nil
 }
 
-func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, error) {
+func (d *DockerClient) ensureDockerSockForward(builderImage string, builderContainerRegistry *containerregistry.ContainerRegistry, logWriter io.Writer) (string, error) {
 	ctx := context.Background()
 
 	containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{
@@ -310,16 +312,15 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 		}
 	}
 
-	// TODO: This image should be configurable because it might be hosted on an alternative registry
-	err = d.PullImage("alpine/socat", nil, logWriter)
+	err = d.PullImage(builderImage, builderContainerRegistry, logWriter)
 	if err != nil {
 		return "", err
 	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image: "alpine/socat",
-		User:  "root",
-		Cmd:   []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
+		Image:      builderImage,
+		Entrypoint: []string{"socat"},
+		Cmd:        []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
 	}, &container.HostConfig{
 		Privileged: true,
 		Mounts: []mount.Mount{
@@ -481,7 +482,7 @@ func (d *DockerClient) execDevcontainerCommand(cmd string, opts *CreateDevcontai
 	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image:      "daytonaio/workspace-project",
+		Image:      opts.BuilderImage,
 		Entrypoint: []string{"sh"},
 		Env:        []string{"DOCKER_HOST=tcp://localhost:2375"},
 		Cmd:        append([]string{"-c"}, cmd),

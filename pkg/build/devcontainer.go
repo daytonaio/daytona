@@ -61,7 +61,7 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 		return errors.New("build image is nil")
 	}
 
-	return dockerClient.PushImage(*build.Image, b.containerRegistry, buildLogger)
+	return dockerClient.PushImage(*build.Image, b.buildImageContainerRegistry, buildLogger)
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
@@ -77,17 +77,18 @@ func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, er
 		ApiClient: cli,
 	})
 
-	// TODO: The image should be configurable
-	err = dockerClient.PullImage("daytonaio/workspace-project", nil, buildLogger)
+	err = dockerClient.PullImage(b.image, b.containerRegistry, buildLogger)
 	if err != nil {
 		return b.defaultProjectImage, b.defaultProjectUser, err
 	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
-		BuildConfig:       build.BuildConfig,
-		ProjectName:       build.Id,
-		ContainerRegistry: b.containerRegistry,
-		Prebuild:          true,
+		BuildConfig:              build.BuildConfig,
+		ProjectName:              build.Id,
+		ContainerRegistry:        b.buildImageContainerRegistry,
+		BuilderImage:             b.image,
+		BuilderContainerRegistry: b.containerRegistry,
+		Prebuild:                 true,
 		IdLabels: map[string]string{
 			"daytona.build.id": build.Id,
 		},

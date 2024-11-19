@@ -157,7 +157,7 @@ var ServeCmd = &cobra.Command{
 
 		err = <-localContainerRegistryErrChan
 		if err != nil {
-			return err
+			log.Errorf("Failed to start local container registry: %v\nBuilds may not work properly.\nRestart the server to restart the registry.", err)
 		}
 
 		printServerStartedMessage(c, false)
@@ -287,13 +287,19 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	}
 
 	if c.BuilderRegistryServer == "local" {
+		cr, err := containerRegistryService.FindByImageName(c.LocalBuilderRegistryImage)
+		if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+			return nil, err
+		}
+
 		localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
-			DataPath: filepath.Join(configDir, "registry"),
-			Port:     c.LocalBuilderRegistryPort,
-			Image:    c.LocalBuilderRegistryImage,
-			Logger:   log.StandardLogger().Writer(),
-			Frps:     c.Frps,
-			ServerId: c.Id,
+			DataPath:          filepath.Join(configDir, "registry"),
+			Port:              c.LocalBuilderRegistryPort,
+			Image:             c.LocalBuilderRegistryImage,
+			ContainerRegistry: cr,
+			Logger:            log.StandardLogger().Writer(),
+			Frps:              c.Frps,
+			ServerId:          c.Id,
 		})
 		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 	}
