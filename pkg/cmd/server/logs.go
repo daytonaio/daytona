@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -111,16 +112,17 @@ func readServerLogFile() error {
 		return fmt.Errorf("no log files found in %s", logDir)
 	}
 
-	selectedFile, err := selectLogFile(logFiles)
-	if err != nil {
-		return fmt.Errorf("failed to select log file: %w", err)
+	selectedFile := selection.GetLogFileFromPrompt(logFiles)
+	log.Debug(*selectedFile)
+	if selectedFile == nil {
+		return nil
 	}
 
 	var reader io.Reader
-	if strings.HasSuffix(selectedFile, ".zip") {
-		reader, err = readCompressedFile(selectedFile)
+	if strings.HasSuffix(*selectedFile, ".zip") || strings.HasSuffix(*selectedFile, ".gz") {
+		reader, err = readCompressedFile(*selectedFile)
 	} else {
-		reader, err = os.Open(selectedFile)
+		reader, err = os.Open(*selectedFile)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
@@ -156,7 +158,7 @@ func getLogFiles(dir string) ([]string, error) {
 
 	var logFiles []string
 	for _, file := range files {
-		if file.Name() == "daytona.log" || strings.HasPrefix(file.Name(), "daytona-") && (strings.HasSuffix(file.Name(), ".log") || strings.HasSuffix(file.Name(), ".zip")) {
+		if file.Name() == "daytona.log" || strings.HasPrefix(file.Name(), "daytona-") && (strings.HasSuffix(file.Name(), ".log") || strings.HasSuffix(file.Name(), ".zip") || strings.HasSuffix(file.Name(), ".gz")) {
 			logFiles = append(logFiles, filepath.Join(dir, file.Name()))
 		}
 	}
@@ -164,31 +166,31 @@ func getLogFiles(dir string) ([]string, error) {
 	return logFiles, nil
 }
 
-func selectLogFile(files []string) (string, error) {
-	var options []huh.Option[string]
-	for _, file := range files {
-		options = append(options, huh.Option[string]{Key: filepath.Base(file), Value: filepath.Base(file)})
-	}
+// func selectLogFile(files []string) (string, error) {
+// 	var options []huh.Option[string]
+// 	for _, file := range files {
+// 		options = append(options, huh.Option[string]{Key: filepath.Base(file), Value: filepath.Base(file)})
+// 	}
 
-	var selected string
-	prompt := huh.NewSelect[string]().
-		Title("Select a log file to read").
-		Options(options...).
-		Value(&selected)
+// 	var selected string
+// 	prompt := huh.NewSelect[string]().
+// 		Title("Select a log file to read").
+// 		Options(options...).
+// 		Value(&selected)
 
-	err := prompt.Run()
-	if err != nil {
-		return "", err
-	}
+// 	err := prompt.Run()
+// 	if err != nil {
+// 		return "", err
+// 	}
 
-	for _, file := range files {
-		if filepath.Base(file) == selected {
-			return file, nil
-		}
-	}
+// 	for _, file := range files {
+// 		if filepath.Base(file) == selected {
+// 			return file, nil
+// 		}
+// 	}
 
-	return "", fmt.Errorf("selected file not found")
-}
+// 	return "", fmt.Errorf("selected file not found")
+// }
 
 func readCompressedFile(filePath string) (io.Reader, error) {
 	zipFile, err := zip.OpenReader(filePath)
