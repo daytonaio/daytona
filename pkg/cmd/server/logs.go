@@ -24,11 +24,13 @@ import (
 )
 
 var followFlag bool
-var fileFlag bool
+var fileFlag string
+var localFlag bool
 
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().BoolVar(&fileFlag, "file", false, "Read logs from local server log file")
+	logsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file from server log files")
+	logsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read logs from local server log files")
 }
 
 var logsCmd = &cobra.Command{
@@ -50,79 +52,95 @@ var logsCmd = &cobra.Command{
 			query += "follow=true"
 		}
 
+		if fileFlag != "" {
+			if query != "" {
+				query += "&"
+			}
+			query += fmt.Sprintf("file=%s", fileFlag)
+		}
+
 		switch {
-		case fileFlag:
-			return readServerLogFile()
-
+		case localFlag:
+			return readLocalServerLogFile()
 		default:
-			ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
-
-			if err != nil {
-				log.Error(apiclient.HandleErrorResponse(res, err))
-
-				if activeProfile.Id != "default" {
-					return nil
-				}
-
-				readLogsFile := true
-				form := huh.NewForm(
-					huh.NewGroup(
-						huh.NewConfirm().Description("An error occurred while connecting to the server. Would you like to read from local log file instead?").
-							Value(&readLogsFile),
-					),
-				).WithTheme(views.GetCustomTheme())
-				formErr := form.Run()
-				if formErr != nil {
-					return formErr
-				}
-
-				if readLogsFile {
-					return readServerLogFile()
-				}
-				return nil
-
-			}
-
-			for {
-				_, msg, err := ws.ReadMessage()
-				if err != nil {
-					return nil
-				}
-
-				fmt.Println(string(msg))
-			}
+			return readRemoteServerLogFile(activeProfile, query)
 		}
 	},
 }
 
-func readServerLogFile() error {
-	views.RenderBorderedMessage("Reading from server log file...")
+func readRemoteServerLogFile(activeProfile config.Profile, query string) error {
+	ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
+
+	if err != nil {
+		log.Error(apiclient.HandleErrorResponse(res, err))
+
+		if activeProfile.Id != "default" {
+			return nil
+		}
+
+		readLocalLogsFile := true
+		form := huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().Description("An error occurred while connecting to the server. Would you like to read from local log file instead?").
+					Value(&readLocalLogsFile),
+			),
+		).WithTheme(views.GetCustomTheme())
+		formErr := form.Run()
+		if formErr != nil {
+			return formErr
+		}
+
+		if readLocalLogsFile {
+			return readLocalServerLogFile()
+		}
+
+		return nil
+
+	}
+
+	for {
+		_, msg, err := ws.ReadMessage()
+		if err != nil {
+			return nil
+		}
+
+		fmt.Println(string(msg))
+	}
+}
+
+func readLocalServerLogFile() error {
+	views.RenderBorderedMessage("Reading from local server log file...")
+
 	cfg, err := server.GetConfig()
 	if err != nil {
 		return fmt.Errorf("failed to get server config: %w", err)
 	}
 
-	logDir := filepath.Dir(cfg.LogFile.Path)
-	logFiles, err := getLogFiles(logDir)
-	if err != nil {
-		return fmt.Errorf("failed to get log files: %w", err)
-	}
+	logFile := fmt.Sprintf("%s/%s", filepath.Dir(cfg.LogFile.Path), fileFlag)
+	if fileFlag == "" {
+		logDir := filepath.Dir(cfg.LogFile.Path)
+		logFiles, err := getLocalServerLogFiles(logDir)
+		if err != nil {
+			return fmt.Errorf("failed to get log files: %w", err)
+		}
 
-	if len(logFiles) == 0 {
-		return fmt.Errorf("no log files found in %s", logDir)
-	}
+		if len(logFiles) == 0 {
+			return fmt.Errorf("no log files found in %s", logDir)
+		}
 
-	selectedFile := selection.GetLogFileFromPrompt(logFiles)
-	log.Debug(*selectedFile)
-	if selectedFile == nil {
-		return nil
+		selectedFile := selection.GetLogFileFromPrompt(logFiles)
+		if selectedFile == nil {
+			return nil
+		}
+
+		logFile = *selectedFile
 	}
 
 	var reader io.Reader
-	if strings.HasSuffix(*selectedFile, ".zip") || strings.HasSuffix(*selectedFile, ".gz") {
-		reader, err = readCompressedFile(*selectedFile)
+	if strings.HasSuffix(logFile, ".zip") || strings.HasSuffix(logFile, ".gz") {
+		reader, err = readCompressedFile(logFile)
 	} else {
-		reader, err = os.Open(*selectedFile)
+		reader, err = os.Open(logFile)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to open log file: %w", err)
@@ -150,7 +168,7 @@ func readServerLogFile() error {
 	}
 }
 
-func getLogFiles(dir string) ([]string, error) {
+func getLocalServerLogFiles(dir string) ([]string, error) {
 	files, err := os.ReadDir(dir)
 	if err != nil {
 		return nil, err
@@ -165,32 +183,6 @@ func getLogFiles(dir string) ([]string, error) {
 
 	return logFiles, nil
 }
-
-// func selectLogFile(files []string) (string, error) {
-// 	var options []huh.Option[string]
-// 	for _, file := range files {
-// 		options = append(options, huh.Option[string]{Key: filepath.Base(file), Value: filepath.Base(file)})
-// 	}
-
-// 	var selected string
-// 	prompt := huh.NewSelect[string]().
-// 		Title("Select a log file to read").
-// 		Options(options...).
-// 		Value(&selected)
-
-// 	err := prompt.Run()
-// 	if err != nil {
-// 		return "", err
-// 	}
-
-// 	for _, file := range files {
-// 		if filepath.Base(file) == selected {
-// 			return file, nil
-// 		}
-// 	}
-
-// 	return "", fmt.Errorf("selected file not found")
-// }
 
 func readCompressedFile(filePath string) (io.Reader, error) {
 	zipFile, err := zip.OpenReader(filePath)
