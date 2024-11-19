@@ -81,3 +81,25 @@ func GenerateNetworkKey(ctx *gin.Context) {
 
 	ctx.JSON(200, &server.NetworkKey{Key: authKey})
 }
+
+// GetServerLogFiles 		godoc
+//
+//	@Tags			server
+//	@Summary		List server log files
+//	@Description	List server log files
+//	@Produce		json
+//	@Success		200	{array}	string
+//	@Router			/server/logs [get]
+//
+//	@id				GetServerLogFiles
+func GetServerLogFiles(ctx *gin.Context) {
+	server := server.GetInstance(nil)
+
+	logFiles, err := server.GetLogFiles()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	ctx.JSON(200, logFiles)
+}

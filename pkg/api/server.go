@@ -130,6 +130,7 @@ func (a *ApiServer) Start() error {
 		serverController.GET("/config", server.GetConfig)
 		serverController.POST("/config", server.SetConfig)
 		serverController.POST("/network-key", server.GenerateNetworkKey)
+		serverController.GET("/logs", server.GetServerLogFiles)
 	}
 
 	binaryController := protected.Group("/binary")

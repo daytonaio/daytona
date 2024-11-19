@@ -6,6 +6,8 @@ package server
 import (
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
@@ -75,4 +77,22 @@ func (s *Server) GetLogReader() (io.Reader, error) {
 	}
 
 	return file, nil
+}
+
+func (s *Server) GetLogFiles() ([]string, error) {
+	logDir := filepath.Dir(s.config.LogFile.Path)
+
+	files, err := os.ReadDir(logDir)
+	if err != nil {
+		return nil, err
+	}
+
+	var logFiles []string
+	for _, file := range files {
+		if file.Name() == "daytona.log" || strings.HasPrefix(file.Name(), "daytona-") && (strings.HasSuffix(file.Name(), ".log") || strings.HasSuffix(file.Name(), ".zip") || strings.HasSuffix(file.Name(), ".gz")) {
+			logFiles = append(logFiles, filepath.Join(logDir, file.Name()))
+		}
+	}
+
+	return logFiles, nil
 }

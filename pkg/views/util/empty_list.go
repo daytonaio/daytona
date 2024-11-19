@@ -81,3 +81,10 @@ func NotifyEmptyEnvVarList(tip bool) {
 		views.RenderTip("Use 'daytona env set' to set environment variables")
 	}
 }
+
+func NotifyEmptyServerLogList(tip bool) {
+	views.RenderInfoMessageBold("No server log files found")
+	if tip {
+		views.RenderTip("Use 'daytona serve' in order to create server log files")
+	}
+}
