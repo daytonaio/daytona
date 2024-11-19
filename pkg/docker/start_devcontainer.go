@@ -40,7 +40,7 @@ func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions)
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--id-label=daytona.target.id=" + opts.Workspace.TargetId,
-		"--id-label=daytona.workspace.name=" + opts.Workspace.Name,
+		"--id-label=daytona.workspace.id=" + opts.Workspace.Id,
 	}
 
 	cmd := strings.Join(devcontainerCmd, " ")

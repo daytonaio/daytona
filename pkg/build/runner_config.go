@@ -15,7 +15,7 @@ import (
 
 // TODO: add lock when running interval func
 // 10 second interval
-const DEFAULT_POLL_INTERVAL = "*/10 * * * * *"
+const DEFAULT_BUILD_POLL_INTERVAL = "*/10 * * * * *"
 
 type Config struct {
 	Id               string `json:"id" validate:"required"`
@@ -107,7 +107,7 @@ func GetRunnerConfigDir() (string, error) {
 func getDefaultConfig() *Config {
 	return &Config{
 		Id:               uuid.NewString(),
-		Interval:         DEFAULT_POLL_INTERVAL,
+		Interval:         DEFAULT_BUILD_POLL_INTERVAL,
 		TelemetryEnabled: false,
 	}
 }

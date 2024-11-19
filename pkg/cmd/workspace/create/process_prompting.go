@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 )
@@ -19,14 +19,14 @@ type ProcessPromptingParams struct {
 	ApiClient                   *apiclient.APIClient
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
 	ExistingWorkspaces          *[]apiclient.WorkspaceDTO
-	WorkspaceConfigurationFlags workspace_common.WorkspaceConfigurationFlags
+	WorkspaceConfigurationFlags cmd_common.WorkspaceConfigurationFlags
 	MultiWorkspaceFlag          bool
 	BlankFlag                   bool
 	TargetName                  string
 }
 
 func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error {
-	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) || (params.WorkspaceConfigurationFlags.Branches != nil && len(*params.WorkspaceConfigurationFlags.Branches) > 0) {
+	if cmd_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) || (params.WorkspaceConfigurationFlags.Branches != nil && len(*params.WorkspaceConfigurationFlags.Branches) > 0) {
 		return errors.New("please provide the repository URL in order to set up custom workspace details through the CLI")
 	}
 

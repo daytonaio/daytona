@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
@@ -43,9 +44,13 @@ func GetTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, verbose)
+	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{Verbose: verbose})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get target: %w", err))
+		statusCode := http.StatusInternalServerError
+		if stores.IsTargetNotFound(err) || services.IsTargetDeleted(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find target: %w", err))
 		return
 	}
 
@@ -55,6 +60,8 @@ func GetTarget(ctx *gin.Context) {
 	} else {
 		t.Options = maskedOptions
 	}
+
+	util.HideDaytonaEnvVars(&t.EnvVars)
 
 	ctx.JSON(200, t)
 }
@@ -85,7 +92,7 @@ func ListTargets(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, verbose)
+	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, services.TargetRetrievalParams{Verbose: verbose})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
@@ -99,6 +106,7 @@ func ListTargets(ctx *gin.Context) {
 		}
 
 		targetList[i].Options = maskedOptions
+		util.HideDaytonaEnvVars(&targetList[i].EnvVars)
 	}
 
 	ctx.JSON(200, targetList)

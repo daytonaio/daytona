@@ -6,13 +6,14 @@ package targets
 import "github.com/daytonaio/daytona/pkg/models"
 
 type TargetEnvVarParams struct {
-	ApiUrl        string
-	ServerUrl     string
-	ServerVersion string
-	ClientId      string
+	ApiUrl           string
+	ServerUrl        string
+	ServerVersion    string
+	ClientId         string
+	TelemetryEnabled bool
 }
 
-func GetTargetEnvVars(target *models.Target, params TargetEnvVarParams, telemetryEnabled bool) map[string]string {
+func GetTargetEnvVars(target *models.Target, params TargetEnvVarParams) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_TARGET_ID":      target.Id,
 		"DAYTONA_SERVER_API_KEY": target.ApiKey,
@@ -24,7 +25,7 @@ func GetTargetEnvVars(target *models.Target, params TargetEnvVarParams, telemetr
 		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
 	}
 
-	if telemetryEnabled {
+	if params.TelemetryEnabled {
 		envVars["DAYTONA_TELEMETRY_ENABLED"] = "true"
 	}
 

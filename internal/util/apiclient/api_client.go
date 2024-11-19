@@ -114,34 +114,34 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, error) {
+func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, int, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetNameOrId).Verbose(verbose).Execute()
 	if err != nil {
-		return nil, HandleErrorResponse(res, err)
+		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
 
-	return target, nil
+	return target, res.StatusCode, nil
 }
 
-func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
+func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, int, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
 	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
 	if err != nil {
-		return nil, HandleErrorResponse(res, err)
+		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
 
-	return workspace, nil
+	return workspace, res.StatusCode, nil
 }

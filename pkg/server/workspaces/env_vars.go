@@ -6,13 +6,14 @@ package workspaces
 import "github.com/daytonaio/daytona/pkg/models"
 
 type WorkspaceEnvVarParams struct {
-	ApiUrl        string
-	ServerUrl     string
-	ServerVersion string
-	ClientId      string
+	ApiUrl           string
+	ServerUrl        string
+	ServerVersion    string
+	ClientId         string
+	TelemetryEnabled bool
 }
 
-func GetWorkspaceEnvVars(workspace *models.Workspace, params WorkspaceEnvVarParams, telemetryEnabled bool) map[string]string {
+func GetWorkspaceEnvVars(workspace *models.Workspace, params WorkspaceEnvVarParams) map[string]string {
 	envVars := map[string]string{
 		"DAYTONA_TARGET_ID":                workspace.TargetId,
 		"DAYTONA_WORKSPACE_ID":             workspace.Id,
@@ -26,7 +27,7 @@ func GetWorkspaceEnvVars(workspace *models.Workspace, params WorkspaceEnvVarPara
 		"DAYTONA_AGENT_LOG_FILE_PATH": "(HOME)/.daytona-agent.log",
 	}
 
-	if telemetryEnabled {
+	if params.TelemetryEnabled {
 		envVars["DAYTONA_TELEMETRY_ENABLED"] = "true"
 	}
 

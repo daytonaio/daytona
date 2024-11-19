@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
@@ -34,7 +33,7 @@ func (s *InMemoryTargetStore) Find(filter *stores.TargetFilter) (*models.Target,
 	}
 
 	if len(t) == 0 {
-		return nil, targets.ErrTargetNotFound
+		return nil, stores.ErrTargetNotFound
 	}
 
 	return t[0], nil

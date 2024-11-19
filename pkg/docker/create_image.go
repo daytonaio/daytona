@@ -87,11 +87,11 @@ func GetContainerCreateConfig(workspace *models.Workspace) *container.Config {
 	}
 
 	return &container.Config{
-		Hostname: workspace.Name,
+		Hostname: workspace.Id,
 		Image:    workspace.Image,
 		Labels: map[string]string{
 			"daytona.target.id":                workspace.TargetId,
-			"daytona.workspace.name":           workspace.Name,
+			"daytona.workspace.id":             workspace.Id,
 			"daytona.workspace.repository.url": workspace.Repository.Url,
 		},
 		User:         workspace.User,

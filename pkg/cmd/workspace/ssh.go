@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -61,13 +61,13 @@ var SshCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			ws, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
 				return err
 			}
 		}
 
-		if ws.State == nil || ws.State.Uptime < 1 {
+		if ws.State.Name == apiclient.ResourceStateNameStopped {
 			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err

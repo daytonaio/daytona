@@ -38,6 +38,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
+	"github.com/daytonaio/daytona/pkg/api/controllers/job"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
@@ -160,6 +161,11 @@ func (a *ApiServer) Start() error {
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
 	}
 
+	jobController := protected.Group("/job")
+	{
+		jobController.GET("/", job.ListJobs)
+	}
+
 	workspaceConfigController := protected.Group("/workspace-config")
 	{
 		// Defining the prebuild routes first to avoid conflicts with the workspace config routes
@@ -268,7 +274,8 @@ func (a *ApiServer) Start() error {
 	workspaceGroup := protected.Group("/")
 	workspaceGroup.Use(middlewares.WorkspaceAuthMiddleware())
 	{
-		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/state", workspace.SetWorkspaceState)
+		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/metadata", workspace.SetWorkspaceMetadata)
+		workspaceGroup.POST(targetController.BasePath()+"/:targetId/metadata", target.SetTargetMetadata)
 	}
 
 	a.httpServer = &http.Server{

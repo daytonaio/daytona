@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/cmd/targetconfig"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -78,6 +79,11 @@ var targetCreateCmd = &cobra.Command{
 		_, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		err = cmd_common.AwaitTargetState(createTargetDto.Id, apiclient.ResourceStateNameStarted)
+		if err != nil {
+			return err
 		}
 
 		views.RenderInfoMessage(fmt.Sprintf("Target '%s' set successfully and will be used by default", createTargetDto.Name))
