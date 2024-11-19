@@ -15,7 +15,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -37,6 +37,8 @@ var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Server logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		ctx := context.Background()
+
 		c, err := config.GetConfig()
 		if err != nil {
 			return err
@@ -52,50 +54,56 @@ var logsCmd = &cobra.Command{
 			query += "follow=true"
 		}
 
-		if fileFlag != "" {
-			if query != "" {
-				query += "&"
-			}
-			query += fmt.Sprintf("file=%s", fileFlag)
-		}
-
 		switch {
 		case localFlag:
 			return readLocalServerLogFile()
 		default:
-			return readRemoteServerLogFile(activeProfile, query)
+			return readRemoteServerLogFile(ctx, activeProfile, query)
 		}
 	},
 }
 
-func readRemoteServerLogFile(activeProfile config.Profile, query string) error {
-	ws, res, err := apiclient.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
+func readRemoteServerLogFile(ctx context.Context, activeProfile config.Profile, query string) error {
+	apiclient, err := apiclient_util.GetApiClient(&activeProfile)
+	if err != nil {
+		return err
+	}
+
+	logFiles, res, err := apiclient.ServerAPI.GetServerLogFiles(ctx).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	if len(logFiles) == 0 {
+		return promptReadingLocalServerLogs("No server log files found.")
+	}
+
+	if fileFlag == "" {
+		selectedFile := selection.GetLogFileFromPrompt(logFiles)
+		if selectedFile == nil {
+			return nil
+		}
+
+		fileFlag = *selectedFile
+	}
+
+	if fileFlag != "" {
+		if query != "" {
+			query += "&"
+		}
+		query += fmt.Sprintf("file=%s", fileFlag)
+	}
+
+	ws, res, err := apiclient_util.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
 
 	if err != nil {
-		log.Error(apiclient.HandleErrorResponse(res, err))
+		log.Error(apiclient_util.HandleErrorResponse(res, err))
 
 		if activeProfile.Id != "default" {
 			return nil
 		}
 
-		readLocalLogsFile := true
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewConfirm().Description("An error occurred while connecting to the server. Would you like to read from local log file instead?").
-					Value(&readLocalLogsFile),
-			),
-		).WithTheme(views.GetCustomTheme())
-		formErr := form.Run()
-		if formErr != nil {
-			return formErr
-		}
-
-		if readLocalLogsFile {
-			return readLocalServerLogFile()
-		}
-
-		return nil
-
+		return promptReadingLocalServerLogs("An error occurred while connecting to the server.")
 	}
 
 	for {
@@ -106,6 +114,26 @@ func readRemoteServerLogFile(activeProfile config.Profile, query string) error {
 
 		fmt.Println(string(msg))
 	}
+}
+
+func promptReadingLocalServerLogs(info string) error {
+	readLocalLogsFile := true
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().Description(info + " Would you like to read from local log files instead?").
+				Value(&readLocalLogsFile),
+		),
+	).WithTheme(views.GetCustomTheme())
+	formErr := form.Run()
+	if formErr != nil {
+		return formErr
+	}
+
+	if readLocalLogsFile {
+		return readLocalServerLogFile()
+	}
+
+	return nil
 }
 
 func readLocalServerLogFile() error {
