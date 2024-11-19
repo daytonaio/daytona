@@ -12,7 +12,7 @@ import (
 )
 
 var listServerLogsCmd = &cobra.Command{
-	Use:     "log-list",
+	Use:     "list-logs",
 	Aliases: []string{"ls", "lls"},
 	Short:   "Output Daytona Server logs",
 	RunE: func(cmd *cobra.Command, args []string) error {

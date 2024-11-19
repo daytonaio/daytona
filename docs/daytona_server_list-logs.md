@@ -1,9 +1,9 @@
-## daytona server log-list
+## daytona server list-logs
 
 Output Daytona Server logs
 
 ```
-daytona server log-list [flags]
+daytona server list-logs [flags]
 ```
 
 ### Options inherited from parent commands

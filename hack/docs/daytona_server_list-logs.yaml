@@ -1,6 +1,6 @@
-name: daytona server log-list
+name: daytona server list-logs
 synopsis: Output Daytona Server logs
-usage: daytona server log-list [flags]
+usage: daytona server list-logs [flags]
 inherited_options:
     - name: help
       default_value: "false"

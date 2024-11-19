@@ -14,7 +14,7 @@ see_also:
     - daytona - Daytona is a Dev Environment Manager
     - daytona server config - Output local Daytona Server config
     - daytona server configure - Configure Daytona Server
-    - daytona server log-list - Output Daytona Server logs
+    - daytona server list-logs - Output Daytona Server logs
     - daytona server logs - Output Daytona Server logs
     - daytona server restart - Restarts the Daytona Server daemon
     - daytona server start - Start the Daytona Server daemon
