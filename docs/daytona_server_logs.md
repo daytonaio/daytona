@@ -23,4 +23,5 @@ daytona server logs [flags]
 ### SEE ALSO
 
 * [daytona server](daytona_server.md)	 - Start the server process in daemon mode
+* [daytona server logs list](daytona_server_logs_list.md)	 - Output Daytona Server logs
 

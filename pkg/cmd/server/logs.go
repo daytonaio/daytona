@@ -28,6 +28,8 @@ var fileFlag string
 var localFlag bool
 
 func init() {
+	logsCmd.AddCommand(listCmd)
+
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 	logsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file from server log files")
 	logsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read logs from local server log files")
@@ -76,6 +78,10 @@ func readRemoteServerLogFile(ctx context.Context, activeProfile config.Profile, 
 
 	if len(logFiles) == 0 {
 		return promptReadingLocalServerLogs("No server log files found.")
+	}
+
+	if fileFlag == "" && len(logFiles) == 1 {
+		fileFlag = logFiles[0]
 	}
 
 	if fileFlag == "" {
@@ -156,9 +162,13 @@ func readLocalServerLogFile() error {
 			return fmt.Errorf("no log files found in %s", logDir)
 		}
 
-		selectedFile := selection.GetLogFileFromPrompt(logFiles)
-		if selectedFile == nil {
-			return nil
+		selectedFile := &logFiles[0]
+
+		if len(logFiles) > 1 {
+			selectedFile = selection.GetLogFileFromPrompt(logFiles)
+			if selectedFile == nil {
+				return nil
+			}
 		}
 
 		logFile = *selectedFile

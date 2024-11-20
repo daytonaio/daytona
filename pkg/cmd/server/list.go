@@ -11,9 +11,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var listServerLogsCmd = &cobra.Command{
-	Use:     "list-logs",
-	Aliases: []string{"ls", "lls"},
+var listCmd = &cobra.Command{
+	Use:     "list",
+	Aliases: []string{"ls"},
 	Short:   "Output Daytona Server logs",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

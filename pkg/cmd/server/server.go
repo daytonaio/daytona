@@ -83,6 +83,5 @@ func init() {
 	ServerCmd.AddCommand(startCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)
-	ServerCmd.AddCommand(listServerLogsCmd)
 	ServerCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Skip the confirmation prompt")
 }

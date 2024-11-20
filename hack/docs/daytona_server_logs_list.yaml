@@ -1,9 +1,9 @@
-name: daytona server list-logs
+name: daytona server logs list
 synopsis: Output Daytona Server logs
-usage: daytona server list-logs [flags]
+usage: daytona server logs list [flags]
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona server - Start the server process in daemon mode
+    - daytona server logs - Output Daytona Server logs
