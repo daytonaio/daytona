@@ -340,6 +340,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
+		BuilderImage:             c.BuilderImage,
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
@@ -419,15 +420,20 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 		Store: containerRegistryStore,
 	})
 
-	var builderRegistry *containerregistry.ContainerRegistry
+	var buildImageCr *containerregistry.ContainerRegistry
 
 	if c.BuilderRegistryServer != "local" {
-		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		buildImageCr, err = containerRegistryService.Find(c.BuilderRegistryServer)
 		if err != nil {
-			builderRegistry = &containerregistry.ContainerRegistry{
+			buildImageCr = &containerregistry.ContainerRegistry{
 				Server: c.BuilderRegistryServer,
 			}
 		}
+	}
+
+	cr, err := containerRegistryService.FindByImageName(c.BuilderImage)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return nil, err
 	}
 
 	configDir, err := config.GetConfigDir()
@@ -436,20 +442,22 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 	}
 
 	builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-		Image:               c.BuilderImage,
-		ContainerRegistry:   builderRegistry,
-		BuildStore:          buildStore,
-		BuildImageNamespace: buildImageNamespace,
-		LoggerFactory:       loggerFactory,
-		DefaultProjectImage: c.DefaultProjectImage,
-		DefaultProjectUser:  c.DefaultProjectUser,
+		Image:                       c.BuilderImage,
+		ContainerRegistry:           cr,
+		BuildImageContainerRegistry: buildImageCr,
+		BuildStore:                  buildStore,
+		BuildImageNamespace:         buildImageNamespace,
+		LoggerFactory:               loggerFactory,
+		DefaultProjectImage:         c.DefaultProjectImage,
+		DefaultProjectUser:          c.DefaultProjectUser,
 	})
 
 	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{
 		Interval:          buildRunnerConfig.Interval,
 		Scheduler:         build.NewCronScheduler(),
 		BuildRunnerId:     buildRunnerConfig.Id,
-		ContainerRegistry: builderRegistry,
+		ContainerRegistry: buildImageCr,
+		TelemetryEnabled:  buildRunnerConfig.TelemetryEnabled,
 		GitProviderStore:  gitProviderService,
 		BuildStore:        buildStore,
 		BuilderFactory:    builderFactory,
