@@ -3,7 +3,7 @@ synopsis: Output Daytona Server logs
 usage: daytona server logs [flags]
 options:
     - name: file
-      usage: Read specific log file from server log files
+      usage: Read specific log file
     - name: follow
       shorthand: f
       default_value: "false"
@@ -11,7 +11,7 @@ options:
     - name: local
       shorthand: l
       default_value: "false"
-      usage: Read logs from local server log files
+      usage: Read local server log files
 inherited_options:
     - name: help
       default_value: "false"

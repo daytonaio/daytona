@@ -4,16 +4,17 @@
 package server
 
 import (
-	"archive/zip"
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"regexp"
 
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -31,8 +32,8 @@ func init() {
 	logsCmd.AddCommand(listCmd)
 
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file from server log files")
-	logsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read logs from local server log files")
+	logsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file")
+	logsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read local server log files")
 }
 
 var logsCmd = &cobra.Command{
@@ -97,11 +98,13 @@ func readRemoteServerLogFile(ctx context.Context, activeProfile config.Profile, 
 		if query != "" {
 			query += "&"
 		}
-		query += fmt.Sprintf("file=%s", fileFlag)
+		query += fmt.Sprintf("file=%s", filepath.Base(fileFlag))
 	}
 
 	ws, res, err := apiclient_util.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
-
+	if res.StatusCode == http.StatusNotFound {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
 	if err != nil {
 		log.Error(apiclient_util.HandleErrorResponse(res, err))
 
@@ -143,8 +146,6 @@ func promptReadingLocalServerLogs(info string) error {
 }
 
 func readLocalServerLogFile() error {
-	views.RenderBorderedMessage("Reading from local server log file...")
-
 	cfg, err := server.GetConfig()
 	if err != nil {
 		return fmt.Errorf("failed to get server config: %w", err)
@@ -175,8 +176,8 @@ func readLocalServerLogFile() error {
 	}
 
 	var reader io.Reader
-	if strings.HasSuffix(logFile, ".zip") || strings.HasSuffix(logFile, ".gz") {
-		reader, err = readCompressedFile(logFile)
+	if regexp.MustCompile(constants.ZIP_LOG_FILE_NAME_SUFFIX_PATTERN).MatchString(logFile) {
+		reader, err = util.ReadCompressedFile(logFile)
 	} else {
 		reader, err = os.Open(logFile)
 	}
@@ -214,23 +215,10 @@ func getLocalServerLogFiles(dir string) ([]string, error) {
 
 	var logFiles []string
 	for _, file := range files {
-		if file.Name() == "daytona.log" || strings.HasPrefix(file.Name(), "daytona-") && (strings.HasSuffix(file.Name(), ".log") || strings.HasSuffix(file.Name(), ".zip") || strings.HasSuffix(file.Name(), ".gz")) {
+		if regexp.MustCompile(constants.LOG_FILE_NAME_PATTERN).MatchString(file.Name()) {
 			logFiles = append(logFiles, filepath.Join(dir, file.Name()))
 		}
 	}
 
 	return logFiles, nil
-}
-
-func readCompressedFile(filePath string) (io.Reader, error) {
-	zipFile, err := zip.OpenReader(filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(zipFile.File) == 0 {
-		return nil, fmt.Errorf("empty zip file")
-	}
-
-	return zipFile.File[0].Open()
 }

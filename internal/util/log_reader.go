@@ -4,9 +4,11 @@
 package util
 
 import (
+	"archive/zip"
 	"bufio"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"strings"
 
@@ -70,4 +72,17 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan i
 			}
 		}
 	}
+}
+
+func ReadCompressedFile(filePath string) (io.Reader, error) {
+	zipFile, err := zip.OpenReader(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(zipFile.File) == 0 {
+		return nil, fmt.Errorf("empty zip file")
+	}
+
+	return zipFile.File[0].Open()
 }

@@ -9,9 +9,9 @@ daytona server logs [flags]
 ### Options
 
 ```
-      --file string   Read specific log file from server log files
+      --file string   Read specific log file
   -f, --follow        Follow logs
-  -l, --local         Read logs from local server log files
+  -l, --local         Read local server log files
 ```
 
 ### Options inherited from parent commands
