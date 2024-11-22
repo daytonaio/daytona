@@ -249,7 +249,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
 
-	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
+	err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
 	if err != nil {
 		return "", "", err
 	}
@@ -394,7 +394,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 	return rawConfig, &rootConfig, nil
 }
 
-func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Command, logWriter io.Writer, sshClient *ssh.Client) error {
+func (d *DockerClient) runInitializeCommand(projectDir string, initializeCommand devcontainer.Command, logWriter io.Writer, sshClient *ssh.Client) error {
 	if initializeCommand == nil {
 		return nil
 	}
@@ -404,7 +404,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 	switch initializeCommand := initializeCommand.(type) {
 	case string:
 		cmd := []string{"sh", "-c", initializeCommand}
-		return execDevcontainerCommand(cmd, logWriter, sshClient)
+		return execDevcontainerCommand(projectDir, cmd, logWriter, sshClient)
 	case []interface{}:
 		var commandArray []string
 		for _, arg := range initializeCommand {
@@ -414,7 +414,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 			}
 			commandArray = append(commandArray, argString)
 		}
-		return execDevcontainerCommand(commandArray, logWriter, sshClient)
+		return execDevcontainerCommand(projectDir, commandArray, logWriter, sshClient)
 	case map[string]interface{}:
 		commands := map[string][]string{}
 		for name, command := range initializeCommand {
@@ -437,7 +437,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 		for name, command := range commands {
 			go func() {
 				logWriter.Write([]byte(fmt.Sprintf("Running %s\n", name)))
-				err := execDevcontainerCommand(command, logWriter, sshClient)
+				err := execDevcontainerCommand(projectDir, command, logWriter, sshClient)
 				if err != nil {
 					logWriter.Write([]byte(fmt.Sprintf("Error running %s: %v\n", name, err)))
 					errChan <- err
@@ -597,10 +597,10 @@ func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) (map[string]string,
 	return envMap, nil
 }
 
-func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *ssh.Client) error {
+func execDevcontainerCommand(projectDir string, command []string, logWriter io.Writer, sshClient *ssh.Client) error {
 	if sshClient != nil {
 		if command[0] == "sh" {
-			cmd := fmt.Sprintf(`sh -c "%s"`, strings.Join(command[2:], " "))
+			cmd := fmt.Sprintf(`sh -c "cd %s && %s"`, projectDir, strings.Join(command[2:], " "))
 			return sshClient.Exec(cmd, logWriter)
 		}
 		return sshClient.Exec(strings.Join(command, " "), logWriter)
@@ -610,5 +610,6 @@ func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *s
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 	cmd.Env = os.Environ()
+	cmd.Dir = projectDir
 	return cmd.Run()
 }
