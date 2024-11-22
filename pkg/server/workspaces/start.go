@@ -8,8 +8,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
@@ -119,7 +122,33 @@ func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project,
 		ClientId:      telemetry.ClientId(ctx),
 	}, telemetry.TelemetryEnabled(ctx))
 
-	err := s.provisioner.StartProject(&projectToStart, target)
+	cr, err := s.containerRegistryService.FindByImageName(p.Image)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
+
+	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
+
+	var gc *gitprovider.GitProviderConfig
+
+	if p.GitProviderConfigId != nil {
+		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
+		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+			return err
+		}
+	}
+
+	err = s.provisioner.StartProject(provisioner.ProjectParams{
+		Project:                       &projectToStart,
+		Target:                        target,
+		ContainerRegistry:             cr,
+		GitProviderConfig:             gc,
+		BuilderImage:                  s.builderImage,
+		BuilderImageContainerRegistry: builderCr,
+	})
 	if err != nil {
 		return err
 	}

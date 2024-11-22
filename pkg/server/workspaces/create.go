@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -167,6 +168,11 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 		return err
 	}
 
+	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return err
+	}
+
 	var gc *gitprovider.GitProviderConfig
 
 	if p.GitProviderConfigId != nil {
@@ -176,7 +182,14 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 		}
 	}
 
-	err = s.provisioner.CreateProject(p, target, cr, gc)
+	err = s.provisioner.CreateProject(provisioner.ProjectParams{
+		Project:                       p,
+		Target:                        target,
+		ContainerRegistry:             cr,
+		GitProviderConfig:             gc,
+		BuilderImage:                  s.builderImage,
+		BuilderImageContainerRegistry: builderCr,
+	})
 	if err != nil {
 		return err
 	}

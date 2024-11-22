@@ -40,13 +40,11 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 	// This is only an optimisation for images with tag 'latest'
 	pulledImages := map[string]bool{}
 
-	// TODO: The image should be configurable
-	err := d.PullImage("daytonaio/workspace-project", nil, opts.LogWriter)
+	err := d.PullImage(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return err
 	}
-	pulledImages["daytonaio/workspace-project"] = true
-	pulledImages["daytonaio/workspace-project:latest"] = true
+	pulledImages[opts.BuilderImage] = true
 
 	err = d.cloneProjectRepository(opts)
 	if err != nil {
@@ -99,7 +97,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 	cloneCmd := gitService.CloneRepositoryCmd(opts.Project.Repository, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image:      "daytonaio/workspace-project",
+		Image:      opts.BuilderImage,
 		Entrypoint: []string{"sleep"},
 		Cmd:        []string{"infinity"},
 		Env: []string{
@@ -200,13 +198,15 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 
 func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateProjectOptions, prebuild bool) CreateDevcontainerOptions {
 	return CreateDevcontainerOptions{
-		ProjectDir:        opts.ProjectDir,
-		ProjectName:       opts.Project.Name,
-		BuildConfig:       opts.Project.BuildConfig,
-		LogWriter:         opts.LogWriter,
-		SshClient:         opts.SshClient,
-		ContainerRegistry: opts.Cr,
-		EnvVars:           opts.Project.EnvVars,
+		ProjectDir:               opts.ProjectDir,
+		ProjectName:              opts.Project.Name,
+		BuildConfig:              opts.Project.BuildConfig,
+		LogWriter:                opts.LogWriter,
+		SshClient:                opts.SshClient,
+		ContainerRegistry:        opts.ContainerRegistry,
+		BuilderImage:             opts.BuilderImage,
+		BuilderContainerRegistry: opts.BuilderContainerRegistry,
+		EnvVars:                  opts.Project.EnvVars,
 		IdLabels: map[string]string{
 			"daytona.workspace.id": opts.Project.WorkspaceId,
 			"daytona.project.name": opts.Project.Name,

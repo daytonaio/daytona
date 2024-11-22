@@ -86,7 +86,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Builder Image").
-				Description("Image dependencies: docker, @devcontainers/cli (node package)").
+				Description("Image dependencies: docker, socat, git, @devcontainers/cli (node package)").
 				Value(&m.config.BuilderImage),
 			huh.NewSelect[string]().
 				Title("Builder Registry").
