@@ -18,4 +18,4 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona server - Start the server process in daemon mode
-    - daytona server logs list - Output Daytona Server logs
+    - daytona server logs list - Lists Daytona Server Log Files

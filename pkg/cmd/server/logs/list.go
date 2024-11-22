@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package server
+package logs
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Aliases: []string{"ls"},
-	Short:   "Output Daytona Server logs",
+	Short:   "Lists Daytona Server Log Files",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

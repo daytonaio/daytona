@@ -1,6 +1,6 @@
 ## daytona server logs list
 
-Output Daytona Server logs
+Lists Daytona Server Log Files
 
 ```
 daytona server logs list [flags]

@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package server
+package logs
 
 import (
 	"context"
@@ -19,7 +19,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/daytonaio/daytona/pkg/views/server/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -29,14 +29,14 @@ var fileFlag string
 var localFlag bool
 
 func init() {
-	logsCmd.AddCommand(listCmd)
+	LogsCmd.AddCommand(listCmd)
 
-	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
-	logsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file")
-	logsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read local server log files")
+	LogsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
+	LogsCmd.Flags().StringVar(&fileFlag, "file", "", "Read specific log file")
+	LogsCmd.Flags().BoolVarP(&localFlag, "local", "l", false, "Read local server log files")
 }
 
-var logsCmd = &cobra.Command{
+var LogsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Output Daytona Server logs",
 	RunE: func(cmd *cobra.Command, args []string) error {

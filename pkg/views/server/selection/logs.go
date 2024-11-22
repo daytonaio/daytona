@@ -28,15 +28,6 @@ func selectLogFileFromPrompt(files []string, choiceChan chan<- *string) {
 		return files[i] < files[j]
 	})
 
-	p := getLogFileSelectionProgramEssentials(files)
-	if m, ok := p.(model[string]); ok && m.choice != nil {
-		choiceChan <- m.choice
-	} else {
-		choiceChan <- nil
-	}
-}
-
-func getLogFileSelectionProgramEssentials(files []string) tea.Model {
 	items := []list.Item{}
 
 	for _, logFile := range files {
@@ -76,5 +67,9 @@ func getLogFileSelectionProgramEssentials(files []string) tea.Model {
 		os.Exit(1)
 	}
 
-	return p
+	if m, ok := p.(model[string]); ok && m.choice != nil {
+		choiceChan <- m.choice
+	} else {
+		choiceChan <- nil
+	}
 }

@@ -1,5 +1,5 @@
 name: daytona server logs list
-synopsis: Output Daytona Server logs
+synopsis: Lists Daytona Server Log Files
 usage: daytona server logs list [flags]
 inherited_options:
     - name: help
