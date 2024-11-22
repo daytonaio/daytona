@@ -28,7 +28,7 @@ func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
 
 func (m *ProviderRPCClient) CheckRequirements() (*[]RequirementStatus, error) {
 	var result []RequirementStatus
-	err := m.client.Call("Plugin.CheckRequirements", new(interface{}), result)
+	err := m.client.Call("Plugin.CheckRequirements", new(interface{}), &result)
 	return &result, err
 }
 
