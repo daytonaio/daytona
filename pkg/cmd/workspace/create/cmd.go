@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/internal/cmd/tailscale"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
@@ -57,7 +58,7 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
-		profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
+		envVars, res, err := apiClient.EnvVarAPI.ListEnvironmentVariables(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -120,8 +121,8 @@ var CreateCmd = &cobra.Command{
 
 		workspaceNames := []string{}
 		for i := range createWorkspaceDtos {
-			if profileData != nil && profileData.EnvVars != nil {
-				createWorkspaceDtos[i].EnvVars = util.MergeEnvVars(profileData.EnvVars, createWorkspaceDtos[i].EnvVars)
+			if envVars != nil {
+				createWorkspaceDtos[i].EnvVars = util.MergeEnvVars(conversion.ToEnvVarsMap(envVars), createWorkspaceDtos[i].EnvVars)
 			} else {
 				createWorkspaceDtos[i].EnvVars = util.MergeEnvVars(createWorkspaceDtos[i].EnvVars)
 			}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -68,7 +69,7 @@ var buildRunCmd = &cobra.Command{
 func CreateBuild(apiClient *apiclient.APIClient, workspaceConfig *apiclient.WorkspaceConfig, branch string, prebuildId *string) (string, error) {
 	ctx := context.Background()
 
-	profileData, res, err := apiClient.ProfileAPI.GetProfileData(ctx).Execute()
+	envVars, res, err := apiClient.EnvVarAPI.ListEnvironmentVariables(ctx).Execute()
 	if err != nil {
 		return "", apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -83,8 +84,8 @@ func CreateBuild(apiClient *apiclient.APIClient, workspaceConfig *apiclient.Work
 		PrebuildId:          prebuildId,
 	}
 
-	if profileData != nil {
-		createBuildDto.EnvVars = util.MergeEnvVars(profileData.EnvVars, workspaceConfig.EnvVars)
+	if envVars != nil {
+		createBuildDto.EnvVars = util.MergeEnvVars(conversion.ToEnvVarsMap(envVars), workspaceConfig.EnvVars)
 	} else {
 		createBuildDto.EnvVars = util.MergeEnvVars(workspaceConfig.EnvVars)
 	}

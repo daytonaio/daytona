@@ -83,8 +83,8 @@ func NotifyEmptyBuildList(tip bool) {
 }
 
 func NotifyEmptyEnvVarList(tip bool) {
-	views.RenderInfoMessageBold("No environment variables found")
+	views.RenderInfoMessageBold("No server environment variables found")
 	if tip {
-		views.RenderTip("Use 'daytona env set' to set environment variables")
+		views.RenderTip("Use 'daytona env set' to add new server environment variables")
 	}
 }
