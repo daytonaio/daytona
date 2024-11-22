@@ -81,7 +81,7 @@ func (s *Server) GetLogReader(logFileQuery string) (io.Reader, error) {
 
 	_, err := os.Stat(logFilePath)
 	if os.IsNotExist(err) {
-		return nil, ErrLogFileDoesntExists
+		return nil, ErrLogFileNotFound
 	}
 
 	var reader io.Reader

@@ -8,9 +8,9 @@ import (
 )
 
 var (
-	ErrLogFileDoesntExists = errors.New("log file does not exist")
+	ErrLogFileNotFound = errors.New("log file does not exist")
 )
 
-func IsLogFileDoesntExists(err error) bool {
-	return err.Error() == ErrLogFileDoesntExists.Error()
+func IsLogFileNotFound(err error) bool {
+	return err.Error() == ErrLogFileNotFound.Error()
 }

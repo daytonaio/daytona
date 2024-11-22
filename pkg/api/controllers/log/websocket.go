@@ -118,7 +118,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 	if retry {
 		for {
 			reader, err := s.GetLogReader(logFileQuery)
-			if err != nil && server.IsLogFileDoesntExists(err) {
+			if err != nil && server.IsLogFileNotFound(err) {
 				ginCtx.AbortWithError(http.StatusNotFound, err)
 				return
 			}
@@ -132,7 +132,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 
 	reader, err := s.GetLogReader(logFileQuery)
 	if err != nil {
-		if server.IsLogFileDoesntExists(err) {
+		if server.IsLogFileNotFound(err) {
 			ginCtx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
