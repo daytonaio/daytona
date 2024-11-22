@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	ErrLogFileNotFound = errors.New("log file does not exist")
+	ErrLogFileNotFound = errors.New("log file not found")
 )
 
 func IsLogFileNotFound(err error) bool {
