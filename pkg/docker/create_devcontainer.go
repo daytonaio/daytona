@@ -137,26 +137,55 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	delete(devcontainerConfig, "initializeCommand")
 
 	if _, ok := devcontainerConfig["dockerComposeFile"]; ok {
-		composeFilePath := devcontainerConfig["dockerComposeFile"].(string)
+		composePaths := []string{}
 
-		if opts.SshClient != nil {
-			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+		getComposeFilePath := func(composeFilePath string) (string, error) {
+			if opts.SshClient != nil {
+				composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
-			composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
-			if err != nil {
-				return "", "", err
+				composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
+				if err != nil {
+					return "", err
+				}
+
+				composeFilePath = filepath.Join(os.TempDir(), fmt.Sprintf("daytona-compose-%s.yml", uuid.NewString()))
+				err = os.WriteFile(composeFilePath, []byte(composeFileContent), 0644)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 			}
 
-			composeFilePath = filepath.Join(os.TempDir(), fmt.Sprintf("daytona-compose-%s.yml", uuid.NewString()))
-			err = os.WriteFile(composeFilePath, []byte(composeFileContent), 0644)
-			if err != nil {
-				return "", "", err
-			}
-		} else {
-			composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+			return composeFilePath, nil
 		}
 
-		options, err := cli.NewProjectOptions([]string{composeFilePath}, cli.WithOsEnv, cli.WithDotEnv)
+		composeFilePath, ok := devcontainerConfig["dockerComposeFile"].(string)
+		if ok {
+			composeFilePath, err = getComposeFilePath(composeFilePath)
+			if err != nil {
+				return "", "", err
+			}
+			composePaths = append(composePaths, composeFilePath)
+		} else {
+			composeFilePaths, ok := devcontainerConfig["dockerComposeFile"].([]interface{})
+			if !ok {
+				return "", "", errors.New("unable to parse dockerComposeFile from devcontainer configuration")
+			}
+			for _, composeFilePath := range composeFilePaths {
+				composeFilePath, ok := composeFilePath.(string)
+				if !ok {
+					return "", "", errors.New("unable to parse dockerComposeFile from devcontainer configuration")
+				}
+				composeFilePath, err = getComposeFilePath(composeFilePath)
+				if err != nil {
+					return "", "", err
+				}
+				composePaths = append(composePaths, composeFilePath)
+			}
+		}
+
+		options, err := cli.NewProjectOptions(composePaths, cli.WithOsEnv, cli.WithDotEnv)
 		if err != nil {
 			return "", "", err
 		}
