@@ -100,12 +100,13 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 	).Return(container.CreateResponse{ID: "123"}, nil)
 
 	err := s.dockerClient.CreateProject(&docker.CreateProjectOptions{
-		Project:    project1,
-		ProjectDir: projectDir,
-		Cr:         nil,
-		LogWriter:  nil,
-		Gpc:        nil,
-		SshClient:  nil,
+		Project:           project1,
+		ProjectDir:        projectDir,
+		ContainerRegistry: nil,
+		LogWriter:         nil,
+		Gpc:               nil,
+		SshClient:         nil,
+		BuilderImage:      "daytonaio/workspace-project",
 	})
 	require.Nil(s.T(), err)
 }

@@ -22,7 +22,7 @@ func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulled
 		return d.initProjectContainer(opts)
 	}
 
-	err := d.PullImage(opts.Project.Image, opts.Cr, opts.LogWriter)
+	err := d.PullImage(opts.Project.Image, opts.ContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return err
 	}

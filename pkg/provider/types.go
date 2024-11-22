@@ -37,10 +37,12 @@ type WorkspaceRequest struct {
 }
 
 type ProjectRequest struct {
-	TargetOptions     string
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Project           *project.Project
-	GitProviderConfig *gitprovider.GitProviderConfig
+	TargetOptions            string
+	ContainerRegistry        *containerregistry.ContainerRegistry
+	Project                  *project.Project
+	GitProviderConfig        *gitprovider.GitProviderConfig
+	BuilderImage             string
+	BuilderContainerRegistry *containerregistry.ContainerRegistry
 }
 
 type ProviderTarget struct {

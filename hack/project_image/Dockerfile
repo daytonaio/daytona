@@ -4,7 +4,7 @@
 FROM ubuntu:22.04
 
 RUN apt update -y && \
-    apt install curl libgit2-1.1 -y
+    apt install curl socat libgit2-1.1 -y
 
 USER daytona
 

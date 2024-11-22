@@ -8,9 +8,8 @@ package mocks
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/stretchr/testify/mock"
@@ -24,8 +23,8 @@ func NewMockProvisioner() *mockProvisioner {
 	return &mockProvisioner{}
 }
 
-func (p *mockProvisioner) CreateProject(proj *project.Project, target *provider.ProviderTarget, cr *containerregistry.ContainerRegistry, gc *gitprovider.GitProviderConfig) error {
-	args := p.Called(proj, target, cr, gc)
+func (p *mockProvisioner) CreateProject(params provisioner.ProjectParams) error {
+	args := p.Called(params)
 	return args.Error(0)
 }
 
@@ -49,8 +48,8 @@ func (p *mockProvisioner) GetWorkspaceInfo(ctx context.Context, w *workspace.Wor
 	return args.Get(0).(*workspace.WorkspaceInfo), args.Error(1)
 }
 
-func (p *mockProvisioner) StartProject(proj *project.Project, target *provider.ProviderTarget) error {
-	args := p.Called(proj, target)
+func (p *mockProvisioner) StartProject(params provisioner.ProjectParams) error {
+	args := p.Called(params)
 	return args.Error(0)
 }
 
