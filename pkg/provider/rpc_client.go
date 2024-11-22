@@ -26,6 +26,12 @@ func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
 	return resp, err
 }
 
+func (m *ProviderRPCClient) CheckRequirements() (*[]RequirementStatus, error) {
+	var result []RequirementStatus
+	err := m.client.Call("Plugin.CheckRequirements", new(interface{}), &result)
+	return &result, err
+}
+
 func (m *ProviderRPCClient) GetTargetManifest() (*ProviderTargetManifest, error) {
 	var resp ProviderTargetManifest
 	err := m.client.Call("Plugin.GetTargetManifest", new(interface{}), &resp)

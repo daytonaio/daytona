@@ -103,6 +103,17 @@ func (s *Server) registerProviders() error {
 				log.Error(err)
 				continue
 			}
+			requirements, err := (*provider).CheckRequirements()
+			if err != nil {
+				return err
+			}
+			for _, req := range *requirements {
+				if req.Met {
+					log.Infof("Provider requirement met: %s", req.Reason)
+				} else {
+					log.Warnf("Provider requirement not met: %s", req.Reason)
+				}
+			}
 
 			if manifest.HasUpdateAvailable(info.Name, info.Version) {
 				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
