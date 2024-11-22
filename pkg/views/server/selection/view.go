@@ -25,14 +25,6 @@ var selectedStyles = lipgloss.NewStyle().
 	Bold(true).
 	Padding(0, 0, 0, 1)
 
-var statusMessageGreenStyle = lipgloss.NewStyle().Bold(true).
-	Foreground(lipgloss.AdaptiveColor{Light: "#04B575", Dark: "#04B575"}).
-	Render
-
-var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
-	Foreground(lipgloss.AdaptiveColor{Light: "#FF474C", Dark: "#FF474C"}).
-	Render
-
 type item[T any] struct {
 	title, desc    string
 	choiceProperty T
