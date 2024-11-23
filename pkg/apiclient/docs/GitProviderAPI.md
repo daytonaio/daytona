@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetGitContext**](GitProviderAPI.md#GetGitContext) | **Post** /gitprovider/context | Get Git context
-[**GetGitProviderForUrl**](GitProviderAPI.md#GetGitProviderForUrl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+[**GetGitProvider**](GitProviderAPI.md#GetGitProvider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
 [**GetGitProviderIdForUrl**](GitProviderAPI.md#GetGitProviderIdForUrl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 [**GetGitUser**](GitProviderAPI.md#GetGitUser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 [**GetNamespaces**](GitProviderAPI.md#GetNamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
@@ -14,6 +14,7 @@ Method | HTTP request | Description
 [**GetRepositories**](GitProviderAPI.md#GetRepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
 [**GetUrlFromRepository**](GitProviderAPI.md#GetUrlFromRepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 [**ListGitProviders**](GitProviderAPI.md#ListGitProviders) | **Get** /gitprovider | List Git providers
+[**ListGitProvidersForUrl**](GitProviderAPI.md#ListGitProvidersForUrl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
 [**RemoveGitProvider**](GitProviderAPI.md#RemoveGitProvider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 [**SetGitProvider**](GitProviderAPI.md#SetGitProvider) | **Put** /gitprovider | Set Git provider
 
@@ -85,9 +86,9 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetGitProviderForUrl
+## GetGitProvider
 
-> GitProvider GetGitProviderForUrl(ctx, url).Execute()
+> GitProvider GetGitProvider(ctx, gitProviderId).Execute()
 
 Get Git provider
 
@@ -106,17 +107,17 @@ import (
 )
 
 func main() {
-	url := "url_example" // string | Url
+	gitProviderId := "gitProviderId_example" // string | ID
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetGitProviderForUrl(context.Background(), url).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetGitProvider(context.Background(), gitProviderId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitProviderForUrl``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetGitProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetGitProviderForUrl`: GitProvider
-	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitProviderForUrl`: %v\n", resp)
+	// response from `GetGitProvider`: GitProvider
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.GetGitProvider`: %v\n", resp)
 }
 ```
 
@@ -126,11 +127,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**url** | **string** | Url | 
+**gitProviderId** | **string** | ID | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetGitProviderForUrlRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiGetGitProviderRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -148,7 +149,7 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
-- **Accept**: application/json
+- **Accept**: text/plain
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -297,7 +298,7 @@ Name | Type | Description  | Notes
 
 ## GetNamespaces
 
-> []GitNamespace GetNamespaces(ctx, gitProviderId).Execute()
+> []GitNamespace GetNamespaces(ctx, gitProviderId).Page(page).PerPage(perPage).Execute()
 
 Get Git namespaces
 
@@ -317,10 +318,12 @@ import (
 
 func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetNamespaces(context.Background(), gitProviderId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetNamespaces(context.Background(), gitProviderId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetNamespaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -346,6 +349,8 @@ Other parameters are passed through a pointer to a apiGetNamespacesRequest struc
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -367,7 +372,7 @@ Name | Type | Description  | Notes
 
 ## GetRepoBranches
 
-> []GitBranch GetRepoBranches(ctx, gitProviderId, namespaceId, repositoryId).Execute()
+> []GitBranch GetRepoBranches(ctx, gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 
 Get Git repository branches
 
@@ -389,10 +394,12 @@ func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
 	repositoryId := "repositoryId_example" // string | Repository
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepoBranches(context.Background(), gitProviderId, namespaceId, repositoryId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepoBranches(context.Background(), gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepoBranches``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -422,6 +429,8 @@ Name | Type | Description  | Notes
 
 
 
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -443,7 +452,7 @@ Name | Type | Description  | Notes
 
 ## GetRepoPRs
 
-> []GitPullRequest GetRepoPRs(ctx, gitProviderId, namespaceId, repositoryId).Execute()
+> []GitPullRequest GetRepoPRs(ctx, gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 
 Get Git repository PRs
 
@@ -465,10 +474,12 @@ func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
 	repositoryId := "repositoryId_example" // string | Repository
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepoPRs(context.Background(), gitProviderId, namespaceId, repositoryId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepoPRs(context.Background(), gitProviderId, namespaceId, repositoryId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepoPRs``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -498,6 +509,8 @@ Name | Type | Description  | Notes
 
 
 
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -519,7 +532,7 @@ Name | Type | Description  | Notes
 
 ## GetRepositories
 
-> []GitRepository GetRepositories(ctx, gitProviderId, namespaceId).Execute()
+> []GitRepository GetRepositories(ctx, gitProviderId, namespaceId).Page(page).PerPage(perPage).Execute()
 
 Get Git repositories
 
@@ -540,10 +553,12 @@ import (
 func main() {
 	gitProviderId := "gitProviderId_example" // string | Git provider
 	namespaceId := "namespaceId_example" // string | Namespace
+	page := int32(56) // int32 | Page number (optional)
+	perPage := int32(56) // int32 | Number of items per page (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.GitProviderAPI.GetRepositories(context.Background(), gitProviderId, namespaceId).Execute()
+	resp, r, err := apiClient.GitProviderAPI.GetRepositories(context.Background(), gitProviderId, namespaceId).Page(page).PerPage(perPage).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.GetRepositories``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -571,6 +586,8 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
+ **page** | **int32** | Page number | 
+ **perPage** | **int32** | Number of items per page | 
 
 ### Return type
 
@@ -717,6 +734,76 @@ Other parameters are passed through a pointer to a apiListGitProvidersRequest st
 [[Back to README]](../README.md)
 
 
+## ListGitProvidersForUrl
+
+> []GitProvider ListGitProvidersForUrl(ctx, url).Execute()
+
+List Git providers for url
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	url := "url_example" // string | Url
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(context.Background(), url).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `GitProviderAPI.ListGitProvidersForUrl``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListGitProvidersForUrl`: []GitProvider
+	fmt.Fprintf(os.Stdout, "Response from `GitProviderAPI.ListGitProvidersForUrl`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**url** | **string** | Url | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListGitProvidersForUrlRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]GitProvider**](GitProvider.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## RemoveGitProvider
 
 > RemoveGitProvider(ctx, gitProviderId).Execute()
@@ -806,7 +893,7 @@ import (
 )
 
 func main() {
-	gitProviderConfig := *openapiclient.NewSetGitProviderConfig("Id_example", "Token_example") // SetGitProviderConfig | Git provider
+	gitProviderConfig := *openapiclient.NewSetGitProviderConfig("ProviderId_example", "Token_example") // SetGitProviderConfig | Git provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

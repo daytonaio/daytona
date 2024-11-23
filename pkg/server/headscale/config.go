@@ -58,7 +58,8 @@ func (s *HeadscaleServer) getHeadscaleConfig() (*hstypes.Config, error) {
 
 		Database: hstypes.DatabaseConfig{
 			Sqlite: hstypes.SqliteConfig{
-				Path: filepath.Join(s.configDir, "headscale.db"),
+				Path:          filepath.Join(s.configDir, "headscale.db"),
+				WriteAheadLog: true,
 			},
 			Type: "sqlite3",
 		},

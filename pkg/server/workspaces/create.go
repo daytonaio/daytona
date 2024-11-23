@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
@@ -78,6 +79,21 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		}
 
 		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
+		if p.GitProviderConfigId == nil || *p.GitProviderConfigId == "" {
+			configs, err := s.gitProviderService.ListConfigsForUrl(p.Repository.Url)
+			if err != nil {
+				return nil, err
+			}
+
+			if len(configs) > 1 {
+				return nil, errors.New("multiple git provider configs found for the repository url")
+			}
+
+			if len(configs) == 1 {
+				p.GitProviderConfigId = &configs[0].Id
+			}
+		}
+
 		if p.Repository.Sha == "" {
 			sha, err := s.gitProviderService.GetLastCommitSha(p.Repository)
 			if err != nil {
@@ -117,7 +133,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWo
 		return nil, err
 	}
 
-	target, err := s.targetStore.Find(w.Target)
+	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
 	if err != nil {
 		return w, err
 	}
@@ -152,12 +168,28 @@ func (s *WorkspaceService) createProject(p *project.Project, target *provider.Pr
 		return err
 	}
 
-	gc, err := s.gitProviderService.GetConfigForUrl(p.Repository.Url)
-	if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
 		return err
 	}
 
-	err = s.provisioner.CreateProject(p, target, cr, gc)
+	var gc *gitprovider.GitProviderConfig
+
+	if p.GitProviderConfigId != nil {
+		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
+		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
+			return err
+		}
+	}
+
+	err = s.provisioner.CreateProject(provisioner.ProjectParams{
+		Project:                       p,
+		Target:                        target,
+		ContainerRegistry:             cr,
+		GitProviderConfig:             gc,
+		BuilderImage:                  s.builderImage,
+		BuilderImageContainerRegistry: builderCr,
+	})
 	if err != nil {
 		return err
 	}

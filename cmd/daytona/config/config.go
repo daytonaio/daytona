@@ -8,8 +8,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	"github.com/google/uuid"
 )
 
@@ -37,17 +39,9 @@ type Ide struct {
 	Name string
 }
 
-const DefaultIdeId = "vscode"
-
 type GitProvider struct {
 	Id   string
 	Name string
-}
-
-const configDoesntExistError = "config does not exist. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server."
-
-func IsNotExist(err error) bool {
-	return err.Error() == configDoesntExistError
 }
 
 func GetConfig() (*Config, error) {
@@ -58,7 +52,15 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		return nil, errors.New(configDoesntExistError)
+		// Setup autocompletion when adding initial config
+		_ = autocomplete.DetectShellAndSetupAutocompletion(autocomplete.AutoCompleteCmd.Root())
+
+		config := &Config{
+			Id:               uuid.NewString(),
+			DefaultIdeId:     getInitialDefaultIde(),
+			TelemetryEnabled: true,
+		}
+		return config, config.Save()
 	}
 
 	if err != nil {
@@ -87,14 +89,20 @@ func GetConfig() (*Config, error) {
 	return &c, nil
 }
 
+var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server")
+
 func (c *Config) GetActiveProfile() (Profile, error) {
+	if len(c.Profiles) == 0 {
+		return Profile{}, ErrNoProfilesFound
+	}
+
 	for _, profile := range c.Profiles {
 		if profile.Id == c.ActiveProfileId {
 			return profile, nil
 		}
 	}
 
-	return Profile{}, errors.New("active profile not found")
+	return Profile{}, errors.New("active profile not found. Set an active profile with `daytona profile use`")
 }
 
 func (c *Config) Save() error {
@@ -256,4 +264,12 @@ func GetErrorLogsDir() (string, error) {
 	}
 
 	return errorLogsDir, nil
+}
+
+func getInitialDefaultIde() string {
+	_, err := exec.LookPath("code")
+	if err == nil {
+		return "vscode"
+	}
+	return "browser"
 }

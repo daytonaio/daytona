@@ -478,15 +478,15 @@ const docTemplate = `{
         },
         "/gitprovider/for-url/{url}": {
             "get": {
-                "description": "Get Git provider",
+                "description": "List Git providers for url",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider",
-                "operationId": "GetGitProviderForUrl",
+                "summary": "List Git providers for url",
+                "operationId": "ListGitProvidersForUrl",
                 "parameters": [
                     {
                         "type": "string",
@@ -500,7 +500,10 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/GitProvider"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/GitProvider"
+                            }
                         }
                     }
                 }
@@ -537,6 +540,34 @@ const docTemplate = `{
             }
         },
         "/gitprovider/{gitProviderId}": {
+            "get": {
+                "description": "Get Git provider",
+                "produces": [
+                    "text/plain"
+                ],
+                "tags": [
+                    "gitProvider"
+                ],
+                "summary": "Get Git provider",
+                "operationId": "GetGitProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID",
+                        "name": "gitProviderId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/GitProvider"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "description": "Remove Git provider",
                 "produces": [
@@ -581,6 +612,18 @@ const docTemplate = `{
                         "name": "gitProviderId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -651,6 +694,18 @@ const docTemplate = `{
                         "name": "namespaceId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -698,6 +753,18 @@ const docTemplate = `{
                         "name": "repositoryId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -745,6 +812,18 @@ const docTemplate = `{
                         "name": "repositoryId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Page number",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Number of items per page",
+                        "name": "per_page",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1443,7 +1522,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ProviderTarget"
+                            "$ref": "#/definitions/CreateProviderTargetDTO"
                         }
                     }
                 ],
@@ -1474,6 +1553,30 @@ const docTemplate = `{
                 "responses": {
                     "204": {
                         "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/target/{target}/set-default": {
+            "patch": {
+                "description": "Set target to default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to default",
+                "operationId": "SetDefaultTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target name",
+                        "name": "target",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
@@ -1966,6 +2069,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -1997,6 +2103,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -2019,6 +2128,25 @@ const docTemplate = `{
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateProviderTargetDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/provider.ProviderInfo"
                 }
             }
         },
@@ -2169,16 +2297,30 @@ const docTemplate = `{
         "GitProvider": {
             "type": "object",
             "required": [
+                "alias",
                 "id",
+                "providerId",
                 "token",
                 "username"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
+                },
+                "providerId": {
+                    "type": "string"
+                },
+                "signingKey": {
+                    "type": "string"
+                },
+                "signingMethod": {
+                    "$ref": "#/definitions/SigningMethod"
                 },
                 "token": {
                     "type": "string"
@@ -2335,6 +2477,35 @@ const docTemplate = `{
                 }
             }
         },
+        "LogFileConfig": {
+            "type": "object",
+            "required": [
+                "maxAge",
+                "maxBackups",
+                "maxSize",
+                "path"
+            ],
+            "properties": {
+                "compress": {
+                    "type": "boolean"
+                },
+                "localTime": {
+                    "type": "boolean"
+                },
+                "maxAge": {
+                    "type": "integer"
+                },
+                "maxBackups": {
+                    "type": "integer"
+                },
+                "maxSize": {
+                    "type": "integer"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
         "NetworkKey": {
             "type": "object",
             "required": [
@@ -2443,6 +2614,9 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
                 "image": {
                     "type": "string"
                 },
@@ -2488,6 +2662,9 @@ const docTemplate = `{
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
                 },
                 "image": {
                     "type": "string"
@@ -2561,6 +2738,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2572,11 +2752,15 @@ const docTemplate = `{
         "ProviderTarget": {
             "type": "object",
             "required": [
+                "isDefault",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
+                "isDefault": {
+                    "type": "boolean"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -2638,7 +2822,7 @@ const docTemplate = `{
                 "id",
                 "localBuilderRegistryImage",
                 "localBuilderRegistryPort",
-                "logFilePath",
+                "logFile",
                 "providersDir",
                 "registryUrl",
                 "serverDownloadUrl"
@@ -2680,8 +2864,8 @@ const docTemplate = `{
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
-                "logFilePath": {
-                    "type": "string"
+                "logFile": {
+                    "$ref": "#/definitions/LogFileConfig"
                 },
                 "providersDir": {
                     "type": "string"
@@ -2700,15 +2884,27 @@ const docTemplate = `{
         "SetGitProviderConfig": {
             "type": "object",
             "required": [
-                "id",
+                "providerId",
                 "token"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "baseApiUrl": {
                     "type": "string"
                 },
                 "id": {
                     "type": "string"
+                },
+                "providerId": {
+                    "type": "string"
+                },
+                "signingKey": {
+                    "type": "string"
+                },
+                "signingMethod": {
+                    "$ref": "#/definitions/SigningMethod"
                 },
                 "token": {
                     "type": "string"
@@ -2731,6 +2927,17 @@ const docTemplate = `{
                     "type": "integer"
                 }
             }
+        },
+        "SigningMethod": {
+            "type": "string",
+            "enum": [
+                "ssh",
+                "gpg"
+            ],
+            "x-enum-varnames": [
+                "SigningMethodSSH",
+                "SigningMethodGPG"
+            ]
         },
         "Status": {
             "type": "string",
@@ -2874,6 +3081,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "label": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },

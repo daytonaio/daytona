@@ -10,10 +10,6 @@ options:
       usage: Specify the Git branches to use in the projects
     - name: builder
       usage: Specify the builder (currently auto/devcontainer/none)
-    - name: code
-      shorthand: c
-      default_value: "false"
-      usage: Open the workspace in the IDE after workspace creation
     - name: custom-image
       usage: |
         Create the project with the custom image passed as the flag value; Requires setting --custom-image-user flag as well
@@ -27,10 +23,12 @@ options:
       default_value: '[]'
       usage: |
         Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
+    - name: git-provider-config
+      usage: Specify the Git provider configuration ID or alias
     - name: ide
       shorthand: i
       usage: |
-        Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+        Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, zed, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: manual
       default_value: "false"
       usage: Manually enter the Git repository
@@ -39,6 +37,11 @@ options:
       usage: Workspace with multiple projects/repos
     - name: name
       usage: Specify the workspace name
+    - name: no-ide
+      shorthand: "n"
+      default_value: "false"
+      usage: |
+        Do not open the workspace in the IDE after workspace creation
     - name: target
       shorthand: t
       usage: Specify the target (e.g. 'local')

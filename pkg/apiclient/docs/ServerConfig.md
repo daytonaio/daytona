@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **LocalBuilderRegistryImage** | **string** |  | 
 **LocalBuilderRegistryPort** | **int32** |  | 
-**LogFilePath** | **string** |  | 
+**LogFile** | [**LogFileConfig**](LogFileConfig.md) |  | 
 **ProvidersDir** | **string** |  | 
 **RegistryUrl** | **string** |  | 
 **SamplesIndexUrl** | Pointer to **string** |  | [optional] 
@@ -26,7 +26,7 @@ Name | Type | Description | Notes
 
 ### NewServerConfig
 
-`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFilePath string, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
+`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultProjectImage string, defaultProjectUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
 
 NewServerConfig instantiates a new ServerConfig object
 This constructor will assign default values to properties that have it defined,
@@ -291,24 +291,24 @@ and a boolean to check if the value has been set.
 SetLocalBuilderRegistryPort sets LocalBuilderRegistryPort field to given value.
 
 
-### GetLogFilePath
+### GetLogFile
 
-`func (o *ServerConfig) GetLogFilePath() string`
+`func (o *ServerConfig) GetLogFile() LogFileConfig`
 
-GetLogFilePath returns the LogFilePath field if non-nil, zero value otherwise.
+GetLogFile returns the LogFile field if non-nil, zero value otherwise.
 
-### GetLogFilePathOk
+### GetLogFileOk
 
-`func (o *ServerConfig) GetLogFilePathOk() (*string, bool)`
+`func (o *ServerConfig) GetLogFileOk() (*LogFileConfig, bool)`
 
-GetLogFilePathOk returns a tuple with the LogFilePath field if it's non-nil, zero value otherwise
+GetLogFileOk returns a tuple with the LogFile field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetLogFilePath
+### SetLogFile
 
-`func (o *ServerConfig) SetLogFilePath(v string)`
+`func (o *ServerConfig) SetLogFile(v LogFileConfig)`
 
-SetLogFilePath sets LogFilePath field to given value.
+SetLogFile sets LogFile field to given value.
 
 
 ### GetProvidersDir

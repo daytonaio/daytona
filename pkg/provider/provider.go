@@ -15,9 +15,10 @@ import (
 type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
 	GetInfo() (ProviderInfo, error)
+	CheckRequirements() (*[]RequirementStatus, error)
 
 	GetTargetManifest() (*ProviderTargetManifest, error)
-	GetDefaultTargets() (*[]ProviderTarget, error)
+	GetPresetTargets() (*[]ProviderTarget, error)
 
 	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)

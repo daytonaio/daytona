@@ -4,6 +4,7 @@
 package manager
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -40,17 +41,14 @@ func (m *ProviderManager) GetProvidersManifest() (*ProvidersManifest, error) {
 	return &manifest, nil
 }
 
-func (m *ProviderManager) DownloadProvider(downloadUrls map[os.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error) {
+func (m *ProviderManager) DownloadProvider(ctx context.Context, downloadUrls map[os.OperatingSystem]string, providerName string) (string, error) {
 	downloadPath := filepath.Join(m.baseDir, providerName, providerName)
 	if runtime.GOOS == "windows" {
 		downloadPath += ".exe"
 	}
 
 	if _, err := goos.Stat(downloadPath); err == nil {
-		if throwIfPresent {
-			return "", fmt.Errorf("provider %s already downloaded", providerName)
-		}
-		return "", nil
+		return "", providerAlreadyDownloadedError(providerName)
 	}
 
 	log.Info("Downloading " + providerName)
@@ -60,7 +58,7 @@ func (m *ProviderManager) DownloadProvider(downloadUrls map[os.OperatingSystem]s
 		return "", err
 	}
 
-	err = os.DownloadFile(downloadUrls[*operatingSystem], downloadPath)
+	err = os.DownloadFile(ctx, downloadUrls[*operatingSystem], downloadPath)
 	if err != nil {
 		return "", err
 	}

@@ -49,7 +49,7 @@ func (a *Agent) Start() error {
 }
 
 func (a *Agent) startProjectMode() error {
-	err := a.setDefaultConfig()
+	err := a.ensureDefaultProfile()
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,14 @@ func (a *Agent) startProjectMode() error {
 		}
 	}
 
-	err = a.Git.SetGitConfig(gitUser)
+	var providerConfig *gitprovider.GitProviderConfig
+	if gitProvider != nil {
+		providerConfig = &gitprovider.GitProviderConfig{
+			SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+			SigningKey:    gitProvider.SigningKey,
+		}
+	}
+	err = a.Git.SetGitConfig(gitUser, providerConfig)
 	if err != nil {
 		log.Error(fmt.Sprintf("failed to set git config: %s", err))
 	}
@@ -162,13 +169,13 @@ func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
 	}
 
 	encodedUrl := url.QueryEscape(repoUrl)
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProviderForUrl(ctx, encodedUrl).Execute()
+	gitProviders, res, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, encodedUrl).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if gitProvider != nil {
-		return gitProvider, nil
+	if len(gitProviders) > 0 {
+		return &gitProviders[0], nil
 	}
 
 	return nil, nil
@@ -188,38 +195,33 @@ func (a *Agent) getGitUser(gitProviderId string) (*apiclient.GitUser, error) {
 	return userData, nil
 }
 
-func (a *Agent) setDefaultConfig() error {
+func (a *Agent) ensureDefaultProfile() error {
 	existingConfig, err := config.GetConfig()
-	if err != nil && !config.IsNotExist(err) {
+	if err != nil {
 		return err
 	}
 
-	if existingConfig != nil {
-		for _, profile := range existingConfig.Profiles {
-			if profile.Id == "default" {
-				return nil
-			}
+	if existingConfig == nil {
+		return errors.New("config does not exist")
+	}
+
+	for _, profile := range existingConfig.Profiles {
+		if profile.Id == "default" {
+			return nil
 		}
 	}
 
-	config := &config.Config{
-		Id:              a.Config.ClientId,
-		ActiveProfileId: "default",
-		DefaultIdeId:    "vscode",
-		Profiles: []config.Profile{
-			{
-				Id:   "default",
-				Name: "default",
-				Api: config.ServerApi{
-					Url: a.Config.Server.ApiUrl,
-					Key: a.Config.Server.ApiKey,
-				},
-			},
-		},
-		TelemetryEnabled: a.TelemetryEnabled,
-	}
+	existingConfig.Id = a.Config.ClientId
+	existingConfig.TelemetryEnabled = a.TelemetryEnabled
 
-	return config.Save()
+	return existingConfig.AddProfile(config.Profile{
+		Id:   "default",
+		Name: "default",
+		Api: config.ServerApi{
+			Url: a.Config.Server.ApiUrl,
+			Key: a.Config.Server.ApiKey,
+		},
+	})
 }
 
 // Agent uptime in seconds

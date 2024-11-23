@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -60,7 +61,7 @@ var providerInstallCmd = &cobra.Command{
 		providerList := GetProviderListFromManifest(providersManifestLatest)
 		specificProviderName := "Select a specific version"
 		specificProviderVersion := ""
-		providerList = append(providerList, apiclient.Provider{Name: specificProviderName, Version: specificProviderVersion})
+		providerList = append(providerList, apiclient.Provider{Name: specificProviderName, Label: &specificProviderName, Version: specificProviderVersion})
 
 		providerToInstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Install", false)
 		if err != nil {
@@ -131,9 +132,9 @@ var providerInstallCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			targetToSet := &apiclient.ProviderTarget{
+			targetToSet := &target.TargetView{
 				Options: "{}",
-				ProviderInfo: apiclient.ProviderProviderInfo{
+				ProviderInfo: target.ProviderInfo{
 					Name:    providerToInstall.Name,
 					Version: providerToInstall.Version,
 				},
@@ -149,7 +150,16 @@ var providerInstallCmd = &cobra.Command{
 				return err
 			}
 
-			res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(*targetToSet).Execute()
+			targetData := apiclient.CreateProviderTargetDTO{
+				Name:    targetToSet.Name,
+				Options: targetToSet.Options,
+				ProviderInfo: apiclient.ProviderProviderInfo{
+					Name:    targetToSet.ProviderInfo.Name,
+					Version: targetToSet.ProviderInfo.Version,
+				},
+			}
+
+			res, err = apiClient.TargetAPI.SetTarget(context.Background()).Target(targetData).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -168,17 +178,22 @@ func init() {
 }
 
 func GetProviderListFromManifest(manifest *manager.ProvidersManifest) []apiclient.Provider {
-	pluginList := []apiclient.Provider{}
-	for pluginName, pluginManifest := range *manifest {
-		for version := range pluginManifest.Versions {
-			pluginList = append(pluginList, apiclient.Provider{
-				Name:    pluginName,
+	providerList := []apiclient.Provider{}
+	for providerName, providerManifest := range *manifest {
+		for version := range providerManifest.Versions {
+			providerList = append(providerList, apiclient.Provider{
+				Name:    providerName,
+				Label:   providerManifest.Label,
 				Version: version,
 			})
 		}
 	}
 
-	return pluginList
+	slices.SortFunc(providerList, func(a, b apiclient.Provider) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	return providerList
 }
 
 func ConvertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string]string {
@@ -192,7 +207,7 @@ func ConvertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string
 
 func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider_view.ProviderView, providersManifest *manager.ProvidersManifest) error {
 	downloadUrls := ConvertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
-	err := views_util.WithSpinner("Installing", func() error {
+	err := views_util.WithInlineSpinner("Installing", func() error {
 		res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
 			Name:         providerToInstall.Name,
 			DownloadUrls: downloadUrls,

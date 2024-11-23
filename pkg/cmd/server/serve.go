@@ -4,6 +4,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -156,12 +157,12 @@ var ServeCmd = &cobra.Command{
 
 		err = <-localContainerRegistryErrChan
 		if err != nil {
-			return err
+			log.Errorf("Failed to start local container registry: %v\nBuilds may not work properly.\nRestart the server to restart the registry.", err)
 		}
 
 		printServerStartedMessage(c, false)
 
-		err = setDefaultConfig(server, c.ApiPort)
+		err = ensureDefaultProfile(server, c.ApiPort)
 		if err != nil {
 			return err
 		}
@@ -176,8 +177,8 @@ var ServeCmd = &cobra.Command{
 			return err
 		case <-interruptChannel:
 			log.Info("Shutting down")
-			// Exit will be handled by command PreRun
-			select {}
+
+			return server.TailscaleServer.Stop()
 		}
 	},
 }
@@ -256,7 +257,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	})
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
-		ConfigStore: gitProviderConfigStore,
+		ConfigStore:        gitProviderConfigStore,
+		ProjectConfigStore: projectConfigStore,
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
@@ -285,13 +287,19 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	}
 
 	if c.BuilderRegistryServer == "local" {
+		cr, err := containerRegistryService.FindByImageName(c.LocalBuilderRegistryImage)
+		if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+			return nil, err
+		}
+
 		localContainerRegistry = registry.NewLocalContainerRegistry(&registry.LocalContainerRegistryConfig{
-			DataPath: filepath.Join(configDir, "registry"),
-			Port:     c.LocalBuilderRegistryPort,
-			Image:    c.LocalBuilderRegistryImage,
-			Logger:   log.StandardLogger().Writer(),
-			Frps:     c.Frps,
-			ServerId: c.Id,
+			DataPath:          filepath.Join(configDir, "registry"),
+			Port:              c.LocalBuilderRegistryPort,
+			Image:             c.LocalBuilderRegistryImage,
+			ContainerRegistry: cr,
+			Logger:            log.StandardLogger().Writer(),
+			Frps:              c.Frps,
+			ServerId:          c.Id,
 		})
 		c.BuilderRegistryServer = util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain)
 	}
@@ -332,6 +340,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ApiKeyService:            apiKeyService,
 		GitProviderService:       gitProviderService,
 		ContainerRegistryService: containerRegistryService,
+		BuilderImage:             c.BuilderImage,
 		BuildService:             buildService,
 		ProjectConfigService:     projectConfigService,
 		ServerApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
@@ -411,15 +420,20 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 		Store: containerRegistryStore,
 	})
 
-	var builderRegistry *containerregistry.ContainerRegistry
+	var buildImageCr *containerregistry.ContainerRegistry
 
 	if c.BuilderRegistryServer != "local" {
-		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		buildImageCr, err = containerRegistryService.Find(c.BuilderRegistryServer)
 		if err != nil {
-			builderRegistry = &containerregistry.ContainerRegistry{
+			buildImageCr = &containerregistry.ContainerRegistry{
 				Server: c.BuilderRegistryServer,
 			}
 		}
+	}
+
+	cr, err := containerRegistryService.FindByImageName(c.BuilderImage)
+	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
+		return nil, err
 	}
 
 	configDir, err := config.GetConfigDir()
@@ -428,20 +442,22 @@ func GetBuildRunner(c *server.Config, buildRunnerConfig *build.Config, telemetry
 	}
 
 	builderFactory := build.NewBuilderFactory(build.BuilderFactoryConfig{
-		Image:               c.BuilderImage,
-		ContainerRegistry:   builderRegistry,
-		BuildStore:          buildStore,
-		BuildImageNamespace: buildImageNamespace,
-		LoggerFactory:       loggerFactory,
-		DefaultProjectImage: c.DefaultProjectImage,
-		DefaultProjectUser:  c.DefaultProjectUser,
+		Image:                       c.BuilderImage,
+		ContainerRegistry:           cr,
+		BuildImageContainerRegistry: buildImageCr,
+		BuildStore:                  buildStore,
+		BuildImageNamespace:         buildImageNamespace,
+		LoggerFactory:               loggerFactory,
+		DefaultProjectImage:         c.DefaultProjectImage,
+		DefaultProjectUser:          c.DefaultProjectUser,
 	})
 
 	return build.NewBuildRunner(build.BuildRunnerInstanceConfig{
 		Interval:          buildRunnerConfig.Interval,
 		Scheduler:         build.NewCronScheduler(),
 		BuildRunnerId:     buildRunnerConfig.Id,
-		ContainerRegistry: builderRegistry,
+		ContainerRegistry: buildImageCr,
+		TelemetryEnabled:  buildRunnerConfig.TelemetryEnabled,
 		GitProviderStore:  gitProviderService,
 		BuildStore:        buildStore,
 		BuilderFactory:    builderFactory,
@@ -489,17 +505,19 @@ func getDbPath() (string, error) {
 	return filepath.Join(configDir, "db"), nil
 }
 
-func setDefaultConfig(server *server.Server, apiPort uint32) error {
+func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 	existingConfig, err := config.GetConfig()
-	if err != nil && !config.IsNotExist(err) {
+	if err != nil {
 		return err
 	}
 
-	if existingConfig != nil {
-		for _, profile := range existingConfig.Profiles {
-			if profile.Id == "default" {
-				return nil
-			}
+	if existingConfig == nil {
+		return errors.New("config does not exist")
+	}
+
+	for _, profile := range existingConfig.Profiles {
+		if profile.Id == "default" {
+			return nil
 		}
 	}
 
@@ -508,37 +526,12 @@ func setDefaultConfig(server *server.Server, apiPort uint32) error {
 		return err
 	}
 
-	if existingConfig != nil {
-		err := existingConfig.AddProfile(config.Profile{
-			Id:   "default",
-			Name: "default",
-			Api: config.ServerApi{
-				Url: fmt.Sprintf("http://localhost:%d", apiPort),
-				Key: apiKey,
-			},
-		})
-		if err != nil {
-			return err
-		}
-
-		return existingConfig.Save()
-	}
-
-	config := &config.Config{
-		ActiveProfileId: "default",
-		DefaultIdeId:    config.DefaultIdeId,
-		Profiles: []config.Profile{
-			{
-				Id:   "default",
-				Name: "default",
-				Api: config.ServerApi{
-					Url: fmt.Sprintf("http://localhost:%d", apiPort),
-					Key: apiKey,
-				},
-			},
+	return existingConfig.AddProfile(config.Profile{
+		Id:   "default",
+		Name: "default",
+		Api: config.ServerApi{
+			Url: fmt.Sprintf("http://localhost:%d", apiPort),
+			Key: apiKey,
 		},
-		TelemetryEnabled: true,
-	}
-
-	return config.Save()
+	})
 }

@@ -42,18 +42,33 @@ type DevcontainerPaths struct {
 type CreateDevcontainerOptions struct {
 	ProjectDir string
 	// Name of the project inside the devcontainer
-	ProjectName       string
-	BuildConfig       *buildconfig.BuildConfig
-	LogWriter         io.Writer
-	SshClient         *ssh.Client
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Prebuild          bool
-	EnvVars           map[string]string
-	IdLabels          map[string]string
+	ProjectName              string
+	BuildConfig              *buildconfig.BuildConfig
+	LogWriter                io.Writer
+	SshClient                *ssh.Client
+	ContainerRegistry        *containerregistry.ContainerRegistry
+	Prebuild                 bool
+	EnvVars                  map[string]string
+	IdLabels                 map[string]string
+	BuilderImage             string
+	BuilderContainerRegistry *containerregistry.ContainerRegistry
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
-	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
+	// Ensure that the devcontainer config exists
+	if opts.SshClient != nil {
+		_, err := opts.SshClient.ReadFile(path.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		if err != nil {
+			return "", "", err
+		}
+	} else {
+		_, err := os.Stat(filepath.Join(opts.ProjectDir, opts.BuildConfig.Devcontainer.FilePath))
+		if err != nil {
+			return "", "", err
+		}
+	}
+
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return "", "", err
 	}
@@ -122,26 +137,55 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	delete(devcontainerConfig, "initializeCommand")
 
 	if _, ok := devcontainerConfig["dockerComposeFile"]; ok {
-		composeFilePath := devcontainerConfig["dockerComposeFile"].(string)
+		composePaths := []string{}
 
-		if opts.SshClient != nil {
-			composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+		getComposeFilePath := func(composeFilePath string) (string, error) {
+			if opts.SshClient != nil {
+				composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
-			composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
-			if err != nil {
-				return "", "", err
+				composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
+				if err != nil {
+					return "", err
+				}
+
+				composeFilePath = filepath.Join(os.TempDir(), fmt.Sprintf("daytona-compose-%s.yml", uuid.NewString()))
+				err = os.WriteFile(composeFilePath, []byte(composeFileContent), 0644)
+				if err != nil {
+					return "", err
+				}
+			} else {
+				composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 			}
 
-			composeFilePath = filepath.Join(os.TempDir(), fmt.Sprintf("daytona-compose-%s.yml", uuid.NewString()))
-			err = os.WriteFile(composeFilePath, []byte(composeFileContent), 0644)
-			if err != nil {
-				return "", "", err
-			}
-		} else {
-			composeFilePath = filepath.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+			return composeFilePath, nil
 		}
 
-		options, err := cli.NewProjectOptions([]string{composeFilePath}, cli.WithOsEnv, cli.WithDotEnv)
+		composeFilePath, ok := devcontainerConfig["dockerComposeFile"].(string)
+		if ok {
+			composeFilePath, err = getComposeFilePath(composeFilePath)
+			if err != nil {
+				return "", "", err
+			}
+			composePaths = append(composePaths, composeFilePath)
+		} else {
+			composeFilePaths, ok := devcontainerConfig["dockerComposeFile"].([]interface{})
+			if !ok {
+				return "", "", errors.New("unable to parse dockerComposeFile from devcontainer configuration")
+			}
+			for _, composeFilePath := range composeFilePaths {
+				composeFilePath, ok := composeFilePath.(string)
+				if !ok {
+					return "", "", errors.New("unable to parse dockerComposeFile from devcontainer configuration")
+				}
+				composeFilePath, err = getComposeFilePath(composeFilePath)
+				if err != nil {
+					return "", "", err
+				}
+				composePaths = append(composePaths, composeFilePath)
+			}
+		}
+
+		options, err := cli.NewProjectOptions(composePaths, cli.WithOsEnv, cli.WithDotEnv)
 		if err != nil {
 			return "", "", err
 		}
@@ -236,7 +280,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
 
-	err = d.runInitializeCommand(config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
+	err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
 	if err != nil {
 		return "", "", err
 	}
@@ -272,7 +316,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	return result.ContainerId, RemoteUser(result.RemoteUser), nil
 }
 
-func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, error) {
+func (d *DockerClient) ensureDockerSockForward(builderImage string, builderContainerRegistry *containerregistry.ContainerRegistry, logWriter io.Writer) (string, error) {
 	ctx := context.Background()
 
 	containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{
@@ -297,16 +341,15 @@ func (d *DockerClient) ensureDockerSockForward(logWriter io.Writer) (string, err
 		}
 	}
 
-	// TODO: This image should be configurable because it might be hosted on an alternative registry
-	err = d.PullImage("alpine/socat", nil, logWriter)
+	err = d.PullImage(builderImage, builderContainerRegistry, logWriter)
 	if err != nil {
 		return "", err
 	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image: "alpine/socat",
-		User:  "root",
-		Cmd:   []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
+		Image:      builderImage,
+		Entrypoint: []string{"socat"},
+		Cmd:        []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
 	}, &container.HostConfig{
 		Privileged: true,
 		Mounts: []mount.Mount{
@@ -381,7 +424,7 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 	return rawConfig, &rootConfig, nil
 }
 
-func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Command, logWriter io.Writer, sshClient *ssh.Client) error {
+func (d *DockerClient) runInitializeCommand(projectDir string, initializeCommand devcontainer.Command, logWriter io.Writer, sshClient *ssh.Client) error {
 	if initializeCommand == nil {
 		return nil
 	}
@@ -391,7 +434,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 	switch initializeCommand := initializeCommand.(type) {
 	case string:
 		cmd := []string{"sh", "-c", initializeCommand}
-		return execDevcontainerCommand(cmd, logWriter, sshClient)
+		return execDevcontainerCommand(projectDir, cmd, logWriter, sshClient)
 	case []interface{}:
 		var commandArray []string
 		for _, arg := range initializeCommand {
@@ -401,7 +444,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 			}
 			commandArray = append(commandArray, argString)
 		}
-		return execDevcontainerCommand(commandArray, logWriter, sshClient)
+		return execDevcontainerCommand(projectDir, commandArray, logWriter, sshClient)
 	case map[string]interface{}:
 		commands := map[string][]string{}
 		for name, command := range initializeCommand {
@@ -424,7 +467,7 @@ func (d *DockerClient) runInitializeCommand(initializeCommand devcontainer.Comma
 		for name, command := range commands {
 			go func() {
 				logWriter.Write([]byte(fmt.Sprintf("Running %s\n", name)))
-				err := execDevcontainerCommand(command, logWriter, sshClient)
+				err := execDevcontainerCommand(projectDir, command, logWriter, sshClient)
 				if err != nil {
 					logWriter.Write([]byte(fmt.Sprintf("Error running %s: %v\n", name, err)))
 					errChan <- err
@@ -468,7 +511,7 @@ func (d *DockerClient) execDevcontainerCommand(cmd string, opts *CreateDevcontai
 	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
-		Image:      "daytonaio/workspace-project",
+		Image:      opts.BuilderImage,
 		Entrypoint: []string{"sh"},
 		Env:        []string{"DOCKER_HOST=tcp://localhost:2375"},
 		Cmd:        append([]string{"-c"}, cmd),
@@ -584,10 +627,10 @@ func (d *DockerClient) getHostEnvVars(sshClient *ssh.Client) (map[string]string,
 	return envMap, nil
 }
 
-func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *ssh.Client) error {
+func execDevcontainerCommand(projectDir string, command []string, logWriter io.Writer, sshClient *ssh.Client) error {
 	if sshClient != nil {
 		if command[0] == "sh" {
-			cmd := fmt.Sprintf(`sh -c "%s"`, strings.Join(command[2:], " "))
+			cmd := fmt.Sprintf(`sh -c "cd %s && %s"`, projectDir, strings.Join(command[2:], " "))
 			return sshClient.Exec(cmd, logWriter)
 		}
 		return sshClient.Exec(strings.Join(command, " "), logWriter)
@@ -597,5 +640,6 @@ func execDevcontainerCommand(command []string, logWriter io.Writer, sshClient *s
 	cmd.Stdout = logWriter
 	cmd.Stderr = logWriter
 	cmd.Env = os.Environ()
+	cmd.Dir = projectDir
 	return cmd.Run()
 }

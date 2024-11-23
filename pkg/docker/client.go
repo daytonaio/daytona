@@ -20,12 +20,14 @@ import (
 )
 
 type CreateProjectOptions struct {
-	Project    *project.Project
-	ProjectDir string
-	Cr         *containerregistry.ContainerRegistry
-	LogWriter  io.Writer
-	Gpc        *gitprovider.GitProviderConfig
-	SshClient  *ssh.Client
+	Project                  *project.Project
+	ProjectDir               string
+	ContainerRegistry        *containerregistry.ContainerRegistry
+	LogWriter                io.Writer
+	Gpc                      *gitprovider.GitProviderConfig
+	SshClient                *ssh.Client
+	BuilderImage             string
+	BuilderContainerRegistry *containerregistry.ContainerRegistry
 }
 
 type IDockerClient interface {

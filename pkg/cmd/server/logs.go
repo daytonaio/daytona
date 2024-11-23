@@ -93,7 +93,7 @@ func readServerLogFile() error {
 		return fmt.Errorf("failed to get server config: %w", err)
 	}
 
-	file, err := os.Open(cfg.LogFilePath)
+	file, err := os.Open(cfg.LogFile.Path)
 	if err != nil {
 		return fmt.Errorf("while opening server logs: %w", err)
 	}

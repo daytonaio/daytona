@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/key"
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -92,7 +93,7 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults
 	projectConfigurationData := NewConfigurationData(builderChoice, devContainerFilePath, currentProject, &defaults)
 
 	form := GetProjectConfigurationForm(projectConfigurationData)
-	err := form.Run()
+	err := form.WithProgramOptions(tea.WithAltScreen()).Run()
 	if err != nil {
 		log.Fatal(err)
 	}

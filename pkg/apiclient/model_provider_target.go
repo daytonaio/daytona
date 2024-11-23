@@ -21,7 +21,8 @@ var _ MappedNullable = &ProviderTarget{}
 
 // ProviderTarget struct for ProviderTarget
 type ProviderTarget struct {
-	Name string `json:"name"`
+	IsDefault bool   `json:"isDefault"`
+	Name      string `json:"name"`
 	// JSON encoded map of options
 	Options      string               `json:"options"`
 	ProviderInfo ProviderProviderInfo `json:"providerInfo"`
@@ -33,8 +34,9 @@ type _ProviderTarget ProviderTarget
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProviderTarget(name string, options string, providerInfo ProviderProviderInfo) *ProviderTarget {
+func NewProviderTarget(isDefault bool, name string, options string, providerInfo ProviderProviderInfo) *ProviderTarget {
 	this := ProviderTarget{}
+	this.IsDefault = isDefault
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
@@ -47,6 +49,30 @@ func NewProviderTarget(name string, options string, providerInfo ProviderProvide
 func NewProviderTargetWithDefaults() *ProviderTarget {
 	this := ProviderTarget{}
 	return &this
+}
+
+// GetIsDefault returns the IsDefault field value
+func (o *ProviderTarget) GetIsDefault() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.IsDefault
+}
+
+// GetIsDefaultOk returns a tuple with the IsDefault field value
+// and a boolean to check if the value has been set.
+func (o *ProviderTarget) GetIsDefaultOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.IsDefault, true
+}
+
+// SetIsDefault sets field value
+func (o *ProviderTarget) SetIsDefault(v bool) {
+	o.IsDefault = v
 }
 
 // GetName returns the Name field value
@@ -131,6 +157,7 @@ func (o ProviderTarget) MarshalJSON() ([]byte, error) {
 
 func (o ProviderTarget) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["isDefault"] = o.IsDefault
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
@@ -142,6 +169,7 @@ func (o *ProviderTarget) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"isDefault",
 		"name",
 		"options",
 		"providerInfo",

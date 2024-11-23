@@ -52,6 +52,11 @@ func GetConfig() (*Config, error) {
 	if c.Id == "" {
 		c.Id = uuid.NewString()
 	}
+
+	if c.LogFile == nil {
+		c.LogFile = getDefaultLogFileConfig()
+	}
+
 	err = Save(c)
 	if err != nil {
 		return nil, err

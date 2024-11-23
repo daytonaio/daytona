@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"slices"
 	"strings"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
+	. "github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	. "github.com/daytonaio/daytona/pkg/cmd/build"
 	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
@@ -86,7 +88,7 @@ func Execute() error {
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
-	telemetryService, cmd, flags, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	telemetryService, cmd, flags, isCompletion, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
 		return cmd.Help()
@@ -96,17 +98,24 @@ func Execute() error {
 
 	endTime := time.Now()
 
-	PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
+	if !isCompletion {
+		PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
+	}
 
 	return err
 }
 
-func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, err error) {
+func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command, flags []string, isCompletion bool, err error) {
+	completionCommands := []string{"__complete", "__completeNoDesc", "__completeNoDescCmd", "__completeCmd"}
+	if len(args) > 0 && slices.Contains(completionCommands, args[0]) {
+		return rootCmd, flags, true, nil
+	}
+
 	rootCmd.InitDefaultHelpCmd()
 	currentCmd := rootCmd
 
 	// Filter flags from args
-	sanitzedArgs := []string{}
+	sanitizedArgs := []string{}
 	for i := 0; i < len(args); i++ {
 		if strings.HasPrefix(args[i], "-") {
 			flags = append(flags, args[i])
@@ -115,13 +124,13 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 			}
 			continue
 		}
-		sanitzedArgs = append(sanitzedArgs, args[i])
+		sanitizedArgs = append(sanitizedArgs, args[i])
 	}
 
-	for len(sanitzedArgs) > 0 {
-		subCmd, subArgs, err := currentCmd.Find(sanitzedArgs)
+	for len(sanitizedArgs) > 0 {
+		subCmd, subArgs, err := currentCmd.Find(sanitizedArgs)
 		if err != nil {
-			return currentCmd, flags, err
+			return currentCmd, flags, false, err
 		}
 
 		if subCmd == currentCmd {
@@ -129,16 +138,10 @@ func validateCommands(rootCmd *cobra.Command, args []string) (cmd *cobra.Command
 		}
 
 		currentCmd = subCmd
-		sanitzedArgs = subArgs
+		sanitizedArgs = subArgs
 	}
 
-	if len(sanitzedArgs) > 0 {
-		if err := currentCmd.ValidateArgs(sanitzedArgs); err != nil {
-			return currentCmd, flags, err
-		}
-	}
-
-	return currentCmd, flags, nil
+	return currentCmd, flags, false, currentCmd.ValidateArgs(sanitizedArgs)
 }
 
 func SetupRootCommand(cmd *cobra.Command) {
@@ -221,7 +224,7 @@ func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interfac
 	return data
 }
 
-func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, error) {
+func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, bool, error) {
 	var telemetryService telemetry.TelemetryService
 
 	if telemetryEnabled {
@@ -232,26 +235,26 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		})
 	}
 
-	cmd, flags, err := validateCommands(rootCmd, os.Args[1:])
-	if err != nil {
+	cmd, flags, isCompletion, err := validateCommands(rootCmd, os.Args[1:])
+	if err != nil && !isCompletion {
 		if telemetryEnabled {
 			props := GetCmdTelemetryData(cmd, flags)
 			props["command"] = os.Args[1]
 			props["called_as"] = os.Args[1]
 			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
 			if err != nil {
-				log.Error(err)
+				log.Trace(err)
 			}
 			telemetryService.Close()
 		}
 
-		return telemetryService, cmd, flags, err
+		return telemetryService, cmd, flags, isCompletion, err
 	}
 
-	if telemetryEnabled {
+	if telemetryEnabled && !isCompletion {
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 
 		go func() {
@@ -267,7 +270,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 
 				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 				if err != nil {
-					log.Error(err)
+					log.Trace(err)
 				}
 				telemetryService.Close()
 				os.Exit(0)
@@ -275,7 +278,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		}()
 	}
 
-	return telemetryService, cmd, flags, nil
+	return telemetryService, cmd, flags, isCompletion, nil
 }
 
 func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time, flags []string) {
@@ -289,7 +292,7 @@ func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.Teleme
 
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
 		if err != nil {
-			log.Error(err)
+			log.Trace(err)
 		}
 		telemetryService.Close()
 	}

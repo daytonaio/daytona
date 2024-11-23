@@ -10,14 +10,15 @@ import (
 )
 
 type ProjectConfig struct {
-	Name          string                   `json:"name" validate:"required"`
-	Image         string                   `json:"image" validate:"required"`
-	User          string                   `json:"user" validate:"required"`
-	BuildConfig   *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
-	RepositoryUrl string                   `json:"repositoryUrl" validate:"required"`
-	EnvVars       map[string]string        `json:"envVars" validate:"required"`
-	IsDefault     bool                     `json:"default" validate:"required"`
-	Prebuilds     []*PrebuildConfig        `json:"prebuilds" validate:"optional"`
+	Name                string                   `json:"name" validate:"required"`
+	Image               string                   `json:"image" validate:"required"`
+	User                string                   `json:"user" validate:"required"`
+	BuildConfig         *buildconfig.BuildConfig `json:"buildConfig,omitempty" validate:"optional"`
+	RepositoryUrl       string                   `json:"repositoryUrl" validate:"required"`
+	EnvVars             map[string]string        `json:"envVars" validate:"required"`
+	IsDefault           bool                     `json:"default" validate:"required"`
+	Prebuilds           []*PrebuildConfig        `json:"prebuilds" validate:"optional"`
+	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"optional"`
 } // @name ProjectConfig
 
 func (pc *ProjectConfig) SetPrebuild(p *PrebuildConfig) error {
@@ -31,7 +32,7 @@ func (pc *ProjectConfig) SetPrebuild(p *PrebuildConfig) error {
 
 	for _, pb := range pc.Prebuilds {
 		if pb.Id == p.Id {
-			pb = &newPrebuild
+			*pb = newPrebuild
 			return nil
 		}
 	}

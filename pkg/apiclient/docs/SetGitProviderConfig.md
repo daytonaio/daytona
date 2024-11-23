@@ -4,8 +4,12 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Alias** | Pointer to **string** |  | [optional] 
 **BaseApiUrl** | Pointer to **string** |  | [optional] 
-**Id** | **string** |  | 
+**Id** | Pointer to **string** |  | [optional] 
+**ProviderId** | **string** |  | 
+**SigningKey** | Pointer to **string** |  | [optional] 
+**SigningMethod** | Pointer to [**SigningMethod**](SigningMethod.md) |  | [optional] 
 **Token** | **string** |  | 
 **Username** | Pointer to **string** |  | [optional] 
 
@@ -13,7 +17,7 @@ Name | Type | Description | Notes
 
 ### NewSetGitProviderConfig
 
-`func NewSetGitProviderConfig(id string, token string, ) *SetGitProviderConfig`
+`func NewSetGitProviderConfig(providerId string, token string, ) *SetGitProviderConfig`
 
 NewSetGitProviderConfig instantiates a new SetGitProviderConfig object
 This constructor will assign default values to properties that have it defined,
@@ -27,6 +31,31 @@ will change when the set of required properties is changed
 NewSetGitProviderConfigWithDefaults instantiates a new SetGitProviderConfig object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAlias
+
+`func (o *SetGitProviderConfig) GetAlias() string`
+
+GetAlias returns the Alias field if non-nil, zero value otherwise.
+
+### GetAliasOk
+
+`func (o *SetGitProviderConfig) GetAliasOk() (*string, bool)`
+
+GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAlias
+
+`func (o *SetGitProviderConfig) SetAlias(v string)`
+
+SetAlias sets Alias field to given value.
+
+### HasAlias
+
+`func (o *SetGitProviderConfig) HasAlias() bool`
+
+HasAlias returns a boolean if a field has been set.
 
 ### GetBaseApiUrl
 
@@ -72,6 +101,81 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
+### HasId
+
+`func (o *SetGitProviderConfig) HasId() bool`
+
+HasId returns a boolean if a field has been set.
+
+### GetProviderId
+
+`func (o *SetGitProviderConfig) GetProviderId() string`
+
+GetProviderId returns the ProviderId field if non-nil, zero value otherwise.
+
+### GetProviderIdOk
+
+`func (o *SetGitProviderConfig) GetProviderIdOk() (*string, bool)`
+
+GetProviderIdOk returns a tuple with the ProviderId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderId
+
+`func (o *SetGitProviderConfig) SetProviderId(v string)`
+
+SetProviderId sets ProviderId field to given value.
+
+
+### GetSigningKey
+
+`func (o *SetGitProviderConfig) GetSigningKey() string`
+
+GetSigningKey returns the SigningKey field if non-nil, zero value otherwise.
+
+### GetSigningKeyOk
+
+`func (o *SetGitProviderConfig) GetSigningKeyOk() (*string, bool)`
+
+GetSigningKeyOk returns a tuple with the SigningKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningKey
+
+`func (o *SetGitProviderConfig) SetSigningKey(v string)`
+
+SetSigningKey sets SigningKey field to given value.
+
+### HasSigningKey
+
+`func (o *SetGitProviderConfig) HasSigningKey() bool`
+
+HasSigningKey returns a boolean if a field has been set.
+
+### GetSigningMethod
+
+`func (o *SetGitProviderConfig) GetSigningMethod() SigningMethod`
+
+GetSigningMethod returns the SigningMethod field if non-nil, zero value otherwise.
+
+### GetSigningMethodOk
+
+`func (o *SetGitProviderConfig) GetSigningMethodOk() (*SigningMethod, bool)`
+
+GetSigningMethodOk returns a tuple with the SigningMethod field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetSigningMethod
+
+`func (o *SetGitProviderConfig) SetSigningMethod(v SigningMethod)`
+
+SetSigningMethod sets SigningMethod field to given value.
+
+### HasSigningMethod
+
+`func (o *SetGitProviderConfig) HasSigningMethod() bool`
+
+HasSigningMethod returns a boolean if a field has been set.
 
 ### GetToken
 

@@ -6,7 +6,6 @@ package prebuild
 import (
 	"context"
 	"errors"
-	"net/http"
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -15,17 +14,20 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
 var prebuildUpdateCmd = &cobra.Command{
-	Use:   "update",
+	Use:   "update [PROJECT_CONFIG] [PREBUILD_ID]",
 	Short: "Update a prebuild configuration",
-	Args:  cobra.NoArgs,
+	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
 		var prebuild *apiclient.PrebuildDTO
+		var projectConfigRecieved string
+		var retention int
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -33,6 +35,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			return err
 		}
 
+		// Fetch the list of registered Git providers
 		userGitProviders, res, err := apiClient.GitProviderAPI.ListGitProviders(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
@@ -43,26 +46,63 @@ var prebuildUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		if len(args) < 2 {
+		// Determine the mode of operation: interactive or non-interactive
+		if len(args) == 2 || (branchFlag != "" || retentionFlag != 0 || commitIntervalFlag != 0 || len(triggerFilesFlag) > 0) {
+			// Non-interactive mode: use provided arguments and flags
+			if len(args) < 2 {
+				return errors.New("Both project config name and prebuild ID must be specified when using flags")
+			}
+
+			projectConfigRecieved = args[0]
+			prebuildID := args[1]
+
+			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, projectConfigRecieved, prebuildID).Execute()
+			if err != nil {
+				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			// Set prebuild details based on flags
+			if branchFlag != "" {
+				prebuild.Branch = branchFlag
+			}
+
+			if retentionFlag > 0 {
+				prebuild.Retention = int32(retentionFlag)
+			}
+
+			if commitIntervalFlag > 0 {
+				prebuild.CommitInterval = util.Pointer(int32(commitIntervalFlag))
+			}
+
+			if len(triggerFilesFlag) > 0 {
+				prebuild.TriggerFiles = triggerFilesFlag
+			}
+			prebuildAddView.Branch = prebuild.Branch
+			prebuildAddView.Retention = strconv.Itoa(int(prebuild.Retention))
+			prebuildAddView.ProjectConfigName = projectConfigRecieved
+			prebuildAddView.TriggerFiles = prebuild.TriggerFiles
+			prebuildAddView.CommitInterval = strconv.Itoa(int(*prebuild.CommitInterval))
+			retention = int(prebuild.Retention)
+		} else {
+			// Interactive mode: Prompt for details
 			var prebuilds []apiclient.PrebuildDTO
-			var res *http.Response
 			var selectedProjectConfigName string
 
 			if len(args) == 1 {
 				selectedProjectConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(ctx, selectedProjectConfigName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			} else {
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuilds(context.Background()).Execute()
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuilds(ctx).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
 			}
 
 			if len(prebuilds) == 0 {
-				views.RenderInfoMessage("No prebuilds found")
+				views_util.NotifyEmptyPrebuildList(true)
 				return nil
 			}
 
@@ -70,27 +110,28 @@ var prebuildUpdateCmd = &cobra.Command{
 			if prebuild == nil {
 				return nil
 			}
-		} else {
-			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, args[0], args[1]).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
+
+			projectConfigRecieved = prebuild.ProjectConfigName
+			prebuildAddView = add.PrebuildAddView{
+				Branch:            prebuild.Branch,
+				Retention:         strconv.Itoa(int(prebuild.Retention)),
+				ProjectConfigName: projectConfigRecieved,
 			}
+			retention, err = strconv.Atoi(prebuildAddView.Retention)
+			if err != nil {
+				return errors.New("retention must be a number")
+			}
+
+			if prebuild.CommitInterval != nil {
+				prebuildAddView.CommitInterval = strconv.Itoa(int(*prebuild.CommitInterval))
+			}
+			if len(prebuild.TriggerFiles) > 0 {
+				prebuildAddView.TriggerFiles = prebuild.TriggerFiles
+			}
+			add.PrebuildCreationView(&prebuildAddView, false)
 		}
 
-		prebuildAddView.Branch = prebuild.Branch
-		prebuildAddView.Retention = strconv.Itoa(int(prebuild.Retention))
-		prebuildAddView.ProjectConfigName = prebuild.ProjectConfigName
-
-		if prebuild.CommitInterval != nil {
-			prebuildAddView.CommitInterval = strconv.Itoa(int(*prebuild.CommitInterval))
-		}
-		if len(prebuild.TriggerFiles) > 0 {
-			prebuildAddView.TriggerFiles = prebuild.TriggerFiles
-		}
-
-		prebuildAddView.RunBuildOnAdd = runOnUpdateFlag
-
-		add.PrebuildCreationView(&prebuildAddView, true)
+		prebuildAddView.RunBuildOnAdd = runFlag
 
 		var commitInterval int
 		if prebuildAddView.CommitInterval != "" {
@@ -98,11 +139,6 @@ var prebuildUpdateCmd = &cobra.Command{
 			if err != nil {
 				return errors.New("commit interval must be a number")
 			}
-		}
-
-		retention, err := strconv.Atoi(prebuildAddView.Retention)
-		if err != nil {
-			return errors.New("retention must be a number")
 		}
 
 		newPrebuild := apiclient.CreatePrebuildDTO{
@@ -139,12 +175,23 @@ var prebuildUpdateCmd = &cobra.Command{
 
 			views.RenderViewBuildLogsMessage(buildId)
 		}
+
 		return nil
 	},
 }
 
-var runOnUpdateFlag bool
+var (
+	branchFlag         string
+	retentionFlag      int
+	commitIntervalFlag int
+	triggerFilesFlag   []string
+	runFlag            bool
+)
 
 func init() {
-	prebuildUpdateCmd.Flags().BoolVar(&runOnUpdateFlag, "run", false, "Run the prebuild once after updating it")
+	prebuildUpdateCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
+	prebuildUpdateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
+	prebuildUpdateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
+	prebuildUpdateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
+	prebuildUpdateCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after updating it")
 }

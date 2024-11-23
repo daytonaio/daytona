@@ -11,8 +11,9 @@ import (
 )
 
 type ProviderInfo struct {
-	Name    string `json:"name" validate:"required"`
-	Version string `json:"version" validate:"required"`
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
 }
 
 type InitializeProviderRequest struct {
@@ -36,17 +37,20 @@ type WorkspaceRequest struct {
 }
 
 type ProjectRequest struct {
-	TargetOptions     string
-	ContainerRegistry *containerregistry.ContainerRegistry
-	Project           *project.Project
-	GitProviderConfig *gitprovider.GitProviderConfig
+	TargetOptions            string
+	ContainerRegistry        *containerregistry.ContainerRegistry
+	Project                  *project.Project
+	GitProviderConfig        *gitprovider.GitProviderConfig
+	BuilderImage             string
+	BuilderContainerRegistry *containerregistry.ContainerRegistry
 }
 
 type ProviderTarget struct {
 	Name         string       `json:"name" validate:"required"`
 	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required"`
 	// JSON encoded map of options
-	Options string `json:"options" validate:"required"`
+	Options   string `json:"options" validate:"required"`
+	IsDefault bool   `json:"isDefault" validate:"required"`
 } // @name ProviderTarget
 
 type ProviderTargetManifest map[string]ProviderTargetProperty // @name ProviderTargetManifest
@@ -79,3 +83,9 @@ type ProviderTargetProperty struct {
 	// Suggestions is an optional list of auto-complete values to assist the user while filling the field
 	Suggestions []string
 }
+
+type RequirementStatus struct {
+	Name   string
+	Met    bool
+	Reason string
+} // @name RequirementStatus

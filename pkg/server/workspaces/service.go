@@ -38,7 +38,7 @@ type IWorkspaceService interface {
 }
 
 type targetStore interface {
-	Find(targetName string) (*provider.ProviderTarget, error)
+	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
 }
 
 type WorkspaceServiceConfig struct {
@@ -53,6 +53,7 @@ type WorkspaceServiceConfig struct {
 	Provisioner              provisioner.IProvisioner
 	DefaultProjectImage      string
 	DefaultProjectUser       string
+	BuilderImage             string
 	ApiKeyService            apikeys.IApiKeyService
 	LoggerFactory            logs.LoggerFactory
 	GitProviderService       gitproviders.IGitProviderService
@@ -76,6 +77,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
 		apiKeyService:            config.ApiKeyService,
 		gitProviderService:       config.GitProviderService,
 		telemetryService:         config.TelemetryService,
+		builderImage:             config.BuilderImage,
 	}
 }
 
@@ -92,6 +94,7 @@ type WorkspaceService struct {
 	serverVersion            string
 	defaultProjectImage      string
 	defaultProjectUser       string
+	builderImage             string
 	loggerFactory            logs.LoggerFactory
 	gitProviderService       gitproviders.IGitProviderService
 	telemetryService         telemetry.TelemetryService

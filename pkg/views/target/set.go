@@ -44,7 +44,7 @@ func NewTargetNameInput(targetName *string, existingTargetNames []string) error 
 	return nil
 }
 
-func SetTargetForm(target *apiclient.ProviderTarget, targetManifest map[string]apiclient.ProviderProviderTargetProperty) error {
+func SetTargetForm(target *TargetView, targetManifest map[string]apiclient.ProviderProviderTargetProperty) error {
 	fields := make([]huh.Field, 0, len(targetManifest))
 	groups := []*huh.Group{}
 	options := make(map[string]interface{})

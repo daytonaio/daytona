@@ -89,7 +89,7 @@ func TestProviderTargetService(t *testing.T) {
 func (s *ProviderTargetServiceTestSuite) TestList() {
 	require := s.Require()
 
-	providerTargets, err := s.providerTargetService.List()
+	providerTargets, err := s.providerTargetService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProviderTargets, providerTargets)
 }
@@ -105,9 +105,25 @@ func (s *ProviderTargetServiceTestSuite) TestMap() {
 func (s *ProviderTargetServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	providerTarget, err := s.providerTargetService.Find(providerTarget1.Name)
+	providerTarget, err := s.providerTargetService.Find(&provider.TargetFilter{
+		Name: &providerTarget1.Name,
+	})
 	require.Nil(err)
 	require.Equal(providerTarget1, providerTarget)
+}
+
+func (s *ProviderTargetServiceTestSuite) TestSetDefault() {
+	require := s.Require()
+
+	err := s.providerTargetService.SetDefault(providerTarget2)
+	require.Nil(err)
+
+	providerTarget, err := s.providerTargetService.Find(&provider.TargetFilter{
+		Name: &providerTarget2.Name,
+	})
+	require.Nil(err)
+
+	require.Equal(providerTarget2, providerTarget)
 }
 
 func (s *ProviderTargetServiceTestSuite) TestSave() {
@@ -118,7 +134,7 @@ func (s *ProviderTargetServiceTestSuite) TestSave() {
 	err := s.providerTargetService.Save(providerTarget4)
 	require.Nil(err)
 
-	providerTargets, err := s.providerTargetService.List()
+	providerTargets, err := s.providerTargetService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProviderTargets, providerTargets)
 }
@@ -131,7 +147,7 @@ func (s *ProviderTargetServiceTestSuite) TestDelete() {
 	err := s.providerTargetService.Delete(providerTarget3)
 	require.Nil(err)
 
-	providerTargets, err := s.providerTargetService.List()
+	providerTargets, err := s.providerTargetService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedProviderTargets, providerTargets)
 }

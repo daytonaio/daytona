@@ -103,7 +103,7 @@ func (s *BuildRunnerTestSuite) TestRun() {
 
 func (s *BuildRunnerTestSuite) TestRunBuildProcess() {
 	pendingBuild := *mocks.MockBuild
-	s.mockGitProviderConfigStore.On("GetConfigForUrl", pendingBuild.Repository.Url).Return(&gitProviderConfig, nil)
+	s.mockGitProviderConfigStore.On("ListConfigsForUrl", pendingBuild.Repository.Url).Return([]*gitprovider.GitProviderConfig{&gitProviderConfig}, nil)
 	s.mockGitService.On("CloneRepository", pendingBuild.Repository, &http.BasicAuth{
 		Username: gitProviderConfig.Username,
 	}).Return(nil)

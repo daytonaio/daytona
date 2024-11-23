@@ -23,24 +23,26 @@ func NewProviderTargetStore(db *gorm.DB) (*ProviderTargetStore, error) {
 	return &ProviderTargetStore{db: db}, nil
 }
 
-func (s *ProviderTargetStore) List() ([]*provider.ProviderTarget, error) {
-	providerTargetsDTOs := []ProviderTargetDTO{}
-	tx := s.db.Find(&providerTargetsDTOs)
+func (s *ProviderTargetStore) List(filter *provider.TargetFilter) ([]*provider.ProviderTarget, error) {
+	targetDTOs := []ProviderTargetDTO{}
+	tx := processTargetFilters(s.db, filter).Find(&targetDTOs)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	providerTargets := []*provider.ProviderTarget{}
-	for _, providerTargetDTO := range providerTargetsDTOs {
-		providerTargets = append(providerTargets, ToProviderTarget(providerTargetDTO))
+	targets := []*provider.ProviderTarget{}
+	for _, targetDTO := range targetDTOs {
+		targets = append(targets, ToProviderTarget(targetDTO))
 	}
 
-	return providerTargets, nil
+	return targets, nil
 }
 
-func (s *ProviderTargetStore) Find(targetName string) (*provider.ProviderTarget, error) {
-	providerTargetDTO := ProviderTargetDTO{}
-	tx := s.db.Where("name = ?", targetName).First(&providerTargetDTO)
+func (s *ProviderTargetStore) Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error) {
+	targetDTO := ProviderTargetDTO{}
+	tx := processTargetFilters(s.db, filter).First(&targetDTO)
+
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, provider.ErrTargetNotFound
@@ -48,7 +50,7 @@ func (s *ProviderTargetStore) Find(targetName string) (*provider.ProviderTarget,
 		return nil, tx.Error
 	}
 
-	return ToProviderTarget(providerTargetDTO), nil
+	return ToProviderTarget(targetDTO), nil
 }
 
 func (s *ProviderTargetStore) Save(target *provider.ProviderTarget) error {
@@ -70,4 +72,17 @@ func (s *ProviderTargetStore) Delete(target *provider.ProviderTarget) error {
 	}
 
 	return nil
+}
+
+func processTargetFilters(tx *gorm.DB, filter *provider.TargetFilter) *gorm.DB {
+	if filter != nil {
+		if filter.Name != nil {
+			tx = tx.Where("name = ?", *filter.Name)
+		}
+		if filter.Default != nil {
+			tx = tx.Where("is_default = ?", *filter.Default)
+		}
+	}
+
+	return tx
 }

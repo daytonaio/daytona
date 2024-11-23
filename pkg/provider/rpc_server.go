@@ -28,6 +28,15 @@ func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
 	return nil
 }
 
+func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]RequirementStatus) error {
+	result, err := m.Impl.CheckRequirements()
+	if err != nil {
+		return err
+	}
+	*resp = *result
+	return nil
+}
+
 func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTargetManifest) error {
 	targetManifest, err := m.Impl.GetTargetManifest()
 	if err != nil {
@@ -38,8 +47,8 @@ func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTar
 	return nil
 }
 
-func (m *ProviderRPCServer) GetDefaultTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetDefaultTargets()
+func (m *ProviderRPCServer) GetPresetTargets(arg interface{}, resp *[]ProviderTarget) error {
+	targets, err := m.Impl.GetPresetTargets()
 	if err != nil {
 		return err
 	}

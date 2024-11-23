@@ -37,7 +37,7 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Binaries Path: "), config.BinariesPath) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Log File Path: "), config.LogFilePath) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Log File Path: "), config.LogFile.Path) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Image: "), config.BuilderImage) + "\n\n"
 

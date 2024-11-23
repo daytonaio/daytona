@@ -4,7 +4,9 @@
 package manager
 
 import (
+	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,6 +23,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const INITIAL_SETUP_LOCK_FILE_NAME = "initial-setup.lock"
+
 type pluginRef struct {
 	client *plugin.Client
 	path   string
@@ -34,11 +38,11 @@ var ProviderHandshakeConfig = plugin.HandshakeConfig{
 }
 
 type IProviderManager interface {
-	DownloadProvider(downloadUrls map[os_util.OperatingSystem]string, providerName string, throwIfPresent bool) (string, error)
+	DownloadProvider(ctx context.Context, downloadUrls map[os_util.OperatingSystem]string, providerName string) (string, error)
 	GetProvider(name string) (*Provider, error)
 	GetProviders() map[string]Provider
 	GetProvidersManifest() (*ProvidersManifest, error)
-	RegisterProvider(pluginPath string) error
+	RegisterProvider(pluginPath string, manualInstall bool) error
 	TerminateProviderProcesses(providersBasePath string) error
 	UninstallProvider(name string) error
 	Purge() error
@@ -128,7 +132,7 @@ func (m *ProviderManager) GetProviders() map[string]Provider {
 	return providers
 }
 
-func (m *ProviderManager) RegisterProvider(pluginPath string) error {
+func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool) error {
 	pluginRef, err := m.initializeProvider(pluginPath)
 	if err != nil {
 		return err
@@ -136,36 +140,40 @@ func (m *ProviderManager) RegisterProvider(pluginPath string) error {
 
 	m.pluginRefs[pluginRef.name] = pluginRef
 
-	p, err := m.dispenseProvider(pluginRef.client, pluginRef.name)
-	if err != nil {
-		return err
-	}
-
-	existingTargets, err := m.providerTargetService.Map()
-	if err != nil {
-		return errors.New("failed to get targets: " + err.Error())
-	}
-
-	defaultTargets, err := (*p).GetDefaultTargets()
-	if err != nil {
-		return errors.New("failed to get default targets: " + err.Error())
-	}
-
-	log.Info("Setting default targets")
-	for _, target := range *defaultTargets {
-		if _, ok := existingTargets[target.Name]; ok {
-			log.Infof("Target %s already exists. Skipping...", target.Name)
-			continue
-		}
-
-		err := m.providerTargetService.Save(&target)
+	lockFilePath := filepath.Join(pluginRef.path, INITIAL_SETUP_LOCK_FILE_NAME)
+	_, err = os.Stat(lockFilePath)
+	if os.IsNotExist(err) || manualInstall {
+		p, err := m.GetProvider(pluginRef.name)
 		if err != nil {
-			log.Errorf("Failed to set target %s: %s", target.Name, err)
-		} else {
-			log.Infof("Target %s set", target.Name)
+			return fmt.Errorf("failed to get provider: %w", err)
 		}
+
+		existingTargets, err := m.providerTargetService.Map()
+		if err != nil {
+			return errors.New("failed to get targets: " + err.Error())
+		}
+
+		presetTargets, err := (*p).GetPresetTargets()
+		if err != nil {
+			return errors.New("failed to get preset targets: " + err.Error())
+		}
+
+		log.Infof("Setting preset targets for %s", pluginRef.name)
+		for _, target := range *presetTargets {
+			if _, ok := existingTargets[target.Name]; ok {
+				log.Infof("Target %s already exists. Skipping...", target.Name)
+				continue
+			}
+
+			err := m.providerTargetService.Save(&target)
+			if err != nil {
+				log.Errorf("Failed to set target %s: %s", target.Name, err)
+			} else {
+				log.Infof("Target %s set", target.Name)
+			}
+		}
+		log.Infof("Preset targets set for %s", pluginRef.name)
 	}
-	log.Info("Default targets set")
 
 	log.Infof("Provider %s initialized", pluginRef.name)
 
@@ -179,9 +187,33 @@ func (m *ProviderManager) UninstallProvider(name string) error {
 	}
 	pluginRef.client.Kill()
 
-	err := os.RemoveAll(pluginRef.path)
+	lockFileExisted := false
+	lockFilePath := filepath.Join(pluginRef.path, INITIAL_SETUP_LOCK_FILE_NAME)
+	_, err := os.Stat(lockFilePath)
+	if err == nil {
+		lockFileExisted = true
+	}
+
+	err = os.RemoveAll(pluginRef.path)
 	if err != nil {
 		return errors.New("failed to remove provider: " + err.Error())
+	}
+
+	if lockFileExisted {
+		// After clearing up the contents, remake the directory and add a lock file that
+		// will be used to ensure that the provider is not reinstalled automatically
+		err = os.MkdirAll(pluginRef.path, os.ModePerm)
+		if err != nil {
+			return err
+		}
+
+		lockFilePath := filepath.Join(pluginRef.path, INITIAL_SETUP_LOCK_FILE_NAME)
+
+		file, err := os.Create(lockFilePath)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 	}
 
 	delete(m.pluginRefs, name)

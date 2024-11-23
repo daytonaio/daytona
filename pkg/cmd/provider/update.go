@@ -12,9 +12,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
-	"github.com/spf13/cobra"
-
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var allFlag bool
@@ -35,6 +35,11 @@ var providerUpdateCmd = &cobra.Command{
 		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(providerList) == 0 {
+			views_util.NotifyEmptyProviderList(true)
+			return nil
 		}
 
 		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})

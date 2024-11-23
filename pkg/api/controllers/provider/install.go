@@ -40,13 +40,13 @@ func InstallProvider(ctx *gin.Context) {
 		}
 	}
 
-	downloadPath, err := server.ProviderManager.DownloadProvider(req.DownloadUrls, req.Name, true)
+	downloadPath, err := server.ProviderManager.DownloadProvider(ctx.Request.Context(), req.DownloadUrls, req.Name)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to download provider: %w", err))
 		return
 	}
 
-	err = server.ProviderManager.RegisterProvider(downloadPath)
+	err = server.ProviderManager.RegisterProvider(downloadPath, true)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register provider: %w", err))
 		return

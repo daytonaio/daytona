@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -136,12 +137,13 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 	}
 
 	createProjectConfig := apiclient.CreateProjectConfigDTO{
-		Name:          chosenName,
-		BuildConfig:   createDtos[0].BuildConfig,
-		Image:         createDtos[0].Image,
-		User:          createDtos[0].User,
-		RepositoryUrl: createDtos[0].Source.Repository.Url,
-		EnvVars:       createDtos[0].EnvVars,
+		Name:                chosenName,
+		BuildConfig:         createDtos[0].BuildConfig,
+		Image:               createDtos[0].Image,
+		User:                createDtos[0].User,
+		RepositoryUrl:       createDtos[0].Source.Repository.Url,
+		EnvVars:             createDtos[0].EnvVars,
+		GitProviderConfigId: createDtos[0].GitProviderConfigId,
 	}
 
 	res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(createProjectConfig).Execute()
@@ -150,12 +152,13 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 	}
 
 	projectConfig := apiclient.ProjectConfig{
-		BuildConfig:   createProjectConfig.BuildConfig,
-		Default:       false,
-		EnvVars:       createProjectConfig.EnvVars,
-		Name:          createProjectConfig.Name,
-		Prebuilds:     nil,
-		RepositoryUrl: createProjectConfig.RepositoryUrl,
+		BuildConfig:         createProjectConfig.BuildConfig,
+		Default:             false,
+		EnvVars:             createProjectConfig.EnvVars,
+		Name:                createProjectConfig.Name,
+		Prebuilds:           nil,
+		RepositoryUrl:       createProjectConfig.RepositoryUrl,
+		GitProviderConfigId: createProjectConfig.GitProviderConfigId,
 	}
 
 	if createProjectConfig.Image != nil {
@@ -164,6 +167,14 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 
 	if createProjectConfig.User != nil {
 		projectConfig.User = *createProjectConfig.User
+	}
+
+	if createProjectConfig.GitProviderConfigId == nil && *createProjectConfig.GitProviderConfigId == "" {
+		gitProviderConfigId, res, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(createProjectConfig.RepositoryUrl)).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+		projectConfig.GitProviderConfigId = &gitProviderConfigId
 	}
 
 	return &projectConfig, nil
@@ -196,6 +207,11 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
+	projectConfigurationFlags.GitProviderConfig, err = workspace_util.GetGitProviderConfigIdFromFlag(ctx, apiClient, projectConfigurationFlags.GitProviderConfig)
+	if err != nil {
+		return nil, err
+	}
+
 	project, err := workspace_util.GetCreateProjectDtoFromFlags(projectConfigurationFlags)
 	if err != nil {
 		return nil, err
@@ -209,13 +225,22 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		name = workspace_util.GetSuggestedName(projectName, existingProjectConfigNames)
 	}
 
+	if project.GitProviderConfigId == nil || *project.GitProviderConfigId == "" {
+		gitProviderConfigId, res, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(repoUrl)).Execute()
+		if err != nil {
+			return nil, apiclient_util.HandleErrorResponse(res, err)
+		}
+		*project.GitProviderConfigId = gitProviderConfigId
+	}
+
 	newProjectConfig := apiclient.CreateProjectConfigDTO{
-		Name:          name,
-		BuildConfig:   project.BuildConfig,
-		Image:         project.Image,
-		User:          project.User,
-		RepositoryUrl: repoUrl,
-		EnvVars:       project.EnvVars,
+		Name:                name,
+		BuildConfig:         project.BuildConfig,
+		Image:               project.Image,
+		User:                project.User,
+		RepositoryUrl:       repoUrl,
+		EnvVars:             project.EnvVars,
+		GitProviderConfigId: project.GitProviderConfigId,
 	}
 
 	if newProjectConfig.Image == nil {
@@ -252,12 +277,14 @@ func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, er
 var nameFlag string
 
 var projectConfigurationFlags = workspace_util.ProjectConfigurationFlags{
-	Builder:          new(views_util.BuildChoice),
-	CustomImage:      new(string),
-	CustomImageUser:  new(string),
-	DevcontainerPath: new(string),
-	EnvVars:          new([]string),
-	Manual:           new(bool),
+	Builder:           new(views_util.BuildChoice),
+	CustomImage:       new(string),
+	CustomImageUser:   new(string),
+	Branches:          new([]string),
+	DevcontainerPath:  new(string),
+	EnvVars:           new([]string),
+	Manual:            new(bool),
+	GitProviderConfig: new(string),
 }
 
 func init() {

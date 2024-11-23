@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -46,6 +47,11 @@ var RestartCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(true)
+				return nil
+			}
+
 			workspace := selection.GetWorkspaceFromPrompt(workspaceList, "Restart")
 			if workspace == nil {
 				return nil
@@ -67,10 +73,6 @@ var RestartCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) >= 1 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
-
 		return getAllWorkspacesByState(WORKSPACE_STATUS_RUNNING)
 	},
 }

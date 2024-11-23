@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
+	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -75,16 +76,32 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 	var initialRepoUrl string
 	var repo *apiclient.GitRepository
 
+	var previousRepoUrl string
+	var previousError error
+
 	initialRepoInput := huh.NewInput().
 		Title(title).
 		Value(&initialRepoUrl).
 		Key("initialProjectRepo").
 		Validate(func(str string) error {
-			return views_util.WithInlineSpinner("Validating", func() error {
+			if str == previousRepoUrl && previousError != nil {
+				return previousError
+			}
+
+			previousRepoUrl = str
+			previousError = nil
+
+			err := views_util.WithInlineSpinner("Validating", func() error {
 				var err error
 				repo, err = validateRepoUrl(str, apiClient)
 				return err
 			})
+
+			if err != nil {
+				previousError = err
+			}
+
+			return err
 		})
 
 	dTheme := views.GetCustomTheme()
@@ -98,7 +115,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 		WithShowHelp(false).
 		WithShowErrors(true)
 
-	err := m.form.Run()
+	err := m.form.WithProgramOptions(tea.WithAltScreen()).Run()
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +145,7 @@ func RunAddMoreProjectsForm() (bool, error) {
 		WithShowErrors(true).
 		WithTheme(views.GetCustomTheme())
 
-	err := m.form.Run()
+	err := m.form.WithProgramOptions(tea.WithAltScreen()).Run()
 	if err != nil {
 		return false, err
 	}
@@ -179,7 +196,8 @@ func validateRepoUrl(repoUrl string, apiClient *apiclient.APIClient) (*apiclient
 		Url: result,
 	}).Execute()
 	if err != nil {
-		return nil, errors.New("Failed to fetch repository information. Please check the URL and try again.")
+		wrappedErr := "Failed to fetch repository information. Please check the URL and try again."
+		return nil, errors.New(views_util.WrapText(wrappedErr, views_util.GetTerminalWidth()))
 	}
 
 	return repo, nil

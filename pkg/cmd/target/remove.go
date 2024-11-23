@@ -15,9 +15,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target"
-	"github.com/spf13/cobra"
-
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 var yesFlag bool
@@ -52,7 +52,12 @@ var targetRemoveCmd = &cobra.Command{
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, false)
+			if len(targetList) == 0 {
+				views_util.NotifyEmptyTargetList(false)
+				return nil
+			}
+
+			selectedTarget, err := target.GetTargetFromPrompt(targetList, activeProfile.Name, nil, false, "Remove")
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -74,27 +79,50 @@ var targetRemoveCmd = &cobra.Command{
 				return err
 			}
 		} else {
-			form := huh.NewForm(
-				huh.NewGroup(
-					huh.NewConfirm().
-						Title(fmt.Sprintf("Delete all workspaces within %s?", selectedTargetName)).
-						Description("You might not be able to easily remove these workspaces later.").
-						Value(&yesFlag),
-				),
-			).WithTheme(views.GetCustomTheme())
+			var targetWorkspaceCount int
 
-			err := form.Run()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
-				return err
+				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			if yesFlag {
-				err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
+			for _, workspace := range workspaceList {
+				if workspace.Target == selectedTargetName {
+					targetWorkspaceCount++
+				}
+			}
+
+			if targetWorkspaceCount > 0 {
+				title := fmt.Sprintf("Delete %d workspaces within %s?", targetWorkspaceCount, selectedTargetName)
+				description := "You might not be able to easily remove these workspaces later."
+
+				if targetWorkspaceCount == 1 {
+					title = fmt.Sprintf("Delete %d workspace within %s?", targetWorkspaceCount, selectedTargetName)
+					description = "You might not be able to easily remove this workspace later."
+				}
+
+				form := huh.NewForm(
+					huh.NewGroup(
+						huh.NewConfirm().
+							Title(title).
+							Description(description).
+							Value(&yesFlag),
+					),
+				).WithTheme(views.GetCustomTheme())
+
+				err := form.Run()
 				if err != nil {
 					return err
 				}
-			} else {
-				fmt.Println("Proceeding with target removal without deleting workspaces.")
+
+				if yesFlag {
+					err := RemoveTargetWorkspaces(ctx, apiClient, selectedTargetName)
+					if err != nil {
+						return err
+					}
+				} else {
+					fmt.Println("Proceeding with target removal without deleting workspaces.")
+				}
 			}
 		}
 

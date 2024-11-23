@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
@@ -42,6 +43,7 @@ func (pl *projectLogger) Write(p []byte) (n int, err error) {
 	entry.Source = string(pl.source)
 	entry.WorkspaceId = &pl.workspaceId
 	entry.ProjectName = &pl.projectName
+	entry.Time = time.Now().Format(time.RFC3339)
 
 	b, err := json.Marshal(entry)
 	if err != nil {

@@ -18,7 +18,7 @@ import (
 
 var workspaceLogsStarted bool
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool) {
+func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool, from *time.Time) {
 	var wg sync.WaitGroup
 	query := ""
 	if follow {
@@ -32,7 +32,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 
 	for index, projectName := range projectNames {
 		wg.Add(1)
-		go func(projectName string) {
+		go func(projectName string, from *time.Time) {
 			defer wg.Done()
 
 			for {
@@ -50,11 +50,11 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 					continue
 				}
 
-				readJSONLog(ctx, ws, index)
+				readJSONLog(ctx, ws, index, from)
 				ws.Close()
 				break
 			}
-		}(projectName)
+		}(projectName, from)
 	}
 
 	if showWorkspaceLogs {
@@ -67,7 +67,7 @@ func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, worksp
 				continue
 			}
 
-			readJSONLog(ctx, ws, logs_view.STATIC_INDEX)
+			readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
 			ws.Close()
 			break
 		}
@@ -88,13 +88,13 @@ func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId st
 			continue
 		}
 
-		readJSONLog(ctx, ws, logs_view.FIRST_PROJECT_INDEX)
+		readJSONLog(ctx, ws, logs_view.FIRST_PROJECT_INDEX, nil)
 		ws.Close()
 		break
 	}
 }
 
-func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
+func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.Time) {
 	logEntriesChan := make(chan logs.LogEntry)
 	readErr := make(chan error)
 	go func() {
@@ -124,7 +124,19 @@ func readJSONLog(ctx context.Context, ws *websocket.Conn, index int) {
 		case <-ctx.Done():
 			return
 		case logEntry := <-logEntriesChan:
-			logs_view.DisplayLogEntry(logEntry, index)
+			if from != nil {
+				parsedTime, err := time.Parse(time.RFC3339Nano, logEntry.Time)
+				if err != nil {
+					log.Trace(err)
+				}
+
+				if parsedTime.After(*from) || parsedTime.Equal(*from) {
+					logs_view.DisplayLogEntry(logEntry, index)
+				}
+			} else {
+				logs_view.DisplayLogEntry(logEntry, index)
+			}
+
 		case err := <-readErr:
 			if err != nil {
 				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))

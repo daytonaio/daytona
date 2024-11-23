@@ -30,6 +30,7 @@ func GetIdeList() []Ide {
 		{"ssh", "Terminal SSH"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
+		{"zed", "Zed"},
 	}
 
 	sortedJbIdes := []Ide{}
@@ -57,6 +58,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"gitness", "Gitness"},
 		{"azure-devops", "Azure DevOps"},
 		{"aws-codecommit", "AWS CodeCommit"},
+		{"gogs", "Gogs"},
 	}
 }
 
@@ -84,6 +86,25 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://learn.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?view=azure-devops&tabs=Windows#create-a-pat"
 	case "aws-codecommit":
 		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html and to configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY & AWS_DEFAULT_REGION read https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html"
+	case "gogs":
+		return "https://www.daytona.io/docs/configuration/git-providers/#gogs"
+	default:
+		return ""
+	}
+}
+
+func GetDocsLinkForCommitSigning(providerId string) string {
+	switch providerId {
+	case "github", "github-enterprise-server":
+		return "https://docs.github.com/en/authentication/managing-commit-signature-verification"
+	case "gitlab", "gitlab-self-managed":
+		return "https://docs.gitlab.com/ee/user/project/repository/signed_commits"
+	case "gitea":
+		return "https://docs.gitea.com/administration/signing"
+	case "azure-devops":
+		return "https://learn.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate?view=azure-devops"
+	case "aws-codecommit":
+		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html"
 	default:
 		return ""
 	}
@@ -113,6 +134,8 @@ func GetRequiredScopesFromGitProviderId(providerId string) string {
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
 	case "aws-codecommit":
 		return "/"
+	case "gogs":
+		fallthrough
 	default:
 		return ""
 	}
@@ -126,6 +149,8 @@ func GetPrebuildScopesFromGitProviderId(providerId string) string {
 		return "admin:repo_hook"
 	case "bitbucket":
 		return "webhooks"
+	case "bitbucket-server":
+		return "REPO_ADMIN"
 	case "azure-devops":
 		return "Work (Read, Write & Manage); Build (Read & Execute)"
 	default:
@@ -143,10 +168,14 @@ func GetWebhookEventHeaderKeyFromGitProvider(providerId string) string {
 		return "X-Gitlab-Event"
 	case "bitbucket":
 		return "X-Event-Key"
+	case "bitbucket-server":
+		return "X-Event-Key"
 	case "gitea":
 		return "X-Gitea-Event"
 	case "azure-devops":
 		return "X-AzureDevops-Event"
+	case "gitness":
+		return "X-Gitness-Trigger"
 	default:
 		return ""
 	}

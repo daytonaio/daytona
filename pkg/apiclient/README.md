@@ -92,7 +92,7 @@ Class | Method | HTTP request | Description
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
-*GitProviderAPI* | [**GetGitProviderForUrl**](docs/GitProviderAPI.md#getgitproviderforurl) | **Get** /gitprovider/for-url/{url} | Get Git provider
+*GitProviderAPI* | [**GetGitProvider**](docs/GitProviderAPI.md#getgitprovider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
 *GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 *GitProviderAPI* | [**GetNamespaces**](docs/GitProviderAPI.md#getnamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
@@ -101,6 +101,7 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**GetRepositories**](docs/GitProviderAPI.md#getrepositories) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/repositories | Get Git repositories
 *GitProviderAPI* | [**GetUrlFromRepository**](docs/GitProviderAPI.md#geturlfromrepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
+*GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
 *PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild
@@ -128,6 +129,7 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
+*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{target}/set-default | Set target to default
 *TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
@@ -156,6 +158,7 @@ Class | Method | HTTP request | Description
  - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
  - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
+ - [CreateProviderTargetDTO](docs/CreateProviderTargetDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [FRPSConfig](docs/FRPSConfig.md)
@@ -169,6 +172,7 @@ Class | Method | HTTP request | Description
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
+ - [LogFileConfig](docs/LogFileConfig.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
@@ -187,6 +191,7 @@ Class | Method | HTTP request | Description
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
+ - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)

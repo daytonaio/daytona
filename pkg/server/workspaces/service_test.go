@@ -18,8 +18,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/stretchr/testify/mock"
@@ -28,6 +30,7 @@ import (
 
 const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
+const serverVersion = "0.0.0-test"
 const defaultProjectUser = "daytona"
 const defaultProjectImage = "daytonaio/workspace-project:latest"
 
@@ -39,6 +42,18 @@ var target = provider.ProviderTarget{
 	},
 	Options: "test-options",
 }
+var gitProviderConfigId = "github"
+
+var baseApiUrl = "https://api.github.com"
+
+var gitProviderConfig = gitprovider.GitProviderConfig{
+	Id:         "github",
+	ProviderId: gitProviderConfigId,
+	Alias:      "test-alias",
+	Username:   "test-username",
+	Token:      "test-token",
+	BaseApiUrl: &baseApiUrl,
+}
 
 var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Name:   "test",
@@ -46,12 +61,15 @@ var createWorkspaceDto = dto.CreateWorkspaceDTO{
 	Target: target.Name,
 	Projects: []dto.CreateProjectDTO{
 		{
-			Name: "project1",
+			Name:                "project1",
+			GitProviderConfigId: &gitProviderConfig.Id,
 			Source: dto.CreateProjectSourceDTO{
 				Repository: &gitprovider.GitRepository{
-					Id:   "123",
-					Url:  "https://github.com/daytonaio/daytona",
-					Name: "daytona",
+					Id:     "123",
+					Url:    "https://github.com/daytonaio/daytona",
+					Name:   "daytona",
+					Branch: "main",
+					Sha:    "sha1",
 				},
 			},
 			Image: util.Pointer(defaultProjectImage),
@@ -75,6 +93,9 @@ var workspaceInfo = workspace.WorkspaceInfo{
 }
 
 func TestWorkspaceService(t *testing.T) {
+	ctx := context.Background()
+	ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, "test")
+
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
 
 	containerRegistryService := mocks.NewMockContainerRegistryService()
@@ -87,7 +108,7 @@ func TestWorkspaceService(t *testing.T) {
 
 	apiKeyService := mocks.NewMockApiKeyService()
 	gitProviderService := mocks.NewMockGitProviderService()
-	provisioner := mocks.NewMockProvisioner()
+	mockProvisioner := mocks.NewMockProvisioner()
 
 	wsLogsDir := t.TempDir()
 	buildLogsDir := t.TempDir()
@@ -97,12 +118,14 @@ func TestWorkspaceService(t *testing.T) {
 		TargetStore:              targetStore,
 		ServerApiUrl:             serverApiUrl,
 		ServerUrl:                serverUrl,
+		ServerVersion:            serverVersion,
 		ContainerRegistryService: containerRegistryService,
 		ProjectConfigService:     projectConfigService,
 		DefaultProjectImage:      defaultProjectImage,
 		DefaultProjectUser:       defaultProjectUser,
+		BuilderImage:             defaultProjectImage,
 		ApiKeyService:            apiKeyService,
-		Provisioner:              provisioner,
+		Provisioner:              mockProvisioner,
 		LoggerFactory:            logs.NewLoggerFactory(&wsLogsDir, &buildLogsDir),
 		GitProviderService:       gitProviderService,
 	})
@@ -112,29 +135,55 @@ func TestWorkspaceService(t *testing.T) {
 
 		containerRegistryService.On("FindByImageName", defaultProjectImage).Return(containerRegistry, containerregistry.ErrContainerRegistryNotFound)
 
-		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
 
 		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceDto.Id).Return(createWorkspaceDto.Id, nil)
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDto.Projects[0].Source.Repository).Return("123", nil)
 
-		baseApiUrl := "https://api.github.com"
-		gitProviderConfig := gitprovider.GitProviderConfig{
-			Id:         "github",
-			Username:   "test-username",
-			Token:      "test-token",
-			BaseApiUrl: &baseApiUrl,
-		}
-
 		for _, project := range createWorkspaceDto.Projects {
 			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceDto.Id, project.Name)).Return(project.Name, nil)
 		}
-		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
-		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
 
-		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
+		proj := &project.Project{
+			Name:                createWorkspaceDto.Projects[0].Name,
+			Image:               *createWorkspaceDto.Projects[0].Image,
+			User:                *createWorkspaceDto.Projects[0].User,
+			BuildConfig:         createWorkspaceDto.Projects[0].BuildConfig,
+			Repository:          createWorkspaceDto.Projects[0].Source.Repository,
+			ApiKey:              createWorkspaceDto.Projects[0].Name,
+			GitProviderConfigId: createWorkspaceDto.Projects[0].GitProviderConfigId,
+			WorkspaceId:         createWorkspaceDto.Id,
+			Target:              createWorkspaceDto.Target,
+		}
 
-		workspace, err := service.CreateWorkspace(context.TODO(), createWorkspaceDto)
+		proj.EnvVars = project.GetProjectEnvVars(proj, project.ProjectEnvVarParams{
+			ApiUrl:        serverApiUrl,
+			ServerUrl:     serverUrl,
+			ServerVersion: serverVersion,
+			ClientId:      "test",
+		}, false)
+
+		mockProvisioner.On("CreateProject", provisioner.ProjectParams{
+			Project:                       proj,
+			Target:                        &target,
+			ContainerRegistry:             containerRegistry,
+			GitProviderConfig:             &gitProviderConfig,
+			BuilderImage:                  defaultProjectImage,
+			BuilderImageContainerRegistry: containerRegistry,
+		}).Return(nil)
+		mockProvisioner.On("StartProject", provisioner.ProjectParams{
+			Project:                       proj,
+			Target:                        &target,
+			ContainerRegistry:             containerRegistry,
+			GitProviderConfig:             &gitProviderConfig,
+			BuilderImage:                  defaultProjectImage,
+			BuilderImageContainerRegistry: containerRegistry,
+		}).Return(nil)
+
+		gitProviderService.On("GetConfig", "github").Return(&gitProviderConfig, nil)
+
+		workspace, err := service.CreateWorkspace(ctx, createWorkspaceDto)
 
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
@@ -143,7 +192,7 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("CreateWorkspace fails when workspace already exists", func(t *testing.T) {
-		_, err := service.CreateWorkspace(context.TODO(), createWorkspaceDto)
+		_, err := service.CreateWorkspace(ctx, createWorkspaceDto)
 		require.NotNil(t, err)
 		require.Equal(t, workspaces.ErrWorkspaceAlreadyExists, err)
 	})
@@ -152,15 +201,15 @@ func TestWorkspaceService(t *testing.T) {
 		invalidWorkspaceRequest := createWorkspaceDto
 		invalidWorkspaceRequest.Name = "invalid name"
 
-		_, err := service.CreateWorkspace(context.TODO(), invalidWorkspaceRequest)
+		_, err := service.CreateWorkspace(ctx, invalidWorkspaceRequest)
 		require.NotNil(t, err)
 		require.Equal(t, workspaces.ErrInvalidWorkspaceName, err)
 	})
 
 	t.Run("GetWorkspace", func(t *testing.T) {
-		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
+		mockProvisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspace, err := service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
+		workspace, err := service.GetWorkspace(ctx, createWorkspaceDto.Id, true)
 
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
@@ -169,16 +218,16 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("GetWorkspace fails when workspace not found", func(t *testing.T) {
-		_, err := service.GetWorkspace(context.TODO(), "invalid-id", true)
+		_, err := service.GetWorkspace(ctx, "invalid-id", true)
 		require.NotNil(t, err)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("ListWorkspaces", func(t *testing.T) {
 		verbose := false
-		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
+		mockProvisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspaces, err := service.ListWorkspaces(context.TODO(), verbose)
+		workspaces, err := service.ListWorkspaces(ctx, verbose)
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -190,9 +239,9 @@ func TestWorkspaceService(t *testing.T) {
 
 	t.Run("ListWorkspaces - verbose", func(t *testing.T) {
 		verbose := true
-		provisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
+		mockProvisioner.On("GetWorkspaceInfo", mock.Anything, mock.Anything, &target).Return(&workspaceInfo, nil)
 
-		workspaces, err := service.ListWorkspaces(context.TODO(), verbose)
+		workspaces, err := service.ListWorkspaces(ctx, verbose)
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -203,94 +252,72 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("StartWorkspace", func(t *testing.T) {
-		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StartProject", mock.Anything).Return(nil)
 
-		err := service.StartWorkspace(context.TODO(), createWorkspaceDto.Id)
+		err := service.StartWorkspace(ctx, createWorkspaceDto.Id)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("StartProject", func(t *testing.T) {
-		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StartProject", mock.Anything).Return(nil)
 
-		err := service.StartProject(context.TODO(), createWorkspaceDto.Id, createWorkspaceDto.Projects[0].Name)
+		err := service.StartProject(ctx, createWorkspaceDto.Id, createWorkspaceDto.Projects[0].Name)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("StopWorkspace", func(t *testing.T) {
-		provisioner.On("StopWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StopProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StopWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StopProject", mock.Anything, &target).Return(nil)
 
-		err := service.StopWorkspace(context.TODO(), createWorkspaceDto.Id)
+		err := service.StopWorkspace(ctx, createWorkspaceDto.Id)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("StopProject", func(t *testing.T) {
-		provisioner.On("StopWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StopProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StopWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("StopProject", mock.Anything, &target).Return(nil)
 
-		err := service.StopProject(context.TODO(), createWorkspaceDto.Id, createWorkspaceDto.Projects[0].Name)
+		err := service.StopProject(ctx, createWorkspaceDto.Id, createWorkspaceDto.Projects[0].Name)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("RemoveWorkspace", func(t *testing.T) {
-		provisioner.On("DestroyWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("DestroyProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("DestroyWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("DestroyProject", mock.Anything, &target).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
-		err := service.RemoveWorkspace(context.TODO(), createWorkspaceDto.Id)
+		err := service.RemoveWorkspace(ctx, createWorkspaceDto.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
+		_, err = service.GetWorkspace(ctx, createWorkspaceDto.Id, true)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("ForceRemoveWorkspace", func(t *testing.T) {
-		var containerRegistry *containerregistry.ContainerRegistry
+		err := workspaceStore.Save(&workspace.Workspace{Id: createWorkspaceDto.Id, Target: target.Name})
+		require.Nil(t, err)
 
-		provisioner.On("CreateWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("StartWorkspace", mock.Anything, &target).Return(nil)
-
-		apiKeyService.On("Generate", apikey.ApiKeyTypeWorkspace, createWorkspaceDto.Id).Return(createWorkspaceDto.Id, nil)
-		gitProviderService.On("GetLastCommitSha", createWorkspaceDto.Projects[0].Source.Repository).Return("123", nil)
-
-		baseApiUrl := "https://api.github.com"
-		gitProviderConfig := gitprovider.GitProviderConfig{
-			Id:         "github",
-			Username:   "test-username",
-			Token:      "test-token",
-			BaseApiUrl: &baseApiUrl,
-		}
-		gitProviderService.On("GetConfigForUrl", "https://github.com/daytonaio/daytona").Return(&gitProviderConfig, nil)
-
-		for _, project := range createWorkspaceDto.Projects {
-			apiKeyService.On("Generate", apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", createWorkspaceDto.Id, project.Name)).Return(project.Name, nil)
-		}
-		provisioner.On("CreateProject", mock.Anything, &target, containerRegistry, &gitProviderConfig).Return(nil)
-		provisioner.On("StartProject", mock.Anything, &target).Return(nil)
-
-		_, _ = service.CreateWorkspace(context.TODO(), createWorkspaceDto)
-
-		provisioner.On("DestroyWorkspace", mock.Anything, &target).Return(nil)
-		provisioner.On("DestroyProject", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("DestroyWorkspace", mock.Anything, &target).Return(nil)
+		mockProvisioner.On("DestroyProject", mock.Anything, &target).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
-		err = service.ForceRemoveWorkspace(context.TODO(), createWorkspaceDto.Id)
+		err = service.ForceRemoveWorkspace(ctx, createWorkspaceDto.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(context.TODO(), createWorkspaceDto.Id, true)
+		_, err = service.GetWorkspace(ctx, createWorkspaceDto.Id, true)
 		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("SetProjectState", func(t *testing.T) {
-		ws, err := service.CreateWorkspace(context.TODO(), createWorkspaceDto)
+		ws, err := service.CreateWorkspace(ctx, createWorkspaceDto)
 		require.Nil(t, err)
 
 		projectName := ws.Projects[0].Name
@@ -311,7 +338,7 @@ func TestWorkspaceService(t *testing.T) {
 
 	t.Cleanup(func() {
 		apiKeyService.AssertExpectations(t)
-		provisioner.AssertExpectations(t)
+		mockProvisioner.AssertExpectations(t)
 	})
 }
 

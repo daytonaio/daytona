@@ -12,7 +12,7 @@ type MockGitProviderConfigStore struct {
 	mock.Mock
 }
 
-func (s *MockGitProviderConfigStore) GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error) {
+func (s *MockGitProviderConfigStore) ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error) {
 	args := s.Called(url)
-	return args.Get(0).(*gitprovider.GitProviderConfig), args.Error(1)
+	return args.Get(0).([]*gitprovider.GitProviderConfig), args.Error(1)
 }

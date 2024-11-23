@@ -24,7 +24,7 @@ func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (Rem
 }
 
 func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) error {
-	socketForwardId, err := d.ensureDockerSockForward(opts.LogWriter)
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
 	if err != nil {
 		return err
 	}

@@ -3,14 +3,18 @@
 
 package providertargets
 
-import "github.com/daytonaio/daytona/pkg/provider"
+import (
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/provider"
+)
 
 type IProviderTargetService interface {
 	Delete(target *provider.ProviderTarget) error
-	Find(targetName string) (*provider.ProviderTarget, error)
-	List() ([]*provider.ProviderTarget, error)
+	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
+	List(filter *provider.TargetFilter) ([]*provider.ProviderTarget, error)
 	Map() (map[string]*provider.ProviderTarget, error)
 	Save(target *provider.ProviderTarget) error
+	SetDefault(target *provider.ProviderTarget) error
 }
 
 type ProviderTargetServiceConfig struct {
@@ -27,12 +31,12 @@ func NewProviderTargetService(config ProviderTargetServiceConfig) IProviderTarge
 	}
 }
 
-func (s *ProviderTargetService) List() ([]*provider.ProviderTarget, error) {
-	return s.targetStore.List()
+func (s *ProviderTargetService) List(filter *provider.TargetFilter) ([]*provider.ProviderTarget, error) {
+	return s.targetStore.List(filter)
 }
 
 func (s *ProviderTargetService) Map() (map[string]*provider.ProviderTarget, error) {
-	list, err := s.targetStore.List()
+	list, err := s.targetStore.List(nil)
 	if err != nil {
 		return nil, err
 	}
@@ -45,14 +49,46 @@ func (s *ProviderTargetService) Map() (map[string]*provider.ProviderTarget, erro
 	return targets, nil
 }
 
-func (s *ProviderTargetService) Find(targetName string) (*provider.ProviderTarget, error) {
-	return s.targetStore.Find(targetName)
+func (s *ProviderTargetService) Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error) {
+	return s.targetStore.Find(filter)
 }
 
 func (s *ProviderTargetService) Save(target *provider.ProviderTarget) error {
-	return s.targetStore.Save(target)
+	err := s.targetStore.Save(target)
+	if err != nil {
+		return err
+	}
+
+	return s.SetDefault(target)
 }
 
 func (s *ProviderTargetService) Delete(target *provider.ProviderTarget) error {
 	return s.targetStore.Delete(target)
+}
+
+func (s *ProviderTargetService) SetDefault(target *provider.ProviderTarget) error {
+	currentTarget, err := s.Find(&provider.TargetFilter{
+		Name: &target.Name,
+	})
+	if err != nil {
+		return err
+	}
+
+	defaultTarget, err := s.Find(&provider.TargetFilter{
+		Default: util.Pointer(true),
+	})
+	if err != nil && err != provider.ErrTargetNotFound {
+		return err
+	}
+
+	if defaultTarget != nil {
+		defaultTarget.IsDefault = false
+		err := s.targetStore.Save(defaultTarget)
+		if err != nil {
+			return err
+		}
+	}
+
+	currentTarget.IsDefault = true
+	return s.targetStore.Save(currentTarget)
 }

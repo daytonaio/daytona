@@ -20,8 +20,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -41,6 +41,7 @@ var CodeCmd = &cobra.Command{
 		ctx := context.Background()
 		var workspaceId string
 		var projectName string
+		var providerConfigId *string
 		var ideId string
 		var workspace *apiclient.WorkspaceDTO
 
@@ -60,6 +61,11 @@ var CodeCmd = &cobra.Command{
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
+			}
+
+			if len(workspaceList) == 0 {
+				views_util.NotifyEmptyWorkspaceList(true)
+				return nil
 			}
 
 			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "Open")
@@ -87,11 +93,19 @@ var CodeCmd = &cobra.Command{
 			if selectedProject == nil {
 				return nil
 			}
+
 			projectName = selectedProject.Name
+			providerConfigId = selectedProject.GitProviderConfigId
 		}
 
 		if len(args) == 2 {
 			projectName = args[1]
+			for _, project := range workspace.Projects {
+				if project.Name == projectName {
+					providerConfigId = project.GitProviderConfigId
+					break
+				}
+			}
 		}
 
 		if ideFlag != "" {
@@ -116,15 +130,17 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
+		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+		if err != nil {
+			log.Warn(err)
+		}
+
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(workspace.Name, projectName, ideId, ideList)
-		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag)
+		return openIDE(ideId, activeProfile, workspaceId, projectName, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) >= 2 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
 		if len(args) == 1 {
 			return getProjectNameCompletions(cmd, args, toComplete)
 		}
@@ -159,26 +175,28 @@ func selectWorkspaceProject(workspaceId string, profile *config.Profile) (*apicl
 	return nil, errors.New("no projects found in workspace")
 }
 
-func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool) error {
+func openIDE(ideId string, activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, yesFlag bool, gpgKey string) error {
 	telemetry.AdditionalData["ide"] = ideId
 
 	switch ideId {
 	case "vscode":
-		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata)
+		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "ssh":
-		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName)
+		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgKey, nil)
 	case "browser":
-		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata)
+		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "cursor":
-		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata)
+		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "jupyter":
-		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag)
+		return ide.OpenJupyterIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, yesFlag, gpgKey)
 	case "fleet":
-		return ide.OpenFleet(activeProfile, workspaceId, projectName)
+		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
+	case "zed":
+		return ide.OpenZed(activeProfile, workspaceId, projectName, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {
-			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, projectName)
+			return ide.OpenJetbrainsIDE(activeProfile, ideId, workspaceId, projectName, gpgKey)
 		}
 	}
 

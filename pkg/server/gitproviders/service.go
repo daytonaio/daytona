@@ -10,19 +10,20 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/workspace/project/config"
 )
 
 type IGitProviderService interface {
 	GetConfig(id string) (*gitprovider.GitProviderConfig, error)
-	GetConfigForUrl(url string) (*gitprovider.GitProviderConfig, error)
+	ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error)
 	GetGitProvider(id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(url string) (gitprovider.GitProvider, string, error)
 	GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error)
 	GetGitUser(gitProviderId string) (*gitprovider.GitUser, error)
-	GetNamespaces(gitProviderId string) ([]*gitprovider.GitNamespace, error)
-	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitBranch, error)
-	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string) ([]*gitprovider.GitPullRequest, error)
-	GetRepositories(gitProviderId string, namespaceId string) ([]*gitprovider.GitRepository, error)
+	GetNamespaces(gitProviderId string, options gitprovider.ListOptions) ([]*gitprovider.GitNamespace, error)
+	GetRepoBranches(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error)
+	GetRepoPRs(gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error)
+	GetRepositories(gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error)
 	ListConfigs() ([]*gitprovider.GitProviderConfig, error)
 	RemoveGitProvider(gitProviderId string) error
 	SetGitProviderConfig(providerConfig *gitprovider.GitProviderConfig) error
@@ -32,17 +33,25 @@ type IGitProviderService interface {
 	UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error
 }
 
+type ProjectConfigStore interface {
+	Save(projectConfig *config.ProjectConfig) error
+	List(filter *config.ProjectConfigFilter) ([]*config.ProjectConfig, error)
+}
+
 type GitProviderServiceConfig struct {
-	ConfigStore gitprovider.ConfigStore
+	ConfigStore        gitprovider.ConfigStore
+	ProjectConfigStore ProjectConfigStore
 }
 
 type GitProviderService struct {
-	configStore gitprovider.ConfigStore
+	configStore        gitprovider.ConfigStore
+	projectConfigStore ProjectConfigStore
 }
 
 func NewGitProviderService(config GitProviderServiceConfig) IGitProviderService {
 	return &GitProviderService{
-		configStore: config.ConfigStore,
+		configStore:        config.ConfigStore,
+		projectConfigStore: config.ProjectConfigStore,
 	}
 }
 
@@ -55,6 +64,7 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 		if gitprovider.IsGitProviderNotFound(err) {
 			providerConfig = &gitprovider.GitProviderConfig{
 				Id:         id,
+				ProviderId: id,
 				Username:   "",
 				Token:      "",
 				BaseApiUrl: nil,
@@ -65,14 +75,6 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	}
 
 	return s.newGitProvider(providerConfig)
-}
-
-func (s *GitProviderService) ListConfigs() ([]*gitprovider.GitProviderConfig, error) {
-	return s.configStore.List()
-}
-
-func (s *GitProviderService) GetConfig(id string) (*gitprovider.GitProviderConfig, error) {
-	return s.configStore.Find(id)
 }
 
 func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
@@ -88,8 +90,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 	for _, p := range gitProviders {
 
 		isAwsUrl := strings.Contains(repo.Url, ".amazonaws.com/") || strings.Contains(repo.Url, ".console.aws.amazon.com/")
-		if p.Id == "aws-codecommit" && isAwsUrl {
-			provider, err = s.GetGitProvider(p.Id)
+		if p.ProviderId == "aws-codecommit" && isAwsUrl {
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -97,8 +99,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 			break
 		}
 
-		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.Id)) {
-			provider, err = s.GetGitProvider(p.Id)
+		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.ProviderId)) {
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -112,7 +114,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repo.Url, hostname) {
-			provider, err = s.GetGitProvider(p.Id)
+			provider, err = s.GetGitProvider(p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -127,7 +129,8 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		providerId := strings.Split(hostname, ".")[0]
 
 		provider, err = s.newGitProvider(&gitprovider.GitProviderConfig{
-			Id:         providerId,
+			Id:         "",
+			ProviderId: providerId,
 			Username:   "",
 			Token:      "",
 			BaseApiUrl: nil,
@@ -151,7 +154,12 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 }
 
 func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfig) (gitprovider.GitProvider, error) {
-	switch config.Id {
+	baseApiUrl := ""
+	if config.BaseApiUrl != nil {
+		baseApiUrl = *config.BaseApiUrl
+	}
+
+	switch config.ProviderId {
 	case "github":
 		return gitprovider.NewGitHubGitProvider(config.Token, nil), nil
 	case "github-enterprise-server":
@@ -161,19 +169,21 @@ func (s *GitProviderService) newGitProvider(config *gitprovider.GitProviderConfi
 	case "bitbucket":
 		return gitprovider.NewBitbucketGitProvider(config.Username, config.Token), nil
 	case "bitbucket-server":
-		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewBitbucketServerGitProvider(config.Username, config.Token, baseApiUrl), nil
 	case "gitlab-self-managed":
 		return gitprovider.NewGitLabGitProvider(config.Token, config.BaseApiUrl), nil
 	case "codeberg":
 		return gitprovider.NewGiteaGitProvider(config.Token, codebergUrl), nil
 	case "gitea":
-		return gitprovider.NewGiteaGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewGiteaGitProvider(config.Token, baseApiUrl), nil
 	case "gitness":
-		return gitprovider.NewGitnessGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewGitnessGitProvider(config.Token, baseApiUrl), nil
 	case "azure-devops":
-		return gitprovider.NewAzureDevOpsGitProvider(config.Token, *config.BaseApiUrl), nil
+		return gitprovider.NewAzureDevOpsGitProvider(config.Token, baseApiUrl), nil
 	case "aws-codecommit":
-		return gitprovider.NewAwsCodeCommitGitProvider(*config.BaseApiUrl), nil
+		return gitprovider.NewAwsCodeCommitGitProvider(baseApiUrl), nil
+	case "gogs":
+		return gitprovider.NewGogsGitProvider(config.Token, baseApiUrl), nil
 	default:
 		return nil, errors.New("git provider not found")
 	}
