@@ -1,0 +1,13 @@
+# Sample Python script
+def swoc_analysis():
+    strengths = ["Problem-solving", "Teamwork"]
+    weaknesses = ["Time management"]
+    opportunities = ["Learning new tech", "Networking"]
+    challenges = ["Debugging", "Staying consistent"]
+    
+    print("Strengths:", strengths)
+    print("Weaknesses:", weaknesses)
+    print("Opportunities:", opportunities)
+    print("Challenges:", challenges)
+
+swoc_analysis()
