@@ -12,6 +12,7 @@ VERSION=${DAYTONA_SERVER_VERSION:-"latest"}
 BASE_URL=${DAYTONA_SERVER_DOWNLOAD_URL:-"https://download.daytona.io/daytona"}
 DESTINATION=${DAYTONA_PATH:-"/usr/local/bin"}
 CONFIRM_FLAG=false
+CURRENT_VERSION=$(daytona version 2>/dev/null)
 
 # Check for the -y flag
 for arg in "$@"; do
@@ -253,4 +254,52 @@ if [[ ! :"$PATH:" == *":$DESTINATION:"* ]]; then
   echo "         Source the configuration file to apply the changes (e.g., source ~/.bashrc)"
 fi
 
-echo -e "\nDaytona has been successfully installed to $DESTINATION!"
+function parseVersion {
+    if [[ "$1" =~ v([0-9]+\.[0-9]+\.[0-9]+) ]]; then
+        echo "${BASH_REMATCH[0]}"
+    else
+        echo ""
+    fi
+}
+
+format_breaking_changes() { 
+  sed -E 's/^#+\s*//; 
+          s/^```.*$//;  
+          s/\*\*([^*]+)\*\*/\1/g; 
+          s/`([^`]+)`/\1/g';
+}
+
+print_breaking_changes() {
+    local release_url=$1
+    if [ -z "$release_url" ]; then
+      return 1
+    fi
+    release_body=$(curl -sf "$release_url" | grep '"body":' | sed 's/.*"body": "\(.*\)".*/\1/' | sed 's/\\n/\n/g')
+    if [ -z "$release_body" ]; then
+      return 1
+    fi
+    breaking_changes=$(echo "$release_body" | sed -n '/## Breaking changes/,/^## /{//!p;}' | sed '1d' | sed '/^$/d')
+    if [ "$breaking_changes" ]; then
+      echo -e "$breaking_changes" | format_breaking_changes
+    fi
+}
+
+UPDATED_VERSION=$(daytona version 2>/dev/null)
+PARSED_CURRENT_VERSION=$(parseVersion "$CURRENT_VERSION")
+PARSED_UPDATED_VERSION=$(parseVersion "$UPDATED_VERSION")
+
+if [[ -z "$CURRENT_VERSION" ]]; then
+  echo "Daytona has been successfully installed to $DESTINATION!"
+elif [[ "$PARSED_CURRENT_VERSION" != "$PARSED_UPDATED_VERSION" ]]; then
+  if [[ -z "$PARSED_UPDATED_VERSION" ]]; then
+    echo "Daytona has been successfully updated to latest version"
+  else
+    echo -e "\nDaytona has been successfully updated to version $PARSED_UPDATED_VERSION"
+    echo -e "\n\033[1mBreaking Changes:\033[0m"
+    print_breaking_changes "https://api.github.com/repos/daytonaio/daytona/releases/tags/v0.46.0"
+    echo -e "\nFor more details, please visit: https://github.com/daytonaio/daytona/releases/tag/$PARSED_UPDATED_VERSION"
+  fi
+else
+  echo "Daytona has been successfully installed to $DESTINATION!"
+fi
+
