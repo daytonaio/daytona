@@ -349,6 +349,7 @@ func (d *DockerClient) ensureDockerSockForward(builderImage string, builderConta
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      builderImage,
 		Entrypoint: []string{"socat"},
+		User:       "root",
 		Cmd:        []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
 	}, &container.HostConfig{
 		Privileged: true,
