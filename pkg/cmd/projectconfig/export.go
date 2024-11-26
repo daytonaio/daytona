@@ -109,6 +109,5 @@ var projectConfigExportCmd = &cobra.Command{
 }
 
 func init() {
-	ProjectConfigCmd.AddCommand(projectConfigExportCmd)
 	projectConfigExportCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Export all project configs")
 }

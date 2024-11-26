@@ -59,7 +59,6 @@ var projectConfigImportCmd = &cobra.Command{
 			// 	}
 			// }
 
-			// GitProviderConfigId is not set or does not exist, fetch it using the repo URL
 			gitProviders, _, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
 			if err != nil {
 				return fmt.Errorf("error fetching Git providers: %v", err)
@@ -72,7 +71,6 @@ var projectConfigImportCmd = &cobra.Command{
 			if len(gitProviders) == 1 {
 				config.GitProviderConfigId = &gitProviders[0].Id
 			} else {
-				// Multiple Git providers available, prompt the user to select one
 				selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
 					GitProviderConfigs: gitProviders,
 					ActionVerb:         "Use",
@@ -122,8 +120,4 @@ var projectConfigImportCmd = &cobra.Command{
 
 		return nil
 	},
-}
-
-func init() {
-	ProjectConfigCmd.AddCommand(projectConfigImportCmd)
 }
