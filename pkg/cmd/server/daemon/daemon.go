@@ -129,7 +129,7 @@ func getServiceConfig() (*service.Config, error) {
 		Name:        serviceName,
 		DisplayName: "Daytona Server",
 		Description: "Daytona Server daemon.",
-		Arguments:   []string{"serve"},
+		Arguments:   []string{"daemon-serve"},
 	}
 
 	switch runtime.GOOS {
