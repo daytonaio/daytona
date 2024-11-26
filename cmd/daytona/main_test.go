@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/daytonaio/daytona/internal/listview"
 )
 
 func TestCheckComponentHealth(t *testing.T) {
@@ -211,4 +213,12 @@ func TestRetryBehavior(t *testing.T) {
 	if attempts != 3 {
 		t.Errorf("Expected 3 attempts, got %d", attempts)
 	}
+}
+
+func TestListView(t *testing.T) {
+	lv := listview.New()
+	if lv == nil {
+		t.Error("Failed to create ListView")
+	}
+
 }

@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/internal"
+	"github.com/daytonaio/daytona/internal/listview"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
 	"github.com/daytonaio/daytona/pkg/cmd/workspacemode"
@@ -74,6 +75,11 @@ func init() {
 		Out:        &util.DebugLogWriter{},
 		TimeFormat: time.RFC3339,
 	})
+}
+
+func handleListView() {
+	lv := listview.New()
+	lv.Render()
 }
 
 func checkComponentHealth(timeout time.Duration) error {
