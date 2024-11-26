@@ -45,6 +45,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var DaemonServeCmd = &cobra.Command{
+	Use:    "daemon-serve",
+	Short:  "Used by the daemon to start the Daytona Server",
+	Args:   cobra.NoArgs,
+	Hidden: true,
+	RunE:   ServeCmd.RunE,
+}
+
 var ServeCmd = &cobra.Command{
 	Use:     "serve",
 	Short:   "Run the server process in the current terminal session",
