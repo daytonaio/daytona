@@ -85,7 +85,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					return nil
 				}),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return !providerRequiresUsername(gitProviderAddView.ProviderId)
+			return !ProviderRequiresUsername(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -99,7 +99,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					return nil
 				}),
 		).WithHeight(6).WithHideFunc(func() bool {
-			return !providerRequiresApiUrl(gitProviderAddView.ProviderId)
+			return !ProviderRequiresApiUrl(gitProviderAddView.ProviderId)
 		}),
 
 		huh.NewGroup(
@@ -143,7 +143,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 			).
 			Value(&selectedSigningMethod).WithHeight(6),
 		).WithHeight(8).WithHideFunc(func() bool {
-			return commitSigningNotSupported(gitProviderAddView.ProviderId)
+			return CommitSigningNotSupported(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -158,7 +158,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					}
 
 					if selectedSigningMethod == "ssh" {
-						if err := isValidSSHKey(str); err != nil {
+						if err := IsValidSSHKey(str); err != nil {
 							return err
 						}
 					}
@@ -186,7 +186,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 	return nil
 
 }
-func isValidSSHKey(key string) error {
+func IsValidSSHKey(key string) error {
 	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
 	if !sshKeyPattern.MatchString(key) {
 		return errors.New("invalid SSH key: must start with valid SSH key type (e.g., ssh-rsa, ssh-ed25519)")
@@ -195,11 +195,11 @@ func isValidSSHKey(key string) error {
 	return nil
 }
 
-func providerRequiresUsername(gitProviderId string) bool {
+func ProviderRequiresUsername(gitProviderId string) bool {
 	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server" || gitProviderId == "aws-codecommit"
 }
 
-func providerRequiresApiUrl(gitProviderId string) bool {
+func ProviderRequiresApiUrl(gitProviderId string) bool {
 	providersRequiringApiUrl := []string{
 		"gitness",
 		"github-enterprise-server",
@@ -213,7 +213,7 @@ func providerRequiresApiUrl(gitProviderId string) bool {
 	return slices.Contains(providersRequiringApiUrl, gitProviderId)
 }
 
-func commitSigningNotSupported(gitProviderId string) bool {
+func CommitSigningNotSupported(gitProviderId string) bool {
 	return gitProviderId == "gitness" || gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 

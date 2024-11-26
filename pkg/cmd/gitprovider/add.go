@@ -5,7 +5,10 @@ package gitprovider
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
@@ -18,6 +21,7 @@ var GitProviderAddCmd = &cobra.Command{
 	Use:     "add",
 	Aliases: []string{"new", "register"},
 	Short:   "Register a Git provider",
+	Args:    cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -44,9 +48,86 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
-		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
-		if err != nil {
-			return err
+		if len(args) == 0 {
+			err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
+			if err != nil {
+				return err
+			}
+		} else {
+			supportedProviders := config.GetSupportedGitProviders()
+			for _, gp := range supportedProviders {
+				if gp.Id == args[0] {
+					setGitProviderConfig.ProviderId = gp.Id
+					break
+				}
+			}
+			providerId := setGitProviderConfig.ProviderId
+
+			if providerId == "" {
+				supportedProvidersStr := ""
+				for _, gp := range supportedProviders {
+					supportedProvidersStr += fmt.Sprintf("%s, ", gp.Id)
+				}
+				return fmt.Errorf("'%s' is invalid or not a supported git provider.\nSupported providers are: %s", args[0], strings.TrimSuffix(supportedProvidersStr, ", "))
+			}
+
+			if tokenFlag == "" {
+				return fmt.Errorf("token is required")
+			}
+			setGitProviderConfig.Token = tokenFlag
+
+			if aliasFlag != "" {
+				for _, alias := range existingAliases {
+					if alias == aliasFlag {
+						initialAlias := setGitProviderConfig.Alias
+						if initialAlias == nil || *initialAlias != aliasFlag {
+							return fmt.Errorf("alias '%s' is already in use", aliasFlag)
+						}
+					}
+				}
+				setGitProviderConfig.Alias = &aliasFlag
+			}
+
+			if gitprovider_view.ProviderRequiresUsername(providerId) {
+				if usernameFlag == "" {
+					return fmt.Errorf("username is required for '%s' provider", providerId)
+				}
+				setGitProviderConfig.Username = &usernameFlag
+			}
+
+			if gitprovider_view.ProviderRequiresApiUrl(providerId) {
+				if baseApiUrlFlag == "" {
+					return fmt.Errorf("base API URL is required for '%s' provider", providerId)
+				}
+				setGitProviderConfig.BaseApiUrl = &baseApiUrlFlag
+			}
+
+			if signingMethodFlag != "" || signingKeyFlag != "" {
+				if gitprovider_view.CommitSigningNotSupported(providerId) {
+					return fmt.Errorf("commit signing is not supported for '%s' provider", providerId)
+				} else {
+					if signingMethodFlag == "" || signingKeyFlag == "" {
+						return fmt.Errorf("both signing method and key must be provided")
+					}
+					isValidSigningMethod := false
+					for _, signingMethod := range apiclient.AllowedSigningMethodEnumValues {
+						if signingMethod == apiclient.SigningMethod(signingMethodFlag) {
+							setGitProviderConfig.SigningMethod = &signingMethod
+							isValidSigningMethod = true
+							break
+						}
+					}
+					if !isValidSigningMethod {
+						return fmt.Errorf("invalid signing method '%s'", signingMethodFlag)
+					}
+					if signingMethodFlag == "ssh" {
+						if err := gitprovider_view.IsValidSSHKey(signingKeyFlag); err != nil {
+							return err
+						}
+					}
+					setGitProviderConfig.SigningKey = &signingKeyFlag
+				}
+			}
 		}
 
 		if setGitProviderConfig.ProviderId == "" {
@@ -61,4 +142,21 @@ var GitProviderAddCmd = &cobra.Command{
 		views.RenderInfoMessage("Git provider has been registered")
 		return nil
 	},
+}
+
+var aliasFlag string
+var usernameFlag string
+var baseApiUrlFlag string
+var tokenFlag string
+var signingMethodFlag string
+var signingKeyFlag string
+
+func init() {
+	GitProviderAddCmd.Flags().StringVarP(&aliasFlag, "alias", "a", "", "Alias")
+	GitProviderAddCmd.Flags().StringVarP(&usernameFlag, "username", "u", "", "Username")
+	GitProviderAddCmd.Flags().StringVarP(&baseApiUrlFlag, "baseApiUrl", "b", "", "BaseApiUrl")
+	GitProviderAddCmd.Flags().StringVarP(&tokenFlag, "token", "t", "", "Token")
+	GitProviderAddCmd.Flags().StringVarP(&signingMethodFlag, "signing-method", "s", "", "SigningMethod")
+	GitProviderAddCmd.Flags().StringVarP(&signingKeyFlag, "signing-key", "k", "", "SigningKey")
+	GitProviderAddCmd.MarkFlagsRequiredTogether("signing-method", "signing-key")
 }
