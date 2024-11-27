@@ -6,6 +6,7 @@ package gitprovider
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -18,7 +19,7 @@ import (
 )
 
 var GitProviderAddCmd = &cobra.Command{
-	Use:     "add",
+	Use:     "add [GIT_PROVIDER_ID]",
 	Aliases: []string{"new", "register"},
 	Short:   "Register a Git provider",
 	Args:    cobra.RangeArgs(0, 1),
@@ -55,19 +56,17 @@ var GitProviderAddCmd = &cobra.Command{
 			}
 		} else {
 			supportedProviders := config.GetSupportedGitProviders()
-			for _, gp := range supportedProviders {
-				if gp.Id == args[0] {
-					setGitProviderConfig.ProviderId = gp.Id
-					break
-				}
+			supportedProviderIds := util.ArrayMap(supportedProviders, func(gp config.GitProvider) string {
+				return gp.Id
+			})
+
+			if slices.Contains(supportedProviderIds, args[0]) {
+				setGitProviderConfig.ProviderId = args[0]
 			}
 			providerId := setGitProviderConfig.ProviderId
 
 			if providerId == "" {
-				supportedProvidersStr := ""
-				for _, gp := range supportedProviders {
-					supportedProvidersStr += fmt.Sprintf("%s, ", gp.Id)
-				}
+				supportedProvidersStr := strings.Join(supportedProviderIds, ", ")
 				return fmt.Errorf("'%s' is invalid or not a supported git provider.\nSupported providers are: %s", args[0], strings.TrimSuffix(supportedProvidersStr, ", "))
 			}
 
@@ -154,9 +153,9 @@ var signingKeyFlag string
 func init() {
 	GitProviderAddCmd.Flags().StringVarP(&aliasFlag, "alias", "a", "", "Alias")
 	GitProviderAddCmd.Flags().StringVarP(&usernameFlag, "username", "u", "", "Username")
-	GitProviderAddCmd.Flags().StringVarP(&baseApiUrlFlag, "baseApiUrl", "b", "", "BaseApiUrl")
-	GitProviderAddCmd.Flags().StringVarP(&tokenFlag, "token", "t", "", "Token")
-	GitProviderAddCmd.Flags().StringVarP(&signingMethodFlag, "signing-method", "s", "", "SigningMethod")
-	GitProviderAddCmd.Flags().StringVarP(&signingKeyFlag, "signing-key", "k", "", "SigningKey")
+	GitProviderAddCmd.Flags().StringVarP(&baseApiUrlFlag, "base-api-url", "b", "", "Base API Url")
+	GitProviderAddCmd.Flags().StringVarP(&tokenFlag, "token", "t", "", "Personal Access Token")
+	GitProviderAddCmd.Flags().StringVarP(&signingMethodFlag, "signing-method", "s", "", "Signing Method (ssh, gpg)")
+	GitProviderAddCmd.Flags().StringVarP(&signingKeyFlag, "signing-key", "k", "", "Signing Key")
 	GitProviderAddCmd.MarkFlagsRequiredTogether("signing-method", "signing-key")
 }
