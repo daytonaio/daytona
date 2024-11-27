@@ -15,6 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/mock"
@@ -60,12 +61,13 @@ func TestTargetService(t *testing.T) {
 		ApiUrl:    serverApiUrl,
 		ServerUrl: serverUrl,
 		ClientId:  "test-client-id",
-	}, false)
+	})
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, "test-client-id")
 
 	targetStore := t_targets.NewInMemoryTargetStore()
+	targetMetadataStore := t_targets.NewInMemoryTargetMetadataStore()
 	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
 
 	err := targetConfigStore.Save(&tc)
@@ -78,7 +80,8 @@ func TestTargetService(t *testing.T) {
 	buildLogsDir := t.TempDir()
 
 	service := targets.NewTargetService(targets.TargetServiceConfig{
-		TargetStore: targetStore,
+		TargetStore:         targetStore,
+		TargetMetadataStore: targetMetadataStore,
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
 			return targetConfigStore.Find(&stores.TargetConfigFilter{Name: &name})
 		},
@@ -117,13 +120,13 @@ func TestTargetService(t *testing.T) {
 	t.Run("CreateTarget fails when target already exists", func(t *testing.T) {
 		_, err := service.CreateTarget(ctx, createTargetDTO)
 		require.NotNil(t, err)
-		require.Equal(t, targets.ErrTargetAlreadyExists, err)
+		require.Equal(t, services.ErrTargetAlreadyExists, err)
 	})
 
 	t.Run("GetTarget", func(t *testing.T) {
 		mockProvisioner.On("GetTargetInfo", mock.Anything, tg).Return(&targetInfo, nil)
 
-		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
+		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -132,14 +135,14 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetTarget fails when target not found", func(t *testing.T) {
-		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, true)
+		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{Verbose: true})
 		require.NotNil(t, err)
-		require.Equal(t, targets.ErrTargetNotFound, err)
+		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
 	t.Run("ListTargets", func(t *testing.T) {
 		verbose := false
-		targets, err := service.ListTargets(ctx, nil, verbose)
+		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{Verbose: verbose})
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
@@ -152,7 +155,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("ListTargets - verbose", func(t *testing.T) {
 		verbose := true
 
-		targets, err := service.ListTargets(ctx, nil, verbose)
+		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{Verbose: verbose})
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
@@ -167,7 +170,7 @@ func TestTargetService(t *testing.T) {
 			ApiUrl:    serverApiUrl,
 			ServerUrl: serverUrl,
 			ClientId:  "test-client-id",
-		}, false)
+		})
 
 		err := service.StartTarget(ctx, createTargetDTO.Id)
 
@@ -192,8 +195,8 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
-		require.Equal(t, targets.ErrTargetNotFound, err)
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
+		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
 	t.Run("ForceRemoveTarget", func(t *testing.T) {
@@ -207,8 +210,8 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, true)
-		require.Equal(t, targets.ErrTargetNotFound, err)
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
+		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
 	t.Run("CreateTarget fails name validation", func(t *testing.T) {
@@ -217,7 +220,17 @@ func TestTargetService(t *testing.T) {
 
 		_, err := service.CreateTarget(ctx, invalidTargetRequest)
 		require.NotNil(t, err)
-		require.Equal(t, targets.ErrInvalidTargetName, err)
+		require.Equal(t, services.ErrInvalidTargetName, err)
+	})
+
+	t.Run("SetTargetMetadata", func(t *testing.T) {
+		err := targetStore.Save(tg)
+		require.Nil(t, err)
+
+		_, err = service.SetTargetMetadata(tg.Id, &models.TargetMetadata{
+			Uptime: 10,
+		})
+		require.Nil(t, err)
 	})
 
 	t.Cleanup(func() {

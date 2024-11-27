@@ -7,7 +7,6 @@ package workspaces
 
 import (
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
@@ -38,7 +37,7 @@ func (s *InMemoryWorkspaceStore) Find(idOrName string) (*models.Workspace, error
 				return w, nil
 			}
 		}
-		return nil, workspaces.ErrWorkspaceNotFound
+		return nil, stores.ErrWorkspaceNotFound
 	}
 
 	return w, nil

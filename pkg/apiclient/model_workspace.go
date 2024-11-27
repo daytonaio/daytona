@@ -21,17 +21,18 @@ var _ MappedNullable = &Workspace{}
 
 // Workspace struct for Workspace
 type Workspace struct {
-	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
-	EnvVars             map[string]string `json:"envVars"`
-	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
-	Id                  string            `json:"id"`
-	Image               string            `json:"image"`
-	Name                string            `json:"name"`
-	Repository          GitRepository     `json:"repository"`
-	State               *WorkspaceState   `json:"state,omitempty"`
-	Target              Target            `json:"target"`
-	TargetId            string            `json:"targetId"`
-	User                string            `json:"user"`
+	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string  `json:"envVars"`
+	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
+	Id                  string             `json:"id"`
+	Image               string             `json:"image"`
+	LastJob             *Job               `json:"lastJob,omitempty"`
+	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
+	Name                string             `json:"name"`
+	Repository          GitRepository      `json:"repository"`
+	Target              Target             `json:"target"`
+	TargetId            string             `json:"targetId"`
+	User                string             `json:"user"`
 }
 
 type _Workspace Workspace
@@ -197,6 +198,70 @@ func (o *Workspace) SetImage(v string) {
 	o.Image = v
 }
 
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *Workspace) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *Workspace) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *Workspace) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *Workspace) GetMetadata() WorkspaceMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret WorkspaceMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetMetadataOk() (*WorkspaceMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *Workspace) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given WorkspaceMetadata and assigns it to the Metadata field.
+func (o *Workspace) SetMetadata(v WorkspaceMetadata) {
+	o.Metadata = &v
+}
+
 // GetName returns the Name field value
 func (o *Workspace) GetName() string {
 	if o == nil {
@@ -243,38 +308,6 @@ func (o *Workspace) GetRepositoryOk() (*GitRepository, bool) {
 // SetRepository sets field value
 func (o *Workspace) SetRepository(v GitRepository) {
 	o.Repository = v
-}
-
-// GetState returns the State field value if set, zero value otherwise.
-func (o *Workspace) GetState() WorkspaceState {
-	if o == nil || IsNil(o.State) {
-		var ret WorkspaceState
-		return ret
-	}
-	return *o.State
-}
-
-// GetStateOk returns a tuple with the State field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Workspace) GetStateOk() (*WorkspaceState, bool) {
-	if o == nil || IsNil(o.State) {
-		return nil, false
-	}
-	return o.State, true
-}
-
-// HasState returns a boolean if a field has been set.
-func (o *Workspace) HasState() bool {
-	if o != nil && !IsNil(o.State) {
-		return true
-	}
-
-	return false
-}
-
-// SetState gets a reference to the given WorkspaceState and assigns it to the State field.
-func (o *Workspace) SetState(v WorkspaceState) {
-	o.State = &v
 }
 
 // GetTarget returns the Target field value
@@ -368,11 +401,14 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["image"] = o.Image
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["repository"] = o.Repository
-	if !IsNil(o.State) {
-		toSerialize["state"] = o.State
-	}
 	toSerialize["target"] = o.Target
 	toSerialize["targetId"] = o.TargetId
 	toSerialize["user"] = o.User

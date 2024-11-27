@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/build"
-	server_cmd "github.com/daytonaio/daytona/pkg/cmd/server"
+	"github.com/daytonaio/daytona/pkg/cmd/server/bootstrap"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
@@ -106,12 +106,17 @@ var purgeCmd = &cobra.Command{
 
 		defer telemetryService.Close()
 
-		fmt.Println("Purging the server")
-		server, err := server_cmd.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)
+		err = bootstrap.InitProviderManager(serverConfig, serverConfigDir)
 		if err != nil {
 			return err
 		}
-		buildRunner, err := server_cmd.GetBuildRunner(serverConfig, buildRunnerConfig, telemetryService)
+
+		fmt.Println("Purging the server")
+		server, err := bootstrap.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)
+		if err != nil {
+			return err
+		}
+		buildRunner, err := bootstrap.GetBuildRunner(serverConfig, buildRunnerConfig, telemetryService)
 		if err != nil {
 			return err
 		}

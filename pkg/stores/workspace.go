@@ -4,6 +4,8 @@
 package stores
 
 import (
+	"errors"
+
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -12,4 +14,12 @@ type WorkspaceStore interface {
 	Find(idOrName string) (*models.Workspace, error)
 	Save(workspace *models.Workspace) error
 	Delete(workspace *models.Workspace) error
+}
+
+var (
+	ErrWorkspaceNotFound = errors.New("workspace not found")
+)
+
+func IsWorkspaceNotFound(err error) bool {
+	return err.Error() == ErrWorkspaceNotFound.Error()
 }

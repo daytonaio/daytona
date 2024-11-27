@@ -10,9 +10,11 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Image** | **string** |  | 
 **Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
+**LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
-**State** | Pointer to [**WorkspaceState**](WorkspaceState.md) |  | [optional] 
+**State** | [**ResourceState**](ResourceState.md) |  | 
 **Target** | [**Target**](Target.md) |  | 
 **TargetId** | **string** |  | 
 **User** | **string** |  | 
@@ -21,7 +23,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -171,6 +173,56 @@ SetInfo sets Info field to given value.
 
 HasInfo returns a boolean if a field has been set.
 
+### GetLastJob
+
+`func (o *WorkspaceDTO) GetLastJob() Job`
+
+GetLastJob returns the LastJob field if non-nil, zero value otherwise.
+
+### GetLastJobOk
+
+`func (o *WorkspaceDTO) GetLastJobOk() (*Job, bool)`
+
+GetLastJobOk returns a tuple with the LastJob field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJob
+
+`func (o *WorkspaceDTO) SetLastJob(v Job)`
+
+SetLastJob sets LastJob field to given value.
+
+### HasLastJob
+
+`func (o *WorkspaceDTO) HasLastJob() bool`
+
+HasLastJob returns a boolean if a field has been set.
+
+### GetMetadata
+
+`func (o *WorkspaceDTO) GetMetadata() WorkspaceMetadata`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *WorkspaceDTO) GetMetadataOk() (*WorkspaceMetadata, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *WorkspaceDTO) SetMetadata(v WorkspaceMetadata)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *WorkspaceDTO) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
+
 ### GetName
 
 `func (o *WorkspaceDTO) GetName() string`
@@ -213,28 +265,23 @@ SetRepository sets Repository field to given value.
 
 ### GetState
 
-`func (o *WorkspaceDTO) GetState() WorkspaceState`
+`func (o *WorkspaceDTO) GetState() ResourceState`
 
 GetState returns the State field if non-nil, zero value otherwise.
 
 ### GetStateOk
 
-`func (o *WorkspaceDTO) GetStateOk() (*WorkspaceState, bool)`
+`func (o *WorkspaceDTO) GetStateOk() (*ResourceState, bool)`
 
 GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetState
 
-`func (o *WorkspaceDTO) SetState(v WorkspaceState)`
+`func (o *WorkspaceDTO) SetState(v ResourceState)`
 
 SetState sets State field to given value.
 
-### HasState
-
-`func (o *WorkspaceDTO) HasState() bool`
-
-HasState returns a boolean if a field has been set.
 
 ### GetTarget
 

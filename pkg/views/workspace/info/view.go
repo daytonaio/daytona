@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"golang.org/x/term"
 )
 
@@ -82,6 +83,7 @@ func renderTUIView(output string, width int, isCreationView bool) {
 	fmt.Println(content)
 }
 
+// TODO: migrate to the target info view
 func getSingleWorkspaceOutput(workspace *apiclient.WorkspaceDTO, isCreationView bool) string {
 	var output string
 	var repositoryUrl string
@@ -90,12 +92,16 @@ func getSingleWorkspaceOutput(workspace *apiclient.WorkspaceDTO, isCreationView 
 	repositoryUrl = strings.TrimPrefix(repositoryUrl, "https://")
 	repositoryUrl = strings.TrimPrefix(repositoryUrl, "http://")
 
-	if workspace.State != nil {
-		output += getInfoLineState("State", workspace.State) + "\n"
-		output += getInfoLineGitStatus("Branch", workspace.State.GitStatus) + "\n"
+	output += getInfoLineState("State", workspace.State, workspace.Metadata) + "\n"
+	if workspace.State.Error != nil {
+		output += getInfoLine("Error", *workspace.State.Error) + "\n"
 	}
 
-	output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.State)
+	if workspace.Metadata != nil && workspace.Metadata.GitStatus != nil {
+		output += getInfoLineGitStatus("Branch", workspace.Metadata.GitStatus) + "\n"
+	}
+
+	output += getInfoLinePrNumber(workspace.Repository.PrNumber, workspace.Repository, workspace.Metadata)
 
 	if !isCreationView {
 		output += getInfoLine("Target", fmt.Sprintf("%s (%s)", workspace.Target.Name, workspace.TargetId)) + "\n"
@@ -110,69 +116,67 @@ func getInfoLine(key, value string) string {
 	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + propertyValueStyle.Render(value) + "\n"
 }
 
-func getInfoLineState(key string, state *apiclient.WorkspaceState) string {
-	var uptime int
-	var stateProperty string
+func getInfoLineState(key string, state apiclient.ResourceState, metadata *apiclient.WorkspaceMetadata) string {
+	stateLabel := views.GetStateLabel(state.Name)
 
-	if state == nil {
-		uptime = 0
-	} else {
-		uptime = int(state.Uptime)
+	if metadata != nil {
+		views_util.CheckAndAppendTimeLabel(&stateLabel, state, metadata.Uptime)
 	}
 
-	if uptime == 0 {
-		stateProperty = propertyValueStyle.Foreground(views.Gray).Render("STOPPED")
-	} else {
-		stateProperty = propertyValueStyle.Foreground(views.Green).Render("RUNNING")
-	}
-
-	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateProperty + propertyValueStyle.Foreground(views.Light).Render("\n")
+	return propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key)) + stateLabel + propertyValueStyle.Foreground(views.Light).Render("\n")
 }
 
 func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
 	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
-	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
 
-	changesOutput := ""
+	if status == nil {
+		return output + propertyValueStyle.Foreground(views.Light).Render("\n")
+	}
+
+	currentBranch := status.CurrentBranch
+	if status.CurrentBranch == "" {
+		currentBranch = "/"
+	}
+
+	output += propertyNameStyle.Foreground(views.Gray).Render(currentBranch)
+
+	detailsOutput := ""
 	if status.FileStatus != nil {
 		filesNum := len(status.FileStatus)
 		if filesNum == 1 {
-			changesOutput = " (1 uncommitted change)"
+			detailsOutput = " (1 uncommitted change)"
 		} else if filesNum > 1 {
-			changesOutput = fmt.Sprintf(" (%d uncommitted changes)", filesNum)
+			detailsOutput = fmt.Sprintf(" (%d uncommitted changes)", filesNum)
 		}
 	}
 
-	unpushedOutput := ""
-
 	if status.Ahead != nil && *status.Ahead > 0 {
 		if *status.Ahead == 1 {
-			unpushedOutput += " (1 commit ahead)"
+			detailsOutput += " (1 commit ahead)"
 		} else {
-			unpushedOutput += fmt.Sprintf(" (%d commits ahead)", *status.Ahead)
+			detailsOutput += fmt.Sprintf(" (%d commits ahead)", *status.Ahead)
 		}
 	}
 
 	if status.Behind != nil && *status.Behind > 0 {
 		if *status.Behind == 1 {
-			unpushedOutput += " (1 commit behind)"
+			detailsOutput += " (1 commit behind)"
 		} else {
-			unpushedOutput += fmt.Sprintf(" (%d commits behind)", *status.Behind)
+			detailsOutput += fmt.Sprintf(" (%d commits behind)", *status.Behind)
 		}
 	}
 
-	branchPublishedOutput := ""
 	if !*status.BranchPublished {
-		branchPublishedOutput = " (branch not published)"
+		detailsOutput += " (branch not published)"
 	}
 
-	output += changesOutput + unpushedOutput + branchPublishedOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
+	output += detailsOutput + propertyValueStyle.Foreground(views.Light).Render("\n")
 
 	return output
 }
 
-func getInfoLinePrNumber(PrNumber *int32, repo apiclient.GitRepository, state *apiclient.WorkspaceState) string {
-	if PrNumber != nil && (state == nil || state.GitStatus.CurrentBranch == repo.Branch) {
+func getInfoLinePrNumber(PrNumber *int32, repo apiclient.GitRepository, metadata *apiclient.WorkspaceMetadata) string {
+	if PrNumber != nil && (metadata == nil || metadata.GitStatus.CurrentBranch == repo.Branch) {
 		return getInfoLine("PR Number", fmt.Sprintf("#%d", *PrNumber)) + "\n"
 	}
 	return ""

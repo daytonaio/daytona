@@ -4,6 +4,8 @@
 package stores
 
 import (
+	"errors"
+
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -17,4 +19,12 @@ type TargetStore interface {
 	Find(filter *TargetFilter) (*models.Target, error)
 	Save(target *models.Target) error
 	Delete(target *models.Target) error
+}
+
+var (
+	ErrTargetNotFound = errors.New("target not found")
+)
+
+func IsTargetNotFound(err error) bool {
+	return err.Error() == ErrTargetNotFound.Error()
 }

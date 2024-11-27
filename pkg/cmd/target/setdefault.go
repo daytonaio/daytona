@@ -42,7 +42,7 @@ var setDefaultCmd = &cobra.Command{
 
 			target = selection.GetTargetFromPrompt(targetList, false, "Set As Default")
 		} else {
-			target, err = apiclient_util.GetTarget(args[0], true)
+			target, _, err = apiclient_util.GetTarget(args[0], true)
 			if err != nil {
 				return err
 			}
@@ -61,6 +61,6 @@ var setDefaultCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getTargetNameCompletions()
+		return getAllTargetsByState(nil)
 	},
 }

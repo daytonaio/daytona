@@ -15,11 +15,10 @@ import (
 func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
 	target, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleStopError(ctx, nil, ErrTargetNotFound)
+		return s.handleStopError(ctx, nil, stores.ErrTargetNotFound)
 	}
 
-	err = s.provisioner.StopTarget(target)
-
+	err = s.createJob(ctx, target.Id, models.JobActionStop)
 	return s.handleStopError(ctx, target, err)
 }
 

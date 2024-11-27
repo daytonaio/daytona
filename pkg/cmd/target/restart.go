@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -56,10 +57,9 @@ var restartCmd = &cobra.Command{
 		views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully restarted", targetId))
 		return nil
 	},
-	// FIXME: add after adding state to targets
-	// ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	// 	return getAllTargetsByState(TARGET_STATE_RUNNING)
-	// },
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return getAllTargetsByState(util.Pointer(apiclient.ResourceStateNameStarted))
+	},
 }
 
 func RestartTarget(apiClient *apiclient.APIClient, targetId string) error {
