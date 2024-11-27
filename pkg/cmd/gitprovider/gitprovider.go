@@ -16,7 +16,7 @@ var GitProviderCmd = &cobra.Command{
 }
 
 func init() {
-	GitProviderCmd.AddCommand(GitProviderAddCmd)
+	GitProviderCmd.AddCommand(NewAddCommand())
 	GitProviderCmd.AddCommand(gitProviderUpdateCmd)
 	GitProviderCmd.AddCommand(gitProviderDeleteCmd)
 	GitProviderCmd.AddCommand(gitProviderListCmd)
