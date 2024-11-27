@@ -1,22 +1,22 @@
 name: daytona git-providers add
 synopsis: Register a Git provider
-usage: daytona git-providers add [flags]
+usage: daytona git-providers add [GIT_PROVIDER_ID] [flags]
 options:
     - name: alias
       shorthand: a
       usage: Alias
-    - name: baseApiUrl
+    - name: base-api-url
       shorthand: b
-      usage: BaseApiUrl
+      usage: Base API Url
     - name: signing-key
       shorthand: k
-      usage: SigningKey
+      usage: Signing Key
     - name: signing-method
       shorthand: s
-      usage: SigningMethod
+      usage: Signing Method (ssh, gpg)
     - name: token
       shorthand: t
-      usage: Token
+      usage: Personal Access Token
     - name: username
       shorthand: u
       usage: Username
