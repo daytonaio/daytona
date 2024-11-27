@@ -21,9 +21,12 @@ var _ MappedNullable = &Target{}
 
 // Target struct for Target
 type Target struct {
-	Default bool   `json:"default"`
-	Id      string `json:"id"`
-	Name    string `json:"name"`
+	Default  bool              `json:"default"`
+	EnvVars  map[string]string `json:"envVars"`
+	Id       string            `json:"id"`
+	LastJob  *Job              `json:"lastJob,omitempty"`
+	Metadata *TargetMetadata   `json:"metadata,omitempty"`
+	Name     string            `json:"name"`
 	// JSON encoded map of options
 	Options      string             `json:"options"`
 	ProviderInfo TargetProviderInfo `json:"providerInfo"`
@@ -36,9 +39,10 @@ type _Target Target
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTarget(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo) *Target {
+func NewTarget(default_ bool, envVars map[string]string, id string, name string, options string, providerInfo TargetProviderInfo) *Target {
 	this := Target{}
 	this.Default = default_
+	this.EnvVars = envVars
 	this.Id = id
 	this.Name = name
 	this.Options = options
@@ -78,6 +82,30 @@ func (o *Target) SetDefault(v bool) {
 	o.Default = v
 }
 
+// GetEnvVars returns the EnvVars field value
+func (o *Target) GetEnvVars() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.EnvVars
+}
+
+// GetEnvVarsOk returns a tuple with the EnvVars field value
+// and a boolean to check if the value has been set.
+func (o *Target) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.EnvVars, true
+}
+
+// SetEnvVars sets field value
+func (o *Target) SetEnvVars(v map[string]string) {
+	o.EnvVars = v
+}
+
 // GetId returns the Id field value
 func (o *Target) GetId() string {
 	if o == nil {
@@ -100,6 +128,70 @@ func (o *Target) GetIdOk() (*string, bool) {
 // SetId sets field value
 func (o *Target) SetId(v string) {
 	o.Id = v
+}
+
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *Target) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Target) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *Target) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *Target) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *Target) GetMetadata() TargetMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret TargetMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Target) GetMetadataOk() (*TargetMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *Target) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given TargetMetadata and assigns it to the Metadata field.
+func (o *Target) SetMetadata(v TargetMetadata) {
+	o.Metadata = &v
 }
 
 // GetName returns the Name field value
@@ -217,7 +309,14 @@ func (o Target) MarshalJSON() ([]byte, error) {
 func (o Target) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["default"] = o.Default
+	toSerialize["envVars"] = o.EnvVars
 	toSerialize["id"] = o.Id
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
@@ -233,6 +332,7 @@ func (o *Target) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"default",
+		"envVars",
 		"id",
 		"name",
 		"options",

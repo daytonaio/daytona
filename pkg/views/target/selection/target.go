@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
 var NewTargetIdentifier = "<NEW_TARGET>"
@@ -31,10 +32,17 @@ func generateTargetList(targets []apiclient.TargetDTO, isMultipleSelect bool, wi
 			providerName = target.ProviderInfo.Name
 		}
 
+		stateLabel := views.GetStateLabel(target.State.Name)
+
+		if target.Metadata != nil {
+			views_util.CheckAndAppendTimeLabel(&stateLabel, target.State, target.Metadata.Uptime)
+		}
+
 		newItem := item[apiclient.TargetDTO]{
 			title:          target.Name,
 			id:             target.Id,
 			desc:           providerName,
+			state:          stateLabel,
 			target:         &target,
 			choiceProperty: target,
 		}

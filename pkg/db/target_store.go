@@ -5,9 +5,9 @@ package db
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
@@ -27,7 +27,7 @@ func NewTargetStore(db *gorm.DB) (stores.TargetStore, error) {
 func (s *TargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error) {
 	targets := []*models.Target{}
 
-	tx := processTargetFilters(s.db, filter).Preload("Workspaces").Find(&targets)
+	tx := preloadTargetEntities(processTargetFilters(s.db, filter)).Find(&targets)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -37,14 +37,14 @@ func (s *TargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error
 func (s *TargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) {
 	tg := &models.Target{}
 
-	tx := processTargetFilters(s.db, filter).Preload("Workspaces").First(tg)
+	tx := preloadTargetEntities(processTargetFilters(s.db, filter)).First(tg)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, targets.ErrTargetNotFound
+			return nil, stores.ErrTargetNotFound
 		}
 		return nil, tx.Error
 	}
@@ -66,7 +66,7 @@ func (s *TargetStore) Delete(t *models.Target) error {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return targets.ErrTargetNotFound
+		return stores.ErrTargetNotFound
 	}
 
 	return nil
@@ -83,4 +83,8 @@ func processTargetFilters(tx *gorm.DB, filter *stores.TargetFilter) *gorm.DB {
 	}
 
 	return tx
+}
+
+func preloadTargetEntities(tx *gorm.DB) *gorm.DB {
+	return tx.Preload(clause.Associations).Preload("Workspaces.LastJob", preloadLastJob).Preload("LastJob", preloadLastJob)
 }

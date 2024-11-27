@@ -21,18 +21,20 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
-	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty"`
-	EnvVars             map[string]string `json:"envVars"`
-	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
-	Id                  string            `json:"id"`
-	Image               string            `json:"image"`
-	Info                *WorkspaceInfo    `json:"info,omitempty"`
-	Name                string            `json:"name"`
-	Repository          GitRepository     `json:"repository"`
-	State               *WorkspaceState   `json:"state,omitempty"`
-	Target              Target            `json:"target"`
-	TargetId            string            `json:"targetId"`
-	User                string            `json:"user"`
+	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string  `json:"envVars"`
+	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
+	Id                  string             `json:"id"`
+	Image               string             `json:"image"`
+	Info                *WorkspaceInfo     `json:"info,omitempty"`
+	LastJob             *Job               `json:"lastJob,omitempty"`
+	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
+	Name                string             `json:"name"`
+	Repository          GitRepository      `json:"repository"`
+	State               ResourceState      `json:"state"`
+	Target              Target             `json:"target"`
+	TargetId            string             `json:"targetId"`
+	User                string             `json:"user"`
 }
 
 type _WorkspaceDTO WorkspaceDTO
@@ -41,13 +43,14 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string) *WorkspaceDTO {
+func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
 	this.Name = name
 	this.Repository = repository
+	this.State = state
 	this.Target = target
 	this.TargetId = targetId
 	this.User = user
@@ -230,6 +233,70 @@ func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo) {
 	o.Info = &v
 }
 
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *WorkspaceDTO) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetMetadata() WorkspaceMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret WorkspaceMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetMetadataOk() (*WorkspaceMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given WorkspaceMetadata and assigns it to the Metadata field.
+func (o *WorkspaceDTO) SetMetadata(v WorkspaceMetadata) {
+	o.Metadata = &v
+}
+
 // GetName returns the Name field value
 func (o *WorkspaceDTO) GetName() string {
 	if o == nil {
@@ -278,36 +345,28 @@ func (o *WorkspaceDTO) SetRepository(v GitRepository) {
 	o.Repository = v
 }
 
-// GetState returns the State field value if set, zero value otherwise.
-func (o *WorkspaceDTO) GetState() WorkspaceState {
-	if o == nil || IsNil(o.State) {
-		var ret WorkspaceState
+// GetState returns the State field value
+func (o *WorkspaceDTO) GetState() ResourceState {
+	if o == nil {
+		var ret ResourceState
 		return ret
 	}
-	return *o.State
+
+	return o.State
 }
 
-// GetStateOk returns a tuple with the State field value if set, nil otherwise
+// GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetStateOk() (*WorkspaceState, bool) {
-	if o == nil || IsNil(o.State) {
+func (o *WorkspaceDTO) GetStateOk() (*ResourceState, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.State, true
+	return &o.State, true
 }
 
-// HasState returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasState() bool {
-	if o != nil && !IsNil(o.State) {
-		return true
-	}
-
-	return false
-}
-
-// SetState gets a reference to the given WorkspaceState and assigns it to the State field.
-func (o *WorkspaceDTO) SetState(v WorkspaceState) {
-	o.State = &v
+// SetState sets field value
+func (o *WorkspaceDTO) SetState(v ResourceState) {
+	o.State = v
 }
 
 // GetTarget returns the Target field value
@@ -404,11 +463,15 @@ func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Info) {
 		toSerialize["info"] = o.Info
 	}
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["repository"] = o.Repository
-	if !IsNil(o.State) {
-		toSerialize["state"] = o.State
-	}
+	toSerialize["state"] = o.State
 	toSerialize["target"] = o.Target
 	toSerialize["targetId"] = o.TargetId
 	toSerialize["user"] = o.User
@@ -425,6 +488,7 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 		"image",
 		"name",
 		"repository",
+		"state",
 		"target",
 		"targetId",
 		"user",

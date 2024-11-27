@@ -7,7 +7,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-type SetWorkspaceState struct {
+type SetWorkspaceMetadata struct {
 	Uptime    uint64            `json:"uptime" validate:"required"`
 	GitStatus *models.GitStatus `json:"gitStatus,omitempty" validate:"optional"`
-} // @name SetWorkspaceState
+} // @name SetWorkspaceMetadata

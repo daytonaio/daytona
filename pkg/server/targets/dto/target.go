@@ -9,7 +9,8 @@ import (
 
 type TargetDTO struct {
 	models.Target
-	Info *models.TargetInfo `json:"info" validate:"optional"`
+	State models.ResourceState `json:"state" validate:"required"`
+	Info  *models.TargetInfo   `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {

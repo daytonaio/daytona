@@ -4,6 +4,8 @@
 package conversion
 
 import (
+	"time"
+
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -26,13 +28,17 @@ func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
 		Url:    workspaceDTO.Repository.Url,
 	}
 
-	var workspaceState *models.WorkspaceState
-	if workspaceDTO.State != nil {
-		uptime := workspaceDTO.State.Uptime
-		workspaceState = &models.WorkspaceState{
-			UpdatedAt: workspaceDTO.State.UpdatedAt,
+	var workspaceMetadata *models.WorkspaceMetadata
+	if workspaceDTO.Metadata != nil {
+		updatedAt, err := time.Parse(time.RFC3339, workspaceDTO.Metadata.UpdatedAt)
+		if err != nil {
+			updatedAt = time.Unix(0, 0)
+		}
+		uptime := workspaceDTO.Metadata.Uptime
+		workspaceMetadata = &models.WorkspaceMetadata{
+			UpdatedAt: updatedAt,
 			Uptime:    uint64(uptime),
-			GitStatus: ToGitStatus(workspaceDTO.State.GitStatus),
+			GitStatus: ToGitStatus(workspaceDTO.Metadata.GitStatus),
 		}
 	}
 
@@ -54,7 +60,7 @@ func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
 		BuildConfig:         workspaceBuild,
 		Repository:          repository,
 		TargetId:            workspaceDTO.TargetId,
-		State:               workspaceState,
+		Metadata:            workspaceMetadata,
 		GitProviderConfigId: workspaceDTO.GitProviderConfigId,
 	}
 

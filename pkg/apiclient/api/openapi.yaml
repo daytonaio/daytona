@@ -618,6 +618,22 @@ paths:
                 type: object
           description: OK
       summary: Health check
+  /job:
+    get:
+      description: List jobs
+      operationId: ListJobs
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Job'
+                type: array
+          description: OK
+      summary: List jobs
+      tags:
+      - job
   /profile:
     delete:
       description: Delete profile data
@@ -961,6 +977,32 @@ paths:
       summary: Get target info
       tags:
       - target
+  /target/{targetId}/metadata:
+    post:
+      description: Set target metadata
+      operationId: SetTargetMetadata
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SetTargetMetadata'
+        description: Set Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set target metadata
+      tags:
+      - target
+      x-codegen-request-body-name: setMetadata
   /target/{targetId}/set-default:
     patch:
       description: Set target to be used by default
@@ -1363,6 +1405,32 @@ paths:
       summary: Get workspace info
       tags:
       - workspace
+  /workspace/{workspaceId}/metadata:
+    post:
+      description: Set workspace metadata
+      operationId: SetWorkspaceMetadata
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SetWorkspaceMetadata'
+        description: Set Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set workspace metadata
+      tags:
+      - workspace
+      x-codegen-request-body-name: setMetadata
   /workspace/{workspaceId}/start:
     post:
       description: Start workspace
@@ -1381,32 +1449,6 @@ paths:
       summary: Start workspace
       tags:
       - workspace
-  /workspace/{workspaceId}/state:
-    post:
-      description: Set workspace state
-      operationId: SetWorkspaceState
-      parameters:
-      - description: Workspace ID
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/SetWorkspaceState'
-        description: Set State
-        required: true
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Set workspace state
-      tags:
-      - workspace
-      x-codegen-request-body-name: setState
   /workspace/{workspaceId}/stop:
     post:
       description: Stop workspace
@@ -1989,7 +2031,7 @@ components:
       type: object
     GitStatus:
       example:
-        behind: 6
+        behind: 1
         fileStatus:
         - extra: extra
           name: name
@@ -1999,7 +2041,7 @@ components:
           name: name
           staging: null
           worktree: null
-        ahead: 0
+        ahead: 6
         branchPublished: true
         currentBranch: currentBranch
       properties:
@@ -2056,6 +2098,54 @@ components:
       - downloadUrls
       - name
       type: object
+    Job:
+      example:
+        createdAt: createdAt
+        resourceId: resourceId
+        action: null
+        id: id
+        state: null
+        error: error
+        resourceType: null
+        updatedAt: updatedAt
+      properties:
+        action:
+          $ref: '#/components/schemas/models.JobAction'
+        createdAt:
+          type: string
+        error:
+          type: string
+        id:
+          type: string
+        resourceId:
+          type: string
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+        state:
+          $ref: '#/components/schemas/JobState'
+        updatedAt:
+          type: string
+      required:
+      - action
+      - createdAt
+      - id
+      - resourceId
+      - resourceType
+      - state
+      - updatedAt
+      type: object
+    JobState:
+      enum:
+      - pending
+      - running
+      - error
+      - success
+      type: string
+      x-enum-varnames:
+      - JobStatePending
+      - JobStateRunning
+      - JobStateError
+      - JobStateSuccess
     LogFileConfig:
       example:
         localTime: true
@@ -2193,6 +2283,30 @@ components:
       required:
       - url
       type: object
+    ResourceState:
+      example:
+        name: null
+        error: error
+        updatedAt: updatedAt
+      properties:
+        error:
+          type: string
+        name:
+          $ref: '#/components/schemas/models.ResourceStateName'
+        updatedAt:
+          type: string
+      required:
+      - name
+      - updatedAt
+      type: object
+    ResourceType:
+      enum:
+      - workspace
+      - target
+      type: string
+      x-enum-varnames:
+      - ResourceTypeWorkspace
+      - ResourceTypeTarget
     Sample:
       example:
         name: name
@@ -2320,10 +2434,19 @@ components:
       - providerId
       - token
       type: object
-    SetWorkspaceState:
+    SetTargetMetadata:
+      example:
+        uptime: 0
+      properties:
+        uptime:
+          type: integer
+      required:
+      - uptime
+      type: object
+    SetWorkspaceMetadata:
       example:
         gitStatus:
-          behind: 6
+          behind: 1
           fileStatus:
           - extra: extra
             name: name
@@ -2333,7 +2456,7 @@ components:
             name: name
             staging: null
             worktree: null
-          ahead: 0
+          ahead: 6
           branchPublished: true
           currentBranch: currentBranch
         uptime: 0
@@ -2376,6 +2499,21 @@ components:
     Target:
       example:
         default: true
+        metadata:
+          targetId: targetId
+          updatedAt: updatedAt
+          uptime: 0
+        lastJob:
+          createdAt: createdAt
+          resourceId: resourceId
+          action: null
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        envVars:
+          key: envVars
         name: name
         options: options
         id: id
@@ -2389,8 +2527,16 @@ components:
       properties:
         default:
           type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         id:
           type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        metadata:
+          $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
         options:
@@ -2404,6 +2550,7 @@ components:
           type: array
       required:
       - default
+      - envVars
       - id
       - name
       - options
@@ -2469,9 +2616,28 @@ components:
     TargetDTO:
       example:
         default: true
+        metadata:
+          targetId: targetId
+          updatedAt: updatedAt
+          uptime: 0
+        lastJob:
+          createdAt: createdAt
+          resourceId: resourceId
+          action: null
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        envVars:
+          key: envVars
         name: name
         options: options
         id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
         workspaces:
         - buildConfig:
             cachedBuild:
@@ -2481,14 +2647,9 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          id: id
-          state:
+          metadata:
             gitStatus:
-              behind: 6
+              behind: 1
               fileStatus:
               - extra: extra
                 name: name
@@ -2498,11 +2659,26 @@ components:
                 name: name
                 staging: null
                 worktree: null
-              ahead: 0
+              ahead: 6
               branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 1
+            uptime: 5
+            workspaceId: workspaceId
+          targetId: targetId
+          lastJob:
+            createdAt: createdAt
+            resourceId: resourceId
+            action: null
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
+          name: name
+          id: id
           repository:
             owner: owner
             path: path
@@ -2517,6 +2693,21 @@ components:
           user: user
           target:
             default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            lastJob:
+              createdAt: createdAt
+              resourceId: resourceId
+              action: null
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
             name: name
             options: options
             id: id
@@ -2535,14 +2726,9 @@ components:
               filePath: filePath
           gitProviderConfigId: gitProviderConfigId
           image: image
-          targetId: targetId
-          envVars:
-            key: envVars
-          name: name
-          id: id
-          state:
+          metadata:
             gitStatus:
-              behind: 6
+              behind: 1
               fileStatus:
               - extra: extra
                 name: name
@@ -2552,11 +2738,26 @@ components:
                 name: name
                 staging: null
                 worktree: null
-              ahead: 0
+              ahead: 6
               branchPublished: true
               currentBranch: currentBranch
             updatedAt: updatedAt
-            uptime: 1
+            uptime: 5
+            workspaceId: workspaceId
+          targetId: targetId
+          lastJob:
+            createdAt: createdAt
+            resourceId: resourceId
+            action: null
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
+          name: name
+          id: id
           repository:
             owner: owner
             path: path
@@ -2571,6 +2772,21 @@ components:
           user: user
           target:
             default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            lastJob:
+              createdAt: createdAt
+              resourceId: resourceId
+              action: null
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
             name: name
             options: options
             id: id
@@ -2591,10 +2807,18 @@ components:
       properties:
         default:
           type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
         id:
           type: string
         info:
           $ref: '#/components/schemas/TargetInfo'
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        metadata:
+          $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
         options:
@@ -2602,16 +2826,20 @@ components:
           type: string
         providerInfo:
           $ref: '#/components/schemas/TargetProviderInfo'
+        state:
+          $ref: '#/components/schemas/ResourceState'
         workspaces:
           items:
             $ref: '#/components/schemas/Workspace'
           type: array
       required:
       - default
+      - envVars
       - id
       - name
       - options
       - providerInfo
+      - state
       type: object
     TargetInfo:
       example:
@@ -2624,6 +2852,23 @@ components:
           type: string
       required:
       - name
+      type: object
+    TargetMetadata:
+      example:
+        targetId: targetId
+        updatedAt: updatedAt
+        uptime: 0
+      properties:
+        targetId:
+          type: string
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
+      required:
+      - targetId
+      - updatedAt
+      - uptime
       type: object
     TargetProviderInfo:
       example:
@@ -2651,14 +2896,9 @@ components:
             filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
-        targetId: targetId
-        envVars:
-          key: envVars
-        name: name
-        id: id
-        state:
+        metadata:
           gitStatus:
-            behind: 6
+            behind: 1
             fileStatus:
             - extra: extra
               name: name
@@ -2668,11 +2908,26 @@ components:
               name: name
               staging: null
               worktree: null
-            ahead: 0
+            ahead: 6
             branchPublished: true
             currentBranch: currentBranch
           updatedAt: updatedAt
-          uptime: 1
+          uptime: 5
+          workspaceId: workspaceId
+        targetId: targetId
+        lastJob:
+          createdAt: createdAt
+          resourceId: resourceId
+          action: null
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        envVars:
+          key: envVars
+        name: name
+        id: id
         repository:
           owner: owner
           path: path
@@ -2687,6 +2942,21 @@ components:
         user: user
         target:
           default: true
+          metadata:
+            targetId: targetId
+            updatedAt: updatedAt
+            uptime: 0
+          lastJob:
+            createdAt: createdAt
+            resourceId: resourceId
+            action: null
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
           name: name
           options: options
           id: id
@@ -2710,12 +2980,14 @@ components:
           type: string
         image:
           type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        metadata:
+          $ref: '#/components/schemas/WorkspaceMetadata'
         name:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
-        state:
-          $ref: '#/components/schemas/WorkspaceState'
         target:
           $ref: '#/components/schemas/Target'
         targetId:
@@ -2796,22 +3068,11 @@ components:
       type: object
     WorkspaceDTO:
       example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
-        targetId: targetId
-        envVars:
-          key: envVars
-        name: name
-        id: id
-        state:
+        metadata:
           gitStatus:
-            behind: 6
+            behind: 1
             fileStatus:
             - extra: extra
               name: name
@@ -2821,11 +3082,15 @@ components:
               name: name
               staging: null
               worktree: null
-            ahead: 0
+            ahead: 6
             branchPublished: true
             currentBranch: currentBranch
           updatedAt: updatedAt
-          uptime: 1
+          uptime: 5
+          workspaceId: workspaceId
+        targetId: targetId
+        envVars:
+          key: envVars
         repository:
           owner: owner
           path: path
@@ -2837,15 +3102,23 @@ components:
           cloneTarget: null
           sha: sha
           url: url
-        user: user
-        info:
-          providerMetadata: providerMetadata
-          targetId: targetId
-          isRunning: true
-          created: created
-          name: name
         target:
           default: true
+          metadata:
+            targetId: targetId
+            updatedAt: updatedAt
+            uptime: 0
+          lastJob:
+            createdAt: createdAt
+            resourceId: resourceId
+            action: null
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
           name: name
           options: options
           id: id
@@ -2856,6 +3129,34 @@ components:
             name: name
             label: label
             version: version
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        lastJob:
+          createdAt: createdAt
+          resourceId: resourceId
+          action: null
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        name: name
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
+        user: user
+        info:
+          providerMetadata: providerMetadata
+          targetId: targetId
+          isRunning: true
+          created: created
+          name: name
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
@@ -2871,12 +3172,16 @@ components:
           type: string
         info:
           $ref: '#/components/schemas/WorkspaceInfo'
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        metadata:
+          $ref: '#/components/schemas/WorkspaceMetadata'
         name:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
         state:
-          $ref: '#/components/schemas/WorkspaceState'
+          $ref: '#/components/schemas/ResourceState'
         target:
           $ref: '#/components/schemas/Target'
         targetId:
@@ -2889,6 +3194,7 @@ components:
       - image
       - name
       - repository
+      - state
       - target
       - targetId
       - user
@@ -2917,10 +3223,10 @@ components:
       - name
       - targetId
       type: object
-    WorkspaceState:
+    WorkspaceMetadata:
       example:
         gitStatus:
-          behind: 6
+          behind: 1
           fileStatus:
           - extra: extra
             name: name
@@ -2930,11 +3236,12 @@ components:
             name: name
             staging: null
             worktree: null
-          ahead: 0
+          ahead: 6
           branchPublished: true
           currentBranch: currentBranch
         updatedAt: updatedAt
-        uptime: 1
+        uptime: 5
+        workspaceId: workspaceId
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
@@ -2942,10 +3249,13 @@ components:
           type: string
         uptime:
           type: integer
+        workspaceId:
+          type: string
       required:
       - gitStatus
       - updatedAt
       - uptime
+      - workspaceId
       type: object
     models.ApiKeyType:
       enum:
@@ -2977,6 +3287,58 @@ components:
       - BuildStatePendingDelete
       - BuildStatePendingForcedDelete
       - BuildStateDeleting
+    models.JobAction:
+      enum:
+      - create
+      - start
+      - stop
+      - restart
+      - delete
+      - force-delete
+      type: string
+      x-enum-varnames:
+      - JobActionCreate
+      - JobActionStart
+      - JobActionStop
+      - JobActionRestart
+      - JobActionDelete
+      - JobActionForceDelete
+    models.ResourceStateName:
+      enum:
+      - undefined
+      - pending-create
+      - creating
+      - pending-start
+      - starting
+      - started
+      - pending-stop
+      - stopping
+      - stopped
+      - pending-restart
+      - error
+      - unresponsive
+      - pending-delete
+      - pending-forced-delete
+      - deleting
+      - deleted
+      type: string
+      x-enum-varnames:
+      - ResourceStateNameUndefined
+      - ResourceStateNamePendingCreate
+      - ResourceStateNameCreating
+      - ResourceStateNamePendingStart
+      - ResourceStateNameStarting
+      - ResourceStateNameStarted
+      - ResourceStateNamePendingStop
+      - ResourceStateNameStopping
+      - ResourceStateNameStopped
+      - ResourceStateNamePendingRestart
+      - ResourceStateNameError
+      - ResourceStateNameUnresponsive
+      - ResourceStateNamePendingDelete
+      - ResourceStateNamePendingForcedDelete
+      - ResourceStateNameDeleting
+      - ResourceStateNameDeleted
     provider.TargetConfigPropertyType:
       enum:
       - string

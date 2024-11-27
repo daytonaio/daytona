@@ -68,7 +68,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
+	providersManifest, err := manager.GetProviderManager(&manager.ProviderManagerConfig{
 		RegistryUrl: serverConfig.RegistryUrl,
 	}).GetProvidersManifest()
 	if err != nil {

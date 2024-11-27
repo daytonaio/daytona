@@ -21,13 +21,17 @@ var _ MappedNullable = &TargetDTO{}
 
 // TargetDTO struct for TargetDTO
 type TargetDTO struct {
-	Default bool        `json:"default"`
-	Id      string      `json:"id"`
-	Info    *TargetInfo `json:"info,omitempty"`
-	Name    string      `json:"name"`
+	Default  bool              `json:"default"`
+	EnvVars  map[string]string `json:"envVars"`
+	Id       string            `json:"id"`
+	Info     *TargetInfo       `json:"info,omitempty"`
+	LastJob  *Job              `json:"lastJob,omitempty"`
+	Metadata *TargetMetadata   `json:"metadata,omitempty"`
+	Name     string            `json:"name"`
 	// JSON encoded map of options
 	Options      string             `json:"options"`
 	ProviderInfo TargetProviderInfo `json:"providerInfo"`
+	State        ResourceState      `json:"state"`
 	Workspaces   []Workspace        `json:"workspaces,omitempty"`
 }
 
@@ -37,13 +41,15 @@ type _TargetDTO TargetDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetDTO(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo) *TargetDTO {
+func NewTargetDTO(default_ bool, envVars map[string]string, id string, name string, options string, providerInfo TargetProviderInfo, state ResourceState) *TargetDTO {
 	this := TargetDTO{}
 	this.Default = default_
+	this.EnvVars = envVars
 	this.Id = id
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
+	this.State = state
 	return &this
 }
 
@@ -77,6 +83,30 @@ func (o *TargetDTO) GetDefaultOk() (*bool, bool) {
 // SetDefault sets field value
 func (o *TargetDTO) SetDefault(v bool) {
 	o.Default = v
+}
+
+// GetEnvVars returns the EnvVars field value
+func (o *TargetDTO) GetEnvVars() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.EnvVars
+}
+
+// GetEnvVarsOk returns a tuple with the EnvVars field value
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.EnvVars, true
+}
+
+// SetEnvVars sets field value
+func (o *TargetDTO) SetEnvVars(v map[string]string) {
+	o.EnvVars = v
 }
 
 // GetId returns the Id field value
@@ -133,6 +163,70 @@ func (o *TargetDTO) HasInfo() bool {
 // SetInfo gets a reference to the given TargetInfo and assigns it to the Info field.
 func (o *TargetDTO) SetInfo(v TargetInfo) {
 	o.Info = &v
+}
+
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *TargetDTO) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *TargetDTO) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *TargetDTO) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *TargetDTO) GetMetadata() TargetMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret TargetMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetMetadataOk() (*TargetMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *TargetDTO) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given TargetMetadata and assigns it to the Metadata field.
+func (o *TargetDTO) SetMetadata(v TargetMetadata) {
+	o.Metadata = &v
 }
 
 // GetName returns the Name field value
@@ -207,6 +301,30 @@ func (o *TargetDTO) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
+// GetState returns the State field value
+func (o *TargetDTO) GetState() ResourceState {
+	if o == nil {
+		var ret ResourceState
+		return ret
+	}
+
+	return o.State
+}
+
+// GetStateOk returns a tuple with the State field value
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetStateOk() (*ResourceState, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.State, true
+}
+
+// SetState sets field value
+func (o *TargetDTO) SetState(v ResourceState) {
+	o.State = v
+}
+
 // GetWorkspaces returns the Workspaces field value if set, zero value otherwise.
 func (o *TargetDTO) GetWorkspaces() []Workspace {
 	if o == nil || IsNil(o.Workspaces) {
@@ -250,13 +368,21 @@ func (o TargetDTO) MarshalJSON() ([]byte, error) {
 func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["default"] = o.Default
+	toSerialize["envVars"] = o.EnvVars
 	toSerialize["id"] = o.Id
 	if !IsNil(o.Info) {
 		toSerialize["info"] = o.Info
 	}
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
 	toSerialize["providerInfo"] = o.ProviderInfo
+	toSerialize["state"] = o.State
 	if !IsNil(o.Workspaces) {
 		toSerialize["workspaces"] = o.Workspaces
 	}
@@ -269,10 +395,12 @@ func (o *TargetDTO) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"default",
+		"envVars",
 		"id",
 		"name",
 		"options",
 		"providerInfo",
+		"state",
 	}
 
 	allProperties := make(map[string]interface{})

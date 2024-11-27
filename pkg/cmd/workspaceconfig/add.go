@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	create_cmd "github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -67,7 +67,7 @@ var workspaceAddCmd = &cobra.Command{
 }
 
 func RunWorkspaceConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apiclient.GitProvider, ctx context.Context) (*apiclient.WorkspaceConfig, error) {
-	if workspace_common.CheckAnyWorkspaceConfigurationFlagSet(workspaceConfigurationFlags) {
+	if cmd_common.CheckAnyWorkspaceConfigurationFlagSet(workspaceConfigurationFlags) {
 		return nil, errors.New("please provide the repository URL in order to set up custom workspace config details through the CLI")
 	}
 
@@ -277,7 +277,7 @@ func getExistingWorkspaceConfigNames(apiClient *apiclient.APIClient) ([]string, 
 
 var nameFlag string
 
-var workspaceConfigurationFlags = workspace_common.WorkspaceConfigurationFlags{
+var workspaceConfigurationFlags = cmd_common.WorkspaceConfigurationFlags{
 	Builder:           new(views_util.BuildChoice),
 	CustomImage:       new(string),
 	CustomImageUser:   new(string),
@@ -290,5 +290,5 @@ var workspaceConfigurationFlags = workspace_common.WorkspaceConfigurationFlags{
 
 func init() {
 	workspaceAddCmd.Flags().StringVar(&nameFlag, "name", "", "Specify the workspace config name")
-	workspace_common.AddWorkspaceConfigurationFlags(workspaceAddCmd, workspaceConfigurationFlags, false)
+	cmd_common.AddWorkspaceConfigurationFlags(workspaceAddCmd, workspaceConfigurationFlags, false)
 }

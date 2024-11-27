@@ -9,7 +9,7 @@ daytona agent [flags]
 ### Options
 
 ```
-      --host   Run the agent in host mode
+      --target   Run the agent in target mode
 ```
 
 ### Options inherited from parent commands

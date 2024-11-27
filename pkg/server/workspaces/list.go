@@ -10,12 +10,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/services"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]services.WorkspaceDTO, error) {
+func (s *WorkspaceService) ListWorkspaces(ctx context.Context, params services.WorkspaceRetrievalParams) ([]services.WorkspaceDTO, error) {
 	workspaces, err := s.workspaceStore.List()
 	if err != nil {
 		return nil, err
@@ -25,8 +26,18 @@ func (s *WorkspaceService) ListWorkspaces(ctx context.Context, verbose bool) ([]
 	response := []services.WorkspaceDTO{}
 
 	for i, ws := range workspaces {
-		response = append(response, services.WorkspaceDTO{Workspace: *ws})
-		if !verbose {
+		state := ws.GetState()
+
+		if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
+			continue
+		}
+
+		response = append(response, services.WorkspaceDTO{
+			Workspace: *ws,
+			State:     state,
+		})
+
+		if !params.Verbose {
 			continue
 		}
 
