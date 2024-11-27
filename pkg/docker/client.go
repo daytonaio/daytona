@@ -66,18 +66,18 @@ type DockerClient struct {
 
 func (d *DockerClient) GetWorkspaceContainerName(workspace *models.Workspace) string {
 	containers, err := d.apiClient.ContainerList(context.Background(), container.ListOptions{
-		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.target.id=%s", workspace.TargetId)), filters.Arg("label", fmt.Sprintf("daytona.workspace.name=%s", workspace.Name))),
+		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.target.id=%s", workspace.TargetId)), filters.Arg("label", fmt.Sprintf("daytona.workspace.id=%s", workspace.Id))),
 		All:     true,
 	})
 	if err != nil || len(containers) == 0 {
-		return workspace.TargetId + "-" + workspace.Name
+		return workspace.TargetId + "-" + workspace.Id
 	}
 
 	return containers[0].ID
 }
 
 func (d *DockerClient) GetWorkspaceVolumeName(workspace *models.Workspace) string {
-	return workspace.TargetId + "-" + workspace.Name
+	return workspace.TargetId + "-" + workspace.Id
 }
 
 func (d *DockerClient) getComposeContainers(c types.ContainerJSON) (string, []types.Container, error) {

@@ -21,7 +21,7 @@ var infoCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var target *apiclient.TargetDTO
 
-		target, err := apiclient_util.GetTarget(targetId, true)
+		target, _, err := apiclient_util.GetTarget(targetId, true)
 		if err != nil {
 			return err
 		}

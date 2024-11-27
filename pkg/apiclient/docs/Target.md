@@ -5,7 +5,10 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Default** | **bool** |  | 
+**EnvVars** | **map[string]string** |  | 
 **Id** | **string** |  | 
+**LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**Metadata** | Pointer to [**TargetMetadata**](TargetMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
 **Options** | **string** | JSON encoded map of options | 
 **ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
@@ -15,7 +18,7 @@ Name | Type | Description | Notes
 
 ### NewTarget
 
-`func NewTarget(default_ bool, id string, name string, options string, providerInfo TargetProviderInfo, ) *Target`
+`func NewTarget(default_ bool, envVars map[string]string, id string, name string, options string, providerInfo TargetProviderInfo, ) *Target`
 
 NewTarget instantiates a new Target object
 This constructor will assign default values to properties that have it defined,
@@ -50,6 +53,26 @@ and a boolean to check if the value has been set.
 SetDefault sets Default field to given value.
 
 
+### GetEnvVars
+
+`func (o *Target) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *Target) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *Target) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
+
 ### GetId
 
 `func (o *Target) GetId() string`
@@ -69,6 +92,56 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
+
+### GetLastJob
+
+`func (o *Target) GetLastJob() Job`
+
+GetLastJob returns the LastJob field if non-nil, zero value otherwise.
+
+### GetLastJobOk
+
+`func (o *Target) GetLastJobOk() (*Job, bool)`
+
+GetLastJobOk returns a tuple with the LastJob field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJob
+
+`func (o *Target) SetLastJob(v Job)`
+
+SetLastJob sets LastJob field to given value.
+
+### HasLastJob
+
+`func (o *Target) HasLastJob() bool`
+
+HasLastJob returns a boolean if a field has been set.
+
+### GetMetadata
+
+`func (o *Target) GetMetadata() TargetMetadata`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *Target) GetMetadataOk() (*TargetMetadata, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *Target) SetMetadata(v TargetMetadata)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *Target) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
 
 ### GetName
 

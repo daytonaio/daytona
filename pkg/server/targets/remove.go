@@ -6,7 +6,7 @@ package targets
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -14,58 +14,64 @@ import (
 )
 
 func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
+	t, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, target, ErrTargetNotFound)
+		return s.handleRemoveError(ctx, t, stores.ErrTargetNotFound)
 	}
 
-	log.Infof("Destroying target %s", target.Id)
+	t.Name = util.AddDeletedToName(t.Name)
 
-	err = s.provisioner.DestroyTarget(target)
+	err = s.targetStore.Save(t)
 	if err != nil {
-		return s.handleRemoveError(ctx, target, err)
+		return s.handleRemoveError(ctx, t, err)
 	}
 
-	// Should not fail the whole operation if the API key cannot be revoked
-	err = s.revokeApiKey(ctx, target.Id)
-	if err != nil {
-		log.Error(err)
-	}
-
-	logger := s.loggerFactory.CreateTargetLogger(target.Id, target.Name, logs.LogSourceServer)
-	err = logger.Cleanup()
-	if err != nil {
-		// Should not fail the whole operation if the target logger cannot be cleaned up
-		log.Error(err)
-	}
-
-	err = s.targetStore.Delete(target)
-
-	return s.handleRemoveError(ctx, target, err)
+	err = s.createJob(ctx, t.Id, models.JobActionDelete)
+	return s.handleRemoveError(ctx, t, err)
 }
 
 // ForceRemoveTarget ignores provider errors and makes sure the target is removed from storage.
 func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) error {
-	target, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
+	t, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, nil, ErrTargetNotFound)
+		return s.handleRemoveError(ctx, nil, stores.ErrTargetNotFound)
 	}
 
-	log.Infof("Destroying target %s", target.Id)
+	t.Name = util.AddDeletedToName(t.Name)
 
-	err = s.provisioner.DestroyTarget(target)
+	err = s.targetStore.Save(t)
 	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
+
+	err = s.createJob(ctx, t.Id, models.JobActionForceDelete)
+	return s.handleRemoveError(ctx, t, err)
+}
+
+func (s *TargetService) HandleSuccessfulRemoval(ctx context.Context, targetId string) error {
+	err := s.revokeApiKey(ctx, targetId)
+	if err != nil {
+		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
 	}
 
-	err = s.revokeApiKey(ctx, target.Id)
+	t, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		log.Error(err)
+		return s.handleRemoveError(ctx, t, stores.ErrTargetNotFound)
 	}
 
-	err = s.targetStore.Delete(target)
+	metadata, err := s.targetMetadataStore.Find(&stores.TargetMetadataFilter{TargetId: &targetId})
+	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
 
-	return s.handleRemoveError(ctx, target, err)
+	err = s.targetMetadataStore.Delete(metadata)
+	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
+
+	err = s.targetStore.Delete(t)
+	return s.handleRemoveError(ctx, t, err)
 }
 
 func (s *TargetService) handleRemoveError(ctx context.Context, target *models.Target, err error) error {

@@ -33,7 +33,7 @@ type Config struct {
 type Mode string
 
 const (
-	ModeHost      Mode = "host"
+	ModeTarget    Mode = "target"
 	ModeWorkspace Mode = "workspace"
 )
 

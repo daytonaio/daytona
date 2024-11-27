@@ -5,6 +5,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"io"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
@@ -13,21 +14,28 @@ import (
 
 type IWorkspaceService interface {
 	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*models.Workspace, error)
-	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*WorkspaceDTO, error)
-	ListWorkspaces(ctx context.Context, verbose bool) ([]WorkspaceDTO, error)
+	GetWorkspace(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
+	ListWorkspaces(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
 	StartWorkspace(ctx context.Context, workspaceId string) error
 	StopWorkspace(ctx context.Context, workspaceId string) error
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
+	HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error
 
 	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error)
+	SetWorkspaceMetadata(workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 }
 
 type WorkspaceDTO struct {
 	models.Workspace
-	Info *models.WorkspaceInfo `json:"info" validate:"optional"`
+	State models.ResourceState  `json:"state" validate:"required"`
+	Info  *models.WorkspaceInfo `json:"info" validate:"optional"`
 } //	@name	WorkspaceDTO
+
+type WorkspaceRetrievalParams struct {
+	Verbose     bool
+	ShowDeleted bool
+}
 
 type CreateWorkspaceDTO struct {
 	Id                  string                   `json:"id" validate:"required"`
@@ -66,3 +74,14 @@ func (c *CreateWorkspaceDTO) ToWorkspace() *models.Workspace {
 type CreateWorkspaceSourceDTO struct {
 	Repository *gitprovider.GitRepository `json:"repository" validate:"required"`
 } // @name CreateWorkspaceSourceDTO
+
+var (
+	ErrWorkspaceAlreadyExists = errors.New("workspace already exists")
+	ErrWorkspaceDeleted       = errors.New("workspace is deleted")
+	ErrInvalidWorkspaceName   = errors.New("workspace name is not valid. Only [a-zA-Z0-9-_.] are allowed")
+	ErrInvalidWorkspaceConfig = errors.New("workspace config is invalid")
+)
+
+func IsWorkspaceDeleted(err error) bool {
+	return errors.Is(err, ErrWorkspaceDeleted)
+}

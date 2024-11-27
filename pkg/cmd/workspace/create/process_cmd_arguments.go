@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -23,7 +23,7 @@ type ProcessCmdArgumentsParams struct {
 	RepoUrls                    []string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
 	ExistingWorkspaces          *[]apiclient.WorkspaceDTO
-	WorkspaceConfigurationFlags workspace_common.WorkspaceConfigurationFlags
+	WorkspaceConfigurationFlags cmd_common.WorkspaceConfigurationFlags
 	BlankFlag                   bool
 }
 
@@ -31,7 +31,7 @@ type ProcessGitUrlParams struct {
 	ApiClient                   *apiclient.APIClient
 	RepoUrl                     string
 	CreateWorkspaceDtos         *[]apiclient.CreateWorkspaceDTO
-	WorkspaceConfigurationFlags workspace_common.WorkspaceConfigurationFlags
+	WorkspaceConfigurationFlags cmd_common.WorkspaceConfigurationFlags
 	Branch                      *string
 	BlankFlag                   bool
 }
@@ -41,7 +41,7 @@ func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) 
 		return nil, fmt.Errorf("no repository URLs provided")
 	}
 
-	if len(params.RepoUrls) > 1 && workspace_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) {
+	if len(params.RepoUrls) > 1 && cmd_common.CheckAnyWorkspaceConfigurationFlagSet(params.WorkspaceConfigurationFlags) {
 		return nil, fmt.Errorf("can't set custom workspace configuration properties for multiple workspaces")
 	}
 

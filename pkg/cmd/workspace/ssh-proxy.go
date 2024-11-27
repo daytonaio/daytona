@@ -44,12 +44,12 @@ var SshProxyCmd = &cobra.Command{
 			return err
 		}
 
-		ws, err := apiclient_util.GetWorkspace(workspaceId, true)
+		ws, _, err := apiclient_util.GetWorkspace(workspaceId, true)
 		if err != nil {
 			return err
 		}
 
-		target, err := apiclient_util.GetTarget(ws.TargetId, true)
+		target, _, err := apiclient_util.GetTarget(ws.TargetId, true)
 		if err != nil {
 			return err
 		}

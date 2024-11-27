@@ -104,6 +104,7 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
+*JobAPI* | [**ListJobs**](docs/JobAPI.md#listjobs) | **Get** /job | List jobs
 *PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-config/{configName}/prebuild/{prebuildId} | Delete prebuild
 *PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /workspace-config/{configName}/prebuild/{prebuildId} | Get prebuild
 *PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-config/prebuild | List prebuilds
@@ -126,6 +127,7 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
 *TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
+*TargetAPI* | [**SetTargetMetadata**](docs/TargetAPI.md#settargetmetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
@@ -135,7 +137,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
-*WorkspaceAPI* | [**SetWorkspaceState**](docs/WorkspaceAPI.md#setworkspacestate) | **Post** /workspace/{workspaceId}/state | Set workspace state
+*WorkspaceAPI* | [**SetWorkspaceMetadata**](docs/WorkspaceAPI.md#setworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 *WorkspaceConfigAPI* | [**DeleteWorkspaceConfig**](docs/WorkspaceConfigAPI.md#deleteworkspaceconfig) | **Delete** /workspace-config/{configName} | Delete workspace config data
@@ -174,8 +176,12 @@ Class | Method | HTTP request | Description
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
+ - [Job](docs/Job.md)
+ - [JobState](docs/JobState.md)
  - [ModelsApiKeyType](docs/ModelsApiKeyType.md)
  - [ModelsBuildState](docs/ModelsBuildState.md)
+ - [ModelsJobAction](docs/ModelsJobAction.md)
+ - [ModelsResourceStateName](docs/ModelsResourceStateName.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
@@ -183,10 +189,13 @@ Class | Method | HTTP request | Description
  - [Provider](docs/Provider.md)
  - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
+ - [ResourceState](docs/ResourceState.md)
+ - [ResourceType](docs/ResourceType.md)
  - [Sample](docs/Sample.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
- - [SetWorkspaceState](docs/SetWorkspaceState.md)
+ - [SetTargetMetadata](docs/SetTargetMetadata.md)
+ - [SetWorkspaceMetadata](docs/SetWorkspaceMetadata.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
  - [Target](docs/Target.md)
@@ -194,12 +203,13 @@ Class | Method | HTTP request | Description
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetInfo](docs/TargetInfo.md)
+ - [TargetMetadata](docs/TargetMetadata.md)
  - [TargetProviderInfo](docs/TargetProviderInfo.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceConfig](docs/WorkspaceConfig.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
- - [WorkspaceState](docs/WorkspaceState.md)
+ - [WorkspaceMetadata](docs/WorkspaceMetadata.md)
 
 
 ## Documentation For Authorization

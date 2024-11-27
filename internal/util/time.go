@@ -45,24 +45,24 @@ func FormatUptime(uptime int32) string {
 	duration := time.Duration(uptime) * time.Second
 
 	if duration < time.Minute {
-		return "< 1 minute"
+		return "< 1 minute ago"
 	} else if duration < time.Hour {
 		minutes := int(duration.Minutes())
 		if minutes == 1 {
-			return "1 minute"
+			return "1 minute ago"
 		}
-		return fmt.Sprintf("%d minutes", minutes)
+		return fmt.Sprintf("%d minutes ago", minutes)
 	} else if duration < 24*time.Hour {
 		hours := int(duration.Hours())
 		if hours == 1 {
-			return "1 hour"
+			return "1 hour ago"
 		}
-		return fmt.Sprintf("%d hours", hours)
+		return fmt.Sprintf("%d hours ago", hours)
 	} else {
 		days := int(duration.Hours() / 24)
 		if days == 1 {
-			return "1 day"
+			return "1 day ago"
 		}
-		return fmt.Sprintf("%d days", days)
+		return fmt.Sprintf("%d days ago", days)
 	}
 }

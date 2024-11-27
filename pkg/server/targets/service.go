@@ -16,11 +16,13 @@ import (
 )
 
 type TargetServiceConfig struct {
-	TargetStore stores.TargetStore
+	TargetStore         stores.TargetStore
+	TargetMetadataStore stores.TargetMetadataStore
 
 	FindTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
 	GenerateApiKey   func(ctx context.Context, name string) (string, error)
 	RevokeApiKey     func(ctx context.Context, name string) error
+	CreateJob        func(ctx context.Context, targetId string, action models.JobAction) error
 
 	ServerApiUrl     string
 	ServerUrl        string
@@ -32,10 +34,14 @@ type TargetServiceConfig struct {
 
 func NewTargetService(config TargetServiceConfig) services.ITargetService {
 	return &TargetService{
-		targetStore:      config.TargetStore,
+		targetStore:         config.TargetStore,
+		targetMetadataStore: config.TargetMetadataStore,
+
 		findTargetConfig: config.FindTargetConfig,
 		generateApiKey:   config.GenerateApiKey,
 		revokeApiKey:     config.RevokeApiKey,
+		createJob:        config.CreateJob,
+
 		serverApiUrl:     config.ServerApiUrl,
 		serverUrl:        config.ServerUrl,
 		serverVersion:    config.ServerVersion,
@@ -46,10 +52,13 @@ func NewTargetService(config TargetServiceConfig) services.ITargetService {
 }
 
 type TargetService struct {
-	targetStore      stores.TargetStore
+	targetStore         stores.TargetStore
+	targetMetadataStore stores.TargetMetadataStore
+
 	findTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
 	generateApiKey   func(ctx context.Context, name string) (string, error)
 	revokeApiKey     func(ctx context.Context, name string) error
+	createJob        func(ctx context.Context, targetId string, action models.JobAction) error
 
 	provisioner      provisioner.IProvisioner
 	serverApiUrl     string

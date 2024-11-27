@@ -17,7 +17,8 @@ import (
 )
 
 type WorkspaceServiceConfig struct {
-	WorkspaceStore stores.WorkspaceStore
+	WorkspaceStore         stores.WorkspaceStore
+	WorkspaceMetadataStore stores.WorkspaceMetadataStore
 
 	FindTarget             func(ctx context.Context, targetId string) (*models.Target, error)
 	FindContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
@@ -27,6 +28,7 @@ type WorkspaceServiceConfig struct {
 	ListGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	CreateJob              func(ctx context.Context, workspaceId string, action models.JobAction) error
 	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
 	LoggerFactory         logs.LoggerFactory
@@ -41,6 +43,8 @@ type WorkspaceServiceConfig struct {
 func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceService {
 	return &WorkspaceService{
 		workspaceStore:         config.WorkspaceStore,
+		workspaceMetadataStore: config.WorkspaceMetadataStore,
+
 		findTarget:             config.FindTarget,
 		findContainerRegistry:  config.FindContainerRegistry,
 		findCachedBuild:        config.FindCachedBuild,
@@ -49,6 +53,7 @@ func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceServi
 		listGitProviderConfigs: config.ListGitProviderConfigs,
 		findGitProviderConfig:  config.FindGitProviderConfig,
 		getLastCommitSha:       config.GetLastCommitSha,
+		createJob:              config.CreateJob,
 		trackTelemetryEvent:    config.TrackTelemetryEvent,
 
 		serverApiUrl:          config.ServerApiUrl,
@@ -62,7 +67,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceServi
 }
 
 type WorkspaceService struct {
-	workspaceStore stores.WorkspaceStore
+	workspaceStore         stores.WorkspaceStore
+	workspaceMetadataStore stores.WorkspaceMetadataStore
 
 	findTarget             func(ctx context.Context, targetId string) (*models.Target, error)
 	findContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
@@ -72,6 +78,7 @@ type WorkspaceService struct {
 	listGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	createJob              func(ctx context.Context, workspaceId string, action models.JobAction) error
 	trackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
 	provisioner           provisioner.IProvisioner
@@ -81,16 +88,6 @@ type WorkspaceService struct {
 	defaultWorkspaceImage string
 	defaultWorkspaceUser  string
 	loggerFactory         logs.LoggerFactory
-}
-
-func (s *WorkspaceService) SetWorkspaceState(workspaceId string, state *models.WorkspaceState) (*models.Workspace, error) {
-	ws, err := s.workspaceStore.Find(workspaceId)
-	if err != nil {
-		return nil, ErrWorkspaceNotFound
-	}
-
-	ws.State = state
-	return ws, s.workspaceStore.Save(ws)
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {

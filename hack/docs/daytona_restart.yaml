@@ -1,6 +1,6 @@
 name: daytona restart
 synopsis: Restart a workspace
-usage: daytona restart [WORKSPACE] [flags]
+usage: daytona restart [WORKSPACE]... [flags]
 inherited_options:
     - name: help
       default_value: "false"

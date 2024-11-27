@@ -63,22 +63,36 @@ type ProviderManagerConfig struct {
 	ApiPort                  uint32
 }
 
-func NewProviderManager(config ProviderManagerConfig) *ProviderManager {
-	return &ProviderManager{
-		pluginRefs:               make(map[string]*pluginRef),
-		daytonaDownloadUrl:       config.DaytonaDownloadUrl,
-		serverUrl:                config.ServerUrl,
-		serverVersion:            config.ServerVersion,
-		apiUrl:                   config.ApiUrl,
-		logsDir:                  config.LogsDir,
-		getTargetConfigMap:       config.GetTargetConfigMap,
-		createTargetConfig:       config.CreateTargetConfig,
-		registryUrl:              config.RegistryUrl,
-		baseDir:                  config.BaseDir,
-		createProviderNetworkKey: config.CreateProviderNetworkKey,
-		serverPort:               config.ServerPort,
-		apiPort:                  config.ApiPort,
+var providerManager *ProviderManager
+
+func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
+	if config != nil && providerManager != nil {
+		log.Fatal("Provider manager already initialized")
 	}
+
+	if providerManager == nil {
+		if config == nil {
+			log.Fatal("Provider manager not initialized")
+		}
+
+		providerManager = &ProviderManager{
+			pluginRefs:               make(map[string]*pluginRef),
+			daytonaDownloadUrl:       config.DaytonaDownloadUrl,
+			serverUrl:                config.ServerUrl,
+			serverVersion:            config.ServerVersion,
+			apiUrl:                   config.ApiUrl,
+			logsDir:                  config.LogsDir,
+			getTargetConfigMap:       config.GetTargetConfigMap,
+			createTargetConfig:       config.CreateTargetConfig,
+			registryUrl:              config.RegistryUrl,
+			baseDir:                  config.BaseDir,
+			createProviderNetworkKey: config.CreateProviderNetworkKey,
+			serverPort:               config.ServerPort,
+			apiPort:                  config.ApiPort,
+		}
+	}
+
+	return providerManager
 }
 
 type ProviderManager struct {

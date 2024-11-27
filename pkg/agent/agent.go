@@ -31,8 +31,20 @@ func (a *Agent) Start() error {
 
 	a.startTime = time.Now()
 
+	err := a.ensureDefaultProfile()
+	if err != nil {
+		return err
+	}
+
 	if a.Config.Mode == agent_config.ModeWorkspace {
 		err := a.startWorkspaceMode()
+		if err != nil {
+			return err
+		}
+	}
+
+	if a.Config.Mode == agent_config.ModeTarget {
+		err := a.startTargetMode()
 		if err != nil {
 			return err
 		}
@@ -48,12 +60,23 @@ func (a *Agent) Start() error {
 	return a.Tailscale.Start()
 }
 
-func (a *Agent) startWorkspaceMode() error {
-	err := a.ensureDefaultProfile()
-	if err != nil {
-		return err
-	}
+func (a *Agent) startTargetMode() error {
 
+	go func() {
+		for {
+			err := a.updateTargetMetadata()
+			if err != nil {
+				log.Error(fmt.Sprintf("failed to update target state: %s", err))
+			}
+
+			time.Sleep(2 * time.Second)
+		}
+	}()
+
+	return nil
+}
+
+func (a *Agent) startWorkspaceMode() error {
 	// Ignoring error because we don't want to fail if the git provider is not found
 	gitProvider, _ := a.getGitProvider(a.Workspace.Repository.Url)
 
@@ -121,7 +144,7 @@ func (a *Agent) startWorkspaceMode() error {
 
 	go func() {
 		for {
-			err := a.updateWorkspaceState()
+			err := a.updateWorkspaceMetadata()
 			if err != nil {
 				log.Error(fmt.Sprintf("failed to update workspace state: %s", err))
 			}
@@ -202,7 +225,7 @@ func (a *Agent) uptime() int32 {
 	return max(int32(time.Since(a.startTime).Seconds()), 1)
 }
 
-func (a *Agent) updateWorkspaceState() error {
+func (a *Agent) updateWorkspaceMetadata() error {
 	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return err
@@ -214,9 +237,26 @@ func (a *Agent) updateWorkspaceState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.WorkspaceAPI.SetWorkspaceState(context.Background(), a.Config.WorkspaceId).SetState(apiclient.SetWorkspaceState{
+	res, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).SetMetadata(apiclient.SetWorkspaceMetadata{
 		Uptime:    uptime,
 		GitStatus: conversion.ToGitStatusDTO(gitStatus),
+	}).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	return nil
+}
+
+func (a *Agent) updateTargetMetadata() error {
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
+	if err != nil {
+		return err
+	}
+
+	uptime := a.uptime()
+	res, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), a.Config.TargetId).SetMetadata(apiclient.SetTargetMetadata{
+		Uptime: uptime,
 	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)

@@ -2,9 +2,9 @@ name: daytona agent
 synopsis: Start the agent process
 usage: daytona agent [flags]
 options:
-    - name: host
+    - name: target
       default_value: "false"
-      usage: Run the agent in host mode
+      usage: Run the agent in target mode
 inherited_options:
     - name: help
       default_value: "false"

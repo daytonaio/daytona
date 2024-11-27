@@ -10,37 +10,17 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
-	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/views"
 
 	log "github.com/sirupsen/logrus"
 )
 
-func isValidWorkspaceName(name string) bool {
-	// The repository name can only contain ASCII letters, digits, and the characters ., -, and _.
-	var validName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
-
-	// Check if the name matches the basic regex
-	if !validName.MatchString(name) {
-		return false
-	}
-
-	// Names starting with a period must have atleast one char appended to it.
-	if name == "." || name == "" {
-		return false
-	}
-
-	return true
-}
-
 func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*models.Workspace, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
-		return s.handleCreateError(ctx, nil, ErrWorkspaceAlreadyExists)
+		return s.handleCreateError(ctx, nil, services.ErrWorkspaceAlreadyExists)
 	}
 
 	target, err := s.findTarget(ctx, req.TargetId)
@@ -52,7 +32,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	w.Target = *target
 
 	if !isValidWorkspaceName(w.Name) {
-		return s.handleCreateError(ctx, w, ErrInvalidWorkspaceName)
+		return s.handleCreateError(ctx, w, services.ErrInvalidWorkspaceName)
 	}
 
 	w.Repository.Url = util.CleanUpRepositoryUrl(w.Repository.Url)
@@ -101,21 +81,14 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 
 	w.ApiKey = apiKey
 
-	err = s.workspaceStore.Save(w)
-	if err != nil {
-		return s.handleCreateError(ctx, w, err)
-	}
-
-	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
-	defer workspaceLogger.Close()
-
 	workspaceWithEnv := *w
 	workspaceWithEnv.EnvVars = GetWorkspaceEnvVars(w, WorkspaceEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
+		ApiUrl:           s.serverApiUrl,
+		ServerUrl:        s.serverUrl,
+		ServerVersion:    s.serverVersion,
+		ClientId:         telemetry.ClientId(ctx),
+		TelemetryEnabled: telemetry.TelemetryEnabled(ctx),
+	})
 
 	for k, v := range w.EnvVars {
 		workspaceWithEnv.EnvVars[k] = v
@@ -123,31 +96,21 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 
 	w = &workspaceWithEnv
 
-	workspaceLogger.Write([]byte(fmt.Sprintf("Creating workspace %s\n", w.Name)))
-
-	cr, err := s.findContainerRegistry(ctx, w.Image)
-	if err != nil && !stores.IsContainerRegistryNotFound(err) {
-		return s.handleCreateError(ctx, w, err)
-	}
-
-	var gc *models.GitProviderConfig
-
-	if w.GitProviderConfigId != nil {
-		gc, err = s.findGitProviderConfig(ctx, *w.GitProviderConfigId)
-		if err != nil && !stores.IsGitProviderNotFound(err) {
-			return s.handleCreateError(ctx, w, err)
-		}
-	}
-
-	err = s.provisioner.CreateWorkspace(w, cr, gc)
+	err = s.workspaceStore.Save(w)
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	workspaceLogger.Write([]byte(views.GetPrettyLogLine(fmt.Sprintf("Workspace %s created", w.Name))))
+	err = s.workspaceMetadataStore.Save(&models.WorkspaceMetadata{
+		WorkspaceId: w.Id,
+		Uptime:      0,
+		GitStatus:   &models.GitStatus{},
+	})
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
 
-	err = s.startWorkspace(w, workspaceLogger)
-
+	err = s.createJob(ctx, w.Id, models.JobActionCreate)
 	return s.handleCreateError(ctx, w, err)
 }
 
@@ -177,4 +140,21 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Work
 	}
 
 	return w, err
+}
+
+func isValidWorkspaceName(name string) bool {
+	// The repository name can only contain ASCII letters, digits, and the characters ., -, and _.
+	var validName = regexp.MustCompile(`^[a-zA-Z0-9._-]+$`)
+
+	// Check if the name matches the basic regex
+	if !validName.MatchString(name) {
+		return false
+	}
+
+	// Names starting with a period must have atleast one char appended to it.
+	if name == "." || name == "" {
+		return false
+	}
+
+	return true
 }

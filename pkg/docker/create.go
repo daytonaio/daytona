@@ -208,8 +208,8 @@ func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateWorkspaceOptions,
 		ContainerRegistry:   opts.Cr,
 		EnvVars:             opts.Workspace.EnvVars,
 		IdLabels: map[string]string{
-			"daytona.target.id":      opts.Workspace.TargetId,
-			"daytona.workspace.name": opts.Workspace.Name,
+			"daytona.target.id":    opts.Workspace.TargetId,
+			"daytona.workspace.id": opts.Workspace.Id,
 		},
 		Prebuild: true,
 	}
