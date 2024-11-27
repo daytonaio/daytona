@@ -92,6 +92,10 @@ var GitProviderAddCmd = &cobra.Command{
 					return fmt.Errorf("username is required for '%s' provider", providerId)
 				}
 				setGitProviderConfig.Username = &usernameFlag
+			} else {
+				if usernameFlag != "" {
+					return fmt.Errorf("username is not required for '%s' provider", providerId)
+				}
 			}
 
 			if gitprovider_view.ProviderRequiresApiUrl(providerId) {
@@ -99,6 +103,10 @@ var GitProviderAddCmd = &cobra.Command{
 					return fmt.Errorf("base API URL is required for '%s' provider", providerId)
 				}
 				setGitProviderConfig.BaseApiUrl = &baseApiUrlFlag
+			} else {
+				if baseApiUrlFlag != "" {
+					return fmt.Errorf("base API URL is not required for '%s' provider", providerId)
+				}
 			}
 
 			if signingMethodFlag != "" || signingKeyFlag != "" {
