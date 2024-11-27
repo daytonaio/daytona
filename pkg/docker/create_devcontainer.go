@@ -94,6 +94,11 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		return "", "", err
 	}
 
+	err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
+	if err != nil {
+		return "", "", err
+	}
+
 	workspaceFolder := config.Workspace.WorkspaceFolder
 	if workspaceFolder == "" {
 		return "", "", errors.New("unable to determine workspace folder from devcontainer configuration")
@@ -185,12 +190,12 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			}
 		}
 
-		options, err := cli.NewProjectOptions(composePaths, cli.WithOsEnv, cli.WithDotEnv)
+		options, err := cli.NewProjectOptions(composePaths, cli.WithEnvFiles(), cli.WithOsEnv, cli.WithDotEnv)
 		if err != nil {
 			return "", "", err
 		}
 
-		project, err := cli.ProjectFromOptions(ctx, options)
+		project, err := options.LoadProject(ctx)
 		if err != nil {
 			return "", "", err
 		}
@@ -280,11 +285,6 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		devcontainerCmd = append(devcontainerCmd, "--prebuild")
 	}
 
-	err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
-	if err != nil {
-		return "", "", err
-	}
-
 	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), &opts, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
@@ -349,6 +349,7 @@ func (d *DockerClient) ensureDockerSockForward(builderImage string, builderConta
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      builderImage,
 		Entrypoint: []string{"socat"},
+		User:       "root",
 		Cmd:        []string{"tcp-listen:2375,fork,reuseaddr", "unix-connect:/var/run/docker.sock"},
 	}, &container.HostConfig{
 		Privileged: true,

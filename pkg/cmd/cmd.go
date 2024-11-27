@@ -60,6 +60,7 @@ func Execute() error {
 	rootCmd.AddCommand(DeleteCmd)
 	rootCmd.AddCommand(ProjectConfigCmd)
 	rootCmd.AddCommand(ServeCmd)
+	rootCmd.AddCommand(DaemonServeCmd)
 	rootCmd.AddCommand(ServerCmd)
 	rootCmd.AddCommand(ApiKeyCmd)
 	rootCmd.AddCommand(ContainerRegistryCmd)
@@ -237,10 +238,8 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 
 	cmd, flags, isCompletion, err := validateCommands(rootCmd, os.Args[1:])
 	if err != nil && !isCompletion {
-		if telemetryEnabled {
+		if telemetryEnabled && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
 			props := GetCmdTelemetryData(cmd, flags)
-			props["command"] = os.Args[1]
-			props["called_as"] = os.Args[1]
 			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
 			if err != nil {
 				log.Trace(err)
@@ -251,7 +250,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		return telemetryService, cmd, flags, isCompletion, err
 	}
 
-	if telemetryEnabled && !isCompletion {
+	if telemetryEnabled && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") && !isCompletion {
 		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
 		if err != nil {
 			log.Trace(err)
@@ -282,7 +281,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 }
 
 func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time, flags []string) {
-	if telemetryService != nil {
+	if telemetryService != nil && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
 		execTime := endTime.Sub(startTime)
 		props := GetCmdTelemetryData(cmd, flags)
 		props["exec time (µs)"] = execTime.Microseconds()
