@@ -65,7 +65,7 @@ var GitProviderAddCmd = &cobra.Command{
 				for _, gp := range supportedProviders {
 					supprotedProvidersString += fmt.Sprintf("%s  ", gp.Id)
 				}
-				return fmt.Errorf("Invalid git provider %s .",gitProviderFlag)
+				return fmt.Errorf("Invalid git provider %s .", gitProviderFlag)
 			}
 			if tokenFlag == "" {
 				return fmt.Errorf("Token is required")
