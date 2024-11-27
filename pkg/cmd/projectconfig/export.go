@@ -44,8 +44,14 @@ var projectConfigExportCmd = &cobra.Command{
 				return nil
 			}
 
+			var pbFlag bool
+
 			for i := range projectConfigs {
 				projectConfigs[i].GitProviderConfigId = nil
+				if projectConfigs[i].Prebuilds != nil {
+					projectConfigs[i].Prebuilds = nil
+					pbFlag = true
+				}
 			}
 
 			data, err := json.MarshalIndent(projectConfigs, "", "  ")
@@ -54,6 +60,10 @@ var projectConfigExportCmd = &cobra.Command{
 			}
 
 			fmt.Println(string(data))
+
+			if pbFlag {
+				views.RenderContainerLayout("Prebuilds have been removed from your configs.")
+			}
 
 			if err := clipboard.WriteAll(string(data)); err == nil {
 				output = "The configs have been copied to your clipboard."
@@ -89,6 +99,10 @@ var projectConfigExportCmd = &cobra.Command{
 		}
 
 		selectedProjectConfig.GitProviderConfigId = nil
+		if selectedProjectConfig.Prebuilds != nil {
+			selectedProjectConfig.Prebuilds = nil
+			views.RenderContainerLayout("Prebuilds have been removed from the config.")
+		}
 
 		data, err := json.MarshalIndent(selectedProjectConfig, "", "  ")
 		if err != nil {
