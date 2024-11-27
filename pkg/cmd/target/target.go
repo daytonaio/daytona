@@ -19,4 +19,5 @@ func init() {
 	TargetCmd.AddCommand(TargetSetCmd)
 	TargetCmd.AddCommand(targetRemoveCmd)
 	TargetCmd.AddCommand(targetSetDefaultCmd)
+	TargetSetCmd.Flags().StringVarP(&pipeFile, "pipe", "p", "", "Path to JSON file for target configuration")
 }

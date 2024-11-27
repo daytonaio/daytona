@@ -5,8 +5,10 @@ package target
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
@@ -24,6 +26,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var pipeFile string
+
 var TargetSetCmd = &cobra.Command{
 	Use:     "set",
 	Short:   "Set provider target",
@@ -32,6 +36,10 @@ var TargetSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var isNewProvider bool
+
+		if pipeFile != "" {
+			return PipeTargetInputs(pipeFile)
+		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -168,4 +176,98 @@ var TargetSetCmd = &cobra.Command{
 		views.RenderInfoMessage("Target set successfully and will be used by default")
 		return nil
 	},
+}
+
+func PipeTargetInputs(filePath string) error {
+	ctx := context.Background()
+
+	apiClient, err := apiclient_util.GetApiClient(nil)
+	if err != nil {
+		return err
+	}
+	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
+		RegistryUrl: serverConfig.RegistryUrl,
+	}).GetProvidersManifest()
+	if err != nil {
+		log.Error(err)
+	}
+
+	var latestProviders []apiclient.Provider
+	if providersManifest != nil {
+		providersManifestLatest := providersManifest.GetLatestVersions()
+		if providersManifestLatest == nil {
+			return errors.New("could not get latest provider versions")
+		}
+
+		latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+	} else {
+		fmt.Println("Could not get provider manifest. Can't check for new providers to install")
+	}
+	providerList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+	if err != nil {
+		return err
+	}
+
+	selectedProvider, err := provider_view.GetProviderFromPrompt(providerList, "Choose a Provider", false)
+	if err != nil {
+		if common.IsCtrlCAbort(err) {
+			return nil
+		} else {
+			return err
+		}
+	}
+	if selectedProvider == nil {
+		return errors.New("no provider selected")
+	}
+	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+		if providersManifest == nil {
+			return errors.New("could not get providers manifest")
+		}
+		err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
+		if err != nil {
+			return err
+		}
+	}
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return fmt.Errorf("failed to read file %s: %w", filePath, err)
+	}
+	var selectedTarget *target_view.TargetView
+	err = ParseJSON(data, &selectedTarget)
+	if err != nil {
+		return fmt.Errorf("failed to parse file %s: %w", filePath, err)
+	}
+
+	if selectedTarget.Name == "" {
+		return errors.New("invalid file: 'name' field is required")
+	}
+	if selectedTarget.Options == "" {
+		selectedTarget.Options = "{}"
+	}
+	targetData := apiclient.CreateProviderTargetDTO{
+		Name:    selectedTarget.Name,
+		Options: selectedTarget.Options,
+		ProviderInfo: apiclient.ProviderProviderInfo{
+			Name:    selectedProvider.Name,
+			Version: selectedProvider.Version,
+		},
+	}
+	res, err = apiClient.TargetAPI.SetTarget(ctx).Target(targetData).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+	views.RenderInfoMessage("Target set successfully and will be used by default")
+	return nil
+}
+
+func ParseJSON(data []byte, v interface{}) error {
+	if err := json.Unmarshal(data, v); err == nil {
+		return nil
+	}
+	return errors.New("input is not a valid JSON")
 }
