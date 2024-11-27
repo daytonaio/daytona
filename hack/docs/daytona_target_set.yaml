@@ -1,6 +1,10 @@
 name: daytona target set
 synopsis: Set provider target
 usage: daytona target set [flags]
+options:
+    - name: pipe
+      shorthand: p
+      usage: Path to JSON file for target configuration
 inherited_options:
     - name: help
       default_value: "false"
