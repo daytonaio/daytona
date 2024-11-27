@@ -67,7 +67,7 @@ var GitProviderAddCmd = &cobra.Command{
 
 			if providerId == "" {
 				supportedProvidersStr := strings.Join(supportedProviderIds, ", ")
-				return fmt.Errorf("'%s' is invalid or not a supported git provider.\nSupported providers are: %s", args[0], strings.TrimSuffix(supportedProvidersStr, ", "))
+				return fmt.Errorf("'%s' is invalid or not a supported git provider.\nSupported providers are: %s", args[0], supportedProvidersStr)
 			}
 
 			if tokenFlag == "" {
