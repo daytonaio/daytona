@@ -9,8 +9,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/info"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -54,7 +54,7 @@ var InfoCmd = &cobra.Command{
 			}
 
 		} else {
-			ws, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0], true)
 			if err != nil {
 				return err
 			}

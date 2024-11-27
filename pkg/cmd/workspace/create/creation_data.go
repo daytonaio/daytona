@@ -16,7 +16,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_common "github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -250,7 +250,7 @@ func GetBranchFromWorkspaceConfig(ctx context.Context, workspaceConfig *apiclien
 	}, nil
 }
 
-func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags workspace_common.WorkspaceConfigurationFlags) (*apiclient.CreateWorkspaceDTO, error) {
+func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags cmd_common.WorkspaceConfigurationFlags) (*apiclient.CreateWorkspaceDTO, error) {
 	workspace := &apiclient.CreateWorkspaceDTO{
 		GitProviderConfigId: workspaceConfigurationFlags.GitProviderConfig,
 		BuildConfig:         &apiclient.BuildConfig{},

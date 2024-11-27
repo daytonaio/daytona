@@ -4,6 +4,9 @@
 package models
 
 import (
+	"time"
+
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
@@ -18,15 +21,65 @@ type Workspace struct {
 	TargetId            string                     `json:"targetId" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
 	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
 	ApiKey              string                     `json:"-"`
-	State               *WorkspaceState            `json:"state,omitempty" validate:"optional" gorm:"serializer:json"`
+	Metadata            *WorkspaceMetadata         `gorm:"foreignKey:WorkspaceId;references:Id" validate:"optional"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
+	LastJob             *Job                       `gorm:"foreignKey:ResourceId;references:Id"`
 } // @name Workspace
+
+type WorkspaceMetadata struct {
+	WorkspaceId string     `json:"workspaceId" validate:"required" gorm:"primaryKey;foreignKey:WorkspaceId;references:Id"`
+	UpdatedAt   time.Time  `json:"updatedAt" validate:"required"`
+	Uptime      uint64     `json:"uptime" validate:"required"`
+	GitStatus   *GitStatus `json:"gitStatus" validate:"optional" gorm:"serializer:json"`
+} // @name WorkspaceMetadata
+
+type ResourceState struct {
+	Name      ResourceStateName `json:"name" validate:"required"`
+	Error     *string           `json:"error" validate:"optional"`
+	UpdatedAt time.Time         `json:"updatedAt" validate:"required"`
+} // @name ResourceState
+
+type ResourceStateName string
+
+const (
+	ResourceStateNameUndefined           ResourceStateName = "undefined"
+	ResourceStateNamePendingCreate       ResourceStateName = "pending-create"
+	ResourceStateNameCreating            ResourceStateName = "creating"
+	ResourceStateNamePendingStart        ResourceStateName = "pending-start"
+	ResourceStateNameStarting            ResourceStateName = "starting"
+	ResourceStateNameStarted             ResourceStateName = "started"
+	ResourceStateNamePendingStop         ResourceStateName = "pending-stop"
+	ResourceStateNameStopping            ResourceStateName = "stopping"
+	ResourceStateNameStopped             ResourceStateName = "stopped"
+	ResourceStateNamePendingRestart      ResourceStateName = "pending-restart"
+	ResourceStateNameError               ResourceStateName = "error"
+	ResourceStateNameUnresponsive        ResourceStateName = "unresponsive"
+	ResourceStateNamePendingDelete       ResourceStateName = "pending-delete"
+	ResourceStateNamePendingForcedDelete ResourceStateName = "pending-forced-delete"
+	ResourceStateNameDeleting            ResourceStateName = "deleting"
+	ResourceStateNameDeleted             ResourceStateName = "deleted"
+)
 
 func (w *Workspace) WorkspaceFolderName() string {
 	if w.Repository != nil {
 		return w.Repository.Name
 	}
 	return w.Name
+}
+
+func (w *Workspace) GetState() ResourceState {
+	state := getResourceStateFromJob(w.LastJob)
+
+	// If the workspace should be running, check if it is unresponsive
+	if state.Name == ResourceStateNameStarted {
+		if w.Metadata != nil && time.Since(w.Metadata.UpdatedAt) > AGENT_UNRESPONSIVE_THRESHOLD {
+			state.Name = ResourceStateNameUnresponsive
+			state.Error = util.Pointer("Workspace is unresponsive")
+			state.UpdatedAt = w.Metadata.UpdatedAt
+		}
+	}
+
+	return state
 }
 
 type BuildConfig struct {
@@ -50,12 +103,6 @@ type WorkspaceInfo struct {
 	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
 	TargetId         string `json:"targetId" validate:"required"`
 } // @name WorkspaceInfo
-
-type WorkspaceState struct {
-	UpdatedAt string     `json:"updatedAt" validate:"required"`
-	Uptime    uint64     `json:"uptime" validate:"required"`
-	GitStatus *GitStatus `json:"gitStatus" validate:"optional"`
-} // @name WorkspaceState
 
 type GitStatus struct {
 	CurrentBranch   string        `json:"currentBranch" validate:"required"`

@@ -516,34 +516,34 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetWorkspaceStateRequest struct {
+type ApiSetWorkspaceMetadataRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
-	setState    *SetWorkspaceState
+	setMetadata *SetWorkspaceMetadata
 }
 
-// Set State
-func (r ApiSetWorkspaceStateRequest) SetState(setState SetWorkspaceState) ApiSetWorkspaceStateRequest {
-	r.setState = &setState
+// Set Metadata
+func (r ApiSetWorkspaceMetadataRequest) SetMetadata(setMetadata SetWorkspaceMetadata) ApiSetWorkspaceMetadataRequest {
+	r.setMetadata = &setMetadata
 	return r
 }
 
-func (r ApiSetWorkspaceStateRequest) Execute() (*http.Response, error) {
-	return r.ApiService.SetWorkspaceStateExecute(r)
+func (r ApiSetWorkspaceMetadataRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetWorkspaceMetadataExecute(r)
 }
 
 /*
-SetWorkspaceState Set workspace state
+SetWorkspaceMetadata Set workspace metadata
 
-Set workspace state
+Set workspace metadata
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID
-	@return ApiSetWorkspaceStateRequest
+	@return ApiSetWorkspaceMetadataRequest
 */
-func (a *WorkspaceAPIService) SetWorkspaceState(ctx context.Context, workspaceId string) ApiSetWorkspaceStateRequest {
-	return ApiSetWorkspaceStateRequest{
+func (a *WorkspaceAPIService) SetWorkspaceMetadata(ctx context.Context, workspaceId string) ApiSetWorkspaceMetadataRequest {
+	return ApiSetWorkspaceMetadataRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
@@ -551,26 +551,26 @@ func (a *WorkspaceAPIService) SetWorkspaceState(ctx context.Context, workspaceId
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) SetWorkspaceStateExecute(r ApiSetWorkspaceStateRequest) (*http.Response, error) {
+func (a *WorkspaceAPIService) SetWorkspaceMetadataExecute(r ApiSetWorkspaceMetadataRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPost
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetWorkspaceState")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetWorkspaceMetadata")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/state"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/metadata"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.setState == nil {
-		return nil, reportError("setState is required and must be specified")
+	if r.setMetadata == nil {
+		return nil, reportError("setMetadata is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -591,7 +591,7 @@ func (a *WorkspaceAPIService) SetWorkspaceStateExecute(r ApiSetWorkspaceStateReq
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.setState
+	localVarPostBody = r.setMetadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

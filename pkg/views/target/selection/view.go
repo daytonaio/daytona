@@ -35,12 +35,12 @@ var statusMessageDangerStyle = lipgloss.NewStyle().Bold(true).
 	Render
 
 type item[T any] struct {
-	id, title, desc  string
-	target           *apiclient.TargetDTO
-	choiceProperty   T
-	isMarked         bool
-	isMultipleSelect bool
-	action           string
+	id, title, desc, state string
+	target                 *apiclient.TargetDTO
+	choiceProperty         T
+	isMarked               bool
+	isMultipleSelect       bool
+	action                 string
 }
 
 func (i item[T]) Title() string {
@@ -55,6 +55,7 @@ func (i item[T]) Title() string {
 
 func (i item[T]) Id() string          { return i.id }
 func (i item[T]) Description() string { return i.desc }
+func (i item[T]) State() string       { return i.state }
 func (i item[T]) FilterValue() string { return i.title }
 
 type model[T any] struct {
@@ -153,11 +154,11 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 	baseStyles := lipgloss.NewStyle().Padding(0, 0, 0, 2)
 
 	title := baseStyles.Render(i.Title())
-	idWithTargetConfigString := i.Id()
+	idLabel := i.Id()
 	if i.Id() == NewTargetIdentifier {
-		idWithTargetConfigString = ""
+		idLabel = ""
 	}
-	idWithTargetConfig := baseStyles.Foreground(views.Gray).Render(idWithTargetConfigString)
+	id := baseStyles.Foreground(views.Gray).Render(idLabel)
 	description := baseStyles.Render(i.Description())
 
 	// Add the created/updated time if it's available
@@ -165,20 +166,23 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 	timeStyles := lipgloss.NewStyle().
 		Align(lipgloss.Right).
 		Width(timeWidth)
-	timeString := timeStyles.Render("")
+	stateLabel := timeStyles.Render("")
+	if i.State() != "" {
+		stateLabel = timeStyles.Render(i.State())
+	}
 
 	// Adjust styles as the user moves through the menu
 	if isSelected {
 		title = selectedStyles.Foreground(views.Green).Render(i.Title())
-		idWithTargetConfig = selectedStyles.Foreground(views.Gray).Render(idWithTargetConfigString)
+		id = selectedStyles.Foreground(views.Gray).Render(idLabel)
 		description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
-		timeString = timeStyles.Foreground(views.DimmedGreen).Render(timeString)
+		stateLabel = timeStyles.Foreground(views.DimmedGreen).Render(stateLabel)
 	}
 
 	// Render to the terminal
-	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, title, timeString))
+	s.WriteString(lipgloss.JoinHorizontal(lipgloss.Bottom, title, stateLabel))
 	s.WriteRune('\n')
-	s.WriteString(idWithTargetConfig)
+	s.WriteString(id)
 	s.WriteRune('\n')
 	s.WriteString(description)
 	s.WriteRune('\n')

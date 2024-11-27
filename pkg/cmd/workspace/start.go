@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -63,7 +63,7 @@ var StartCmd = &cobra.Command{
 			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Start")
 		} else {
 			for _, arg := range args {
-				workspace, err := apiclient_util.GetWorkspace(arg, false)
+				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
@@ -130,7 +130,7 @@ var StartCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return common.GetAllWorkspacesByState(common.WORKSPACE_STATE_STOPPED)
+		return common.GetAllWorkspacesByState(apiclient.ResourceStateNameStopped)
 	},
 }
 
@@ -197,7 +197,15 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspac
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
+
+	err = common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStarted)
+	if err != nil {
+		stopLogs()
+		return err
+	}
+
 	time.Sleep(100 * time.Millisecond)
+
 	stopLogs()
 	return nil
 }

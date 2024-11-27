@@ -5,7 +5,6 @@ package toolbox
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -15,8 +14,10 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/config"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -47,9 +48,9 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, true)
+	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
-		if errors.Is(err, workspaces.ErrWorkspaceNotFound) {
+		if stores.IsWorkspaceNotFound(err) {
 			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
@@ -60,7 +61,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 	var client *http.Client
 	var websocketDialer *websocket.Dialer
 
-	workspaceHostname := w.Hostname()
+	workspaceHostname := common.GetWorkspaceHostname(w.Id)
 	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/toolbox/", workspaceId), "", 1)
 	query := ctx.Request.URL.Query().Encode()
 

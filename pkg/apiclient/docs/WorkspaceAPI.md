@@ -8,7 +8,7 @@ Method | HTTP request | Description
 [**GetWorkspace**](WorkspaceAPI.md#GetWorkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 [**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces
 [**RemoveWorkspace**](WorkspaceAPI.md#RemoveWorkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
-[**SetWorkspaceState**](WorkspaceAPI.md#SetWorkspaceState) | **Post** /workspace/{workspaceId}/state | Set workspace state
+[**SetWorkspaceMetadata**](WorkspaceAPI.md#SetWorkspaceMetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 [**StartWorkspace**](WorkspaceAPI.md#StartWorkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 [**StopWorkspace**](WorkspaceAPI.md#StopWorkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 
@@ -288,11 +288,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## SetWorkspaceState
+## SetWorkspaceMetadata
 
-> SetWorkspaceState(ctx, workspaceId).SetState(setState).Execute()
+> SetWorkspaceMetadata(ctx, workspaceId).SetMetadata(setMetadata).Execute()
 
-Set workspace state
+Set workspace metadata
 
 
 
@@ -310,13 +310,13 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID
-	setState := *openapiclient.NewSetWorkspaceState(int32(123)) // SetWorkspaceState | Set State
+	setMetadata := *openapiclient.NewSetWorkspaceMetadata(int32(123)) // SetWorkspaceMetadata | Set Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceAPI.SetWorkspaceState(context.Background(), workspaceId).SetState(setState).Execute()
+	r, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), workspaceId).SetMetadata(setMetadata).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.SetWorkspaceState``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.SetWorkspaceMetadata``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -332,13 +332,13 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiSetWorkspaceStateRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSetWorkspaceMetadataRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **setState** | [**SetWorkspaceState**](SetWorkspaceState.md) | Set State | 
+ **setMetadata** | [**SetWorkspaceMetadata**](SetWorkspaceMetadata.md) | Set Metadata | 
 
 ### Return type
 
