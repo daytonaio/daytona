@@ -4,13 +4,11 @@
 package target
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/targets"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/gin-gonic/gin"
 )
@@ -38,10 +36,6 @@ func CreateTarget(ctx *gin.Context) {
 
 	t, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
 	if err != nil {
-		if errors.Is(err, targets.ErrTargetAlreadyExists) {
-			ctx.AbortWithError(http.StatusConflict, fmt.Errorf("target already exists: %w", err))
-			return
-		}
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create target: %w", err))
 		return
 	}

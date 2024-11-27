@@ -11,6 +11,7 @@ import (
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -26,7 +27,6 @@ var deleteCmd = &cobra.Command{
 	Short:   "Delete a target",
 	Aliases: []string{"remove", "rm"},
 	RunE: func(cmd *cobra.Command, args []string) error {
-
 		ctx := context.Background()
 
 		var targetDeleteList = []*apiclient.TargetDTO{}
@@ -92,7 +92,7 @@ var deleteCmd = &cobra.Command{
 			}
 		} else {
 			for _, arg := range args {
-				target, err := apiclient_util.GetTarget(arg, false)
+				target, _, err := apiclient_util.GetTarget(arg, false)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
@@ -126,7 +126,7 @@ var deleteCmd = &cobra.Command{
 			fmt.Println("Operation canceled.")
 		} else {
 			for _, target := range targetDeleteList {
-				err := RemoveTarget(ctx, apiClient, target, workspaceList, forceFlag)
+				err := DeleteTarget(ctx, apiClient, target, workspaceList, forceFlag)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", target.Name, err))
 				} else {
@@ -137,7 +137,7 @@ var deleteCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getTargetNameCompletions()
+		return getAllTargetsByState(nil)
 	},
 }
 
@@ -160,7 +160,7 @@ func DeleteAllTargets(workspaceList []apiclient.WorkspaceDTO, force bool) error 
 	}
 
 	for _, target := range targetList {
-		err := RemoveTarget(ctx, apiClient, &target, workspaceList, force)
+		err := DeleteTarget(ctx, apiClient, &target, workspaceList, force)
 		if err != nil {
 			log.Errorf("Failed to delete target %s: %v", target.Name, err)
 			continue
@@ -170,7 +170,7 @@ func DeleteAllTargets(workspaceList []apiclient.WorkspaceDTO, force bool) error 
 	return nil
 }
 
-func RemoveTarget(ctx context.Context, apiClient *apiclient.APIClient, target *apiclient.TargetDTO, workspaceList []apiclient.WorkspaceDTO, force bool) error {
+func DeleteTarget(ctx context.Context, apiClient *apiclient.APIClient, target *apiclient.TargetDTO, workspaceList []apiclient.WorkspaceDTO, force bool) error {
 	for _, workspace := range workspaceList {
 		if workspace.TargetId == target.Id {
 			return fmt.Errorf("target '%s' is in use by workspace '%s', please remove workspaces before deleting their target", target.Name, workspace.Name)
@@ -182,6 +182,11 @@ func RemoveTarget(ctx context.Context, apiClient *apiclient.APIClient, target *a
 		res, err := apiClient.TargetAPI.RemoveTarget(ctx, target.Id).Force(force).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		err = cmd_common.AwaitTargetDeleted(target.Id)
+		if err != nil {
+			return err
 		}
 
 		return nil

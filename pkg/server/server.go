@@ -30,6 +30,7 @@ type ServerInstanceConfig struct {
 	GitProviderService       services.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       services.IProfileDataService
+	JobService               services.IJobService
 	TelemetryService         telemetry.TelemetryService
 }
 
@@ -60,6 +61,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			GitProviderService:       serverConfig.GitProviderService,
 			ProviderManager:          serverConfig.ProviderManager,
 			ProfileDataService:       serverConfig.ProfileDataService,
+			JobService:               serverConfig.JobService,
 			TelemetryService:         serverConfig.TelemetryService,
 		}
 	}
@@ -83,6 +85,7 @@ type Server struct {
 	GitProviderService       services.IGitProviderService
 	ProviderManager          manager.IProviderManager
 	ProfileDataService       services.IProfileDataService
+	JobService               services.IJobService
 	TelemetryService         telemetry.TelemetryService
 }
 

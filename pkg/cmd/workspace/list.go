@@ -32,7 +32,6 @@ var ListCmd = &cobra.Command{
 		}
 
 		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verbose).Execute()
-
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

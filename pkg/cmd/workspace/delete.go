@@ -13,7 +13,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -86,7 +87,7 @@ var DeleteCmd = &cobra.Command{
 			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
 		} else {
 			for _, arg := range args {
-				workspace, err := apiclient_util.GetWorkspace(arg, false)
+				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
@@ -123,7 +124,7 @@ var DeleteCmd = &cobra.Command{
 			fmt.Println("Operation canceled.")
 		} else {
 			for _, workspace := range workspaceDeleteList {
-				err := RemoveWorkspace(ctx, apiClient, workspace, forceFlag)
+				err := DeleteWorkspace(ctx, apiClient, workspace, forceFlag)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", workspace.Name, err))
 				}
@@ -156,7 +157,7 @@ func DeleteAllWorkspaces(force bool) error {
 	}
 
 	for _, workspace := range workspaceList {
-		err := RemoveWorkspace(ctx, apiClient, &workspace, force)
+		err := DeleteWorkspace(ctx, apiClient, &workspace, force)
 		if err != nil {
 			log.Errorf("Failed to delete workspace %s: %v", workspace.Name, err)
 			continue
@@ -166,7 +167,7 @@ func DeleteAllWorkspaces(force bool) error {
 	return nil
 }
 
-func RemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO, force bool) error {
+func DeleteWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspace *apiclient.WorkspaceDTO, force bool) error {
 	message := fmt.Sprintf("Deleting workspace %s", workspace.Name)
 	err := views_util.WithInlineSpinner(message, func() error {
 		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspace.Id).Force(force).Execute()
@@ -187,6 +188,12 @@ func RemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 		if err != nil {
 			return err
 		}
+
+		err = cmd_common.AwaitWorkspaceDeleted(workspace.Id)
+		if err != nil {
+			return err
+		}
+
 		return nil
 	})
 

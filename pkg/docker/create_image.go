@@ -115,7 +115,7 @@ func GetContainerCreateConfig(workspace *models.Workspace, toolboxApiHostPort *u
 
 	labels := map[string]string{
 		"daytona.target.id":                workspace.TargetId,
-		"daytona.workspace.name":           workspace.Name,
+		"daytona.workspace.id":             workspace.Id,
 		"daytona.workspace.repository.url": workspace.Repository.Url,
 	}
 
@@ -129,7 +129,7 @@ func GetContainerCreateConfig(workspace *models.Workspace, toolboxApiHostPort *u
 	}
 
 	return &container.Config{
-		Hostname:     workspace.Name,
+		Hostname:     workspace.Id,
 		Image:        workspace.Image,
 		Labels:       labels,
 		User:         workspace.User,

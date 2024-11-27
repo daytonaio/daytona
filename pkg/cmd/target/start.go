@@ -12,19 +12,13 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-)
-
-type TargetState string
-
-const (
-	TARGET_STATE_RUNNING TargetState = "Running"
-	TARGET_STATE_STOPPED TargetState = "Unavailable"
 )
 
 var allFlag bool
@@ -86,10 +80,9 @@ var startCmd = &cobra.Command{
 		}
 		return nil
 	},
-	// FIXME: add after adding state to targets
-	// ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	// 	return getAllTargetsByState(TARGET_STATE_STOPPED)
-	// },
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return getAllTargetsByState(util.Pointer(apiclient.ResourceStateNameStopped))
+	},
 }
 
 func init() {
@@ -121,28 +114,7 @@ func startAllTargets() error {
 	return nil
 }
 
-// FIXME: add target completions
-// func getWorkspaceNameCompletions(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-// 	ctx := context.Background()
-// 	apiClient, err := apiclient_util.GetApiClient(nil)
-// 	if err != nil {
-// 		return nil, cobra.ShellCompDirectiveDefault
-// 	}
-
-// 	targetId := args[0]
-// 	target, _, err := apiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
-// 	if err != nil {
-// 		return nil, cobra.ShellCompDirectiveDefault
-// 	}
-
-// 	var choices []string
-// 	for _, workspace := range target.Workspaces {
-// 		choices = append(choices, workspace.Name)
-// 	}
-// 	return choices, cobra.ShellCompDirectiveDefault
-// }
-
-func getTargetNameCompletions() ([]string, cobra.ShellCompDirective) {
+func getAllTargetsByState(state *apiclient.ModelsResourceStateName) ([]string, cobra.ShellCompDirective) {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -155,45 +127,24 @@ func getTargetNameCompletions() ([]string, cobra.ShellCompDirective) {
 	}
 
 	var choices []string
-	for _, v := range targetList {
-		choices = append(choices, v.Name)
+	for _, target := range targetList {
+		if state == nil {
+			choices = append(choices, target.Name)
+			break
+		} else {
+			if *state == apiclient.ResourceStateNameStarted {
+				choices = append(choices, target.Name)
+				break
+			}
+			if *state == apiclient.ResourceStateNameStopped {
+				choices = append(choices, target.Name)
+				break
+			}
+		}
 	}
 
 	return choices, cobra.ShellCompDirectiveNoFileComp
 }
-
-// FIXME: fix this after adding state to targets
-// func getAllTargetsByState(state TargetState) ([]string, cobra.ShellCompDirective) {
-// 	ctx := context.Background()
-// 	apiClient, err := apiclient_util.GetApiClient(nil)
-// 	if err != nil {
-// 		return nil, cobra.ShellCompDirectiveNoFileComp
-// 	}
-
-// 	targetList, _, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
-// 	if err != nil {
-// 		return nil, cobra.ShellCompDirectiveNoFileComp
-// 	}
-
-// 	var choices []string
-// 	for _, target := range targetList {
-// 		for _, workspace := range target.Workspaces {
-// 			if workspace.State == nil {
-// 				continue
-// 			}
-// 			if state == TARGET_STATE_RUNNING && workspace.State.Uptime != 0 {
-// 				choices = append(choices, target.Name)
-// 				break
-// 			}
-// 			if state == TARGET_STATE_STOPPED && workspace.State.Uptime == 0 {
-// 				choices = append(choices, target.Name)
-// 				break
-// 			}
-// 		}
-// 	}
-
-// 	return choices, cobra.ShellCompDirectiveNoFileComp
-// }
 
 func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 	ctx := context.Background()
@@ -213,7 +164,7 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 		return err
 	}
 
-	target, err := apiclient_util.GetTarget(targetId, false)
+	target, _, err := apiclient_util.GetTarget(targetId, false)
 	if err != nil {
 		return err
 	}
@@ -226,12 +177,16 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 		Follow:        util.Pointer(true),
 		From:          &from,
 	})
+
 	res, err := apiClient.TargetAPI.StartTarget(ctx, targetId).Execute()
 	if err != nil {
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
+
+	err = cmd_common.AwaitTargetState(targetId, apiclient.ResourceStateNameStarted)
+
 	time.Sleep(100 * time.Millisecond)
 	stopLogs()
-	return nil
+	return err
 }
