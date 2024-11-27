@@ -860,6 +860,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/job": {
+            "get": {
+                "description": "List jobs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "job"
+                ],
+                "summary": "List jobs",
+                "operationId": "ListJobs",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Job"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/profile": {
             "get": {
                 "description": "Get profile data",
@@ -1343,6 +1367,39 @@ const docTemplate = `{
                         "description": "Force",
                         "name": "force",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/metadata": {
+            "post": {
+                "description": "Set target metadata",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target metadata",
+                "operationId": "SetTargetMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set Metadata",
+                        "name": "setMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetTargetMetadata"
+                        }
                     }
                 ],
                 "responses": {
@@ -1908,6 +1965,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}/metadata": {
+            "post": {
+                "description": "Set workspace metadata",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Set workspace metadata",
+                "operationId": "SetWorkspaceMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Set Metadata",
+                        "name": "setMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SetWorkspaceMetadata"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/start": {
             "post": {
                 "description": "Start workspace",
@@ -1923,39 +2013,6 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/workspace/{workspaceId}/state": {
-            "post": {
-                "description": "Set workspace state",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Set workspace state",
-                "operationId": "SetWorkspaceState",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Set State",
-                        "name": "setState",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SetWorkspaceState"
-                        }
                     }
                 ],
                 "responses": {
@@ -4021,6 +4078,59 @@ const docTemplate = `{
                 }
             }
         },
+        "Job": {
+            "type": "object",
+            "required": [
+                "action",
+                "createdAt",
+                "id",
+                "resourceId",
+                "resourceType",
+                "state",
+                "updatedAt"
+            ],
+            "properties": {
+                "action": {
+                    "$ref": "#/definitions/models.JobAction"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "resourceId": {
+                    "type": "string"
+                },
+                "resourceType": {
+                    "$ref": "#/definitions/ResourceType"
+                },
+                "state": {
+                    "$ref": "#/definitions/JobState"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "JobState": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "error",
+                "success"
+            ],
+            "x-enum-varnames": [
+                "JobStatePending",
+                "JobStateRunning",
+                "JobStateError",
+                "JobStateSuccess"
+            ]
+        },
         "ListBranchResponse": {
             "type": "object",
             "required": [
@@ -4378,6 +4488,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ResourceState": {
+            "type": "object",
+            "required": [
+                "name",
+                "updatedAt"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "name": {
+                    "$ref": "#/definitions/models.ResourceStateName"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "ResourceType": {
+            "type": "string",
+            "enum": [
+                "workspace",
+                "target"
+            ],
+            "x-enum-varnames": [
+                "ResourceTypeWorkspace",
+                "ResourceTypeTarget"
+            ]
+        },
         "Sample": {
             "type": "object",
             "required": [
@@ -4516,7 +4655,18 @@ const docTemplate = `{
                 }
             }
         },
-        "SetWorkspaceState": {
+        "SetTargetMetadata": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "SetWorkspaceMetadata": {
             "type": "object",
             "required": [
                 "uptime"
@@ -4568,6 +4718,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "default",
+                "envVars",
                 "id",
                 "name",
                 "options",
@@ -4577,8 +4728,20 @@ const docTemplate = `{
                 "default": {
                     "type": "boolean"
                 },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "string"
+                },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/TargetMetadata"
                 },
                 "name": {
                     "type": "string"
@@ -4665,20 +4828,34 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "default",
+                "envVars",
                 "id",
                 "name",
                 "options",
-                "providerInfo"
+                "providerInfo",
+                "state"
             ],
             "properties": {
                 "default": {
                     "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "id": {
                     "type": "string"
                 },
                 "info": {
                     "$ref": "#/definitions/TargetInfo"
+                },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/TargetMetadata"
                 },
                 "name": {
                     "type": "string"
@@ -4689,6 +4866,9 @@ const docTemplate = `{
                 },
                 "providerInfo": {
                     "$ref": "#/definitions/TargetProviderInfo"
+                },
+                "state": {
+                    "$ref": "#/definitions/ResourceState"
                 },
                 "workspaces": {
                     "type": "array",
@@ -4709,6 +4889,25 @@ const docTemplate = `{
                 },
                 "providerMetadata": {
                     "type": "string"
+                }
+            }
+        },
+        "TargetMetadata": {
+            "type": "object",
+            "required": [
+                "targetId",
+                "updatedAt",
+                "uptime"
+            ],
+            "properties": {
+                "targetId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
                 }
             }
         },
@@ -4761,14 +4960,17 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/WorkspaceMetadata"
+                },
                 "name": {
                     "type": "string"
                 },
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/WorkspaceState"
                 },
                 "target": {
                     "$ref": "#/definitions/Target"
@@ -4835,6 +5037,7 @@ const docTemplate = `{
                 "image",
                 "name",
                 "repository",
+                "state",
                 "target",
                 "targetId",
                 "user"
@@ -4861,6 +5064,12 @@ const docTemplate = `{
                 "info": {
                     "$ref": "#/definitions/WorkspaceInfo"
                 },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/WorkspaceMetadata"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -4868,7 +5077,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/GitRepository"
                 },
                 "state": {
-                    "$ref": "#/definitions/WorkspaceState"
+                    "$ref": "#/definitions/ResourceState"
                 },
                 "target": {
                     "$ref": "#/definitions/Target"
@@ -4915,11 +5124,12 @@ const docTemplate = `{
                 }
             }
         },
-        "WorkspaceState": {
+        "WorkspaceMetadata": {
             "type": "object",
             "required": [
                 "updatedAt",
-                "uptime"
+                "uptime",
+                "workspaceId"
             ],
             "properties": {
                 "gitStatus": {
@@ -4930,6 +5140,9 @@ const docTemplate = `{
                 },
                 "uptime": {
                     "type": "integer"
+                },
+                "workspaceId": {
+                    "type": "string"
                 }
             }
         },
@@ -4967,6 +5180,64 @@ const docTemplate = `{
                 "BuildStatePendingDelete",
                 "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
+            ]
+        },
+        "models.JobAction": {
+            "type": "string",
+            "enum": [
+                "create",
+                "start",
+                "stop",
+                "restart",
+                "delete",
+                "force-delete"
+            ],
+            "x-enum-varnames": [
+                "JobActionCreate",
+                "JobActionStart",
+                "JobActionStop",
+                "JobActionRestart",
+                "JobActionDelete",
+                "JobActionForceDelete"
+            ]
+        },
+        "models.ResourceStateName": {
+            "type": "string",
+            "enum": [
+                "undefined",
+                "pending-create",
+                "creating",
+                "pending-start",
+                "starting",
+                "started",
+                "pending-stop",
+                "stopping",
+                "stopped",
+                "pending-restart",
+                "error",
+                "unresponsive",
+                "pending-delete",
+                "pending-forced-delete",
+                "deleting",
+                "deleted"
+            ],
+            "x-enum-varnames": [
+                "ResourceStateNameUndefined",
+                "ResourceStateNamePendingCreate",
+                "ResourceStateNameCreating",
+                "ResourceStateNamePendingStart",
+                "ResourceStateNameStarting",
+                "ResourceStateNameStarted",
+                "ResourceStateNamePendingStop",
+                "ResourceStateNameStopping",
+                "ResourceStateNameStopped",
+                "ResourceStateNamePendingRestart",
+                "ResourceStateNameError",
+                "ResourceStateNameUnresponsive",
+                "ResourceStateNamePendingDelete",
+                "ResourceStateNamePendingForcedDelete",
+                "ResourceStateNameDeleting",
+                "ResourceStateNameDeleted"
             ]
         },
         "provider.TargetConfigPropertyType": {

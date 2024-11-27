@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type WorkspaceStore struct {
@@ -24,9 +24,10 @@ func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
 	return &WorkspaceStore{db: db}, nil
 }
 
-func (store *WorkspaceStore) List() ([]*models.Workspace, error) {
+func (s *WorkspaceStore) List() ([]*models.Workspace, error) {
 	workspaces := []*models.Workspace{}
-	tx := store.db.Preload(clause.Associations).Find(&workspaces)
+	// Order workspace jobs by created_at
+	tx := preloadWorkspaceEntities(s.db).Find(&workspaces)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -34,12 +35,12 @@ func (store *WorkspaceStore) List() ([]*models.Workspace, error) {
 	return workspaces, nil
 }
 
-func (w *WorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
+func (s *WorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
 	workspace := &models.Workspace{}
-	tx := w.db.Preload(clause.Associations).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
+	tx := preloadWorkspaceEntities(s.db).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, workspaces.ErrWorkspaceNotFound
+			return nil, stores.ErrWorkspaceNotFound
 		}
 		return nil, tx.Error
 	}
@@ -47,8 +48,8 @@ func (w *WorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
 	return workspace, nil
 }
 
-func (w *WorkspaceStore) Save(workspace *models.Workspace) error {
-	tx := w.db.Save(workspace)
+func (s *WorkspaceStore) Save(workspace *models.Workspace) error {
+	tx := s.db.Save(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -56,14 +57,18 @@ func (w *WorkspaceStore) Save(workspace *models.Workspace) error {
 	return nil
 }
 
-func (w *WorkspaceStore) Delete(workspace *models.Workspace) error {
-	tx := w.db.Delete(workspace)
+func (s *WorkspaceStore) Delete(workspace *models.Workspace) error {
+	tx := s.db.Delete(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return workspaces.ErrWorkspaceNotFound
+		return stores.ErrWorkspaceNotFound
 	}
 
 	return nil
+}
+
+func preloadWorkspaceEntities(tx *gorm.DB) *gorm.DB {
+	return tx.Preload(clause.Associations).Preload("LastJob", preloadLastJob)
 }

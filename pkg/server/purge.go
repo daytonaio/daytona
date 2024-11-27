@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
@@ -36,7 +37,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		return []error{err}
 	}
 
-	targets, err := s.TargetService.ListTargets(ctx, nil, false)
+	targets, err := s.TargetService.ListTargets(ctx, nil, services.TargetRetrievalParams{})
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {

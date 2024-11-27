@@ -9,9 +9,10 @@ Name | Type | Description | Notes
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
 **Image** | **string** |  | 
+**LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
-**State** | Pointer to [**WorkspaceState**](WorkspaceState.md) |  | [optional] 
 **Target** | [**Target**](Target.md) |  | 
 **TargetId** | **string** |  | 
 **User** | **string** |  | 
@@ -145,6 +146,56 @@ and a boolean to check if the value has been set.
 SetImage sets Image field to given value.
 
 
+### GetLastJob
+
+`func (o *Workspace) GetLastJob() Job`
+
+GetLastJob returns the LastJob field if non-nil, zero value otherwise.
+
+### GetLastJobOk
+
+`func (o *Workspace) GetLastJobOk() (*Job, bool)`
+
+GetLastJobOk returns a tuple with the LastJob field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJob
+
+`func (o *Workspace) SetLastJob(v Job)`
+
+SetLastJob sets LastJob field to given value.
+
+### HasLastJob
+
+`func (o *Workspace) HasLastJob() bool`
+
+HasLastJob returns a boolean if a field has been set.
+
+### GetMetadata
+
+`func (o *Workspace) GetMetadata() WorkspaceMetadata`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *Workspace) GetMetadataOk() (*WorkspaceMetadata, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *Workspace) SetMetadata(v WorkspaceMetadata)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *Workspace) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
+
 ### GetName
 
 `func (o *Workspace) GetName() string`
@@ -184,31 +235,6 @@ and a boolean to check if the value has been set.
 
 SetRepository sets Repository field to given value.
 
-
-### GetState
-
-`func (o *Workspace) GetState() WorkspaceState`
-
-GetState returns the State field if non-nil, zero value otherwise.
-
-### GetStateOk
-
-`func (o *Workspace) GetStateOk() (*WorkspaceState, bool)`
-
-GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetState
-
-`func (o *Workspace) SetState(v WorkspaceState)`
-
-SetState sets State field to given value.
-
-### HasState
-
-`func (o *Workspace) HasState() bool`
-
-HasState returns a boolean if a field has been set.
 
 ### GetTarget
 

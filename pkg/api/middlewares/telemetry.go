@@ -17,9 +17,10 @@ import (
 )
 
 var ignorePaths = map[string]bool{
-	"/health":                              true,
-	"/target/:targetId/:workspaceId/state": true,
-	"/server/network-key":                  true,
+	"/health":                           true,
+	"/target/:targetId/:metadata":       true,
+	"/workspace/:workspaceId/:metadata": true,
+	"/server/network-key":               true,
 }
 
 func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.HandlerFunc {

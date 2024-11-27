@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var hostModeFlag bool
+var targetModeFlag bool
 
 var AgentCmd = &cobra.Command{
 	Use:   "agent",
@@ -38,8 +38,8 @@ var AgentCmd = &cobra.Command{
 
 		agentMode := config.ModeWorkspace
 
-		if hostModeFlag {
-			agentMode = config.ModeHost
+		if targetModeFlag {
+			agentMode = config.ModeTarget
 		}
 
 		c, err := config.GetConfig(agentMode)
@@ -125,7 +125,7 @@ var AgentCmd = &cobra.Command{
 }
 
 func init() {
-	AgentCmd.Flags().BoolVar(&hostModeFlag, "host", false, "Run the agent in host mode")
+	AgentCmd.Flags().BoolVar(&targetModeFlag, "target", false, "Run the agent in target mode")
 	AgentCmd.AddCommand(logsCmd)
 }
 

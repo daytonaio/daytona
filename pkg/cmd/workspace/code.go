@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 
@@ -14,9 +15,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/common"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 
@@ -68,9 +68,10 @@ var CodeCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			ws, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]), true)
+			var statusCode int
+			ws, statusCode, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]), true)
 			if err != nil {
-				if strings.Contains(err.Error(), workspaces.ErrWorkspaceNotFound.Error()) {
+				if statusCode == http.StatusNotFound {
 					log.Debug(err)
 					return errors.New("workspace not found. You can see all workspace names by running the command `daytona list`")
 				}
@@ -81,7 +82,7 @@ var CodeCmd = &cobra.Command{
 			ideId = create.IdeFlag
 		}
 
-		if ws.State != nil || ws.State.Uptime < 1 {
+		if ws.State.Name == apiclient.ResourceStateNameStopped {
 			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err

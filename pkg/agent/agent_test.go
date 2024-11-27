@@ -28,8 +28,7 @@ var workspace1 = &models.Workspace{
 		Name: "daytona",
 	},
 	TargetId: "123",
-	State: &models.WorkspaceState{
-		UpdatedAt: "123",
+	Metadata: &models.WorkspaceMetadata{
 		Uptime:    148,
 		GitStatus: gitStatus1,
 	},
@@ -108,13 +107,13 @@ func TestAgent(t *testing.T) {
 	})
 }
 
-func TestAgentHostMode(t *testing.T) {
+func TestAgentTargetMode(t *testing.T) {
 	mockGitService := mock_git.NewMockGitService()
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 
 	mockConfig := *mockConfig
-	mockConfig.Mode = config.ModeHost
+	mockConfig.Mode = config.ModeTarget
 
 	// Create a new Agent instance
 	a := &agent.Agent{
@@ -124,8 +123,8 @@ func TestAgentHostMode(t *testing.T) {
 		Tailscale: mockTailscaleServer,
 	}
 
-	t.Run("Start agent in host mode", func(t *testing.T) {
-		mockConfig.Mode = config.ModeHost
+	t.Run("Start agent in target mode", func(t *testing.T) {
+		mockConfig.Mode = config.ModeTarget
 		err := a.Start()
 
 		require.Equal(t, err, mocks.SshServerStartError)

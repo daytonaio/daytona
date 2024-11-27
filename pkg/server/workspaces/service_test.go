@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
@@ -102,7 +101,7 @@ func TestTargetService(t *testing.T) {
 		ApiUrl:    serverApiUrl,
 		ServerUrl: serverUrl,
 		ClientId:  "test-client-id",
-	}, false)
+	})
 
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, "test-client-id")
@@ -161,7 +160,6 @@ func TestTargetService(t *testing.T) {
 		DefaultWorkspaceUser:  defaultWorkspaceUser,
 		Provisioner:           mockProvisioner,
 		LoggerFactory:         logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
-		BuilderImage:          defaultWorkspaceImage,
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
@@ -189,7 +187,7 @@ func TestTargetService(t *testing.T) {
 			ServerUrl:     serverUrl,
 			ServerVersion: serverVersion,
 			ClientId:      "test",
-		}, false)
+		})
 
 		mockProvisioner.On("CreateWorkspace", provisioner.WorkspaceParams{
 			Workspace:                     ws,
@@ -223,7 +221,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("CreateWorkspace fails when workspace already exists", func(t *testing.T) {
 		_, err := service.CreateWorkspace(ctx, createWorkspaceDTO)
 		require.NotNil(t, err)
-		require.Equal(t, workspaces.ErrWorkspaceAlreadyExists, err)
+		require.Equal(t, services.ErrWorkspaceAlreadyExists, err)
 	})
 
 	t.Run("CreateWorkspace fails name validation", func(t *testing.T) {
@@ -232,13 +230,13 @@ func TestTargetService(t *testing.T) {
 
 		_, err := service.CreateWorkspace(ctx, invalidWorkspaceRequest)
 		require.NotNil(t, err)
-		require.Equal(t, workspaces.ErrInvalidWorkspaceName, err)
+		require.Equal(t, services.ErrInvalidWorkspaceName, err)
 	})
 
 	t.Run("GetWorkspace", func(t *testing.T) {
 		mockProvisioner.On("GetWorkspaceInfo", ws, tg).Return(&workspaceInfo, nil)
 
-		w, err := service.GetWorkspace(ctx, ws.Id, true)
+		w, err := service.GetWorkspace(ctx, ws.Id, services.WorkspaceRetrievalParams{Verbose: true})
 
 		require.Nil(t, err)
 		require.NotNil(t, w)
@@ -247,15 +245,15 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetWorkspace fails when workspace not found", func(t *testing.T) {
-		_, err := service.GetWorkspace(ctx, "invalid-id", true)
+		_, err := service.GetWorkspace(ctx, "invalid-id", services.WorkspaceRetrievalParams{Verbose: true})
 		require.NotNil(t, err)
-		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
+		require.Equal(t, stores.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("ListWorkspaces", func(t *testing.T) {
 		verbose := false
 
-		workspaces, err := service.ListWorkspaces(ctx, verbose)
+		workspaces, err := service.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{Verbose: verbose})
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -269,7 +267,7 @@ func TestTargetService(t *testing.T) {
 		verbose := true
 		mockProvisioner.On("GetWorkspaceInfo", ws, tg).Return(&workspaceInfo, nil)
 
-		workspaces, err := service.ListWorkspaces(ctx, verbose)
+		workspaces, err := service.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{Verbose: verbose})
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -301,8 +299,8 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, true)
-		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
+		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{Verbose: true})
+		require.Equal(t, stores.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("ForceRemoveWorkspace", func(t *testing.T) {
@@ -316,18 +314,16 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, true)
-		require.Equal(t, workspaces.ErrWorkspaceNotFound, err)
+		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{Verbose: true})
+		require.Equal(t, stores.ErrWorkspaceNotFound, err)
 	})
 
-	t.Run("SetWorkspaceState", func(t *testing.T) {
+	t.Run("SetWorkspaceMetadata", func(t *testing.T) {
 		err := workspaceStore.Save(ws)
 		require.Nil(t, err)
 
-		updatedAt := time.Now().Format(time.RFC1123)
-		res, err := service.SetWorkspaceState(createWorkspaceDTO.Id, &models.WorkspaceState{
-			UpdatedAt: updatedAt,
-			Uptime:    10,
+		res, err := service.SetWorkspaceMetadata(createWorkspaceDTO.Id, &models.WorkspaceMetadata{
+			Uptime: 10,
 			GitStatus: &models.GitStatus{
 				CurrentBranch: "main",
 			},
@@ -335,7 +331,7 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 
 		require.Nil(t, err)
-		require.Equal(t, "main", res.State.GitStatus.CurrentBranch)
+		require.Equal(t, "main", res.GitStatus.CurrentBranch)
 	})
 
 	t.Cleanup(func() {

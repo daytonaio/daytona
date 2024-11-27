@@ -9,23 +9,41 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilter, verbose bool) (*dto.TargetDTO, error) {
+func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) (*dto.TargetDTO, error) {
 	tg, err := s.targetStore.Find(filter)
 	if err != nil {
-		return nil, ErrTargetNotFound
+		return nil, stores.ErrTargetNotFound
 	}
+
+	state := tg.GetState()
+
+	if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
+		return nil, stores.ErrTargetNotFound
+	}
+
+	var updatedWorkspaces []models.Workspace
+	for _, w := range tg.Workspaces {
+		wsState := w.GetState()
+		if wsState.Name != models.ResourceStateNameDeleted {
+			updatedWorkspaces = append(updatedWorkspaces, w)
+		}
+	}
+	tg.Workspaces = updatedWorkspaces
 
 	response := dto.TargetDTO{
 		Target: *tg,
+		State:  state,
 	}
 
-	if !verbose {
+	if !params.Verbose {
 		return &response, nil
 	}
 

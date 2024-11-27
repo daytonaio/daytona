@@ -18,9 +18,11 @@ import (
 type RowData struct {
 	Name           string
 	Provider       string
-	Default        bool
 	WorkspaceCount string
+	Default        bool
+	Status         string
 	Options        string
+	Uptime         string
 }
 
 func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileName string) {
@@ -31,7 +33,7 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 
 	SortTargets(&targetList)
 
-	headers := []string{"Target", "Provider", "Default", "# Workspaces", "Options"}
+	headers := []string{"Target", "Options", "# Workspaces", "Default", "Status"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
 		provider := target.ProviderInfo.Name
@@ -42,9 +44,14 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 		rowData := RowData{
 			Name:           target.Name,
 			Provider:       provider,
-			Default:        target.Default,
-			WorkspaceCount: fmt.Sprintf("%d", len(target.Workspaces)),
 			Options:        target.Options,
+			WorkspaceCount: fmt.Sprint(len(target.Workspaces)),
+			Default:        target.Default,
+			Status:         views.GetStateLabel(target.State.Name),
+		}
+
+		if target.Metadata != nil {
+			views_util.CheckAndAppendTimeLabel(&rowData.Status, target.State, target.Metadata.Uptime)
 		}
 
 		return getRowFromRowData(rowData)
@@ -57,6 +64,34 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 	})
 
 	fmt.Println(table)
+}
+
+func SortTargets(targetList *[]apiclient.TargetDTO) {
+	sort.Slice(*targetList, func(i, j int) bool {
+		// Sort the default target on top
+		if (*targetList)[i].Default && !(*targetList)[j].Default {
+			return true
+		}
+		if !(*targetList)[i].Default && (*targetList)[j].Default {
+			return false
+		}
+
+		pi, ok := views.ResourceListStatePriorities[(*targetList)[i].State.Name]
+		if !ok {
+			pi = 99
+		}
+		pj, ok2 := views.ResourceListStatePriorities[(*targetList)[j].State.Name]
+		if !ok2 {
+			pj = 99
+		}
+
+		if pi != pj {
+			return pi < pj
+		}
+
+		// If two targets have the same state priority, compare the UpdatedAt property
+		return (*targetList)[i].State.UpdatedAt > (*targetList)[j].State.UpdatedAt
+	})
 }
 
 func renderUnstyledList(targetList []apiclient.TargetDTO) {
@@ -73,22 +108,16 @@ func getRowFromRowData(rowData RowData) []string {
 	var isDefault string
 
 	if rowData.Default {
-		isDefault = views.ActiveStyle.Render("Yes")
+		isDefault = "Yes"
 	} else {
-		isDefault = views.InactiveStyle.Render("/")
+		isDefault = "/"
 	}
 
 	return []string{
-		views.NameStyle.Render(rowData.Name),
-		views.DefaultRowDataStyle.Render(rowData.Provider),
-		isDefault,
-		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
+		fmt.Sprintf("%s %s", views.NameStyle.Render(rowData.Name), views.DefaultRowDataStyle.Render(fmt.Sprintf("(%s)", rowData.Provider))),
 		views.DefaultRowDataStyle.Render(rowData.Options),
+		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
+		isDefault,
+		rowData.Status,
 	}
-}
-
-func SortTargets(targetList *[]apiclient.TargetDTO) {
-	sort.Slice(*targetList, func(i, j int) bool {
-		return (*targetList)[i].Default && !(*targetList)[j].Default
-	})
 }
