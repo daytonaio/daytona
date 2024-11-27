@@ -323,3 +323,36 @@ func init() {
 		sshHomeDir = os.Getenv("HOME")
 	}
 }
+
+// EditSSHConfig allows editing of the SSH configuration for a given project
+func EditSSHConfig(projectHostname string) error {
+	configPath, err := getSSHConfigPath(projectHostname)
+	if err != nil {
+		return fmt.Errorf("could not determine config path: %w", err)
+	}
+
+	editor := os.Getenv("EDITOR")
+	if editor == "" {
+		editor = "vi" // Default to vi if no editor is set
+	}
+
+	cmd := exec.Command(editor, configPath)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
+}
+
+// getSSHConfigPath returns the path to the SSH config for a given project
+func getSSHConfigPath(projectHostname string) (string, error) {
+	sshDir := filepath.Join(os.Getenv("HOME"), ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
+
+	// Check if the file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return "", fmt.Errorf("config file does not exist for project: %s", projectHostname)
+	}
+
+	return configPath, nil
+}

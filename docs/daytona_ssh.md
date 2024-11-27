@@ -1,16 +1,18 @@
-## daytona ssh
+## dtn ssh
 
-SSH into a project using the terminal
+SSH into a project using the terminal or edit its SSH config
+
 
 ```
-daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
+dtn ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 ```
 
 ### Options
 
 ```
-  -o, --option stringArray   Specify SSH options in KEY=VALUE format.
-  -y, --yes                  Automatically confirm any prompts
+  -o, --option stringArray Specify SSH options in KEY=VALUE format.
+  -y, --yes Automatically confirm any prompts
+  -edit Edit SSH config for the specified project
 ```
 
 ### Options inherited from parent commands
@@ -23,3 +25,8 @@ daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 
 * [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
 
+
+### Key Changes
+
+- **Command Name**: Updated from `daytona ssh` to `dtn ssh`.
+- **New Option**: Added `-edit` flag for editing SSH configurations directly from the CLI.

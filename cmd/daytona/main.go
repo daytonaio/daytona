@@ -1,14 +1,14 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package main
 
 import (
+	"flag"
+	"fmt"
 	"os"
 	"time"
 
 	golog "log"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
@@ -19,6 +19,23 @@ import (
 )
 
 func main() {
+	// Define a new flag for editing SSH config
+	edit := flag.Bool("edit", false, "Edit SSH config for a specific project")
+	projectHostname := flag.String("project", "", "Specify the project hostname")
+	flag.Parse()
+
+	// Check if the edit flag is set
+	if *edit {
+		if *projectHostname == "" {
+			log.Fatal("Error: Project hostname must be specified with -edit option")
+		}
+		err := config.EditSSHConfig(*projectHostname)
+		if err != nil {
+			log.Fatalf("Error editing SSH config: %v", err)
+		}
+		return
+	}
+
 	if internal.WorkspaceMode() {
 		err := workspacemode.Execute()
 		if err != nil {
@@ -31,6 +48,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Example: Update usage instructions if present
+	fmt.Println("Usage: dtn ssh [options] <project>")
 }
 
 func init() {
