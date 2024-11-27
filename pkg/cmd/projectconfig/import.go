@@ -12,7 +12,10 @@ import (
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
+	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	"github.com/daytonaio/daytona/pkg/views/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
@@ -48,62 +51,18 @@ var projectConfigImportCmd = &cobra.Command{
 		var config apiclient.ProjectConfig
 		err = json.Unmarshal([]byte(inputText), &config)
 		if err == nil {
-			fmt.Printf("Single Project Config: %+v\n", config)
-
-			// if config.GitProviderConfigId != nil {
-			// 	// Verify if the Git provider config exists
-			// 	_, _, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *config.GitProviderConfigId).Execute()
-			// 	if err == nil {
-			// 		// Git provider config exists, proceed with import
-			// 		return nil
-			// 	}
-			// }
-
-			gitProviders, _, err := apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
-			if err != nil {
-				return fmt.Errorf("error fetching Git providers: %v", err)
-			}
-
-			if len(gitProviders) == 0 {
-				return fmt.Errorf("no Git providers found for URL: %s", config.RepositoryUrl)
-			}
-
-			if len(gitProviders) == 1 {
-				config.GitProviderConfigId = &gitProviders[0].Id
-			} else {
-				selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
-					GitProviderConfigs: gitProviders,
-					ActionVerb:         "Use",
-				})
-				config.GitProviderConfigId = &selectedGitProvider.Id
-			}
-
-			apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			newProjectConfig := apiclient.CreateProjectConfigDTO{
-				Name:                config.Name,
-				BuildConfig:         config.BuildConfig,
-				Image:               &config.Image,
-				User:                &config.User,
-				RepositoryUrl:       config.RepositoryUrl,
-				EnvVars:             config.EnvVars,
-				GitProviderConfigId: config.GitProviderConfigId,
+			if isProjectConfigAlreadyExists(projectConfigList, config) {
+				views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
+				return nil
 			}
-
-			if newProjectConfig.Image == nil {
-				newProjectConfig.Image = &apiServerConfig.DefaultProjectImage
-			}
-
-			if newProjectConfig.User == nil {
-				newProjectConfig.User = &apiServerConfig.DefaultProjectUser
-			}
-
-			res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
+			err = importProjectConfig(ctx, apiClient, config)
 			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
+				return err
 			}
 		} else {
 			var configs []apiclient.ProjectConfig
@@ -112,12 +71,157 @@ var projectConfigImportCmd = &cobra.Command{
 				return fmt.Errorf("invalid JSON input: %v", err)
 			}
 
-			fmt.Println("Multiple Project Configs:")
-			for i, config := range configs {
-				fmt.Printf("Project Config %d: %+v\n", i+1, config)
+			for _, config := range configs {
+				projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+				if err != nil {
+					return apiclient_util.HandleErrorResponse(res, err)
+				}
+
+				if isProjectConfigAlreadyExists(projectConfigList, config) {
+					views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
+					continue
+				}
+				err = importProjectConfig(ctx, apiClient, config)
+				if err != nil {
+					return err
+				}
 			}
 		}
 
 		return nil
 	},
+}
+
+func isProjectConfigAlreadyExists(projectConfigList []apiclient.ProjectConfig, config apiclient.ProjectConfig) bool {
+	for _, projectConfig := range projectConfigList {
+		if projectConfig.Name == config.Name {
+			return true
+		}
+	}
+	return false
+}
+
+func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.ProjectConfig) error {
+	var verifiedGitProvider bool
+	if config.GitProviderConfigId != nil {
+		_, _, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *config.GitProviderConfigId).Execute()
+		if err == nil {
+			verifiedGitProvider = true
+		}
+	}
+
+	var gitProviders []apiclient.GitProvider
+
+	if !verifiedGitProvider {
+		var err error
+		gitProviders, _, err = apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
+		if err != nil {
+			return fmt.Errorf("error fetching Git providers: %v", err)
+		}
+
+		if len(gitProviders) == 0 {
+			return fmt.Errorf("no Git providers found for URL: %s", config.RepositoryUrl)
+		}
+
+		if len(gitProviders) == 1 {
+			config.GitProviderConfigId = &gitProviders[0].Id
+		} else {
+			selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
+				GitProviderConfigs: gitProviders,
+				ActionVerb:         "Use",
+			})
+			config.GitProviderConfigId = &selectedGitProvider.Id
+		}
+	}
+
+	apiServerConfig, res, err := apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	newProjectConfig := apiclient.CreateProjectConfigDTO{
+		Name:                config.Name,
+		BuildConfig:         config.BuildConfig,
+		Image:               &config.Image,
+		User:                &config.User,
+		RepositoryUrl:       config.RepositoryUrl,
+		EnvVars:             config.EnvVars,
+		GitProviderConfigId: config.GitProviderConfigId,
+	}
+
+	if newProjectConfig.Image == nil {
+		newProjectConfig.Image = &apiServerConfig.DefaultProjectImage
+	}
+
+	if newProjectConfig.User == nil {
+		newProjectConfig.User = &apiServerConfig.DefaultProjectUser
+	}
+
+	existingProjectConfigNames, err := GetExistingProjectConfigNames(apiClient)
+	if err != nil {
+		return err
+	}
+
+	apiServerConfig, res, err = apiClient.ServerAPI.GetConfig(context.Background()).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	projectDefaults := &views_util.ProjectConfigDefaults{
+		BuildChoice:          views_util.AUTOMATIC,
+		Image:                &apiServerConfig.DefaultProjectImage,
+		ImageUser:            &apiServerConfig.DefaultProjectUser,
+		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
+	}
+
+	createDto := []apiclient.CreateProjectDTO{
+		{
+			Name: config.Name,
+			Source: apiclient.CreateProjectSourceDTO{
+				Repository: apiclient.GitRepository{
+					Url: config.RepositoryUrl,
+				},
+			},
+			BuildConfig:         config.BuildConfig,
+			EnvVars:             config.EnvVars,
+			GitProviderConfigId: config.GitProviderConfigId,
+		},
+	}
+
+	create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDto, *projectDefaults, true)
+	if err != nil {
+		return err
+	}
+
+	initialSuggestion := createDto[0].Name
+
+	chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
+
+	submissionFormConfig := create.SubmissionFormConfig{
+		ChosenName:    &config.Name,
+		SuggestedName: chosenName,
+		ExistingNames: existingProjectConfigNames,
+		ProjectList:   &createDto,
+		NameLabel:     "Project config",
+		Defaults:      projectDefaults,
+	}
+
+	confirmation := true
+	err = create.RunSubmissionForm(submissionFormConfig, &confirmation)
+	if err != nil {
+		return err
+	}
+
+	if confirmation {
+		res, err = apiClient.ProjectConfigAPI.SetProjectConfig(ctx).ProjectConfig(newProjectConfig).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		views.RenderInfoMessage(fmt.Sprintf("Project config %s imported successfully", newProjectConfig.Name))
+		return nil
+	}
+
+	views.RenderInfoMessage(fmt.Sprintf("Project config %s import cancelled", newProjectConfig.Name))
+	return nil
 }
