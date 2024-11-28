@@ -1,6 +1,6 @@
 name: daytona target delete
 synopsis: Delete a target
-usage: daytona target delete [TARGET] [flags]
+usage: daytona target delete [TARGET]... [flags]
 options:
     - name: all
       shorthand: a
