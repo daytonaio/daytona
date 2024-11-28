@@ -1094,7 +1094,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceDTO'
           description: OK
       summary: Create a workspace
       tags:

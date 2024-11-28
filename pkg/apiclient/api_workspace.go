@@ -34,7 +34,7 @@ func (r ApiCreateWorkspaceRequest) Workspace(workspace CreateWorkspaceDTO) ApiCr
 	return r
 }
 
-func (r ApiCreateWorkspaceRequest) Execute() (*Workspace, *http.Response, error) {
+func (r ApiCreateWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
 	return r.ApiService.CreateWorkspaceExecute(r)
 }
 
@@ -55,13 +55,13 @@ func (a *WorkspaceAPIService) CreateWorkspace(ctx context.Context) ApiCreateWork
 
 // Execute executes the request
 //
-//	@return Workspace
-func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*Workspace, *http.Response, error) {
+//	@return WorkspaceDTO
+func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*WorkspaceDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Workspace
+		localVarReturnValue *WorkspaceDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateWorkspace")
