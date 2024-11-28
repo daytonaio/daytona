@@ -40,11 +40,11 @@ func CreateTarget(ctx *gin.Context) {
 		return
 	}
 
-	maskedOptions, err := util.GetMaskedOptions(server, t.ProviderInfo.Name, t.Options)
+	maskedOptions, err := util.GetMaskedOptions(server, t.TargetConfig.ProviderInfo.Name, t.TargetConfig.Options)
 	if err != nil {
-		t.Options = fmt.Sprintf("Error: %s", err.Error())
+		t.TargetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
 	} else {
-		t.Options = maskedOptions
+		t.TargetConfig.Options = maskedOptions
 	}
 
 	ctx.JSON(200, t)

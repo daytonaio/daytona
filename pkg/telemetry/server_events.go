@@ -54,8 +54,8 @@ func NewTargetEventProps(ctx context.Context, target *models.Target) map[string]
 	if target != nil {
 		props["target_id"] = target.Id
 		props["target_name"] = target.Name
-		props["target_provider"] = target.ProviderInfo.Name
-		props["target_provider_version"] = target.ProviderInfo.Version
+		props["target_provider"] = target.TargetConfig.ProviderInfo.Name
+		props["target_provider_version"] = target.TargetConfig.ProviderInfo.Version
 	}
 
 	return props
@@ -68,8 +68,8 @@ func NewWorkspaceEventProps(ctx context.Context, workspace *models.Workspace) ma
 		return props
 	}
 
-	props["workspace_provider"] = workspace.Target.ProviderInfo.Name
-	props["workspace_provider_version"] = workspace.Target.ProviderInfo.Version
+	props["workspace_provider"] = workspace.Target.TargetConfig.ProviderInfo.Name
+	props["workspace_provider_version"] = workspace.Target.TargetConfig.ProviderInfo.Version
 
 	if isImagePublic(workspace.Image) {
 		props["workspace_image"] = workspace.Image

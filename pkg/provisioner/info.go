@@ -20,7 +20,7 @@ func (p *Provisioner) GetTargetInfo(ctx context.Context, t *models.Target) (*mod
 	ch := make(chan TargetInfoResult, 1)
 
 	go func() {
-		targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
+		targetProvider, err := p.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
 		if err != nil {
 			ch <- TargetInfoResult{nil, err}
 			return
@@ -51,7 +51,7 @@ func (p *Provisioner) GetWorkspaceInfo(ctx context.Context, workspace *models.Wo
 	ch := make(chan WorkspaceInfoResult, 1)
 
 	go func() {
-		targetProvider, err := p.providerManager.GetProvider(workspace.Target.ProviderInfo.Name)
+		targetProvider, err := p.providerManager.GetProvider(workspace.Target.TargetConfig.ProviderInfo.Name)
 		if err != nil {
 			ch <- WorkspaceInfoResult{nil, err}
 			return

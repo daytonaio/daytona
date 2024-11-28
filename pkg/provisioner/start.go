@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Provisioner) StartTarget(t *models.Target) error {
-	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func (p *Provisioner) StartTarget(t *models.Target) error {
 }
 
 func (p *Provisioner) StartWorkspace(params WorkspaceParams) error {
-	targetProvider, err := p.providerManager.GetProvider(params.Workspace.Target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(params.Workspace.Target.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
