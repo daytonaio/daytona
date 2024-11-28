@@ -33,10 +33,10 @@ func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDT
 	}
 
 	tg := &models.Target{
-		Id:           req.Id,
-		Name:         req.Name,
-		ProviderInfo: tc.ProviderInfo,
-		Options:      tc.Options,
+		Id:             req.Id,
+		Name:           req.Name,
+		TargetConfigId: tc.Id,
+		TargetConfig:   *tc,
 	}
 
 	apiKey, err := s.generateApiKey(ctx, tg.Id)

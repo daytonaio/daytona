@@ -891,14 +891,14 @@ paths:
       tags:
       - target-config
     put:
-      description: Set a target config
-      operationId: SetTargetConfig
+      description: Add a target config
+      operationId: AddTargetConfig
       requestBody:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/CreateTargetConfigDTO'
-        description: Target config to set
+              $ref: '#/components/schemas/AddTargetConfigDTO'
+        description: Target config to add
         required: true
       responses:
         "200":
@@ -907,18 +907,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/TargetConfig'
           description: OK
-      summary: Set a target config
+      summary: Add a target config
       tags:
       - target-config
       x-codegen-request-body-name: targetConfig
-  /target-config/{configName}:
+  /target-config/{configId}:
     delete:
       description: Remove a target config
       operationId: RemoveTargetConfig
       parameters:
-      - description: Target Config name
+      - description: Target Config Id
         in: path
-        name: configName
+        name: configId
         required: true
         schema:
           type: string
@@ -2313,6 +2313,26 @@ paths:
       - workspace toolbox
 components:
   schemas:
+    AddTargetConfigDTO:
+      example:
+        name: name
+        options: options
+        providerInfo:
+          name: name
+          label: label
+          version: version
+      properties:
+        name:
+          type: string
+        options:
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/TargetProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
+      type: object
     ApiKey:
       example:
         keyHash: keyHash
@@ -2576,26 +2596,6 @@ components:
           type: array
       required:
       - retention
-      type: object
-    CreateTargetConfigDTO:
-      example:
-        name: name
-        options: options
-        providerInfo:
-          name: name
-          label: label
-          version: version
-      properties:
-        name:
-          type: string
-        options:
-          type: string
-        providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
-      required:
-      - name
-      - options
-      - providerInfo
       type: object
     CreateTargetDTO:
       example:
@@ -3826,6 +3826,15 @@ components:
           targetId: targetId
           updatedAt: updatedAt
           uptime: 0
+        targetConfig:
+          deleted: true
+          name: name
+          options: options
+          id: id
+          providerInfo:
+            name: name
+            label: label
+            version: version
         lastJob:
           createdAt: createdAt
           resourceId: resourceId
@@ -3838,15 +3847,11 @@ components:
         envVars:
           key: envVars
         name: name
-        options: options
+        targetConfigId: targetConfigId
         id: id
         workspaces:
         - null
         - null
-        providerInfo:
-          name: name
-          label: label
-          version: version
       properties:
         default:
           type: boolean
@@ -3862,11 +3867,10 @@ components:
           $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
-        options:
-          description: JSON encoded map of options
+        targetConfig:
+          $ref: '#/components/schemas/TargetConfig'
+        targetConfigId:
           type: string
-        providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
         workspaces:
           items:
             $ref: '#/components/schemas/Workspace'
@@ -3876,18 +3880,24 @@ components:
       - envVars
       - id
       - name
-      - options
-      - providerInfo
+      - targetConfig
+      - targetConfigId
       type: object
     TargetConfig:
       example:
+        deleted: true
         name: name
         options: options
+        id: id
         providerInfo:
           name: name
           label: label
           version: version
       properties:
+        deleted:
+          type: boolean
+        id:
+          type: string
         name:
           type: string
         options:
@@ -3896,6 +3906,8 @@ components:
         providerInfo:
           $ref: '#/components/schemas/TargetProviderInfo'
       required:
+      - deleted
+      - id
       - name
       - options
       - providerInfo
@@ -3943,6 +3955,15 @@ components:
           targetId: targetId
           updatedAt: updatedAt
           uptime: 0
+        targetConfig:
+          deleted: true
+          name: name
+          options: options
+          id: id
+          providerInfo:
+            name: name
+            label: label
+            version: version
         lastJob:
           createdAt: createdAt
           resourceId: resourceId
@@ -3955,7 +3976,7 @@ components:
         envVars:
           key: envVars
         name: name
-        options: options
+        targetConfigId: targetConfigId
         id: id
         state:
           name: null
@@ -4020,6 +4041,15 @@ components:
               targetId: targetId
               updatedAt: updatedAt
               uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                name: name
+                label: label
+                version: version
             lastJob:
               createdAt: createdAt
               resourceId: resourceId
@@ -4032,15 +4062,11 @@ components:
             envVars:
               key: envVars
             name: name
-            options: options
+            targetConfigId: targetConfigId
             id: id
             workspaces:
             - null
             - null
-            providerInfo:
-              name: name
-              label: label
-              version: version
         - buildConfig:
             cachedBuild:
               image: image
@@ -4099,6 +4125,15 @@ components:
               targetId: targetId
               updatedAt: updatedAt
               uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                name: name
+                label: label
+                version: version
             lastJob:
               createdAt: createdAt
               resourceId: resourceId
@@ -4111,22 +4146,14 @@ components:
             envVars:
               key: envVars
             name: name
-            options: options
+            targetConfigId: targetConfigId
             id: id
             workspaces:
             - null
             - null
-            providerInfo:
-              name: name
-              label: label
-              version: version
         info:
           providerMetadata: providerMetadata
           name: name
-        providerInfo:
-          name: name
-          label: label
-          version: version
       properties:
         default:
           type: boolean
@@ -4144,13 +4171,12 @@ components:
           $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
-        options:
-          description: JSON encoded map of options
-          type: string
-        providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
         state:
           $ref: '#/components/schemas/ResourceState'
+        targetConfig:
+          $ref: '#/components/schemas/TargetConfig'
+        targetConfigId:
+          type: string
         workspaces:
           items:
             $ref: '#/components/schemas/Workspace'
@@ -4160,9 +4186,9 @@ components:
       - envVars
       - id
       - name
-      - options
-      - providerInfo
       - state
+      - targetConfig
+      - targetConfigId
       type: object
     TargetInfo:
       example:
@@ -4269,6 +4295,15 @@ components:
             targetId: targetId
             updatedAt: updatedAt
             uptime: 0
+          targetConfig:
+            deleted: true
+            name: name
+            options: options
+            id: id
+            providerInfo:
+              name: name
+              label: label
+              version: version
           lastJob:
             createdAt: createdAt
             resourceId: resourceId
@@ -4281,15 +4316,11 @@ components:
           envVars:
             key: envVars
           name: name
-          options: options
+          targetConfigId: targetConfigId
           id: id
           workspaces:
           - null
           - null
-          providerInfo:
-            name: name
-            label: label
-            version: version
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
@@ -4431,6 +4462,15 @@ components:
             targetId: targetId
             updatedAt: updatedAt
             uptime: 0
+          targetConfig:
+            deleted: true
+            name: name
+            options: options
+            id: id
+            providerInfo:
+              name: name
+              label: label
+              version: version
           lastJob:
             createdAt: createdAt
             resourceId: resourceId
@@ -4443,15 +4483,11 @@ components:
           envVars:
             key: envVars
           name: name
-          options: options
+          targetConfigId: targetConfigId
           id: id
           workspaces:
           - null
           - null
-          providerInfo:
-            name: name
-            label: label
-            version: version
         buildConfig:
           cachedBuild:
             image: image

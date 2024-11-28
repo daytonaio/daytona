@@ -1261,20 +1261,20 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Set a target config",
+                "description": "Add a target config",
                 "tags": [
                     "target-config"
                 ],
-                "summary": "Set a target config",
-                "operationId": "SetTargetConfig",
+                "summary": "Add a target config",
+                "operationId": "AddTargetConfig",
                 "parameters": [
                     {
-                        "description": "Target config to set",
+                        "description": "Target config to add",
                         "name": "targetConfig",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateTargetConfigDTO"
+                            "$ref": "#/definitions/AddTargetConfigDTO"
                         }
                     }
                 ],
@@ -1288,7 +1288,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/target-config/{configName}": {
+        "/target-config/{configId}": {
             "delete": {
                 "description": "Remove a target config",
                 "tags": [
@@ -1299,8 +1299,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target Config name",
-                        "name": "configName",
+                        "description": "Target Config Id",
+                        "name": "configId",
                         "in": "path",
                         "required": true
                     }
@@ -3192,6 +3192,25 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "AddTargetConfigDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/TargetProviderInfo"
+                }
+            }
+        },
         "ApiKey": {
             "type": "object",
             "required": [
@@ -3441,25 +3460,6 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
-                }
-            }
-        },
-        "CreateTargetConfigDTO": {
-            "type": "object",
-            "required": [
-                "name",
-                "options",
-                "providerInfo"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
                 }
             }
         },
@@ -4721,8 +4721,8 @@ const docTemplate = `{
                 "envVars",
                 "id",
                 "name",
-                "options",
-                "providerInfo"
+                "targetConfig",
+                "targetConfigId"
             ],
             "properties": {
                 "default": {
@@ -4746,12 +4746,11 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "options": {
-                    "description": "JSON encoded map of options",
-                    "type": "string"
+                "targetConfig": {
+                    "$ref": "#/definitions/TargetConfig"
                 },
-                "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
+                "targetConfigId": {
+                    "type": "string"
                 },
                 "workspaces": {
                     "type": "array",
@@ -4764,11 +4763,19 @@ const docTemplate = `{
         "TargetConfig": {
             "type": "object",
             "required": [
+                "deleted",
+                "id",
                 "name",
                 "options",
                 "providerInfo"
             ],
             "properties": {
+                "deleted": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -4831,9 +4838,9 @@ const docTemplate = `{
                 "envVars",
                 "id",
                 "name",
-                "options",
-                "providerInfo",
-                "state"
+                "state",
+                "targetConfig",
+                "targetConfigId"
             ],
             "properties": {
                 "default": {
@@ -4860,15 +4867,14 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "options": {
-                    "description": "JSON encoded map of options",
-                    "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
-                },
                 "state": {
                     "$ref": "#/definitions/ResourceState"
+                },
+                "targetConfig": {
+                    "$ref": "#/definitions/TargetConfig"
+                },
+                "targetConfigId": {
+                    "type": "string"
                 },
                 "workspaces": {
                     "type": "array",

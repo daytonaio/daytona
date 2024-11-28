@@ -290,7 +290,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		TargetStore:         targetStore,
 		TargetMetadataStore: targetMetadataStore,
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
-			return targetConfigService.Find(&stores.TargetConfigFilter{Name: &name})
+			return targetConfigService.Find(name)
 		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
 			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)

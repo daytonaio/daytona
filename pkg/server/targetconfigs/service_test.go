@@ -80,7 +80,15 @@ func (s *TargetConfigServiceTestSuite) SetupTest() {
 	})
 
 	for _, targetConfig := range expectedConfigs {
-		_ = s.targetConfigService.Save(targetConfig)
+		tc, err := s.targetConfigService.Add(services.AddTargetConfigDTO{
+			Name:         targetConfig.Name,
+			ProviderInfo: targetConfig.ProviderInfo,
+			Options:      targetConfig.Options,
+		})
+		if err != nil {
+			panic(err)
+		}
+		targetConfig.Id = tc.Id
 	}
 }
 
@@ -91,7 +99,7 @@ func TestTargetConfigService(t *testing.T) {
 func (s *TargetConfigServiceTestSuite) TestList() {
 	require := s.Require()
 
-	targetConfigs, err := s.targetConfigService.List(nil)
+	targetConfigs, err := s.targetConfigService.List()
 	require.Nil(err)
 	require.ElementsMatch(expectedConfigs, targetConfigs)
 }
@@ -107,35 +115,39 @@ func (s *TargetConfigServiceTestSuite) TestMap() {
 func (s *TargetConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	targetConfig, err := s.targetConfigService.Find(&stores.TargetConfigFilter{
-		Name: &targetConfig1.Name,
-	})
+	targetConfig, err := s.targetConfigService.Find(targetConfig1.Id)
 	require.Nil(err)
 	require.Equal(targetConfig1, targetConfig)
 }
 
 func (s *TargetConfigServiceTestSuite) TestSave() {
-	expectedConfigs = append(expectedConfigs, targetConfig4)
-
 	require := s.Require()
 
-	err := s.targetConfigService.Save(targetConfig4)
+	tc, err := s.targetConfigService.Add(services.AddTargetConfigDTO{
+		Name:         targetConfig4.Name,
+		ProviderInfo: targetConfig4.ProviderInfo,
+		Options:      targetConfig4.Options,
+	})
 	require.Nil(err)
 
-	targetConfigs, err := s.targetConfigService.List(nil)
+	targetConfig4.Id = tc.Id
+	expectedConfigs = append(expectedConfigs, targetConfig4)
+
+	targetConfigs, err := s.targetConfigService.List()
 	require.Nil(err)
 	require.ElementsMatch(expectedConfigs, targetConfigs)
 }
 
 func (s *TargetConfigServiceTestSuite) TestDelete() {
-	expectedConfigs = expectedConfigs[:2]
+	expected := expectedConfigs[:2]
 
 	require := s.Require()
 
-	err := s.targetConfigService.Delete(targetConfig3)
+	err := s.targetConfigService.Delete(targetConfig3.Id)
 	require.Nil(err)
 
-	targetConfigs, err := s.targetConfigService.List(nil)
+	targetConfigs, err := s.targetConfigService.List()
 	require.Nil(err)
-	require.ElementsMatch(expectedConfigs, targetConfigs)
+
+	require.ElementsMatch(expected, targetConfigs)
 }

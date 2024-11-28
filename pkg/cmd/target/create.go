@@ -105,7 +105,7 @@ func CreateTargetDtoFlow(ctx context.Context, params TargetCreationParams) (*api
 	}
 
 	if len(targetConfigList) == 0 {
-		targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName, false)
+		targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName)
 		if err != nil {
 			return nil, err
 		}
@@ -124,7 +124,7 @@ func CreateTargetDtoFlow(ctx context.Context, params TargetCreationParams) (*api
 		}
 
 		if targetConfigView.Name == targetconfig_view.NewTargetConfigName {
-			targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName, false)
+			targetConfigView, err = targetconfig.TargetConfigCreationFlow(ctx, params.ApiClient, params.ActiveProfileName)
 			if err != nil {
 				return nil, err
 			}

@@ -32,9 +32,9 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 
 	output += getInfoLine("ID", target.Id) + "\n"
 
-	providerLabel := target.ProviderInfo.Name
-	if target.ProviderInfo.Label != nil {
-		providerLabel = *target.ProviderInfo.Label
+	providerLabel := target.TargetConfig.ProviderInfo.Name
+	if target.TargetConfig.ProviderInfo.Label != nil {
+		providerLabel = *target.TargetConfig.ProviderInfo.Label
 	}
 
 	output += getInfoLine("Provider", providerLabel) + "\n"
@@ -48,7 +48,12 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 		output += getInfoLine("Error", *target.State.Error) + "\n"
 	}
 
-	output += getInfoLine("Options", target.Options) + "\n"
+	output += getInfoLineState("State", target.State, target.Metadata) + "\n"
+	if target.State.Error != nil {
+		output += getInfoLine("Error", *target.State.Error) + "\n"
+	}
+
+	output += getInfoLine("Options", target.TargetConfig.Options) + "\n"
 
 	if target.Info != nil {
 		output += getInfoLine("Metadata", *target.Info.ProviderMetadata) + "\n"
