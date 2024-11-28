@@ -36,11 +36,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
+	"github.com/daytonaio/daytona/pkg/api/controllers/env"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	"github.com/daytonaio/daytona/pkg/api/controllers/job"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
-	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
@@ -323,11 +323,11 @@ func (a *ApiServer) Start() error {
 		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
 	}
 
-	profileDataController := protected.Group("/profile")
+	envVarController := protected.Group("/env")
 	{
-		profileDataController.GET("", profiledata.GetProfileData)
-		profileDataController.PUT("", profiledata.SetProfileData)
-		profileDataController.DELETE("", profiledata.DeleteProfileData)
+		envVarController.GET("", env.ListEnvironmentVariables)
+		envVarController.PUT("", env.SetEnvironmentVariable)
+		envVarController.DELETE("/:key", env.DeleteEnvironmentVariable)
 	}
 
 	samplesController := protected.Group("/sample")

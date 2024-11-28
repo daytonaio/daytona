@@ -1,15 +1,9 @@
-## daytona env list
+## daytona env remove
 
-List server environment variables
-
-```
-daytona env list [flags]
-```
-
-### Options
+Remove server environment variables
 
 ```
-  -f, --format string   Output format. Must be one of (yaml, json)
+daytona env remove [KEY]... [flags]
 ```
 
 ### Options inherited from parent commands
