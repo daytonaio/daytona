@@ -126,6 +126,7 @@ Class | Method | HTTP request | Description
 *SampleAPI* | [**ListSamples**](docs/SampleAPI.md#listsamples) | **Get** /sample | List samples
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
+*ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | List server log files
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target

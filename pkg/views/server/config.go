@@ -39,6 +39,16 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Log File Path: "), config.LogFile.Path) + "\n\n"
 
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Log File Max Size: "), config.LogFile.MaxSize) + "\n\n"
+
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Log File Max Backups: "), config.LogFile.MaxBackups) + "\n\n"
+
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Log File Max Age: "), config.LogFile.MaxAge) + "\n\n"
+
+	output += fmt.Sprintf("%s %t", views.GetPropertyKey("Log File Local Time: "), config.LogFile.LocalTime) + "\n\n"
+
+	output += fmt.Sprintf("%s %t", views.GetPropertyKey("Log File Compress: "), config.LogFile.Compress) + "\n\n"
+
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Builder Image: "), config.BuilderImage) + "\n\n"
 
 	if config.BuilderRegistryServer == "local" {

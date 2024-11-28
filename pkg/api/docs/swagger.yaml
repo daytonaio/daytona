@@ -1880,6 +1880,22 @@ paths:
       summary: Set the server configuration
       tags:
       - server
+  /server/logs:
+    get:
+      description: List server log files
+      operationId: GetServerLogFiles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              type: string
+            type: array
+      summary: List server log files
+      tags:
+      - server
   /server/network-key:
     post:
       description: Generate a new authentication key

@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
+	"github.com/daytonaio/daytona/pkg/cmd/server/logs"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/server"
@@ -79,7 +80,7 @@ var startCmd = &cobra.Command{
 func init() {
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
-	ServerCmd.AddCommand(logsCmd)
+	ServerCmd.AddCommand(logs.LogsCmd)
 	ServerCmd.AddCommand(startCmd)
 	ServerCmd.AddCommand(stopCmd)
 	ServerCmd.AddCommand(restartCmd)

@@ -109,13 +109,19 @@ func readLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(cont
 }
 
 func ReadServerLog(ginCtx *gin.Context) {
-	server := server.GetInstance(nil)
+	s := server.GetInstance(nil)
+
+	logFileQuery := ginCtx.Query("file")
 	retryQuery := ginCtx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
 	if retry {
 		for {
-			reader, err := server.GetLogReader()
+			reader, err := s.GetLogReader(logFileQuery)
+			if err != nil && server.IsLogFileNotFound(err) {
+				ginCtx.AbortWithError(http.StatusNotFound, err)
+				return
+			}
 			if err == nil {
 				readLog(ginCtx, reader, util.ReadLog, writeToWs)
 				return
@@ -124,8 +130,12 @@ func ReadServerLog(ginCtx *gin.Context) {
 		}
 	}
 
-	reader, err := server.GetLogReader()
+	reader, err := s.GetLogReader(logFileQuery)
 	if err != nil {
+		if server.IsLogFileNotFound(err) {
+			ginCtx.AbortWithError(http.StatusNotFound, err)
+			return
+		}
 		ginCtx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}

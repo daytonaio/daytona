@@ -1464,6 +1464,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/server/logs": {
+            "get": {
+                "description": "List server log files",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "server"
+                ],
+                "summary": "List server log files",
+                "operationId": "GetServerLogFiles",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/server/network-key": {
             "post": {
                 "description": "Generate a new authentication key",
