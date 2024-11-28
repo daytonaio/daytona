@@ -2102,7 +2102,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Workspace'
+            $ref: '#/definitions/WorkspaceDTO'
       summary: Create a workspace
       tags:
       - workspace

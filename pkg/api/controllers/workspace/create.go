@@ -19,7 +19,7 @@ import (
 //	@Description	Create a workspace
 //	@Param			workspace	body	CreateWorkspaceDTO	true	"Create workspace"
 //	@Produce		json
-//	@Success		200	{object}	Workspace
+//	@Success		200	{object}	WorkspaceDTO
 //	@Router			/workspace [post]
 //
 //	@id				CreateWorkspace

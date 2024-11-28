@@ -219,7 +219,7 @@ var CreateCmd = &cobra.Command{
 				SkipPrefixLengthSetup: true,
 			})
 
-			_, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(createWorkspaceDtos[i]).Execute()
+			_, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(createWorkspaceDtos[i]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -264,12 +264,20 @@ var CreateCmd = &cobra.Command{
 
 		fmt.Println()
 
-		ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDtos[0].Id, true)
-		if err != nil {
-			return err
+		createdWorkspaces := []apiclient.WorkspaceDTO{}
+		for _, createWorkspaceDto := range createWorkspaceDtos {
+			ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDto.Id, true)
+			if err != nil {
+				return err
+			}
+			createdWorkspaces = append(createdWorkspaces, *ws)
 		}
 
-		info.Render(ws, chosenIde.Name, false)
+		if len(createdWorkspaces) > 1 {
+			info.RenderMulti(createdWorkspaces, chosenIde.Name, false)
+		} else {
+			info.Render(&createdWorkspaces[0], chosenIde.Name, false)
+		}
 
 		if noIdeFlag {
 			views.RenderCreationInfoMessage("Run 'daytona code' when you're ready to start developing")
@@ -278,7 +286,7 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *ws.Info.ProviderMetadata, YesFlag, gpgKey)
+		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].Info.ProviderMetadata, YesFlag, gpgKey)
 	},
 }
 
