@@ -361,6 +361,81 @@ const docTemplate = `{
                 }
             }
         },
+        "/env": {
+            "get": {
+                "description": "List environment variables",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "envVar"
+                ],
+                "summary": "List environment variables",
+                "operationId": "ListEnvironmentVariables",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/EnvironmentVariable"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set environment variable",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "envVar"
+                ],
+                "summary": "Set environment variable",
+                "operationId": "SetEnvironmentVariable",
+                "parameters": [
+                    {
+                        "description": "Environment Variable",
+                        "name": "environmentVariable",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/EnvironmentVariable"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/env/{key}": {
+            "delete": {
+                "description": "Delete environment variable",
+                "tags": [
+                    "envVar"
+                ],
+                "summary": "Delete environment variable",
+                "operationId": "DeleteEnvironmentVariable",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Environment Variable Key",
+                        "name": "key",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
         "/gitprovider": {
             "get": {
                 "description": "List Git providers",
@@ -880,67 +955,6 @@ const docTemplate = `{
                                 "$ref": "#/definitions/Job"
                             }
                         }
-                    }
-                }
-            }
-        },
-        "/profile": {
-            "get": {
-                "description": "Get profile data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Get profile data",
-                "operationId": "GetProfileData",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ProfileData"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Set profile data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Set profile data",
-                "operationId": "SetProfileData",
-                "parameters": [
-                    {
-                        "description": "Profile data",
-                        "name": "profileData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ProfileData"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete profile data",
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Delete profile data",
-                "operationId": "DeleteProfileData",
-                "responses": {
-                    "204": {
-                        "description": "No Content"
                     }
                 }
             }
@@ -2377,6 +2391,21 @@ const docTemplate = `{
                 }
             }
         },
+        "EnvironmentVariable": {
+            "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
+                    "type": "string"
+                }
+            }
+        },
         "FRPSConfig": {
             "type": "object",
             "required": [
@@ -2818,24 +2847,6 @@ const docTemplate = `{
                     }
                 },
                 "workspaceConfigName": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProfileData": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "id"
-            ],
-            "properties": {
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "id": {
                     "type": "string"
                 }
             }
