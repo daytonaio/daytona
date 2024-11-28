@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GenerateNetworkKey**](ServerAPI.md#GenerateNetworkKey) | **Post** /server/network-key | Generate a new authentication key
 [**GetConfig**](ServerAPI.md#GetConfig) | **Get** /server/config | Get the server configuration
+[**GetServerLogFiles**](ServerAPI.md#GetServerLogFiles) | **Get** /server/logs | List server log files
 [**SetConfig**](ServerAPI.md#SetConfig) | **Post** /server/config | Set the server configuration
 
 
@@ -117,6 +118,67 @@ Other parameters are passed through a pointer to a apiGetConfigRequest struct vi
 ### Return type
 
 [**ServerConfig**](ServerConfig.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetServerLogFiles
+
+> []string GetServerLogFiles(ctx).Execute()
+
+List server log files
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.ServerAPI.GetServerLogFiles(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.GetServerLogFiles``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetServerLogFiles`: []string
+	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.GetServerLogFiles`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetServerLogFilesRequest struct via the builder pattern
+
+
+### Return type
+
+**[]string**
 
 ### Authorization
 

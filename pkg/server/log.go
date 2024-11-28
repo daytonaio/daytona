@@ -4,9 +4,14 @@
 package server
 
 import (
+	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"regexp"
 
+	"github.com/daytonaio/daytona/internal/constants"
+	"github.com/daytonaio/daytona/internal/util"
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -68,11 +73,44 @@ func (s *Server) initLogs() error {
 	return nil
 }
 
-func (s *Server) GetLogReader() (io.Reader, error) {
-	file, err := os.Open(s.config.LogFile.Path)
+func (s *Server) GetLogReader(logFileQuery string) (io.Reader, error) {
+	logFilePath := s.config.LogFile.Path
+	if logFileQuery != "" {
+		logFilePath = fmt.Sprintf("%s/%s", filepath.Dir(s.config.LogFile.Path), logFileQuery)
+	}
+
+	_, err := os.Stat(logFilePath)
+	if os.IsNotExist(err) {
+		return nil, ErrLogFileNotFound
+	}
+
+	var reader io.Reader
+	if regexp.MustCompile(constants.ZIP_LOG_FILE_NAME_SUFFIX_PATTERN).MatchString(logFileQuery) {
+		reader, err = util.ReadCompressedFile(logFilePath)
+	} else {
+		reader, err = os.Open(logFilePath)
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to open log file: %w", err)
+	}
+
+	return reader, nil
+}
+
+func (s *Server) GetLogFiles() ([]string, error) {
+	logDir := filepath.Dir(s.config.LogFile.Path)
+
+	files, err := os.ReadDir(logDir)
 	if err != nil {
 		return nil, err
 	}
 
-	return file, nil
+	var logFiles []string
+	for _, file := range files {
+		if regexp.MustCompile(constants.LOG_FILE_NAME_PATTERN).MatchString(file.Name()) {
+			logFiles = append(logFiles, filepath.Join(logDir, file.Name()))
+		}
+	}
+
+	return logFiles, nil
 }
