@@ -4,6 +4,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -27,10 +28,35 @@ func main() {
 		return
 	}
 
-	err := cmd.Execute()
-	if err != nil {
-		log.Fatal(err)
-	}
+	// Add retry logic for workspace creation
+    if os.Args[1] == "create" {
+        err := executeWithRetry(cmd.Execute, 5, time.Second*2)
+        if err != nil {
+            log.Fatal(err)
+        }
+    } else {
+        err := cmd.Execute()
+        if err != nil {
+            log.Fatal(err)
+        }
+    }
+}
+
+// executeWithRetry attempts to execute the given function with retries
+func executeWithRetry(fn func() error, maxRetries int, delay time.Duration) error {
+    var err error
+    for i := 0; i < maxRetries; i++ {
+        err = fn()
+        if err == nil {
+            return nil
+        }
+        if i < maxRetries-1 {
+            log.Warnf("Error executing command: %v. Retrying in %v...", err, delay)
+            time.Sleep(delay)
+            delay *= 2 // Exponential backoff
+        }
+    }
+    return fmt.Errorf("failed to execute command after %d attempts: %v", maxRetries, err)
 }
 
 func init() {
