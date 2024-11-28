@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 
 	"github.com/charmbracelet/lipgloss"
@@ -34,7 +35,7 @@ func getRowData(key, value string) *RowData {
 	return &RowData{key, value}
 }
 
-func List(envVars map[string]string) {
+func List(envVars []apiclient.EnvironmentVariable) {
 	if len(envVars) == 0 {
 		views_util.NotifyEmptyEnvVarList(true)
 		return
@@ -46,11 +47,11 @@ func List(envVars map[string]string) {
 
 	data := [][]string{}
 
-	for k, v := range envVars {
+	for _, envVar := range envVars {
 		var rowData *RowData
 		var row []string
 
-		rowData = getRowData(k, v)
+		rowData = getRowData(envVar.Key, envVar.Value)
 		if rowData == nil {
 			continue
 		}
@@ -86,12 +87,12 @@ func List(envVars map[string]string) {
 	fmt.Println(views.BaseTableStyle.Render(t.String()))
 }
 
-func renderUnstyledList(envVars map[string]string) {
+func renderUnstyledList(envVars []apiclient.EnvironmentVariable) {
 	output := "\n"
 
-	for k, v := range envVars {
-		output += fmt.Sprintf("%s\t%s", views.GetPropertyKey("Key:"), k) + "\n"
-		output += fmt.Sprintf("%s\t%s", views.GetPropertyKey("Value:"), v) + "\n"
+	for _, envVar := range envVars {
+		output += fmt.Sprintf("%s\t%s", views.GetPropertyKey("Key:"), envVar.Key) + "\n"
+		output += fmt.Sprintf("%s\t%s", views.GetPropertyKey("Value:"), envVar.Value) + "\n"
 
 		output += "\n\n"
 	}

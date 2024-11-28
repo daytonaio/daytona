@@ -56,13 +56,13 @@ type APIClient struct {
 
 	DefaultAPI *DefaultAPIService
 
+	EnvVarAPI *EnvVarAPIService
+
 	GitProviderAPI *GitProviderAPIService
 
 	JobAPI *JobAPIService
 
 	PrebuildAPI *PrebuildAPIService
-
-	ProfileAPI *ProfileAPIService
 
 	ProviderAPI *ProviderAPIService
 
@@ -101,10 +101,10 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.BuildAPI = (*BuildAPIService)(&c.common)
 	c.ContainerRegistryAPI = (*ContainerRegistryAPIService)(&c.common)
 	c.DefaultAPI = (*DefaultAPIService)(&c.common)
+	c.EnvVarAPI = (*EnvVarAPIService)(&c.common)
 	c.GitProviderAPI = (*GitProviderAPIService)(&c.common)
 	c.JobAPI = (*JobAPIService)(&c.common)
 	c.PrebuildAPI = (*PrebuildAPIService)(&c.common)
-	c.ProfileAPI = (*ProfileAPIService)(&c.common)
 	c.ProviderAPI = (*ProviderAPIService)(&c.common)
 	c.SampleAPI = (*SampleAPIService)(&c.common)
 	c.ServerAPI = (*ServerAPIService)(&c.common)
