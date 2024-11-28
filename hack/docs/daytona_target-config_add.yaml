@@ -1,6 +1,6 @@
-name: daytona target-config set
-synopsis: Set target config
-usage: daytona target-config set [flags]
+name: daytona target-config add
+synopsis: Add target config
+usage: daytona target-config add [flags]
 inherited_options:
     - name: help
       default_value: "false"

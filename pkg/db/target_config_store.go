@@ -23,9 +23,9 @@ func NewTargetConfigStore(db *gorm.DB) (stores.TargetConfigStore, error) {
 	return &TargetConfigStore{db: db}, nil
 }
 
-func (s *TargetConfigStore) List(filter *stores.TargetConfigFilter) ([]*models.TargetConfig, error) {
+func (s *TargetConfigStore) List(allowDeleted bool) ([]*models.TargetConfig, error) {
 	targetConfigs := []*models.TargetConfig{}
-	tx := processTargetConfigFilters(s.db, filter).Find(&targetConfigs)
+	tx := processTargetConfigFilters(s.db, "", allowDeleted).Find(&targetConfigs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -34,9 +34,9 @@ func (s *TargetConfigStore) List(filter *stores.TargetConfigFilter) ([]*models.T
 	return targetConfigs, nil
 }
 
-func (s *TargetConfigStore) Find(filter *stores.TargetConfigFilter) (*models.TargetConfig, error) {
+func (s *TargetConfigStore) Find(idOrName string, allowDeleted bool) (*models.TargetConfig, error) {
 	targetConfig := &models.TargetConfig{}
-	tx := processTargetConfigFilters(s.db, filter).First(targetConfig)
+	tx := processTargetConfigFilters(s.db, idOrName, allowDeleted).First(targetConfig)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -57,23 +57,13 @@ func (s *TargetConfigStore) Save(targetConfig *models.TargetConfig) error {
 	return nil
 }
 
-func (s *TargetConfigStore) Delete(targetConfig *models.TargetConfig) error {
-	tx := s.db.Delete(targetConfig)
-	if tx.Error != nil {
-		return tx.Error
-	}
-	if tx.RowsAffected == 0 {
-		return stores.ErrTargetConfigNotFound
+func processTargetConfigFilters(tx *gorm.DB, idOrName string, allowDeleted bool) *gorm.DB {
+	if idOrName != "" {
+		tx = tx.Where("id = ? OR name = ?", idOrName, idOrName)
 	}
 
-	return nil
-}
-
-func processTargetConfigFilters(tx *gorm.DB, filter *stores.TargetConfigFilter) *gorm.DB {
-	if filter != nil {
-		if filter.Name != nil {
-			tx = tx.Where("name = ?", *filter.Name)
-		}
+	if !allowDeleted {
+		tx = tx.Where("deleted = ?", false)
 	}
 
 	return tx

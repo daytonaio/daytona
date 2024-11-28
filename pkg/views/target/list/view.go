@@ -36,15 +36,15 @@ func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileNa
 	headers := []string{"Target", "Options", "# Workspaces", "Default", "Status"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
-		provider := target.ProviderInfo.Name
-		if target.ProviderInfo.Label != nil {
-			provider = *target.ProviderInfo.Label
+		provider := target.TargetConfig.ProviderInfo.Name
+		if target.TargetConfig.ProviderInfo.Label != nil {
+			provider = *target.TargetConfig.ProviderInfo.Label
 		}
 
 		rowData := RowData{
 			Name:           target.Name,
 			Provider:       provider,
-			Options:        target.Options,
+			Options:        target.TargetConfig.Options,
 			WorkspaceCount: fmt.Sprint(len(target.Workspaces)),
 			Default:        target.Default,
 			Status:         views.GetStateLabel(target.State.Name),

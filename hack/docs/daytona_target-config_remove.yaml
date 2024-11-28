@@ -1,6 +1,6 @@
 name: daytona target-config remove
 synopsis: Remove target config
-usage: daytona target-config remove [CONFIG_NAME] [flags]
+usage: daytona target-config remove [TARGET_CONFIG] [flags]
 options:
     - name: "yes"
       shorthand: "y"

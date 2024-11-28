@@ -17,6 +17,6 @@ var TargetConfigCmd = &cobra.Command{
 
 func init() {
 	TargetConfigCmd.AddCommand(listCmd)
-	TargetConfigCmd.AddCommand(TargetConfigSetCmd)
+	TargetConfigCmd.AddCommand(TargetConfigAddCmd)
 	TargetConfigCmd.AddCommand(removeCmd)
 }

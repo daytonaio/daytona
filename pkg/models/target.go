@@ -15,17 +15,16 @@ const AGENT_UNRESPONSIVE_THRESHOLD = 30 * time.Second
 var providersWithoutTargetMode = []string{"docker-provider"}
 
 type Target struct {
-	Id           string       `json:"id" validate:"required" gorm:"primaryKey"`
-	Name         string       `json:"name" validate:"required"`
-	ProviderInfo ProviderInfo `json:"providerInfo" validate:"required" gorm:"serializer:json"`
-	// JSON encoded map of options
-	Options    string            `json:"options" validate:"required"`
-	ApiKey     string            `json:"-"`
-	EnvVars    map[string]string `json:"envVars" validate:"required" gorm:"serializer:json"`
-	IsDefault  bool              `json:"default" validate:"required"`
-	Workspaces []Workspace       `gorm:"foreignKey:TargetId;references:Id"`
-	Metadata   *TargetMetadata   `gorm:"foreignKey:TargetId;references:Id" validate:"optional"`
-	LastJob    *Job              `gorm:"foreignKey:ResourceId;references:Id" validate:"optional"`
+	Id             string            `json:"id" validate:"required" gorm:"primaryKey"`
+	Name           string            `json:"name" validate:"required"`
+	TargetConfigId string            `json:"targetConfigId" validate:"required" gorm:"foreignKey:TargetConfigId;references:Id"`
+	TargetConfig   TargetConfig      `json:"targetConfig" validate:"required" gorm:"foreignKey:TargetConfigId"`
+	ApiKey         string            `json:"-"`
+	EnvVars        map[string]string `json:"envVars" validate:"required" gorm:"serializer:json"`
+	IsDefault      bool              `json:"default" validate:"required"`
+	Workspaces     []Workspace       `gorm:"foreignKey:TargetId;references:Id"`
+	Metadata       *TargetMetadata   `gorm:"foreignKey:TargetId;references:Id" validate:"optional"`
+	LastJob        *Job              `gorm:"foreignKey:ResourceId;references:Id" validate:"optional"`
 } // @name Target
 
 type TargetMetadata struct {
@@ -38,7 +37,7 @@ func (t *Target) GetState() ResourceState {
 	state := getResourceStateFromJob(t.LastJob)
 
 	// Some providers do not utilize agents in target mode
-	if state.Name != ResourceStateNameDeleted && slices.Contains(providersWithoutTargetMode, t.ProviderInfo.Name) {
+	if state.Name != ResourceStateNameDeleted && slices.Contains(providersWithoutTargetMode, t.TargetConfig.ProviderInfo.Name) {
 		return ResourceState{
 			Name:      ResourceStateNameUndefined,
 			UpdatedAt: time.Now(),
