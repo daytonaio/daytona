@@ -47,8 +47,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
-	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig"
-	"github.com/daytonaio/daytona/pkg/api/controllers/workspaceconfig/prebuild"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspacetemplate"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspacetemplate/prebuild"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -167,30 +167,30 @@ func (a *ApiServer) Start() error {
 		jobController.GET("/", job.ListJobs)
 	}
 
-	workspaceConfigController := protected.Group("/workspace-config")
+	workspaceTemplateController := protected.Group("/workspace-template")
 	{
-		// Defining the prebuild routes first to avoid conflicts with the workspace config routes
+		// Defining the prebuild routes first to avoid conflicts with the workspace template routes
 		prebuildRoutePath := "/prebuild"
-		workspaceConfigPrebuildsGroup := workspaceConfigController.Group(prebuildRoutePath)
+		workspaceTemplatePrebuildsGroup := workspaceTemplateController.Group(prebuildRoutePath)
 		{
-			workspaceConfigPrebuildsGroup.GET("/", prebuild.ListPrebuilds)
+			workspaceTemplatePrebuildsGroup.GET("/", prebuild.ListPrebuilds)
 		}
 
-		workspaceConfigNameGroup := workspaceConfigController.Group(":configName")
+		workspaceTemplateNameGroup := workspaceTemplateController.Group(":templateName")
 		{
-			workspaceConfigNameGroup.PUT(prebuildRoutePath+"/", prebuild.SetPrebuild)
-			workspaceConfigNameGroup.GET(prebuildRoutePath+"/", prebuild.ListPrebuildsForWorkspaceConfig)
-			workspaceConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
-			workspaceConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
+			workspaceTemplateNameGroup.PUT(prebuildRoutePath+"/", prebuild.SetPrebuild)
+			workspaceTemplateNameGroup.GET(prebuildRoutePath+"/", prebuild.ListPrebuildsForWorkspaceTemplate)
+			workspaceTemplateNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
+			workspaceTemplateNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
 
-			workspaceConfigNameGroup.GET("/", workspaceconfig.GetWorkspaceConfig)
-			workspaceConfigNameGroup.PATCH("/set-default", workspaceconfig.SetDefaultWorkspaceConfig)
-			workspaceConfigNameGroup.DELETE("/", workspaceconfig.DeleteWorkspaceConfig)
+			workspaceTemplateNameGroup.GET("/", workspacetemplate.GetWorkspaceTemplate)
+			workspaceTemplateNameGroup.PATCH("/set-default", workspacetemplate.SetDefaultWorkspaceTemplate)
+			workspaceTemplateNameGroup.DELETE("/", workspacetemplate.DeleteWorkspaceTemplate)
 		}
 
-		workspaceConfigController.GET("/", workspaceconfig.ListWorkspaceConfigs)
-		workspaceConfigController.PUT("/", workspaceconfig.SetWorkspaceConfig)
-		workspaceConfigController.GET("/default/:gitUrl", workspaceconfig.GetDefaultWorkspaceConfig)
+		workspaceTemplateController.GET("/", workspacetemplate.ListWorkspaceTemplates)
+		workspaceTemplateController.PUT("/", workspacetemplate.SetWorkspaceTemplate)
+		workspaceTemplateController.GET("/default/:gitUrl", workspacetemplate.GetDefaultWorkspaceTemplate)
 	}
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)

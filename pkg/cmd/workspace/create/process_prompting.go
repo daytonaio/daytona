@@ -35,7 +35,7 @@ func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error 
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	workspaceConfigs, res, err := params.ApiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
+	workspaceTemplates, res, err := params.ApiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -45,7 +45,7 @@ func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error 
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	workspaceDefaults := &views_util.WorkspaceConfigDefaults{
+	workspaceDefaults := &views_util.WorkspaceTemplateDefaults{
 		BuildChoice:          views_util.AUTOMATIC,
 		Image:                &apiServerConfig.DefaultWorkspaceImage,
 		ImageUser:            &apiServerConfig.DefaultWorkspaceUser,
@@ -53,13 +53,13 @@ func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error 
 	}
 
 	*params.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(ctx, WorkspacesDataPromptParams{
-		UserGitProviders: gitProviders,
-		WorkspaceConfigs: workspaceConfigs,
-		Manual:           *params.WorkspaceConfigurationFlags.Manual,
-		MultiWorkspace:   params.MultiWorkspaceFlag,
-		BlankWorkspace:   params.BlankFlag,
-		ApiClient:        params.ApiClient,
-		Defaults:         workspaceDefaults,
+		UserGitProviders:   gitProviders,
+		WorkspaceTemplates: workspaceTemplates,
+		Manual:             *params.WorkspaceConfigurationFlags.Manual,
+		MultiWorkspace:     params.MultiWorkspaceFlag,
+		BlankWorkspace:     params.BlankFlag,
+		ApiClient:          params.ApiClient,
+		Defaults:           workspaceDefaults,
 	})
 
 	if err != nil {

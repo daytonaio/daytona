@@ -76,10 +76,10 @@ type CreateWorkspaceSourceDTO struct {
 } // @name CreateWorkspaceSourceDTO
 
 var (
-	ErrWorkspaceAlreadyExists = errors.New("workspace already exists")
-	ErrWorkspaceDeleted       = errors.New("workspace is deleted")
-	ErrInvalidWorkspaceName   = errors.New("workspace name is not valid. Only [a-zA-Z0-9-_.] are allowed")
-	ErrInvalidWorkspaceConfig = errors.New("workspace config is invalid")
+	ErrWorkspaceAlreadyExists   = errors.New("workspace already exists")
+	ErrWorkspaceDeleted         = errors.New("workspace is deleted")
+	ErrInvalidWorkspaceName     = errors.New("workspace name is not valid. Only [a-zA-Z0-9-_.] are allowed")
+	ErrInvalidWorkspaceTemplate = errors.New("workspace template is invalid")
 )
 
 func IsWorkspaceDeleted(err error) bool {

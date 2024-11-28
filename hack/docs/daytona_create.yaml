@@ -4,8 +4,7 @@ usage: daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
 options:
     - name: blank
       default_value: "false"
-      usage: |
-        Create a blank workspace without using existing configurations
+      usage: Create a blank workspace without using existing templates
     - name: branch
       default_value: '[]'
       usage: Specify the Git branches to use in the workspaces

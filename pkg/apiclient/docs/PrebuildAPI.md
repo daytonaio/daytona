@@ -4,18 +4,18 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /workspace-config/{configName}/prebuild/{prebuildId} | Delete prebuild
-[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /workspace-config/{configName}/prebuild/{prebuildId} | Get prebuild
-[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /workspace-config/prebuild | List prebuilds
-[**ListPrebuildsForWorkspaceConfig**](PrebuildAPI.md#ListPrebuildsForWorkspaceConfig) | **Get** /workspace-config/{configName}/prebuild | List prebuilds for workspace config
-[**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /workspace-config/prebuild/process-git-event | ProcessGitEvent
-[**SetPrebuild**](PrebuildAPI.md#SetPrebuild) | **Put** /workspace-config/{configName}/prebuild | Set prebuild
+[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
+[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Get prebuild
+[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /workspace-template/prebuild | List prebuilds
+[**ListPrebuildsForWorkspaceTemplate**](PrebuildAPI.md#ListPrebuildsForWorkspaceTemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
+[**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
+[**SetPrebuild**](PrebuildAPI.md#SetPrebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
 
 
 
 ## DeletePrebuild
 
-> DeletePrebuild(ctx, configName, prebuildId).Force(force).Execute()
+> DeletePrebuild(ctx, templateName, prebuildId).Force(force).Execute()
 
 Delete prebuild
 
@@ -34,13 +34,13 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Workspace config name
+	templateName := "templateName_example" // string | Workspace template name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
 	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), configName, prebuildId).Force(force).Execute()
+	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), templateName, prebuildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.DeletePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -54,7 +54,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Workspace config name | 
+**templateName** | **string** | Workspace template name | 
 **prebuildId** | **string** | Prebuild ID | 
 
 ### Other Parameters
@@ -88,7 +88,7 @@ Name | Type | Description  | Notes
 
 ## GetPrebuild
 
-> PrebuildDTO GetPrebuild(ctx, configName, prebuildId).Execute()
+> PrebuildDTO GetPrebuild(ctx, templateName, prebuildId).Execute()
 
 Get prebuild
 
@@ -107,12 +107,12 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Workspace config name
+	templateName := "templateName_example" // string | Workspace template name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.GetPrebuild(context.Background(), configName, prebuildId).Execute()
+	resp, r, err := apiClient.PrebuildAPI.GetPrebuild(context.Background(), templateName, prebuildId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.GetPrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -128,7 +128,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Workspace config name | 
+**templateName** | **string** | Workspace template name | 
 **prebuildId** | **string** | Prebuild ID | 
 
 ### Other Parameters
@@ -220,11 +220,11 @@ Other parameters are passed through a pointer to a apiListPrebuildsRequest struc
 [[Back to README]](../README.md)
 
 
-## ListPrebuildsForWorkspaceConfig
+## ListPrebuildsForWorkspaceTemplate
 
-> []PrebuildDTO ListPrebuildsForWorkspaceConfig(ctx, configName).Execute()
+> []PrebuildDTO ListPrebuildsForWorkspaceTemplate(ctx, templateName).Execute()
 
-List prebuilds for workspace config
+List prebuilds for workspace template
 
 
 
@@ -241,17 +241,17 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Config name
+	templateName := "templateName_example" // string | Config name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.ListPrebuildsForWorkspaceConfig(context.Background(), configName).Execute()
+	resp, r, err := apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), templateName).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ListPrebuildsForWorkspaceConfig``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ListPrebuildsForWorkspaceTemplate``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListPrebuildsForWorkspaceConfig`: []PrebuildDTO
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.ListPrebuildsForWorkspaceConfig`: %v\n", resp)
+	// response from `ListPrebuildsForWorkspaceTemplate`: []PrebuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.ListPrebuildsForWorkspaceTemplate`: %v\n", resp)
 }
 ```
 
@@ -261,11 +261,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Config name | 
+**templateName** | **string** | Config name | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiListPrebuildsForWorkspaceConfigRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiListPrebuildsForWorkspaceTemplateRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -356,7 +356,7 @@ Name | Type | Description  | Notes
 
 ## SetPrebuild
 
-> string SetPrebuild(ctx, configName).Prebuild(prebuild).Execute()
+> string SetPrebuild(ctx, templateName).Prebuild(prebuild).Execute()
 
 Set prebuild
 
@@ -375,12 +375,12 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Config name
+	templateName := "templateName_example" // string | Config name
 	prebuild := *openapiclient.NewCreatePrebuildDTO(int32(123)) // CreatePrebuildDTO | Prebuild
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.SetPrebuild(context.Background(), configName).Prebuild(prebuild).Execute()
+	resp, r, err := apiClient.PrebuildAPI.SetPrebuild(context.Background(), templateName).Prebuild(prebuild).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.SetPrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -396,7 +396,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Config name | 
+**templateName** | **string** | Config name | 
 
 ### Other Parameters
 
