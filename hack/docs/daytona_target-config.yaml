@@ -6,6 +6,6 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
+    - daytona target-config add - Add target config
     - daytona target-config list - List target configs
     - daytona target-config remove - Remove target config
-    - daytona target-config set - Set target config

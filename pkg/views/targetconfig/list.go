@@ -19,6 +19,11 @@ type rowData struct {
 }
 
 func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
+	if len(targetConfigs) == 0 {
+		util.NotifyEmptyTargetConfigList(true)
+		return
+	}
+
 	sortTargetConfigs(&targetConfigs)
 
 	data := [][]string{}

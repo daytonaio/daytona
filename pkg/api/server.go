@@ -224,7 +224,7 @@ func (a *ApiServer) Start() error {
 	targetConfigController := protected.Group("/target-config")
 	{
 		targetConfigController.GET("/", targetconfig.ListTargetConfigs)
-		targetConfigController.PUT("/", targetconfig.SetTargetConfig)
+		targetConfigController.PUT("/", targetconfig.AddTargetConfig)
 		targetConfigController.DELETE("/:configName", targetconfig.RemoveTargetConfig)
 	}
 

@@ -43,14 +43,21 @@ var gitProviderConfig = models.GitProviderConfig{
 	BaseApiUrl: &baseApiUrl,
 }
 
-var tg = &models.Target{
-	Id:   "123",
-	Name: "test",
+var tc = &models.TargetConfig{
+	Name: "tc-test",
 	ProviderInfo: models.ProviderInfo{
 		Name:    "test-provider",
 		Version: "test",
 	},
 	Options: "test-options",
+	Deleted: false,
+}
+
+var tg = &models.Target{
+	Id:             "123",
+	Name:           "test",
+	TargetConfigId: tc.Id,
+	TargetConfig:   *tc,
 }
 
 var createWorkspaceDTO = services.CreateWorkspaceDTO{
@@ -213,7 +220,7 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
 
-		workspaceEquals(t, &services.WorkspaceDTO{Workspace: *ws}, workspace, defaultWorkspaceImage)
+		workspaceEquals(t, &services.WorkspaceDTO{Workspace: *ws}, workspace)
 
 		ws.EnvVars = nil
 	})
@@ -340,7 +347,7 @@ func TestTargetService(t *testing.T) {
 	})
 }
 
-func workspaceEquals(t *testing.T, ws1, ws2 *services.WorkspaceDTO, workspaceImage string) {
+func workspaceEquals(t *testing.T, ws1, ws2 *services.WorkspaceDTO) {
 	t.Helper()
 
 	require.Equal(t, ws1.Id, ws2.Id)

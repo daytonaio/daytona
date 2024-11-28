@@ -25,23 +25,6 @@ import (
 const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
 
-var tg = &models.Target{
-	Id:     "test",
-	Name:   "test",
-	ApiKey: "test",
-	ProviderInfo: models.ProviderInfo{
-		Name:    "test-provider",
-		Version: "test",
-	},
-	Options: "test-options",
-}
-
-var createTargetDTO = dto.CreateTargetDTO{
-	Name:             "test",
-	Id:               "test",
-	TargetConfigName: "test",
-}
-
 var tc = models.TargetConfig{
 	Name: "test",
 	ProviderInfo: models.ProviderInfo{
@@ -49,6 +32,21 @@ var tc = models.TargetConfig{
 		Version: "test",
 	},
 	Options: "test-options",
+	Deleted: false,
+}
+
+var tg = &models.Target{
+	Id:             "test",
+	Name:           "test",
+	ApiKey:         "test",
+	TargetConfigId: tc.Id,
+	TargetConfig:   tc,
+}
+
+var createTargetDTO = dto.CreateTargetDTO{
+	Name:             "test",
+	Id:               "test",
+	TargetConfigName: "test",
 }
 
 var targetInfo = models.TargetInfo{
@@ -83,7 +81,7 @@ func TestTargetService(t *testing.T) {
 		TargetStore:         targetStore,
 		TargetMetadataStore: targetMetadataStore,
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
-			return targetConfigStore.Find(&stores.TargetConfigFilter{Name: &name})
+			return targetConfigStore.Find(name, false)
 		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
 			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)
@@ -244,8 +242,8 @@ func targetEquals(t *testing.T, t1, t2 *models.Target) {
 
 	require.Equal(t, t1.Id, t2.Id)
 	require.Equal(t, t1.Name, t2.Name)
-	require.Equal(t, t1.ProviderInfo, t2.ProviderInfo)
-	require.Equal(t, t1.Options, t2.Options)
+	require.Equal(t, t1.TargetConfig.ProviderInfo, t2.TargetConfig.ProviderInfo)
+	require.Equal(t, t1.TargetConfig.Options, t2.TargetConfig.Options)
 	require.Equal(t, t1.IsDefault, t2.IsDefault)
 }
 
@@ -254,8 +252,8 @@ func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
-	require.Equal(t, tc.ProviderInfo, target.ProviderInfo)
-	require.Equal(t, tc.Options, target.Options)
+	require.Equal(t, tc.ProviderInfo, target.TargetConfig.ProviderInfo)
+	require.Equal(t, tc.Options, target.TargetConfig.Options)
 
 	if verbose {
 		require.Equal(t, target.Info.Name, targetInfo.Name)

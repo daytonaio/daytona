@@ -1,9 +1,9 @@
-## daytona target-config set
+## daytona target-config add
 
-Set target config
+Add target config
 
 ```
-daytona target-config set [flags]
+daytona target-config add [flags]
 ```
 
 ### Options inherited from parent commands

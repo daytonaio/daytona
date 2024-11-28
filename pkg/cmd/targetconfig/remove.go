@@ -19,7 +19,7 @@ import (
 var yesFlag bool
 
 var removeCmd = &cobra.Command{
-	Use:     "remove [CONFIG_NAME]",
+	Use:     "remove [TARGET_CONFIG]",
 	Short:   "Remove target config",
 	Args:    cobra.RangeArgs(0, 1),
 	Aliases: []string{"rm", "delete"},
