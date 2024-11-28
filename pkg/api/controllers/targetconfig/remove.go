@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,25 +16,17 @@ import (
 //	@Tags			target-config
 //	@Summary		Remove a target config
 //	@Description	Remove a target config
-//	@Param			configName	path	string	true	"Target Config name"
+//	@Param			configId	path	string	true	"Target Config Id"
 //	@Success		204
-//	@Router			/target-config/{configName} [delete]
+//	@Router			/target-config/{configId} [delete]
 //
 //	@id				RemoveTargetConfig
 func RemoveTargetConfig(ctx *gin.Context) {
-	configName := ctx.Param("configName")
+	configId := ctx.Param("configId")
 
 	server := server.GetInstance(nil)
 
-	targetConfig, err := server.TargetConfigService.Find(&stores.TargetConfigFilter{
-		Name: &configName,
-	})
-	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to find target config: %w", err))
-		return
-	}
-
-	err = server.TargetConfigService.Delete(targetConfig)
+	err := server.TargetConfigService.Delete(configId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove target config: %w", err))
 		return

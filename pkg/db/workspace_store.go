@@ -26,7 +26,6 @@ func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
 
 func (s *WorkspaceStore) List() ([]*models.Workspace, error) {
 	workspaces := []*models.Workspace{}
-	// Order workspace jobs by created_at
 	tx := preloadWorkspaceEntities(s.db).Find(&workspaces)
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -70,5 +69,5 @@ func (s *WorkspaceStore) Delete(workspace *models.Workspace) error {
 }
 
 func preloadWorkspaceEntities(tx *gorm.DB) *gorm.DB {
-	return tx.Preload(clause.Associations).Preload("LastJob", preloadLastJob)
+	return tx.Preload(clause.Associations).Preload("Target.TargetConfig").Preload("LastJob", preloadLastJob)
 }

@@ -16,40 +16,40 @@ import (
 	"fmt"
 )
 
-// checks if the CreateTargetConfigDTO type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateTargetConfigDTO{}
+// checks if the AddTargetConfigDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &AddTargetConfigDTO{}
 
-// CreateTargetConfigDTO struct for CreateTargetConfigDTO
-type CreateTargetConfigDTO struct {
+// AddTargetConfigDTO struct for AddTargetConfigDTO
+type AddTargetConfigDTO struct {
 	Name         string             `json:"name"`
 	Options      string             `json:"options"`
 	ProviderInfo TargetProviderInfo `json:"providerInfo"`
 }
 
-type _CreateTargetConfigDTO CreateTargetConfigDTO
+type _AddTargetConfigDTO AddTargetConfigDTO
 
-// NewCreateTargetConfigDTO instantiates a new CreateTargetConfigDTO object
+// NewAddTargetConfigDTO instantiates a new AddTargetConfigDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateTargetConfigDTO(name string, options string, providerInfo TargetProviderInfo) *CreateTargetConfigDTO {
-	this := CreateTargetConfigDTO{}
+func NewAddTargetConfigDTO(name string, options string, providerInfo TargetProviderInfo) *AddTargetConfigDTO {
+	this := AddTargetConfigDTO{}
 	this.Name = name
 	this.Options = options
 	this.ProviderInfo = providerInfo
 	return &this
 }
 
-// NewCreateTargetConfigDTOWithDefaults instantiates a new CreateTargetConfigDTO object
+// NewAddTargetConfigDTOWithDefaults instantiates a new AddTargetConfigDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateTargetConfigDTOWithDefaults() *CreateTargetConfigDTO {
-	this := CreateTargetConfigDTO{}
+func NewAddTargetConfigDTOWithDefaults() *AddTargetConfigDTO {
+	this := AddTargetConfigDTO{}
 	return &this
 }
 
 // GetName returns the Name field value
-func (o *CreateTargetConfigDTO) GetName() string {
+func (o *AddTargetConfigDTO) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -60,7 +60,7 @@ func (o *CreateTargetConfigDTO) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *CreateTargetConfigDTO) GetNameOk() (*string, bool) {
+func (o *AddTargetConfigDTO) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -68,12 +68,12 @@ func (o *CreateTargetConfigDTO) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *CreateTargetConfigDTO) SetName(v string) {
+func (o *AddTargetConfigDTO) SetName(v string) {
 	o.Name = v
 }
 
 // GetOptions returns the Options field value
-func (o *CreateTargetConfigDTO) GetOptions() string {
+func (o *AddTargetConfigDTO) GetOptions() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -84,7 +84,7 @@ func (o *CreateTargetConfigDTO) GetOptions() string {
 
 // GetOptionsOk returns a tuple with the Options field value
 // and a boolean to check if the value has been set.
-func (o *CreateTargetConfigDTO) GetOptionsOk() (*string, bool) {
+func (o *AddTargetConfigDTO) GetOptionsOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -92,12 +92,12 @@ func (o *CreateTargetConfigDTO) GetOptionsOk() (*string, bool) {
 }
 
 // SetOptions sets field value
-func (o *CreateTargetConfigDTO) SetOptions(v string) {
+func (o *AddTargetConfigDTO) SetOptions(v string) {
 	o.Options = v
 }
 
 // GetProviderInfo returns the ProviderInfo field value
-func (o *CreateTargetConfigDTO) GetProviderInfo() TargetProviderInfo {
+func (o *AddTargetConfigDTO) GetProviderInfo() TargetProviderInfo {
 	if o == nil {
 		var ret TargetProviderInfo
 		return ret
@@ -108,7 +108,7 @@ func (o *CreateTargetConfigDTO) GetProviderInfo() TargetProviderInfo {
 
 // GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
-func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*TargetProviderInfo, bool) {
+func (o *AddTargetConfigDTO) GetProviderInfoOk() (*TargetProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -116,11 +116,11 @@ func (o *CreateTargetConfigDTO) GetProviderInfoOk() (*TargetProviderInfo, bool) 
 }
 
 // SetProviderInfo sets field value
-func (o *CreateTargetConfigDTO) SetProviderInfo(v TargetProviderInfo) {
+func (o *AddTargetConfigDTO) SetProviderInfo(v TargetProviderInfo) {
 	o.ProviderInfo = v
 }
 
-func (o CreateTargetConfigDTO) MarshalJSON() ([]byte, error) {
+func (o AddTargetConfigDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -128,7 +128,7 @@ func (o CreateTargetConfigDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateTargetConfigDTO) ToMap() (map[string]interface{}, error) {
+func (o AddTargetConfigDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
 	toSerialize["options"] = o.Options
@@ -136,7 +136,7 @@ func (o CreateTargetConfigDTO) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateTargetConfigDTO) UnmarshalJSON(data []byte) (err error) {
+func (o *AddTargetConfigDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -160,53 +160,53 @@ func (o *CreateTargetConfigDTO) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateTargetConfigDTO := _CreateTargetConfigDTO{}
+	varAddTargetConfigDTO := _AddTargetConfigDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateTargetConfigDTO)
+	err = decoder.Decode(&varAddTargetConfigDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateTargetConfigDTO(varCreateTargetConfigDTO)
+	*o = AddTargetConfigDTO(varAddTargetConfigDTO)
 
 	return err
 }
 
-type NullableCreateTargetConfigDTO struct {
-	value *CreateTargetConfigDTO
+type NullableAddTargetConfigDTO struct {
+	value *AddTargetConfigDTO
 	isSet bool
 }
 
-func (v NullableCreateTargetConfigDTO) Get() *CreateTargetConfigDTO {
+func (v NullableAddTargetConfigDTO) Get() *AddTargetConfigDTO {
 	return v.value
 }
 
-func (v *NullableCreateTargetConfigDTO) Set(val *CreateTargetConfigDTO) {
+func (v *NullableAddTargetConfigDTO) Set(val *AddTargetConfigDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateTargetConfigDTO) IsSet() bool {
+func (v NullableAddTargetConfigDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateTargetConfigDTO) Unset() {
+func (v *NullableAddTargetConfigDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateTargetConfigDTO(val *CreateTargetConfigDTO) *NullableCreateTargetConfigDTO {
-	return &NullableCreateTargetConfigDTO{value: val, isSet: true}
+func NewNullableAddTargetConfigDTO(val *AddTargetConfigDTO) *NullableAddTargetConfigDTO {
+	return &NullableAddTargetConfigDTO{value: val, isSet: true}
 }
 
-func (v NullableCreateTargetConfigDTO) MarshalJSON() ([]byte, error) {
+func (v NullableAddTargetConfigDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateTargetConfigDTO) UnmarshalJSON(src []byte) error {
+func (v *NullableAddTargetConfigDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

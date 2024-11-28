@@ -21,16 +21,15 @@ var _ MappedNullable = &Target{}
 
 // Target struct for Target
 type Target struct {
-	Default  bool              `json:"default"`
-	EnvVars  map[string]string `json:"envVars"`
-	Id       string            `json:"id"`
-	LastJob  *Job              `json:"lastJob,omitempty"`
-	Metadata *TargetMetadata   `json:"metadata,omitempty"`
-	Name     string            `json:"name"`
-	// JSON encoded map of options
-	Options      string             `json:"options"`
-	ProviderInfo TargetProviderInfo `json:"providerInfo"`
-	Workspaces   []Workspace        `json:"workspaces,omitempty"`
+	Default        bool              `json:"default"`
+	EnvVars        map[string]string `json:"envVars"`
+	Id             string            `json:"id"`
+	LastJob        *Job              `json:"lastJob,omitempty"`
+	Metadata       *TargetMetadata   `json:"metadata,omitempty"`
+	Name           string            `json:"name"`
+	TargetConfig   TargetConfig      `json:"targetConfig"`
+	TargetConfigId string            `json:"targetConfigId"`
+	Workspaces     []Workspace       `json:"workspaces,omitempty"`
 }
 
 type _Target Target
@@ -39,14 +38,14 @@ type _Target Target
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTarget(default_ bool, envVars map[string]string, id string, name string, options string, providerInfo TargetProviderInfo) *Target {
+func NewTarget(default_ bool, envVars map[string]string, id string, name string, targetConfig TargetConfig, targetConfigId string) *Target {
 	this := Target{}
 	this.Default = default_
 	this.EnvVars = envVars
 	this.Id = id
 	this.Name = name
-	this.Options = options
-	this.ProviderInfo = providerInfo
+	this.TargetConfig = targetConfig
+	this.TargetConfigId = targetConfigId
 	return &this
 }
 
@@ -218,52 +217,52 @@ func (o *Target) SetName(v string) {
 	o.Name = v
 }
 
-// GetOptions returns the Options field value
-func (o *Target) GetOptions() string {
+// GetTargetConfig returns the TargetConfig field value
+func (o *Target) GetTargetConfig() TargetConfig {
+	if o == nil {
+		var ret TargetConfig
+		return ret
+	}
+
+	return o.TargetConfig
+}
+
+// GetTargetConfigOk returns a tuple with the TargetConfig field value
+// and a boolean to check if the value has been set.
+func (o *Target) GetTargetConfigOk() (*TargetConfig, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetConfig, true
+}
+
+// SetTargetConfig sets field value
+func (o *Target) SetTargetConfig(v TargetConfig) {
+	o.TargetConfig = v
+}
+
+// GetTargetConfigId returns the TargetConfigId field value
+func (o *Target) GetTargetConfigId() string {
 	if o == nil {
 		var ret string
 		return ret
 	}
 
-	return o.Options
+	return o.TargetConfigId
 }
 
-// GetOptionsOk returns a tuple with the Options field value
+// GetTargetConfigIdOk returns a tuple with the TargetConfigId field value
 // and a boolean to check if the value has been set.
-func (o *Target) GetOptionsOk() (*string, bool) {
+func (o *Target) GetTargetConfigIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Options, true
+	return &o.TargetConfigId, true
 }
 
-// SetOptions sets field value
-func (o *Target) SetOptions(v string) {
-	o.Options = v
-}
-
-// GetProviderInfo returns the ProviderInfo field value
-func (o *Target) GetProviderInfo() TargetProviderInfo {
-	if o == nil {
-		var ret TargetProviderInfo
-		return ret
-	}
-
-	return o.ProviderInfo
-}
-
-// GetProviderInfoOk returns a tuple with the ProviderInfo field value
-// and a boolean to check if the value has been set.
-func (o *Target) GetProviderInfoOk() (*TargetProviderInfo, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProviderInfo, true
-}
-
-// SetProviderInfo sets field value
-func (o *Target) SetProviderInfo(v TargetProviderInfo) {
-	o.ProviderInfo = v
+// SetTargetConfigId sets field value
+func (o *Target) SetTargetConfigId(v string) {
+	o.TargetConfigId = v
 }
 
 // GetWorkspaces returns the Workspaces field value if set, zero value otherwise.
@@ -318,8 +317,8 @@ func (o Target) ToMap() (map[string]interface{}, error) {
 		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["name"] = o.Name
-	toSerialize["options"] = o.Options
-	toSerialize["providerInfo"] = o.ProviderInfo
+	toSerialize["targetConfig"] = o.TargetConfig
+	toSerialize["targetConfigId"] = o.TargetConfigId
 	if !IsNil(o.Workspaces) {
 		toSerialize["workspaces"] = o.Workspaces
 	}
@@ -335,8 +334,8 @@ func (o *Target) UnmarshalJSON(data []byte) (err error) {
 		"envVars",
 		"id",
 		"name",
-		"options",
-		"providerInfo",
+		"targetConfig",
+		"targetConfigId",
 	}
 
 	allProperties := make(map[string]interface{})

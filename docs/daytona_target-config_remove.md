@@ -3,7 +3,7 @@
 Remove target config
 
 ```
-daytona target-config remove [CONFIG_NAME] [flags]
+daytona target-config remove [TARGET_CONFIG] [flags]
 ```
 
 ### Options

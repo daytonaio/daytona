@@ -9,19 +9,15 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-type TargetConfigFilter struct {
-	Name *string
-}
-
 type TargetConfigStore interface {
-	List(filter *TargetConfigFilter) ([]*models.TargetConfig, error)
-	Find(filter *TargetConfigFilter) (*models.TargetConfig, error)
+	List(allowDeleted bool) ([]*models.TargetConfig, error)
+	Find(idOrName string, allowDeleted bool) (*models.TargetConfig, error)
 	Save(targetConfig *models.TargetConfig) error
-	Delete(targetConfig *models.TargetConfig) error
 }
 
 var (
-	ErrTargetConfigNotFound = errors.New("target config not found")
+	ErrTargetConfigNotFound      = errors.New("target config not found")
+	ErrTargetConfigAlreadyExists = errors.New("target config with the same name already exists")
 )
 
 func IsTargetConfigNotFound(err error) bool {

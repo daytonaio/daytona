@@ -1,5 +1,18 @@
 basePath: /
 definitions:
+  AddTargetConfigDTO:
+    properties:
+      name:
+        type: string
+      options:
+        type: string
+      providerInfo:
+        $ref: '#/definitions/TargetProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
+    type: object
   ApiKey:
     properties:
       keyHash:
@@ -189,19 +202,6 @@ definitions:
         type: string
     required:
     - sessionId
-    type: object
-  CreateTargetConfigDTO:
-    properties:
-      name:
-        type: string
-      options:
-        type: string
-      providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
-    required:
-    - name
-    - options
-    - providerInfo
     type: object
   CreateTargetDTO:
     properties:
@@ -1109,11 +1109,10 @@ definitions:
         $ref: '#/definitions/TargetMetadata'
       name:
         type: string
-      options:
-        description: JSON encoded map of options
+      targetConfig:
+        $ref: '#/definitions/TargetConfig'
+      targetConfigId:
         type: string
-      providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
       workspaces:
         items:
           $ref: '#/definitions/Workspace'
@@ -1123,11 +1122,15 @@ definitions:
     - envVars
     - id
     - name
-    - options
-    - providerInfo
+    - targetConfig
+    - targetConfigId
     type: object
   TargetConfig:
     properties:
+      deleted:
+        type: boolean
+      id:
+        type: string
       name:
         type: string
       options:
@@ -1136,6 +1139,8 @@ definitions:
       providerInfo:
         $ref: '#/definitions/TargetProviderInfo'
     required:
+    - deleted
+    - id
     - name
     - options
     - providerInfo
@@ -1194,13 +1199,12 @@ definitions:
         $ref: '#/definitions/TargetMetadata'
       name:
         type: string
-      options:
-        description: JSON encoded map of options
-        type: string
-      providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
       state:
         $ref: '#/definitions/ResourceState'
+      targetConfig:
+        $ref: '#/definitions/TargetConfig'
+      targetConfigId:
+        type: string
       workspaces:
         items:
           $ref: '#/definitions/Workspace'
@@ -1210,9 +1214,9 @@ definitions:
     - envVars
     - id
     - name
-    - options
-    - providerInfo
     - state
+    - targetConfig
+    - targetConfigId
     type: object
   TargetInfo:
     properties:
@@ -2338,31 +2342,31 @@ paths:
       tags:
       - target-config
     put:
-      description: Set a target config
-      operationId: SetTargetConfig
+      description: Add a target config
+      operationId: AddTargetConfig
       parameters:
-      - description: Target config to set
+      - description: Target config to add
         in: body
         name: targetConfig
         required: true
         schema:
-          $ref: '#/definitions/CreateTargetConfigDTO'
+          $ref: '#/definitions/AddTargetConfigDTO'
       responses:
         "200":
           description: OK
           schema:
             $ref: '#/definitions/TargetConfig'
-      summary: Set a target config
+      summary: Add a target config
       tags:
       - target-config
-  /target-config/{configName}:
+  /target-config/{configId}:
     delete:
       description: Remove a target config
       operationId: RemoveTargetConfig
       parameters:
-      - description: Target Config name
+      - description: Target Config Id
         in: path
-        name: configName
+        name: configId
         required: true
         type: string
       responses:

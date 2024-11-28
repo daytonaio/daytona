@@ -30,11 +30,11 @@ import (
 
 var pipeFile string
 
-var TargetConfigSetCmd = &cobra.Command{
-	Use:     "set",
-	Short:   "Set target config",
+var TargetConfigAddCmd = &cobra.Command{
+	Use:     "add",
+	Short:   "Add target config",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"s", "add", "update", "register", "edit", "new", "create"},
+	Aliases: []string{"a", "set", "register", "new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var input []byte
@@ -69,7 +69,7 @@ var TargetConfigSetCmd = &cobra.Command{
 			return err
 		}
 
-		targetConfig, err := TargetConfigCreationFlow(ctx, apiClient, activeProfile.Name, true)
+		targetConfig, err := TargetConfigCreationFlow(ctx, apiClient, activeProfile.Name)
 		if err != nil {
 			return err
 		}
@@ -83,9 +83,7 @@ var TargetConfigSetCmd = &cobra.Command{
 	},
 }
 
-func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClient, activeProfileName string, allowUpdating bool) (*targetconfig.TargetConfigView, error) {
-	var isNewProvider bool
-
+func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClient, activeProfileName string) (*targetconfig.TargetConfigView, error) {
 	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
@@ -136,7 +134,6 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		if err != nil {
 			return nil, err
 		}
-		isNewProvider = true
 	}
 
 	selectedTargetConfig := &targetconfig.TargetConfigView{
@@ -153,40 +150,12 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
-
-	if allowUpdating {
-		filteredConfigs := []apiclient.TargetConfig{}
-		for _, t := range targetConfigs {
-			if t.ProviderInfo.Name == selectedProvider.Name {
-				filteredConfigs = append(filteredConfigs, t)
-			}
-		}
-
-		if !isNewProvider || len(filteredConfigs) > 0 {
-			selectedTargetConfig, err = targetconfig.GetTargetConfigFromPrompt(filteredConfigs, activeProfileName, nil, true, "Set")
-			if err != nil {
-				if common.IsCtrlCAbort(err) {
-					return nil, nil
-				} else {
-					return nil, err
-				}
-			}
-		} else {
-			selectedTargetConfig = &targetconfig.TargetConfigView{
-				Name:    targetconfig.NewTargetConfigName,
-				Options: "{}",
-			}
-		}
-	}
-
-	if !allowUpdating || selectedTargetConfig.Name == targetconfig.NewTargetConfigName {
-		selectedTargetConfig.Name = ""
-		err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
-			return t.Name
-		}))
-		if err != nil {
-			return nil, err
-		}
+	selectedTargetConfig.Name = ""
+	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+		return t.Name
+	}))
+	if err != nil {
+		return nil, err
 	}
 
 	targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
@@ -199,7 +168,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, err
 	}
 
-	targetConfigData := apiclient.CreateTargetConfigDTO{
+	targetConfigData := apiclient.AddTargetConfigDTO{
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
 		ProviderInfo: apiclient.TargetProviderInfo{
@@ -209,12 +178,13 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		},
 	}
 
-	targetConfig, res, err := apiClient.TargetConfigAPI.SetTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
+	targetConfig, res, err := apiClient.TargetConfigAPI.AddTargetConfig(context.Background()).TargetConfig(targetConfigData).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return &targetconfig.TargetConfigView{
+		Id:      targetConfig.Id,
 		Name:    targetConfig.Name,
 		Options: targetConfig.Options,
 		ProviderInfo: targetconfig.ProviderInfo{
@@ -252,7 +222,7 @@ func handleTargetConfigJSON(data []byte) error {
 	if err != nil {
 		return err
 	}
-	targetConfigData := apiclient.CreateTargetConfigDTO{
+	targetConfigData := apiclient.AddTargetConfigDTO{
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
 		ProviderInfo: apiclient.TargetProviderInfo{
@@ -260,7 +230,7 @@ func handleTargetConfigJSON(data []byte) error {
 			Version: selectedTargetConfig.ProviderInfo.Version,
 		},
 	}
-	_, res, err = apiClient.TargetConfigAPI.SetTargetConfig(ctx).TargetConfig(targetConfigData).Execute()
+	_, res, err = apiClient.TargetConfigAPI.AddTargetConfig(ctx).TargetConfig(targetConfigData).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -365,5 +335,5 @@ func contains(slice []string, item interface{}) bool {
 }
 
 func init() {
-	TargetConfigSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
+	TargetConfigAddCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
 }

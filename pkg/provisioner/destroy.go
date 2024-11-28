@@ -9,7 +9,7 @@ import (
 )
 
 func (p *Provisioner) DestroyTarget(t *models.Target) error {
-	targetProvider, err := p.providerManager.GetProvider(t.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
@@ -22,7 +22,7 @@ func (p *Provisioner) DestroyTarget(t *models.Target) error {
 }
 
 func (p *Provisioner) DestroyWorkspace(ws *models.Workspace) error {
-	targetProvider, err := p.providerManager.GetProvider(ws.Target.ProviderInfo.Name)
+	targetProvider, err := p.providerManager.GetProvider(ws.Target.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
