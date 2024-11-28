@@ -1,6 +1,6 @@
-name: daytona env set
-synopsis: Set server environment variables
-usage: daytona env set [KEY=VALUE]... [flags]
+name: daytona env remove
+synopsis: Remove server environment variables
+usage: daytona env remove [KEY]... [flags]
 inherited_options:
     - name: help
       default_value: "false"

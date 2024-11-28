@@ -91,6 +91,9 @@ Class | Method | HTTP request | Description
 *ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
 *ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
+*EnvVarAPI* | [**DeleteEnvironmentVariable**](docs/EnvVarAPI.md#deleteenvironmentvariable) | **Delete** /env/{key} | Delete environment variable
+*EnvVarAPI* | [**ListEnvironmentVariables**](docs/EnvVarAPI.md#listenvironmentvariables) | **Get** /env | List environment variables
+*EnvVarAPI* | [**SetEnvironmentVariable**](docs/EnvVarAPI.md#setenvironmentvariable) | **Put** /env | Set environment variable
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
 *GitProviderAPI* | [**GetGitProvider**](docs/GitProviderAPI.md#getgitprovider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
 *GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
@@ -111,9 +114,6 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**ListPrebuildsForWorkspaceConfig**](docs/PrebuildAPI.md#listprebuildsforworkspaceconfig) | **Get** /workspace-config/{configName}/prebuild | List prebuilds for workspace config
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-config/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-config/{configName}/prebuild | Set prebuild
-*ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
-*ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
-*ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
 *ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
@@ -198,6 +198,7 @@ Class | Method | HTTP request | Description
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [CreateWorkspaceSourceDTO](docs/CreateWorkspaceSourceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
+ - [EnvironmentVariable](docs/EnvironmentVariable.md)
  - [ExecuteRequest](docs/ExecuteRequest.md)
  - [ExecuteResponse](docs/ExecuteResponse.md)
  - [FRPSConfig](docs/FRPSConfig.md)
@@ -239,7 +240,6 @@ Class | Method | HTTP request | Description
  - [Position](docs/Position.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
- - [ProfileData](docs/ProfileData.md)
  - [Provider](docs/Provider.md)
  - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
  - [ReplaceRequest](docs/ReplaceRequest.md)

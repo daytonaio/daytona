@@ -263,6 +263,16 @@ definitions:
     required:
     - filePath
     type: object
+  EnvironmentVariable:
+    properties:
+      key:
+        type: string
+      value:
+        type: string
+    required:
+    - key
+    - value
+    type: object
   ExecuteRequest:
     properties:
       command:
@@ -828,18 +838,6 @@ definitions:
     - id
     - retention
     - workspaceConfigName
-    type: object
-  ProfileData:
-    properties:
-      envVars:
-        additionalProperties:
-          type: string
-        type: object
-      id:
-        type: string
-    required:
-    - envVars
-    - id
     type: object
   Provider:
     properties:
@@ -1691,6 +1689,56 @@ paths:
       summary: Set container registry credentials
       tags:
       - container-registry
+  /env:
+    get:
+      description: List environment variables
+      operationId: ListEnvironmentVariables
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/EnvironmentVariable'
+            type: array
+      summary: List environment variables
+      tags:
+      - envVar
+    put:
+      consumes:
+      - application/json
+      description: Set environment variable
+      operationId: SetEnvironmentVariable
+      parameters:
+      - description: Environment Variable
+        in: body
+        name: environmentVariable
+        required: true
+        schema:
+          $ref: '#/definitions/EnvironmentVariable'
+      responses:
+        "201":
+          description: Created
+      summary: Set environment variable
+      tags:
+      - envVar
+  /env/{key}:
+    delete:
+      description: Delete environment variable
+      operationId: DeleteEnvironmentVariable
+      parameters:
+      - description: Environment Variable Key
+        in: path
+        name: key
+        required: true
+        type: string
+      responses:
+        "204":
+          description: No Content
+      summary: Delete environment variable
+      tags:
+      - envVar
   /gitprovider:
     get:
       description: List Git providers
@@ -2041,47 +2089,6 @@ paths:
       summary: List jobs
       tags:
       - job
-  /profile:
-    delete:
-      description: Delete profile data
-      operationId: DeleteProfileData
-      responses:
-        "204":
-          description: No Content
-      summary: Delete profile data
-      tags:
-      - profile
-    get:
-      consumes:
-      - application/json
-      description: Get profile data
-      operationId: GetProfileData
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ProfileData'
-      summary: Get profile data
-      tags:
-      - profile
-    put:
-      consumes:
-      - application/json
-      description: Set profile data
-      operationId: SetProfileData
-      parameters:
-      - description: Profile data
-        in: body
-        name: profileData
-        required: true
-        schema:
-          $ref: '#/definitions/ProfileData'
-      responses:
-        "201":
-          description: Created
-      summary: Set profile data
-      tags:
-      - profile
   /provider:
     get:
       description: List providers

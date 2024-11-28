@@ -261,6 +261,58 @@ paths:
       tags:
       - container-registry
       x-codegen-request-body-name: containerRegistry
+  /env:
+    get:
+      description: List environment variables
+      operationId: ListEnvironmentVariables
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/EnvironmentVariable'
+                type: array
+          description: OK
+      summary: List environment variables
+      tags:
+      - envVar
+    put:
+      description: Set environment variable
+      operationId: SetEnvironmentVariable
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentVariable'
+        description: Environment Variable
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set environment variable
+      tags:
+      - envVar
+      x-codegen-request-body-name: environmentVariable
+  /env/{key}:
+    delete:
+      description: Delete environment variable
+      operationId: DeleteEnvironmentVariable
+      parameters:
+      - description: Environment Variable Key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete environment variable
+      tags:
+      - envVar
   /gitprovider:
     get:
       description: List Git providers
@@ -634,48 +686,6 @@ paths:
       summary: List jobs
       tags:
       - job
-  /profile:
-    delete:
-      description: Delete profile data
-      operationId: DeleteProfileData
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Delete profile data
-      tags:
-      - profile
-    get:
-      description: Get profile data
-      operationId: GetProfileData
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ProfileData'
-          description: OK
-      summary: Get profile data
-      tags:
-      - profile
-    put:
-      description: Set profile data
-      operationId: SetProfileData
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileData'
-        description: Profile data
-        required: true
-      responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set profile data
-      tags:
-      - profile
-      x-codegen-request-body-name: profileData
   /provider:
     get:
       description: List providers
@@ -2735,6 +2745,19 @@ components:
       required:
       - filePath
       type: object
+    EnvironmentVariable:
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+      - key
+      - value
+      type: object
     ExecuteRequest:
       example:
         command: command
@@ -3517,22 +3540,6 @@ components:
       - id
       - retention
       - workspaceConfigName
-      type: object
-    ProfileData:
-      example:
-        envVars:
-          key: envVars
-        id: id
-      properties:
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        id:
-          type: string
-      required:
-      - envVars
-      - id
       type: object
     Provider:
       example:
