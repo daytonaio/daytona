@@ -3,7 +3,7 @@
 Delete a target
 
 ```
-daytona target delete [TARGET] [flags]
+daytona target delete [TARGET]... [flags]
 ```
 
 ### Options
