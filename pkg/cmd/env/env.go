@@ -11,7 +11,7 @@ import (
 var EnvCmd = &cobra.Command{
 	Use:     "env",
 	Short:   "Manage server environment variables that are added to all targets and workspaces",
-	GroupID: util.PROFILE_GROUP,
+	GroupID: util.SERVER_GROUP,
 }
 
 func init() {
