@@ -13,7 +13,7 @@ import (
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*models.Workspace, error)
+	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*WorkspaceDTO, error)
 	GetWorkspace(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
 	ListWorkspaces(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
 	StartWorkspace(ctx context.Context, workspaceId string) error

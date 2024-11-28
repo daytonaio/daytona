@@ -213,7 +213,7 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
 
-		workspaceEquals(t, ws, workspace, defaultWorkspaceImage)
+		workspaceEquals(t, &services.WorkspaceDTO{Workspace: *ws}, workspace, defaultWorkspaceImage)
 
 		ws.EnvVars = nil
 	})
@@ -340,7 +340,7 @@ func TestTargetService(t *testing.T) {
 	})
 }
 
-func workspaceEquals(t *testing.T, ws1, ws2 *models.Workspace, workspaceImage string) {
+func workspaceEquals(t *testing.T, ws1, ws2 *services.WorkspaceDTO, workspaceImage string) {
 	t.Helper()
 
 	require.Equal(t, ws1.Id, ws2.Id)
