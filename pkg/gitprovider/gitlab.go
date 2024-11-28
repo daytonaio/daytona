@@ -235,7 +235,8 @@ func (g *GitLabGitProvider) GetBranchByCommit(staticContext *StaticGitContext) (
 
 		commitId := branch.Commit.ID
 		for commitId != "" {
-			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId)
+			commit, _, err := client.Commits.GetCommit(staticContext.Id, commitId, nil)
+
 			if err != nil {
 				return "", g.FormatError(err)
 			}
@@ -283,11 +284,11 @@ func (g *GitLabGitProvider) GetLastCommitSha(staticContext *StaticGitContext) (s
 	}
 
 	commits, _, err := client.Commits.ListCommits(staticContext.Id, &gitlab.ListCommitsOptions{
-		ListOptions: gitlab.ListOptions{
-			PerPage: 1,
-		},
-		RefName: sha,
-	})
+  ListOptions: gitlab.ListOptions{
+  	PerPage: 1,
+  },
+  RefName: gitlab.String(*sha),
+})
 	if err != nil {
 		return "", g.FormatError(err)
 	}
@@ -319,20 +320,19 @@ func (g *GitLabGitProvider) GetUrlFromContext(repoContext *GetRepositoryContext)
 }
 
 func (g *GitLabGitProvider) getApiClient() *gitlab.Client {
-	var client *gitlab.Client
-	var err error
-
-	if g.baseApiUrl == nil {
-		client, err = gitlab.NewClient(g.token)
-	} else {
-		client, err = gitlab.NewClient(g.token, gitlab.WithBaseURL(*g.baseApiUrl))
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return client
+    var client *gitlab.Client
+    var err error
+    if g.baseApiUrl == nil {
+        client, err = gitlab.NewClient(g.token)
+    } else {
+        client, err = gitlab.NewClient(g.token, gitlab.WithBaseURL(*g.baseApiUrl))
+    }
+    if err != nil {
+        log.Fatal(err)
+    }
+    return client
 }
+
 
 func (g *GitLabGitProvider) ParseStaticGitContext(repoUrl string) (*StaticGitContext, error) {
 	if strings.HasPrefix(repoUrl, "git@") {
@@ -609,11 +609,9 @@ func (g *GitLabGitProvider) ParseEventData(request *http.Request) (*GitEventData
 }
 
 func (g *GitLabGitProvider) FormatError(err error) error {
-	re := regexp.MustCompile(`([A-Z]+)\s(https:\/\/\S+):\s(\d{3})\s(\{message:\s\d{3}\s.+\})`)
-	match := re.FindStringSubmatch(err.Error())
-	if len(match) == 5 {
-		return fmt.Errorf("status code: %s err: Request to %s failed with %s", match[3], match[2], match[4])
-	}
-
-	return fmt.Errorf("status code: %d err: failed to format error message Request failed with %s", http.StatusInternalServerError, err.Error())
+    if err, ok := err.(*gitlab.ErrorResponse); ok {
+        return fmt.Errorf("status code: %d err: Request failed with %s", err.Response.StatusCode, err.Message)
+    }
+    return fmt.Errorf("status code: %d err: failed to format error message Request failed with %s", http.StatusInternalServerError, err.Error())
 }
+

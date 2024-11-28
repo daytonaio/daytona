@@ -28,6 +28,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
+	"github.com/daytonaio/daytona/pkg/cmd/update"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -81,6 +82,7 @@ func Execute() error {
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)
+	rootCmd.AddCommand(update.NewUpdateCmd())
 
 	SetupRootCommand(rootCmd)
 
