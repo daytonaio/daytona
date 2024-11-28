@@ -17,7 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*models.Workspace, error) {
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*services.WorkspaceDTO, error) {
 	_, err := s.workspaceStore.Find(req.Name)
 	if err == nil {
 		return s.handleCreateError(ctx, nil, services.ErrWorkspaceAlreadyExists)
@@ -111,15 +111,19 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	}
 
 	err = s.createJob(ctx, w.Id, models.JobActionCreate)
+
 	return s.handleCreateError(ctx, w, err)
 }
 
-func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Workspace, err error) (*models.Workspace, error) {
+func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Workspace, err error) (*services.WorkspaceDTO, error) {
 	if !telemetry.TelemetryEnabled(ctx) {
 		if w == nil {
 			return nil, err
 		}
-		return w, err
+		return &services.WorkspaceDTO{
+			Workspace: *w,
+			State:     w.GetState(),
+		}, err
 	}
 
 	clientId := telemetry.ClientId(ctx)
@@ -139,7 +143,10 @@ func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Work
 		return nil, err
 	}
 
-	return w, err
+	return &services.WorkspaceDTO{
+		Workspace: *w,
+		State:     w.GetState(),
+	}, err
 }
 
 func isValidWorkspaceName(name string) bool {

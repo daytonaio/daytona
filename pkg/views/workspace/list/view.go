@@ -103,10 +103,10 @@ func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool)
 }
 
 func renderUnstyledList(workspaceList []apiclient.WorkspaceDTO) {
-	for _, target := range workspaceList {
-		info_view.Render(&target, "", true)
+	for _, workspace := range workspaceList {
+		info_view.Render(&workspace, "", true)
 
-		if target.Id != workspaceList[len(workspaceList)-1].Id {
+		if workspace.Id != workspaceList[len(workspaceList)-1].Id {
 			fmt.Printf("\n%s\n\n", views.SeparatorString)
 		}
 
