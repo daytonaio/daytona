@@ -20,8 +20,7 @@ type rowData struct {
 
 func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 	if len(targetConfigs) == 0 {
-		views.RenderInfoMessageBold("No target configs found.")
-		views.RenderTip("Use 'daytona target-config add' to add a target config.")
+		util.NotifyEmptyTargetConfigList(true)
 		return
 	}
 
