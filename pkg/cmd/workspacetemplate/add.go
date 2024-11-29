@@ -128,7 +128,7 @@ func RunWorkspaceTemplateAddFlow(apiClient *apiclient.APIClient, gitProviders []
 		SuggestedName:          chosenName,
 		ExistingWorkspaceNames: existingWorkspaceTemplateNames,
 		WorkspaceList:          &createDtos,
-		NameLabel:              "Workspace template",
+		NameLabel:              "Workspace Template",
 		Defaults:               workspaceDefaults,
 	}
 

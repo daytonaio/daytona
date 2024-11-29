@@ -394,7 +394,7 @@ ListPrebuildsForWorkspaceTemplate List prebuilds for workspace template
 List prebuilds for workspace template
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Config name
+	@param templateName Template name
 	@return ApiListPrebuildsForWorkspaceTemplateRequest
 */
 func (a *PrebuildAPIService) ListPrebuildsForWorkspaceTemplate(ctx context.Context, templateName string) ApiListPrebuildsForWorkspaceTemplateRequest {
@@ -633,7 +633,7 @@ SetPrebuild Set prebuild
 Set prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Config name
+	@param templateName Template name
 	@return ApiSetPrebuildRequest
 */
 func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, templateName string) ApiSetPrebuildRequest {

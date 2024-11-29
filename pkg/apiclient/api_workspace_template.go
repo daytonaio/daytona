@@ -45,7 +45,7 @@ DeleteWorkspaceTemplate Delete workspace template data
 Delete workspace template data
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Config name
+	@param templateName Template name
 	@return ApiDeleteWorkspaceTemplateRequest
 */
 func (a *WorkspaceTemplateAPIService) DeleteWorkspaceTemplate(ctx context.Context, templateName string) ApiDeleteWorkspaceTemplateRequest {
@@ -272,7 +272,7 @@ GetWorkspaceTemplate Get workspace template data
 Get workspace template data
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Config name
+	@param templateName Template name
 	@return ApiGetWorkspaceTemplateRequest
 */
 func (a *WorkspaceTemplateAPIService) GetWorkspaceTemplate(ctx context.Context, templateName string) ApiGetWorkspaceTemplateRequest {
@@ -504,7 +504,7 @@ SetDefaultWorkspaceTemplate Set workspace template to default
 Set workspace template to default
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Config name
+	@param templateName Template name
 	@return ApiSetDefaultWorkspaceTemplateRequest
 */
 func (a *WorkspaceTemplateAPIService) SetDefaultWorkspaceTemplate(ctx context.Context, templateName string) ApiSetDefaultWorkspaceTemplateRequest {

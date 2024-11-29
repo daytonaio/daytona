@@ -16,7 +16,7 @@ import (
 )
 
 var BlankWorkspaceIdentifier = "<BLANK_WORKSPACE>"
-var NewWorkspaceTemplateIdentifier = "<NEW_WORKSPACE_CONFIG>"
+var NewWorkspaceTemplateIdentifier = "<NEW_WORKSPACE_TEMPLATE>"
 
 func GetWorkspaceTemplateFromPrompt(workspaceTemplates []apiclient.WorkspaceTemplate, workspaceOrder int, showBlankOption, withNewWorkspaceTemplate bool, actionVerb string) *apiclient.WorkspaceTemplate {
 	choiceChan := make(chan *apiclient.WorkspaceTemplate)

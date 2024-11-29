@@ -241,7 +241,7 @@ import (
 )
 
 func main() {
-	templateName := "templateName_example" // string | Config name
+	templateName := "templateName_example" // string | Template name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -261,7 +261,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**templateName** | **string** | Config name | 
+**templateName** | **string** | Template name | 
 
 ### Other Parameters
 
@@ -375,7 +375,7 @@ import (
 )
 
 func main() {
-	templateName := "templateName_example" // string | Config name
+	templateName := "templateName_example" // string | Template name
 	prebuild := *openapiclient.NewCreatePrebuildDTO(int32(123)) // CreatePrebuildDTO | Prebuild
 
 	configuration := openapiclient.NewConfiguration()
@@ -396,7 +396,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**templateName** | **string** | Config name | 
+**templateName** | **string** | Template name | 
 
 ### Other Parameters
 

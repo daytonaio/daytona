@@ -55,7 +55,7 @@ func GetPrebuild(ctx *gin.Context) {
 // @Summary		Set prebuild
 // @Description	Set prebuild
 // @Accept			json
-// @Param			templateName	path		string				true	"Config name"
+// @Param			templateName	path		string				true	"Template name"
 // @Param			prebuild		body		CreatePrebuildDTO	true	"Prebuild"
 // @Success		201				{string}	prebuildId
 // @Router			/workspace-template/{templateName}/prebuild [put]
@@ -108,7 +108,7 @@ func ListPrebuilds(ctx *gin.Context) {
 // @Summary		List prebuilds for workspace template
 // @Description	List prebuilds for workspace template
 // @Accept			json
-// @Param			templateName	path	string	true	"Config name"
+// @Param			templateName	path	string	true	"Template name"
 // @Success		200				{array}	PrebuildDTO
 // @Router			/workspace-template/{templateName}/prebuild [get]
 //

@@ -91,7 +91,7 @@ func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, de
 	if nameLabel == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
 	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Target %s", nameLabel))
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s", nameLabel))
 	}
 
 	output += "\n\n"

@@ -25,7 +25,7 @@ import (
 //	@Summary		Get workspace template data
 //	@Description	Get workspace template data
 //	@Accept			json
-//	@Param			templateName	path		string	true	"Config name"
+//	@Param			templateName	path		string	true	"Template name"
 //	@Success		200				{object}	WorkspaceTemplate
 //	@Router			/workspace-template/{templateName} [get]
 //
@@ -146,7 +146,7 @@ func SetWorkspaceTemplate(ctx *gin.Context) {
 //	@Tags			workspace-template
 //	@Summary		Set workspace template to default
 //	@Description	Set workspace template to default
-//	@Param			templateName	path	string	true	"Config name"
+//	@Param			templateName	path	string	true	"Template name"
 //	@Success		200
 //	@Router			/workspace-template/{templateName}/set-default [patch]
 //
@@ -170,7 +170,7 @@ func SetDefaultWorkspaceTemplate(ctx *gin.Context) {
 //	@Tags			workspace-template
 //	@Summary		Delete workspace template data
 //	@Description	Delete workspace template data
-//	@Param			templateName	path	string	true	"Config name"
+//	@Param			templateName	path	string	true	"Template name"
 //	@Param			force			query	bool	false	"Force"
 //	@Success		204
 //	@Router			/workspace-template/{templateName} [delete]

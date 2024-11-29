@@ -2192,7 +2192,7 @@ paths:
       description: Delete workspace template data
       operationId: DeleteWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
         name: templateName
         required: true
@@ -2213,7 +2213,7 @@ paths:
       description: Get workspace template data
       operationId: GetWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
         name: templateName
         required: true
@@ -2233,7 +2233,7 @@ paths:
       description: List prebuilds for workspace template
       operationId: ListPrebuildsForWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
         name: templateName
         required: true
@@ -2254,7 +2254,7 @@ paths:
       description: Set prebuild
       operationId: SetPrebuild
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
         name: templateName
         required: true
@@ -2329,7 +2329,7 @@ paths:
       description: Set workspace template to default
       operationId: SetDefaultWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
         name: templateName
         required: true

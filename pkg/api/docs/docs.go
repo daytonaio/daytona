@@ -1702,7 +1702,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
+                        "description": "Template name",
                         "name": "templateName",
                         "in": "path",
                         "required": true
@@ -1727,7 +1727,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
+                        "description": "Template name",
                         "name": "templateName",
                         "in": "path",
                         "required": true
@@ -1760,7 +1760,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
+                        "description": "Template name",
                         "name": "templateName",
                         "in": "path",
                         "required": true
@@ -1791,7 +1791,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
+                        "description": "Template name",
                         "name": "templateName",
                         "in": "path",
                         "required": true
@@ -1902,7 +1902,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
+                        "description": "Template name",
                         "name": "templateName",
                         "in": "path",
                         "required": true
