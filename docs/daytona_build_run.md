@@ -1,6 +1,6 @@
 ## daytona build run
 
-Run a build from a workspace config
+Run a build from a workspace template
 
 ```
 daytona build run [flags]

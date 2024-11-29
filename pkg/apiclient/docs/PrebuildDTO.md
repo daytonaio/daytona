@@ -9,13 +9,13 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Retention** | **int32** |  | 
 **TriggerFiles** | Pointer to **[]string** |  | [optional] 
-**WorkspaceConfigName** | **string** |  | 
+**WorkspaceTemplateName** | **string** |  | 
 
 ## Methods
 
 ### NewPrebuildDTO
 
-`func NewPrebuildDTO(branch string, id string, retention int32, workspaceConfigName string, ) *PrebuildDTO`
+`func NewPrebuildDTO(branch string, id string, retention int32, workspaceTemplateName string, ) *PrebuildDTO`
 
 NewPrebuildDTO instantiates a new PrebuildDTO object
 This constructor will assign default values to properties that have it defined,
@@ -140,24 +140,24 @@ SetTriggerFiles sets TriggerFiles field to given value.
 
 HasTriggerFiles returns a boolean if a field has been set.
 
-### GetWorkspaceConfigName
+### GetWorkspaceTemplateName
 
-`func (o *PrebuildDTO) GetWorkspaceConfigName() string`
+`func (o *PrebuildDTO) GetWorkspaceTemplateName() string`
 
-GetWorkspaceConfigName returns the WorkspaceConfigName field if non-nil, zero value otherwise.
+GetWorkspaceTemplateName returns the WorkspaceTemplateName field if non-nil, zero value otherwise.
 
-### GetWorkspaceConfigNameOk
+### GetWorkspaceTemplateNameOk
 
-`func (o *PrebuildDTO) GetWorkspaceConfigNameOk() (*string, bool)`
+`func (o *PrebuildDTO) GetWorkspaceTemplateNameOk() (*string, bool)`
 
-GetWorkspaceConfigNameOk returns a tuple with the WorkspaceConfigName field if it's non-nil, zero value otherwise
+GetWorkspaceTemplateNameOk returns a tuple with the WorkspaceTemplateName field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetWorkspaceConfigName
+### SetWorkspaceTemplateName
 
-`func (o *PrebuildDTO) SetWorkspaceConfigName(v string)`
+`func (o *PrebuildDTO) SetWorkspaceTemplateName(v string)`
 
-SetWorkspaceConfigName sets WorkspaceConfigName field to given value.
+SetWorkspaceTemplateName sets WorkspaceTemplateName field to given value.
 
 
 

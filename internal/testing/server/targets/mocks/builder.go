@@ -23,10 +23,10 @@ var MockBuild = &models.Build{
 		User:  "test",
 	},
 	BuildConfig: &models.BuildConfig{
-		Devcontainer: MockWorkspaceConfig.BuildConfig.Devcontainer,
+		Devcontainer: MockWorkspaceTemplate.BuildConfig.Devcontainer,
 	},
 	Repository: &gitprovider.GitRepository{
-		Url: MockWorkspaceConfig.RepositoryUrl,
+		Url: MockWorkspaceTemplate.RepositoryUrl,
 	},
 	EnvVars: map[string]string{},
 }

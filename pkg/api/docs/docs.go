@@ -1557,47 +1557,47 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config": {
+        "/workspace-template": {
             "get": {
-                "description": "List workspace configs",
+                "description": "List workspace templates",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "List workspace configs",
-                "operationId": "ListWorkspaceConfigs",
+                "summary": "List workspace templates",
+                "operationId": "ListWorkspaceTemplates",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/WorkspaceConfig"
+                                "$ref": "#/definitions/WorkspaceTemplate"
                             }
                         }
                     }
                 }
             },
             "put": {
-                "description": "Set workspace config data",
+                "description": "Set workspace template data",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "Set workspace config data",
-                "operationId": "SetWorkspaceConfig",
+                "summary": "Set workspace template data",
+                "operationId": "SetWorkspaceTemplate",
                 "parameters": [
                     {
-                        "description": "Workspace config",
-                        "name": "workspaceConfig",
+                        "description": "Workspace template",
+                        "name": "workspaceTemplate",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateWorkspaceConfigDTO"
+                            "$ref": "#/definitions/CreateWorkspaceTemplateDTO"
                         }
                     }
                 ],
@@ -1608,17 +1608,17 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/default/{gitUrl}": {
+        "/workspace-template/default/{gitUrl}": {
             "get": {
-                "description": "Get workspace configs by git url",
+                "description": "Get workspace templates by git url",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "Get workspace configs by git url",
-                "operationId": "GetDefaultWorkspaceConfig",
+                "summary": "Get workspace templates by git url",
+                "operationId": "GetDefaultWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
@@ -1632,13 +1632,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceConfig"
+                            "$ref": "#/definitions/WorkspaceTemplate"
                         }
                     }
                 }
             }
         },
-        "/workspace-config/prebuild": {
+        "/workspace-template/prebuild": {
             "get": {
                 "description": "List prebuilds",
                 "consumes": [
@@ -1662,7 +1662,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/prebuild/process-git-event": {
+        "/workspace-template/prebuild/process-git-event": {
             "post": {
                 "description": "ProcessGitEvent",
                 "tags": [
@@ -1688,22 +1688,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/{configName}": {
+        "/workspace-template/{templateName}": {
             "get": {
-                "description": "Get workspace config data",
+                "description": "Get workspace template data",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "Get workspace config data",
-                "operationId": "GetWorkspaceConfig",
+                "summary": "Get workspace template data",
+                "operationId": "GetWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
+                        "description": "Template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     }
@@ -1712,23 +1712,23 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/WorkspaceConfig"
+                            "$ref": "#/definitions/WorkspaceTemplate"
                         }
                     }
                 }
             },
             "delete": {
-                "description": "Delete workspace config data",
+                "description": "Delete workspace template data",
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "Delete workspace config data",
-                "operationId": "DeleteWorkspaceConfig",
+                "summary": "Delete workspace template data",
+                "operationId": "DeleteWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
+                        "description": "Template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     },
@@ -1746,22 +1746,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/{configName}/prebuild": {
+        "/workspace-template/{templateName}/prebuild": {
             "get": {
-                "description": "List prebuilds for workspace config",
+                "description": "List prebuilds for workspace template",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "prebuild"
                 ],
-                "summary": "List prebuilds for workspace config",
-                "operationId": "ListPrebuildsForWorkspaceConfig",
+                "summary": "List prebuilds for workspace template",
+                "operationId": "ListPrebuildsForWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
+                        "description": "Template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     }
@@ -1791,8 +1791,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
+                        "description": "Template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     },
@@ -1816,7 +1816,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/{configName}/prebuild/{prebuildId}": {
+        "/workspace-template/{templateName}/prebuild/{prebuildId}": {
             "get": {
                 "description": "Get prebuild",
                 "consumes": [
@@ -1830,8 +1830,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace config name",
-                        "name": "configName",
+                        "description": "Workspace template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     },
@@ -1865,8 +1865,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Workspace config name",
-                        "name": "configName",
+                        "description": "Workspace template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     },
@@ -1891,19 +1891,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace-config/{configName}/set-default": {
+        "/workspace-template/{templateName}/set-default": {
             "patch": {
-                "description": "Set workspace config to default",
+                "description": "Set workspace template to default",
                 "tags": [
-                    "workspace-config"
+                    "workspace-template"
                 ],
-                "summary": "Set workspace config to default",
-                "operationId": "SetDefaultWorkspaceConfig",
+                "summary": "Set workspace template to default",
+                "operationId": "SetDefaultWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
+                        "description": "Template name",
+                        "name": "templateName",
                         "in": "path",
                         "required": true
                     }
@@ -3637,7 +3637,7 @@ const docTemplate = `{
             "required": [
                 "branch",
                 "envVars",
-                "workspaceConfigName"
+                "workspaceTemplateName"
             ],
             "properties": {
                 "branch": {
@@ -3652,7 +3652,7 @@ const docTemplate = `{
                 "prebuildId": {
                     "type": "string"
                 },
-                "workspaceConfigName": {
+                "workspaceTemplateName": {
                     "type": "string"
                 }
             }
@@ -3713,40 +3713,6 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateWorkspaceConfigDTO": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "name",
-                "repositoryUrl"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repositoryUrl": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "CreateWorkspaceDTO": {
             "type": "object",
             "required": [
@@ -3797,6 +3763,40 @@ const docTemplate = `{
             "properties": {
                 "repository": {
                     "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateWorkspaceTemplateDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "name",
+                "repositoryUrl"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "repositoryUrl": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
                 }
             }
         },
@@ -4625,7 +4625,7 @@ const docTemplate = `{
                 "branch",
                 "id",
                 "retention",
-                "workspaceConfigName"
+                "workspaceTemplateName"
             ],
             "properties": {
                 "branch": {
@@ -4646,7 +4646,7 @@ const docTemplate = `{
                         "type": "string"
                     }
                 },
-                "workspaceConfigName": {
+                "workspaceTemplateName": {
                     "type": "string"
                 }
             }
@@ -5263,52 +5263,6 @@ const docTemplate = `{
                 }
             }
         },
-        "WorkspaceConfig": {
-            "type": "object",
-            "required": [
-                "default",
-                "envVars",
-                "image",
-                "name",
-                "repositoryUrl",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "default": {
-                    "type": "boolean"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "prebuilds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/PrebuildConfig"
-                    }
-                },
-                "repositoryUrl": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
         "WorkspaceDTO": {
             "type": "object",
             "required": [
@@ -5422,6 +5376,52 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceTemplate": {
+            "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "name",
+                "repositoryUrl",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prebuilds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PrebuildConfig"
+                    }
+                },
+                "repositoryUrl": {
+                    "type": "string"
+                },
+                "user": {
                     "type": "string"
                 }
             }

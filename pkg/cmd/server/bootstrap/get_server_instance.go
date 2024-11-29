@@ -31,8 +31,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/workspaceconfigs"
 	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/server/workspacetemplates"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -70,7 +70,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-	workspaceConfigStore, err := db.NewWorkspaceConfigStore(dbConnection)
+	workspaceTemplateStore, err := db.NewWorkspaceTemplateStore(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -128,8 +128,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 		ConfigStore: gitProviderConfigStore,
-		DetachWorkspaceConfigs: func(ctx context.Context, gitProviderConfigId string) error {
-			workspaceConfigs, err := workspaceConfigStore.List(&stores.WorkspaceConfigFilter{
+		DetachWorkspaceTemplates: func(ctx context.Context, gitProviderConfigId string) error {
+			workspaceTemplates, err := workspaceTemplateStore.List(&stores.WorkspaceTemplateFilter{
 				GitProviderConfigId: &gitProviderConfigId,
 			})
 
@@ -137,9 +137,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				return err
 			}
 
-			for _, workspaceConfig := range workspaceConfigs {
-				workspaceConfig.GitProviderConfigId = nil
-				err = workspaceConfigStore.Save(workspaceConfig)
+			for _, workspaceTemplate := range workspaceTemplates {
+				workspaceTemplate.GitProviderConfigId = nil
+				err = workspaceTemplateStore.Save(workspaceTemplate)
 				if err != nil {
 					return err
 				}
@@ -151,8 +151,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	buildService := builds.NewBuildService(builds.BuildServiceConfig{
 		BuildStore: buildStore,
-		FindWorkspaceConfig: func(ctx context.Context, name string) (*models.WorkspaceConfig, error) {
-			return workspaceConfigStore.Find(&stores.WorkspaceConfigFilter{
+		FindWorkspaceTemplate: func(ctx context.Context, name string) (*models.WorkspaceTemplate, error) {
+			return workspaceTemplateStore.Find(&stores.WorkspaceTemplateFilter{
 				Name: &name,
 			})
 		},
@@ -173,9 +173,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
 
-	workspaceConfigService := workspaceconfigs.NewWorkspaceConfigService(workspaceconfigs.WorkspaceConfigServiceConfig{
+	workspaceTemplateService := workspacetemplates.NewWorkspaceTemplateService(workspacetemplates.WorkspaceTemplateServiceConfig{
 		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
-		ConfigStore:             workspaceConfigStore,
+		ConfigStore:             workspaceTemplateStore,
 		FindNewestBuild: func(ctx context.Context, prebuildId string) (*models.Build, error) {
 			return buildService.Find(&stores.BuildFilter{
 				PrebuildIds: &[]string{prebuildId},
@@ -187,12 +187,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				States: &[]models.BuildState{models.BuildStatePublished},
 			})
 		},
-		CreateBuild: func(ctx context.Context, workspaceConfig *models.WorkspaceConfig, repo *gitprovider.GitRepository, prebuildId string) error {
+		CreateBuild: func(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error {
 			createBuildDto := services.CreateBuildDTO{
-				WorkspaceConfigName: workspaceConfig.Name,
-				Branch:              repo.Branch,
-				PrebuildId:          &prebuildId,
-				EnvVars:             workspaceConfig.EnvVars,
+				WorkspaceTemplateName: workspaceTemplate.Name,
+				Branch:                repo.Branch,
+				PrebuildId:            &prebuildId,
+				EnvVars:               workspaceTemplate.EnvVars,
 			}
 
 			_, err := buildService.Create(createBuildDto)
@@ -240,7 +240,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		},
 	})
 
-	err = workspaceConfigService.StartRetentionPoller()
+	err = workspaceTemplateService.StartRetentionPoller()
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +397,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		TargetConfigService:        targetConfigService,
 		ContainerRegistryService:   containerRegistryService,
 		BuildService:               buildService,
-		WorkspaceConfigService:     workspaceConfigService,
+		WorkspaceTemplateService:   workspaceTemplateService,
 		WorkspaceService:           workspaceService,
 		LocalContainerRegistry:     localContainerRegistry,
 		ApiKeyService:              apiKeyService,

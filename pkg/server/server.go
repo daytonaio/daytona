@@ -22,7 +22,7 @@ type ServerInstanceConfig struct {
 	TargetConfigService        services.ITargetConfigService
 	ContainerRegistryService   services.IContainerRegistryService
 	BuildService               services.IBuildService
-	WorkspaceConfigService     services.IWorkspaceConfigService
+	WorkspaceTemplateService   services.IWorkspaceTemplateService
 	WorkspaceService           services.IWorkspaceService
 	LocalContainerRegistry     ILocalContainerRegistry
 	TargetService              services.ITargetService
@@ -53,7 +53,7 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			TargetConfigService:        serverConfig.TargetConfigService,
 			ContainerRegistryService:   serverConfig.ContainerRegistryService,
 			BuildService:               serverConfig.BuildService,
-			WorkspaceConfigService:     serverConfig.WorkspaceConfigService,
+			WorkspaceTemplateService:   serverConfig.WorkspaceTemplateService,
 			WorkspaceService:           serverConfig.WorkspaceService,
 			LocalContainerRegistry:     serverConfig.LocalContainerRegistry,
 			TargetService:              serverConfig.TargetService,
@@ -77,7 +77,7 @@ type Server struct {
 	TargetConfigService        services.ITargetConfigService
 	ContainerRegistryService   services.IContainerRegistryService
 	BuildService               services.IBuildService
-	WorkspaceConfigService     services.IWorkspaceConfigService
+	WorkspaceTemplateService   services.IWorkspaceTemplateService
 	WorkspaceService           services.IWorkspaceService
 	LocalContainerRegistry     ILocalContainerRegistry
 	TargetService              services.ITargetService

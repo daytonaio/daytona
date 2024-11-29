@@ -48,8 +48,8 @@ daytona [flags]
 * [daytona target](daytona_target.md)	 - Manage targets
 * [daytona target-config](daytona_target-config.md)	 - Manage target configs
 * [daytona telemetry](daytona_telemetry.md)	 - Manage telemetry collection
+* [daytona template](daytona_template.md)	 - Manage workspace templates
 * [daytona use](daytona_use.md)	 - Use profile [PROFILE_NAME]
 * [daytona version](daytona_version.md)	 - Print the version number
 * [daytona whoami](daytona_whoami.md)	 - Display information about the active user
-* [daytona workspace-config](daytona_workspace-config.md)	 - Manage workspace configs
 

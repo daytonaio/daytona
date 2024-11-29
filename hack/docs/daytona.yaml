@@ -40,7 +40,7 @@ see_also:
     - daytona target - Manage targets
     - daytona target-config - Manage target configs
     - daytona telemetry - Manage telemetry collection
+    - daytona template - Manage workspace templates
     - daytona use - Use profile [PROFILE_NAME]
     - daytona version - Print the version number
     - daytona whoami - Display information about the active user
-    - daytona workspace-config - Manage workspace configs

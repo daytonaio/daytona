@@ -33,7 +33,7 @@ type WorkspaceConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentWorkspace *apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceConfigDefaults) *WorkspaceConfigurationData {
+func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentWorkspace *apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceTemplateDefaults) *WorkspaceConfigurationData {
 	workspaceConfigurationData := &WorkspaceConfigurationData{
 		Name:                 currentWorkspace.Name,
 		BuildChoice:          string(buildChoice),
@@ -58,7 +58,7 @@ func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePa
 	return workspaceConfigurationData
 }
 
-func RunWorkspaceConfiguration(workspaceList *[]apiclient.CreateWorkspaceDTO, defaults views_util.WorkspaceConfigDefaults, isTemplateImport bool) (bool, error) {
+func RunWorkspaceConfiguration(workspaceList *[]apiclient.CreateWorkspaceDTO, defaults views_util.WorkspaceTemplateDefaults, isTemplateImport bool) (bool, error) {
 	var currentWorkspace *apiclient.CreateWorkspaceDTO
 
 	if len(*workspaceList) > 1 {
