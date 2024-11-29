@@ -57,6 +57,7 @@ func init() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zlog.Logger = zlog.Output(zerolog.ConsoleWriter{
 		Out:        &util.DebugLogWriter{},
+}
 		TimeFormat: time.RFC3339,
 	})
 
