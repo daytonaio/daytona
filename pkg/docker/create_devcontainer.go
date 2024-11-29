@@ -94,9 +94,11 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		return "", "", err
 	}
 
-	err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
-	if err != nil {
-		return "", "", err
+	if opts.Prebuild {
+		err = d.runInitializeCommand(opts.ProjectDir, config.MergedConfiguration.InitializeCommand, opts.LogWriter, opts.SshClient)
+		if err != nil {
+			return "", "", err
+		}
 	}
 
 	workspaceFolder := config.Workspace.WorkspaceFolder
@@ -146,7 +148,7 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 
 		getComposeFilePath := func(composeFilePath string) (string, error) {
 			if opts.SshClient != nil {
-				composeFilePath = path.Join(opts.ProjectDir, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
+				composeFilePath = path.Join(paths.ProjectTarget, filepath.Dir(opts.BuildConfig.Devcontainer.FilePath), composeFilePath)
 
 				composeFileContent, err := d.getRemoteComposeContent(&opts, paths, socketForwardId, composeFilePath)
 				if err != nil {
@@ -206,6 +208,11 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 			if service.Build != nil {
 				if strings.HasPrefix(service.Build.Context, opts.ProjectDir) {
 					service.Build.Context = strings.Replace(service.Build.Context, opts.ProjectDir, paths.ProjectTarget, 1)
+				}
+			}
+			for i, v := range service.Volumes {
+				if strings.HasPrefix(v.Source, paths.ProjectTarget) {
+					service.Volumes[i].Source = strings.Replace(v.Source, paths.ProjectTarget, opts.ProjectDir, 1)
 				}
 			}
 		}
@@ -598,7 +605,7 @@ func (d *DockerClient) getRemoteComposeContent(opts *CreateDevcontainerOptions, 
 		return "", nil
 	}
 
-	output, err := d.execDevcontainerCommand("docker compose config", opts, paths, filepath.Dir(composePath), socketForwardId, false, nil)
+	output, err := d.execDevcontainerCommand(fmt.Sprintf("docker compose -f %s config", composePath), opts, paths, filepath.Dir(composePath), socketForwardId, false, nil)
 	if err != nil {
 		return "", err
 	}

@@ -211,7 +211,7 @@ func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateProjectOptions, p
 			"daytona.workspace.id": opts.Project.WorkspaceId,
 			"daytona.project.name": opts.Project.Name,
 		},
-		Prebuild: true,
+		Prebuild: prebuild,
 	}
 }
 
