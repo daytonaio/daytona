@@ -9,7 +9,7 @@ daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
 ### Options
 
 ```
-      --blank                        Create a blank workspace without using existing configurations
+      --blank                        Create a blank workspace without using existing templates
       --branch strings               Specify the Git branches to use in the workspaces
       --builder BuildChoice          Specify the builder (currently auto/devcontainer/none)
       --custom-image string          Create the workspace with the custom image passed as the flag value; Requires setting --custom-image-user flag as well

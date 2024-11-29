@@ -18,18 +18,18 @@ import (
 type GitProviderServiceConfig struct {
 	ConfigStore stores.GitProviderConfigStore
 
-	DetachWorkspaceConfigs func(ctx context.Context, gitProviderConfigId string) error
+	DetachWorkspaceTemplates func(ctx context.Context, gitProviderConfigId string) error
 }
 
 type GitProviderService struct {
-	configStore            stores.GitProviderConfigStore
-	detachWorkspaceConfigs func(ctx context.Context, gitProviderConfigId string) error
+	configStore              stores.GitProviderConfigStore
+	detachWorkspaceTemplates func(ctx context.Context, gitProviderConfigId string) error
 }
 
 func NewGitProviderService(config GitProviderServiceConfig) services.IGitProviderService {
 	return &GitProviderService{
-		configStore:            config.ConfigStore,
-		detachWorkspaceConfigs: config.DetachWorkspaceConfigs,
+		configStore:              config.ConfigStore,
+		detachWorkspaceTemplates: config.DetachWorkspaceTemplates,
 	}
 }
 

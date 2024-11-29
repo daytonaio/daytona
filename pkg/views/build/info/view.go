@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	workspaceconfig_info "github.com/daytonaio/daytona/pkg/views/workspaceconfig/info"
+	workspacetemplate_info "github.com/daytonaio/daytona/pkg/views/workspacetemplate/info"
 	"golang.org/x/term"
 )
 
@@ -45,8 +45,8 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 		output += getInfoLine("User", *b.User) + "\n"
 	}
 
-	if workspaceconfig_info.GetLabelFromBuild(b.BuildConfig) != "" {
-		workspaceDefaults := &views_util.WorkspaceConfigDefaults{
+	if workspacetemplate_info.GetLabelFromBuild(b.BuildConfig) != "" {
+		workspaceDefaults := &views_util.WorkspaceTemplateDefaults{
 			Image:     &apiServerConfig.DefaultWorkspaceImage,
 			ImageUser: &apiServerConfig.DefaultWorkspaceUser,
 		}

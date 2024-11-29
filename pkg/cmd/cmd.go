@@ -30,7 +30,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace/create"
-	. "github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
+	. "github.com/daytonaio/daytona/pkg/cmd/workspacetemplate"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -60,7 +60,7 @@ func Execute() error {
 	rootCmd.AddCommand(SshProxyCmd)
 	rootCmd.AddCommand(CreateCmd)
 	rootCmd.AddCommand(DeleteCmd)
-	rootCmd.AddCommand(WorkspaceConfigCmd)
+	rootCmd.AddCommand(WorkspaceTemplateCmd)
 	rootCmd.AddCommand(ServeCmd)
 	rootCmd.AddCommand(DaemonServeCmd)
 	rootCmd.AddCommand(ServerCmd)

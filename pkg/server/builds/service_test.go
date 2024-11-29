@@ -145,10 +145,10 @@ func (s *BuildServiceTestSuite) TestSave() {
 
 	// FIXME: fix me
 	createBuildDto := services.CreateBuildDTO{
-		WorkspaceConfigName: "workspaceConfigName",
-		Branch:              "branch",
-		PrebuildId:          &build4.PrebuildId,
-		EnvVars:             build4.EnvVars,
+		WorkspaceTemplateName: "workspaceTemplateName",
+		Branch:                "branch",
+		PrebuildId:            &build4.PrebuildId,
+		EnvVars:               build4.EnvVars,
 	}
 
 	_, err := s.buildService.Create(createBuildDto)

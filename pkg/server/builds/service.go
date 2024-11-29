@@ -18,25 +18,25 @@ import (
 )
 
 type BuildServiceConfig struct {
-	BuildStore           stores.BuildStore
-	FindWorkspaceConfig  func(ctx context.Context, name string) (*models.WorkspaceConfig, error)
-	GetRepositoryContext func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
-	LoggerFactory        logs.LoggerFactory
+	BuildStore            stores.BuildStore
+	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
+	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	LoggerFactory         logs.LoggerFactory
 }
 
 type BuildService struct {
-	buildStore           stores.BuildStore
-	findWorkspaceConfig  func(ctx context.Context, name string) (*models.WorkspaceConfig, error)
-	getRepositoryContext func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
-	loggerFactory        logs.LoggerFactory
+	buildStore            stores.BuildStore
+	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
+	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	loggerFactory         logs.LoggerFactory
 }
 
 func NewBuildService(config BuildServiceConfig) services.IBuildService {
 	return &BuildService{
-		buildStore:           config.BuildStore,
-		findWorkspaceConfig:  config.FindWorkspaceConfig,
-		getRepositoryContext: config.GetRepositoryContext,
-		loggerFactory:        config.LoggerFactory,
+		buildStore:            config.BuildStore,
+		findWorkspaceTemplate: config.FindWorkspaceTemplate,
+		getRepositoryContext:  config.GetRepositoryContext,
+		loggerFactory:         config.LoggerFactory,
 	}
 }
 
@@ -45,12 +45,12 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 	id = stringid.TruncateID(id)
 	ctx := context.Background()
 
-	workspaceConfig, err := s.findWorkspaceConfig(ctx, b.WorkspaceConfigName)
+	workspaceTemplate, err := s.findWorkspaceTemplate(ctx, b.WorkspaceTemplateName)
 	if err != nil {
 		return "", err
 	}
 
-	repo, err := s.getRepositoryContext(ctx, workspaceConfig.RepositoryUrl, b.Branch)
+	repo, err := s.getRepositoryContext(ctx, workspaceTemplate.RepositoryUrl, b.Branch)
 	if err != nil {
 		return "", err
 	}
@@ -59,10 +59,10 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 		Id:    id,
 		State: models.BuildStatePendingRun,
 		ContainerConfig: models.ContainerConfig{
-			Image: workspaceConfig.Image,
-			User:  workspaceConfig.User,
+			Image: workspaceTemplate.Image,
+			User:  workspaceTemplate.User,
 		},
-		BuildConfig: workspaceConfig.BuildConfig,
+		BuildConfig: workspaceTemplate.BuildConfig,
 		Repository:  repo,
 		EnvVars:     b.EnvVars,
 	}

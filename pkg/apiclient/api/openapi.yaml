@@ -1110,44 +1110,44 @@ paths:
       tags:
       - workspace
       x-codegen-request-body-name: workspace
-  /workspace-config:
+  /workspace-template:
     get:
-      description: List workspace configs
-      operationId: ListWorkspaceConfigs
+      description: List workspace templates
+      operationId: ListWorkspaceTemplates
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/WorkspaceConfig'
+                  $ref: '#/components/schemas/WorkspaceTemplate'
                 type: array
           description: OK
-      summary: List workspace configs
+      summary: List workspace templates
       tags:
-      - workspace-config
+      - workspace-template
     put:
-      description: Set workspace config data
-      operationId: SetWorkspaceConfig
+      description: Set workspace template data
+      operationId: SetWorkspaceTemplate
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateWorkspaceConfigDTO'
-        description: Workspace config
+              $ref: '#/components/schemas/CreateWorkspaceTemplateDTO'
+        description: Workspace template
         required: true
       responses:
         "201":
           content: {}
           description: Created
-      summary: Set workspace config data
+      summary: Set workspace template data
       tags:
-      - workspace-config
-      x-codegen-request-body-name: workspaceConfig
-  /workspace-config/default/{gitUrl}:
+      - workspace-template
+      x-codegen-request-body-name: workspaceTemplate
+  /workspace-template/default/{gitUrl}:
     get:
-      description: Get workspace configs by git url
-      operationId: GetDefaultWorkspaceConfig
+      description: Get workspace templates by git url
+      operationId: GetDefaultWorkspaceTemplate
       parameters:
       - description: Git URL
         in: path
@@ -1160,12 +1160,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/WorkspaceConfig'
+                $ref: '#/components/schemas/WorkspaceTemplate'
           description: OK
-      summary: Get workspace configs by git url
+      summary: Get workspace templates by git url
       tags:
-      - workspace-config
-  /workspace-config/prebuild:
+      - workspace-template
+  /workspace-template/prebuild:
     get:
       description: List prebuilds
       operationId: ListPrebuilds
@@ -1181,7 +1181,7 @@ paths:
       summary: List prebuilds
       tags:
       - prebuild
-  /workspace-config/prebuild/process-git-event:
+  /workspace-template/prebuild/process-git-event:
     post:
       description: ProcessGitEvent
       operationId: ProcessGitEvent
@@ -1200,14 +1200,14 @@ paths:
       tags:
       - prebuild
       x-codegen-request-body-name: body
-  /workspace-config/{configName}:
+  /workspace-template/{templateName}:
     delete:
-      description: Delete workspace config data
-      operationId: DeleteWorkspaceConfig
+      description: Delete workspace template data
+      operationId: DeleteWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1220,16 +1220,16 @@ paths:
         "204":
           content: {}
           description: No Content
-      summary: Delete workspace config data
+      summary: Delete workspace template data
       tags:
-      - workspace-config
+      - workspace-template
     get:
-      description: Get workspace config data
-      operationId: GetWorkspaceConfig
+      description: Get workspace template data
+      operationId: GetWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1238,19 +1238,19 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/WorkspaceConfig'
+                $ref: '#/components/schemas/WorkspaceTemplate'
           description: OK
-      summary: Get workspace config data
+      summary: Get workspace template data
       tags:
-      - workspace-config
-  /workspace-config/{configName}/prebuild:
+      - workspace-template
+  /workspace-template/{templateName}/prebuild:
     get:
-      description: List prebuilds for workspace config
-      operationId: ListPrebuildsForWorkspaceConfig
+      description: List prebuilds for workspace template
+      operationId: ListPrebuildsForWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1263,16 +1263,16 @@ paths:
                   $ref: '#/components/schemas/PrebuildDTO'
                 type: array
           description: OK
-      summary: List prebuilds for workspace config
+      summary: List prebuilds for workspace template
       tags:
       - prebuild
     put:
       description: Set prebuild
       operationId: SetPrebuild
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1294,14 +1294,14 @@ paths:
       tags:
       - prebuild
       x-codegen-request-body-name: prebuild
-  /workspace-config/{configName}/prebuild/{prebuildId}:
+  /workspace-template/{templateName}/prebuild/{prebuildId}:
     delete:
       description: Delete prebuild
       operationId: DeletePrebuild
       parameters:
-      - description: Workspace config name
+      - description: Workspace template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1327,9 +1327,9 @@ paths:
       description: Get prebuild
       operationId: GetPrebuild
       parameters:
-      - description: Workspace config name
+      - description: Workspace template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1349,14 +1349,14 @@ paths:
       summary: Get prebuild
       tags:
       - prebuild
-  /workspace-config/{configName}/set-default:
+  /workspace-template/{templateName}/set-default:
     patch:
-      description: Set workspace config to default
-      operationId: SetDefaultWorkspaceConfig
+      description: Set workspace template to default
+      operationId: SetDefaultWorkspaceTemplate
       parameters:
-      - description: Config name
+      - description: Template name
         in: path
-        name: configName
+        name: templateName
         required: true
         schema:
           type: string
@@ -1364,9 +1364,9 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set workspace config to default
+      summary: Set workspace template to default
       tags:
-      - workspace-config
+      - workspace-template
   /workspace/{workspaceId}:
     delete:
       description: Remove workspace
@@ -1652,8 +1652,8 @@ components:
         prebuildId: prebuildId
         envVars:
           key: envVars
-        workspaceConfigName: workspaceConfigName
         branch: branch
+        workspaceTemplateName: workspaceTemplateName
       properties:
         branch:
           type: string
@@ -1663,12 +1663,12 @@ components:
           type: object
         prebuildId:
           type: string
-        workspaceConfigName:
+        workspaceTemplateName:
           type: string
       required:
       - branch
       - envVars
-      - workspaceConfigName
+      - workspaceTemplateName
       type: object
     CreatePrebuildDTO:
       example:
@@ -1711,43 +1711,6 @@ components:
       - id
       - name
       - targetConfigName
-      type: object
-    CreateWorkspaceConfigDTO:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        envVars:
-          key: envVars
-        name: name
-        user: user
-        repositoryUrl: repositoryUrl
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        repositoryUrl:
-          type: string
-        user:
-          type: string
-      required:
-      - envVars
-      - name
-      - repositoryUrl
       type: object
     CreateWorkspaceDTO:
       example:
@@ -1823,6 +1786,43 @@ components:
           $ref: '#/components/schemas/GitRepository'
       required:
       - repository
+      type: object
+    CreateWorkspaceTemplateDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        envVars:
+          key: envVars
+        name: name
+        user: user
+        repositoryUrl: repositoryUrl
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        repositoryUrl:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - name
+      - repositoryUrl
       type: object
     DevcontainerConfig:
       example:
@@ -2237,13 +2237,13 @@ components:
     PrebuildDTO:
       example:
         commitInterval: 0
-        workspaceConfigName: workspaceConfigName
         id: id
         branch: branch
         retention: 6
         triggerFiles:
         - triggerFiles
         - triggerFiles
+        workspaceTemplateName: workspaceTemplateName
       properties:
         branch:
           type: string
@@ -2257,13 +2257,13 @@ components:
           items:
             type: string
           type: array
-        workspaceConfigName:
+        workspaceTemplateName:
           type: string
       required:
       - branch
       - id
       - retention
-      - workspaceConfigName
+      - workspaceTemplateName
       type: object
     Provider:
       example:
@@ -3042,68 +3042,6 @@ components:
       - targetId
       - user
       type: object
-    WorkspaceConfig:
-      example:
-        prebuilds:
-        - commitInterval: 0
-          id: id
-          branch: branch
-          retention: 6
-          triggerFiles:
-          - triggerFiles
-          - triggerFiles
-        - commitInterval: 0
-          id: id
-          branch: branch
-          retention: 6
-          triggerFiles:
-          - triggerFiles
-          - triggerFiles
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        default: true
-        envVars:
-          key: envVars
-        name: name
-        user: user
-        repositoryUrl: repositoryUrl
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        default:
-          type: boolean
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        prebuilds:
-          items:
-            $ref: '#/components/schemas/PrebuildConfig'
-          type: array
-        repositoryUrl:
-          type: string
-        user:
-          type: string
-      required:
-      - default
-      - envVars
-      - image
-      - name
-      - repositoryUrl
-      - user
-      type: object
     WorkspaceDTO:
       example:
         gitProviderConfigId: gitProviderConfigId
@@ -3299,6 +3237,68 @@ components:
       - updatedAt
       - uptime
       - workspaceId
+      type: object
+    WorkspaceTemplate:
+      example:
+        prebuilds:
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        default: true
+        envVars:
+          key: envVars
+        name: name
+        user: user
+        repositoryUrl: repositoryUrl
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        default:
+          type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        image:
+          type: string
+        name:
+          type: string
+        prebuilds:
+          items:
+            $ref: '#/components/schemas/PrebuildConfig'
+          type: array
+        repositoryUrl:
+          type: string
+        user:
+          type: string
+      required:
+      - default
+      - envVars
+      - image
+      - name
+      - repositoryUrl
+      - user
       type: object
     models.ApiKeyType:
       enum:
