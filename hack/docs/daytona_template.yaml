@@ -1,0 +1,14 @@
+name: daytona template
+synopsis: Manage workspace templates
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona template add - Add a workspace template
+    - daytona template delete - Delete a workspace template
+    - daytona template info - Show workspace template info
+    - daytona template list - Lists workspace templates
+    - daytona template set-default - Set workspace template info
+    - daytona template update - Update a workspace template

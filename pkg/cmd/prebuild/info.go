@@ -33,11 +33,11 @@ var prebuildInfoCmd = &cobra.Command{
 
 		if len(args) < 2 {
 			var prebuilds []apiclient.PrebuildDTO
-			var selectedWorkspaceConfigName string
+			var selectedWorkspaceTemplateName string
 
 			if len(args) == 1 {
-				selectedWorkspaceConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceConfig(context.Background(), selectedWorkspaceConfigName).Execute()
+				selectedWorkspaceTemplateName = args[0]
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), selectedWorkspaceTemplateName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}

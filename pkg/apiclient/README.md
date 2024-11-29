@@ -108,12 +108,12 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
 *GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
 *JobAPI* | [**ListJobs**](docs/JobAPI.md#listjobs) | **Get** /job | List jobs
-*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-config/{configName}/prebuild/{prebuildId} | Delete prebuild
-*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /workspace-config/{configName}/prebuild/{prebuildId} | Get prebuild
-*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-config/prebuild | List prebuilds
-*PrebuildAPI* | [**ListPrebuildsForWorkspaceConfig**](docs/PrebuildAPI.md#listprebuildsforworkspaceconfig) | **Get** /workspace-config/{configName}/prebuild | List prebuilds for workspace config
-*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-config/prebuild/process-git-event | ProcessGitEvent
-*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-config/{configName}/prebuild | Set prebuild
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-template/prebuild | List prebuilds
+*PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
+*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
+*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
 *ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
@@ -141,12 +141,12 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**SetWorkspaceMetadata**](docs/WorkspaceAPI.md#setworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
-*WorkspaceConfigAPI* | [**DeleteWorkspaceConfig**](docs/WorkspaceConfigAPI.md#deleteworkspaceconfig) | **Delete** /workspace-config/{configName} | Delete workspace config data
-*WorkspaceConfigAPI* | [**GetDefaultWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getdefaultworkspaceconfig) | **Get** /workspace-config/default/{gitUrl} | Get workspace configs by git url
-*WorkspaceConfigAPI* | [**GetWorkspaceConfig**](docs/WorkspaceConfigAPI.md#getworkspaceconfig) | **Get** /workspace-config/{configName} | Get workspace config data
-*WorkspaceConfigAPI* | [**ListWorkspaceConfigs**](docs/WorkspaceConfigAPI.md#listworkspaceconfigs) | **Get** /workspace-config | List workspace configs
-*WorkspaceConfigAPI* | [**SetDefaultWorkspaceConfig**](docs/WorkspaceConfigAPI.md#setdefaultworkspaceconfig) | **Patch** /workspace-config/{configName}/set-default | Set workspace config to default
-*WorkspaceConfigAPI* | [**SetWorkspaceConfig**](docs/WorkspaceConfigAPI.md#setworkspaceconfig) | **Put** /workspace-config | Set workspace config data
+*WorkspaceTemplateAPI* | [**DeleteWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#deleteworkspacetemplate) | **Delete** /workspace-template/{templateName} | Delete workspace template data
+*WorkspaceTemplateAPI* | [**GetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getdefaultworkspacetemplate) | **Get** /workspace-template/default/{gitUrl} | Get workspace templates by git url
+*WorkspaceTemplateAPI* | [**GetWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getworkspacetemplate) | **Get** /workspace-template/{templateName} | Get workspace template data
+*WorkspaceTemplateAPI* | [**ListWorkspaceTemplates**](docs/WorkspaceTemplateAPI.md#listworkspacetemplates) | **Get** /workspace-template | List workspace templates
+*WorkspaceTemplateAPI* | [**SetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#setdefaultworkspacetemplate) | **Patch** /workspace-template/{templateName}/set-default | Set workspace template to default
+*WorkspaceTemplateAPI* | [**SetWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#setworkspacetemplate) | **Put** /workspace-template | Set workspace template data
 *WorkspaceToolboxAPI* | [**FsCreateFolder**](docs/WorkspaceToolboxAPI.md#fscreatefolder) | **Post** /workspace/{workspaceId}/toolbox/files/folder | Create folder
 *WorkspaceToolboxAPI* | [**FsDeleteFile**](docs/WorkspaceToolboxAPI.md#fsdeletefile) | **Delete** /workspace/{workspaceId}/toolbox/files | Delete file
 *WorkspaceToolboxAPI* | [**FsDownloadFile**](docs/WorkspaceToolboxAPI.md#fsdownloadfile) | **Get** /workspace/{workspaceId}/toolbox/files/download | Download file
@@ -194,9 +194,9 @@ Class | Method | HTTP request | Description
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateTargetDTO](docs/CreateTargetDTO.md)
- - [CreateWorkspaceConfigDTO](docs/CreateWorkspaceConfigDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [CreateWorkspaceSourceDTO](docs/CreateWorkspaceSourceDTO.md)
+ - [CreateWorkspaceTemplateDTO](docs/CreateWorkspaceTemplateDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [EnvironmentVariable](docs/EnvironmentVariable.md)
  - [ExecuteRequest](docs/ExecuteRequest.md)
@@ -263,11 +263,11 @@ Class | Method | HTTP request | Description
  - [TargetMetadata](docs/TargetMetadata.md)
  - [TargetProviderInfo](docs/TargetProviderInfo.md)
  - [Workspace](docs/Workspace.md)
- - [WorkspaceConfig](docs/WorkspaceConfig.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceDirResponse](docs/WorkspaceDirResponse.md)
  - [WorkspaceInfo](docs/WorkspaceInfo.md)
  - [WorkspaceMetadata](docs/WorkspaceMetadata.md)
+ - [WorkspaceTemplate](docs/WorkspaceTemplate.md)
 
 
 ## Documentation For Authorization
