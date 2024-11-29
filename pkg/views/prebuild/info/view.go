@@ -32,7 +32,7 @@ func Render(prebuild *apiclient.PrebuildDTO, forceUnstyled bool) {
 
 	output += getInfoLine("ID", prebuild.Id) + "\n"
 
-	output += getInfoLine("Workspace config", prebuild.WorkspaceConfigName) + "\n"
+	output += getInfoLine("Workspace template", prebuild.WorkspaceTemplateName) + "\n"
 
 	output += getInfoLine("Branch", views.GetBranchNameLabel(prebuild.Branch)) + "\n"
 

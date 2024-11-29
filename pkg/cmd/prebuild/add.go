@@ -14,7 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/build"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
-	"github.com/daytonaio/daytona/pkg/cmd/workspaceconfig"
+	"github.com/daytonaio/daytona/pkg/cmd/workspacetemplate"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
 	"github.com/daytonaio/daytona/pkg/views/selection"
@@ -28,7 +28,7 @@ var prebuildAddCmd = &cobra.Command{
 	Aliases: []string{"new", "create"},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuildAddView add.PrebuildAddView
-		var workspaceConfig *apiclient.WorkspaceConfig
+		var workspaceTemplate *apiclient.WorkspaceTemplate
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -50,32 +50,32 @@ var prebuildAddCmd = &cobra.Command{
 			commitIntervalFlag == 0 && triggerFilesFlag == nil {
 			// Interactive CLI logic
 
-			workspaceConfigList, res, err := apiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
+			workspaceTemplateList, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			workspaceConfig = selection.GetWorkspaceConfigFromPrompt(workspaceConfigList, 0, false, true, "Prebuild")
-			if workspaceConfig == nil {
-				return errors.New("No workspace config selected")
+			workspaceTemplate = selection.GetWorkspaceTemplateFromPrompt(workspaceTemplateList, 0, false, true, "Prebuild")
+			if workspaceTemplate == nil {
+				return errors.New("No workspace template selected")
 			}
 
-			if workspaceConfig.Name == selection.NewWorkspaceConfigIdentifier {
-				workspaceConfig, err = workspaceconfig.RunWorkspaceConfigAddFlow(apiClient, gitProviders, ctx)
+			if workspaceTemplate.Name == selection.NewWorkspaceTemplateIdentifier {
+				workspaceTemplate, err = workspacetemplate.RunWorkspaceTemplateAddFlow(apiClient, gitProviders, ctx)
 				if err != nil {
 					return err
 				}
-				if workspaceConfig == nil {
+				if workspaceTemplate == nil {
 					return nil
 				}
 			}
 
-			prebuildAddView.WorkspaceConfigName = workspaceConfig.Name
-			if workspaceConfig.BuildConfig == nil {
-				return errors.New("The chosen workspace config does not have a build configuration")
+			prebuildAddView.WorkspaceTemplateName = workspaceTemplate.Name
+			if workspaceTemplate.BuildConfig == nil {
+				return errors.New("The chosen workspace template does not have a build configuration")
 			}
 
-			chosenBranch, err := create.GetBranchFromWorkspaceConfig(ctx, workspaceConfig, apiClient, 0)
+			chosenBranch, err := create.GetBranchFromWorkspaceTemplate(ctx, workspaceTemplate, apiClient, 0)
 			if err != nil {
 				return err
 			}
@@ -90,22 +90,22 @@ var prebuildAddCmd = &cobra.Command{
 		} else {
 			// Non-interactive mode: use provided arguments and flags
 			if len(args) > 0 {
-				prebuildAddView.WorkspaceConfigName = args[0]
+				prebuildAddView.WorkspaceTemplateName = args[0]
 
-				// Fetch the workspace configuration based on the provided argument
-				workspaceConfigTemp, res, err := apiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, prebuildAddView.WorkspaceConfigName).Execute()
+				// Fetch the workspace template based on the provided argument
+				workspaceTemplateTemp, res, err := apiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, prebuildAddView.WorkspaceTemplateName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
-				if workspaceConfigTemp == nil {
-					return errors.New("Invalid workspace config specified")
+				if workspaceTemplateTemp == nil {
+					return errors.New("Invalid workspace template specified")
 				}
 
-				prebuildAddView.WorkspaceConfigName = workspaceConfigTemp.Name
-				workspaceConfig = workspaceConfigTemp
+				prebuildAddView.WorkspaceTemplateName = workspaceTemplateTemp.Name
+				workspaceTemplate = workspaceTemplateTemp
 
 			} else {
-				return errors.New("Workspace config must be specified when using flags")
+				return errors.New("Workspace template must be specified when using flags")
 			}
 
 			// Validate and handle required flags
@@ -157,7 +157,7 @@ var prebuildAddCmd = &cobra.Command{
 			newPrebuild.TriggerFiles = prebuildAddView.TriggerFiles
 		}
 
-		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.WorkspaceConfigName).Prebuild(newPrebuild).Execute()
+		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.WorkspaceTemplateName).Prebuild(newPrebuild).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -165,7 +165,7 @@ var prebuildAddCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild added successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			buildId, err := build.CreateBuild(apiClient, workspaceConfig, prebuildAddView.Branch, &prebuildId)
+			buildId, err := build.CreateBuild(apiClient, workspaceTemplate, prebuildAddView.Branch, &prebuildId)
 			if err != nil {
 				return err
 			}

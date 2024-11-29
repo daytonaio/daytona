@@ -204,7 +204,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	// Fail if prebuild does not exist
-	_, err = server.WorkspaceConfigService.FindPrebuild(nil, &stores.PrebuildFilter{
+	_, err = server.WorkspaceTemplateService.FindPrebuild(nil, &stores.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {

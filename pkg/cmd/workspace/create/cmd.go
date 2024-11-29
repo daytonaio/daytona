@@ -39,7 +39,7 @@ var CreateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var createWorkspaceDtos []apiclient.CreateWorkspaceDTO
-		var existingWorkspaceConfigNames []string
+		var existingWorkspaceTemplateNames []string
 		var targetId string
 		promptUsingTUI := len(args) == 0
 
@@ -106,7 +106,7 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 		} else {
-			existingWorkspaceConfigNames, err = ProcessCmdArguments(ctx, ProcessCmdArgumentsParams{
+			existingWorkspaceTemplateNames, err = ProcessCmdArguments(ctx, ProcessCmdArgumentsParams{
 				ApiClient:                   apiClient,
 				RepoUrls:                    args,
 				CreateWorkspaceDtos:         &createWorkspaceDtos,
@@ -133,16 +133,6 @@ var CreateCmd = &cobra.Command{
 
 		logs_view.SetupLongestPrefixLength(names)
 
-		for i, workspaceConfigName := range existingWorkspaceConfigNames {
-			if workspaceConfigName == "" {
-				continue
-			}
-			logs_view.DisplayLogEntry(logs.LogEntry{
-				WorkspaceName: &createWorkspaceDtos[i].Name,
-				Msg:           fmt.Sprintf("Using detected workspace config '%s'\n", workspaceConfigName),
-			}, i)
-		}
-
 		requestLogEntry := logs.LogEntry{
 			Msg: views.GetPrettyLogLine("Request submitted"),
 		}
@@ -154,6 +144,16 @@ var CreateCmd = &cobra.Command{
 		}
 
 		logs_view.DisplayLogEntry(requestLogEntry, logs_view.STATIC_INDEX)
+
+		for i, workspaceTemplateName := range existingWorkspaceTemplateNames {
+			if workspaceTemplateName == "" {
+				continue
+			}
+			logs_view.DisplayLogEntry(logs.LogEntry{
+				WorkspaceName: &createWorkspaceDtos[i].Name,
+				Msg:           fmt.Sprintf("Using detected workspace template '%s'\n", workspaceTemplateName),
+			}, i)
+		}
 
 		activeProfile, err = c.GetActiveProfile()
 		if err != nil {
@@ -319,7 +319,7 @@ func init() {
 
 	CreateCmd.Flags().StringVarP(&IdeFlag, "ide", "i", "", fmt.Sprintf("Specify the IDE (%s)", ideListStr))
 	CreateCmd.Flags().StringVarP(&targetNameFlag, "target", "t", "", "Specify the target (e.g. 'local')")
-	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank workspace without using existing configurations")
+	CreateCmd.Flags().BoolVar(&blankFlag, "blank", false, "Create a blank workspace without using existing templates")
 	CreateCmd.Flags().BoolVarP(&noIdeFlag, "no-ide", "n", false, "Do not open the target in the IDE after target creation")
 	CreateCmd.Flags().BoolVar(&multiWorkspaceFlag, "multi-workspace", false, "Target with multiple workspaces/repos")
 	CreateCmd.Flags().BoolVarP(&YesFlag, "yes", "y", false, "Automatically confirm any prompts")

@@ -23,11 +23,11 @@ import (
 type PrebuildAPIService service
 
 type ApiDeletePrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuildId string
-	force      *bool
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuildId   string
+	force        *bool
 }
 
 // Force
@@ -46,16 +46,16 @@ DeletePrebuild Delete prebuild
 Delete prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Workspace config name
+	@param templateName Workspace template name
 	@param prebuildId Prebuild ID
 	@return ApiDeletePrebuildRequest
 */
-func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, configName string, prebuildId string) ApiDeletePrebuildRequest {
+func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, templateName string, prebuildId string) ApiDeletePrebuildRequest {
 	return ApiDeletePrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
-		prebuildId: prebuildId,
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
+		prebuildId:   prebuildId,
 	}
 }
 
@@ -72,8 +72,8 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild/{prebuildId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild/{prebuildId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -143,10 +143,10 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 }
 
 type ApiGetPrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuildId string
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuildId   string
 }
 
 func (r ApiGetPrebuildRequest) Execute() (*PrebuildDTO, *http.Response, error) {
@@ -159,16 +159,16 @@ GetPrebuild Get prebuild
 Get prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Workspace config name
+	@param templateName Workspace template name
 	@param prebuildId Prebuild ID
 	@return ApiGetPrebuildRequest
 */
-func (a *PrebuildAPIService) GetPrebuild(ctx context.Context, configName string, prebuildId string) ApiGetPrebuildRequest {
+func (a *PrebuildAPIService) GetPrebuild(ctx context.Context, templateName string, prebuildId string) ApiGetPrebuildRequest {
 	return ApiGetPrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
-		prebuildId: prebuildId,
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
+		prebuildId:   prebuildId,
 	}
 }
 
@@ -188,8 +188,8 @@ func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*Prebu
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild/{prebuildId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild/{prebuildId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -304,7 +304,7 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/prebuild"
+	localVarPath := localBasePath + "/workspace-template/prebuild"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -378,37 +378,37 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiListPrebuildsForWorkspaceConfigRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
+type ApiListPrebuildsForWorkspaceTemplateRequest struct {
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
 }
 
-func (r ApiListPrebuildsForWorkspaceConfigRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
-	return r.ApiService.ListPrebuildsForWorkspaceConfigExecute(r)
+func (r ApiListPrebuildsForWorkspaceTemplateRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
+	return r.ApiService.ListPrebuildsForWorkspaceTemplateExecute(r)
 }
 
 /*
-ListPrebuildsForWorkspaceConfig List prebuilds for workspace config
+ListPrebuildsForWorkspaceTemplate List prebuilds for workspace template
 
-List prebuilds for workspace config
+List prebuilds for workspace template
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiListPrebuildsForWorkspaceConfigRequest
+	@param templateName Template name
+	@return ApiListPrebuildsForWorkspaceTemplateRequest
 */
-func (a *PrebuildAPIService) ListPrebuildsForWorkspaceConfig(ctx context.Context, configName string) ApiListPrebuildsForWorkspaceConfigRequest {
-	return ApiListPrebuildsForWorkspaceConfigRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceTemplate(ctx context.Context, templateName string) ApiListPrebuildsForWorkspaceTemplateRequest {
+	return ApiListPrebuildsForWorkspaceTemplateRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
 	}
 }
 
 // Execute executes the request
 //
 //	@return []PrebuildDTO
-func (a *PrebuildAPIService) ListPrebuildsForWorkspaceConfigExecute(r ApiListPrebuildsForWorkspaceConfigRequest) ([]PrebuildDTO, *http.Response, error) {
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceTemplateExecute(r ApiListPrebuildsForWorkspaceTemplateRequest) ([]PrebuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -416,13 +416,13 @@ func (a *PrebuildAPIService) ListPrebuildsForWorkspaceConfigExecute(r ApiListPre
 		localVarReturnValue []PrebuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForWorkspaceConfig")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForWorkspaceTemplate")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -540,7 +540,7 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/prebuild/process-git-event"
+	localVarPath := localBasePath + "/workspace-template/prebuild/process-git-event"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -611,10 +611,10 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 }
 
 type ApiSetPrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuild   *CreatePrebuildDTO
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuild     *CreatePrebuildDTO
 }
 
 // Prebuild
@@ -633,14 +633,14 @@ SetPrebuild Set prebuild
 Set prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
+	@param templateName Template name
 	@return ApiSetPrebuildRequest
 */
-func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, configName string) ApiSetPrebuildRequest {
+func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, templateName string) ApiSetPrebuildRequest {
 	return ApiSetPrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
 	}
 }
 
@@ -660,8 +660,8 @@ func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-config/{configName}/prebuild"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

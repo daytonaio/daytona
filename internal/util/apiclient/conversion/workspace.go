@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	wc_dto "github.com/daytonaio/daytona/pkg/server/workspaceconfigs/dto"
+	wt_dto "github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
 )
 
 func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
@@ -154,22 +154,22 @@ func ToGitStatusDTO(gitStatus *models.GitStatus) *apiclient.GitStatus {
 	}
 }
 
-func ToWorkspaceConfig(createWorkspaceConfigDto wc_dto.CreateWorkspaceConfigDTO) *models.WorkspaceConfig {
-	result := &models.WorkspaceConfig{
-		Name:                createWorkspaceConfigDto.Name,
-		BuildConfig:         createWorkspaceConfigDto.BuildConfig,
-		EnvVars:             createWorkspaceConfigDto.EnvVars,
-		GitProviderConfigId: createWorkspaceConfigDto.GitProviderConfigId,
+func ToWorkspaceTemplate(createWorkspaceTemplateDto wt_dto.CreateWorkspaceTemplateDTO) *models.WorkspaceTemplate {
+	result := &models.WorkspaceTemplate{
+		Name:                createWorkspaceTemplateDto.Name,
+		BuildConfig:         createWorkspaceTemplateDto.BuildConfig,
+		EnvVars:             createWorkspaceTemplateDto.EnvVars,
+		GitProviderConfigId: createWorkspaceTemplateDto.GitProviderConfigId,
 	}
 
-	result.RepositoryUrl = createWorkspaceConfigDto.RepositoryUrl
+	result.RepositoryUrl = createWorkspaceTemplateDto.RepositoryUrl
 
-	if createWorkspaceConfigDto.Image != nil {
-		result.Image = *createWorkspaceConfigDto.Image
+	if createWorkspaceTemplateDto.Image != nil {
+		result.Image = *createWorkspaceTemplateDto.Image
 	}
 
-	if createWorkspaceConfigDto.User != nil {
-		result.User = *createWorkspaceConfigDto.User
+	if createWorkspaceTemplateDto.User != nil {
+		result.User = *createWorkspaceTemplateDto.User
 	}
 
 	return result

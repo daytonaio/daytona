@@ -13,7 +13,7 @@ func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
 		return err
 	}
 
-	err = s.detachWorkspaceConfigs(ctx, gitProvider.Id)
+	err = s.detachWorkspaceTemplates(ctx, gitProvider.Id)
 	if err != nil {
 		return err
 	}

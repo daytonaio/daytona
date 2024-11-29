@@ -18,14 +18,14 @@ const (
 	NONE         BuildChoice = "none"
 )
 
-type WorkspaceConfigDefaults struct {
+type WorkspaceTemplateDefaults struct {
 	BuildChoice          BuildChoice
 	Image                *string
 	ImageUser            *string
 	DevcontainerFilePath string
 }
 
-func GetWorkspaceBuildChoice(workspace apiclient.CreateWorkspaceDTO, defaults *WorkspaceConfigDefaults) (BuildChoice, string) {
+func GetWorkspaceBuildChoice(workspace apiclient.CreateWorkspaceDTO, defaults *WorkspaceTemplateDefaults) (BuildChoice, string) {
 	if workspace.BuildConfig == nil {
 		if workspace.Image != nil && workspace.User != nil &&
 			defaults.Image != nil && defaults.ImageUser != nil &&

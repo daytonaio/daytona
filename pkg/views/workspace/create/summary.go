@@ -40,7 +40,7 @@ type SummaryModel struct {
 	quitting      bool
 	name          string
 	workspaceList []apiclient.CreateWorkspaceDTO
-	defaults      *views_util.WorkspaceConfigDefaults
+	defaults      *views_util.WorkspaceTemplateDefaults
 	nameLabel     string
 }
 
@@ -49,7 +49,7 @@ type SubmissionFormParams struct {
 	SuggestedName          string
 	WorkspaceList          *[]apiclient.CreateWorkspaceDTO
 	NameLabel              string
-	Defaults               *views_util.WorkspaceConfigDefaults
+	Defaults               *views_util.WorkspaceTemplateDefaults
 	ExistingWorkspaceNames []string
 	ImportConfirmation     *bool
 }
@@ -93,12 +93,12 @@ func RunSubmissionForm(params SubmissionFormParams) error {
 	return RunSubmissionForm(params)
 }
 
-func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceConfigDefaults, nameLabel string) (string, error) {
+func RenderSummary(name string, workspaceList []apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceTemplateDefaults, nameLabel string) (string, error) {
 	var output string
 	if nameLabel == "" {
 		output = views.GetStyledMainTitle("SUMMARY")
 	} else {
-		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - Target %s", nameLabel))
+		output = views.GetStyledMainTitle(fmt.Sprintf("SUMMARY - %s", nameLabel))
 	}
 
 	output += "\n\n"

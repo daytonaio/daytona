@@ -25,7 +25,7 @@ var prebuildDeleteCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedPrebuild *apiclient.PrebuildDTO
 		var selectedPrebuildId string
-		var selectedWorkspaceConfigName string
+		var selectedWorkspaceTemplateName string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -37,8 +37,8 @@ var prebuildDeleteCmd = &cobra.Command{
 			var res *http.Response
 
 			if len(args) == 1 {
-				selectedWorkspaceConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceConfig(context.Background(), selectedWorkspaceConfigName).Execute()
+				selectedWorkspaceTemplateName = args[0]
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), selectedWorkspaceTemplateName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -59,13 +59,13 @@ var prebuildDeleteCmd = &cobra.Command{
 				return nil
 			}
 			selectedPrebuildId = selectedPrebuild.Id
-			selectedWorkspaceConfigName = selectedPrebuild.WorkspaceConfigName
+			selectedWorkspaceTemplateName = selectedPrebuild.WorkspaceTemplateName
 		} else {
-			selectedWorkspaceConfigName = args[0]
+			selectedWorkspaceTemplateName = args[0]
 			selectedPrebuildId = args[1]
 		}
 
-		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedWorkspaceConfigName, selectedPrebuildId).Force(forceFlag).Execute()
+		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedWorkspaceTemplateName, selectedPrebuildId).Force(forceFlag).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

@@ -49,9 +49,9 @@ func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) 
 		return nil, fmt.Errorf("can't set devcontainer file path if builder is not set to %s", views_util.DEVCONTAINER)
 	}
 
-	var workspaceConfig *apiclient.WorkspaceConfig
+	var workspaceTemplate *apiclient.WorkspaceTemplate
 
-	existingWorkspaceConfigNames := []string{}
+	existingWorkspaceTemplateNames := []string{}
 
 	for i, repoUrl := range params.RepoUrls {
 		var branch *string
@@ -62,7 +62,7 @@ func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) 
 		validatedUrl, err := util.GetValidatedUrl(repoUrl)
 		if err == nil {
 			// The argument is a Git URL
-			existingWorkspaceConfigName, err := processGitURL(ctx, ProcessGitUrlParams{
+			existingWorkspaceTemplateName, err := processGitURL(ctx, ProcessGitUrlParams{
 				ApiClient:                   params.ApiClient,
 				RepoUrl:                     validatedUrl,
 				CreateWorkspaceDtos:         params.CreateWorkspaceDtos,
@@ -73,55 +73,55 @@ func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) 
 			if err != nil {
 				return nil, err
 			}
-			if existingWorkspaceConfigName != nil {
-				existingWorkspaceConfigNames = append(existingWorkspaceConfigNames, *existingWorkspaceConfigName)
+			if existingWorkspaceTemplateName != nil {
+				existingWorkspaceTemplateNames = append(existingWorkspaceTemplateNames, *existingWorkspaceTemplateName)
 			} else {
-				existingWorkspaceConfigNames = append(existingWorkspaceConfigNames, "")
+				existingWorkspaceTemplateNames = append(existingWorkspaceTemplateNames, "")
 			}
 
 			continue
 		}
 
-		// The argument is not a Git URL - try getting the workspace config
-		workspaceConfig, _, err = params.ApiClient.WorkspaceConfigAPI.GetWorkspaceConfig(ctx, repoUrl).Execute()
+		// The argument is not a Git URL - try getting the workspace template
+		workspaceTemplate, _, err = params.ApiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, repoUrl).Execute()
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse the URL or fetch the workspace config for '%s'", repoUrl)
+			return nil, fmt.Errorf("failed to parse the URL or fetch the workspace template for '%s'", repoUrl)
 		}
 
-		existingWorkspaceConfigName, err := AddWorkspaceFromConfig(ctx, AddWorkspaceFromConfigParams{
-			WorkspaceConfig: workspaceConfig,
-			ApiClient:       params.ApiClient,
-			Workspaces:      params.CreateWorkspaceDtos,
-			BranchFlag:      branch,
+		existingWorkspaceTemplateName, err := AddWorkspaceFromTemplate(ctx, AddWorkspaceFromTemplateParams{
+			WorkspaceTemplate: workspaceTemplate,
+			ApiClient:         params.ApiClient,
+			Workspaces:        params.CreateWorkspaceDtos,
+			BranchFlag:        branch,
 		})
 		if err != nil {
 			return nil, err
 		}
-		if existingWorkspaceConfigName != nil {
-			existingWorkspaceConfigNames = append(existingWorkspaceConfigNames, *existingWorkspaceConfigName)
+		if existingWorkspaceTemplateName != nil {
+			existingWorkspaceTemplateNames = append(existingWorkspaceTemplateNames, *existingWorkspaceTemplateName)
 		} else {
-			existingWorkspaceConfigNames = append(existingWorkspaceConfigNames, "")
+			existingWorkspaceTemplateNames = append(existingWorkspaceTemplateNames, "")
 		}
 	}
 
 	generateWorkspaceIds(params.CreateWorkspaceDtos)
 	setInitialWorkspaceNames(params.CreateWorkspaceDtos, *params.ExistingWorkspaces)
 
-	return existingWorkspaceConfigNames, nil
+	return existingWorkspaceTemplateNames, nil
 }
 
 func processGitURL(ctx context.Context, params ProcessGitUrlParams) (*string, error) {
 	encodedURLParam := url.QueryEscape(params.RepoUrl)
 
 	if !params.BlankFlag {
-		workspaceConfig, res, err := params.ApiClient.WorkspaceConfigAPI.GetDefaultWorkspaceConfig(ctx, encodedURLParam).Execute()
+		workspaceTemplate, res, err := params.ApiClient.WorkspaceTemplateAPI.GetDefaultWorkspaceTemplate(ctx, encodedURLParam).Execute()
 		if err == nil {
-			workspaceConfig.GitProviderConfigId = params.WorkspaceConfigurationFlags.GitProviderConfig
-			return AddWorkspaceFromConfig(ctx, AddWorkspaceFromConfigParams{
-				WorkspaceConfig: workspaceConfig,
-				ApiClient:       params.ApiClient,
-				Workspaces:      params.CreateWorkspaceDtos,
-				BranchFlag:      params.Branch,
+			workspaceTemplate.GitProviderConfigId = params.WorkspaceConfigurationFlags.GitProviderConfig
+			return AddWorkspaceFromTemplate(ctx, AddWorkspaceFromTemplateParams{
+				WorkspaceTemplate: workspaceTemplate,
+				ApiClient:         params.ApiClient,
+				Workspaces:        params.CreateWorkspaceDtos,
+				BranchFlag:        params.Branch,
 			})
 		}
 

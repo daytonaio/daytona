@@ -1,9 +1,0 @@
-name: daytona workspace-config set-default
-synopsis: Set workspace config info
-usage: daytona workspace-config set-default [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona workspace-config - Manage workspace configs
