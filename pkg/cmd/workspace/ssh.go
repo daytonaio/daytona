@@ -105,8 +105,6 @@ var SshCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-
-			views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s updated successfully", projectName))
 			return nil
 		}
 
@@ -204,6 +202,15 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 		return fmt.Errorf("operation canceled")
 	}
 
+	if modifiedContent == "" {
+		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id, projectName)
+		if err != nil {
+			return err
+		}
+		views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s removed successfully", projectName))
+
+		return nil
+	}
 	updatedLines := strings.Split(modifiedContent, "\n")
 	modifiedContent = hostLine + "\n\t" + strings.Join(updatedLines, "\n\t")
 	modifiedContent = strings.TrimSuffix(modifiedContent, "\t")
@@ -215,6 +222,8 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 	if err != nil {
 		return err
 	}
+
+	views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s updated successfully", projectName))
 
 	return nil
 }

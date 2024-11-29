@@ -287,7 +287,7 @@ func writeSshConfig(configPath, newContent string) error {
 	return nil
 }
 
-func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
+func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error {
 	sshDir := filepath.Join(SshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 
@@ -297,11 +297,15 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId string) error {
 		return err
 	}
 
-	// Define the regex pattern to match Host entries for the given profileId and workspaceId
-	regex := regexp.MustCompile(fmt.Sprintf(`(?m)^Host %s-%s-[^\s]*\s*\n(?:\s+[^\n]*\n?)*`, profileId, workspaceId))
+	hostLine := fmt.Sprintf("Host %s", GetProjectHostname(profileId, workspaceId, projectName))
+	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
+	contentToDelete := regex.FindString(existingContent)
+	if contentToDelete == "" {
+		return fmt.Errorf("no SSH entry found for project %s", projectName)
+	}
 
-	// Replace matched entries with an empty string
-	newContent := regex.ReplaceAllString(existingContent, "")
+	newContent := strings.ReplaceAll(existingContent, contentToDelete, "")
+	newContent = strings.TrimSpace(newContent)
 
 	// Write the updated content back to the config file
 	err = writeSshConfig(configPath, newContent)
