@@ -5,20 +5,30 @@ package workspace
 
 import (
 	"context"
+	"fmt"
+	"path/filepath"
+	"regexp"
+	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/ide"
+	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var sshOptions []string
+var (
+	sshOptions []string
+	edit       bool
+)
 
 var SshCmd = &cobra.Command{
 	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
@@ -90,6 +100,16 @@ var SshCmd = &cobra.Command{
 			}
 		}
 
+		if edit {
+			err := editSSHConfig(activeProfile, workspace, projectName)
+			if err != nil {
+				return err
+			}
+
+			views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s updated successfully", projectName))
+			return nil
+		}
+
 		if !workspace_util.IsProjectRunning(workspace, projectName) {
 			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
 			if err != nil {
@@ -126,5 +146,76 @@ var SshCmd = &cobra.Command{
 
 func init() {
 	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
+	SshCmd.Flags().BoolVarP(&edit, "edit", "e", false, "Edit the project's SSH config")
 	SshCmd.Flags().StringArrayVarP(&sshOptions, "option", "o", []string{}, "Specify SSH options in KEY=VALUE format.")
+}
+
+func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceDTO, projectName string) error {
+	sshDir := filepath.Join(config.SshHomeDir, ".ssh")
+	configPath := filepath.Join(sshDir, "daytona_config")
+	sshConfig, err := config.ReadSshConfig(configPath)
+	if err != nil {
+		return err
+	}
+
+	hostLine := fmt.Sprintf("Host %s-%s-%s", activeProfile.Id, workspace.Id, projectName)
+
+	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
+	matchedEntry := regex.FindString(sshConfig)
+	if matchedEntry == "" {
+		return fmt.Errorf("no SSH entry found for project %s", projectName)
+	}
+
+	lines := strings.Split(matchedEntry, "\n")
+	if len(lines) > 0 {
+		lines = lines[1:]
+	}
+	for i := range lines {
+		lines[i] = strings.TrimSpace(lines[i])
+	}
+	modifiedContent := strings.Join(lines, "\n")
+
+	isCorrect := true
+	formFields := []huh.Field{
+		huh.NewText().
+			Title("Edit SSH Config").
+			Description(hostLine).
+			CharLimit(-1).
+			Value(&modifiedContent).ShowLineNumbers(true).WithHeight(10),
+		huh.NewConfirm().
+			Title("Is the above information correct?").
+			Value(&isCorrect),
+	}
+	form := huh.NewForm(
+		huh.NewGroup(formFields...),
+	).WithTheme(views.GetCustomTheme())
+	keyMap := huh.NewDefaultKeyMap()
+	keyMap.Text = huh.TextKeyMap{
+		NewLine: key.NewBinding(key.WithKeys("alt+enter"), key.WithHelp("alt+enter", "new line")),
+		Next:    key.NewBinding(key.WithKeys("enter"), key.WithHelp("enter", "next")),
+		Prev:    key.NewBinding(key.WithKeys("shift+tab"), key.WithHelp("shift+tab", "prev")),
+	}
+
+	err = form.Run()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if !isCorrect {
+		return fmt.Errorf("operation canceled")
+	}
+
+	updatedLines := strings.Split(modifiedContent, "\n")
+	modifiedContent = hostLine + "\n\t" + strings.Join(updatedLines, "\n\t")
+	modifiedContent = strings.TrimSuffix(modifiedContent, "\t")
+	if !strings.HasSuffix(modifiedContent, "\n") {
+		modifiedContent += "\n"
+	}
+
+	err = config.UpdateWorkspaceSshEntry(activeProfile.Id, workspace.Id, projectName, modifiedContent)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
