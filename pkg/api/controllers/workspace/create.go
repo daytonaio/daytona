@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/daytonaio/daytona/pkg/server/workspaces"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
 	"github.com/gin-gonic/gin"
@@ -35,6 +36,10 @@ func CreateWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.CreateWorkspace(ctx.Request.Context(), createWorkspaceReq)
 	if err != nil {
+		if workspaces.IsWorkspaceAlreadyExists(err) {
+            ctx.AbortWithError(http.StatusConflict, fmt.Errorf("workspace already exists: %w", err))
+            return
+        }
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create workspace: %w", err))
 		return
 	}
