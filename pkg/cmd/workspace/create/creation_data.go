@@ -26,13 +26,13 @@ import (
 
 type WorkspacesDataPromptParams struct {
 	UserGitProviders    []apiclient.GitProvider
-	WorkspaceConfigs    []apiclient.WorkspaceConfig
+	WorkspaceTemplates  []apiclient.WorkspaceTemplate
 	Manual              bool
 	SkipBranchSelection bool
 	MultiWorkspace      bool
 	BlankWorkspace      bool
 	ApiClient           *apiclient.APIClient
-	Defaults            *views_util.WorkspaceConfigDefaults
+	Defaults            *views_util.WorkspaceTemplateDefaults
 }
 
 func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesDataPromptParams) ([]apiclient.CreateWorkspaceDTO, error) {
@@ -54,9 +54,9 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 			}
 		}
 
-		if len(params.WorkspaceConfigs) > 0 && !params.BlankWorkspace {
-			workspaceConfig := selection.GetWorkspaceConfigFromPrompt(params.WorkspaceConfigs, i, true, false, "Use")
-			if workspaceConfig == nil {
+		if len(params.WorkspaceTemplates) > 0 && !params.BlankWorkspace {
+			workspaceTemplate := selection.GetWorkspaceTemplateFromPrompt(params.WorkspaceTemplates, i, true, false, "Use")
+			if workspaceTemplate == nil {
 				return nil, common.ErrCtrlCAbort
 			}
 
@@ -66,19 +66,19 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 			}
 
 			// Append occurence number to keep duplicate entries unique
-			repoUrl := workspaceConfig.RepositoryUrl
+			repoUrl := workspaceTemplate.RepositoryUrl
 			if len(selectedRepos) > 0 && selectedRepos[repoUrl] > 1 {
-				workspaceConfig.Name += strconv.Itoa(selectedRepos[repoUrl])
+				workspaceTemplate.Name += strconv.Itoa(selectedRepos[repoUrl])
 			}
 
-			if workspaceConfig.Name != selection.BlankWorkspaceIdentifier {
-				workspaceName := GetSuggestedName(workspaceConfig.Name, workspaceNames)
+			if workspaceTemplate.Name != selection.BlankWorkspaceIdentifier {
+				workspaceName := GetSuggestedName(workspaceTemplate.Name, workspaceNames)
 
 				getRepoContext := apiclient.GetRepositoryContext{
-					Url: workspaceConfig.RepositoryUrl,
+					Url: workspaceTemplate.RepositoryUrl,
 				}
 
-				branch, err := GetBranchFromWorkspaceConfig(ctx, workspaceConfig, params.ApiClient, i)
+				branch, err := GetBranchFromWorkspaceTemplate(ctx, workspaceTemplate, params.ApiClient, i)
 				if err != nil {
 					return nil, err
 				}
@@ -88,33 +88,33 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 					getRepoContext.Sha = &branch.Sha
 				}
 
-				configRepo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(getRepoContext).Execute()
+				templateRepo, res, err := params.ApiClient.GitProviderAPI.GetGitContext(ctx).Repository(getRepoContext).Execute()
 				if err != nil {
 					return nil, apiclient_util.HandleErrorResponse(res, err)
 				}
 
 				createWorkspaceDto := apiclient.CreateWorkspaceDTO{
 					Name:                workspaceName,
-					GitProviderConfigId: workspaceConfig.GitProviderConfigId,
+					GitProviderConfigId: workspaceTemplate.GitProviderConfigId,
 					Source: apiclient.CreateWorkspaceSourceDTO{
-						Repository: *configRepo,
+						Repository: *templateRepo,
 					},
-					BuildConfig: workspaceConfig.BuildConfig,
+					BuildConfig: workspaceTemplate.BuildConfig,
 					Image:       params.Defaults.Image,
 					User:        params.Defaults.ImageUser,
-					EnvVars:     workspaceConfig.EnvVars,
+					EnvVars:     workspaceTemplate.EnvVars,
 				}
 
-				if workspaceConfig.Image != "" {
-					createWorkspaceDto.Image = &workspaceConfig.Image
+				if workspaceTemplate.Image != "" {
+					createWorkspaceDto.Image = &workspaceTemplate.Image
 				}
 
-				if workspaceConfig.User != "" {
-					createWorkspaceDto.User = &workspaceConfig.User
+				if workspaceTemplate.User != "" {
+					createWorkspaceDto.User = &workspaceTemplate.User
 				}
 
-				if workspaceConfig.GitProviderConfigId == nil || *workspaceConfig.GitProviderConfigId == "" {
-					gitProviderConfigId, res, err := params.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(workspaceConfig.RepositoryUrl)).Execute()
+				if workspaceTemplate.GitProviderConfigId == nil || *workspaceTemplate.GitProviderConfigId == "" {
+					gitProviderConfigId, res, err := params.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(workspaceTemplate.RepositoryUrl)).Execute()
 					if err != nil {
 						return nil, apiclient_util.HandleErrorResponse(res, err)
 					}
@@ -174,7 +174,7 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 			return nil, err
 		}
 
-		workspaceList = append(workspaceList, newCreateWorkspaceConfigDTO(params, providerRepo, providerRepoName, gitProviderConfigId))
+		workspaceList = append(workspaceList, newCreateWorkspaceTemplateDTO(params, providerRepo, providerRepoName, gitProviderConfigId))
 	}
 
 	return workspaceList, nil
@@ -212,11 +212,11 @@ func GetSanitizedWorkspaceName(workspaceName string) (string, error) {
 	return workspaceName, nil
 }
 
-func GetBranchFromWorkspaceConfig(ctx context.Context, workspaceConfig *apiclient.WorkspaceConfig, apiClient *apiclient.APIClient, workspaceOrder int) (*apiclient.GitBranch, error) {
-	encodedURLParam := url.QueryEscape(workspaceConfig.RepositoryUrl)
+func GetBranchFromWorkspaceTemplate(ctx context.Context, workspaceTemplate *apiclient.WorkspaceTemplate, apiClient *apiclient.APIClient, workspaceOrder int) (*apiclient.GitBranch, error) {
+	encodedURLParam := url.QueryEscape(workspaceTemplate.RepositoryUrl)
 
 	repoResponse, res, err := apiClient.GitProviderAPI.GetGitContext(ctx).Repository(apiclient.GetRepositoryContext{
-		Url: workspaceConfig.RepositoryUrl,
+		Url: workspaceTemplate.RepositoryUrl,
 	}).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
@@ -313,7 +313,7 @@ func GetGitProviderConfigIdFromFlag(ctx context.Context, apiClient *apiclient.AP
 	return nil, fmt.Errorf("git provider config '%s' not found", *gitProviderConfigFlag)
 }
 
-func newCreateWorkspaceConfigDTO(params WorkspacesDataPromptParams, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
+func newCreateWorkspaceTemplateDTO(params WorkspacesDataPromptParams, providerRepo *apiclient.GitRepository, providerRepoName string, gitProviderConfigId string) apiclient.CreateWorkspaceDTO {
 	workspace := apiclient.CreateWorkspaceDTO{
 		Name:                providerRepoName,
 		GitProviderConfigId: &gitProviderConfigId,

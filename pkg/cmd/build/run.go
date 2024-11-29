@@ -20,11 +20,11 @@ import (
 
 var buildRunCmd = &cobra.Command{
 	Use:     "run",
-	Short:   "Run a build from a workspace config",
+	Short:   "Run a build from a workspace template",
 	Aliases: []string{"create"},
 	Args:    cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var workspaceConfig *apiclient.WorkspaceConfig
+		var workspaceTemplate *apiclient.WorkspaceTemplate
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -32,21 +32,21 @@ var buildRunCmd = &cobra.Command{
 			return err
 		}
 
-		workspaceConfigList, res, err := apiClient.WorkspaceConfigAPI.ListWorkspaceConfigs(ctx).Execute()
+		workspaceTemplateList, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		workspaceConfig = selection.GetWorkspaceConfigFromPrompt(workspaceConfigList, 0, false, false, "Build")
-		if workspaceConfig == nil {
+		workspaceTemplate = selection.GetWorkspaceTemplateFromPrompt(workspaceTemplateList, 0, false, false, "Build")
+		if workspaceTemplate == nil {
 			return nil
 		}
 
-		if workspaceConfig.BuildConfig == nil {
-			return errors.New("The chosen workspace config does not have a build configuration")
+		if workspaceTemplate.BuildConfig == nil {
+			return errors.New("The chosen workspace template does not have a build configuration")
 		}
 
-		chosenBranch, err := create.GetBranchFromWorkspaceConfig(ctx, workspaceConfig, apiClient, 0)
+		chosenBranch, err := create.GetBranchFromWorkspaceTemplate(ctx, workspaceTemplate, apiClient, 0)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ var buildRunCmd = &cobra.Command{
 			return nil
 		}
 
-		buildId, err := CreateBuild(apiClient, workspaceConfig, chosenBranch.Name, nil)
+		buildId, err := CreateBuild(apiClient, workspaceTemplate, chosenBranch.Name, nil)
 		if err != nil {
 			return err
 		}
@@ -66,7 +66,7 @@ var buildRunCmd = &cobra.Command{
 	},
 }
 
-func CreateBuild(apiClient *apiclient.APIClient, workspaceConfig *apiclient.WorkspaceConfig, branch string, prebuildId *string) (string, error) {
+func CreateBuild(apiClient *apiclient.APIClient, workspaceTemplate *apiclient.WorkspaceTemplate, branch string, prebuildId *string) (string, error) {
 	ctx := context.Background()
 
 	envVars, res, err := apiClient.EnvVarAPI.ListEnvironmentVariables(ctx).Execute()
@@ -74,20 +74,20 @@ func CreateBuild(apiClient *apiclient.APIClient, workspaceConfig *apiclient.Work
 		return "", apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	if workspaceConfig.BuildConfig == nil {
-		return "", errors.New("the chosen workspace config does not have a build configuration")
+	if workspaceTemplate.BuildConfig == nil {
+		return "", errors.New("the chosen workspace template does not have a build configuration")
 	}
 
 	createBuildDto := apiclient.CreateBuildDTO{
-		WorkspaceConfigName: workspaceConfig.Name,
-		Branch:              branch,
-		PrebuildId:          prebuildId,
+		WorkspaceTemplateName: workspaceTemplate.Name,
+		Branch:                branch,
+		PrebuildId:            prebuildId,
 	}
 
 	if envVars != nil {
-		createBuildDto.EnvVars = util.MergeEnvVars(conversion.ToEnvVarsMap(envVars), workspaceConfig.EnvVars)
+		createBuildDto.EnvVars = util.MergeEnvVars(conversion.ToEnvVarsMap(envVars), workspaceTemplate.EnvVars)
 	} else {
-		createBuildDto.EnvVars = util.MergeEnvVars(workspaceConfig.EnvVars)
+		createBuildDto.EnvVars = util.MergeEnvVars(workspaceTemplate.EnvVars)
 	}
 
 	buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()

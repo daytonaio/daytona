@@ -25,7 +25,7 @@ func selectPrebuildPrompt(prebuilds []apiclient.PrebuildDTO, actionVerb string, 
 	items := []list.Item{}
 
 	for _, pb := range prebuilds {
-		title := fmt.Sprintf("%s (%s)", pb.WorkspaceConfigName, views.GetBranchNameLabel(pb.Branch))
+		title := fmt.Sprintf("%s (%s)", pb.WorkspaceTemplateName, views.GetBranchNameLabel(pb.Branch))
 
 		desc := pb.Id
 		if pb.CommitInterval != nil {
