@@ -321,10 +321,15 @@ func UpdateWorkspaceSshEntry(profileId, workspaceId, projectName, updatedContent
 		return err
 	}
 
-	regex := regexp.MustCompile(fmt.Sprintf(`(?m)^Host %s-%s-%s\s*\n(?:\s+[^\n]*\n?)*`, profileId, workspaceId, projectName))
-	newContent := regex.ReplaceAllString(existingContent, updatedContent)
+	hostLine := fmt.Sprintf("Host %s", GetProjectHostname(profileId, workspaceId, projectName))
+	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
+	oldContent := regex.FindString(existingContent)
+	if oldContent == "" {
+		return fmt.Errorf("no SSH entry found for project %s", projectName)
+	}
+	existingContent = strings.ReplaceAll(existingContent, oldContent, updatedContent)
 
-	err = writeSshConfig(configPath, newContent)
+	err = writeSshConfig(configPath, existingContent)
 	if err != nil {
 		return err
 	}

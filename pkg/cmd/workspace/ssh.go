@@ -158,8 +158,7 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 		return err
 	}
 
-	hostLine := fmt.Sprintf("Host %s-%s-%s", activeProfile.Id, workspace.Id, projectName)
-
+	hostLine := fmt.Sprintf("Host %s", config.GetProjectHostname(activeProfile.Id, workspace.Id, projectName))
 	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
 	matchedEntry := regex.FindString(sshConfig)
 	if matchedEntry == "" {
