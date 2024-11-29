@@ -390,21 +390,38 @@ func (d *DockerClient) readDevcontainerConfig(opts *CreateDevcontainerOptions, p
 		configEnvOverride = strings.ReplaceAll(configEnvOverride, fmt.Sprintf("${localEnv:%s}", k), v)
 	}
 
-	writeOverrideCmd := []string{"echo", fmt.Sprintf(`'%s'`, configEnvOverride), ">", "/tmp/devcontainer.json", "&&"}
+	if opts.SshClient != nil {
+		res, err := opts.SshClient.WriteFile(string(configEnvOverride), path.Join(paths.OverridesDir, "devcontainer.json"))
+		if err != nil {
+			opts.LogWriter.Write([]byte(fmt.Sprintf("Error writing override compose file: %s\n", string(res))))
+			return "", nil, err
+		}
+	} else {
+		err = os.WriteFile(path.Join(paths.OverridesDir, "devcontainer.json"), []byte(configEnvOverride), 0644)
+		if err != nil {
+			return "", nil, err
+		}
+	}
 
-	devcontainerCmd := append(writeOverrideCmd, []string{
+	devcontainerCmd := append([]string{}, []string{
 		"devcontainer",
 		"read-configuration",
 		"--workspace-folder=" + paths.ProjectTarget,
 		"--config=" + paths.TargetConfigFilePath,
-		"--override-config=/tmp/devcontainer.json",
+		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
 		"--include-merged-configuration",
 		"&&",
 		"sleep",
 		"1",
 	}...)
 
-	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, nil)
+	output, err := d.execDevcontainerCommand(strings.Join(devcontainerCmd, " "), opts, paths, paths.ProjectTarget, socketForwardId, false, []mount.Mount{
+		{
+			Type:   mount.TypeBind,
+			Source: paths.OverridesDir,
+			Target: paths.OverridesTarget,
+		},
+	})
 	if err != nil {
 		return "", nil, err
 	}
