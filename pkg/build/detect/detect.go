@@ -20,7 +20,11 @@ var (
 )
 
 func DetectProjectBuilderType(buildConfig *buildconfig.BuildConfig, projectDir string, sshClient *ssh.Client) (BuilderType, error) {
-	if buildConfig != nil && buildConfig.Devcontainer != nil {
+	if buildConfig == nil {
+		return BuilderTypeImage, nil
+	}
+
+	if buildConfig.Devcontainer != nil {
 		return BuilderTypeDevcontainer, nil
 	}
 
