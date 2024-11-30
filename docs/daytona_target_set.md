@@ -9,7 +9,7 @@ daytona target set [flags]
 ### Options
 
 ```
-  -p, --pipe string   Path to JSON file for target configuration
+  -f, --file string   Path to JSON file for target configuration, use '-' to read from stdin
 ```
 
 ### Options inherited from parent commands
