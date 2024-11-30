@@ -354,7 +354,7 @@ func (g *GitnessGitProvider) GetCommitsRange(repo *GitRepository, initialSha str
 	}
 
 	if initialShaIndex == -1 || currentShaIndex == -1 {
-		return 0, fmt.Errorf("Sha Not found in commits")
+		return 0, fmt.Errorf("sha not found in commits")
 	}
 
 	commitLength := int(math.Abs(float64(initialShaIndex - currentShaIndex)))

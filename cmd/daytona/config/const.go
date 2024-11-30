@@ -59,6 +59,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"azure-devops", "Azure DevOps"},
 		{"aws-codecommit", "AWS CodeCommit"},
 		{"gogs", "Gogs"},
+		{"gitee", "Gitee"},
 	}
 }
 
@@ -80,6 +81,8 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.codeberg.org/advanced/access-token/"
 	case "gitea":
 		return "https://docs.gitea.com/1.21/development/api-usage#generating-and-listing-api-tokens"
+	case "gitee":
+		return "https://gitee.com/profile/personal_access_tokens"
 	case "gitness":
 		return "https://docs.gitness.com/administration/user-management#generate-user-token"
 	case "azure-devops":
@@ -128,6 +131,8 @@ func GetRequiredScopesFromGitProviderId(providerId string) string {
 		fallthrough
 	case "gitea":
 		return "read:organization,write:repository,read:user"
+	case "gitee":
+		return "projects, pull_requests, issues, notes"
 	case "gitness":
 		return "/"
 	case "azure-devops":
