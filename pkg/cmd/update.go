@@ -6,10 +6,11 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/inconshreveable/go-update"
-	"github.com/spf13/cobra"
 	"net/http"
 	"runtime"
+
+	"github.com/inconshreveable/go-update"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -115,7 +116,10 @@ var updateCmd = &cobra.Command{
 		fmt.Println("Updating to version", version)
 		fmt.Println("Changelog:")
 		fmt.Println(changeLog)
-		updateToVersion(version)
+		err := updateToVersion(version)
+		if err != nil {
+			return err
+		}
 		return nil
 	},
 }
