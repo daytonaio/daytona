@@ -5,9 +5,9 @@ package target
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -36,9 +36,21 @@ var TargetSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var isNewProvider bool
+		var input []byte
+		var err error
 
-		if pipeFile != "" {
-			return PipeTargetInputs(pipeFile)
+		if pipeFile == "-" {
+			input, err = io.ReadAll(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("failed to read from stdin: %w", err)
+			}
+			return HandleTargetInputs(input)
+		} else if pipeFile != "" {
+			input, err = os.ReadFile(pipeFile)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %w", pipeFile, err)
+			}
+			return HandleTargetInputs(input)
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -178,7 +190,7 @@ var TargetSetCmd = &cobra.Command{
 	},
 }
 
-func PipeTargetInputs(filePath string) error {
+func HandleTargetInputs(data []byte) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -233,21 +245,22 @@ func PipeTargetInputs(filePath string) error {
 			return err
 		}
 	}
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return fmt.Errorf("failed to read file %s: %w", filePath, err)
-	}
+
 	var selectedTarget *target_view.TargetView
-	err = ParseJSON(data, &selectedTarget)
+	err = provider_view.ParseJSON(data, &selectedTarget)
 	if err != nil {
-		return fmt.Errorf("failed to parse file %s: %w", filePath, err)
+		return fmt.Errorf("failed to parse input: %w", err)
 	}
 
 	if selectedTarget.Name == "" {
-		return errors.New("invalid file: 'name' field is required")
+		return errors.New("invalid input: 'name' field is required")
 	}
 	if selectedTarget.Options == "" {
-		selectedTarget.Options = "{}"
+		return errors.New("option fields are required to setup your target")
+	}
+	err = provider_view.ValidateProviderTarget(selectedProvider.Name, selectedTarget.Options)
+	if err != nil {
+		return err
 	}
 	targetData := apiclient.CreateProviderTargetDTO{
 		Name:    selectedTarget.Name,
@@ -263,11 +276,4 @@ func PipeTargetInputs(filePath string) error {
 	}
 	views.RenderInfoMessage("Target set successfully and will be used by default")
 	return nil
-}
-
-func ParseJSON(data []byte, v interface{}) error {
-	if err := json.Unmarshal(data, v); err == nil {
-		return nil
-	}
-	return errors.New("input is not a valid JSON")
 }
