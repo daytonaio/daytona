@@ -103,7 +103,7 @@ var updateCmd = &cobra.Command{
 				return err
 			}
 			version = release.TagName
-			changeLog = release.ChangeLog	
+			changeLog = release.ChangeLog
 		} else {
 			release, err := fetchVersionRelease("v" + versionFlag)
 			if err != nil {
