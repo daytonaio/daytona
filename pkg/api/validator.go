@@ -13,12 +13,12 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type defaultValidator struct {
+type DefaultValidator struct {
 	once     sync.Once
 	validate *validator.Validate
 }
 
-var _ binding.StructValidator = &defaultValidator{}
+var _ binding.StructValidator = &DefaultValidator{}
 
 type SliceValidationError []error
 
@@ -39,7 +39,7 @@ func (err SliceValidationError) Error() string {
 	return b.String()
 }
 
-func (v *defaultValidator) ValidateStruct(obj any) error {
+func (v *DefaultValidator) ValidateStruct(obj any) error {
 	if obj == nil {
 		return nil
 	}
@@ -70,17 +70,17 @@ func (v *defaultValidator) ValidateStruct(obj any) error {
 	}
 }
 
-func (v *defaultValidator) Engine() interface{} {
+func (v *DefaultValidator) Engine() interface{} {
 	v.lazyinit()
 	return v.validate
 }
 
-func (v *defaultValidator) validateStruct(obj any) error {
+func (v *DefaultValidator) validateStruct(obj any) error {
 	v.lazyinit()
 	return v.validate.Struct(obj)
 }
 
-func (v *defaultValidator) lazyinit() {
+func (v *DefaultValidator) lazyinit() {
 	v.once.Do(func() {
 		v.validate = validator.New(validator.WithRequiredStructEnabled())
 		v.validate.SetTagName("validate")

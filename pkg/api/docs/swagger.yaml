@@ -75,6 +75,45 @@ definitions:
     x-enum-varnames:
     - CloneTargetBranch
     - CloneTargetCommit
+  CompletionContext:
+    properties:
+      triggerCharacter:
+        type: string
+      triggerKind:
+        type: integer
+    required:
+    - triggerKind
+    type: object
+  CompletionItem:
+    properties:
+      detail:
+        type: string
+      documentation: {}
+      filterText:
+        type: string
+      insertText:
+        type: string
+      kind:
+        type: integer
+      label:
+        type: string
+      sortText:
+        type: string
+    required:
+    - label
+    type: object
+  CompletionList:
+    properties:
+      isIncomplete:
+        type: boolean
+      items:
+        items:
+          $ref: '#/definitions/CompletionItem'
+        type: array
+    required:
+    - isIncomplete
+    - items
+    type: object
   ContainerConfig:
     properties:
       image:
@@ -223,6 +262,26 @@ definitions:
     required:
     - filePath
     type: object
+  ExecuteRequest:
+    properties:
+      command:
+        type: string
+      timeout:
+        description: Timeout in seconds, defaults to 10 seconds
+        type: integer
+    required:
+    - command
+    type: object
+  ExecuteResponse:
+    properties:
+      code:
+        type: integer
+      result:
+        type: string
+    required:
+    - code
+    - result
+    type: object
   FRPSConfig:
     properties:
       domain:
@@ -235,6 +294,34 @@ definitions:
     - domain
     - port
     - protocol
+    type: object
+  FileInfo:
+    properties:
+      group:
+        type: string
+      isDir:
+        type: boolean
+      modTime:
+        type: string
+      mode:
+        type: string
+      name:
+        type: string
+      owner:
+        type: string
+      permissions:
+        type: string
+      size:
+        type: integer
+    required:
+    - group
+    - isDir
+    - modTime
+    - mode
+    - name
+    - owner
+    - permissions
+    - size
     type: object
   FileStatus:
     properties:
@@ -275,6 +362,19 @@ definitions:
     required:
     - url
     type: object
+  GitAddRequest:
+    properties:
+      files:
+        description: files to add (use . for all files)
+        items:
+          type: string
+        type: array
+      path:
+        type: string
+    required:
+    - files
+    - path
+    type: object
   GitBranch:
     properties:
       name:
@@ -284,6 +384,76 @@ definitions:
     required:
     - name
     - sha
+    type: object
+  GitBranchRequest:
+    properties:
+      name:
+        type: string
+      path:
+        type: string
+    required:
+    - name
+    - path
+    type: object
+  GitCloneRequest:
+    properties:
+      branch:
+        type: string
+      commit_id:
+        type: string
+      password:
+        type: string
+      path:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    required:
+    - path
+    - url
+    type: object
+  GitCommitInfo:
+    properties:
+      author:
+        type: string
+      email:
+        type: string
+      hash:
+        type: string
+      message:
+        type: string
+      timestamp:
+        type: string
+    required:
+    - author
+    - email
+    - hash
+    - message
+    - timestamp
+    type: object
+  GitCommitRequest:
+    properties:
+      author:
+        type: string
+      email:
+        type: string
+      message:
+        type: string
+      path:
+        type: string
+    required:
+    - author
+    - email
+    - message
+    - path
+    type: object
+  GitCommitResponse:
+    properties:
+      hash:
+        type: string
+    required:
+    - hash
     type: object
   GitNamespace:
     properties:
@@ -344,6 +514,17 @@ definitions:
     - sourceRepoName
     - sourceRepoOwner
     - sourceRepoUrl
+    type: object
+  GitRepoRequest:
+    properties:
+      password:
+        type: string
+      path:
+        type: string
+      username:
+        type: string
+    required:
+    - path
     type: object
   GitRepository:
     properties:
@@ -422,6 +603,15 @@ definitions:
     - downloadUrls
     - name
     type: object
+  ListBranchResponse:
+    properties:
+      branches:
+        items:
+          type: string
+        type: array
+    required:
+    - branches
+    type: object
   LogFileConfig:
     properties:
       compress:
@@ -442,12 +632,119 @@ definitions:
     - maxSize
     - path
     type: object
+  LspCompletionParams:
+    properties:
+      context:
+        $ref: '#/definitions/CompletionContext'
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+      position:
+        $ref: '#/definitions/Position'
+      uri:
+        type: string
+    required:
+    - languageId
+    - pathToProject
+    - position
+    - uri
+    type: object
+  LspDocumentRequest:
+    properties:
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+      uri:
+        type: string
+    required:
+    - languageId
+    - pathToProject
+    - uri
+    type: object
+  LspLocation:
+    properties:
+      range:
+        $ref: '#/definitions/LspRange'
+      uri:
+        type: string
+    required:
+    - range
+    - uri
+    type: object
+  LspPosition:
+    properties:
+      character:
+        type: integer
+      line:
+        type: integer
+    required:
+    - character
+    - line
+    type: object
+  LspRange:
+    properties:
+      end:
+        $ref: '#/definitions/LspPosition'
+      start:
+        $ref: '#/definitions/LspPosition'
+    required:
+    - end
+    - start
+    type: object
+  LspServerRequest:
+    properties:
+      languageId:
+        type: string
+      pathToProject:
+        type: string
+    required:
+    - languageId
+    - pathToProject
+    type: object
+  LspSymbol:
+    properties:
+      kind:
+        type: integer
+      location:
+        $ref: '#/definitions/LspLocation'
+      name:
+        type: string
+    required:
+    - kind
+    - location
+    - name
+    type: object
+  Match:
+    properties:
+      content:
+        type: string
+      file:
+        type: string
+      line:
+        type: integer
+    required:
+    - content
+    - file
+    - line
+    type: object
   NetworkKey:
     properties:
       key:
         type: string
     required:
     - key
+    type: object
+  Position:
+    properties:
+      character:
+        type: integer
+      line:
+        type: integer
+    required:
+    - character
+    - line
     type: object
   PrebuildConfig:
     properties:
@@ -566,6 +863,11 @@ definitions:
     - repositoryUrl
     - user
     type: object
+  ProjectDirResponse:
+    properties:
+      dir:
+        type: string
+    type: object
   ProjectInfo:
     properties:
       created:
@@ -630,6 +932,30 @@ definitions:
     additionalProperties:
       $ref: '#/definitions/provider.ProviderTargetProperty'
     type: object
+  ReplaceRequest:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+      newValue:
+        type: string
+      pattern:
+        type: string
+    required:
+    - files
+    - newValue
+    - pattern
+    type: object
+  ReplaceResult:
+    properties:
+      error:
+        type: string
+      file:
+        type: string
+      success:
+        type: boolean
+    type: object
   RepositoryUrl:
     properties:
       url:
@@ -649,6 +975,15 @@ definitions:
     - description
     - gitUrl
     - name
+    type: object
+  SearchFilesResponse:
+    properties:
+      files:
+        items:
+          type: string
+        type: array
+    required:
+    - files
     type: object
   ServerConfig:
     properties:
@@ -2127,6 +2462,926 @@ paths:
       summary: Stop project
       tags:
       - workspace
+  /workspace/{workspaceId}/{projectId}/toolbox/files:
+    delete:
+      description: Delete file inside workspace project
+      operationId: FsDeleteFile
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete file
+      tags:
+      - workspace toolbox
+    get:
+      description: List files inside workspace project
+      operationId: FsListFiles
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/FileInfo'
+            type: array
+      summary: List files
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/download:
+    get:
+      description: Download file from workspace project
+      operationId: FsDownloadFile
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: response contains the file
+          schema:
+            type: file
+      summary: Download file
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/find:
+    get:
+      description: Search for text/pattern inside workspace project files
+      operationId: FsFindInFiles
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: Pattern
+        in: query
+        name: pattern
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Match'
+            type: array
+      summary: Search for text/pattern in files
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/folder:
+    post:
+      description: Create folder inside workspace project
+      operationId: FsCreateFolder
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: Mode
+        in: query
+        name: mode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create folder
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/info:
+    get:
+      description: Get file info inside workspace project
+      operationId: FsGetFileDetails
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/FileInfo'
+      summary: Get file info
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/move:
+    post:
+      description: Create folder inside workspace project
+      operationId: FsMoveFile
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Source path
+        in: query
+        name: source
+        required: true
+        type: string
+      - description: Destination path
+        in: query
+        name: destination
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Create folder
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/permissions:
+    post:
+      description: Set file owner/group/permissions inside workspace project
+      operationId: FsSetFilePermissions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: Owner
+        in: query
+        name: owner
+        type: string
+      - description: Group
+        in: query
+        name: group
+        type: string
+      - description: Mode
+        in: query
+        name: mode
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Set file owner/group/permissions
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/replace:
+    post:
+      description: Repleace text/pattern in mutilple files inside workspace project
+      operationId: FsReplaceInFiles
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: ReplaceParams
+        in: body
+        name: replace
+        required: true
+        schema:
+          $ref: '#/definitions/ReplaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ReplaceResult'
+            type: array
+      summary: Repleace text/pattern in files
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/search:
+    get:
+      description: Search for files inside workspace project
+      operationId: FsSearchFiles
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: Pattern
+        in: query
+        name: pattern
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SearchFilesResponse'
+      summary: Search for files
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/files/upload:
+    post:
+      description: Upload file inside workspace project
+      operationId: FsUploadFile
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path
+        in: query
+        name: path
+        required: true
+        type: string
+      - description: File
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Upload file
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/add:
+    post:
+      description: Add files to git commit
+      operationId: GitAddFiles
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: GitAddRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitAddRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Add files
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/branches:
+    get:
+      description: Get branch list from git repository inside workspace project
+      operationId: GitBranchList
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path to git repository
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ListBranchResponse'
+      summary: Get branch list
+      tags:
+      - workspace toolbox
+    post:
+      description: Create branch on git repository inside workspace project
+      operationId: GitCreateBranch
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: GitBranchRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitBranchRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create branch
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/clone:
+    post:
+      description: Clone git repository inside workspace project
+      operationId: GitCloneRepository
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: GitCloneRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitCloneRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Clone git repository
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/commit:
+    post:
+      description: Commit changes to git repository inside workspace project
+      operationId: GitCommitChanges
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: GitCommitRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitCommitRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitCommitResponse'
+      summary: Commit changes
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/history:
+    get:
+      description: Get commit history from git repository inside workspace project
+      operationId: GitCommitHistory
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path to git repository
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/GitCommitInfo'
+            type: array
+      summary: Get commit history
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/pull:
+    post:
+      description: Pull changes from remote to git repository inside workspace project
+      operationId: GitPullChanges
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Git pull request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitRepoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Pull changes
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/push:
+    post:
+      description: Push changes to remote from git repository inside workspace project
+      operationId: GitPushChanges
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Git push request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitRepoRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Push changes
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/status:
+    get:
+      description: Get status from git repository inside workspace project
+      operationId: GitGitStatus
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Path to git repository
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/GitStatus'
+      summary: Get git status
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions:
+    post:
+      description: The Completion request is sent from the client to the server to
+        compute completion items at a given cursor position.
+      operationId: LspCompletions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: LspCompletionParams
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/LspCompletionParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/CompletionList'
+      summary: Get Lsp Completions
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close:
+    post:
+      description: The document close notification is sent from the client to the
+        server when the document got closed in the client.
+      operationId: LspDidClose
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: LspDocumentRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/LspDocumentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Call Lsp DidClose
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open:
+    post:
+      description: The document open notification is sent from the client to the server
+        to signal newly opened text documents.
+      operationId: LspDidOpen
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: LspDocumentRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/LspDocumentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Call Lsp DidOpen
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols:
+    get:
+      description: The document symbol request is sent from the client to the server.
+      operationId: LspDocumentSymbols
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Language ID
+        in: query
+        name: languageId
+        required: true
+        type: string
+      - description: Path to project
+        in: query
+        name: pathToProject
+        required: true
+        type: string
+      - description: Document Uri
+        in: query
+        name: uri
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/LspSymbol'
+            type: array
+      summary: Call Lsp DocumentSymbols
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/start:
+    post:
+      description: Start Lsp server process inside workspace project
+      operationId: LspStart
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: LspServerRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/LspServerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Start Lsp server
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop:
+    post:
+      description: Stop Lsp server process inside workspace project
+      operationId: LspStop
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: LspServerRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/LspServerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Stop Lsp server
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols:
+    get:
+      description: The workspace symbol request is sent from the client to the server
+        to list project-wide symbols matching the query string.
+      operationId: LspWorkspaceSymbols
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Language ID
+        in: query
+        name: languageId
+        required: true
+        type: string
+      - description: Path to project
+        in: query
+        name: pathToProject
+        required: true
+        type: string
+      - description: Symbol Query
+        in: query
+        name: query
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/LspSymbol'
+            type: array
+      summary: Call Lsp WorkspaceSymbols
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/execute:
+    post:
+      description: Execute command synchronously inside workspace project
+      operationId: ProcessExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Execute command request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/ExecuteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ExecuteResponse'
+      summary: Execute command
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
+    get:
+      description: Get project directory
+      operationId: GetProjectDir
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ProjectDirResponse'
+      summary: Get project dir
+      tags:
+      - workspace toolbox
   /workspace/{workspaceId}/start:
     post:
       description: Start workspace
