@@ -35,6 +35,11 @@
       "gitUrl": "https://github.com/daytonaio/sample-java"
   },
   {
+    "name": "Julia",
+    "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia"
+  },
+  {
       "name": "PHP",
       "description": "Develop PHP based applications. Includes needed tools, extensions, and dependencies.",
       "gitUrl": "https://github.com/daytonaio/sample-php"
