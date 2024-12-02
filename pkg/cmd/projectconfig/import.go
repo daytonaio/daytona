@@ -120,12 +120,16 @@ func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, co
 		}
 
 		if len(gitProviders) == 0 {
-			return fmt.Errorf("no Git providers found for URL: %s", config.RepositoryUrl)
+			gitProviderConfigId, _, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
+			if err != nil {
+				return fmt.Errorf("error fetching Git provider: %v", err)
+			}
+			config.GitProviderConfigId = &gitProviderConfigId
 		}
 
-		if len(gitProviders) == 1 {
+		if len(gitProviders) == 1 && config.GitProviderConfigId == nil {
 			config.GitProviderConfigId = &gitProviders[0].Id
-		} else {
+		} else if len(gitProviders) > 1 && config.GitProviderConfigId == nil {
 			selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
 				GitProviderConfigs: gitProviders,
 				ActionVerb:         "Use",
