@@ -15,10 +15,6 @@ import (
 )
 
 var expectedJobs []*models.Job
-var expectedFilteredJobs []*models.Job
-
-var expectedJobsMap map[string]*models.Job
-var expectedFilteredJobsMap map[string]*models.Job
 
 var job1 = &models.Job{
 	Id:         "1",
@@ -63,21 +59,6 @@ func (s *JobServiceTestSuite) SetupTest() {
 		job1, job2, job3,
 	}
 
-	expectedJobsMap = map[string]*models.Job{
-		job1.Id: job1,
-		job2.Id: job2,
-		job3.Id: job3,
-	}
-
-	expectedFilteredJobs = []*models.Job{
-		job1, job2,
-	}
-
-	expectedFilteredJobsMap = map[string]*models.Job{
-		job1.Id: job1,
-		job2.Id: job2,
-	}
-
 	s.jobStore = job_internal.NewInMemoryJobStore()
 	s.jobService = jobs.NewJobService(jobs.JobServiceConfig{
 		JobStore: s.jobStore,
@@ -110,17 +91,53 @@ func (s *JobServiceTestSuite) TestFind() {
 	require.Equal(job1, job)
 }
 
-func (s *JobServiceTestSuite) TestSave() {
+func (s *JobServiceTestSuite) TestCreate() {
 	expectedJobs = append(expectedJobs, job4)
 
 	require := s.Require()
 
-	err := s.jobService.Save(job4)
+	err := s.jobService.Create(job4)
 	require.Nil(err)
 
 	jobs, err := s.jobService.List(nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedJobs, jobs)
+}
+
+func (s *JobServiceTestSuite) TestUpdate() {
+	require := s.Require()
+
+	err := s.jobService.Create(job4)
+	require.Nil(err)
+
+	job4Update := *job4
+	job4Update.State = models.JobStateSuccess
+
+	err = s.jobService.Update(&job4Update)
+	require.Nil(err)
+
+	updated, err := s.jobService.Find(&stores.JobFilter{
+		Id: &job4.Id,
+	})
+	require.Nil(err)
+	require.Equal(job4Update, *updated)
+}
+
+func (s *JobServiceTestSuite) TestCreateWithAnotherJobInProgress() {
+	require := s.Require()
+
+	err := s.jobService.Create(job4)
+	require.Nil(err)
+
+	var job5 = &models.Job{
+		Id:         "5",
+		ResourceId: "4",
+		Action:     models.JobActionStart,
+		State:      models.JobStatePending,
+	}
+
+	err = s.jobService.Create(job5)
+	require.EqualError(err, stores.ErrJobInProgress.Error())
 }
 
 func (s *JobServiceTestSuite) TestDelete() {

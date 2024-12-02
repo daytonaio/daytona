@@ -299,7 +299,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			return apiKeyService.Revoke(name)
 		},
 		CreateJob: func(ctx context.Context, targetId string, action models.JobAction) error {
-			return jobService.Save(&models.Job{
+			return jobService.Create(&models.Job{
 				ResourceId:   targetId,
 				ResourceType: models.ResourceTypeTarget,
 				Action:       action,
@@ -369,7 +369,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			return gitProviderService.GetLastCommitSha(repo)
 		},
 		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction) error {
-			return jobService.Save(&models.Job{
+			return jobService.Create(&models.Job{
 				ResourceId:   workspaceId,
 				ResourceType: models.ResourceTypeWorkspace,
 				Action:       action,
