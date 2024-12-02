@@ -27,6 +27,20 @@ func (s *EnvironmentVariableService) List() ([]*models.EnvironmentVariable, erro
 	return s.environmentVariableStore.List()
 }
 
+func (s *EnvironmentVariableService) Map() (services.EnvironmentVariables, error) {
+	envVars, err := s.List()
+	if err != nil {
+		return nil, err
+	}
+
+	envVarsMap := services.EnvironmentVariables{}
+	for _, envVar := range envVars {
+		envVarsMap[envVar.Key] = envVar.Value
+	}
+
+	return envVarsMap, nil
+}
+
 func (s *EnvironmentVariableService) Save(environmentVariable *models.EnvironmentVariable) error {
 	return s.environmentVariableStore.Save(environmentVariable)
 }

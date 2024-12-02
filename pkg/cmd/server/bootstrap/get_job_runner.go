@@ -67,7 +67,7 @@ func GetJobRunner(c *server.Config, configDir string, version string, telemetryS
 }
 
 func GetWorkspaceJobFactory(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (workspace.IWorkspaceJobFactory, error) {
-	containerRegistryService := server.GetInstance(nil).ContainerRegistryService
+	envVarService := server.GetInstance(nil).EnvironmentVariableService
 
 	gitProviderService := server.GetInstance(nil).GitProviderService
 
@@ -106,11 +106,19 @@ func GetWorkspaceJobFactory(c *server.Config, configDir string, version string, 
 			}
 			return &targetDto.Target, nil
 		},
-		FindContainerRegistry: func(ctx context.Context, image string) (*models.ContainerRegistry, error) {
-			return containerRegistryService.Find(image)
+		FindContainerRegistry: func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry {
+			return services.EnvironmentVariables(envVars).FindContainerRegistryByImageName(image)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
 			return gitProviderService.GetConfig(id)
+		},
+		GetWorkspaceEnvironmentVariables: func(ctx context.Context, w *models.Workspace) (map[string]string, error) {
+			serverEnvVars, err := envVarService.Map()
+			if err != nil {
+				return nil, err
+			}
+
+			return util.MergeEnvVars(serverEnvVars, w.EnvVars), nil
 		},
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return telemetryService.TrackServerEvent(event, clientId, props)
@@ -177,13 +185,6 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 
 	buildService := server.GetInstance(nil).BuildService
 
-	containerRegistryService := server.GetInstance(nil).ContainerRegistryService
-
-	cr, err := containerRegistryService.FindByImageName(c.BuilderImage)
-	if err != nil && !stores.IsContainerRegistryNotFound(err) {
-		return nil, err
-	}
-
 	buildImageNamespace := c.BuildImageNamespace
 	if buildImageNamespace != "" {
 		buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
@@ -192,14 +193,18 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 
 	var builderRegistry *models.ContainerRegistry
 
-	if c.BuilderRegistryServer != "local" {
-		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
-		if err != nil {
-			builderRegistry = &models.ContainerRegistry{
-				Server: c.BuilderRegistryServer,
-			}
+	envVarService := server.GetInstance(nil).EnvironmentVariableService
+
+	envVars, err := envVarService.Map()
+	if err != nil {
+		builderRegistry = &models.ContainerRegistry{
+			Server: c.BuilderRegistryServer,
 		}
+	} else {
+		builderRegistry = envVars.FindContainerRegistry(c.BuilderRegistryServer)
 	}
+
+	cr := envVars.FindContainerRegistryByImageName(c.BuilderImage)
 
 	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
 		FindBuild: func(ctx context.Context, buildId string) (*services.BuildDTO, error) {

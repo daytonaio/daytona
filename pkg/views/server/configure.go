@@ -28,7 +28,7 @@ type keymap struct {
 	submit key.Binding
 }
 
-func NewModel(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) Model {
+func NewModel(config *apiclient.ServerConfig) Model {
 	m := Model{
 		config: config,
 		help:   help.New(),
@@ -37,22 +37,14 @@ func NewModel(config *apiclient.ServerConfig, containerRegistries []apiclient.Co
 		},
 	}
 
-	m.form = m.createForm(containerRegistries)
+	m.form = m.createForm()
 	return m
 }
-func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *huh.Form {
+func (m *Model) createForm() *huh.Form {
 	apiPortView := strconv.Itoa(int(m.config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(m.config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(m.config.Frps.GetPort()))
 	localBuilderRegistryPort := strconv.Itoa(int(m.config.GetLocalBuilderRegistryPort()))
-
-	builderContainerRegistryOptions := []huh.Option[string]{{
-		Key:   "Local registry managed by Daytona",
-		Value: "local",
-	}}
-	for _, cr := range containerRegistries {
-		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: cr.Server, Value: cr.Server})
-	}
 
 	logFileMaxSize := strconv.Itoa(int(m.config.LogFile.MaxSize))
 	logFileMaxBackups := strconv.Itoa(int(m.config.LogFile.MaxBackups))
@@ -88,12 +80,9 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Title("Builder Image").
 				Description("Image dependencies: docker, socat, git, @devcontainers/cli (node package)").
 				Value(&m.config.BuilderImage),
-			huh.NewSelect[string]().
-				Title("Builder Registry").
-				Description("To add options, add a container registry with 'daytona cr set'").
-				Options(
-					builderContainerRegistryOptions...,
-				).
+			huh.NewInput().
+				Title("Builder Registry Server").
+				Description("Add container regitistry credentials to the server by adding them as environment variables using `daytona env set`").
 				Value(&m.config.BuilderRegistryServer),
 			huh.NewInput().
 				Title("Build Image Namespace").
@@ -232,8 +221,8 @@ func (m Model) View() string {
 	return m.form.View() + helpView
 }
 
-func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) (*apiclient.ServerConfig, error) {
-	m := NewModel(config, containerRegistries)
+func ConfigurationForm(config *apiclient.ServerConfig) (*apiclient.ServerConfig, error) {
+	m := NewModel(config)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 

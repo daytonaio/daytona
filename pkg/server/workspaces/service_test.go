@@ -119,8 +119,6 @@ func TestTargetService(t *testing.T) {
 
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
 
-	containerRegistryService := mocks.NewMockContainerRegistryService()
-
 	apiKeyService := mocks.NewMockApiKeyService()
 	gitProviderService := mocks.NewMockGitProviderService()
 	mockProvisioner := mocks.NewMockProvisioner()
@@ -136,8 +134,8 @@ func TestTargetService(t *testing.T) {
 			}
 			return t, nil
 		},
-		FindContainerRegistry: func(ctx context.Context, image string) (*models.ContainerRegistry, error) {
-			return containerRegistryService.FindByImageName(image)
+		FindContainerRegistry: func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry {
+			return services.EnvironmentVariables(envVars).FindContainerRegistryByImageName(image)
 		},
 		FindCachedBuild: func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error) {
 			return nil, nil
@@ -171,8 +169,6 @@ func TestTargetService(t *testing.T) {
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
 		var containerRegistry *models.ContainerRegistry
-
-		containerRegistryService.On("FindByImageName", defaultWorkspaceImage).Return(containerRegistry, stores.ErrContainerRegistryNotFound)
 
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
