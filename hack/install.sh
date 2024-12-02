@@ -330,8 +330,8 @@ elif [[ "$PARSED_CURRENT_VERSION" != "$PARSED_UPDATED_VERSION" ]]; then
     echo "Daytona has been successfully updated to latest version"
   else
     echo -e "\nDaytona has been successfully updated to version $PARSED_UPDATED_VERSION"
+    echo -e "Changelog: https://github.com/daytonaio/daytona/releases/tag/$PARSED_UPDATED_VERSION"
     print_breaking_changes "https://api.github.com/repos/daytonaio/daytona/releases/tags/$PARSED_UPDATED_VERSION" "$PARSED_CURRENT_VERSION" "$PARSED_UPDATED_VERSION"
-    echo -e "\nFor more details, please visit: https://github.com/daytonaio/daytona/releases/tag/$PARSED_UPDATED_VERSION"
   fi
 else
   echo "Daytona has been successfully installed to $DESTINATION!"
