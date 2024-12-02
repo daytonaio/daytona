@@ -108,6 +108,8 @@ func GetDocsLinkForCommitSigning(providerId string) string {
 		return "https://learn.microsoft.com/en-us/azure/devops/repos/git/use-ssh-keys-to-authenticate?view=azure-devops"
 	case "aws-codecommit":
 		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-ssh-unixes.html"
+	case "gitee":
+		return "https://gitee.com/help/articles/4181 and for GPG signing see https://gitee.com/help/articles/4248"
 	default:
 		return ""
 	}
