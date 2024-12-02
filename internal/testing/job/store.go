@@ -97,6 +97,13 @@ func (s *InMemoryJobStore) processFilters(filter *stores.JobFilter) ([]*models.J
 				}
 			}
 		}
+		if filter.ResourceId != nil {
+			for _, job := range filteredJobs {
+				if job.ResourceId != *filter.ResourceId {
+					delete(filteredJobs, job.Id)
+				}
+			}
+		}
 	}
 
 	for _, job := range filteredJobs {

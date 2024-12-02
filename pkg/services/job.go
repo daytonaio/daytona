@@ -9,7 +9,8 @@ import (
 )
 
 type IJobService interface {
-	Save(job *models.Job) error
+	Create(job *models.Job) error
+	Update(job *models.Job) error
 	Find(filter *stores.JobFilter) (*models.Job, error)
 	List(filter *stores.JobFilter) ([]*models.Job, error)
 	Delete(job *models.Job) error
