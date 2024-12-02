@@ -32,12 +32,36 @@ func (s *JobService) Find(filter *stores.JobFilter) (*models.Job, error) {
 	return s.jobStore.Find(filter)
 }
 
-func (s *JobService) Save(j *models.Job) error {
+func (s *JobService) Create(j *models.Job) error {
+	pendingJobs, err := s.List(&stores.JobFilter{
+		ResourceId:   &j.ResourceId,
+		ResourceType: &j.ResourceType,
+		States:       &[]models.JobState{models.JobStatePending, models.JobStateRunning},
+	})
+	if err != nil {
+		return err
+	}
+
+	if len(pendingJobs) > 0 {
+		return stores.ErrJobInProgress
+	}
+
 	if j.Id == "" {
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 		j.Id = id
 	}
+	return s.jobStore.Save(j)
+}
+
+func (s *JobService) Update(j *models.Job) error {
+	_, err := s.Find(&stores.JobFilter{
+		Id: &j.Id,
+	})
+	if err != nil {
+		return err
+	}
+
 	return s.jobStore.Save(j)
 }
 
