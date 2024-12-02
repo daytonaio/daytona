@@ -18,6 +18,7 @@ type JobStore interface {
 
 type JobFilter struct {
 	Id           *string
+	ResourceId   *string
 	ResourceType *models.ResourceType
 	States       *[]models.JobState
 	Actions      *[]models.JobAction
@@ -40,9 +41,14 @@ func (f *JobFilter) ActionsToInterface() []interface{} {
 }
 
 var (
-	ErrJobNotFound = errors.New("job not found")
+	ErrJobNotFound   = errors.New("job not found")
+	ErrJobInProgress = errors.New("another job is in progress")
 )
 
 func IsJobNotFound(err error) bool {
 	return err.Error() == ErrJobNotFound.Error()
+}
+
+func IsJobInProgress(err error) bool {
+	return err.Error() == ErrJobInProgress.Error()
 }
