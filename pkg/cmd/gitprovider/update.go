@@ -61,7 +61,8 @@ var gitProviderUpdateCmd = &cobra.Command{
 			SigningKey:    selectedGitProvider.SigningKey,
 		}
 
-		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
+		flags := map[string]string{}
+		err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases, flags)
 		if err != nil {
 			return err
 		}

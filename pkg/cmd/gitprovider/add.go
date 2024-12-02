@@ -49,8 +49,28 @@ var GitProviderAddCmd = &cobra.Command{
 		setGitProviderConfig.Username = new(string)
 		setGitProviderConfig.Alias = new(string)
 
+		if tokenFlag != "" {
+			setGitProviderConfig.Token = tokenFlag
+		}
+
+		if aliasFlag != "" {
+			err = gitprovider_view.CheckIfAliasExists(aliasFlag, setGitProviderConfig.Alias, existingAliases)
+			if err != nil {
+				return err
+			}
+			setGitProviderConfig.Alias = &aliasFlag
+		}
+
 		if len(args) == 0 {
-			err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases)
+			flags := map[string]string{
+				"alias":          aliasFlag,
+				"token":          tokenFlag,
+				"base-api-url":   baseApiUrlFlag,
+				"username":       usernameFlag,
+				"signing-method": signingMethodFlag,
+				"signing-key":    signingKeyFlag,
+			}
+			err = gitprovider_view.GitProviderCreationView(ctx, apiClient, &setGitProviderConfig, existingAliases, flags)
 			if err != nil {
 				return err
 			}
@@ -72,19 +92,6 @@ var GitProviderAddCmd = &cobra.Command{
 
 			if tokenFlag == "" {
 				return fmt.Errorf("token is required")
-			}
-			setGitProviderConfig.Token = tokenFlag
-
-			if aliasFlag != "" {
-				for _, alias := range existingAliases {
-					if alias == aliasFlag {
-						initialAlias := setGitProviderConfig.Alias
-						if initialAlias == nil || *initialAlias != aliasFlag {
-							return fmt.Errorf("alias '%s' is already in use", aliasFlag)
-						}
-					}
-				}
-				setGitProviderConfig.Alias = &aliasFlag
 			}
 
 			if gitprovider_view.ProviderRequiresUsername(providerId) {
@@ -110,30 +117,13 @@ var GitProviderAddCmd = &cobra.Command{
 			}
 
 			if signingMethodFlag != "" || signingKeyFlag != "" {
-				if gitprovider_view.CommitSigningNotSupported(providerId) {
-					return fmt.Errorf("commit signing is not supported for '%s' provider", providerId)
-				} else {
-					if signingMethodFlag == "" || signingKeyFlag == "" {
-						return fmt.Errorf("both signing method and key must be provided")
-					}
-					isValidSigningMethod := false
-					for _, signingMethod := range apiclient.AllowedSigningMethodEnumValues {
-						if signingMethod == apiclient.SigningMethod(signingMethodFlag) {
-							setGitProviderConfig.SigningMethod = &signingMethod
-							isValidSigningMethod = true
-							break
-						}
-					}
-					if !isValidSigningMethod {
-						return fmt.Errorf("invalid signing method '%s'", signingMethodFlag)
-					}
-					if signingMethodFlag == "ssh" {
-						if err := gitprovider_view.IsValidSSHKey(signingKeyFlag); err != nil {
-							return err
-						}
-					}
-					setGitProviderConfig.SigningKey = &signingKeyFlag
+				err = gitprovider_view.ValidateSigningMethodAndKey(signingMethodFlag, signingKeyFlag, providerId)
+				if err != nil {
+					return err
 				}
+				signingMethod := apiclient.SigningMethod(signingMethodFlag)
+				setGitProviderConfig.SigningMethod = &signingMethod
+				setGitProviderConfig.SigningKey = &signingKeyFlag
 			}
 		}
 
