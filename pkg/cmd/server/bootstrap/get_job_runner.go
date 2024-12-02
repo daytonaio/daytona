@@ -47,7 +47,7 @@ func GetJobRunner(c *server.Config, configDir string, version string, telemetryS
 			if err != nil {
 				job.Error = util.Pointer((*err).Error())
 			}
-			return jobService.Save(job)
+			return jobService.Update(job)
 		},
 		WorkspaceJobFactory: workspaceJobFactory,
 		TargetJobFactory:    targetJobFactory,
