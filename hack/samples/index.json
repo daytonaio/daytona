@@ -35,6 +35,11 @@
       "gitUrl": "https://github.com/daytonaio/sample-java"
   },
   {
+    "name": "Julia (Genie)",
+    "description": "Develop Julia based applications with Genie framework. Includes needed tools, extensions, framework and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
+  },
+  {
     "name": "Julia",
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
