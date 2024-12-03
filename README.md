@@ -343,7 +343,12 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 10. **Sign off on your commits**
 
-    Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in Prepare your changes.
+    Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](#prepare-your-changes).
+
+    ```bash
+    git rebase HEAD~1 --signoff
+    git push --force-with-lease origin my-new-feature
+    ```
 
 11. **Push your changes and create a pull request**
 
