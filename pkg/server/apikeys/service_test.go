@@ -4,6 +4,7 @@
 package apikeys_test
 
 import (
+	"context"
 	"testing"
 
 	t_apikeys "github.com/daytonaio/daytona/internal/testing/server/apikeys"
@@ -34,11 +35,11 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 	})
 
 	for _, keyName := range clientKeyNames {
-		_, _ = s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
+		_, _ = s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
 	}
 
 	for _, keyName := range workspaceKeyNames {
-		_, _ = s.apiKeyService.Generate(models.ApiKeyTypeWorkspace, keyName)
+		_, _ = s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	}
 }
 

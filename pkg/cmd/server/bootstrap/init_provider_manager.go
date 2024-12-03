@@ -49,7 +49,9 @@ func InitProviderManager(c *server.Config, configDir string) error {
 
 	dbConnection := db.GetSQLiteConnection(dbPath)
 
-	targetConfigStore, err := db.NewTargetConfigStore(dbConnection)
+	store := db.NewStore(dbConnection)
+
+	targetConfigStore, err := db.NewTargetConfigStore(store)
 	if err != nil {
 		return err
 	}
@@ -72,10 +74,10 @@ func InitProviderManager(c *server.Config, configDir string) error {
 		ServerPort: c.HeadscalePort,
 		ApiPort:    c.ApiPort,
 		GetTargetConfigMap: func(ctx context.Context) (map[string]*models.TargetConfig, error) {
-			return targetConfigService.Map()
+			return targetConfigService.Map(ctx)
 		},
 		CreateTargetConfig: func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error {
-			_, err := targetConfigService.Add(services.AddTargetConfigDTO{
+			_, err := targetConfigService.Add(ctx, services.AddTargetConfigDTO{
 				Name:         name,
 				Options:      options,
 				ProviderInfo: providerInfo,

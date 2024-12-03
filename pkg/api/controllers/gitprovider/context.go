@@ -35,7 +35,7 @@ func GetGitContext(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repositoryContext.Url)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(ctx.Request.Context(), repositoryContext.Url)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -78,7 +78,7 @@ func GetUrlFromRepository(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(repoContext.Url)
+	gitProvider, _, err := server.GitProviderService.GetGitProviderForUrl(ctx.Request.Context(), repoContext.Url)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

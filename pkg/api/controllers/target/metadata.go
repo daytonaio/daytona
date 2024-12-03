@@ -36,7 +36,7 @@ func SetTargetMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.TargetService.SetTargetMetadata(targetId, &models.TargetMetadata{
+	_, err = server.TargetService.SetTargetMetadata(ctx.Request.Context(), targetId, &models.TargetMetadata{
 		Uptime: setTargetMetadataDTO.Uptime,
 	})
 	if err != nil {

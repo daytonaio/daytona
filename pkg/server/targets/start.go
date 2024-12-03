@@ -13,7 +13,7 @@ import (
 )
 
 func (s *TargetService) StartTarget(ctx context.Context, targetId string) error {
-	t, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
+	t, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStartError(ctx, nil, stores.ErrTargetNotFound)
 	}

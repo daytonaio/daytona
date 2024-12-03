@@ -4,16 +4,18 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type WorkspaceStore interface {
-	List() ([]*models.Workspace, error)
-	Find(idOrName string) (*models.Workspace, error)
-	Save(workspace *models.Workspace) error
-	Delete(workspace *models.Workspace) error
+	IStore
+	List(ctx context.Context) ([]*models.Workspace, error)
+	Find(ctx context.Context, idOrName string) (*models.Workspace, error)
+	Save(ctx context.Context, workspace *models.Workspace) error
+	Delete(ctx context.Context, workspace *models.Workspace) error
 }
 
 var (

@@ -187,7 +187,7 @@ func (s *WorkspaceTemplateServiceTestSuite) SetupTest() {
 	})
 
 	for _, wt := range expectedWorkspaceTemplates {
-		_ = s.workspaceTemplateStore.Save(wt)
+		_ = s.workspaceTemplateStore.Save(context.TODO(), wt)
 	}
 }
 
@@ -198,7 +198,7 @@ func TestWorkspaceTemplateService(t *testing.T) {
 func (s *WorkspaceTemplateServiceTestSuite) TestList() {
 	require := s.Require()
 
-	workspaceTemplates, err := s.workspaceTemplateService.List(nil)
+	workspaceTemplates, err := s.workspaceTemplateService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedWorkspaceTemplates, workspaceTemplates)
 }
@@ -206,7 +206,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestList() {
 func (s *WorkspaceTemplateServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	workspaceTemplate, err := s.workspaceTemplateService.Find(&stores.WorkspaceTemplateFilter{
+	workspaceTemplate, err := s.workspaceTemplateService.Find(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplate1.Name,
 	})
 	require.Nil(err)
@@ -215,10 +215,10 @@ func (s *WorkspaceTemplateServiceTestSuite) TestFind() {
 func (s *WorkspaceTemplateServiceTestSuite) TestSetDefault() {
 	require := s.Require()
 
-	err := s.workspaceTemplateService.SetDefault(workspaceTemplate2.Name)
+	err := s.workspaceTemplateService.SetDefault(context.TODO(), workspaceTemplate2.Name)
 	require.Nil(err)
 
-	workspaceTemplate, err := s.workspaceTemplateService.Find(&stores.WorkspaceTemplateFilter{
+	workspaceTemplate, err := s.workspaceTemplateService.Find(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Url:     util.Pointer(workspaceTemplate1.RepositoryUrl),
 		Default: util.Pointer(true),
 	})
@@ -232,10 +232,10 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSave() {
 
 	require := s.Require()
 
-	err := s.workspaceTemplateService.Save(workspaceTemplate4)
+	err := s.workspaceTemplateService.Save(context.TODO(), workspaceTemplate4)
 	require.Nil(err)
 
-	workspaceTemplates, err := s.workspaceTemplateService.List(nil)
+	workspaceTemplates, err := s.workspaceTemplateService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedWorkspaceTemplates, workspaceTemplates)
 }
@@ -245,10 +245,10 @@ func (s *WorkspaceTemplateServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.workspaceTemplateService.Delete(workspaceTemplate3.Name, false)
+	err := s.workspaceTemplateService.Delete(context.TODO(), workspaceTemplate3.Name, false)
 	require.Nil(err)
 
-	workspaceTemplates, errs := s.workspaceTemplateService.List(nil)
+	workspaceTemplates, errs := s.workspaceTemplateService.List(context.TODO(), nil)
 	require.Nil(errs)
 	require.ElementsMatch(expectedWorkspaceTemplates, workspaceTemplates)
 }

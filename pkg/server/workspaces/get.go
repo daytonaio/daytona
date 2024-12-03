@@ -17,7 +17,7 @@ import (
 )
 
 func (s *WorkspaceService) GetWorkspace(ctx context.Context, workspaceId string, params services.WorkspaceRetrievalParams) (*services.WorkspaceDTO, error) {
-	ws, err := s.workspaceStore.Find(workspaceId)
+	ws, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return nil, stores.ErrWorkspaceNotFound
 	}

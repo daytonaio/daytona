@@ -4,6 +4,8 @@
 package jobs
 
 import (
+	"context"
+	"errors"
 	"slices"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -26,15 +28,15 @@ func NewJobService(config JobServiceConfig) services.IJobService {
 	}
 }
 
-func (s *JobService) List(filter *stores.JobFilter) ([]*models.Job, error) {
-	return s.jobStore.List(filter)
+func (s *JobService) List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error) {
+	return s.jobStore.List(ctx, filter)
 }
 
-func (s *JobService) Find(filter *stores.JobFilter) (*models.Job, error) {
-	return s.jobStore.Find(filter)
+func (s *JobService) Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error) {
+	return s.jobStore.Find(ctx, filter)
 }
 
-func (s *JobService) Create(j *models.Job) error {
+func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 	validAction, ok := validResourceActions[j.ResourceType]
 	if !ok {
 		return services.ErrInvalidResourceJobAction
@@ -44,7 +46,7 @@ func (s *JobService) Create(j *models.Job) error {
 		return services.ErrInvalidResourceJobAction
 	}
 
-	pendingJobs, err := s.List(&stores.JobFilter{
+	pendingJobs, err := s.List(ctx, &stores.JobFilter{
 		ResourceId:   &j.ResourceId,
 		ResourceType: &j.ResourceType,
 		States:       &[]models.JobState{models.JobStatePending, models.JobStateRunning},
@@ -62,22 +64,29 @@ func (s *JobService) Create(j *models.Job) error {
 		id = stringid.TruncateID(id)
 		j.Id = id
 	}
-	return s.jobStore.Save(j)
+	return s.jobStore.Save(ctx, j)
 }
 
-func (s *JobService) Update(j *models.Job) error {
-	_, err := s.Find(&stores.JobFilter{
-		Id: &j.Id,
+func (s *JobService) SetState(ctx context.Context, jobId string, state models.JobState, err *string) error {
+	job, findErr := s.Find(ctx, &stores.JobFilter{
+		Id: &jobId,
 	})
-	if err != nil {
-		return err
+	if findErr != nil {
+		return findErr
 	}
 
-	return s.jobStore.Save(j)
+	if job.State == state {
+		return errors.New("job is already in the specified state")
+	}
+
+	job.State = state
+	job.Error = err
+
+	return s.jobStore.Save(ctx, job)
 }
 
-func (s *JobService) Delete(j *models.Job) error {
-	return s.jobStore.Delete(j)
+func (s *JobService) Delete(ctx context.Context, j *models.Job) error {
+	return s.jobStore.Delete(ctx, j)
 }
 
 var validResourceActions = map[models.ResourceType][]models.JobAction{

@@ -4,6 +4,7 @@
 package jobs_test
 
 import (
+	"context"
 	"testing"
 
 	job_internal "github.com/daytonaio/daytona/internal/testing/job"
@@ -65,7 +66,7 @@ func (s *JobServiceTestSuite) SetupTest() {
 	})
 
 	for _, j := range expectedJobs {
-		_ = s.jobStore.Save(j)
+		_ = s.jobStore.Save(context.TODO(), j)
 	}
 }
 
@@ -76,7 +77,7 @@ func TestJobService(t *testing.T) {
 func (s *JobServiceTestSuite) TestList() {
 	require := s.Require()
 
-	jobs, err := s.jobService.List(nil)
+	jobs, err := s.jobService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedJobs, jobs)
 }
@@ -84,7 +85,7 @@ func (s *JobServiceTestSuite) TestList() {
 func (s *JobServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	job, err := s.jobService.Find(&stores.JobFilter{
+	job, err := s.jobService.Find(context.TODO(), &stores.JobFilter{
 		Id: &job1.Id,
 	})
 	require.Nil(err)
@@ -96,27 +97,27 @@ func (s *JobServiceTestSuite) TestCreate() {
 
 	require := s.Require()
 
-	err := s.jobService.Create(job4)
+	err := s.jobService.Create(context.TODO(), job4)
 	require.Nil(err)
 
-	jobs, err := s.jobService.List(nil)
+	jobs, err := s.jobService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedJobs, jobs)
 }
 
-func (s *JobServiceTestSuite) TestUpdate() {
+func (s *JobServiceTestSuite) TestSetState() {
 	require := s.Require()
 
-	err := s.jobService.Create(job4)
+	err := s.jobService.Create(context.TODO(), job4)
 	require.Nil(err)
 
 	job4Update := *job4
 	job4Update.State = models.JobStateSuccess
 
-	err = s.jobService.Update(&job4Update)
+	err = s.jobService.SetState(context.TODO(), job4Update.Id, models.JobStateSuccess, nil)
 	require.Nil(err)
 
-	updated, err := s.jobService.Find(&stores.JobFilter{
+	updated, err := s.jobService.Find(context.TODO(), &stores.JobFilter{
 		Id: &job4.Id,
 	})
 	require.Nil(err)
@@ -126,7 +127,7 @@ func (s *JobServiceTestSuite) TestUpdate() {
 func (s *JobServiceTestSuite) TestCreateWithAnotherJobInProgress() {
 	require := s.Require()
 
-	err := s.jobService.Create(job4)
+	err := s.jobService.Create(context.TODO(), job4)
 	require.Nil(err)
 
 	var job5 = &models.Job{
@@ -136,7 +137,7 @@ func (s *JobServiceTestSuite) TestCreateWithAnotherJobInProgress() {
 		State:      models.JobStatePending,
 	}
 
-	err = s.jobService.Create(job5)
+	err = s.jobService.Create(context.TODO(), job5)
 	require.EqualError(err, stores.ErrJobInProgress.Error())
 }
 
@@ -145,10 +146,10 @@ func (s *JobServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.jobService.Delete(job3)
+	err := s.jobService.Delete(context.TODO(), job3)
 	require.Nil(err)
 
-	jobs, err := s.jobService.List(nil)
+	jobs, err := s.jobService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedJobs, jobs)
 }

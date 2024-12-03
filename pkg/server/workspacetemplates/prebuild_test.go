@@ -4,6 +4,7 @@
 package workspacetemplates_test
 
 import (
+	"context"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
@@ -67,7 +68,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSetPrebuild() {
 	}).Return(repository1, nil)
 	s.gitProviderService.On("GetPrebuildWebhook", "github", repository1, "").Return(util.Pointer("webhook-id"), nil)
 
-	newPrebuildDto, err := s.workspaceTemplateService.SetPrebuild(workspaceTemplate1.Name, services.CreatePrebuildDTO{
+	newPrebuildDto, err := s.workspaceTemplateService.SetPrebuild(context.TODO(), workspaceTemplate1.Name, services.CreatePrebuildDTO{
 		Id:             &prebuild3.Id,
 		Branch:         prebuild3.Branch,
 		CommitInterval: prebuild3.CommitInterval,
@@ -76,7 +77,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSetPrebuild() {
 	})
 	require.Nil(err)
 
-	prebuildDtos, err := s.workspaceTemplateService.ListPrebuilds(&stores.WorkspaceTemplateFilter{
+	prebuildDtos, err := s.workspaceTemplateService.ListPrebuilds(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplate1.Name,
 	}, nil)
 	require.Nil(err)
@@ -86,7 +87,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSetPrebuild() {
 func (s *WorkspaceTemplateServiceTestSuite) TestFindPrebuild() {
 	require := s.Require()
 
-	prebuild, err := s.workspaceTemplateService.FindPrebuild(&stores.WorkspaceTemplateFilter{
+	prebuild, err := s.workspaceTemplateService.FindPrebuild(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplate1.Name,
 	}, &stores.PrebuildFilter{
 		Id: &prebuild1.Id,
@@ -97,7 +98,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestFindPrebuild() {
 func (s *WorkspaceTemplateServiceTestSuite) TestListPrebuilds() {
 	require := s.Require()
 
-	prebuildDtos, err := s.workspaceTemplateService.ListPrebuilds(&stores.WorkspaceTemplateFilter{
+	prebuildDtos, err := s.workspaceTemplateService.ListPrebuilds(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplate1.Name,
 	}, nil)
 	require.Nil(err)
@@ -114,10 +115,10 @@ func (s *WorkspaceTemplateServiceTestSuite) TestDeletePrebuild() {
 		PrebuildIds: &[]string{prebuild2.Id},
 	}, false).Return([]error{})
 
-	err := s.workspaceTemplateService.DeletePrebuild(workspaceTemplate1.Name, prebuild2.Id, false)
+	err := s.workspaceTemplateService.DeletePrebuild(context.TODO(), workspaceTemplate1.Name, prebuild2.Id, false)
 	require.Nil(err)
 
-	prebuildDtos, errs := s.workspaceTemplateService.ListPrebuilds(&stores.WorkspaceTemplateFilter{
+	prebuildDtos, errs := s.workspaceTemplateService.ListPrebuilds(context.TODO(), &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplate1.Name,
 	}, nil)
 	require.Nil(errs)
@@ -160,7 +161,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestProcessGitEventCommitInterval() 
 
 	s.gitProvider.On("GetCommitsRange", repository1, repository1.Sha, data.Sha).Return(3, nil)
 
-	err := s.workspaceTemplateService.ProcessGitEvent(data)
+	err := s.workspaceTemplateService.ProcessGitEvent(context.TODO(), data)
 	require.Nil(err)
 }
 
@@ -189,7 +190,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestProcessGitEventTriggerFiles() {
 		},
 	}
 
-	err := s.workspaceTemplateService.ProcessGitEvent(data)
+	err := s.workspaceTemplateService.ProcessGitEvent(context.TODO(), data)
 	require.Nil(err)
 }
 
@@ -225,6 +226,6 @@ func (s *WorkspaceTemplateServiceTestSuite) TestEnforceRetentionPolicy() {
 		Id: util.Pointer("1"),
 	}, false).Return([]error{})
 
-	err := s.workspaceTemplateService.EnforceRetentionPolicy()
+	err := s.workspaceTemplateService.EnforceRetentionPolicy(context.TODO())
 	require.Nil(err)
 }

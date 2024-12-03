@@ -4,12 +4,14 @@
 package apikeys
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (s *ApiKeyService) ListClientKeys() ([]*models.ApiKey, error) {
-	keys, err := s.apiKeyStore.List()
+func (s *ApiKeyService) ListClientKeys(ctx context.Context) ([]*models.ApiKey, error) {
+	keys, err := s.apiKeyStore.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -25,16 +27,16 @@ func (s *ApiKeyService) ListClientKeys() ([]*models.ApiKey, error) {
 	return clientKeys, nil
 }
 
-func (s *ApiKeyService) Revoke(name string) error {
-	apiKey, err := s.apiKeyStore.FindByName(name)
+func (s *ApiKeyService) Revoke(ctx context.Context, name string) error {
+	apiKey, err := s.apiKeyStore.FindByName(ctx, name)
 	if err != nil {
 		return err
 	}
 
-	return s.apiKeyStore.Delete(apiKey)
+	return s.apiKeyStore.Delete(ctx, apiKey)
 }
 
-func (s *ApiKeyService) Generate(keyType models.ApiKeyType, name string) (string, error) {
+func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error) {
 	key := apikeys.GenerateRandomKey()
 
 	apiKey := &models.ApiKey{
@@ -43,7 +45,7 @@ func (s *ApiKeyService) Generate(keyType models.ApiKeyType, name string) (string
 		Name:    name,
 	}
 
-	err := s.apiKeyStore.Save(apiKey)
+	err := s.apiKeyStore.Save(ctx, apiKey)
 	if err != nil {
 		return "", err
 	}

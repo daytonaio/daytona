@@ -4,16 +4,18 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type BuildStore interface {
-	Find(filter *BuildFilter) (*models.Build, error)
-	List(filter *BuildFilter) ([]*models.Build, error)
-	Save(build *models.Build) error
-	Delete(id string) error
+	IStore
+	Find(ctx context.Context, filter *BuildFilter) (*models.Build, error)
+	List(ctx context.Context, filter *BuildFilter) ([]*models.Build, error)
+	Save(ctx context.Context, build *models.Build) error
+	Delete(ctx context.Context, id string) error
 }
 
 var (
