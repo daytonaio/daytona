@@ -12,6 +12,7 @@ VERSION=${DAYTONA_SERVER_VERSION:-"latest"}
 BASE_URL=${DAYTONA_SERVER_DOWNLOAD_URL:-"https://download.daytona.io/daytona"}
 DESTINATION=${DAYTONA_PATH:-"/usr/local/bin"}
 CONFIRM_FLAG=false
+CURRENT_VERSION=$(daytona version 2>/dev/null)
 
 # Check for the -y flag
 for arg in "$@"; do
@@ -253,4 +254,86 @@ if [[ ! :"$PATH:" == *":$DESTINATION:"* ]]; then
   echo "         Source the configuration file to apply the changes (e.g., source ~/.bashrc)"
 fi
 
-echo -e "\nDaytona has been successfully installed to $DESTINATION!"
+parse_version() {
+    local version="$1"
+    if [[ "$version" =~ v?([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
+        echo "${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[3]}"
+    else
+        echo ""
+    fi
+}
+
+format_breaking_changes() { 
+  sed -E 's/^#+\s*//; 
+          s/^```.*$//;  
+          s/\*\*([^*]+)\*\*/\1/g; 
+          s/`([^`]+)`/\1/g';
+}
+
+is_updated_to_next_version() {
+    local current_version="$1"
+    local updated_version="$2"
+
+    read -r current_major current_minor current_patch <<< "$(parse_version "$current_version")"
+    read -r updated_major updated_minor updated_patch <<< "$(parse_version "$updated_version")"
+
+    if [[ -z "$current_major" || -z "$updated_major" || -z "$current_minor" || -z "$updated_minor" ]]; then
+        return 1
+    fi
+
+    major_diff=$((updated_major - current_major))
+    minor_diff=$((updated_minor - current_minor))
+
+    if [[ $major_diff -eq 1 && $minor_diff -eq 0 ]] || [[ $major_diff -eq 0 && $minor_diff -eq 1 ]]; then
+        return 0
+    fi
+
+    return 1
+}
+
+print_breaking_changes() {
+    local release_url=$1
+    if [ -z "$release_url" ]; then
+      return 1
+    fi
+    release_body=$(curl -sf "$release_url" | grep '"body":' | sed 's/.*"body": "\(.*\)".*/\1/' | sed 's/\\n/\n/g')
+    if [ -z "$release_body" ]; then
+      return 1
+    fi
+    breaking_changes=$(echo "$release_body" | sed -n '/## Breaking changes/,/^## /{//!p;}' | sed '1d' | sed '/^$/d')
+    if [ "$breaking_changes" ]; then
+      echo -e "\n\033[1mBreaking Changes:\033[0m"
+      echo -e "$breaking_changes" | format_breaking_changes
+    fi
+    if ! is_updated_to_next_version $2 $3; then
+      if [ "$breaking_changes" ]; then
+        echo -e "\nThere may be more breaking changes from previous releases. We suggest you check the releases page for more details: https://github.com/daytonaio/daytona/releases"
+      else
+        echo -e "\n\033[1mBreaking Changes:\033[0m"
+        echo -e "\nThere may be breaking changes from previous releases. We suggest you check the releases page for more details: https://github.com/daytonaio/daytona/releases"
+      fi
+    fi
+}
+
+UPDATED_VERSION=$(daytona version 2>/dev/null)
+read -r current_major current_minor current_patch <<< $(parse_version "$CURRENT_VERSION")
+read -r updated_major updated_minor updated_patch <<< "$(parse_version "$UPDATED_VERSION")"
+
+PARSED_CURRENT_VERSION="v${current_major}.${current_minor}.${current_patch}"
+PARSED_UPDATED_VERSION="v${updated_major}.${updated_minor}.${updated_patch}"
+
+
+if [[ -z "$CURRENT_VERSION" ]]; then
+  echo "Daytona has been successfully installed to $DESTINATION!"
+elif [[ "$PARSED_CURRENT_VERSION" != "$PARSED_UPDATED_VERSION" ]]; then
+  if [[ -z "$PARSED_UPDATED_VERSION" ]]; then
+    echo "Daytona has been successfully updated to latest version"
+  else
+    echo -e "\nDaytona has been successfully updated to version $PARSED_UPDATED_VERSION"
+    echo -e "Changelog: https://github.com/daytonaio/daytona/releases/tag/$PARSED_UPDATED_VERSION"
+    print_breaking_changes "https://api.github.com/repos/daytonaio/daytona/releases/tags/$PARSED_UPDATED_VERSION" "$PARSED_CURRENT_VERSION" "$PARSED_UPDATED_VERSION"
+  fi
+else
+  echo "Daytona has been successfully installed to $DESTINATION!"
+fi
+
