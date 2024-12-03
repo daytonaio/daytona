@@ -17,19 +17,19 @@ import (
 	list_view "github.com/daytonaio/daytona/pkg/views/build/list"
 )
 
-func GetBuildFromPrompt(builds []apiclient.Build, actionVerb string) *apiclient.Build {
-	choiceChan := make(chan *apiclient.Build)
+func GetBuildFromPrompt(builds []apiclient.BuildDTO, actionVerb string) *apiclient.BuildDTO {
+	choiceChan := make(chan *apiclient.BuildDTO)
 	go selectBuildPrompt(builds, actionVerb, choiceChan)
 	return <-choiceChan
 }
 
-func selectBuildPrompt(builds []apiclient.Build, actionVerb string, choiceChan chan<- *apiclient.Build) {
+func selectBuildPrompt(builds []apiclient.BuildDTO, actionVerb string, choiceChan chan<- *apiclient.BuildDTO) {
 	list_view.SortBuilds(&builds)
 
 	items := []list.Item{}
 
 	for _, b := range builds {
-		newItem := item[apiclient.Build]{title: fmt.Sprintf("ID: %s (%s)", b.Id, b.State), desc: fmt.Sprintf("created %s", util.FormatTimestamp(b.CreatedAt)), choiceProperty: b}
+		newItem := item[apiclient.BuildDTO]{title: fmt.Sprintf("ID: %s - %s", b.Id, b.Repository.Url), desc: fmt.Sprintf("State: %s (created %s)", b.State.Name, util.FormatTimestamp(b.CreatedAt)), choiceProperty: b}
 		items = append(items, newItem)
 	}
 
@@ -56,7 +56,7 @@ func selectBuildPrompt(builds []apiclient.Build, actionVerb string, choiceChan c
 	l.Title = views.GetStyledMainTitle(title)
 	l.Styles.Title = titleStyle
 
-	m := model[apiclient.Build]{list: l}
+	m := model[apiclient.BuildDTO]{list: l}
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 	if err != nil {
@@ -64,7 +64,7 @@ func selectBuildPrompt(builds []apiclient.Build, actionVerb string, choiceChan c
 		os.Exit(1)
 	}
 
-	if m, ok := p.(model[apiclient.Build]); ok && m.choice != nil {
+	if m, ok := p.(model[apiclient.BuildDTO]); ok && m.choice != nil {
 		choiceChan <- m.choice
 	} else {
 		choiceChan <- nil

@@ -21,6 +21,7 @@ type BuildServiceConfig struct {
 	BuildStore            stores.BuildStore
 	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	CreateJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
 	LoggerFactory         logs.LoggerFactory
 }
 
@@ -28,6 +29,7 @@ type BuildService struct {
 	buildStore            stores.BuildStore
 	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	createJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
 	loggerFactory         logs.LoggerFactory
 }
 
@@ -37,6 +39,7 @@ func NewBuildService(config BuildServiceConfig) services.IBuildService {
 		findWorkspaceTemplate: config.FindWorkspaceTemplate,
 		getRepositoryContext:  config.GetRepositoryContext,
 		loggerFactory:         config.LoggerFactory,
+		createJob:             config.CreateJob,
 	}
 }
 
@@ -56,8 +59,7 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 	}
 
 	newBuild := models.Build{
-		Id:    id,
-		State: models.BuildStatePendingRun,
+		Id: id,
 		ContainerConfig: models.ContainerConfig{
 			Image: workspaceTemplate.Image,
 			User:  workspaceTemplate.User,
@@ -76,18 +78,65 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 		return "", err
 	}
 
+	err = s.createJob(ctx, id, models.JobActionRun)
+	if err != nil {
+		return "", err
+	}
+
 	return id, nil
 }
 
-func (s *BuildService) Find(filter *stores.BuildFilter) (*models.Build, error) {
-	return s.buildStore.Find(filter)
+func (s *BuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, error) {
+	var storeFilter *stores.BuildFilter
+
+	if filter != nil {
+		storeFilter = &filter.StoreFilter
+	}
+
+	build, err := s.buildStore.Find(storeFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	state := build.GetState()
+
+	return &services.BuildDTO{
+		Build: *build,
+		State: state,
+	}, nil
 }
 
-func (s *BuildService) List(filter *stores.BuildFilter) ([]*models.Build, error) {
-	return s.buildStore.List(filter)
+func (s *BuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO, error) {
+	var storeFilter *stores.BuildFilter
+
+	if filter != nil {
+		storeFilter = &filter.StoreFilter
+	}
+
+	builds, err := s.buildStore.List(storeFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*services.BuildDTO
+
+	for _, b := range builds {
+		state := b.GetState()
+		result = append(result, &services.BuildDTO{
+			Build: *b,
+			State: state,
+		})
+	}
+
+	return result, nil
 }
 
-func (s *BuildService) MarkForDeletion(filter *stores.BuildFilter, force bool) []error {
+func (s *BuildService) HandleSuccessfulRemoval(id string) error {
+	return s.buildStore.Delete(id)
+}
+
+func (s *BuildService) Delete(filter *services.BuildFilter, force bool) []error {
+	ctx := context.Background()
 	var errors []error
 
 	builds, err := s.List(filter)
@@ -97,22 +146,19 @@ func (s *BuildService) MarkForDeletion(filter *stores.BuildFilter, force bool) [
 
 	for _, b := range builds {
 		if force {
-			b.State = models.BuildStatePendingForcedDelete
+			err = s.createJob(ctx, b.Id, models.JobActionForceDelete)
+			if err != nil {
+				errors = append(errors, err)
+			}
 		} else {
-			b.State = models.BuildStatePendingDelete
-		}
-
-		err = s.buildStore.Save(b)
-		if err != nil {
-			errors = append(errors, err)
+			err = s.createJob(ctx, b.Id, models.JobActionDelete)
+			if err != nil {
+				errors = append(errors, err)
+			}
 		}
 	}
 
 	return errors
-}
-
-func (s *BuildService) Delete(id string) error {
-	return s.buildStore.Delete(id)
 }
 
 func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {

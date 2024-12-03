@@ -23,6 +23,7 @@ type ResourceType string // @name ResourceType
 const (
 	ResourceTypeWorkspace ResourceType = "workspace"
 	ResourceTypeTarget    ResourceType = "target"
+	ResourceTypeBuild     ResourceType = "build"
 )
 
 type JobState string // @name JobState
@@ -43,6 +44,7 @@ const (
 	JobActionRestart     JobAction = "restart"
 	JobActionDelete      JobAction = "delete"
 	JobActionForceDelete JobAction = "force-delete"
+	JobActionRun         JobAction = "run"
 )
 
 func getResourceStateFromJob(job *Job) ResourceState {
@@ -57,6 +59,8 @@ func getResourceStateFromJob(job *Job) ResourceState {
 
 	if job.State == JobStateSuccess {
 		switch job.Action {
+		case JobActionRun:
+			state.Name = ResourceStateNameRunSuccessful
 		case JobActionCreate:
 			state.Name = ResourceStateNameStarted
 		case JobActionStart:
@@ -75,6 +79,8 @@ func getResourceStateFromJob(job *Job) ResourceState {
 		state.Error = job.Error
 	} else if job.State == JobStateRunning {
 		switch job.Action {
+		case JobActionRun:
+			state.Name = ResourceStateNameRunning
 		case JobActionCreate:
 			state.Name = ResourceStateNameCreating
 		case JobActionStart:

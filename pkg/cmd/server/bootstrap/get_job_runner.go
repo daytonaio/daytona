@@ -5,9 +5,14 @@ package bootstrap
 
 import (
 	"context"
+	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/docker"
+	jobs_build "github.com/daytonaio/daytona/pkg/jobs/build"
 	"github.com/daytonaio/daytona/pkg/jobs/target"
 	"github.com/daytonaio/daytona/pkg/jobs/workspace"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -19,6 +24,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/docker/docker/client"
 
 	"github.com/daytonaio/daytona/pkg/runners/runner"
 )
@@ -32,6 +38,11 @@ func GetJobRunner(c *server.Config, configDir string, version string, telemetryS
 	}
 
 	targetJobFactory, err := GetTargetJobFactory(c, configDir, version, telemetryService)
+	if err != nil {
+		return nil, err
+	}
+
+	buildJobFactory, err := GetBuildJobFactory(c, configDir, version, telemetryService)
 	if err != nil {
 		return nil, err
 	}
@@ -51,6 +62,7 @@ func GetJobRunner(c *server.Config, configDir string, version string, telemetryS
 		},
 		WorkspaceJobFactory: workspaceJobFactory,
 		TargetJobFactory:    targetJobFactory,
+		BuildJobFactory:     buildJobFactory,
 	}), nil
 }
 
@@ -144,5 +156,97 @@ func GetTargetJobFactory(c *server.Config, configDir string, version string, tel
 		},
 		LoggerFactory: loggerFactory,
 		Provisioner:   provisioner,
+	}), nil
+}
+
+func GetBuildJobFactory(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (jobs_build.IBuildJobFactory, error) {
+	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	if err != nil {
+		return nil, err
+	}
+
+	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
+		ApiClient: cli,
+	})
+
+	logsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := logs.NewLoggerFactory(nil, &logsDir)
+
+	buildService := server.GetInstance(nil).BuildService
+
+	containerRegistryService := server.GetInstance(nil).ContainerRegistryService
+
+	cr, err := containerRegistryService.FindByImageName(c.BuilderImage)
+	if err != nil && !stores.IsContainerRegistryNotFound(err) {
+		return nil, err
+	}
+
+	buildImageNamespace := c.BuildImageNamespace
+	if buildImageNamespace != "" {
+		buildImageNamespace = fmt.Sprintf("/%s", buildImageNamespace)
+	}
+	buildImageNamespace = strings.TrimSuffix(buildImageNamespace, "/")
+
+	var builderRegistry *models.ContainerRegistry
+
+	if c.BuilderRegistryServer != "local" {
+		builderRegistry, err = containerRegistryService.Find(c.BuilderRegistryServer)
+		if err != nil {
+			builderRegistry = &models.ContainerRegistry{
+				Server: c.BuilderRegistryServer,
+			}
+		}
+	}
+
+	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
+		FindBuild: func(ctx context.Context, buildId string) (*services.BuildDTO, error) {
+			return buildService.Find(&services.BuildFilter{
+				StoreFilter: stores.BuildFilter{
+					Id: &buildId,
+				},
+			})
+		},
+		ListSuccessfulBuilds: func(ctx context.Context) ([]*models.Build, error) {
+			buildDtos, err := buildService.List(&services.BuildFilter{
+				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
+			})
+			if err != nil {
+				return nil, err
+			}
+
+			var builds []*models.Build
+			for _, buildDto := range buildDtos {
+				builds = append(builds, &buildDto.Build)
+			}
+			return builds, nil
+		},
+		ListConfigsForUrl: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
+			return server.GetInstance(nil).GitProviderService.ListConfigsForUrl(repoUrl)
+		},
+		CheckImageExists: func(ctx context.Context, image string) bool {
+			_, _, err = cli.ImageInspectWithRaw(context.Background(), image)
+			return err == nil
+		},
+		DeleteImage: func(ctx context.Context, image string, force bool) error {
+			return dockerClient.DeleteImage(image, force, nil)
+		},
+		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
+			return telemetryService.TrackBuildRunnerEvent(event, clientId, props)
+		},
+		LoggerFactory: loggerFactory,
+		BuilderFactory: build.NewBuilderFactory(build.BuilderFactoryConfig{
+			Image:                       c.BuilderImage,
+			ContainerRegistry:           cr,
+			BuildImageContainerRegistry: builderRegistry,
+			BuildService:                buildService,
+			BuildImageNamespace:         buildImageNamespace,
+			LoggerFactory:               loggerFactory,
+			DefaultWorkspaceImage:       c.DefaultWorkspaceImage,
+			DefaultWorkspaceUser:        c.DefaultWorkspaceUser,
+		}),
+		BasePath: filepath.Join(configDir, "builds"),
 	}), nil
 }

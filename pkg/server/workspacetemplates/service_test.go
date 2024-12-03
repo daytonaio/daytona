@@ -118,15 +118,17 @@ func (s *WorkspaceTemplateServiceTestSuite) SetupTest() {
 	s.workspaceTemplateStore = workspacetemplate_internal.NewInMemoryWorkspaceTemplateStore()
 	s.workspaceTemplateService = workspacetemplates.NewWorkspaceTemplateService(workspacetemplates.WorkspaceTemplateServiceConfig{
 		ConfigStore: s.workspaceTemplateStore,
-		FindNewestBuild: func(ctx context.Context, prebuildId string) (*models.Build, error) {
-			return s.buildService.Find(&stores.BuildFilter{
-				PrebuildIds: &[]string{prebuildId},
-				GetNewest:   util.Pointer(true),
+		FindNewestBuild: func(ctx context.Context, prebuildId string) (*services.BuildDTO, error) {
+			return s.buildService.Find(&services.BuildFilter{
+				StoreFilter: stores.BuildFilter{
+					PrebuildIds: &[]string{prebuildId},
+					GetNewest:   util.Pointer(true),
+				},
 			})
 		},
-		ListPublishedBuilds: func(ctx context.Context) ([]*models.Build, error) {
-			return s.buildService.List(&stores.BuildFilter{
-				States: &[]models.BuildState{models.BuildStatePublished},
+		ListPublishedBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
+			return s.buildService.List(&services.BuildFilter{
+				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 			})
 		},
 		CreateBuild: func(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error {
@@ -146,9 +148,11 @@ func (s *WorkspaceTemplateServiceTestSuite) SetupTest() {
 				prebuildIds = &[]string{*prebuildId}
 			}
 
-			return s.buildService.MarkForDeletion(&stores.BuildFilter{
-				Id:          id,
-				PrebuildIds: prebuildIds,
+			return s.buildService.Delete(&services.BuildFilter{
+				StoreFilter: stores.BuildFilter{
+					Id:          id,
+					PrebuildIds: prebuildIds,
+				},
 			}, force)
 		},
 		GetRepositoryContext: func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error) {

@@ -48,10 +48,7 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 		output += getInfoLine("Error", *target.State.Error) + "\n"
 	}
 
-	output += getInfoLineState("State", target.State, target.Metadata) + "\n"
-	if target.State.Error != nil {
-		output += getInfoLine("Error", *target.State.Error) + "\n"
-	}
+	output += getInfoLine("# Workspaces", fmt.Sprint(len(target.Workspaces))) + "\n"
 
 	output += getInfoLine("Options", target.TargetConfig.Options) + "\n"
 

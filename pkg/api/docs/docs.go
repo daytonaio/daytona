@@ -108,7 +108,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Build"
+                                "$ref": "#/definitions/BuildDTO"
                             }
                         }
                     }
@@ -220,7 +220,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Build"
+                            "$ref": "#/definitions/BuildDTO"
                         }
                     }
                 }
@@ -2101,7 +2101,18 @@ const docTemplate = `{
                 }
             }
         },
-        "Build": {
+        "BuildConfig": {
+            "type": "object",
+            "properties": {
+                "cachedBuild": {
+                    "$ref": "#/definitions/CachedBuild"
+                },
+                "devcontainer": {
+                    "$ref": "#/definitions/DevcontainerConfig"
+                }
+            }
+        },
+        "BuildDTO": {
             "type": "object",
             "required": [
                 "containerConfig",
@@ -2135,6 +2146,9 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
                 "prebuildId": {
                     "type": "string"
                 },
@@ -2142,24 +2156,13 @@ const docTemplate = `{
                     "$ref": "#/definitions/GitRepository"
                 },
                 "state": {
-                    "$ref": "#/definitions/models.BuildState"
+                    "$ref": "#/definitions/ResourceState"
                 },
                 "updatedAt": {
                     "type": "string"
                 },
                 "user": {
                     "type": "string"
-                }
-            }
-        },
-        "BuildConfig": {
-            "type": "object",
-            "properties": {
-                "cachedBuild": {
-                    "$ref": "#/definitions/CachedBuild"
-                },
-                "devcontainer": {
-                    "$ref": "#/definitions/DevcontainerConfig"
                 }
             }
         },
@@ -2902,11 +2905,13 @@ const docTemplate = `{
             "type": "string",
             "enum": [
                 "workspace",
-                "target"
+                "target",
+                "build"
             ],
             "x-enum-varnames": [
                 "ResourceTypeWorkspace",
-                "ResourceTypeTarget"
+                "ResourceTypeTarget",
+                "ResourceTypeBuild"
             ]
         },
         "Sample": {
@@ -3536,29 +3541,6 @@ const docTemplate = `{
                 "ApiKeyTypeTarget"
             ]
         },
-        "models.BuildState": {
-            "type": "string",
-            "enum": [
-                "pending-run",
-                "running",
-                "error",
-                "success",
-                "published",
-                "pending-delete",
-                "pending-forced-delete",
-                "deleting"
-            ],
-            "x-enum-varnames": [
-                "BuildStatePendingRun",
-                "BuildStateRunning",
-                "BuildStateError",
-                "BuildStateSuccess",
-                "BuildStatePublished",
-                "BuildStatePendingDelete",
-                "BuildStatePendingForcedDelete",
-                "BuildStateDeleting"
-            ]
-        },
         "models.JobAction": {
             "type": "string",
             "enum": [
@@ -3567,7 +3549,8 @@ const docTemplate = `{
                 "stop",
                 "restart",
                 "delete",
-                "force-delete"
+                "force-delete",
+                "run"
             ],
             "x-enum-varnames": [
                 "JobActionCreate",
@@ -3575,13 +3558,17 @@ const docTemplate = `{
                 "JobActionStop",
                 "JobActionRestart",
                 "JobActionDelete",
-                "JobActionForceDelete"
+                "JobActionForceDelete",
+                "JobActionRun"
             ]
         },
         "models.ResourceStateName": {
             "type": "string",
             "enum": [
                 "undefined",
+                "pending-run",
+                "running",
+                "run-successful",
                 "pending-create",
                 "creating",
                 "pending-start",
@@ -3600,6 +3587,9 @@ const docTemplate = `{
             ],
             "x-enum-varnames": [
                 "ResourceStateNameUndefined",
+                "ResourceStateNamePendingRun",
+                "ResourceStateNameRunning",
+                "ResourceStateNameRunSuccessful",
                 "ResourceStateNamePendingCreate",
                 "ResourceStateNameCreating",
                 "ResourceStateNamePendingStart",

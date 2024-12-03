@@ -26,6 +26,7 @@ const (
 	JobActionRestart     ModelsJobAction = "restart"
 	JobActionDelete      ModelsJobAction = "delete"
 	JobActionForceDelete ModelsJobAction = "force-delete"
+	JobActionRun         ModelsJobAction = "run"
 )
 
 // All allowed values of ModelsJobAction enum
@@ -36,6 +37,7 @@ var AllowedModelsJobActionEnumValues = []ModelsJobAction{
 	"restart",
 	"delete",
 	"force-delete",
+	"run",
 }
 
 func (v *ModelsJobAction) UnmarshalJSON(src []byte) error {

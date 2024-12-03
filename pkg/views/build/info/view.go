@@ -25,7 +25,7 @@ var propertyValueStyle = lipgloss.NewStyle().
 	Foreground(views.Light).
 	Bold(true)
 
-func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUnstyled bool) {
+func Render(b *apiclient.BuildDTO, apiServerConfig *apiclient.ServerConfig, forceUnstyled bool) {
 	var output string
 	output += "\n\n"
 
@@ -33,7 +33,7 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 
 	output += getInfoLine("ID", b.Id) + "\n"
 
-	output += getInfoLine("State", string(b.State)) + "\n"
+	output += getInfoLine("State", views.GetStateLabel(b.State.Name)) + "\n"
 
 	output += getInfoLine("Repository", b.Repository.Url) + "\n"
 

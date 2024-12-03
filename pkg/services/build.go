@@ -13,13 +13,18 @@ import (
 
 type IBuildService interface {
 	Create(CreateBuildDTO) (string, error)
-	Find(filter *stores.BuildFilter) (*models.Build, error)
-	List(filter *stores.BuildFilter) ([]*models.Build, error)
-	MarkForDeletion(filter *stores.BuildFilter, force bool) []error
-	Delete(id string) error
+	Find(filter *BuildFilter) (*BuildDTO, error)
+	List(filter *BuildFilter) ([]*BuildDTO, error)
+	Delete(filter *BuildFilter, force bool) []error
+	HandleSuccessfulRemoval(id string) error
 	AwaitEmptyList(time.Duration) error
 	GetBuildLogReader(buildId string) (io.Reader, error)
 }
+
+type BuildDTO struct {
+	models.Build
+	State models.ResourceState `json:"state" validate:"required"`
+} //	@name	BuildDTO
 
 type CreateBuildDTO struct {
 	WorkspaceTemplateName string            `json:"workspaceTemplateName" validate:"required"`
@@ -27,3 +32,8 @@ type CreateBuildDTO struct {
 	PrebuildId            *string           `json:"prebuildId" validate:"optional"`
 	EnvVars               map[string]string `json:"envVars" validate:"required"`
 } // @name CreateBuildDTO
+
+type BuildFilter struct {
+	StateNames  *[]models.ResourceStateName
+	StoreFilter stores.BuildFilter
+}

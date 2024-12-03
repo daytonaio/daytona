@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/runners"
 	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -303,7 +303,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
 
 	// Group builds by their prebuildId
 	for _, b := range existingBuilds {
-		buildMap[b.PrebuildId] = append(buildMap[b.PrebuildId], *b)
+		buildMap[b.PrebuildId] = append(buildMap[b.PrebuildId], *&b.Build)
 	}
 
 	for _, prebuild := range prebuilds {
@@ -337,7 +337,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
 func (s *WorkspaceTemplateService) StartRetentionPoller() error {
 	scheduler := scheduler.NewCronScheduler()
 
-	err := scheduler.AddFunc(build.DEFAULT_BUILD_POLL_INTERVAL, func() {
+	err := scheduler.AddFunc(runners.DEFAULT_JOB_POLL_INTERVAL, func() {
 		err := s.EnforceRetentionPolicy()
 		if err != nil {
 			log.Error(err)
