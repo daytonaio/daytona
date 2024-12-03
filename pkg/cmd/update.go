@@ -65,6 +65,9 @@ func getChangeLog(currentVersion string, version string) ([]string, error) {
 			canAdd = true
 		}
 		if canAdd {
+			if release.TagName == currentVersion {
+				break
+			}
 			changeLog = append(changeLog, release.ChangeLog)
 			counter--
 		}
@@ -227,7 +230,7 @@ func renderChangeLog(changeLog []string, version string, currentVersion string) 
 
 	// Display ChangeLog Summary
 	if len(changeLog) == 10 {
-		fmt.Println("Showing the ChangeLog for the last 10 releases.\nYou can find the complete changeLog at https://github.com/daytonaio/daytona/releases\n")
+		fmt.Println("Showing the ChangeLog for the last 10 releases.\nYou can find the complete changeLog at https://github.com/daytonaio/daytona/releases")
 	} else {
 		fmt.Printf("Showing the ChangeLog from %s to %s.\n\n", currentVersion, version)
 	}
