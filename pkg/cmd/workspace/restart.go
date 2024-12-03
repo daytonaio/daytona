@@ -44,7 +44,7 @@ var RestartCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Restart")
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, string(selection.RestartActionVerb))
 			if selectedWorkspaces == nil {
 				return nil
 			}

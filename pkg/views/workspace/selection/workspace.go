@@ -19,6 +19,13 @@ import (
 
 var NewWorkspaceIdentifier = "<NEW_WORKSPACE>"
 
+type ActionVerb string
+
+var StartActionVerb ActionVerb = "Start"
+var StopActionVerb ActionVerb = "Stop"
+var RestartActionVerb ActionVerb = "Restart"
+var DeleteActionVerb ActionVerb = "Delete"
+
 func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool, action string) []list.Item {
 	// Initialize an empty list of items.
 	items := []list.Item{}
@@ -39,6 +46,18 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 
 		stateLabel := views.GetStateLabel(workspace.State.Name)
 
+		isDisabled := false
+		switch action {
+		case string(StartActionVerb):
+			if workspace.State.Name == apiclient.ResourceStateNameStarted {
+				isDisabled = true
+			}
+		case string(StopActionVerb), string(RestartActionVerb):
+			if workspace.State.Name == apiclient.ResourceStateNameStopped {
+				isDisabled = true
+			}
+		}
+
 		if workspace.Metadata != nil {
 			views_util.CheckAndAppendTimeLabel(&stateLabel, workspace.State, workspace.Metadata.Uptime)
 		}
@@ -53,6 +72,7 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			state:          stateLabel,
 			workspace:      &workspace,
 			choiceProperty: workspace,
+			isDisabled:     isDisabled,
 		}
 
 		if isMultipleSelect {

@@ -50,7 +50,7 @@ var StopCmd = &cobra.Command{
 				return nil
 			}
 
-			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, "Stop")
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, string(selection.StopActionVerb))
 		} else {
 			for _, arg := range args {
 				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
