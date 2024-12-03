@@ -6,11 +6,13 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"runtime"
-
+	"github.com/daytonaio/daytona/internal"
 	"github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
+	"net/http"
+	"runtime"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -88,6 +90,33 @@ func getBinaryUrl(version string) string {
 	}
 	return baseDownloadURL + fmt.Sprintf("%s/daytona-%s-%s", version, runtime.GOOS, runtime.GOARCH)
 }
+func isVersionGreater(version string, currentVersion string) bool {
+	version = strings.TrimPrefix(version, "v")
+	currentVersion = strings.TrimPrefix(currentVersion, "v")
+	v1 := strings.Split(version, ".")
+	v2 := strings.Split(currentVersion, ".")
+	maxLength := len(v1)
+	if len(v2) > maxLength {
+		maxLength = len(v2)
+	}
+	for i := 0; i < maxLength; i++ {
+		var ver1 int
+		var ver2 int
+		if i < len(v1) {
+			ver1, _ = strconv.Atoi(v1[i])
+		}
+		if i < len(v2) {
+			ver2, _ = strconv.Atoi(v2[i])
+		}
+		if ver1 > ver2 {
+			return false
+		}
+		if ver1 < ver2 {
+			return true
+		}
+	}
+	return false
+}
 
 var versionFlag string
 var updateCmd = &cobra.Command{
@@ -98,6 +127,7 @@ var updateCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var version string
 		var changeLog string
+		currentVersion := internal.Version
 		if versionFlag == "" {
 			release, err := fetchLatestRelase()
 			if err != nil {
@@ -112,6 +142,10 @@ var updateCmd = &cobra.Command{
 			}
 			version = release.TagName
 			changeLog = release.ChangeLog
+		}
+		if isVersionGreater(version, currentVersion) {
+			fmt.Println("Current version is greater than the version you are trying to update to")
+			return nil
 		}
 		fmt.Println("Updating to version", version)
 		fmt.Println("Changelog:")
