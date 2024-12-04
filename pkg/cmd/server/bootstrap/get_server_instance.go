@@ -149,6 +149,10 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		},
 	})
 
+	jobService := jobs.NewJobService(jobs.JobServiceConfig{
+		JobStore: jobStore,
+	})
+
 	buildService := builds.NewBuildService(builds.BuildServiceConfig{
 		BuildStore: buildStore,
 		FindWorkspaceTemplate: func(ctx context.Context, name string) (*models.WorkspaceTemplate, error) {
@@ -168,6 +172,14 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 			return repo, err
 		},
+		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction) error {
+			return jobService.Create(&models.Job{
+				ResourceId:   workspaceId,
+				ResourceType: models.ResourceTypeBuild,
+				Action:       action,
+				State:        models.JobStatePending,
+			})
+		},
 		LoggerFactory: loggerFactory,
 	})
 
@@ -176,15 +188,17 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	workspaceTemplateService := workspacetemplates.NewWorkspaceTemplateService(workspacetemplates.WorkspaceTemplateServiceConfig{
 		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
 		ConfigStore:             workspaceTemplateStore,
-		FindNewestBuild: func(ctx context.Context, prebuildId string) (*models.Build, error) {
-			return buildService.Find(&stores.BuildFilter{
-				PrebuildIds: &[]string{prebuildId},
-				GetNewest:   util.Pointer(true),
+		FindNewestBuild: func(ctx context.Context, prebuildId string) (*services.BuildDTO, error) {
+			return buildService.Find(&services.BuildFilter{
+				StoreFilter: stores.BuildFilter{
+					PrebuildIds: &[]string{prebuildId},
+					GetNewest:   util.Pointer(true),
+				},
 			})
 		},
-		ListPublishedBuilds: func(ctx context.Context) ([]*models.Build, error) {
-			return buildService.List(&stores.BuildFilter{
-				States: &[]models.BuildState{models.BuildStatePublished},
+		ListSuccessfulBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
+			return buildService.List(&services.BuildFilter{
+				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 			})
 		},
 		CreateBuild: func(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error {
@@ -204,9 +218,11 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				prebuildIds = &[]string{*prebuildId}
 			}
 
-			return buildService.MarkForDeletion(&stores.BuildFilter{
-				Id:          id,
-				PrebuildIds: prebuildIds,
+			return buildService.Delete(&services.BuildFilter{
+				StoreFilter: stores.BuildFilter{
+					Id:          id,
+					PrebuildIds: prebuildIds,
+				},
 			}, force)
 		},
 		GetRepositoryContext: func(ctx context.Context, url string) (*gitprovider.GitRepository, string, error) {
@@ -278,10 +294,6 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
 
-	jobService := jobs.NewJobService(jobs.JobServiceConfig{
-		JobStore: jobStore,
-	})
-
 	provisioner := provisioner.NewProvisioner(provisioner.ProvisionerConfig{
 		ProviderManager: providerManager,
 	})
@@ -328,17 +340,19 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			return containerRegistryService.FindByImageName(image)
 		},
 		FindCachedBuild: func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error) {
-			validStates := &[]models.BuildState{
-				models.BuildStatePublished,
+			validStates := []models.ResourceStateName{
+				models.ResourceStateNameRunSuccessful,
 			}
 
-			build, err := buildService.Find(&stores.BuildFilter{
-				States:        validStates,
-				RepositoryUrl: &w.Repository.Url,
-				Branch:        &w.Repository.Branch,
-				EnvVars:       &w.EnvVars,
-				BuildConfig:   w.BuildConfig,
-				GetNewest:     util.Pointer(true),
+			build, err := buildService.Find(&services.BuildFilter{
+				StateNames: &validStates,
+				StoreFilter: stores.BuildFilter{
+					RepositoryUrl: &w.Repository.Url,
+					Branch:        &w.Repository.Branch,
+					EnvVars:       &w.EnvVars,
+					BuildConfig:   w.BuildConfig,
+					GetNewest:     util.Pointer(true),
+				},
 			})
 			if err != nil {
 				return nil, err

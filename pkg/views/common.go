@@ -49,17 +49,20 @@ var (
 
 // Resources that have actions being performed on them have a higher priority when listing
 var ResourceListStatePriorities = map[apiclient.ModelsResourceStateName]int{
+	apiclient.ResourceStateNamePendingRun:          1,
 	apiclient.ResourceStateNamePendingCreate:       1,
 	apiclient.ResourceStateNamePendingStart:        1,
 	apiclient.ResourceStateNamePendingStop:         1,
 	apiclient.ResourceStateNamePendingRestart:      1,
 	apiclient.ResourceStateNamePendingDelete:       1,
 	apiclient.ResourceStateNamePendingForcedDelete: 1,
+	apiclient.ResourceStateNameRunning:             1,
 	apiclient.ResourceStateNameCreating:            1,
 	apiclient.ResourceStateNameStarting:            1,
 	apiclient.ResourceStateNameStopping:            1,
 	apiclient.ResourceStateNameDeleting:            1,
 	apiclient.ResourceStateNameStarted:             2,
+	apiclient.ResourceStateNameRunSuccessful:       2,
 	apiclient.ResourceStateNameUndefined:           2,
 	apiclient.ResourceStateNameError:               3,
 	apiclient.ResourceStateNameUnresponsive:        4,
@@ -210,6 +213,12 @@ func GetStateLabel(state apiclient.ModelsResourceStateName) string {
 	switch state {
 	case apiclient.ResourceStateNameUndefined:
 		return UndefinedStyle.Render("/")
+	case apiclient.ResourceStateNamePendingRun:
+		return PendingStyle.Render("PENDING")
+	case apiclient.ResourceStateNameRunning:
+		return RunningStyle.Render("RUNNING")
+	case apiclient.ResourceStateNameRunSuccessful:
+		return RunSuccessfulStyle.Render("SUCCESS")
 	case apiclient.ResourceStateNamePendingCreate:
 		return PendingStyle.Render("PENDING")
 	case apiclient.ResourceStateNameCreating:

@@ -16,13 +16,13 @@ import (
 
 type rowData struct {
 	Id         string
-	State      string
+	Status     string
 	PrebuildId string
 	CreatedAt  string
 	UpdatedAt  string
 }
 
-func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
+func ListBuilds(buildList []apiclient.BuildDTO, apiServerConfig *apiclient.ServerConfig) {
 	if len(buildList) == 0 {
 		views_util.NotifyEmptyBuildList(true)
 		return
@@ -45,15 +45,19 @@ func ListBuilds(buildList []apiclient.Build, apiServerConfig *apiclient.ServerCo
 	fmt.Println(table)
 }
 
-func SortBuilds(buildList *[]apiclient.Build) {
+func SortBuilds(buildList *[]apiclient.BuildDTO) {
 	sort.Slice(*buildList, func(i, j int) bool {
-		b1 := (*buildList)[i]
-		b2 := (*buildList)[j]
-		return b1.UpdatedAt > b2.UpdatedAt
+		pi, pj := views_util.GetStateSortPriorities((*buildList)[i].State.Name, (*buildList)[j].State.Name)
+		if pi != pj {
+			return pi < pj
+		}
+
+		// If two builds have the same state priority, compare the UpdatedAt property
+		return (*buildList)[i].State.UpdatedAt > (*buildList)[j].State.UpdatedAt
 	})
 }
 
-func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.ServerConfig) {
+func renderUnstyledList(buildList []apiclient.BuildDTO, apiServerConfig *apiclient.ServerConfig) {
 	for _, b := range buildList {
 		info.Render(&b, apiServerConfig, true)
 
@@ -63,11 +67,11 @@ func renderUnstyledList(buildList []apiclient.Build, apiServerConfig *apiclient.
 	}
 }
 
-func getRowFromRowData(build apiclient.Build) []string {
+func getRowFromRowData(build apiclient.BuildDTO) []string {
 	var data rowData
 
 	data.Id = build.Id + views_util.AdditionalPropertyPadding
-	data.State = string(build.State)
+	data.Status = views.GetStateLabel(build.State.Name)
 	data.PrebuildId = build.PrebuildId
 	if data.PrebuildId == "" {
 		data.PrebuildId = "/"
@@ -77,7 +81,7 @@ func getRowFromRowData(build apiclient.Build) []string {
 
 	return []string{
 		views.NameStyle.Render(data.Id),
-		views.DefaultRowDataStyle.Render(data.State),
+		views.DefaultRowDataStyle.Render(data.Status),
 		views.DefaultRowDataStyle.Render(data.PrebuildId),
 		views.DefaultRowDataStyle.Render(data.CreatedAt),
 		views.DefaultRowDataStyle.Render(data.UpdatedAt),

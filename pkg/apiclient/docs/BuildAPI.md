@@ -285,7 +285,7 @@ Name | Type | Description  | Notes
 
 ## GetBuild
 
-> Build GetBuild(ctx, buildId).Execute()
+> BuildDTO GetBuild(ctx, buildId).Execute()
 
 Get build data
 
@@ -313,7 +313,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.GetBuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetBuild`: Build
+	// response from `GetBuild`: BuildDTO
 	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.GetBuild`: %v\n", resp)
 }
 ```
@@ -337,7 +337,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Build**](Build.md)
+[**BuildDTO**](BuildDTO.md)
 
 ### Authorization
 
@@ -355,7 +355,7 @@ Name | Type | Description  | Notes
 
 ## ListBuilds
 
-> []Build ListBuilds(ctx).Execute()
+> []BuildDTO ListBuilds(ctx).Execute()
 
 List builds
 
@@ -382,7 +382,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.ListBuilds``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListBuilds`: []Build
+	// response from `ListBuilds`: []BuildDTO
 	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.ListBuilds`: %v\n", resp)
 }
 ```
@@ -398,7 +398,7 @@ Other parameters are passed through a pointer to a apiListBuildsRequest struct v
 
 ### Return type
 
-[**[]Build**](Build.md)
+[**[]BuildDTO**](BuildDTO.md)
 
 ### Authorization
 

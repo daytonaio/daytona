@@ -5,6 +5,12 @@
 
 * `ResourceStateNameUndefined` (value: `"undefined"`)
 
+* `ResourceStateNamePendingRun` (value: `"pending-run"`)
+
+* `ResourceStateNameRunning` (value: `"running"`)
+
+* `ResourceStateNameRunSuccessful` (value: `"run-successful"`)
+
 * `ResourceStateNamePendingCreate` (value: `"pending-create"`)
 
 * `ResourceStateNameCreating` (value: `"creating"`)

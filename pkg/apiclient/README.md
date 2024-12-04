@@ -153,8 +153,8 @@ Class | Method | HTTP request | Description
 
  - [AddTargetConfigDTO](docs/AddTargetConfigDTO.md)
  - [ApiKey](docs/ApiKey.md)
- - [Build](docs/Build.md)
  - [BuildConfig](docs/BuildConfig.md)
+ - [BuildDTO](docs/BuildDTO.md)
  - [CachedBuild](docs/CachedBuild.md)
  - [CloneTarget](docs/CloneTarget.md)
  - [ContainerConfig](docs/ContainerConfig.md)
@@ -182,7 +182,6 @@ Class | Method | HTTP request | Description
  - [JobState](docs/JobState.md)
  - [LogFileConfig](docs/LogFileConfig.md)
  - [ModelsApiKeyType](docs/ModelsApiKeyType.md)
- - [ModelsBuildState](docs/ModelsBuildState.md)
  - [ModelsJobAction](docs/ModelsJobAction.md)
  - [ModelsResourceStateName](docs/ModelsResourceStateName.md)
  - [NetworkKey](docs/NetworkKey.md)

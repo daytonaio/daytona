@@ -26,21 +26,12 @@ func IsBuildNotFound(err error) bool {
 
 type BuildFilter struct {
 	Id            *string
-	States        *[]models.BuildState
 	PrebuildIds   *[]string
 	GetNewest     *bool
 	BuildConfig   *models.BuildConfig
 	RepositoryUrl *string
 	Branch        *string
 	EnvVars       *map[string]string
-}
-
-func (f *BuildFilter) StatesToInterface() []interface{} {
-	args := make([]interface{}, len(*f.States))
-	for i, v := range *f.States {
-		args[i] = v
-	}
-	return args
 }
 
 func (f *BuildFilter) PrebuildIdsToInterface() []interface{} {

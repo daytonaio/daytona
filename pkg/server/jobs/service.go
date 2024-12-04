@@ -4,6 +4,8 @@
 package jobs
 
 import (
+	"slices"
+
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -33,6 +35,15 @@ func (s *JobService) Find(filter *stores.JobFilter) (*models.Job, error) {
 }
 
 func (s *JobService) Create(j *models.Job) error {
+	validAction, ok := validResourceActions[j.ResourceType]
+	if !ok {
+		return services.ErrInvalidResourceJobAction
+	}
+
+	if !slices.Contains(validAction, j.Action) {
+		return services.ErrInvalidResourceJobAction
+	}
+
 	pendingJobs, err := s.List(&stores.JobFilter{
 		ResourceId:   &j.ResourceId,
 		ResourceType: &j.ResourceType,
@@ -67,4 +78,28 @@ func (s *JobService) Update(j *models.Job) error {
 
 func (s *JobService) Delete(j *models.Job) error {
 	return s.jobStore.Delete(j)
+}
+
+var validResourceActions = map[models.ResourceType][]models.JobAction{
+	models.ResourceTypeWorkspace: {
+		models.JobActionCreate,
+		models.JobActionStart,
+		models.JobActionStop,
+		models.JobActionRestart,
+		models.JobActionDelete,
+		models.JobActionForceDelete,
+	},
+	models.ResourceTypeTarget: {
+		models.JobActionCreate,
+		models.JobActionStart,
+		models.JobActionStop,
+		models.JobActionRestart,
+		models.JobActionDelete,
+		models.JobActionForceDelete,
+	},
+	models.ResourceTypeBuild: {
+		models.JobActionRun,
+		models.JobActionDelete,
+		models.JobActionForceDelete,
+	},
 }

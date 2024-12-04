@@ -16,32 +16,33 @@ import (
 	"fmt"
 )
 
-// checks if the Build type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &Build{}
+// checks if the BuildDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &BuildDTO{}
 
-// Build struct for Build
-type Build struct {
+// BuildDTO struct for BuildDTO
+type BuildDTO struct {
 	BuildConfig     *BuildConfig      `json:"buildConfig,omitempty"`
 	ContainerConfig ContainerConfig   `json:"containerConfig"`
 	CreatedAt       string            `json:"createdAt"`
 	EnvVars         map[string]string `json:"envVars"`
 	Id              string            `json:"id"`
 	Image           *string           `json:"image,omitempty"`
+	LastJob         *Job              `json:"lastJob,omitempty"`
 	PrebuildId      string            `json:"prebuildId"`
 	Repository      GitRepository     `json:"repository"`
-	State           ModelsBuildState  `json:"state"`
+	State           ResourceState     `json:"state"`
 	UpdatedAt       string            `json:"updatedAt"`
 	User            *string           `json:"user,omitempty"`
 }
 
-type _Build Build
+type _BuildDTO BuildDTO
 
-// NewBuild instantiates a new Build object
+// NewBuildDTO instantiates a new BuildDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ModelsBuildState, updatedAt string) *Build {
-	this := Build{}
+func NewBuildDTO(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ResourceState, updatedAt string) *BuildDTO {
+	this := BuildDTO{}
 	this.ContainerConfig = containerConfig
 	this.CreatedAt = createdAt
 	this.EnvVars = envVars
@@ -53,16 +54,16 @@ func NewBuild(containerConfig ContainerConfig, createdAt string, envVars map[str
 	return &this
 }
 
-// NewBuildWithDefaults instantiates a new Build object
+// NewBuildDTOWithDefaults instantiates a new BuildDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewBuildWithDefaults() *Build {
-	this := Build{}
+func NewBuildDTOWithDefaults() *BuildDTO {
+	this := BuildDTO{}
 	return &this
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
-func (o *Build) GetBuildConfig() BuildConfig {
+func (o *BuildDTO) GetBuildConfig() BuildConfig {
 	if o == nil || IsNil(o.BuildConfig) {
 		var ret BuildConfig
 		return ret
@@ -72,7 +73,7 @@ func (o *Build) GetBuildConfig() BuildConfig {
 
 // GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Build) GetBuildConfigOk() (*BuildConfig, bool) {
+func (o *BuildDTO) GetBuildConfigOk() (*BuildConfig, bool) {
 	if o == nil || IsNil(o.BuildConfig) {
 		return nil, false
 	}
@@ -80,7 +81,7 @@ func (o *Build) GetBuildConfigOk() (*BuildConfig, bool) {
 }
 
 // HasBuildConfig returns a boolean if a field has been set.
-func (o *Build) HasBuildConfig() bool {
+func (o *BuildDTO) HasBuildConfig() bool {
 	if o != nil && !IsNil(o.BuildConfig) {
 		return true
 	}
@@ -89,12 +90,12 @@ func (o *Build) HasBuildConfig() bool {
 }
 
 // SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
-func (o *Build) SetBuildConfig(v BuildConfig) {
+func (o *BuildDTO) SetBuildConfig(v BuildConfig) {
 	o.BuildConfig = &v
 }
 
 // GetContainerConfig returns the ContainerConfig field value
-func (o *Build) GetContainerConfig() ContainerConfig {
+func (o *BuildDTO) GetContainerConfig() ContainerConfig {
 	if o == nil {
 		var ret ContainerConfig
 		return ret
@@ -105,7 +106,7 @@ func (o *Build) GetContainerConfig() ContainerConfig {
 
 // GetContainerConfigOk returns a tuple with the ContainerConfig field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetContainerConfigOk() (*ContainerConfig, bool) {
+func (o *BuildDTO) GetContainerConfigOk() (*ContainerConfig, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -113,12 +114,12 @@ func (o *Build) GetContainerConfigOk() (*ContainerConfig, bool) {
 }
 
 // SetContainerConfig sets field value
-func (o *Build) SetContainerConfig(v ContainerConfig) {
+func (o *BuildDTO) SetContainerConfig(v ContainerConfig) {
 	o.ContainerConfig = v
 }
 
 // GetCreatedAt returns the CreatedAt field value
-func (o *Build) GetCreatedAt() string {
+func (o *BuildDTO) GetCreatedAt() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -129,7 +130,7 @@ func (o *Build) GetCreatedAt() string {
 
 // GetCreatedAtOk returns a tuple with the CreatedAt field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetCreatedAtOk() (*string, bool) {
+func (o *BuildDTO) GetCreatedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -137,12 +138,12 @@ func (o *Build) GetCreatedAtOk() (*string, bool) {
 }
 
 // SetCreatedAt sets field value
-func (o *Build) SetCreatedAt(v string) {
+func (o *BuildDTO) SetCreatedAt(v string) {
 	o.CreatedAt = v
 }
 
 // GetEnvVars returns the EnvVars field value
-func (o *Build) GetEnvVars() map[string]string {
+func (o *BuildDTO) GetEnvVars() map[string]string {
 	if o == nil {
 		var ret map[string]string
 		return ret
@@ -153,7 +154,7 @@ func (o *Build) GetEnvVars() map[string]string {
 
 // GetEnvVarsOk returns a tuple with the EnvVars field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetEnvVarsOk() (*map[string]string, bool) {
+func (o *BuildDTO) GetEnvVarsOk() (*map[string]string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -161,12 +162,12 @@ func (o *Build) GetEnvVarsOk() (*map[string]string, bool) {
 }
 
 // SetEnvVars sets field value
-func (o *Build) SetEnvVars(v map[string]string) {
+func (o *BuildDTO) SetEnvVars(v map[string]string) {
 	o.EnvVars = v
 }
 
 // GetId returns the Id field value
-func (o *Build) GetId() string {
+func (o *BuildDTO) GetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -177,7 +178,7 @@ func (o *Build) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetIdOk() (*string, bool) {
+func (o *BuildDTO) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -185,12 +186,12 @@ func (o *Build) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *Build) SetId(v string) {
+func (o *BuildDTO) SetId(v string) {
 	o.Id = v
 }
 
 // GetImage returns the Image field value if set, zero value otherwise.
-func (o *Build) GetImage() string {
+func (o *BuildDTO) GetImage() string {
 	if o == nil || IsNil(o.Image) {
 		var ret string
 		return ret
@@ -200,7 +201,7 @@ func (o *Build) GetImage() string {
 
 // GetImageOk returns a tuple with the Image field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Build) GetImageOk() (*string, bool) {
+func (o *BuildDTO) GetImageOk() (*string, bool) {
 	if o == nil || IsNil(o.Image) {
 		return nil, false
 	}
@@ -208,7 +209,7 @@ func (o *Build) GetImageOk() (*string, bool) {
 }
 
 // HasImage returns a boolean if a field has been set.
-func (o *Build) HasImage() bool {
+func (o *BuildDTO) HasImage() bool {
 	if o != nil && !IsNil(o.Image) {
 		return true
 	}
@@ -217,12 +218,44 @@ func (o *Build) HasImage() bool {
 }
 
 // SetImage gets a reference to the given string and assigns it to the Image field.
-func (o *Build) SetImage(v string) {
+func (o *BuildDTO) SetImage(v string) {
 	o.Image = &v
 }
 
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *BuildDTO) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildDTO) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *BuildDTO) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *BuildDTO) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
 // GetPrebuildId returns the PrebuildId field value
-func (o *Build) GetPrebuildId() string {
+func (o *BuildDTO) GetPrebuildId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -233,7 +266,7 @@ func (o *Build) GetPrebuildId() string {
 
 // GetPrebuildIdOk returns a tuple with the PrebuildId field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetPrebuildIdOk() (*string, bool) {
+func (o *BuildDTO) GetPrebuildIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -241,12 +274,12 @@ func (o *Build) GetPrebuildIdOk() (*string, bool) {
 }
 
 // SetPrebuildId sets field value
-func (o *Build) SetPrebuildId(v string) {
+func (o *BuildDTO) SetPrebuildId(v string) {
 	o.PrebuildId = v
 }
 
 // GetRepository returns the Repository field value
-func (o *Build) GetRepository() GitRepository {
+func (o *BuildDTO) GetRepository() GitRepository {
 	if o == nil {
 		var ret GitRepository
 		return ret
@@ -257,7 +290,7 @@ func (o *Build) GetRepository() GitRepository {
 
 // GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetRepositoryOk() (*GitRepository, bool) {
+func (o *BuildDTO) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -265,14 +298,14 @@ func (o *Build) GetRepositoryOk() (*GitRepository, bool) {
 }
 
 // SetRepository sets field value
-func (o *Build) SetRepository(v GitRepository) {
+func (o *BuildDTO) SetRepository(v GitRepository) {
 	o.Repository = v
 }
 
 // GetState returns the State field value
-func (o *Build) GetState() ModelsBuildState {
+func (o *BuildDTO) GetState() ResourceState {
 	if o == nil {
-		var ret ModelsBuildState
+		var ret ResourceState
 		return ret
 	}
 
@@ -281,7 +314,7 @@ func (o *Build) GetState() ModelsBuildState {
 
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetStateOk() (*ModelsBuildState, bool) {
+func (o *BuildDTO) GetStateOk() (*ResourceState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -289,12 +322,12 @@ func (o *Build) GetStateOk() (*ModelsBuildState, bool) {
 }
 
 // SetState sets field value
-func (o *Build) SetState(v ModelsBuildState) {
+func (o *BuildDTO) SetState(v ResourceState) {
 	o.State = v
 }
 
 // GetUpdatedAt returns the UpdatedAt field value
-func (o *Build) GetUpdatedAt() string {
+func (o *BuildDTO) GetUpdatedAt() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -305,7 +338,7 @@ func (o *Build) GetUpdatedAt() string {
 
 // GetUpdatedAtOk returns a tuple with the UpdatedAt field value
 // and a boolean to check if the value has been set.
-func (o *Build) GetUpdatedAtOk() (*string, bool) {
+func (o *BuildDTO) GetUpdatedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -313,12 +346,12 @@ func (o *Build) GetUpdatedAtOk() (*string, bool) {
 }
 
 // SetUpdatedAt sets field value
-func (o *Build) SetUpdatedAt(v string) {
+func (o *BuildDTO) SetUpdatedAt(v string) {
 	o.UpdatedAt = v
 }
 
 // GetUser returns the User field value if set, zero value otherwise.
-func (o *Build) GetUser() string {
+func (o *BuildDTO) GetUser() string {
 	if o == nil || IsNil(o.User) {
 		var ret string
 		return ret
@@ -328,7 +361,7 @@ func (o *Build) GetUser() string {
 
 // GetUserOk returns a tuple with the User field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Build) GetUserOk() (*string, bool) {
+func (o *BuildDTO) GetUserOk() (*string, bool) {
 	if o == nil || IsNil(o.User) {
 		return nil, false
 	}
@@ -336,7 +369,7 @@ func (o *Build) GetUserOk() (*string, bool) {
 }
 
 // HasUser returns a boolean if a field has been set.
-func (o *Build) HasUser() bool {
+func (o *BuildDTO) HasUser() bool {
 	if o != nil && !IsNil(o.User) {
 		return true
 	}
@@ -345,11 +378,11 @@ func (o *Build) HasUser() bool {
 }
 
 // SetUser gets a reference to the given string and assigns it to the User field.
-func (o *Build) SetUser(v string) {
+func (o *BuildDTO) SetUser(v string) {
 	o.User = &v
 }
 
-func (o Build) MarshalJSON() ([]byte, error) {
+func (o BuildDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -357,7 +390,7 @@ func (o Build) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o Build) ToMap() (map[string]interface{}, error) {
+func (o BuildDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
@@ -369,6 +402,9 @@ func (o Build) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
 	toSerialize["prebuildId"] = o.PrebuildId
 	toSerialize["repository"] = o.Repository
 	toSerialize["state"] = o.State
@@ -379,7 +415,7 @@ func (o Build) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *Build) UnmarshalJSON(data []byte) (err error) {
+func (o *BuildDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -408,53 +444,53 @@ func (o *Build) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varBuild := _Build{}
+	varBuildDTO := _BuildDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varBuild)
+	err = decoder.Decode(&varBuildDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = Build(varBuild)
+	*o = BuildDTO(varBuildDTO)
 
 	return err
 }
 
-type NullableBuild struct {
-	value *Build
+type NullableBuildDTO struct {
+	value *BuildDTO
 	isSet bool
 }
 
-func (v NullableBuild) Get() *Build {
+func (v NullableBuildDTO) Get() *BuildDTO {
 	return v.value
 }
 
-func (v *NullableBuild) Set(val *Build) {
+func (v *NullableBuildDTO) Set(val *BuildDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableBuild) IsSet() bool {
+func (v NullableBuildDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableBuild) Unset() {
+func (v *NullableBuildDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableBuild(val *Build) *NullableBuild {
-	return &NullableBuild{value: val, isSet: true}
+func NewNullableBuildDTO(val *BuildDTO) *NullableBuildDTO {
+	return &NullableBuildDTO{value: val, isSet: true}
 }
 
-func (v NullableBuild) MarshalJSON() ([]byte, error) {
+func (v NullableBuildDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableBuild) UnmarshalJSON(src []byte) error {
+func (v *NullableBuildDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

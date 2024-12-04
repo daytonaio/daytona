@@ -76,15 +76,7 @@ func SortTargets(targetList *[]apiclient.TargetDTO) {
 			return false
 		}
 
-		pi, ok := views.ResourceListStatePriorities[(*targetList)[i].State.Name]
-		if !ok {
-			pi = 99
-		}
-		pj, ok2 := views.ResourceListStatePriorities[(*targetList)[j].State.Name]
-		if !ok2 {
-			pj = 99
-		}
-
+		pi, pj := views_util.GetStateSortPriorities((*targetList)[i].State.Name, (*targetList)[j].State.Name)
 		if pi != pj {
 			return pi < pj
 		}

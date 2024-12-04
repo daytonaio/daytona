@@ -33,7 +33,7 @@ func (b *BuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
 	defer b.Lock.Unlock()
 
 	build := &models.Build{}
-	tx := processBuildFilters(b.db, filter).First(build)
+	tx := preloadBuildEntities(processBuildFilters(b.db, filter)).First(build)
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
@@ -50,7 +50,7 @@ func (b *BuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
 	defer b.Lock.Unlock()
 
 	builds := []*models.Build{}
-	tx := processBuildFilters(b.db, filter).Find(&builds)
+	tx := preloadBuildEntities(processBuildFilters(b.db, filter)).Find(&builds)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -86,16 +86,14 @@ func (b *BuildStore) Delete(id string) error {
 	return nil
 }
 
+func preloadBuildEntities(tx *gorm.DB) *gorm.DB {
+	return tx.Preload("LastJob", preloadLastJob)
+}
+
 func processBuildFilters(tx *gorm.DB, filter *stores.BuildFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Id != nil {
 			tx = tx.Where("id = ?", *filter.Id)
-		}
-		if filter.States != nil && len(*filter.States) > 0 {
-			placeholders := strings.Repeat("?,", len(*filter.States))
-			placeholders = placeholders[:len(placeholders)-1]
-
-			tx = tx.Where(fmt.Sprintf("state IN (%s)", placeholders), filter.StatesToInterface()...)
 		}
 		if filter.PrebuildIds != nil && len(*filter.PrebuildIds) > 0 {
 			placeholders := strings.Repeat("?,", len(*filter.PrebuildIds))

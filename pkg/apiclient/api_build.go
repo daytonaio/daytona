@@ -498,7 +498,7 @@ type ApiGetBuildRequest struct {
 	buildId    string
 }
 
-func (r ApiGetBuildRequest) Execute() (*Build, *http.Response, error) {
+func (r ApiGetBuildRequest) Execute() (*BuildDTO, *http.Response, error) {
 	return r.ApiService.GetBuildExecute(r)
 }
 
@@ -521,13 +521,13 @@ func (a *BuildAPIService) GetBuild(ctx context.Context, buildId string) ApiGetBu
 
 // Execute executes the request
 //
-//	@return Build
-func (a *BuildAPIService) GetBuildExecute(r ApiGetBuildRequest) (*Build, *http.Response, error) {
+//	@return BuildDTO
+func (a *BuildAPIService) GetBuildExecute(r ApiGetBuildRequest) (*BuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Build
+		localVarReturnValue *BuildDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BuildAPIService.GetBuild")
@@ -615,7 +615,7 @@ type ApiListBuildsRequest struct {
 	ApiService *BuildAPIService
 }
 
-func (r ApiListBuildsRequest) Execute() ([]Build, *http.Response, error) {
+func (r ApiListBuildsRequest) Execute() ([]BuildDTO, *http.Response, error) {
 	return r.ApiService.ListBuildsExecute(r)
 }
 
@@ -636,13 +636,13 @@ func (a *BuildAPIService) ListBuilds(ctx context.Context) ApiListBuildsRequest {
 
 // Execute executes the request
 //
-//	@return []Build
-func (a *BuildAPIService) ListBuildsExecute(r ApiListBuildsRequest) ([]Build, *http.Response, error) {
+//	@return []BuildDTO
+func (a *BuildAPIService) ListBuildsExecute(r ApiListBuildsRequest) ([]BuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Build
+		localVarReturnValue []BuildDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BuildAPIService.ListBuilds")

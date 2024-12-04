@@ -64,15 +64,7 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 
 func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 	sort.Slice(*workspaceList, func(i, j int) bool {
-		pi, ok := views.ResourceListStatePriorities[(*workspaceList)[i].State.Name]
-		if !ok {
-			pi = 99
-		}
-		pj, ok2 := views.ResourceListStatePriorities[(*workspaceList)[j].State.Name]
-		if !ok2 {
-			pj = 99
-		}
-
+		pi, pj := views_util.GetStateSortPriorities((*workspaceList)[i].State.Name, (*workspaceList)[j].State.Name)
 		if pi != pj {
 			return pi < pj
 		}
