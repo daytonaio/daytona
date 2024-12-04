@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/jobs"
+	"github.com/daytonaio/daytona/pkg/jobs/build"
 	"github.com/daytonaio/daytona/pkg/jobs/target"
 	"github.com/daytonaio/daytona/pkg/jobs/workspace"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -23,6 +24,7 @@ type JobRunnerConfig struct {
 
 	WorkspaceJobFactory workspace.IWorkspaceJobFactory
 	TargetJobFactory    target.ITargetJobFactory
+	BuildJobFactory     build.IBuildJobFactory
 }
 
 func NewJobRunner(config JobRunnerConfig) runners.IJobRunner {
@@ -32,6 +34,7 @@ func NewJobRunner(config JobRunnerConfig) runners.IJobRunner {
 
 		workspaceJobFactory: config.WorkspaceJobFactory,
 		targetJobFactory:    config.TargetJobFactory,
+		buildJobFactory:     config.BuildJobFactory,
 	}
 }
 
@@ -41,6 +44,7 @@ type JobRunner struct {
 
 	workspaceJobFactory workspace.IWorkspaceJobFactory
 	targetJobFactory    target.ITargetJobFactory
+	buildJobFactory     build.IBuildJobFactory
 }
 
 func (s *JobRunner) StartRunner(ctx context.Context) error {
@@ -99,6 +103,8 @@ func (s *JobRunner) runJob(ctx context.Context, j *models.Job) error {
 		job = s.workspaceJobFactory.Create(*j)
 	case models.ResourceTypeTarget:
 		job = s.targetJobFactory.Create(*j)
+	case models.ResourceTypeBuild:
+		job = s.buildJobFactory.Create(*j)
 	}
 
 	err = job.Execute(ctx)

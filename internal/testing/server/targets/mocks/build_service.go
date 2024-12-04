@@ -9,9 +9,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
-	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -28,24 +26,24 @@ func (m *MockBuildService) Create(createBuildDto services.CreateBuildDTO) (strin
 	return args.String(0), args.Error(1)
 }
 
-func (m *MockBuildService) Find(filter *stores.BuildFilter) (*models.Build, error) {
+func (m *MockBuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, error) {
 	args := m.Called(filter)
-	return args.Get(0).(*models.Build), args.Error(1)
+	return args.Get(0).(*services.BuildDTO), args.Error(1)
 }
 
-func (m *MockBuildService) List(filter *stores.BuildFilter) ([]*models.Build, error) {
+func (m *MockBuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO, error) {
 	args := m.Called(filter)
-	return args.Get(0).([]*models.Build), args.Error(1)
+	return args.Get(0).([]*services.BuildDTO), args.Error(1)
 }
 
-func (m *MockBuildService) MarkForDeletion(filter *stores.BuildFilter, force bool) []error {
+func (m *MockBuildService) Delete(filter *services.BuildFilter, force bool) []error {
 	args := m.Called(filter, force)
 	return args.Get(0).([]error)
 }
 
-func (m *MockBuildService) Delete(id string) error {
+func (m *MockBuildService) HandleSuccessfulRemoval(id string) error {
 	args := m.Called(id)
-	return args.Error(0)
+	return args.Get(0).(error)
 }
 
 func (m *MockBuildService) AwaitEmptyList(waitTime time.Duration) error {

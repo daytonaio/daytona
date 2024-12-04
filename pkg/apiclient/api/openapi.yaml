@@ -89,7 +89,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Build'
+                  $ref: '#/components/schemas/BuildDTO'
                 type: array
           description: OK
       summary: List builds
@@ -177,7 +177,7 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/BuildDTO'
           description: OK
       summary: Get build data
       tags:
@@ -2361,7 +2361,20 @@ components:
       - name
       - type
       type: object
-    Build:
+    BuildConfig:
+      example:
+        cachedBuild:
+          image: image
+          user: user
+        devcontainer:
+          filePath: filePath
+      properties:
+        cachedBuild:
+          $ref: '#/components/schemas/CachedBuild'
+        devcontainer:
+          $ref: '#/components/schemas/DevcontainerConfig'
+      type: object
+    BuildDTO:
       example:
         buildConfig:
           cachedBuild:
@@ -2375,10 +2388,22 @@ components:
           image: image
           user: user
         prebuildId: prebuildId
+        lastJob:
+          createdAt: createdAt
+          resourceId: resourceId
+          action: null
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
         envVars:
           key: envVars
         id: id
-        state: null
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
         repository:
           owner: owner
           path: path
@@ -2407,12 +2432,14 @@ components:
           type: string
         image:
           type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
         prebuildId:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
         state:
-          $ref: '#/components/schemas/models.BuildState'
+          $ref: '#/components/schemas/ResourceState'
         updatedAt:
           type: string
         user:
@@ -2426,19 +2453,6 @@ components:
       - repository
       - state
       - updatedAt
-      type: object
-    BuildConfig:
-      example:
-        cachedBuild:
-          image: image
-          user: user
-        devcontainer:
-          filePath: filePath
-      properties:
-        cachedBuild:
-          $ref: '#/components/schemas/CachedBuild'
-        devcontainer:
-          $ref: '#/components/schemas/DevcontainerConfig'
       type: object
     CachedBuild:
       example:
@@ -3620,10 +3634,12 @@ components:
       enum:
       - workspace
       - target
+      - build
       type: string
       x-enum-varnames:
       - ResourceTypeWorkspace
       - ResourceTypeTarget
+      - ResourceTypeBuild
     Sample:
       example:
         name: name
@@ -4639,26 +4655,6 @@ components:
       - ApiKeyTypeClient
       - ApiKeyTypeWorkspace
       - ApiKeyTypeTarget
-    models.BuildState:
-      enum:
-      - pending-run
-      - running
-      - error
-      - success
-      - published
-      - pending-delete
-      - pending-forced-delete
-      - deleting
-      type: string
-      x-enum-varnames:
-      - BuildStatePendingRun
-      - BuildStateRunning
-      - BuildStateError
-      - BuildStateSuccess
-      - BuildStatePublished
-      - BuildStatePendingDelete
-      - BuildStatePendingForcedDelete
-      - BuildStateDeleting
     models.JobAction:
       enum:
       - create
@@ -4667,6 +4663,7 @@ components:
       - restart
       - delete
       - force-delete
+      - run
       type: string
       x-enum-varnames:
       - JobActionCreate
@@ -4675,9 +4672,13 @@ components:
       - JobActionRestart
       - JobActionDelete
       - JobActionForceDelete
+      - JobActionRun
     models.ResourceStateName:
       enum:
       - undefined
+      - pending-run
+      - running
+      - run-successful
       - pending-create
       - creating
       - pending-start
@@ -4696,6 +4697,9 @@ components:
       type: string
       x-enum-varnames:
       - ResourceStateNameUndefined
+      - ResourceStateNamePendingRun
+      - ResourceStateNameRunning
+      - ResourceStateNameRunSuccessful
       - ResourceStateNamePendingCreate
       - ResourceStateNameCreating
       - ResourceStateNamePendingStart
