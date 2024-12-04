@@ -119,7 +119,7 @@ func TestBuildService(t *testing.T) {
 func (s *BuildServiceTestSuite) TestList() {
 	require := s.Require()
 
-	builds, err := s.buildService.List(nil)
+	builds, err := s.buildService.List(nil, services.BuildRetrievalParams{})
 	require.Nil(err)
 	require.ElementsMatch(expectedBuilds, builds)
 }
@@ -131,7 +131,7 @@ func (s *BuildServiceTestSuite) TestFind() {
 		StoreFilter: stores.BuildFilter{
 			Id: &build1.Id,
 		},
-	})
+	}, services.BuildRetrievalParams{})
 	require.Nil(err)
 	require.Equal(build1, build)
 }
@@ -152,7 +152,7 @@ func (s *BuildServiceTestSuite) TestSave() {
 	_, err := s.buildService.Create(createBuildDto)
 	require.Nil(err)
 
-	_, err = s.buildService.List(nil)
+	_, err = s.buildService.List(nil, services.BuildRetrievalParams{})
 	require.Nil(err)
 	require.Contains(expectedBuilds, build4)
 }
@@ -178,7 +178,7 @@ func (s *BuildServiceTestSuite) TestHandleSuccessfulRemoval() {
 	err := s.buildService.HandleSuccessfulRemoval(build3.Id)
 	require.Nil(err)
 
-	builds, err := s.buildService.List(nil)
+	builds, err := s.buildService.List(nil, services.BuildRetrievalParams{})
 	require.Nil(err)
 	require.ElementsMatch(expectedBuilds, builds)
 }

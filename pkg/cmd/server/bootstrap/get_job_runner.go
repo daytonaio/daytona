@@ -207,12 +207,12 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 				StoreFilter: stores.BuildFilter{
 					Id: &buildId,
 				},
-			})
+			}, services.BuildRetrievalParams{})
 		},
 		ListSuccessfulBuilds: func(ctx context.Context) ([]*models.Build, error) {
 			buildDtos, err := buildService.List(&services.BuildFilter{
 				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
-			})
+			}, services.BuildRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}

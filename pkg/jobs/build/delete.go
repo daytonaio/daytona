@@ -6,7 +6,6 @@ package build
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -16,10 +15,6 @@ func (bj *BuildJob) delete(ctx context.Context, j *models.Job, force bool) error
 		return err
 	}
 
-	buildLogger := bj.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
-	defer buildLogger.Close()
-
-	// If the build has an image, delete it first
 	if b.Image != nil {
 		return bj.deleteImage(ctx, *b.Image, force)
 	}

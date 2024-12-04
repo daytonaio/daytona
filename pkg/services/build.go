@@ -4,6 +4,7 @@
 package services
 
 import (
+	"errors"
 	"io"
 	"time"
 
@@ -13,8 +14,8 @@ import (
 
 type IBuildService interface {
 	Create(CreateBuildDTO) (string, error)
-	Find(filter *BuildFilter) (*BuildDTO, error)
-	List(filter *BuildFilter) ([]*BuildDTO, error)
+	Find(filter *BuildFilter, params BuildRetrievalParams) (*BuildDTO, error)
+	List(filter *BuildFilter, params BuildRetrievalParams) ([]*BuildDTO, error)
 	Delete(filter *BuildFilter, force bool) []error
 	HandleSuccessfulRemoval(id string) error
 	AwaitEmptyList(time.Duration) error
@@ -26,6 +27,10 @@ type BuildDTO struct {
 	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	BuildDTO
 
+type BuildRetrievalParams struct {
+	ShowDeleted bool
+}
+
 type CreateBuildDTO struct {
 	WorkspaceTemplateName string            `json:"workspaceTemplateName" validate:"required"`
 	Branch                string            `json:"branch" validate:"required"`
@@ -36,4 +41,12 @@ type CreateBuildDTO struct {
 type BuildFilter struct {
 	StateNames  *[]models.ResourceStateName
 	StoreFilter stores.BuildFilter
+}
+
+var (
+	ErrBuildDeleted = errors.New("build is deleted")
+)
+
+func IsBuildDeleted(err error) bool {
+	return err.Error() == ErrBuildDeleted.Error()
 }

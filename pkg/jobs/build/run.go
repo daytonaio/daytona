@@ -58,10 +58,8 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 	b.BuildConfig.CachedBuild = models.GetCachedBuild(&b.Build, successfulBuilds)
 
 	err = bj.runBuildProcess(ctx, BuildProcessConfig{
-		Builder:      builder,
-		BuildLogger:  buildLogger,
-		Build:        &b.Build,
-		WorkspaceDir: workspaceDir,
+		Builder: builder,
+		Build:   &b.Build,
 		GitService: &git.Service{
 			WorkspaceDir: workspaceDir,
 			LogWriter:    buildLogger,
@@ -70,6 +68,8 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 	if err != nil {
 		return bj.handleBuildResult(b.Build, builder, buildLogger, err)
 	}
+
+	buildLogger.Write([]byte("\n \n" + lipgloss.NewStyle().Bold(true).Render("Build run successful. Publishing...")))
 
 	err = builder.Publish(b.Build)
 	if err != nil {
@@ -86,17 +86,15 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 }
 
 type BuildProcessConfig struct {
-	Builder      build.IBuilder
-	BuildLogger  logs.Logger
-	Build        *models.Build
-	WorkspaceDir string
-	GitService   git.IGitService
+	Builder    build.IBuilder
+	Build      *models.Build
+	GitService git.IGitService
 }
 
 func (bj *BuildJob) runBuildProcess(ctx context.Context, config BuildProcessConfig) error {
 	gitProviders, err := bj.listConfigsForUrl(ctx, config.Build.Repository.Url)
 	if err != nil {
-		return bj.handleBuildResult(*config.Build, config.Builder, config.BuildLogger, err)
+		return err
 	}
 
 	var auth *http.BasicAuth
@@ -108,18 +106,17 @@ func (bj *BuildJob) runBuildProcess(ctx context.Context, config BuildProcessConf
 
 	err = config.GitService.CloneRepository(config.Build.Repository, auth)
 	if err != nil {
-		return bj.handleBuildResult(*config.Build, config.Builder, config.BuildLogger, err)
+		return err
 	}
 
 	image, user, err := config.Builder.Build(*config.Build)
 	if err != nil {
-		return bj.handleBuildResult(*config.Build, config.Builder, config.BuildLogger, err)
+		return err
 	}
 
 	config.Build.Image = &image
 	config.Build.User = &user
 
-	config.BuildLogger.Write([]byte("\n \n" + lipgloss.NewStyle().Bold(true).Render("Build completed successfully.")))
 	return nil
 }
 

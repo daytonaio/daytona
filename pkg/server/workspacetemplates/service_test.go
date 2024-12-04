@@ -126,7 +126,7 @@ func (s *WorkspaceTemplateServiceTestSuite) SetupTest() {
 				},
 			})
 		},
-		ListPublishedBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
+		ListSuccessfulBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
 			return s.buildService.List(&services.BuildFilter{
 				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 			})

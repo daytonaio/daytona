@@ -194,12 +194,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 					PrebuildIds: &[]string{prebuildId},
 					GetNewest:   util.Pointer(true),
 				},
-			})
+			}, services.BuildRetrievalParams{})
 		},
-		ListPublishedBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
+		ListSuccessfulBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
 			return buildService.List(&services.BuildFilter{
 				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
-			})
+			}, services.BuildRetrievalParams{})
 		},
 		CreateBuild: func(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error {
 			createBuildDto := services.CreateBuildDTO{
@@ -353,7 +353,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 					BuildConfig:   w.BuildConfig,
 					GetNewest:     util.Pointer(true),
 				},
-			})
+			}, services.BuildRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}

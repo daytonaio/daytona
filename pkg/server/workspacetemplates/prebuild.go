@@ -294,7 +294,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
 		return err
 	}
 
-	existingBuilds, err := s.listPublishedBuilds(ctx)
+	existingBuilds, err := s.listSuccessfulBuilds(ctx)
 	if err != nil {
 		return err
 	}
@@ -303,7 +303,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
 
 	// Group builds by their prebuildId
 	for _, b := range existingBuilds {
-		buildMap[b.PrebuildId] = append(buildMap[b.PrebuildId], *&b.Build)
+		buildMap[b.PrebuildId] = append(buildMap[b.PrebuildId], b.Build)
 	}
 
 	for _, prebuild := range prebuilds {

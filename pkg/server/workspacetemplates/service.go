@@ -19,7 +19,7 @@ type WorkspaceTemplateServiceConfig struct {
 	ConfigStore             stores.WorkspaceTemplateStore
 
 	FindNewestBuild           func(ctx context.Context, prebuildId string) (*services.BuildDTO, error)
-	ListPublishedBuilds       func(ctx context.Context) ([]*services.BuildDTO, error)
+	ListSuccessfulBuilds      func(ctx context.Context) ([]*services.BuildDTO, error)
 	CreateBuild               func(ctx context.Context, wt *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error
 	DeleteBuilds              func(ctx context.Context, id, prebuildId *string, force bool) []error
 	GetRepositoryContext      func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error)
@@ -34,7 +34,7 @@ type WorkspaceTemplateService struct {
 	templateStore           stores.WorkspaceTemplateStore
 
 	findNewestBuild           func(ctx context.Context, prebuildId string) (*services.BuildDTO, error)
-	listPublishedBuilds       func(ctx context.Context) ([]*services.BuildDTO, error)
+	listSuccessfulBuilds      func(ctx context.Context) ([]*services.BuildDTO, error)
 	createBuild               func(ctx context.Context, wt *models.WorkspaceTemplate, repo *gitprovider.GitRepository, prebuildId string) error
 	deleteBuilds              func(ctx context.Context, id, prebuildId *string, force bool) []error
 	getRepositoryContext      func(ctx context.Context, url string) (repo *gitprovider.GitRepository, gitProviderId string, err error)
@@ -49,7 +49,7 @@ func NewWorkspaceTemplateService(config WorkspaceTemplateServiceConfig) services
 		prebuildWebhookEndpoint:   config.PrebuildWebhookEndpoint,
 		templateStore:             config.ConfigStore,
 		findNewestBuild:           config.FindNewestBuild,
-		listPublishedBuilds:       config.ListPublishedBuilds,
+		listSuccessfulBuilds:      config.ListSuccessfulBuilds,
 		createBuild:               config.CreateBuild,
 		deleteBuilds:              config.DeleteBuilds,
 		getRepositoryContext:      config.GetRepositoryContext,

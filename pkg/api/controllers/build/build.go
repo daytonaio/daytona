@@ -65,10 +65,10 @@ func GetBuild(ctx *gin.Context) {
 		StoreFilter: stores.BuildFilter{
 			Id: &buildId,
 		},
-	})
+	}, services.BuildRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if stores.IsBuildNotFound(err) {
+		if stores.IsBuildNotFound(err) || services.IsBuildDeleted(err) {
 			statusCode = http.StatusNotFound
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find build: %w", err))
@@ -91,7 +91,7 @@ func GetBuild(ctx *gin.Context) {
 func ListBuilds(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	builds, err := server.BuildService.List(nil)
+	builds, err := server.BuildService.List(nil, services.BuildRetrievalParams{})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list builds: %s", err.Error()))
 		return
