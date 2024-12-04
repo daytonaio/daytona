@@ -55,6 +55,7 @@ func GetWorkspace(ctx *gin.Context) {
 	}
 
 	util.HideDaytonaEnvVars(&w.EnvVars)
+	util.HideDaytonaEnvVars(&w.Target.EnvVars)
 
 	ctx.JSON(200, w)
 }
@@ -93,6 +94,7 @@ func ListWorkspaces(ctx *gin.Context) {
 
 	for i, _ := range workspaceList {
 		util.HideDaytonaEnvVars(&workspaceList[i].EnvVars)
+		util.HideDaytonaEnvVars(&workspaceList[i].Target.EnvVars)
 	}
 
 	ctx.JSON(200, workspaceList)
