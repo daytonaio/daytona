@@ -60,7 +60,7 @@ var StartCmd = &cobra.Command{
 				return nil
 			}
 
-			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, string(selection.StartActionVerb))
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, selection.StartActionVerb)
 		} else {
 			for _, arg := range args {
 				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
