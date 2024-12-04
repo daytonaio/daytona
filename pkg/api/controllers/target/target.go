@@ -61,6 +61,10 @@ func GetTarget(ctx *gin.Context) {
 		t.TargetConfig.Options = maskedOptions
 	}
 
+	for i := range t.Workspaces {
+		util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
+	}
+
 	util.HideDaytonaEnvVars(&t.EnvVars)
 
 	ctx.JSON(200, t)
@@ -106,6 +110,11 @@ func ListTargets(ctx *gin.Context) {
 		}
 
 		targetList[i].TargetConfig.Options = maskedOptions
+
+		for j := range targetList[i].Workspaces {
+			util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
+		}
+
 		util.HideDaytonaEnvVars(&targetList[i].EnvVars)
 	}
 
