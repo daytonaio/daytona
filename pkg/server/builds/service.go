@@ -100,7 +100,7 @@ func (s *BuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, e
 
 	state := build.GetState()
 
-	if state.Name == models.ResourceStateNameDeleted && !filter.ShowDeleted {
+	if state.Name == models.ResourceStateNameDeleted && (filter == nil || !filter.ShowDeleted) {
 		return nil, services.ErrBuildDeleted
 	}
 
@@ -127,7 +127,7 @@ func (s *BuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO,
 	for _, b := range builds {
 		state := b.GetState()
 
-		if state.Name == models.ResourceStateNameDeleted && !filter.ShowDeleted {
+		if state.Name == models.ResourceStateNameDeleted && (filter == nil || !filter.ShowDeleted) {
 			continue
 		}
 
