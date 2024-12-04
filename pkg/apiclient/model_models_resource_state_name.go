@@ -21,6 +21,9 @@ type ModelsResourceStateName string
 // List of models.ResourceStateName
 const (
 	ResourceStateNameUndefined           ModelsResourceStateName = "undefined"
+	ResourceStateNamePendingRun          ModelsResourceStateName = "pending-run"
+	ResourceStateNameRunning             ModelsResourceStateName = "running"
+	ResourceStateNameRunSuccessful       ModelsResourceStateName = "run-successful"
 	ResourceStateNamePendingCreate       ModelsResourceStateName = "pending-create"
 	ResourceStateNameCreating            ModelsResourceStateName = "creating"
 	ResourceStateNamePendingStart        ModelsResourceStateName = "pending-start"
@@ -41,6 +44,9 @@ const (
 // All allowed values of ModelsResourceStateName enum
 var AllowedModelsResourceStateNameEnumValues = []ModelsResourceStateName{
 	"undefined",
+	"pending-run",
+	"running",
+	"run-successful",
 	"pending-create",
 	"creating",
 	"pending-start",

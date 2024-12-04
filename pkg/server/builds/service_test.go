@@ -28,7 +28,6 @@ var build1 *models.Build = &models.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha1",
 	},
-	State: models.BuildStatePublished,
 }
 
 var build2 *models.Build = &models.Build{
@@ -41,7 +40,6 @@ var build2 *models.Build = &models.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha2",
 	},
-	State: models.BuildStatePublished,
 }
 
 var build3 *models.Build = &models.Build{
@@ -54,7 +52,6 @@ var build3 *models.Build = &models.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha3",
 	},
-	State: models.BuildStatePendingRun,
 }
 
 var build4 *models.Build = &models.Build{
@@ -67,7 +64,6 @@ var build4 *models.Build = &models.Build{
 	Repository: &gitprovider.GitRepository{
 		Sha: "sha4",
 	},
-	State: models.BuildStatePendingRun,
 }
 
 var expectedBuilds []*models.Build
@@ -131,8 +127,10 @@ func (s *BuildServiceTestSuite) TestList() {
 func (s *BuildServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	build, err := s.buildService.Find(&stores.BuildFilter{
-		Id: &build1.Id,
+	build, err := s.buildService.Find(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Id: &build1.Id,
+		},
 	})
 	require.Nil(err)
 	require.Equal(build1, build)
@@ -159,29 +157,25 @@ func (s *BuildServiceTestSuite) TestSave() {
 	require.Contains(expectedBuilds, build4)
 }
 
-func (s *BuildServiceTestSuite) TestMarkForDeletion() {
+func (s *BuildServiceTestSuite) TestDelete() {
 	expectedBuilds = append(expectedBuilds, build3)
 
 	require := s.Require()
 
-	err := s.buildService.MarkForDeletion(&stores.BuildFilter{
-		Id: &build3.Id,
+	err := s.buildService.Delete(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Id: &build3.Id,
+		},
 	}, false)
 	require.Nil(err)
-
-	b, errs := s.buildService.Find(&stores.BuildFilter{
-		Id: &build3.Id,
-	})
-	require.Nil(errs)
-	require.Equal(b.State, models.BuildStatePendingDelete)
 }
 
-func (s *BuildServiceTestSuite) TestDelete() {
+func (s *BuildServiceTestSuite) TestHandleSuccessfulRemoval() {
 	expectedBuilds = expectedBuilds[:2]
 
 	require := s.Require()
 
-	err := s.buildService.Delete(build3.Id)
+	err := s.buildService.HandleSuccessfulRemoval(build3.Id)
 	require.Nil(err)
 
 	builds, err := s.buildService.List(nil)

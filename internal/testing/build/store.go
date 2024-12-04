@@ -69,20 +69,6 @@ func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*mode
 				return []*models.Build{}, fmt.Errorf("build with id %s not found", *filter.Id)
 			}
 		}
-		if filter.States != nil {
-			for _, b := range filteredBuilds {
-				check := false
-				for _, state := range *filter.States {
-					if b.State == state {
-						check = true
-						break
-					}
-				}
-				if !check {
-					delete(filteredBuilds, b.Id)
-				}
-			}
-		}
 		if filter.PrebuildIds != nil {
 			for _, b := range filteredBuilds {
 				check := false

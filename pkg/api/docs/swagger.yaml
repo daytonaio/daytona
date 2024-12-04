@@ -27,7 +27,14 @@ definitions:
     - name
     - type
     type: object
-  Build:
+  BuildConfig:
+    properties:
+      cachedBuild:
+        $ref: '#/definitions/CachedBuild'
+      devcontainer:
+        $ref: '#/definitions/DevcontainerConfig'
+    type: object
+  BuildDTO:
     properties:
       buildConfig:
         $ref: '#/definitions/BuildConfig'
@@ -43,12 +50,14 @@ definitions:
         type: string
       image:
         type: string
+      lastJob:
+        $ref: '#/definitions/Job'
       prebuildId:
         type: string
       repository:
         $ref: '#/definitions/GitRepository'
       state:
-        $ref: '#/definitions/models.BuildState'
+        $ref: '#/definitions/ResourceState'
       updatedAt:
         type: string
       user:
@@ -62,13 +71,6 @@ definitions:
     - repository
     - state
     - updatedAt
-    type: object
-  BuildConfig:
-    properties:
-      cachedBuild:
-        $ref: '#/definitions/CachedBuild'
-      devcontainer:
-        $ref: '#/definitions/DevcontainerConfig'
     type: object
   CachedBuild:
     properties:
@@ -917,10 +919,12 @@ definitions:
     enum:
     - workspace
     - target
+    - build
     type: string
     x-enum-varnames:
     - ResourceTypeWorkspace
     - ResourceTypeTarget
+    - ResourceTypeBuild
   Sample:
     properties:
       description:
@@ -1411,26 +1415,6 @@ definitions:
     - ApiKeyTypeClient
     - ApiKeyTypeWorkspace
     - ApiKeyTypeTarget
-  models.BuildState:
-    enum:
-    - pending-run
-    - running
-    - error
-    - success
-    - published
-    - pending-delete
-    - pending-forced-delete
-    - deleting
-    type: string
-    x-enum-varnames:
-    - BuildStatePendingRun
-    - BuildStateRunning
-    - BuildStateError
-    - BuildStateSuccess
-    - BuildStatePublished
-    - BuildStatePendingDelete
-    - BuildStatePendingForcedDelete
-    - BuildStateDeleting
   models.JobAction:
     enum:
     - create
@@ -1439,6 +1423,7 @@ definitions:
     - restart
     - delete
     - force-delete
+    - run
     type: string
     x-enum-varnames:
     - JobActionCreate
@@ -1447,9 +1432,13 @@ definitions:
     - JobActionRestart
     - JobActionDelete
     - JobActionForceDelete
+    - JobActionRun
   models.ResourceStateName:
     enum:
     - undefined
+    - pending-run
+    - running
+    - run-successful
     - pending-create
     - creating
     - pending-start
@@ -1468,6 +1457,9 @@ definitions:
     type: string
     x-enum-varnames:
     - ResourceStateNameUndefined
+    - ResourceStateNamePendingRun
+    - ResourceStateNameRunning
+    - ResourceStateNameRunSuccessful
     - ResourceStateNamePendingCreate
     - ResourceStateNameCreating
     - ResourceStateNamePendingStart
@@ -1582,7 +1574,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Build'
+              $ref: '#/definitions/BuildDTO'
             type: array
       summary: List builds
       tags:
@@ -1642,7 +1634,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/Build'
+            $ref: '#/definitions/BuildDTO'
       summary: Get build data
       tags:
       - build

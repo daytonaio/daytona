@@ -11,32 +11,23 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-type BuildState string
-
-const (
-	BuildStatePendingRun          BuildState = "pending-run"
-	BuildStateRunning             BuildState = "running"
-	BuildStateError               BuildState = "error"
-	BuildStateSuccess             BuildState = "success"
-	BuildStatePublished           BuildState = "published"
-	BuildStatePendingDelete       BuildState = "pending-delete"
-	BuildStatePendingForcedDelete BuildState = "pending-forced-delete"
-	BuildStateDeleting            BuildState = "deleting"
-)
-
 type Build struct {
 	Id              string                     `json:"id" validate:"required" gorm:"primaryKey"`
-	State           BuildState                 `json:"state" validate:"required"`
 	Image           *string                    `json:"image" validate:"optional"`
 	User            *string                    `json:"user" validate:"optional"`
 	ContainerConfig ContainerConfig            `json:"containerConfig" validate:"required" gorm:"serializer:json"`
 	BuildConfig     *BuildConfig               `json:"buildConfig" validate:"optional" gorm:"serializer:json"`
 	Repository      *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json"`
 	EnvVars         map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json"`
+	LastJob         *Job                       `gorm:"foreignKey:ResourceId;references:Id" validate:"optional"`
 	PrebuildId      string                     `json:"prebuildId" validate:"required"`
 	CreatedAt       time.Time                  `json:"createdAt" validate:"required"`
 	UpdatedAt       time.Time                  `json:"updatedAt" validate:"required"`
 } // @name Build
+
+func (w *Build) GetState() ResourceState {
+	return getResourceStateFromJob(w.LastJob)
+}
 
 type ContainerConfig struct {
 	Image string `json:"image" validate:"required"`
@@ -114,7 +105,7 @@ func GetCachedBuild(build *Build, builds []*Build) *CachedBuild {
 		if err != nil {
 			continue
 		}
-		if !equal || existingBuild.State != BuildStatePublished {
+		if !equal || existingBuild.GetState().Name != ResourceStateNameRunSuccessful {
 			continue
 		}
 		if cachedBuild == nil {

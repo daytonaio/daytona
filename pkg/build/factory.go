@@ -10,6 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/docker/docker/pkg/stringid"
 )
@@ -23,7 +24,7 @@ type BuilderFactory struct {
 	containerRegistry           *models.ContainerRegistry
 	buildImageContainerRegistry *models.ContainerRegistry
 	buildImageNamespace         string
-	buildStore                  stores.BuildStore
+	buildService                services.IBuildService
 	loggerFactory               logs.LoggerFactory
 	image                       string
 	defaultWorkspaceImage       string
@@ -34,7 +35,7 @@ type BuilderFactoryConfig struct {
 	Image                       string
 	ContainerRegistry           *models.ContainerRegistry
 	BuildImageContainerRegistry *models.ContainerRegistry
-	BuildStore                  stores.BuildStore
+	BuildService                services.IBuildService
 	BuildImageNamespace         string // Namespace to be used when tagging and pushing the build image
 	LoggerFactory               logs.LoggerFactory
 	DefaultWorkspaceImage       string
@@ -47,7 +48,7 @@ func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 		containerRegistry:           config.ContainerRegistry,
 		buildImageNamespace:         config.BuildImageNamespace,
 		buildImageContainerRegistry: config.BuildImageContainerRegistry,
-		buildStore:                  config.BuildStore,
+		buildService:                config.BuildService,
 		loggerFactory:               config.LoggerFactory,
 		defaultWorkspaceImage:       config.DefaultWorkspaceImage,
 		defaultWorkspaceUser:        config.DefaultWorkspaceUser,
@@ -64,17 +65,19 @@ func (f *BuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, erro
 		return nil, errors.New("repository must be set")
 	}
 
-	build, err := f.buildStore.Find(&stores.BuildFilter{
-		Branch:        &b.Repository.Branch,
-		RepositoryUrl: &b.Repository.Url,
-		BuildConfig:   b.BuildConfig,
-		EnvVars:       &b.EnvVars,
+	build, err := f.buildService.Find(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Branch:        &b.Repository.Branch,
+			RepositoryUrl: &b.Repository.Url,
+			BuildConfig:   b.BuildConfig,
+			EnvVars:       &b.EnvVars,
+		},
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return build, nil
+	return &build.Build, nil
 }
 
 func (f *BuilderFactory) newDevcontainerBuilder(workspaceDir string) (*DevcontainerBuilder, error) {
@@ -95,7 +98,7 @@ func (f *BuilderFactory) newDevcontainerBuilder(workspaceDir string) (*Devcontai
 			containerRegistry:           f.containerRegistry,
 			buildImageContainerRegistry: f.buildImageContainerRegistry,
 			buildImageNamespace:         f.buildImageNamespace,
-			buildStore:                  f.buildStore,
+			buildService:                f.buildService,
 			loggerFactory:               f.loggerFactory,
 			defaultWorkspaceImage:       f.defaultWorkspaceImage,
 			defaultWorkspaceUser:        f.defaultWorkspaceUser,

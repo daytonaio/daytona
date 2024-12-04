@@ -52,7 +52,7 @@ func CreateBuild(ctx *gin.Context) {
 //	@Description	Get build data
 //	@Accept			json
 //	@Param			buildId	path		string	true	"Build ID"
-//	@Success		200		{object}	Build
+//	@Success		200		{object}	BuildDTO
 //	@Router			/build/{buildId} [get]
 //
 //	@id				GetBuild
@@ -61,12 +61,14 @@ func GetBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	b, err := server.BuildService.Find(&stores.BuildFilter{
-		Id: &buildId,
+	b, err := server.BuildService.Find(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Id: &buildId,
+		},
 	})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
-		if stores.IsBuildNotFound(err) {
+		if stores.IsBuildNotFound(err) || services.IsBuildDeleted(err) {
 			statusCode = http.StatusNotFound
 		}
 		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find build: %w", err))
@@ -82,7 +84,7 @@ func GetBuild(ctx *gin.Context) {
 //	@Summary		List builds
 //	@Description	List builds
 //	@Produce		json
-//	@Success		200	{array}	Build
+//	@Success		200	{array}	BuildDTO
 //	@Router			/build [get]
 //
 //	@id				ListBuilds
@@ -123,7 +125,7 @@ func DeleteAllBuilds(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.MarkForDeletion(nil, force)
+	errs := server.BuildService.Delete(nil, force)
 	if len(errs) > 0 {
 		for _, err := range errs {
 			_ = ctx.Error(err)
@@ -162,8 +164,10 @@ func DeleteBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.MarkForDeletion(&stores.BuildFilter{
-		Id: &buildId,
+	errs := server.BuildService.Delete(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Id: &buildId,
+		},
 	}, force)
 	if len(errs) > 0 {
 		for _, err := range errs {
@@ -212,8 +216,10 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 		return
 	}
 
-	errs := server.BuildService.MarkForDeletion(&stores.BuildFilter{
-		PrebuildIds: &[]string{prebuildId},
+	errs := server.BuildService.Delete(&services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			PrebuildIds: &[]string{prebuildId},
+		},
 	}, force)
 	if len(errs) > 0 {
 		for _, err := range errs {
