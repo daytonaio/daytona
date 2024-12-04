@@ -82,7 +82,7 @@ var DeleteCmd = &cobra.Command{
 				return nil
 			}
 
-			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, "Delete")
+			workspaceDeleteList = selection.GetWorkspacesFromPrompt(workspaceList, selection.DeleteActionVerb)
 		} else {
 			for _, arg := range args {
 				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
