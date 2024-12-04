@@ -65,7 +65,7 @@
       "gitUrl": "https://github.com/daytonaio/sample-rust"
   },
   {
-      "name": "Rust / Actix-web",
+      "name": "Rust/Actix-web",
       "description": "Build Rust-based web applications with Actix-Web, including all necessary setup and runtime configurations for a seamless development experience.",
       "gitUrl": "https://github.com/ayimdomnic/daytona-rs-sample"
   },
