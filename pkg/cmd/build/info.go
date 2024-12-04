@@ -23,7 +23,7 @@ var buildInfoCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		var build *apiclient.Build
+		var build *apiclient.BuildDTO
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {

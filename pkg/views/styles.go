@@ -33,8 +33,8 @@ var (
 
 var (
 	ColorPending      = lipgloss.AdaptiveColor{Light: "#cce046", Dark: "#cce046"}
-	ColorStarted      = lipgloss.AdaptiveColor{Light: "#2ecc71", Dark: "#2ecc71"}
-	ColorStarting     = ColorStarted
+	ColorSuccess      = lipgloss.AdaptiveColor{Light: "#2ecc71", Dark: "#2ecc71"}
+	ColorStarting     = ColorSuccess
 	ColorStopped      = lipgloss.AdaptiveColor{Light: "#a2a2a2", Dark: "#a2a2a2"}
 	ColorStopping     = ColorStopped
 	ColorError        = lipgloss.AdaptiveColor{Light: "#e74c3c", Dark: "#e74c3c"}
@@ -60,17 +60,19 @@ var (
 )
 
 var (
-	UndefinedStyle    = lipgloss.NewStyle().Foreground(ColorPending)
-	PendingStyle      = lipgloss.NewStyle().Foreground(ColorPending)
-	CreatingStyle     = lipgloss.NewStyle().Foreground(ColorPending)
-	StartedStyle      = lipgloss.NewStyle().Foreground(ColorStarted)
-	StartingStyle     = lipgloss.NewStyle().Foreground(ColorStarting)
-	StoppedStyle      = lipgloss.NewStyle().Foreground(ColorStopped)
-	StoppingStyle     = lipgloss.NewStyle().Foreground(ColorStopping)
-	ErrorStyle        = lipgloss.NewStyle().Foreground(ColorError)
-	DeletingStyle     = lipgloss.NewStyle().Foreground(ColorDeleting)
-	DeletedStyle      = lipgloss.NewStyle().Foreground(ColorDeleted)
-	UnresponsiveStyle = lipgloss.NewStyle().Foreground(ColorUnresponsive)
+	UndefinedStyle     = lipgloss.NewStyle().Foreground(ColorPending)
+	PendingStyle       = lipgloss.NewStyle().Foreground(ColorPending)
+	RunningStyle       = lipgloss.NewStyle().Foreground(ColorPending)
+	RunSuccessfulStyle = lipgloss.NewStyle().Foreground(ColorSuccess)
+	CreatingStyle      = lipgloss.NewStyle().Foreground(ColorPending)
+	StartedStyle       = lipgloss.NewStyle().Foreground(ColorSuccess)
+	StartingStyle      = lipgloss.NewStyle().Foreground(ColorStarting)
+	StoppedStyle       = lipgloss.NewStyle().Foreground(ColorStopped)
+	StoppingStyle      = lipgloss.NewStyle().Foreground(ColorStopping)
+	ErrorStyle         = lipgloss.NewStyle().Foreground(ColorError)
+	DeletingStyle      = lipgloss.NewStyle().Foreground(ColorDeleting)
+	DeletedStyle       = lipgloss.NewStyle().Foreground(ColorDeleted)
+	UnresponsiveStyle  = lipgloss.NewStyle().Foreground(ColorUnresponsive)
 )
 
 var LogPrefixColors = []lipgloss.AdaptiveColor{

@@ -197,31 +197,27 @@ func (s *WorkspaceTemplateServiceTestSuite) TestProcessGitEventTriggerFiles() {
 func (s *WorkspaceTemplateServiceTestSuite) TestEnforceRetentionPolicy() {
 	require := s.Require()
 
-	s.buildService.On("List", &stores.BuildFilter{
-		States: &[]models.BuildState{models.BuildStatePublished},
+	s.buildService.On("List", &services.BuildFilter{
+		StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 	}).Return([]*models.Build{
 		{
 			Id:         "1",
 			PrebuildId: "1",
-			State:      models.BuildStatePublished,
 			CreatedAt:  time.Now().Add(time.Hour * -4),
 		},
 		{
 			Id:         "2",
 			PrebuildId: "1",
-			State:      models.BuildStatePublished,
 			CreatedAt:  time.Now().Add(time.Hour * -3),
 		},
 		{
 			Id:         "3",
 			PrebuildId: "1",
-			State:      models.BuildStatePublished,
 			CreatedAt:  time.Now().Add(time.Hour * -2),
 		},
 		{
 			Id:         "4",
 			PrebuildId: "1",
-			State:      models.BuildStatePublished,
 			CreatedAt:  time.Now().Add(time.Hour * -1),
 		},
 	}, nil)

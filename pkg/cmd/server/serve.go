@@ -15,7 +15,6 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/cmd/server/bootstrap"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -81,21 +80,6 @@ var ServeCmd = &cobra.Command{
 		}
 
 		server, err := bootstrap.GetInstance(c, configDir, internal.Version, telemetryService)
-		if err != nil {
-			return err
-		}
-
-		buildRunnerConfig, err := build.GetConfig()
-		if err != nil {
-			return err
-		}
-
-		buildRunner, err := bootstrap.GetBuildRunner(c, buildRunnerConfig, telemetryService)
-		if err != nil {
-			return err
-		}
-
-		err = buildRunner.Start()
 		if err != nil {
 			return err
 		}

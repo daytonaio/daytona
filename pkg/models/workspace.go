@@ -33,33 +33,6 @@ type WorkspaceMetadata struct {
 	GitStatus   *GitStatus `json:"gitStatus" validate:"optional" gorm:"serializer:json"`
 } // @name WorkspaceMetadata
 
-type ResourceState struct {
-	Name      ResourceStateName `json:"name" validate:"required"`
-	Error     *string           `json:"error" validate:"optional"`
-	UpdatedAt time.Time         `json:"updatedAt" validate:"required"`
-} // @name ResourceState
-
-type ResourceStateName string
-
-const (
-	ResourceStateNameUndefined           ResourceStateName = "undefined"
-	ResourceStateNamePendingCreate       ResourceStateName = "pending-create"
-	ResourceStateNameCreating            ResourceStateName = "creating"
-	ResourceStateNamePendingStart        ResourceStateName = "pending-start"
-	ResourceStateNameStarting            ResourceStateName = "starting"
-	ResourceStateNameStarted             ResourceStateName = "started"
-	ResourceStateNamePendingStop         ResourceStateName = "pending-stop"
-	ResourceStateNameStopping            ResourceStateName = "stopping"
-	ResourceStateNameStopped             ResourceStateName = "stopped"
-	ResourceStateNamePendingRestart      ResourceStateName = "pending-restart"
-	ResourceStateNameError               ResourceStateName = "error"
-	ResourceStateNameUnresponsive        ResourceStateName = "unresponsive"
-	ResourceStateNamePendingDelete       ResourceStateName = "pending-delete"
-	ResourceStateNamePendingForcedDelete ResourceStateName = "pending-forced-delete"
-	ResourceStateNameDeleting            ResourceStateName = "deleting"
-	ResourceStateNameDeleted             ResourceStateName = "deleted"
-)
-
 func (w *Workspace) WorkspaceFolderName() string {
 	if w.Repository != nil {
 		return w.Repository.Name
@@ -81,15 +54,6 @@ func (w *Workspace) GetState() ResourceState {
 
 	return state
 }
-
-type BuildConfig struct {
-	Devcontainer *DevcontainerConfig `json:"devcontainer,omitempty" validate:"optional"`
-	CachedBuild  *CachedBuild        `json:"cachedBuild,omitempty" validate:"optional"`
-} // @name BuildConfig
-
-type DevcontainerConfig struct {
-	FilePath string `json:"filePath" validate:"required"`
-} // @name DevcontainerConfig
 
 type CachedBuild struct {
 	User  string `json:"user" validate:"required"`

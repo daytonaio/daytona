@@ -22,12 +22,14 @@ type ResourceType string
 const (
 	ResourceTypeWorkspace ResourceType = "workspace"
 	ResourceTypeTarget    ResourceType = "target"
+	ResourceTypeBuild     ResourceType = "build"
 )
 
 // All allowed values of ResourceType enum
 var AllowedResourceTypeEnumValues = []ResourceType{
 	"workspace",
 	"target",
+	"build",
 }
 
 func (v *ResourceType) UnmarshalJSON(src []byte) error {
