@@ -10,7 +10,6 @@ import (
 	"github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
 	"net/http"
-	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -41,39 +40,6 @@ func fetchLatestRelase() (*GitHubRelease, error) {
 	}
 	return &release, nil
 }
-func getChangeLog(currentVersion string, version string) ([]string, error) {
-	var changeLog []string
-	resp, err := http.Get(githubReleaseURL)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch latest release: %w", err)
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("failed to fetch latest release: %s", resp.Status)
-	}
-	var releases []GitHubRelease
-	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
-		return nil, fmt.Errorf("failed to fetch latest release: %w", err)
-	}
-	counter := 10
-	canAdd := false
-	for _, release := range releases {
-		if counter == 0 {
-			break
-		}
-		if release.TagName == version {
-			canAdd = true
-		}
-		if canAdd {
-			if release.TagName == currentVersion {
-				break
-			}
-			changeLog = append(changeLog, release.ChangeLog)
-			counter--
-		}
-	}
-	return changeLog, nil
-}
 
 func fetchVersionRelease(version string) (*GitHubRelease, error) {
 	resp, err := http.Get(githubReleaseURL)
@@ -87,6 +53,9 @@ func fetchVersionRelease(version string) (*GitHubRelease, error) {
 	var releases []GitHubRelease
 	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
 		return nil, fmt.Errorf("failed to fetch latest release: %w", err)
+	}
+	if len(releases) == 0 {
+		return nil, fmt.Errorf("no releases found")
 	}
 	for _, release := range releases {
 		if release.TagName == version {
@@ -151,6 +120,33 @@ func isVersionGreater(version string, currentVersion string) bool {
 	}
 	return false
 }
+func isCurrentVersionEqualToPrevious(currentVersion string, version string) (bool, error) {
+	resp, err := http.Get(githubReleaseURL)
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch latest release: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("failed to fetch latest release: %s", resp.Status)
+	}
+	var releases []GitHubRelease
+	if err := json.NewDecoder(resp.Body).Decode(&releases); err != nil {
+		return false, fmt.Errorf("failed to fetch latest release: %w", err)
+	}
+	if len(releases) == 0 {
+		return false, fmt.Errorf("no releases found")
+	}
+	for i := 0; i < len(releases); i++ {
+		if releases[i].TagName == version {
+			if i+1 < len(releases) {
+				if releases[i+1].TagName == currentVersion {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
+}
 
 var versionFlag string
 var updateCmd = &cobra.Command{
@@ -160,6 +156,7 @@ var updateCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var version string
+		var changeLog string
 		currentVersion := internal.Version
 		if versionFlag == "" {
 			release, err := fetchLatestRelase()
@@ -167,23 +164,29 @@ var updateCmd = &cobra.Command{
 				return err
 			}
 			version = release.TagName
+			changeLog = release.ChangeLog
 		} else {
 			release, err := fetchVersionRelease("v" + versionFlag)
 			if err != nil {
 				return err
 			}
 			version = release.TagName
+			changeLog = release.ChangeLog
 		}
 		if isVersionGreater(version, currentVersion) {
 			fmt.Println("Current version is greater than the version you are trying to update to")
 			return nil
 		}
-		changeLog, err := getChangeLog(currentVersion, version)
+		isCurrEqualPrev, err := isCurrentVersionEqualToPrevious(currentVersion, version)
 		if err != nil {
 			return err
 		}
+		if !isCurrEqualPrev {
+			changeLog = "There are more changes in the version. Please visit https://github.com/daytonaio/daytona/releases for all the complete chnageLog"
+		}
 		fmt.Println("Updating to version ", version, "from ", currentVersion)
-		renderChangeLog(changeLog, version, currentVersion)
+		fmt.Println("ChangeLog:")
+		fmt.Println(changeLog)
 		err = updateToVersion(version)
 		if err != nil {
 			return err
@@ -192,67 +195,6 @@ var updateCmd = &cobra.Command{
 	},
 }
 
-func renderChangeLog(changeLog []string, version string, currentVersion string) {
-	categories := map[string][]string{
-		"features": {},
-		"fixes":    {},
-		"others":   {},
-	}
-
-	var changeLogs []string
-	for _, log := range changeLog {
-
-		// Match "others" sections
-		otherSectionsRegex := regexp.MustCompile(`(?mi)^### ([^\n]+)\n([\s\S]*?)(\n###|\n\*\*|$)`)
-		allMatches := otherSectionsRegex.FindAllStringSubmatch(log, -1)
-		for _, matches := range allMatches {
-			sectionTitle := strings.ToLower(matches[1])
-			if sectionTitle != "fixes" && sectionTitle != "features" {
-				lines := strings.Split(matches[2], "\n")
-				for _, line := range lines {
-					line = strings.TrimSpace(line)
-					if line != "" && strings.HasPrefix(line, "*") || strings.Contains(line, "update") {
-						changeLogs = append(changeLogs, line)
-					}
-				}
-			}
-		}
-	}
-	for _, log := range changeLogs {
-		if strings.HasPrefix(log, "* feat") {
-			categories["features"] = append(categories["features"], log)
-		} else if strings.HasPrefix(log, "* fix") {
-			categories["fixes"] = append(categories["fixes"], log)
-		} else {
-			categories["others"] = append(categories["others"], log)
-		}
-	}
-
-	// Display ChangeLog Summary
-	if len(changeLog) == 10 {
-		fmt.Println("Showing the ChangeLog for the last 10 releases.\nYou can find the complete changeLog at https://github.com/daytonaio/daytona/releases")
-	} else {
-		fmt.Printf("Showing the ChangeLog from %s to %s.\n\n", currentVersion, version)
-	}
-	if len(categories["features"]) > 0 {
-		fmt.Println("Features:")
-		for _, feature := range categories["features"] {
-			fmt.Printf(" - %s\n", feature)
-		}
-	}
-	if len(categories["fixes"]) > 0 {
-		fmt.Println("Bug Fixes:")
-		for _, fix := range categories["fixes"] {
-			fmt.Printf(" - %s\n", fix)
-		}
-	}
-	if len(categories["others"]) > 0 {
-		fmt.Println("Other Improvements:")
-		for _, improvement := range categories["others"] {
-			fmt.Printf(" - %s\n", improvement)
-		}
-	}
-}
 func init() {
 	updateCmd.Flags().StringVarP(&versionFlag, "version", "v", "", "Version to update to")
 	rootCmd.AddCommand(updateCmd)
