@@ -22,7 +22,7 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	successfulBuilds, err := bj.listSuccessfulBuilds(ctx)
+	successfulBuilds, err := bj.listSuccessfulBuilds(ctx, b.Repository.Url)
 	if err != nil {
 		return err
 	}

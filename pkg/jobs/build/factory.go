@@ -24,7 +24,7 @@ type BuildJobFactory struct {
 
 type BuildJobFactoryConfig struct {
 	FindBuild            func(ctx context.Context, buildId string) (*services.BuildDTO, error)
-	ListSuccessfulBuilds func(ctx context.Context) ([]*models.Build, error)
+	ListSuccessfulBuilds func(ctx context.Context, repoUrl string) ([]*models.Build, error)
 	ListConfigsForUrl    func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	CheckImageExists     func(ctx context.Context, image string) bool
 	DeleteImage          func(ctx context.Context, image string, force bool) error

@@ -14,8 +14,8 @@ import (
 
 type IBuildService interface {
 	Create(CreateBuildDTO) (string, error)
-	Find(filter *BuildFilter, params BuildRetrievalParams) (*BuildDTO, error)
-	List(filter *BuildFilter, params BuildRetrievalParams) ([]*BuildDTO, error)
+	Find(filter *BuildFilter) (*BuildDTO, error)
+	List(filter *BuildFilter) ([]*BuildDTO, error)
 	Delete(filter *BuildFilter, force bool) []error
 	HandleSuccessfulRemoval(id string) error
 	AwaitEmptyList(time.Duration) error
@@ -27,10 +27,6 @@ type BuildDTO struct {
 	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	BuildDTO
 
-type BuildRetrievalParams struct {
-	ShowDeleted bool
-}
-
 type CreateBuildDTO struct {
 	WorkspaceTemplateName string            `json:"workspaceTemplateName" validate:"required"`
 	Branch                string            `json:"branch" validate:"required"`
@@ -40,6 +36,7 @@ type CreateBuildDTO struct {
 
 type BuildFilter struct {
 	StateNames  *[]models.ResourceStateName
+	ShowDeleted bool
 	StoreFilter stores.BuildFilter
 }
 

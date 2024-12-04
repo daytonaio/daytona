@@ -72,7 +72,7 @@ func (f *BuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, erro
 			BuildConfig:   b.BuildConfig,
 			EnvVars:       &b.EnvVars,
 		},
-	}, services.BuildRetrievalParams{})
+	})
 	if err != nil {
 		return nil, err
 	}

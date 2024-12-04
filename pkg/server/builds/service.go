@@ -86,7 +86,7 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 	return id, nil
 }
 
-func (s *BuildService) Find(filter *services.BuildFilter, params services.BuildRetrievalParams) (*services.BuildDTO, error) {
+func (s *BuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, error) {
 	var storeFilter *stores.BuildFilter
 
 	if filter != nil {
@@ -100,7 +100,7 @@ func (s *BuildService) Find(filter *services.BuildFilter, params services.BuildR
 
 	state := build.GetState()
 
-	if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
+	if state.Name == models.ResourceStateNameDeleted && !filter.ShowDeleted {
 		return nil, services.ErrBuildDeleted
 	}
 
@@ -110,7 +110,7 @@ func (s *BuildService) Find(filter *services.BuildFilter, params services.BuildR
 	}, nil
 }
 
-func (s *BuildService) List(filter *services.BuildFilter, params services.BuildRetrievalParams) ([]*services.BuildDTO, error) {
+func (s *BuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO, error) {
 	var storeFilter *stores.BuildFilter
 
 	if filter != nil {
@@ -127,7 +127,7 @@ func (s *BuildService) List(filter *services.BuildFilter, params services.BuildR
 	for _, b := range builds {
 		state := b.GetState()
 
-		if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
+		if state.Name == models.ResourceStateNameDeleted && !filter.ShowDeleted {
 			continue
 		}
 
@@ -148,7 +148,7 @@ func (s *BuildService) Delete(filter *services.BuildFilter, force bool) []error 
 	ctx := context.Background()
 	var errors []error
 
-	builds, err := s.List(filter, services.BuildRetrievalParams{})
+	builds, err := s.List(filter)
 	if err != nil {
 		return []error{err}
 	}
@@ -179,7 +179,9 @@ func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {
 		case <-timeout.C:
 			return errors.New("awaiting empty build list timed out")
 		default:
-			builds, err := s.List(nil, services.BuildRetrievalParams{ShowDeleted: true})
+			builds, err := s.List(&services.BuildFilter{
+				ShowDeleted: true,
+			})
 			if err != nil {
 				return err
 			}

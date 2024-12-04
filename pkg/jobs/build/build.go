@@ -18,7 +18,7 @@ type BuildJob struct {
 	models.Job
 
 	findBuild            func(ctx context.Context, buildId string) (*services.BuildDTO, error)
-	listSuccessfulBuilds func(ctx context.Context) ([]*models.Build, error)
+	listSuccessfulBuilds func(ctx context.Context, repoUrl string) ([]*models.Build, error)
 	listConfigsForUrl    func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	checkImageExists     func(ctx context.Context, image string) bool
 	deleteImage          func(ctx context.Context, image string, force bool) error
