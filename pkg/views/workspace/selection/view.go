@@ -40,6 +40,7 @@ type item[T any] struct {
 	choiceProperty                                              T
 	isMarked                                                    bool
 	isMultipleSelect                                            bool
+	isDisabled                                                  bool
 	action                                                      string
 }
 
@@ -75,23 +76,70 @@ func (m model[T]) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch keypress := msg.String(); keypress {
+		case "down", "j":
+			for {
+				isSubsequentItemsDisabled := true
+				curIndex := m.list.Index()
+				lastIndex := len(m.list.Items()) - 1
+				for i := curIndex + 1; i <= lastIndex; i++ {
+					if !m.list.Items()[i].(item[T]).isDisabled {
+						isSubsequentItemsDisabled = false
+						break
+					}
+				}
+				// no need of moving cursor down if all subsequent items after current index have
+				// disabled property true.
+				if isSubsequentItemsDisabled {
+					break
+				}
+				m.list.CursorDown()
+				item := m.list.SelectedItem().(item[T])
+				if !item.isDisabled {
+					break
+				}
+			}
+			return m, nil
+
+		case "up", "k":
+			for {
+				isPrecedingItemsDisabled := true
+				curIndex := m.list.Index()
+				for i := curIndex - 1; i >= 0; i-- {
+					if !m.list.Items()[i].(item[T]).isDisabled {
+						isPrecedingItemsDisabled = false
+						break
+					}
+				}
+				// no need of moving cursor up if all preceding items before current index have
+				// disabled property true.
+				if isPrecedingItemsDisabled {
+					break
+				}
+				m.list.CursorUp()
+				item := m.list.SelectedItem().(item[T])
+				if !item.isDisabled {
+					break
+				}
+			}
+			return m, nil
+
 		case "ctrl+c":
 			return m, tea.Quit
 
 		case "enter":
 			i, ok := m.list.SelectedItem().(item[T])
-			if ok {
+			if ok && !i.isDisabled {
 				m.choice = &i.choiceProperty
 			}
-			targetList := m.list.Items()
+			workspaceList := m.list.Items()
 			var choices []*T
-			for _, target := range targetList {
-				if target.(item[T]).isMarked {
-					targetItem, ok := target.(item[T])
-					if !ok {
+			for _, workspace := range workspaceList {
+				if workspace.(item[T]).isMarked {
+					workspaceItem, ok := workspace.(item[T])
+					if !ok || workspaceItem.isDisabled {
 						continue
 					}
-					choices = append(choices, &targetItem.choiceProperty)
+					choices = append(choices, &workspaceItem.choiceProperty)
 				}
 
 			}
@@ -166,13 +214,29 @@ func (d ItemDelegate[T]) Render(w io.Writer, m list.Model, index int, listItem l
 		stateLabel = timeStyles.Render(i.State())
 	}
 
+	if i.isDisabled {
+		title = baseStyles.Foreground(views.Gray).Render(i.Title())
+		idWithTarget = baseStyles.Foreground(views.Gray).Render(idWithTargetString)
+		repository = baseStyles.Foreground(views.Gray).Render(i.Repository())
+		description = baseStyles.Foreground(views.Gray).Render(i.Description())
+		stateLabel = timeStyles.Foreground(views.Gray).Render(stateLabel)
+	}
+
 	// Adjust styles as the user moves through the menu
 	if isSelected {
-		title = selectedStyles.Foreground(views.Green).Render(i.Title())
-		idWithTarget = selectedStyles.Foreground(views.Gray).Render(idWithTargetString)
-		repository = selectedStyles.Foreground(views.DimmedGreen).Render(i.Repository())
-		description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
-		stateLabel = timeStyles.Foreground(views.DimmedGreen).Render(stateLabel)
+		if !i.isDisabled {
+			title = selectedStyles.Foreground(views.Green).Render(i.Title())
+			idWithTarget = selectedStyles.Foreground(views.Gray).Render(idWithTargetString)
+			repository = selectedStyles.Foreground(views.DimmedGreen).Render(i.Repository())
+			description = selectedStyles.Foreground(views.DimmedGreen).Render(i.Description())
+			stateLabel = timeStyles.Foreground(views.DimmedGreen).Render(stateLabel)
+		} else {
+			title = selectedStyles.Render(i.Title())
+			idWithTarget = selectedStyles.Foreground(views.Gray).Render(idWithTargetString)
+			repository = selectedStyles.Foreground(views.LightGray).Render(i.Repository())
+			description = selectedStyles.Foreground(views.LightGray).Render(i.Description())
+			stateLabel = timeStyles.Foreground(views.LightGray).Render(stateLabel)
+		}
 	}
 
 	// Render to the terminal
@@ -214,6 +278,9 @@ func (d ItemDelegate[T]) Update(msg tea.Msg, m *list.Model) tea.Cmd {
 		case "x":
 			if !i.isMultipleSelect {
 				return nil
+			}
+			if i.isDisabled {
+				return m.NewStatusMessage(statusMessageGreenStyle("Workspace ") + i.title + statusMessageGreenStyle(" selection is disabled for this action"))
 			}
 			if i.isMarked {
 				i.title = strings.TrimPrefix(i.title, statusMessageDangerStyle(fmt.Sprintf("%s: ", i.action)))
