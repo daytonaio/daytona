@@ -19,9 +19,18 @@ import (
 
 var NewWorkspaceIdentifier = "<NEW_WORKSPACE>"
 
-func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool, action string) []list.Item {
+type ActionVerb string
+
+var StartActionVerb ActionVerb = "Start"
+var StopActionVerb ActionVerb = "Stop"
+var RestartActionVerb ActionVerb = "Restart"
+var DeleteActionVerb ActionVerb = "Delete"
+
+func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect bool, action ActionVerb) []list.Item {
 	// Initialize an empty list of items.
 	items := []list.Item{}
+	enabledItems := []list.Item{}
+	disabledItems := []list.Item{}
 
 	// Populate items with titles and descriptions from workspaces.
 	for _, workspace := range workspaces {
@@ -39,6 +48,18 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 
 		stateLabel := views.GetStateLabel(workspace.State.Name)
 
+		isDisabled := false
+		switch action {
+		case StartActionVerb:
+			if workspace.State.Name == apiclient.ResourceStateNameStarted {
+				isDisabled = true
+			}
+		case StopActionVerb, RestartActionVerb:
+			if workspace.State.Name == apiclient.ResourceStateNameStopped {
+				isDisabled = true
+			}
+		}
+
 		if workspace.Metadata != nil {
 			views_util.CheckAndAppendTimeLabel(&stateLabel, workspace.State, workspace.Metadata.Uptime)
 		}
@@ -53,20 +74,28 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			state:          stateLabel,
 			workspace:      &workspace,
 			choiceProperty: workspace,
+			isDisabled:     isDisabled,
 		}
 
 		if isMultipleSelect {
 			newItem.isMultipleSelect = true
-			newItem.action = action
+			newItem.action = string(action)
 		}
 
-		items = append(items, newItem)
+		if isDisabled {
+			disabledItems = append(disabledItems, newItem)
+		} else {
+			enabledItems = append(enabledItems, newItem)
+		}
 	}
+
+	items = append(items, enabledItems...)
+	items = append(items, disabledItems...)
 
 	return items
 }
 
-func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspaces []apiclient.WorkspaceDTO, footerText string, isMultipleSelect bool) tea.Model {
+func getWorkspaceProgramEssentials(modelTitle string, actionVerb ActionVerb, workspaces []apiclient.WorkspaceDTO, footerText string, isMultipleSelect bool) tea.Model {
 
 	items := generateWorkspaceList(workspaces, isMultipleSelect, actionVerb)
 
@@ -82,7 +111,7 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspa
 
 	m := model[apiclient.WorkspaceDTO]{list: l}
 
-	m.list.Title = views.GetStyledMainTitle(modelTitle + actionVerb)
+	m.list.Title = views.GetStyledMainTitle(modelTitle + string(actionVerb))
 	m.list.Styles.Title = lipgloss.NewStyle().Foreground(views.Green).Bold(true)
 	m.footer = footerText
 
@@ -96,7 +125,7 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb string, workspa
 	return p
 }
 
-func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- *apiclient.WorkspaceDTO) {
+func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb, choiceChan chan<- *apiclient.WorkspaceDTO) {
 	list_view.SortWorkspaces(&workspaces, true)
 
 	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "", false)
@@ -107,7 +136,7 @@ func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb strin
 	}
 }
 
-func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string) *apiclient.WorkspaceDTO {
+func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb) *apiclient.WorkspaceDTO {
 	choiceChan := make(chan *apiclient.WorkspaceDTO)
 
 	go selectWorkspacePrompt(workspaces, actionVerb, choiceChan)
@@ -115,7 +144,7 @@ func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb stri
 	return <-choiceChan
 }
 
-func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string, choiceChan chan<- []*apiclient.WorkspaceDTO) {
+func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb, choiceChan chan<- []*apiclient.WorkspaceDTO) {
 	list_view.SortWorkspaces(&workspaces, true)
 
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark a workspace.\nPress 'enter' to %s the current/marked workspaces.", actionVerb))
@@ -131,7 +160,7 @@ func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb 
 	}
 }
 
-func GetWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb string) []*apiclient.WorkspaceDTO {
+func GetWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb) []*apiclient.WorkspaceDTO {
 	choiceChan := make(chan []*apiclient.WorkspaceDTO)
 
 	go selectWorkspacesFromPrompt(workspaces, actionVerb, choiceChan)
