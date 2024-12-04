@@ -15,7 +15,6 @@ import (
 
 var MockBuild = &models.Build{
 	Id:    "1",
-	State: models.BuildStatePendingRun,
 	Image: util.Pointer("image"),
 	User:  util.Pointer("user"),
 	ContainerConfig: models.ContainerConfig{

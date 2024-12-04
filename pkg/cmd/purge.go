@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/cmd/server/bootstrap"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
@@ -47,11 +46,6 @@ var purgeCmd = &cobra.Command{
 		}
 
 		serverConfigDir, err := server.GetConfigDir()
-		if err != nil {
-			return err
-		}
-
-		buildRunnerConfig, err := build.GetConfig()
 		if err != nil {
 			return err
 		}
@@ -116,10 +110,6 @@ var purgeCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		buildRunner, err := bootstrap.GetBuildRunner(serverConfig, buildRunnerConfig, telemetryService)
-		if err != nil {
-			return err
-		}
 
 		ctx := context.Background()
 		ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, config.GetClientId())
@@ -127,19 +117,10 @@ var purgeCmd = &cobra.Command{
 
 		errCh := make(chan error)
 
-		// Starting the build runner so it can be used to delete builds
-		err = buildRunner.Start()
-		if err != nil {
-			if !forceFlag {
-				return err
-			}
-		}
-
 		go func() {
 			err := <-errCh
 			if err != nil {
 				if !forceFlag {
-					buildRunner.Stop()
 					log.Fatal(err)
 				}
 			}
