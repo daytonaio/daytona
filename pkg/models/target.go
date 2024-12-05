@@ -4,15 +4,12 @@
 package models
 
 import (
-	"slices"
 	"time"
 
 	"github.com/daytonaio/daytona/internal/util"
 )
 
 const AGENT_UNRESPONSIVE_THRESHOLD = 30 * time.Second
-
-var providersWithoutTargetMode = []string{"docker-provider"}
 
 type Target struct {
 	Id             string            `json:"id" validate:"required" gorm:"primaryKey"`
@@ -37,7 +34,7 @@ func (t *Target) GetState() ResourceState {
 	state := getResourceStateFromJob(t.LastJob)
 
 	// Some providers do not utilize agents in target mode
-	if state.Name != ResourceStateNameDeleted && slices.Contains(providersWithoutTargetMode, t.TargetConfig.ProviderInfo.Name) {
+	if state.Name != ResourceStateNameDeleted && t.TargetConfig.ProviderInfo.AgentlessTarget {
 		return ResourceState{
 			Name:      ResourceStateNameUndefined,
 			UpdatedAt: time.Now(),
@@ -62,7 +59,8 @@ type TargetInfo struct {
 } // @name TargetInfo
 
 type ProviderInfo struct {
-	Name    string  `json:"name" validate:"required"`
-	Version string  `json:"version" validate:"required"`
-	Label   *string `json:"label" validate:"optional"`
+	Name            string  `json:"name" validate:"required"`
+	Version         string  `json:"version" validate:"required"`
+	AgentlessTarget bool    `json:"agentlessTarget" validate:"required"`
+	Label           *string `json:"label" validate:"optional"`
 } // @name TargetProviderInfo

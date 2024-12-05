@@ -31,7 +31,7 @@ import (
 )
 
 func main() {
-	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewTargetProviderInfo("Name_example", "Version_example")) // AddTargetConfigDTO | Target config to add
+	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewTargetProviderInfo(false, "Name_example", "Version_example")) // AddTargetConfigDTO | Target config to add
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

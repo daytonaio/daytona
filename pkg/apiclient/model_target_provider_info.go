@@ -21,9 +21,10 @@ var _ MappedNullable = &TargetProviderInfo{}
 
 // TargetProviderInfo struct for TargetProviderInfo
 type TargetProviderInfo struct {
-	Label   *string `json:"label,omitempty"`
-	Name    string  `json:"name"`
-	Version string  `json:"version"`
+	AgentlessTarget bool    `json:"agentlessTarget"`
+	Label           *string `json:"label,omitempty"`
+	Name            string  `json:"name"`
+	Version         string  `json:"version"`
 }
 
 type _TargetProviderInfo TargetProviderInfo
@@ -32,8 +33,9 @@ type _TargetProviderInfo TargetProviderInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetProviderInfo(name string, version string) *TargetProviderInfo {
+func NewTargetProviderInfo(agentlessTarget bool, name string, version string) *TargetProviderInfo {
 	this := TargetProviderInfo{}
+	this.AgentlessTarget = agentlessTarget
 	this.Name = name
 	this.Version = version
 	return &this
@@ -45,6 +47,30 @@ func NewTargetProviderInfo(name string, version string) *TargetProviderInfo {
 func NewTargetProviderInfoWithDefaults() *TargetProviderInfo {
 	this := TargetProviderInfo{}
 	return &this
+}
+
+// GetAgentlessTarget returns the AgentlessTarget field value
+func (o *TargetProviderInfo) GetAgentlessTarget() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.AgentlessTarget
+}
+
+// GetAgentlessTargetOk returns a tuple with the AgentlessTarget field value
+// and a boolean to check if the value has been set.
+func (o *TargetProviderInfo) GetAgentlessTargetOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.AgentlessTarget, true
+}
+
+// SetAgentlessTarget sets field value
+func (o *TargetProviderInfo) SetAgentlessTarget(v bool) {
+	o.AgentlessTarget = v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
@@ -137,6 +163,7 @@ func (o TargetProviderInfo) MarshalJSON() ([]byte, error) {
 
 func (o TargetProviderInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["agentlessTarget"] = o.AgentlessTarget
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label
 	}
@@ -150,6 +177,7 @@ func (o *TargetProviderInfo) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"agentlessTarget",
 		"name",
 		"version",
 	}

@@ -169,6 +169,10 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 		return err
 	}
 
+	if target.TargetConfig.ProviderInfo.AgentlessTarget {
+		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
+	}
+
 	logsContext, stopLogs := context.WithCancel(context.Background())
 	go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
 		Id:            target.Id,
@@ -189,4 +193,8 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 	time.Sleep(100 * time.Millisecond)
 	stopLogs()
 	return err
+}
+
+func agentlessTargetError(providerName string) error {
+	return fmt.Errorf("%s does not require target state management; you may continue without starting or stopping it", providerName)
 }

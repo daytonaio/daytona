@@ -35,9 +35,10 @@ type WorkspaceRequest struct {
 }
 
 type ProviderInfo struct {
-	Name    string  `json:"name" validate:"required"`
-	Label   *string `json:"label" validate:"optional"`
-	Version string  `json:"version" validate:"required"`
+	Name            string  `json:"name" validate:"required"`
+	Label           *string `json:"label" validate:"optional"`
+	AgentlessTarget bool    `json:"agentlessTarget" validate:"required"`
+	Version         string  `json:"version" validate:"required"`
 }
 
 type TargetConfig struct {

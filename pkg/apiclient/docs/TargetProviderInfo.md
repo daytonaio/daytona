@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**AgentlessTarget** | **bool** |  | 
 **Label** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Version** | **string** |  | 
@@ -12,7 +13,7 @@ Name | Type | Description | Notes
 
 ### NewTargetProviderInfo
 
-`func NewTargetProviderInfo(name string, version string, ) *TargetProviderInfo`
+`func NewTargetProviderInfo(agentlessTarget bool, name string, version string, ) *TargetProviderInfo`
 
 NewTargetProviderInfo instantiates a new TargetProviderInfo object
 This constructor will assign default values to properties that have it defined,
@@ -26,6 +27,26 @@ will change when the set of required properties is changed
 NewTargetProviderInfoWithDefaults instantiates a new TargetProviderInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetAgentlessTarget
+
+`func (o *TargetProviderInfo) GetAgentlessTarget() bool`
+
+GetAgentlessTarget returns the AgentlessTarget field if non-nil, zero value otherwise.
+
+### GetAgentlessTargetOk
+
+`func (o *TargetProviderInfo) GetAgentlessTargetOk() (*bool, bool)`
+
+GetAgentlessTargetOk returns a tuple with the AgentlessTarget field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetAgentlessTarget
+
+`func (o *TargetProviderInfo) SetAgentlessTarget(v bool)`
+
+SetAgentlessTarget sets AgentlessTarget field to given value.
+
 
 ### GetLabel
 

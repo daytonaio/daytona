@@ -157,7 +157,16 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 func StopTarget(apiClient *apiclient.APIClient, targetId string) error {
 	ctx := context.Background()
 
-	err := views_util.WithInlineSpinner(fmt.Sprintf("Target '%s' is stopping", targetId), func() error {
+	target, _, err := apiclient_util.GetTarget(targetId, false)
+	if err != nil {
+		return err
+	}
+
+	if target.TargetConfig.ProviderInfo.AgentlessTarget {
+		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
+	}
+
+	err = views_util.WithInlineSpinner(fmt.Sprintf("Target '%s' is stopping", targetId), func() error {
 		res, err := apiClient.TargetAPI.StopTarget(ctx, targetId).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
