@@ -6,9 +6,9 @@ package models
 import "time"
 
 type ResourceState struct {
-	Name      ResourceStateName `json:"name" validate:"required" gorm:"not null"`
+	Name      ResourceStateName `json:"name" validate:"required"`
 	Error     *string           `json:"error" validate:"optional"`
-	UpdatedAt time.Time         `json:"updatedAt" validate:"required" gorm:"not null"`
+	UpdatedAt time.Time         `json:"updatedAt" validate:"required"`
 } // @name ResourceState
 
 type ResourceStateName string
@@ -41,5 +41,5 @@ type BuildConfig struct {
 } // @name BuildConfig
 
 type DevcontainerConfig struct {
-	FilePath string `json:"filePath" validate:"required" gorm:"not null"`
+	FilePath string `json:"filePath" validate:"required"`
 } // @name DevcontainerConfig

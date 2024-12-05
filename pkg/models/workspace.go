@@ -19,7 +19,7 @@ type Workspace struct {
 	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
 	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
 	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
-	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId;not nulls"`
+	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
 	ApiKey              string                     `json:"-" validate:"required" gorm:"not null"`
 	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
@@ -61,26 +61,26 @@ type CachedBuild struct {
 } // @name CachedBuild
 
 type WorkspaceInfo struct {
-	Name             string `json:"name" validate:"required" gorm:"not null"`
-	Created          string `json:"created" validate:"required" gorm:"not null"`
-	IsRunning        bool   `json:"isRunning" validate:"required" gorm:"not null"`
+	Name             string `json:"name" validate:"required"`
+	Created          string `json:"created" validate:"required"`
+	IsRunning        bool   `json:"isRunning" validate:"required"`
 	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
-	TargetId         string `json:"targetId" validate:"required" gorm:"not null"`
+	TargetId         string `json:"targetId" validate:"required"`
 } // @name WorkspaceInfo
 
 type GitStatus struct {
-	CurrentBranch   string        `json:"currentBranch" validate:"required" gorm:"not null"`
-	Files           []*FileStatus `json:"fileStatus" validate:"required" gorm:"not null"`
+	CurrentBranch   string        `json:"currentBranch" validate:"required"`
+	Files           []*FileStatus `json:"fileStatus" validate:"required"`
 	BranchPublished bool          `json:"branchPublished" validate:"optional"`
 	Ahead           int           `json:"ahead" validate:"optional"`
 	Behind          int           `json:"behind" validate:"optional"`
 } // @name GitStatus
 
 type FileStatus struct {
-	Name     string `json:"name" validate:"required" gorm:"not null"`
-	Extra    string `json:"extra" validate:"required" gorm:"not null"`
-	Staging  Status `json:"staging" validate:"required" gorm:"not null"`
-	Worktree Status `json:"worktree" validate:"required" gorm:"not null"`
+	Name     string `json:"name" validate:"required"`
+	Extra    string `json:"extra" validate:"required"`
+	Staging  Status `json:"staging" validate:"required"`
+	Worktree Status `json:"worktree" validate:"required"`
 } // @name FileStatus
 
 // Status status code of a file in the Worktree
