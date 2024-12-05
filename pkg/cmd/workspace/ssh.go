@@ -225,7 +225,13 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 	trimmedContent := strings.TrimSpace(modifiedContent)
 	updatedLines := strings.Split(trimmedContent, "\n")
 	updatedLines = append(updatedLines, proxyCommand)
-	modifiedContent = hostLine + "\n\t" + strings.Join(updatedLines, "\n\t")
+	var updatedLinesWithoutEmpty []string
+	for _, line := range updatedLines {
+		if line != "" {
+			updatedLinesWithoutEmpty = append(updatedLinesWithoutEmpty, line)
+		}
+	}
+	modifiedContent = hostLine + "\n\t" + strings.Join(updatedLinesWithoutEmpty, "\n\t")
 	modifiedContent = strings.TrimSuffix(modifiedContent, "\t")
 	if !strings.HasSuffix(modifiedContent, "\n") {
 		modifiedContent += "\n"
