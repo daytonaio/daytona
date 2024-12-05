@@ -25,4 +25,5 @@ func init() {
 	TargetCmd.AddCommand(logsCmd)
 	TargetCmd.AddCommand(listCmd)
 	TargetCmd.AddCommand(setDefaultCmd)
+	TargetCmd.AddCommand(sshCmd)
 }

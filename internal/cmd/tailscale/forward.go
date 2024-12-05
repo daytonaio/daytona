@@ -47,7 +47,7 @@ func ForwardPort(workspaceId string, targetPort uint16, profile config.Profile) 
 				return
 			}
 
-			targetUrl := fmt.Sprintf("%s:%d", common.GetWorkspaceHostname(workspaceId), targetPort)
+			targetUrl := fmt.Sprintf("%s:%d", common.GetTailscaleHostname(workspaceId), targetPort)
 
 			go handlePortConnection(conn, tsConn, targetUrl, errChan)
 		}
