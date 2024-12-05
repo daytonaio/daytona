@@ -23,7 +23,7 @@ import (
 	"github.com/pkg/browser"
 )
 
-func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId string, gpgKey string) error {
+func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId string, gpgKey *string) error {
 	err := IsJetBrainsGatewayInstalled()
 	if err != nil {
 		return err
@@ -34,7 +34,7 @@ func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId string, gpg
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	jbIde, ok := jetbrains.GetIdes()[jetbrains.Id(ide)]
 	if !ok {
