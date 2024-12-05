@@ -328,7 +328,8 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 8. **Generate new API client**
 
-    Ensure to generate a new API client after making changes related to the API spec, by running ./hack/swagger.sh in the daytona root directory.
+    Ensure to generate a new API client after making changes related to the API spec.
+    Run the following command in the daytona root directory:
 
     ```bash
     ./hack/swagger.sh
@@ -336,7 +337,8 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 9. **Check for lint errors**
 
-    Ensure that you have no lint errors. We use golangci-lint as our linter which is automaticalled installed. You can check for linting errors by running golangci-lint run in the root of the project.
+    Ensure that you have no lint errors. We use golangci-lint as our linter which is automaticalled installed.
+    Run the following command in the daytona root directory to check for linting errors:
 
     ```bash
     golangci-lint run
