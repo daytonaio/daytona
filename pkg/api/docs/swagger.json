@@ -4467,7 +4467,6 @@
             "type": "object",
             "required": [
                 "branch",
-                "commitInterval",
                 "id",
                 "retention",
                 "triggerFiles"
@@ -4872,7 +4871,8 @@
                 "id",
                 "name",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {
@@ -4990,7 +4990,8 @@
                 "name",
                 "state",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {

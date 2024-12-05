@@ -14,13 +14,13 @@ Name | Type | Description | Notes
 **State** | [**ResourceState**](ResourceState.md) |  | 
 **TargetConfig** | [**TargetConfig**](TargetConfig.md) |  | 
 **TargetConfigId** | **string** |  | 
-**Workspaces** | Pointer to [**[]Workspace**](Workspace.md) |  | [optional] 
+**Workspaces** | [**[]Workspace**](Workspace.md) |  | 
 
 ## Methods
 
 ### NewTargetDTO
 
-`func NewTargetDTO(default_ bool, envVars map[string]string, id string, name string, state ResourceState, targetConfig TargetConfig, targetConfigId string, ) *TargetDTO`
+`func NewTargetDTO(default_ bool, envVars map[string]string, id string, name string, state ResourceState, targetConfig TargetConfig, targetConfigId string, workspaces []Workspace, ) *TargetDTO`
 
 NewTargetDTO instantiates a new TargetDTO object
 This constructor will assign default values to properties that have it defined,
@@ -269,11 +269,6 @@ and a boolean to check if the value has been set.
 
 SetWorkspaces sets Workspaces field to given value.
 
-### HasWorkspaces
-
-`func (o *TargetDTO) HasWorkspaces() bool`
-
-HasWorkspaces returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

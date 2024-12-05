@@ -15,14 +15,14 @@ type Build struct {
 	Id              string                     `json:"id" validate:"required" gorm:"primaryKey"`
 	Image           *string                    `json:"image" validate:"optional"`
 	User            *string                    `json:"user" validate:"optional"`
-	ContainerConfig ContainerConfig            `json:"containerConfig" validate:"required" gorm:"serializer:json"`
+	ContainerConfig ContainerConfig            `json:"containerConfig" validate:"required" gorm:"serializer:json;not null"`
 	BuildConfig     *BuildConfig               `json:"buildConfig" validate:"optional" gorm:"serializer:json"`
-	Repository      *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json"`
-	EnvVars         map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json"`
-	LastJob         *Job                       `gorm:"foreignKey:ResourceId;references:Id" validate:"optional"`
-	PrebuildId      string                     `json:"prebuildId" validate:"required"`
-	CreatedAt       time.Time                  `json:"createdAt" validate:"required"`
-	UpdatedAt       time.Time                  `json:"updatedAt" validate:"required"`
+	Repository      *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
+	EnvVars         map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	LastJob         *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	PrebuildId      string                     `json:"prebuildId" validate:"required" gorm:"not null"`
+	CreatedAt       time.Time                  `json:"createdAt" validate:"required" gorm:"not null"`
+	UpdatedAt       time.Time                  `json:"updatedAt" validate:"required" gorm:"not null"`
 } // @name Build
 
 func (w *Build) GetState() ResourceState {
@@ -30,8 +30,8 @@ func (w *Build) GetState() ResourceState {
 }
 
 type ContainerConfig struct {
-	Image string `json:"image" validate:"required"`
-	User  string `json:"user" validate:"required"`
+	Image string `json:"image" validate:"required" gorm:"not null"`
+	User  string `json:"user" validate:"required" gorm:"not null"`
 } // @name ContainerConfig
 
 func (b *Build) Compare(other *Build) (bool, error) {

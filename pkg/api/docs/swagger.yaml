@@ -820,7 +820,6 @@ definitions:
         type: array
     required:
     - branch
-    - commitInterval
     - id
     - retention
     - triggerFiles
@@ -1113,6 +1112,7 @@ definitions:
     - name
     - targetConfig
     - targetConfigId
+    - workspaces
     type: object
   TargetConfig:
     properties:
@@ -1206,6 +1206,7 @@ definitions:
     - state
     - targetConfig
     - targetConfigId
+    - workspaces
     type: object
   TargetInfo:
     properties:

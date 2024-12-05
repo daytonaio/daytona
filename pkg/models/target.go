@@ -16,21 +16,21 @@ var providersWithoutTargetMode = []string{"docker-provider"}
 
 type Target struct {
 	Id             string            `json:"id" validate:"required" gorm:"primaryKey"`
-	Name           string            `json:"name" validate:"required"`
-	TargetConfigId string            `json:"targetConfigId" validate:"required" gorm:"foreignKey:TargetConfigId;references:Id"`
+	Name           string            `json:"name" validate:"required" gorm:"not null"`
+	TargetConfigId string            `json:"targetConfigId" validate:"required" gorm:"not null"`
 	TargetConfig   TargetConfig      `json:"targetConfig" validate:"required" gorm:"foreignKey:TargetConfigId"`
-	ApiKey         string            `json:"-"`
-	EnvVars        map[string]string `json:"envVars" validate:"required" gorm:"serializer:json"`
-	IsDefault      bool              `json:"default" validate:"required"`
-	Workspaces     []Workspace       `gorm:"foreignKey:TargetId;references:Id"`
-	Metadata       *TargetMetadata   `gorm:"foreignKey:TargetId;references:Id" validate:"optional"`
-	LastJob        *Job              `gorm:"foreignKey:ResourceId;references:Id" validate:"optional"`
+	ApiKey         string            `json:"-" validate:"required" gorm:"not null"`
+	EnvVars        map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	IsDefault      bool              `json:"default" validate:"required" gorm:"not null"`
+	Workspaces     []Workspace       `json:"workspaces" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
+	Metadata       *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:TargetId;references:Id"`
+	LastJob        *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
 } // @name Target
 
 type TargetMetadata struct {
-	TargetId  string    `json:"targetId" validate:"required" gorm:"primaryKey;foreignKey:TargetId;references:Id"`
-	UpdatedAt time.Time `json:"updatedAt" validate:"required"`
-	Uptime    uint64    `json:"uptime" validate:"required"`
+	TargetId  string    `json:"targetId" validate:"required" gorm:"primaryKey"`
+	UpdatedAt time.Time `json:"updatedAt" validate:"required" gorm:"not null"`
+	Uptime    uint64    `json:"uptime" validate:"required" gorm:"not null"`
 } // @name TargetMetadata
 
 func (t *Target) GetState() ResourceState {
