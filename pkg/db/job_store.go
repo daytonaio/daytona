@@ -4,6 +4,7 @@
 package db
 
 import (
+	"context"
 	"fmt"
 	"strings"
 
@@ -13,21 +14,23 @@ import (
 )
 
 type JobStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewJobStore(db *gorm.DB) (*JobStore, error) {
-	err := db.AutoMigrate(&models.Job{})
+func NewJobStore(store Store) (stores.JobStore, error) {
+	err := store.db.AutoMigrate(&models.Job{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &JobStore{db: db}, nil
+	return &JobStore{store}, nil
 }
 
-func (s *JobStore) List(filter *stores.JobFilter) ([]*models.Job, error) {
+func (s *JobStore) List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error) {
+	tx := s.getTransaction(ctx)
+
 	jobs := []*models.Job{}
-	tx := processJobFilters(s.db, filter).Find(&jobs)
+	tx = processJobFilters(tx, filter).Find(&jobs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -36,9 +39,11 @@ func (s *JobStore) List(filter *stores.JobFilter) ([]*models.Job, error) {
 	return jobs, nil
 }
 
-func (s *JobStore) Find(filter *stores.JobFilter) (*models.Job, error) {
+func (s *JobStore) Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error) {
+	tx := s.getTransaction(ctx)
+
 	job := &models.Job{}
-	tx := processJobFilters(s.db, filter).First(&job)
+	tx = processJobFilters(tx, filter).First(&job)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrJobNotFound
@@ -50,8 +55,10 @@ func (s *JobStore) Find(filter *stores.JobFilter) (*models.Job, error) {
 
 }
 
-func (s *JobStore) Save(job *models.Job) error {
-	tx := s.db.Save(job)
+func (s *JobStore) Save(ctx context.Context, job *models.Job) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(job)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -59,8 +66,10 @@ func (s *JobStore) Save(job *models.Job) error {
 	return nil
 }
 
-func (s *JobStore) Delete(job *models.Job) error {
-	tx := s.db.Delete(job)
+func (s *JobStore) Delete(ctx context.Context, job *models.Job) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(job)
 	if tx.Error != nil {
 		return tx.Error
 	}

@@ -4,15 +4,17 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type EnvironmentVariableStore interface {
-	List() ([]*models.EnvironmentVariable, error)
-	Save(environmentVariable *models.EnvironmentVariable) error
-	Delete(key string) error
+	IStore
+	List(ctx context.Context) ([]*models.EnvironmentVariable, error)
+	Save(ctx context.Context, environmentVariable *models.EnvironmentVariable) error
+	Delete(ctx context.Context, key string) error
 }
 
 var (

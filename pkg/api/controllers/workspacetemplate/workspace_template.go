@@ -35,7 +35,7 @@ func GetWorkspaceTemplate(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceTemplate, err := server.WorkspaceTemplateService.Find(&stores.WorkspaceTemplateFilter{
+	workspaceTemplate, err := server.WorkspaceTemplateService.Find(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
 		Name: &templateName,
 	})
 	if err != nil {
@@ -68,7 +68,7 @@ func GetDefaultWorkspaceTemplate(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceTemplates, err := server.WorkspaceTemplateService.Find(&stores.WorkspaceTemplateFilter{
+	workspaceTemplates, err := server.WorkspaceTemplateService.Find(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
 		Url:     &decodedURLParam,
 		Default: util.Pointer(true),
 	})
@@ -100,7 +100,7 @@ func GetDefaultWorkspaceTemplate(ctx *gin.Context) {
 func ListWorkspaceTemplates(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	workspaceTemplates, err := server.WorkspaceTemplateService.List(nil)
+	workspaceTemplates, err := server.WorkspaceTemplateService.List(ctx.Request.Context(), nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspace templates: %s", err.Error()))
 		return
@@ -132,7 +132,7 @@ func SetWorkspaceTemplate(ctx *gin.Context) {
 
 	workspaceTemplate := conversion.ToWorkspaceTemplate(req)
 
-	err = s.WorkspaceTemplateService.Save(workspaceTemplate)
+	err = s.WorkspaceTemplateService.Save(ctx.Request.Context(), workspaceTemplate)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save workspace template: %s", err.Error()))
 		return
@@ -156,7 +156,7 @@ func SetDefaultWorkspaceTemplate(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceTemplateService.SetDefault(templateName)
+	err := server.WorkspaceTemplateService.SetDefault(ctx.Request.Context(), templateName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to set workspace template to default: %s", err.Error()))
 		return
@@ -193,7 +193,7 @@ func DeleteWorkspaceTemplate(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceTemplate, err := server.WorkspaceTemplateService.Find(&stores.WorkspaceTemplateFilter{
+	workspaceTemplate, err := server.WorkspaceTemplateService.Find(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
 		Name: &templateName,
 	})
 	if err != nil {
@@ -201,7 +201,7 @@ func DeleteWorkspaceTemplate(ctx *gin.Context) {
 		return
 	}
 
-	errs := server.WorkspaceTemplateService.Delete(workspaceTemplate.Name, force)
+	errs := server.WorkspaceTemplateService.Delete(ctx.Request.Context(), workspaceTemplate.Name, force)
 	if len(errs) > 0 {
 		if stores.IsWorkspaceTemplateNotFound(errs[0]) {
 			ctx.AbortWithError(http.StatusNotFound, errors.New("workspace template not found"))

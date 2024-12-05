@@ -3,13 +3,17 @@
 
 package services
 
-import "github.com/daytonaio/daytona/pkg/models"
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
+)
 
 type IApiKeyService interface {
-	Generate(keyType models.ApiKeyType, name string) (string, error)
-	IsWorkspaceApiKey(apiKey string) bool
-	IsTargetApiKey(apiKey string) bool
-	IsValidApiKey(apiKey string) bool
-	ListClientKeys() ([]*models.ApiKey, error)
-	Revoke(name string) error
+	Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error)
+	IsWorkspaceApiKey(ctx context.Context, apiKey string) bool
+	IsTargetApiKey(ctx context.Context, apiKey string) bool
+	IsValidApiKey(ctx context.Context, apiKey string) bool
+	ListClientKeys(ctx context.Context) ([]*models.ApiKey, error)
+	Revoke(ctx context.Context, name string) error
 }

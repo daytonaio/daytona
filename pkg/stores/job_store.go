@@ -4,16 +4,18 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type JobStore interface {
-	List(filter *JobFilter) ([]*models.Job, error)
-	Find(filter *JobFilter) (*models.Job, error)
-	Save(job *models.Job) error
-	Delete(job *models.Job) error
+	IStore
+	List(ctx context.Context, filter *JobFilter) ([]*models.Job, error)
+	Find(ctx context.Context, filter *JobFilter) (*models.Job, error)
+	Save(ctx context.Context, job *models.Job) error
+	Delete(ctx context.Context, job *models.Job) error
 }
 
 type JobFilter struct {

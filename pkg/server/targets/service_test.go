@@ -67,7 +67,7 @@ func TestTargetService(t *testing.T) {
 	targetMetadataStore := t_targets.NewInMemoryTargetMetadataStore()
 	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
 
-	err := targetConfigStore.Save(&tc)
+	err := targetConfigStore.Save(ctx, &tc)
 	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
@@ -80,7 +80,7 @@ func TestTargetService(t *testing.T) {
 		TargetStore:         targetStore,
 		TargetMetadataStore: targetMetadataStore,
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
-			return targetConfigStore.Find(name, false)
+			return targetConfigStore.Find(ctx, name, false)
 		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
 			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)
@@ -197,7 +197,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("ForceRemoveTarget", func(t *testing.T) {
-		err := targetStore.Save(tg)
+		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
 		mockProvisioner.On("DestroyTarget", tg).Return(nil)
@@ -221,10 +221,10 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("SetTargetMetadata", func(t *testing.T) {
-		err := targetStore.Save(tg)
+		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
-		_, err = service.SetTargetMetadata(tg.Id, &models.TargetMetadata{
+		_, err = service.SetTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
 			Uptime: 10,
 		})
 		require.Nil(t, err)

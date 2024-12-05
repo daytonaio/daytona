@@ -35,8 +35,8 @@ func NewGitProviderService(config GitProviderServiceConfig) services.IGitProvide
 
 var codebergUrl = "https://codeberg.org"
 
-func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider, error) {
-	providerConfig, err := s.configStore.Find(id)
+func (s *GitProviderService) GetGitProvider(ctx context.Context, id string) (gitprovider.GitProvider, error) {
+	providerConfig, err := s.configStore.Find(ctx, id)
 	if err != nil {
 		// If config is not defined, use the default (public) client without token
 		if stores.IsGitProviderNotFound(err) {
@@ -55,12 +55,12 @@ func (s *GitProviderService) GetGitProvider(id string) (gitprovider.GitProvider,
 	return s.newGitProvider(providerConfig)
 }
 
-func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (string, error) {
+func (s *GitProviderService) GetLastCommitSha(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
 	var err error
 	var provider gitprovider.GitProvider
 	providerFound := false
 
-	gitProviders, err := s.configStore.List()
+	gitProviders, err := s.configStore.List(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 
 		isAwsUrl := strings.Contains(repo.Url, ".amazonaws.com/") || strings.Contains(repo.Url, ".console.aws.amazon.com/")
 		if p.ProviderId == "aws-codecommit" && isAwsUrl {
-			provider, err = s.GetGitProvider(p.ProviderId)
+			provider, err = s.GetGitProvider(ctx, p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -78,7 +78,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		}
 
 		if strings.Contains(repo.Url, fmt.Sprintf("%s.", p.ProviderId)) {
-			provider, err = s.GetGitProvider(p.ProviderId)
+			provider, err = s.GetGitProvider(ctx, p.ProviderId)
 			if err == nil {
 				return "", err
 			}
@@ -92,7 +92,7 @@ func (s *GitProviderService) GetLastCommitSha(repo *gitprovider.GitRepository) (
 		}
 
 		if p.BaseApiUrl != nil && strings.Contains(repo.Url, hostname) {
-			provider, err = s.GetGitProvider(p.ProviderId)
+			provider, err = s.GetGitProvider(ctx, p.ProviderId)
 			if err == nil {
 				return "", err
 			}

@@ -4,12 +4,14 @@
 package workspaces
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *WorkspaceService) SetWorkspaceMetadata(workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error) {
-	m, err := s.workspaceMetadataStore.Find(&stores.WorkspaceMetadataFilter{
+func (s *WorkspaceService) SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error) {
+	m, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{
 		WorkspaceId: &workspaceId,
 	})
 	if err != nil {
@@ -19,5 +21,5 @@ func (s *WorkspaceService) SetWorkspaceMetadata(workspaceId string, metadata *mo
 	m.GitStatus = metadata.GitStatus
 	m.Uptime = metadata.Uptime
 	m.UpdatedAt = metadata.UpdatedAt
-	return m, s.workspaceMetadataStore.Save(m)
+	return m, s.workspaceMetadataStore.Save(ctx, m)
 }

@@ -12,28 +12,36 @@ import (
 )
 
 func (s *TargetService) SetDefault(ctx context.Context, id string) error {
+	var err error
+	ctx, err = s.targetStore.BeginTransaction(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.targetStore)
+
 	currentTarget, err := s.GetTarget(ctx, &stores.TargetFilter{
 		IdOrName: &id,
 	}, services.TargetRetrievalParams{})
 	if err != nil || currentTarget == nil {
-		return err
+		return s.targetStore.RollbackTransaction(ctx, err)
 	}
 
 	defaultTarget, err := s.GetTarget(ctx, &stores.TargetFilter{
 		Default: util.Pointer(true),
 	}, services.TargetRetrievalParams{})
 	if err != nil && !stores.IsTargetNotFound(err) {
-		return err
+		return s.targetStore.RollbackTransaction(ctx, err)
 	}
 
 	if defaultTarget != nil {
 		defaultTarget.IsDefault = false
-		err := s.targetStore.Save(&defaultTarget.Target)
+		err := s.targetStore.Save(ctx, &defaultTarget.Target)
 		if err != nil {
-			return err
+			return s.targetStore.RollbackTransaction(ctx, err)
 		}
 	}
 
 	currentTarget.IsDefault = true
-	return s.targetStore.Save(&currentTarget.Target)
+	return s.targetStore.Save(ctx, &currentTarget.Target)
 }

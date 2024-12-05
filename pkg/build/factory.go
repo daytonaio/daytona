@@ -4,6 +4,7 @@
 package build
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -65,7 +66,7 @@ func (f *BuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, erro
 		return nil, errors.New("repository must be set")
 	}
 
-	build, err := f.buildService.Find(&services.BuildFilter{
+	build, err := f.buildService.Find(context.Background(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			Branch:        &b.Repository.Branch,
 			RepositoryUrl: &b.Repository.Url,

@@ -26,7 +26,7 @@ func WorkspaceAuthMiddleware() gin.HandlerFunc {
 
 		server := server.GetInstance(nil)
 
-		if !server.ApiKeyService.IsWorkspaceApiKey(token) && !server.ApiKeyService.IsTargetApiKey(token) {
+		if !server.ApiKeyService.IsWorkspaceApiKey(ctx.Request.Context(), token) && !server.ApiKeyService.IsTargetApiKey(ctx.Request.Context(), token) {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 		}
 

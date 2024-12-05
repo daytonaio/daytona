@@ -22,8 +22,8 @@ type IWorkspaceService interface {
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 	HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error
 
-	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	SetWorkspaceMetadata(workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
+	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
+	SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 }
 
 type WorkspaceDTO struct {

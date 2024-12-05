@@ -4,12 +4,14 @@
 package targets
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *TargetService) SetTargetMetadata(targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error) {
-	m, err := s.targetMetadataStore.Find(&stores.TargetMetadataFilter{
+func (s *TargetService) SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error) {
+	m, err := s.targetMetadataStore.Find(ctx, &stores.TargetMetadataFilter{
 		TargetId: &targetId,
 	})
 	if err != nil {
@@ -18,5 +20,5 @@ func (s *TargetService) SetTargetMetadata(targetId string, metadata *models.Targ
 
 	m.Uptime = metadata.Uptime
 	m.UpdatedAt = metadata.UpdatedAt
-	return m, s.targetMetadataStore.Save(m)
+	return m, s.targetMetadataStore.Save(ctx, m)
 }

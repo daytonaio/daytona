@@ -6,13 +6,16 @@
 package targets
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryTargetStore struct {
+	common.InMemoryStore
 	targets map[string]*models.Target
 }
 
@@ -22,11 +25,11 @@ func NewInMemoryTargetStore() stores.TargetStore {
 	}
 }
 
-func (s *InMemoryTargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error) {
+func (s *InMemoryTargetStore) List(ctx context.Context, filter *stores.TargetFilter) ([]*models.Target, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryTargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) {
+func (s *InMemoryTargetStore) Find(ctx context.Context, filter *stores.TargetFilter) (*models.Target, error) {
 	t, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -39,7 +42,7 @@ func (s *InMemoryTargetStore) Find(filter *stores.TargetFilter) (*models.Target,
 	return t[0], nil
 }
 
-func (s *InMemoryTargetStore) Save(target *models.Target) error {
+func (s *InMemoryTargetStore) Save(ctx context.Context, target *models.Target) error {
 	tg := *target
 	tg.EnvVars = nil
 	tg.ApiKey = ""
@@ -48,7 +51,7 @@ func (s *InMemoryTargetStore) Save(target *models.Target) error {
 	return nil
 }
 
-func (s *InMemoryTargetStore) Delete(target *models.Target) error {
+func (s *InMemoryTargetStore) Delete(ctx context.Context, target *models.Target) error {
 	delete(s.targets, target.Id)
 	return nil
 }

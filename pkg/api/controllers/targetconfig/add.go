@@ -33,7 +33,7 @@ func AddTargetConfig(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	targetConfig, err := server.TargetConfigService.Add(req)
+	targetConfig, err := server.TargetConfigService.Add(ctx.Request.Context(), req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set target config: %w", err))
 		return

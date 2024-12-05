@@ -4,6 +4,8 @@
 package env
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -23,12 +25,12 @@ type EnvironmentVariableService struct {
 	environmentVariableStore stores.EnvironmentVariableStore
 }
 
-func (s *EnvironmentVariableService) List() ([]*models.EnvironmentVariable, error) {
-	return s.environmentVariableStore.List()
+func (s *EnvironmentVariableService) List(ctx context.Context) ([]*models.EnvironmentVariable, error) {
+	return s.environmentVariableStore.List(ctx)
 }
 
-func (s *EnvironmentVariableService) Map() (services.EnvironmentVariables, error) {
-	envVars, err := s.List()
+func (s *EnvironmentVariableService) Map(ctx context.Context) (services.EnvironmentVariables, error) {
+	envVars, err := s.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -41,10 +43,10 @@ func (s *EnvironmentVariableService) Map() (services.EnvironmentVariables, error
 	return envVarsMap, nil
 }
 
-func (s *EnvironmentVariableService) Save(environmentVariable *models.EnvironmentVariable) error {
-	return s.environmentVariableStore.Save(environmentVariable)
+func (s *EnvironmentVariableService) Save(ctx context.Context, environmentVariable *models.EnvironmentVariable) error {
+	return s.environmentVariableStore.Save(ctx, environmentVariable)
 }
 
-func (s *EnvironmentVariableService) Delete(key string) error {
-	return s.environmentVariableStore.Delete(key)
+func (s *EnvironmentVariableService) Delete(ctx context.Context, key string) error {
+	return s.environmentVariableStore.Delete(ctx, key)
 }

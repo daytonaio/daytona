@@ -28,16 +28,16 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		server := server.GetInstance(nil)
 
-		if !server.ApiKeyService.IsValidApiKey(token) {
+		if !server.ApiKeyService.IsValidApiKey(ctx.Request.Context(), token) {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return
 		}
 
 		apiKeyType := models.ApiKeyTypeClient
 
-		if server.ApiKeyService.IsTargetApiKey(token) {
+		if server.ApiKeyService.IsTargetApiKey(ctx.Request.Context(), token) {
 			apiKeyType = models.ApiKeyTypeTarget
-		} else if server.ApiKeyService.IsWorkspaceApiKey(token) {
+		} else if server.ApiKeyService.IsWorkspaceApiKey(ctx.Request.Context(), token) {
 			apiKeyType = models.ApiKeyTypeWorkspace
 		}
 

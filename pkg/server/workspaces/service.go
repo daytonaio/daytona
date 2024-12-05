@@ -90,6 +90,6 @@ type WorkspaceService struct {
 	loggerFactory         logs.LoggerFactory
 }
 
-func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {
 	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
 }
