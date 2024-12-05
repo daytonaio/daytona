@@ -13,6 +13,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var AllProviderRegistered = false
+
 func (s *Server) downloadDefaultProviders() error {
 	manifest, err := s.ProviderManager.GetProvidersManifest()
 	if err != nil {
@@ -122,6 +124,7 @@ func (s *Server) registerProviders() error {
 	}
 
 	log.Info("Providers registered")
+	AllProviderRegistered = true
 
 	return nil
 }
