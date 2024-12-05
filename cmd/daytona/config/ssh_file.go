@@ -163,6 +163,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpg
 		return err
 	}
 
+	var configGenerated bool
 	regexWithoutGPG := regexp.MustCompile(fmt.Sprintf(`(?m)^Host %s-%s-%s\s*\n(?:\s+[^\n]*\n?)*`, profileId, workspaceName, projectName))
 	regexWithGPG := regexp.MustCompile(fmt.Sprintf(`(?m)^Host %s-%s-%s\s*\n(?:\s+[^\n]*\n?)*StreamLocalBindUnlink\s+yes\s*\n(?:\s+[^\n]*\n?)*RemoteForward\s+[^\s]+\s+[^\s]+\s*\n`, profileId, workspaceName, projectName))
 	if !regexWithoutGPG.MatchString(existingContent) {
@@ -171,6 +172,7 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpg
 			return err
 		}
 		existingContent = newContent
+		configGenerated = true
 	}
 
 	if gpgKey != "" && !regexWithGPG.MatchString(existingContent) {
@@ -184,9 +186,41 @@ func EnsureSshConfigEntryAdded(profileId, workspaceName, projectName string, gpg
 		if err != nil {
 			return err
 		}
+
+		configGenerated = true
+	}
+
+	if !configGenerated {
+		updatedContent, err := regenerateProxyCommand(existingContent, profileId, workspaceName, projectName)
+		if err != nil {
+			return err
+		}
+		err = UpdateWorkspaceSshEntry(profileId, workspaceName, projectName, updatedContent)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func regenerateProxyCommand(existingContent, profileId, workspaceId, projectName string) (string, error) {
+	daytonaPath, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+
+	hostLine := fmt.Sprintf("Host %s", GetProjectHostname(profileId, workspaceId, projectName))
+	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
+	matchedEntry := regex.FindString(existingContent)
+	if matchedEntry == "" {
+		return "", fmt.Errorf("no SSH entry found for project %s", projectName)
+	}
+
+	re := regexp.MustCompile(`(?m)^\s*ProxyCommand\s+.*$`)
+	updatedContent := re.ReplaceAllString(matchedEntry, fmt.Sprintf("\tProxyCommand \"%s\" ssh-proxy %s %s %s", daytonaPath, profileId, workspaceId, projectName))
+
+	return updatedContent, nil
 }
 
 func getKnownHostsFile() string {

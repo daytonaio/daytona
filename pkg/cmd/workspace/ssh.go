@@ -167,10 +167,20 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 	if len(lines) > 0 {
 		lines = lines[1:]
 	}
-	for i := range lines {
-		lines[i] = strings.TrimSpace(lines[i])
+
+	var proxyCommand string
+	var filteredLines []string
+	for _, line := range lines {
+		trimmedLine := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmedLine, "ProxyCommand") {
+			proxyCommand = trimmedLine
+		} else {
+			if trimmedLine != "" {
+				filteredLines = append(filteredLines, trimmedLine)
+			}
+		}
 	}
-	modifiedContent := strings.Join(lines, "\n")
+	modifiedContent := strings.Join(filteredLines, "\n")
 
 	isCorrect := true
 	formFields := []huh.Field{
@@ -211,7 +221,9 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 
 		return nil
 	}
+
 	updatedLines := strings.Split(modifiedContent, "\n")
+	updatedLines = append(updatedLines, proxyCommand)
 	modifiedContent = hostLine + "\n\t" + strings.Join(updatedLines, "\n\t")
 	modifiedContent = strings.TrimSuffix(modifiedContent, "\t")
 	if !strings.HasSuffix(modifiedContent, "\n") {
