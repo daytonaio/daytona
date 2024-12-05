@@ -25,7 +25,7 @@ import (
 //	@id				ListEnvironmentVariables
 func ListEnvironmentVariables(ctx *gin.Context) {
 	server := server.GetInstance(nil)
-	envVars, err := server.EnvironmentVariableService.List()
+	envVars, err := server.EnvironmentVariableService.List(ctx.Request.Context())
 	if err != nil {
 		if stores.IsEnvironmentVariableNotFound(err) {
 			ctx.JSON(200, []*models.EnvironmentVariable{})
@@ -58,7 +58,7 @@ func SetEnvironmentVariable(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	err = server.EnvironmentVariableService.Save(&req)
+	err = server.EnvironmentVariableService.Save(ctx.Request.Context(), &req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save environment variable: %w", err))
 		return
@@ -82,7 +82,7 @@ func DeleteEnvironmentVariable(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.EnvironmentVariableService.Delete(envVarKey)
+	err := server.EnvironmentVariableService.Delete(ctx.Request.Context(), envVarKey)
 	if err != nil {
 		if stores.IsEnvironmentVariableNotFound(err) {
 			ctx.Status(204)

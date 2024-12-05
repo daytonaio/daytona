@@ -108,22 +108,22 @@ func ReadLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(cont
 	}
 }
 
-func ReadServerLog(ginCtx *gin.Context) {
+func ReadServerLog(ctx *gin.Context) {
 	s := server.GetInstance(nil)
 
-	logFileQuery := ginCtx.Query("file")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
+	logFileQuery := ctx.Query("file")
+	retryQuery := ctx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
 	if retry {
 		for {
 			reader, err := s.GetLogReader(logFileQuery)
 			if err != nil && server.IsLogFileNotFound(err) {
-				ginCtx.AbortWithError(http.StatusNotFound, err)
+				ctx.AbortWithError(http.StatusNotFound, err)
 				return
 			}
 			if err == nil {
-				ReadLog(ginCtx, reader, util.ReadLog, writeToWs)
+				ReadLog(ctx, reader, util.ReadLog, writeToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -133,19 +133,19 @@ func ReadServerLog(ginCtx *gin.Context) {
 	reader, err := s.GetLogReader(logFileQuery)
 	if err != nil {
 		if server.IsLogFileNotFound(err) {
-			ginCtx.AbortWithError(http.StatusNotFound, err)
+			ctx.AbortWithError(http.StatusNotFound, err)
 			return
 		}
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ReadLog(ginCtx, reader, util.ReadLog, writeToWs)
+	ReadLog(ctx, reader, util.ReadLog, writeToWs)
 }
 
-func ReadTargetLog(ginCtx *gin.Context) {
-	targetId := ginCtx.Param("targetId")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
+func ReadTargetLog(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
 	server := server.GetInstance(nil)
@@ -154,7 +154,7 @@ func ReadTargetLog(ginCtx *gin.Context) {
 		for {
 			targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 			if err == nil {
-				ReadLog(ginCtx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
+				ReadLog(ctx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -163,64 +163,64 @@ func ReadTargetLog(ginCtx *gin.Context) {
 
 	targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ReadLog(ginCtx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
+	ReadLog(ctx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
 }
 
-func ReadWorkspaceLog(ginCtx *gin.Context) {
-	workspaceId := ginCtx.Param("workspaceId")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
+func ReadWorkspaceLog(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
 	server := server.GetInstance(nil)
 
 	if retry {
 		for {
-			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
+			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
 			if err == nil {
-				ReadLog(ginCtx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
+				ReadLog(ctx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
 		}
 	}
 
-	workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
+	workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
 	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ReadLog(ginCtx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
+	ReadLog(ctx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
 }
 
-func ReadBuildLog(ginCtx *gin.Context) {
-	buildId := ginCtx.Param("buildId")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
+func ReadBuildLog(ctx *gin.Context) {
+	buildId := ctx.Param("buildId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
 	retry := retryQuery == "true"
 
 	server := server.GetInstance(nil)
 
 	if retry {
 		for {
-			buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+			buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
 
 			if err == nil {
-				ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
+				ReadLog(ctx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
 		}
 	}
 
-	buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
+	buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
 	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
+		ctx.AbortWithError(http.StatusInternalServerError, err)
 		return
 	}
 
-	ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
+	ReadLog(ctx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
 }

@@ -6,11 +6,15 @@
 package workspaces
 
 import (
+	"context"
+
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryWorkspaceMetadataStore struct {
+	common.InMemoryStore
 	workspaceMetadataEntries map[string]*models.WorkspaceMetadata
 }
 
@@ -20,7 +24,7 @@ func NewInMemoryWorkspaceMetadataStore() stores.WorkspaceMetadataStore {
 	}
 }
 
-func (s *InMemoryWorkspaceMetadataStore) Find(filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
+func (s *InMemoryWorkspaceMetadataStore) Find(ctx context.Context, filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
 	metadatas, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -32,12 +36,12 @@ func (s *InMemoryWorkspaceMetadataStore) Find(filter *stores.WorkspaceMetadataFi
 	return metadatas[0], nil
 }
 
-func (s *InMemoryWorkspaceMetadataStore) Save(workspaceMetadata *models.WorkspaceMetadata) error {
+func (s *InMemoryWorkspaceMetadataStore) Save(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
 	s.workspaceMetadataEntries[workspaceMetadata.WorkspaceId] = workspaceMetadata
 	return nil
 }
 
-func (s *InMemoryWorkspaceMetadataStore) Delete(workspaceMetadata *models.WorkspaceMetadata) error {
+func (s *InMemoryWorkspaceMetadataStore) Delete(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
 	delete(s.workspaceMetadataEntries, workspaceMetadata.WorkspaceId)
 	return nil
 }

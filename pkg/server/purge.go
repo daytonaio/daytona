@@ -75,7 +75,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 	}
 
 	fmt.Println("Purging builds...")
-	errs := s.BuildService.Delete(nil, force)
+	errs := s.BuildService.Delete(ctx, nil, force)
 	if len(errs) > 0 {
 		s.trackPurgeError(ctx, force, errs[0])
 		if !force {
@@ -85,7 +85,7 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		}
 	}
 
-	err = s.BuildService.AwaitEmptyList(time.Minute)
+	err = s.BuildService.AwaitEmptyList(ctx, time.Minute)
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
 		if !force {

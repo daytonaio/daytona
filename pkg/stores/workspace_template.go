@@ -4,6 +4,7 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -26,10 +27,11 @@ type PrebuildFilter struct {
 }
 
 type WorkspaceTemplateStore interface {
-	List(filter *WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error)
-	Find(filter *WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
-	Save(workspaceTemplate *models.WorkspaceTemplate) error
-	Delete(workspaceTemplate *models.WorkspaceTemplate) error
+	IStore
+	List(ctx context.Context, filter *WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error)
+	Find(ctx context.Context, filter *WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
+	Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error
+	Delete(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error
 }
 
 var (

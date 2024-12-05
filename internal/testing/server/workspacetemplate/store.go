@@ -6,13 +6,16 @@
 package workspacetemplate
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryWorkspaceTemplateStore struct {
+	common.InMemoryStore
 	workspaceTemplates map[string]*models.WorkspaceTemplate
 }
 
@@ -22,11 +25,11 @@ func NewInMemoryWorkspaceTemplateStore() stores.WorkspaceTemplateStore {
 	}
 }
 
-func (s *InMemoryWorkspaceTemplateStore) List(filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
+func (s *InMemoryWorkspaceTemplateStore) List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
 	return s.processFilters(filter)
 }
 
-func (s *InMemoryWorkspaceTemplateStore) Find(filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
+func (s *InMemoryWorkspaceTemplateStore) Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
 	workspaceTemplates, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -38,12 +41,12 @@ func (s *InMemoryWorkspaceTemplateStore) Find(filter *stores.WorkspaceTemplateFi
 	return workspaceTemplates[0], nil
 }
 
-func (s *InMemoryWorkspaceTemplateStore) Save(workspaceTemplate *models.WorkspaceTemplate) error {
+func (s *InMemoryWorkspaceTemplateStore) Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
 	s.workspaceTemplates[workspaceTemplate.Name] = workspaceTemplate
 	return nil
 }
 
-func (s *InMemoryWorkspaceTemplateStore) Delete(workspaceTemplate *models.WorkspaceTemplate) error {
+func (s *InMemoryWorkspaceTemplateStore) Delete(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
 	delete(s.workspaceTemplates, workspaceTemplate.Name)
 	return nil
 }

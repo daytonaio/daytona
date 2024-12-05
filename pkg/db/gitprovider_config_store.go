@@ -4,28 +4,30 @@
 package db
 
 import (
-	"gorm.io/gorm"
+	"context"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type GitProviderConfigStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewGitProviderConfigStore(db *gorm.DB) (stores.GitProviderConfigStore, error) {
-	err := db.AutoMigrate(&models.GitProviderConfig{})
+func NewGitProviderConfigStore(store Store) (stores.GitProviderConfigStore, error) {
+	err := store.db.AutoMigrate(&models.GitProviderConfig{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &GitProviderConfigStore{db: db}, nil
+	return &GitProviderConfigStore{store}, nil
 }
 
-func (p *GitProviderConfigStore) List() ([]*models.GitProviderConfig, error) {
+func (p *GitProviderConfigStore) List(ctx context.Context) ([]*models.GitProviderConfig, error) {
+	tx := p.getTransaction(ctx)
+
 	gitProviders := []*models.GitProviderConfig{}
-	tx := p.db.Find(&gitProviders)
+	tx = tx.Find(&gitProviders)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -33,9 +35,11 @@ func (p *GitProviderConfigStore) List() ([]*models.GitProviderConfig, error) {
 	return gitProviders, nil
 }
 
-func (p *GitProviderConfigStore) Find(id string) (*models.GitProviderConfig, error) {
+func (p *GitProviderConfigStore) Find(ctx context.Context, id string) (*models.GitProviderConfig, error) {
+	tx := p.getTransaction(ctx)
+
 	gitProvider := &models.GitProviderConfig{}
-	tx := p.db.Where("id = ?", id).First(gitProvider)
+	tx = tx.Where("id = ?", id).First(gitProvider)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrGitProviderConfigNotFound
@@ -46,8 +50,10 @@ func (p *GitProviderConfigStore) Find(id string) (*models.GitProviderConfig, err
 	return gitProvider, nil
 }
 
-func (p *GitProviderConfigStore) Save(gitProvider *models.GitProviderConfig) error {
-	tx := p.db.Save(gitProvider)
+func (p *GitProviderConfigStore) Save(ctx context.Context, gitProvider *models.GitProviderConfig) error {
+	tx := p.getTransaction(ctx)
+
+	tx = tx.Save(gitProvider)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -55,8 +61,10 @@ func (p *GitProviderConfigStore) Save(gitProvider *models.GitProviderConfig) err
 	return nil
 }
 
-func (p *GitProviderConfigStore) Delete(gitProvider *models.GitProviderConfig) error {
-	tx := p.db.Delete(gitProvider)
+func (p *GitProviderConfigStore) Delete(ctx context.Context, gitProvider *models.GitProviderConfig) error {
+	tx := p.getTransaction(ctx)
+
+	tx = tx.Delete(gitProvider)
 	if tx.Error != nil {
 		return tx.Error
 	}

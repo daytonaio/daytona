@@ -4,16 +4,17 @@
 package services
 
 import (
+	"context"
 	"strings"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type IEnvironmentVariableService interface {
-	List() ([]*models.EnvironmentVariable, error)
-	Map() (EnvironmentVariables, error)
-	Save(environmentVariable *models.EnvironmentVariable) error
-	Delete(key string) error
+	List(ctx context.Context) ([]*models.EnvironmentVariable, error)
+	Map(ctx context.Context) (EnvironmentVariables, error)
+	Save(ctx context.Context, environmentVariable *models.EnvironmentVariable) error
+	Delete(ctx context.Context, key string) error
 }
 
 type EnvironmentVariables map[string]string

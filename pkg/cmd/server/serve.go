@@ -211,7 +211,7 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 		}
 	}
 
-	apiKey, err := server.ApiKeyService.Generate(models.ApiKeyTypeClient, "default")
+	apiKey, err := server.ApiKeyService.Generate(context.Background(), models.ApiKeyTypeClient, "default")
 	if err != nil {
 		return err
 	}

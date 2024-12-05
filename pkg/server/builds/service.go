@@ -43,10 +43,9 @@ func NewBuildService(config BuildServiceConfig) services.IBuildService {
 	}
 }
 
-func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
+func (s *BuildService) Create(ctx context.Context, b services.CreateBuildDTO) (string, error) {
 	id := stringid.GenerateRandomID()
 	id = stringid.TruncateID(id)
-	ctx := context.Background()
 
 	workspaceTemplate, err := s.findWorkspaceTemplate(ctx, b.WorkspaceTemplateName)
 	if err != nil {
@@ -73,7 +72,7 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 		newBuild.PrebuildId = *b.PrebuildId
 	}
 
-	err = s.buildStore.Save(&newBuild)
+	err = s.buildStore.Save(ctx, &newBuild)
 	if err != nil {
 		return "", err
 	}
@@ -86,14 +85,14 @@ func (s *BuildService) Create(b services.CreateBuildDTO) (string, error) {
 	return id, nil
 }
 
-func (s *BuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, error) {
+func (s *BuildService) Find(ctx context.Context, filter *services.BuildFilter) (*services.BuildDTO, error) {
 	var storeFilter *stores.BuildFilter
 
 	if filter != nil {
 		storeFilter = &filter.StoreFilter
 	}
 
-	build, err := s.buildStore.Find(storeFilter)
+	build, err := s.buildStore.Find(ctx, storeFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -110,14 +109,14 @@ func (s *BuildService) Find(filter *services.BuildFilter) (*services.BuildDTO, e
 	}, nil
 }
 
-func (s *BuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO, error) {
+func (s *BuildService) List(ctx context.Context, filter *services.BuildFilter) ([]*services.BuildDTO, error) {
 	var storeFilter *stores.BuildFilter
 
 	if filter != nil {
 		storeFilter = &filter.StoreFilter
 	}
 
-	builds, err := s.buildStore.List(storeFilter)
+	builds, err := s.buildStore.List(ctx, storeFilter)
 	if err != nil {
 		return nil, err
 	}
@@ -140,15 +139,14 @@ func (s *BuildService) List(filter *services.BuildFilter) ([]*services.BuildDTO,
 	return result, nil
 }
 
-func (s *BuildService) HandleSuccessfulRemoval(id string) error {
-	return s.buildStore.Delete(id)
+func (s *BuildService) HandleSuccessfulRemoval(ctx context.Context, id string) error {
+	return s.buildStore.Delete(ctx, id)
 }
 
-func (s *BuildService) Delete(filter *services.BuildFilter, force bool) []error {
-	ctx := context.Background()
+func (s *BuildService) Delete(ctx context.Context, filter *services.BuildFilter, force bool) []error {
 	var errors []error
 
-	builds, err := s.List(filter)
+	builds, err := s.List(ctx, filter)
 	if err != nil {
 		return []error{err}
 	}
@@ -170,7 +168,7 @@ func (s *BuildService) Delete(filter *services.BuildFilter, force bool) []error 
 	return errors
 }
 
-func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {
+func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duration) error {
 	timeout := time.NewTimer(waitTime)
 	defer timeout.Stop()
 
@@ -179,7 +177,7 @@ func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {
 		case <-timeout.C:
 			return errors.New("awaiting empty build list timed out")
 		default:
-			builds, err := s.List(&services.BuildFilter{
+			builds, err := s.List(ctx, &services.BuildFilter{
 				ShowDeleted: true,
 			})
 			if err != nil {
@@ -195,6 +193,6 @@ func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {
 	}
 }
 
-func (s *BuildService) GetBuildLogReader(buildId string) (io.Reader, error) {
+func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
 	return s.loggerFactory.CreateBuildLogReader(buildId)
 }

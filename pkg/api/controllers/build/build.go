@@ -36,7 +36,7 @@ func CreateBuild(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	buildId, err := s.BuildService.Create(createBuildDto)
+	buildId, err := s.BuildService.Create(ctx.Request.Context(), createBuildDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create build: %s", err.Error()))
 		return
@@ -61,7 +61,7 @@ func GetBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	b, err := server.BuildService.Find(&services.BuildFilter{
+	b, err := server.BuildService.Find(ctx.Request.Context(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			Id: &buildId,
 		},
@@ -91,7 +91,7 @@ func GetBuild(ctx *gin.Context) {
 func ListBuilds(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	builds, err := server.BuildService.List(nil)
+	builds, err := server.BuildService.List(ctx.Request.Context(), nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list builds: %s", err.Error()))
 		return
@@ -125,7 +125,7 @@ func DeleteAllBuilds(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.Delete(nil, force)
+	errs := server.BuildService.Delete(ctx.Request.Context(), nil, force)
 	if len(errs) > 0 {
 		for _, err := range errs {
 			_ = ctx.Error(err)
@@ -164,7 +164,7 @@ func DeleteBuild(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	errs := server.BuildService.Delete(&services.BuildFilter{
+	errs := server.BuildService.Delete(ctx.Request.Context(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			Id: &buildId,
 		},
@@ -208,7 +208,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	// Fail if prebuild does not exist
-	_, err = server.WorkspaceTemplateService.FindPrebuild(nil, &stores.PrebuildFilter{
+	_, err = server.WorkspaceTemplateService.FindPrebuild(ctx.Request.Context(), nil, &stores.PrebuildFilter{
 		Id: &prebuildId,
 	})
 	if err != nil {
@@ -216,7 +216,7 @@ func DeleteBuildsFromPrebuild(ctx *gin.Context) {
 		return
 	}
 
-	errs := server.BuildService.Delete(&services.BuildFilter{
+	errs := server.BuildService.Delete(ctx.Request.Context(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			PrebuildIds: &[]string{prebuildId},
 		},

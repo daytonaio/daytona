@@ -6,13 +6,16 @@
 package job
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryJobStore struct {
+	common.InMemoryStore
 	jobs map[string]*models.Job
 }
 
@@ -22,7 +25,7 @@ func NewInMemoryJobStore() stores.JobStore {
 	}
 }
 
-func (s *InMemoryJobStore) List(filter *stores.JobFilter) ([]*models.Job, error) {
+func (s *InMemoryJobStore) List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error) {
 	jobs, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -31,7 +34,7 @@ func (s *InMemoryJobStore) List(filter *stores.JobFilter) ([]*models.Job, error)
 	return jobs, nil
 }
 
-func (s *InMemoryJobStore) Find(filter *stores.JobFilter) (*models.Job, error) {
+func (s *InMemoryJobStore) Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error) {
 	jobs, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -43,12 +46,12 @@ func (s *InMemoryJobStore) Find(filter *stores.JobFilter) (*models.Job, error) {
 	return jobs[0], nil
 }
 
-func (s *InMemoryJobStore) Save(job *models.Job) error {
+func (s *InMemoryJobStore) Save(ctx context.Context, job *models.Job) error {
 	s.jobs[job.Id] = job
 	return nil
 }
 
-func (s *InMemoryJobStore) Delete(job *models.Job) error {
+func (s *InMemoryJobStore) Delete(ctx context.Context, job *models.Job) error {
 	delete(s.jobs, job.Id)
 	return nil
 }

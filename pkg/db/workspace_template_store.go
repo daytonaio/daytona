@@ -4,6 +4,8 @@
 package db
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -11,21 +13,23 @@ import (
 )
 
 type WorkspaceTemplateStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewWorkspaceTemplateStore(db *gorm.DB) (*WorkspaceTemplateStore, error) {
-	err := db.AutoMigrate(&models.WorkspaceTemplate{})
+func NewWorkspaceTemplateStore(store Store) (stores.WorkspaceTemplateStore, error) {
+	err := store.db.AutoMigrate(&models.WorkspaceTemplate{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &WorkspaceTemplateStore{db: db}, nil
+	return &WorkspaceTemplateStore{store}, nil
 }
 
-func (s *WorkspaceTemplateStore) List(filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
+func (s *WorkspaceTemplateStore) List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
+	tx := s.getTransaction(ctx)
+
 	workspaceTemplates := []*models.WorkspaceTemplate{}
-	tx := processWorkspaceTemplateFilters(s.db, filter).Find(&workspaceTemplates)
+	tx = processWorkspaceTemplateFilters(tx, filter).Find(&workspaceTemplates)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -34,9 +38,11 @@ func (s *WorkspaceTemplateStore) List(filter *stores.WorkspaceTemplateFilter) ([
 	return workspaceTemplates, nil
 }
 
-func (s *WorkspaceTemplateStore) Find(filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
+func (s *WorkspaceTemplateStore) Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
+	tx := s.getTransaction(ctx)
+
 	workspaceTemplate := &models.WorkspaceTemplate{}
-	tx := processWorkspaceTemplateFilters(s.db, filter).First(workspaceTemplate)
+	tx = processWorkspaceTemplateFilters(tx, filter).First(workspaceTemplate)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -48,8 +54,10 @@ func (s *WorkspaceTemplateStore) Find(filter *stores.WorkspaceTemplateFilter) (*
 	return workspaceTemplate, nil
 }
 
-func (s *WorkspaceTemplateStore) Save(workspaceTemplate *models.WorkspaceTemplate) error {
-	tx := s.db.Save(workspaceTemplate)
+func (s *WorkspaceTemplateStore) Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(workspaceTemplate)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -57,8 +65,10 @@ func (s *WorkspaceTemplateStore) Save(workspaceTemplate *models.WorkspaceTemplat
 	return nil
 }
 
-func (s *WorkspaceTemplateStore) Delete(workspaceTemplate *models.WorkspaceTemplate) error {
-	tx := s.db.Delete(workspaceTemplate)
+func (s *WorkspaceTemplateStore) Delete(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(workspaceTemplate)
 	if tx.Error != nil {
 		return tx.Error
 	}

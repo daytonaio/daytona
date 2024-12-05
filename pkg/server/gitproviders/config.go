@@ -4,6 +4,7 @@
 package gitproviders
 
 import (
+	"context"
 	"net/url"
 	"strconv"
 
@@ -12,18 +13,18 @@ import (
 	"github.com/docker/docker/pkg/stringid"
 )
 
-func (s *GitProviderService) GetConfig(id string) (*models.GitProviderConfig, error) {
-	return s.configStore.Find(id)
+func (s *GitProviderService) GetConfig(ctx context.Context, id string) (*models.GitProviderConfig, error) {
+	return s.configStore.Find(ctx, id)
 }
 
-func (s *GitProviderService) ListConfigs() ([]*models.GitProviderConfig, error) {
-	return s.configStore.List()
+func (s *GitProviderService) ListConfigs(ctx context.Context) ([]*models.GitProviderConfig, error) {
+	return s.configStore.List(ctx)
 }
 
-func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*models.GitProviderConfig, error) {
+func (s *GitProviderService) ListConfigsForUrl(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
 	var gpcs []*models.GitProviderConfig
 
-	gitProviders, err := s.configStore.List()
+	gitProviders, err := s.configStore.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +33,7 @@ func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*models.GitPro
 		p.Token = url.QueryEscape(p.Token)
 		p.Username = url.QueryEscape(p.Username)
 
-		gitProvider, err := s.GetGitProvider(p.Id)
+		gitProvider, err := s.GetGitProvider(ctx, p.Id)
 		if err != nil {
 			return nil, err
 		}
@@ -51,7 +52,7 @@ func (s *GitProviderService) ListConfigsForUrl(repoUrl string) ([]*models.GitPro
 	return gpcs, nil
 }
 
-func (s *GitProviderService) SetGitProviderConfig(providerConfig *models.GitProviderConfig) error {
+func (s *GitProviderService) SetGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error {
 	gitProvider, err := s.newGitProvider(providerConfig)
 	if err != nil {
 		return err
@@ -69,7 +70,7 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *models.GitProv
 	}
 
 	if providerConfig.Alias == "" {
-		gitProviderConfigs, err := s.ListConfigs()
+		gitProviderConfigs, err := s.ListConfigs(ctx)
 		if err != nil {
 			return err
 		}
@@ -90,5 +91,5 @@ func (s *GitProviderService) SetGitProviderConfig(providerConfig *models.GitProv
 		providerConfig.Alias = uniqueAlias
 	}
 
-	return s.configStore.Save(providerConfig)
+	return s.configStore.Save(ctx, providerConfig)
 }

@@ -4,26 +4,28 @@
 package services
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type IWorkspaceTemplateService interface {
-	Save(workspaceTemplate *models.WorkspaceTemplate) error
-	Find(filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
-	List(filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error)
-	SetDefault(workspaceTemplateName string) error
-	Delete(workspaceTemplateName string, force bool) []error
+	Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error
+	Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
+	List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error)
+	SetDefault(ctx context.Context, workspaceTemplateName string) error
+	Delete(ctx context.Context, workspaceTemplateName string, force bool) []error
 
-	SetPrebuild(workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
-	FindPrebuild(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*PrebuildDTO, error)
-	ListPrebuilds(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*PrebuildDTO, error)
-	DeletePrebuild(workspaceTemplateName string, id string, force bool) []error
+	SetPrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
+	FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*PrebuildDTO, error)
+	ListPrebuilds(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*PrebuildDTO, error)
+	DeletePrebuild(ctx context.Context, workspaceTemplateName string, id string, force bool) []error
 
-	StartRetentionPoller() error
-	EnforceRetentionPolicy() error
-	ProcessGitEvent(gitprovider.GitEventData) error
+	StartRetentionPoller(ctx context.Context) error
+	EnforceRetentionPolicy(ctx context.Context) error
+	ProcessGitEvent(ctx context.Context, gitEventData gitprovider.GitEventData) error
 }
 
 type CreateWorkspaceTemplateDTO struct {

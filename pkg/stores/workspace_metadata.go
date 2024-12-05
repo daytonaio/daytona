@@ -4,6 +4,7 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -15,9 +16,10 @@ type WorkspaceMetadataFilter struct {
 }
 
 type WorkspaceMetadataStore interface {
-	Find(filter *WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error)
-	Save(metadata *models.WorkspaceMetadata) error
-	Delete(metadata *models.WorkspaceMetadata) error
+	IStore
+	Find(ctx context.Context, filter *WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error)
+	Save(ctx context.Context, metadata *models.WorkspaceMetadata) error
+	Delete(ctx context.Context, metadata *models.WorkspaceMetadata) error
 }
 
 var (

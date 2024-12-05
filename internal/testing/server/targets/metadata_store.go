@@ -6,11 +6,15 @@
 package targets
 
 import (
+	"context"
+
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryTargetMetadataStore struct {
+	common.InMemoryStore
 	targetMetadataEntries map[string]*models.TargetMetadata
 }
 
@@ -20,7 +24,7 @@ func NewInMemoryTargetMetadataStore() stores.TargetMetadataStore {
 	}
 }
 
-func (s *InMemoryTargetMetadataStore) Find(filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
+func (s *InMemoryTargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
 	metadatas, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -32,12 +36,12 @@ func (s *InMemoryTargetMetadataStore) Find(filter *stores.TargetMetadataFilter) 
 	return metadatas[0], nil
 }
 
-func (s *InMemoryTargetMetadataStore) Save(targetMetadata *models.TargetMetadata) error {
+func (s *InMemoryTargetMetadataStore) Save(ctx context.Context, targetMetadata *models.TargetMetadata) error {
 	s.targetMetadataEntries[targetMetadata.TargetId] = targetMetadata
 	return nil
 }
 
-func (s *InMemoryTargetMetadataStore) Delete(targetMetadata *models.TargetMetadata) error {
+func (s *InMemoryTargetMetadataStore) Delete(ctx context.Context, targetMetadata *models.TargetMetadata) error {
 	delete(s.targetMetadataEntries, targetMetadata.TargetId)
 	return nil
 }

@@ -17,7 +17,7 @@ import (
 )
 
 func (s *WorkspaceService) ListWorkspaces(ctx context.Context, params services.WorkspaceRetrievalParams) ([]services.WorkspaceDTO, error) {
-	workspaces, err := s.workspaceStore.List()
+	workspaces, err := s.workspaceStore.List(ctx)
 	if err != nil {
 		return nil, err
 	}

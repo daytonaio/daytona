@@ -5,10 +5,8 @@ package gitproviders
 
 import "context"
 
-func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
-	ctx := context.Background()
-
-	gitProvider, err := s.configStore.Find(gitProviderId)
+func (s *GitProviderService) RemoveGitProvider(ctx context.Context, gitProviderId string) error {
+	gitProvider, err := s.configStore.Find(ctx, gitProviderId)
 	if err != nil {
 		return err
 	}
@@ -18,5 +16,5 @@ func (s *GitProviderService) RemoveGitProvider(gitProviderId string) error {
 		return err
 	}
 
-	return s.configStore.Delete(gitProvider)
+	return s.configStore.Delete(ctx, gitProvider)
 }

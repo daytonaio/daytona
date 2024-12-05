@@ -4,6 +4,8 @@
 package db
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -12,21 +14,23 @@ import (
 )
 
 type WorkspaceStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
-	err := db.AutoMigrate(&models.Workspace{})
+func NewWorkspaceStore(store Store) (stores.WorkspaceStore, error) {
+	err := store.db.AutoMigrate(&models.Workspace{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &WorkspaceStore{db: db}, nil
+	return &WorkspaceStore{store}, nil
 }
 
-func (s *WorkspaceStore) List() ([]*models.Workspace, error) {
+func (s *WorkspaceStore) List(ctx context.Context) ([]*models.Workspace, error) {
+	tx := s.getTransaction(ctx)
+
 	workspaces := []*models.Workspace{}
-	tx := preloadWorkspaceEntities(s.db).Find(&workspaces)
+	tx = preloadWorkspaceEntities(tx).Find(&workspaces)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -34,9 +38,11 @@ func (s *WorkspaceStore) List() ([]*models.Workspace, error) {
 	return workspaces, nil
 }
 
-func (s *WorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
+func (s *WorkspaceStore) Find(ctx context.Context, idOrName string) (*models.Workspace, error) {
+	tx := s.getTransaction(ctx)
+
 	workspace := &models.Workspace{}
-	tx := preloadWorkspaceEntities(s.db).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
+	tx = preloadWorkspaceEntities(tx).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrWorkspaceNotFound
@@ -47,8 +53,10 @@ func (s *WorkspaceStore) Find(idOrName string) (*models.Workspace, error) {
 	return workspace, nil
 }
 
-func (s *WorkspaceStore) Save(workspace *models.Workspace) error {
-	tx := s.db.Save(workspace)
+func (s *WorkspaceStore) Save(ctx context.Context, workspace *models.Workspace) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -56,8 +64,10 @@ func (s *WorkspaceStore) Save(workspace *models.Workspace) error {
 	return nil
 }
 
-func (s *WorkspaceStore) Delete(workspace *models.Workspace) error {
-	tx := s.db.Delete(workspace)
+func (s *WorkspaceStore) Delete(ctx context.Context, workspace *models.Workspace) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}

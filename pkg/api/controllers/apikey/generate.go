@@ -28,7 +28,7 @@ func GenerateApiKey(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.ApiKeyService.Generate(models.ApiKeyTypeClient, apiKeyName)
+	response, err := server.ApiKeyService.Generate(ctx.Request.Context(), models.ApiKeyTypeClient, apiKeyName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get API keys: %w", err))
 		return
