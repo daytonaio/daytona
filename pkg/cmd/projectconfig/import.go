@@ -7,12 +7,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/create"
@@ -20,13 +22,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var projectConfigList []apiclient.ProjectConfig
+
 var projectConfigImportCmd = &cobra.Command{
 	Use:     "import",
 	Aliases: []string{"imp"},
 	Short:   "Import project config from JSON",
-	Args:    cobra.NoArgs,
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputText string
+		var res *http.Response
+		var err error
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -34,32 +40,36 @@ var projectConfigImportCmd = &cobra.Command{
 			return err
 		}
 
-		form := huh.NewForm(
-			huh.NewGroup(
-				huh.NewText().
-					Title("Import Project-Config").
-					Description("Enter Project-Config as a JSON or an array of JSON objects").
-					CharLimit(-1).
-					Value(&inputText),
-			),
-		).WithTheme(views.GetCustomTheme()).WithHeight(20)
-		err = form.Run()
+		projectConfigList, res, err = apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 		if err != nil {
-			return err
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if len(args) == 1 && args[0] == "-" {
+			inputBytes, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("error reading stdin: %v", err)
+			}
+			inputText = string(inputBytes)
+		} else {
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewText().
+						Title("Import Project-Config").
+						Description("Enter Project-Config as a JSON or an array of JSON objects").
+						CharLimit(-1).
+						Value(&inputText),
+				),
+			).WithTheme(views.GetCustomTheme()).WithHeight(20)
+			err = form.Run()
+			if err != nil {
+				return err
+			}
 		}
 
 		var config apiclient.ProjectConfig
 		err = json.Unmarshal([]byte(inputText), &config)
 		if err == nil {
-			projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-
-			if isProjectConfigAlreadyExists(projectConfigList, config) {
-				views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
-				return nil
-			}
 			err = importProjectConfig(ctx, apiClient, config)
 			if err != nil {
 				return err
@@ -72,29 +82,19 @@ var projectConfigImportCmd = &cobra.Command{
 			}
 
 			for _, config := range configs {
-				projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
-				if err != nil {
-					return apiclient_util.HandleErrorResponse(res, err)
-				}
-
-				if isProjectConfigAlreadyExists(projectConfigList, config) {
-					views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
-					continue
-				}
 				err = importProjectConfig(ctx, apiClient, config)
 				if err != nil {
 					return err
 				}
 			}
 		}
-
 		return nil
 	},
 }
 
-func isProjectConfigAlreadyExists(projectConfigList []apiclient.ProjectConfig, config apiclient.ProjectConfig) bool {
+func isProjectConfigAlreadyExists(configName string) bool {
 	for _, projectConfig := range projectConfigList {
-		if projectConfig.Name == config.Name {
+		if projectConfig.Name == configName {
 			return true
 		}
 	}
@@ -102,6 +102,11 @@ func isProjectConfigAlreadyExists(projectConfigList []apiclient.ProjectConfig, c
 }
 
 func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.ProjectConfig) error {
+	if isProjectConfigAlreadyExists(config.Name) {
+		views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
+		return nil
+	}
+
 	var verifiedGitProvider bool
 	if config.GitProviderConfigId != nil {
 		_, _, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *config.GitProviderConfigId).Execute()
@@ -197,13 +202,9 @@ func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, co
 		return err
 	}
 
-	initialSuggestion := createDto[0].Name
-
-	chosenName := workspace_util.GetSuggestedName(initialSuggestion, existingProjectConfigNames)
-
 	submissionFormConfig := create.SubmissionFormConfig{
 		ChosenName:    &config.Name,
-		SuggestedName: chosenName,
+		SuggestedName: config.Name,
 		ExistingNames: existingProjectConfigNames,
 		ProjectList:   &createDto,
 		NameLabel:     "Project config",
@@ -222,6 +223,7 @@ func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, co
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
+		projectConfigList = append(projectConfigList, config)
 		views.RenderInfoMessage(fmt.Sprintf("Project config %s imported successfully", newProjectConfig.Name))
 		return nil
 	}

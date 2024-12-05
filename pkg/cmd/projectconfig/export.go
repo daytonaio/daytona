@@ -25,7 +25,6 @@ var projectConfigExportCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedProjectConfig *apiclient.ProjectConfig
-		var output string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -44,35 +43,7 @@ var projectConfigExportCmd = &cobra.Command{
 				return nil
 			}
 
-			var pbFlag bool
-
-			for i := range projectConfigs {
-				projectConfigs[i].GitProviderConfigId = nil
-				if projectConfigs[i].Prebuilds != nil {
-					projectConfigs[i].Prebuilds = nil
-					pbFlag = true
-				}
-			}
-
-			data, err := json.MarshalIndent(projectConfigs, "", "  ")
-			if err != nil {
-				return err
-			}
-
-			fmt.Println(string(data))
-
-			if pbFlag {
-				views.RenderContainerLayout("Prebuilds have been removed from your configs.")
-			}
-
-			if err := clipboard.WriteAll(string(data)); err == nil {
-				output = "The configs have been copied to your clipboard."
-			} else {
-				output = "Could not copy the configs to your clipboard."
-			}
-			views.RenderContainerLayout(views.GetInfoMessage(output))
-
-			return nil
+			return exportProjectConfig(projectConfigs)
 		}
 
 		if len(args) == 0 {
@@ -98,30 +69,49 @@ var projectConfigExportCmd = &cobra.Command{
 			}
 		}
 
-		selectedProjectConfig.GitProviderConfigId = nil
-		if selectedProjectConfig.Prebuilds != nil {
-			selectedProjectConfig.Prebuilds = nil
-			views.RenderContainerLayout("Prebuilds have been removed from the config.")
-		}
-
-		data, err := json.MarshalIndent(selectedProjectConfig, "", "  ")
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(string(data))
-
-		if err := clipboard.WriteAll(string(data)); err == nil {
-			output = "The config has been copied to your clipboard."
-		} else {
-			output = "Could not copy the config to your clipboard."
-		}
-		views.RenderContainerLayout(views.GetInfoMessage(output))
-
-		return nil
+		return exportProjectConfig([]apiclient.ProjectConfig{*selectedProjectConfig})
 	},
 }
 
 func init() {
 	projectConfigExportCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Export all project configs")
+}
+
+func exportProjectConfig(projectConfigs []apiclient.ProjectConfig) error {
+	var pbFlag bool
+
+	for i := range projectConfigs {
+		projectConfigs[i].GitProviderConfigId = nil
+		if projectConfigs[i].Prebuilds != nil {
+			projectConfigs[i].Prebuilds = nil
+			pbFlag = true
+		}
+	}
+
+	var data []byte
+	var err error
+
+	if len(projectConfigs) == 1 {
+		data, err = json.MarshalIndent(projectConfigs[0], "", "  ")
+		views.RenderContainerLayout("Prebuilds have been removed from the config.")
+	} else {
+		data, err = json.MarshalIndent(projectConfigs, "", "  ")
+		if pbFlag {
+			views.RenderContainerLayout("Prebuilds have been removed from your configs.")
+		}
+	}
+
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(data))
+
+	if err := clipboard.WriteAll(string(data)); err == nil {
+		views.RenderContainerLayout(views.GetInfoMessage("The config(s) have been copied to your clipboard."))
+	} else {
+		views.RenderContainerLayout(views.GetInfoMessage("Could not copy the config(s) to your clipboard."))
+	}
+
+	return nil
 }
