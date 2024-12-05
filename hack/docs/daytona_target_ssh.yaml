@@ -1,0 +1,18 @@
+name: daytona target ssh
+synopsis: SSH into a target using the terminal
+usage: daytona target ssh [TARGET] [CMD...] [flags]
+options:
+    - name: option
+      shorthand: o
+      default_value: '[]'
+      usage: Specify SSH options in KEY=VALUE format.
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Automatically confirm any prompts
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona target - Manage targets
