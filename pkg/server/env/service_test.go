@@ -4,6 +4,7 @@
 package env_test
 
 import (
+	"context"
 	"testing"
 
 	t_envvar "github.com/daytonaio/daytona/internal/testing/server/env"
@@ -36,7 +37,7 @@ func TestEnvironmentVariableService(t *testing.T) {
 }
 
 func (s *EnvironmentVariableServiceTestSuite) TestReturnsEnvironmentVariableNotFound() {
-	envVar, err := s.environmentVariableService.List()
+	envVar, err := s.environmentVariableService.List(context.TODO())
 	s.Require().Nil(envVar)
 	s.Require().True(stores.IsEnvironmentVariableNotFound(err))
 }
@@ -47,10 +48,10 @@ func (s *EnvironmentVariableServiceTestSuite) TestSaveEnvironmentVariable() {
 		Value: "value1",
 	}
 
-	err := s.environmentVariableService.Save(envVar)
+	err := s.environmentVariableService.Save(context.TODO(), envVar)
 	s.Require().Nil(err)
 
-	envVarsFromStore, err := s.environmentVariableStore.List()
+	envVarsFromStore, err := s.environmentVariableStore.List(context.TODO())
 	s.Require().Nil(err)
 	s.Require().NotNil(envVarsFromStore)
 	s.Require().Equal(envVar, envVarsFromStore)
@@ -62,13 +63,13 @@ func (s *EnvironmentVariableServiceTestSuite) TestDeleteEnvironmentVariable() {
 		Value: "value1",
 	}
 
-	err := s.environmentVariableService.Save(envVar)
+	err := s.environmentVariableService.Save(context.TODO(), envVar)
 	s.Require().Nil(err)
 
-	err = s.environmentVariableService.Delete(envVar.Key)
+	err = s.environmentVariableService.Delete(context.TODO(), envVar.Key)
 	s.Require().Nil(err)
 
-	EnvVarsFromStore, err := s.environmentVariableStore.List()
+	EnvVarsFromStore, err := s.environmentVariableStore.List(context.TODO())
 	s.Require().Nil(EnvVarsFromStore)
 	s.Require().True(stores.IsEnvironmentVariableNotFound(err))
 }

@@ -4,6 +4,8 @@
 package apikeys_test
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -13,13 +15,13 @@ func (s *ApiKeyServiceTestSuite) TestListClientKeys() {
 
 	keyNames = append(keyNames, clientKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
 		expectedKeys = append(expectedKeys, apiKey)
 	}
 
 	require := s.Require()
 
-	keys, err := s.apiKeyService.ListClientKeys()
+	keys, err := s.apiKeyService.ListClientKeys(context.TODO())
 
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, keys)
@@ -32,16 +34,16 @@ func (s *ApiKeyServiceTestSuite) TestRevoke() {
 	keyNames = append(keyNames, clientKeyNames[1:]...)
 	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
 		expectedKeys = append(expectedKeys, apiKey)
 	}
 
 	require := s.Require()
 
-	err := s.apiKeyService.Revoke(clientKeyNames[0])
+	err := s.apiKeyService.Revoke(context.TODO(), clientKeyNames[0])
 	require.Nil(err)
 
-	keys, err := s.apiKeyStore.List()
+	keys, err := s.apiKeyStore.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, keys)
 }
@@ -53,7 +55,7 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 	keyNames = append(keyNames, clientKeyNames...)
 	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
 		expectedKeys = append(expectedKeys, apiKey)
 	}
 
@@ -61,14 +63,14 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 
 	require := s.Require()
 
-	_, err := s.apiKeyService.Generate(models.ApiKeyTypeClient, keyName)
+	_, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
-	apiKey, err := s.apiKeyStore.FindByName(keyName)
+	apiKey, err := s.apiKeyStore.FindByName(context.TODO(), keyName)
 	require.Nil(err)
 	expectedKeys = append(expectedKeys, apiKey)
 
-	apiKeys, err := s.apiKeyStore.List()
+	apiKeys, err := s.apiKeyStore.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, apiKeys)
 }

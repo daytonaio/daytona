@@ -4,6 +4,7 @@
 package builds_test
 
 import (
+	"context"
 	"testing"
 
 	build_internal "github.com/daytonaio/daytona/internal/testing/build"
@@ -108,7 +109,7 @@ func (s *BuildServiceTestSuite) SetupTest() {
 	})
 
 	for _, b := range expectedBuilds {
-		_ = s.buildStore.Save(b)
+		_ = s.buildStore.Save(context.TODO(), b)
 	}
 }
 
@@ -119,7 +120,7 @@ func TestBuildService(t *testing.T) {
 func (s *BuildServiceTestSuite) TestList() {
 	require := s.Require()
 
-	builds, err := s.buildService.List(nil)
+	builds, err := s.buildService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedBuilds, builds)
 }
@@ -127,7 +128,7 @@ func (s *BuildServiceTestSuite) TestList() {
 func (s *BuildServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	build, err := s.buildService.Find(&services.BuildFilter{
+	build, err := s.buildService.Find(context.TODO(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			Id: &build1.Id,
 		},
@@ -149,10 +150,10 @@ func (s *BuildServiceTestSuite) TestSave() {
 		EnvVars:               build4.EnvVars,
 	}
 
-	_, err := s.buildService.Create(createBuildDto)
+	_, err := s.buildService.Create(context.TODO(), createBuildDto)
 	require.Nil(err)
 
-	_, err = s.buildService.List(nil)
+	_, err = s.buildService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.Contains(expectedBuilds, build4)
 }
@@ -162,7 +163,7 @@ func (s *BuildServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.buildService.Delete(&services.BuildFilter{
+	err := s.buildService.Delete(context.TODO(), &services.BuildFilter{
 		StoreFilter: stores.BuildFilter{
 			Id: &build3.Id,
 		},
@@ -175,10 +176,10 @@ func (s *BuildServiceTestSuite) TestHandleSuccessfulRemoval() {
 
 	require := s.Require()
 
-	err := s.buildService.HandleSuccessfulRemoval(build3.Id)
+	err := s.buildService.HandleSuccessfulRemoval(context.TODO(), build3.Id)
 	require.Nil(err)
 
-	builds, err := s.buildService.List(nil)
+	builds, err := s.buildService.List(context.TODO(), nil)
 	require.Nil(err)
 	require.ElementsMatch(expectedBuilds, builds)
 }

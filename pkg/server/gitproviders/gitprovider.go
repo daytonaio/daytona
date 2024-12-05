@@ -4,6 +4,7 @@
 package gitproviders
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
@@ -14,8 +15,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.GitProvider, string, error) {
-	gitProviders, err := s.configStore.List()
+func (s *GitProviderService) GetGitProviderForUrl(ctx context.Context, repoUrl string) (gitprovider.GitProvider, string, error) {
+	gitProviders, err := s.configStore.List(ctx)
 	if err != nil {
 		return nil, "", err
 	}
@@ -24,7 +25,7 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	var eligibleProviderId string
 
 	for _, p := range gitProviders {
-		gitProvider, err := s.GetGitProvider(p.Id)
+		gitProvider, err := s.GetGitProvider(ctx, p.Id)
 		if err != nil {
 			continue
 		}
@@ -66,10 +67,10 @@ func (s *GitProviderService) GetGitProviderForUrl(repoUrl string) (gitprovider.G
 	return nil, "", errors.New("can not get public client for the URL " + repoUrl)
 }
 
-func (s *GitProviderService) GetGitProviderForHttpRequest(req *http.Request) (gitprovider.GitProvider, error) {
+func (s *GitProviderService) GetGitProviderForHttpRequest(ctx context.Context, req *http.Request) (gitprovider.GitProvider, error) {
 	var provider *models.GitProviderConfig
 
-	gitProviders, err := s.configStore.List()
+	gitProviders, err := s.configStore.List(ctx)
 	if err != nil {
 		return nil, err
 	}

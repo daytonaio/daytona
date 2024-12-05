@@ -4,6 +4,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"io"
 	"time"
@@ -13,13 +14,13 @@ import (
 )
 
 type IBuildService interface {
-	Create(CreateBuildDTO) (string, error)
-	Find(filter *BuildFilter) (*BuildDTO, error)
-	List(filter *BuildFilter) ([]*BuildDTO, error)
-	Delete(filter *BuildFilter, force bool) []error
-	HandleSuccessfulRemoval(id string) error
-	AwaitEmptyList(time.Duration) error
-	GetBuildLogReader(buildId string) (io.Reader, error)
+	Create(ctx context.Context, createBuildDTO CreateBuildDTO) (string, error)
+	Find(ctx context.Context, filter *BuildFilter) (*BuildDTO, error)
+	List(ctx context.Context, filter *BuildFilter) ([]*BuildDTO, error)
+	Delete(ctx context.Context, filter *BuildFilter, force bool) []error
+	HandleSuccessfulRemoval(ctx context.Context, id string) error
+	AwaitEmptyList(ctx context.Context, waitTime time.Duration) error
+	GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error)
 }
 
 type BuildDTO struct {

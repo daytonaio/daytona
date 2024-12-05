@@ -60,39 +60,52 @@ func NewWorkspaceTemplateService(config WorkspaceTemplateServiceConfig) services
 	}
 }
 
-func (s *WorkspaceTemplateService) List(filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
-	return s.templateStore.List(filter)
+func (s *WorkspaceTemplateService) List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
+	return s.templateStore.List(ctx, filter)
 }
 
-func (s *WorkspaceTemplateService) SetDefault(workspaceTemplateName string) error {
-	workspaceTemplate, err := s.Find(&stores.WorkspaceTemplateFilter{
-		Name: &workspaceTemplateName,
-	})
+func (s *WorkspaceTemplateService) SetDefault(ctx context.Context, workspaceTemplateName string) error {
+	var err error
+	ctx, err = s.templateStore.BeginTransaction(ctx)
 	if err != nil {
 		return err
 	}
 
-	defaultWorkspaceTemplate, err := s.Find(&stores.WorkspaceTemplateFilter{
+	defer stores.RecoverAndRollback(ctx, s.templateStore)
+
+	workspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
+		Name: &workspaceTemplateName,
+	})
+	if err != nil {
+		return s.templateStore.RollbackTransaction(ctx, err)
+	}
+
+	defaultWorkspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
 		Url:     &workspaceTemplate.RepositoryUrl,
 		Default: util.Pointer(true),
 	})
 	if err != nil && !stores.IsWorkspaceTemplateNotFound(err) {
-		return err
+		return s.templateStore.RollbackTransaction(ctx, err)
 	}
 
 	if defaultWorkspaceTemplate != nil {
 		defaultWorkspaceTemplate.IsDefault = false
-		err := s.templateStore.Save(defaultWorkspaceTemplate)
+		err := s.templateStore.Save(ctx, defaultWorkspaceTemplate)
 		if err != nil {
-			return err
+			return s.templateStore.RollbackTransaction(ctx, err)
 		}
 	}
 
 	workspaceTemplate.IsDefault = true
-	return s.templateStore.Save(workspaceTemplate)
+	err = s.templateStore.Save(ctx, workspaceTemplate)
+	if err != nil {
+		return s.templateStore.RollbackTransaction(ctx, err)
+	}
+
+	return s.templateStore.CommitTransaction(ctx)
 }
 
-func (s *WorkspaceTemplateService) Find(filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
+func (s *WorkspaceTemplateService) Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
 	if filter != nil && filter.Url != nil {
 		cleanedUrl := util.CleanUpRepositoryUrl(*filter.Url)
 		if !strings.HasSuffix(cleanedUrl, ".git") {
@@ -100,22 +113,22 @@ func (s *WorkspaceTemplateService) Find(filter *stores.WorkspaceTemplateFilter) 
 		}
 		filter.Url = util.Pointer(cleanedUrl)
 	}
-	return s.templateStore.Find(filter)
+	return s.templateStore.Find(ctx, filter)
 }
 
-func (s *WorkspaceTemplateService) Save(workspaceTemplate *models.WorkspaceTemplate) error {
+func (s *WorkspaceTemplateService) Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
 	workspaceTemplate.RepositoryUrl = util.CleanUpRepositoryUrl(workspaceTemplate.RepositoryUrl)
 
-	err := s.templateStore.Save(workspaceTemplate)
+	err := s.templateStore.Save(ctx, workspaceTemplate)
 	if err != nil {
 		return err
 	}
 
-	return s.SetDefault(workspaceTemplate.Name)
+	return s.SetDefault(ctx, workspaceTemplate.Name)
 }
 
-func (s *WorkspaceTemplateService) Delete(workspaceTemplateName string, force bool) []error {
-	wt, err := s.Find(&stores.WorkspaceTemplateFilter{
+func (s *WorkspaceTemplateService) Delete(ctx context.Context, workspaceTemplateName string, force bool) []error {
+	wt, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplateName,
 	})
 	if err != nil {
@@ -124,13 +137,13 @@ func (s *WorkspaceTemplateService) Delete(workspaceTemplateName string, force bo
 
 	// DeletePrebuild handles deleting the builds and removing the webhook
 	for _, prebuild := range wt.Prebuilds {
-		errs := s.DeletePrebuild(wt.Name, prebuild.Id, force)
+		errs := s.DeletePrebuild(ctx, wt.Name, prebuild.Id, force)
 		if len(errs) > 0 {
 			return errs
 		}
 	}
 
-	err = s.templateStore.Delete(wt)
+	err = s.templateStore.Delete(ctx, wt)
 	if err != nil {
 		return []error{err}
 	}

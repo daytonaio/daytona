@@ -37,7 +37,7 @@ func GetNamespaces(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetNamespaces(gitProviderId, options)
+	response, err := server.GitProviderService.GetNamespaces(ctx.Request.Context(), gitProviderId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

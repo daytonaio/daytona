@@ -4,15 +4,17 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type TargetConfigStore interface {
-	List(allowDeleted bool) ([]*models.TargetConfig, error)
-	Find(idOrName string, allowDeleted bool) (*models.TargetConfig, error)
-	Save(targetConfig *models.TargetConfig) error
+	IStore
+	List(ctx context.Context, allowDeleted bool) ([]*models.TargetConfig, error)
+	Find(ctx context.Context, idOrName string, allowDeleted bool) (*models.TargetConfig, error)
+	Save(ctx context.Context, targetConfig *models.TargetConfig) error
 }
 
 var (

@@ -36,7 +36,7 @@ func SetWorkspaceMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.WorkspaceService.SetWorkspaceMetadata(workspaceId, &models.WorkspaceMetadata{
+	_, err = server.WorkspaceService.SetWorkspaceMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
 		Uptime:    setWorkspaceMetadataDTO.Uptime,
 		GitStatus: setWorkspaceMetadataDTO.GitStatus,
 	})

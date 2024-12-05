@@ -4,6 +4,7 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -15,10 +16,11 @@ type TargetFilter struct {
 }
 
 type TargetStore interface {
-	List(filter *TargetFilter) ([]*models.Target, error)
-	Find(filter *TargetFilter) (*models.Target, error)
-	Save(target *models.Target) error
-	Delete(target *models.Target) error
+	IStore
+	List(ctx context.Context, filter *TargetFilter) ([]*models.Target, error)
+	Find(ctx context.Context, filter *TargetFilter) (*models.Target, error)
+	Save(ctx context.Context, target *models.Target) error
+	Delete(ctx context.Context, target *models.Target) error
 }
 
 var (

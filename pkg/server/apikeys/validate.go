@@ -4,21 +4,23 @@
 package apikeys
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (s *ApiKeyService) IsValidApiKey(apiKey string) bool {
+func (s *ApiKeyService) IsValidApiKey(ctx context.Context, apiKey string) bool {
 	keyHash := apikeys.HashKey(apiKey)
 
-	_, err := s.apiKeyStore.Find(keyHash)
+	_, err := s.apiKeyStore.Find(ctx, keyHash)
 	return err == nil
 }
 
-func (s *ApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
+func (s *ApiKeyService) IsWorkspaceApiKey(ctx context.Context, apiKey string) bool {
 	keyHash := apikeys.HashKey(apiKey)
 
-	key, err := s.apiKeyStore.Find(keyHash)
+	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
 		return false
 	}
@@ -30,10 +32,10 @@ func (s *ApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
 	return true
 }
 
-func (s *ApiKeyService) IsTargetApiKey(apiKey string) bool {
+func (s *ApiKeyService) IsTargetApiKey(ctx context.Context, apiKey string) bool {
 	keyHash := apikeys.HashKey(apiKey)
 
-	key, err := s.apiKeyStore.Find(keyHash)
+	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
 		return false
 	}

@@ -15,67 +15,110 @@ import (
 )
 
 func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId string) error {
-	ws, err := s.workspaceStore.Find(workspaceId)
+	var err error
+	ctx, err = s.workspaceStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleRemoveError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
+
+	ws, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
 	}
 
 	ws.Name = util.AddDeletedToName(ws.Name)
 
-	err = s.workspaceStore.Save(ws)
+	err = s.workspaceStore.Save(ctx, ws)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
 	err = s.createJob(ctx, ws.Id, models.JobActionDelete)
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	err = s.workspaceStore.CommitTransaction(ctx)
 	return s.handleRemoveError(ctx, ws, err)
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
 func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId string) error {
-	ws, err := s.workspaceStore.Find(workspaceId)
+	var err error
+	ctx, err = s.workspaceStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleRemoveError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
+
+	ws, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
 	}
 
 	ws.Name = util.AddDeletedToName(ws.Name)
 
-	err = s.workspaceStore.Save(ws)
+	err = s.workspaceStore.Save(ctx, ws)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
 	err = s.createJob(ctx, ws.Id, models.JobActionForceDelete)
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	err = s.workspaceStore.CommitTransaction(ctx)
 	return s.handleRemoveError(ctx, ws, err)
 }
 
 func (s *WorkspaceService) HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error {
-	err := s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", workspaceId))
+	var err error
+	ctx, err = s.workspaceStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleRemoveError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
+
+	err = s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", workspaceId))
 	if err != nil {
 		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
 	}
 
-	ws, err := s.workspaceStore.Find(workspaceId)
+	ws, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
 	}
 
-	metadata, err := s.workspaceMetadataStore.Find(&stores.WorkspaceMetadataFilter{WorkspaceId: &workspaceId})
+	metadata, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{WorkspaceId: &workspaceId})
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	err = s.workspaceMetadataStore.Delete(metadata)
+	err = s.workspaceMetadataStore.Delete(ctx, metadata)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	err = s.workspaceStore.Delete(ws)
+	err = s.workspaceStore.Delete(ctx, ws)
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	err = s.workspaceStore.CommitTransaction(ctx)
 	return s.handleRemoveError(ctx, ws, err)
 }
 
 func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Workspace, err error) error {
+	if err != nil {
+		err = s.workspaceStore.RollbackTransaction(ctx, err)
+	}
+
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}

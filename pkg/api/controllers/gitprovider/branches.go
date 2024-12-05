@@ -53,7 +53,7 @@ func GetRepoBranches(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepoBranches(gitProviderId, namespaceId, repositoryId, options)
+	response, err := server.GitProviderService.GetRepoBranches(ctx.Request.Context(), gitProviderId, namespaceId, repositoryId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

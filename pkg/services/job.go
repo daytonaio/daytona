@@ -4,6 +4,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -11,11 +12,11 @@ import (
 )
 
 type IJobService interface {
-	Create(job *models.Job) error
-	Update(job *models.Job) error
-	Find(filter *stores.JobFilter) (*models.Job, error)
-	List(filter *stores.JobFilter) ([]*models.Job, error)
-	Delete(job *models.Job) error
+	Create(ctx context.Context, job *models.Job) error
+	SetState(ctx context.Context, jobId string, state models.JobState, error *string) error
+	Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error)
+	List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error)
+	Delete(ctx context.Context, job *models.Job) error
 }
 
 var (

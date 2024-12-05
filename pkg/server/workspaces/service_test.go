@@ -114,7 +114,7 @@ func TestTargetService(t *testing.T) {
 	ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, "test-client-id")
 
 	targetStore := t_targets.NewInMemoryTargetStore()
-	err := targetStore.Save(tg)
+	err := targetStore.Save(ctx, tg)
 	require.Nil(t, err)
 
 	workspaceStore := t_workspaces.NewInMemoryWorkspaceStore()
@@ -128,7 +128,7 @@ func TestTargetService(t *testing.T) {
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			t, err := targetStore.Find(&stores.TargetFilter{IdOrName: &targetId})
+			t, err := targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
 			if err != nil {
 				return nil, err
 			}
@@ -307,7 +307,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("ForceRemoveWorkspace", func(t *testing.T) {
-		err := workspaceStore.Save(ws)
+		err := workspaceStore.Save(ctx, ws)
 		require.Nil(t, err)
 
 		mockProvisioner.On("DestroyWorkspace", mock.Anything, tg).Return(nil)
@@ -322,10 +322,10 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("SetWorkspaceMetadata", func(t *testing.T) {
-		err := workspaceStore.Save(ws)
+		err := workspaceStore.Save(ctx, ws)
 		require.Nil(t, err)
 
-		res, err := service.SetWorkspaceMetadata(createWorkspaceDTO.Id, &models.WorkspaceMetadata{
+		res, err := service.SetWorkspaceMetadata(ctx, createWorkspaceDTO.Id, &models.WorkspaceMetadata{
 			Uptime: 10,
 			GitStatus: &models.GitStatus{
 				CurrentBranch: "main",

@@ -57,47 +57,49 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	dbConnection := db.GetSQLiteConnection(dbPath)
 
-	apiKeyStore, err := db.NewApiKeyStore(dbConnection)
+	store := db.NewStore(dbConnection)
+
+	apiKeyStore, err := db.NewApiKeyStore(store)
 	if err != nil {
 		return nil, err
 	}
-	buildStore, err := db.NewBuildStore(dbConnection)
+	buildStore, err := db.NewBuildStore(store)
 	if err != nil {
 		return nil, err
 	}
-	workspaceTemplateStore, err := db.NewWorkspaceTemplateStore(dbConnection)
+	workspaceTemplateStore, err := db.NewWorkspaceTemplateStore(store)
 	if err != nil {
 		return nil, err
 	}
-	gitProviderConfigStore, err := db.NewGitProviderConfigStore(dbConnection)
+	gitProviderConfigStore, err := db.NewGitProviderConfigStore(store)
 	if err != nil {
 		return nil, err
 	}
-	targetConfigStore, err := db.NewTargetConfigStore(dbConnection)
+	targetConfigStore, err := db.NewTargetConfigStore(store)
 	if err != nil {
 		return nil, err
 	}
-	targetStore, err := db.NewTargetStore(dbConnection)
+	targetStore, err := db.NewTargetStore(store)
 	if err != nil {
 		return nil, err
 	}
-	targetMetadataStore, err := db.NewTargetMetadataStore(dbConnection)
+	targetMetadataStore, err := db.NewTargetMetadataStore(store)
 	if err != nil {
 		return nil, err
 	}
-	envVarStore, err := db.NewEnvironmentVariableStore(dbConnection)
+	envVarStore, err := db.NewEnvironmentVariableStore(store)
 	if err != nil {
 		return nil, err
 	}
-	workspaceStore, err := db.NewWorkspaceStore(dbConnection)
+	workspaceStore, err := db.NewWorkspaceStore(store)
 	if err != nil {
 		return nil, err
 	}
-	workspaceMetadataStore, err := db.NewWorkspaceMetadataStore(dbConnection)
+	workspaceMetadataStore, err := db.NewWorkspaceMetadataStore(store)
 	if err != nil {
 		return nil, err
 	}
-	jobStore, err := db.NewJobStore(dbConnection)
+	jobStore, err := db.NewJobStore(store)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +122,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 		ConfigStore: gitProviderConfigStore,
 		DetachWorkspaceTemplates: func(ctx context.Context, gitProviderConfigId string) error {
-			workspaceTemplates, err := workspaceTemplateStore.List(&stores.WorkspaceTemplateFilter{
+			workspaceTemplates, err := workspaceTemplateStore.List(ctx, &stores.WorkspaceTemplateFilter{
 				GitProviderConfigId: &gitProviderConfigId,
 			})
 
@@ -130,7 +132,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 			for _, workspaceTemplate := range workspaceTemplates {
 				workspaceTemplate.GitProviderConfigId = nil
-				err = workspaceTemplateStore.Save(workspaceTemplate)
+				err = workspaceTemplateStore.Save(ctx, workspaceTemplate)
 				if err != nil {
 					return err
 				}
@@ -147,12 +149,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	buildService := builds.NewBuildService(builds.BuildServiceConfig{
 		BuildStore: buildStore,
 		FindWorkspaceTemplate: func(ctx context.Context, name string) (*models.WorkspaceTemplate, error) {
-			return workspaceTemplateStore.Find(&stores.WorkspaceTemplateFilter{
+			return workspaceTemplateStore.Find(ctx, &stores.WorkspaceTemplateFilter{
 				Name: &name,
 			})
 		},
 		GetRepositoryContext: func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error) {
-			gitProvider, _, err := gitProviderService.GetGitProviderForUrl(url)
+			gitProvider, _, err := gitProviderService.GetGitProviderForUrl(ctx, url)
 			if err != nil {
 				return nil, err
 			}
@@ -164,7 +166,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			return repo, err
 		},
 		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction) error {
-			return jobService.Create(&models.Job{
+			return jobService.Create(ctx, &models.Job{
 				ResourceId:   workspaceId,
 				ResourceType: models.ResourceTypeBuild,
 				Action:       action,
@@ -180,7 +182,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		PrebuildWebhookEndpoint: prebuildWebhookEndpoint,
 		ConfigStore:             workspaceTemplateStore,
 		FindNewestBuild: func(ctx context.Context, prebuildId string) (*services.BuildDTO, error) {
-			return buildService.Find(&services.BuildFilter{
+			return buildService.Find(ctx, &services.BuildFilter{
 				StoreFilter: stores.BuildFilter{
 					PrebuildIds: &[]string{prebuildId},
 					GetNewest:   util.Pointer(true),
@@ -188,7 +190,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			})
 		},
 		ListSuccessfulBuilds: func(ctx context.Context) ([]*services.BuildDTO, error) {
-			return buildService.List(&services.BuildFilter{
+			return buildService.List(ctx, &services.BuildFilter{
 				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 			})
 		},
@@ -200,7 +202,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				EnvVars:               workspaceTemplate.EnvVars,
 			}
 
-			_, err := buildService.Create(createBuildDto)
+			_, err := buildService.Create(ctx, createBuildDto)
 			return err
 		},
 		DeleteBuilds: func(ctx context.Context, id, prebuildId *string, force bool) []error {
@@ -209,7 +211,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				prebuildIds = &[]string{*prebuildId}
 			}
 
-			return buildService.Delete(&services.BuildFilter{
+			return buildService.Delete(ctx, &services.BuildFilter{
 				StoreFilter: stores.BuildFilter{
 					Id:          id,
 					PrebuildIds: prebuildIds,
@@ -217,7 +219,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			}, force)
 		},
 		GetRepositoryContext: func(ctx context.Context, url string) (*gitprovider.GitRepository, string, error) {
-			gitProvider, gitProviderId, err := gitProviderService.GetGitProviderForUrl(url)
+			gitProvider, gitProviderId, err := gitProviderService.GetGitProviderForUrl(ctx, url)
 			if err != nil {
 				return nil, "", err
 			}
@@ -229,16 +231,16 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			return repo, gitProviderId, err
 		},
 		FindPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error) {
-			return gitProviderService.GetPrebuildWebhook(gitProviderId, repo, endpointUrl)
+			return gitProviderService.GetPrebuildWebhook(ctx, gitProviderId, repo, endpointUrl)
 		},
 		UnregisterPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error {
-			return gitProviderService.UnregisterPrebuildWebhook(gitProviderId, repo, id)
+			return gitProviderService.UnregisterPrebuildWebhook(ctx, gitProviderId, repo, id)
 		},
 		RegisterPrebuildWebhook: func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error) {
-			return gitProviderService.RegisterPrebuildWebhook(gitProviderId, repo, endpointUrl)
+			return gitProviderService.RegisterPrebuildWebhook(ctx, gitProviderId, repo, endpointUrl)
 		},
 		GetCommitsRange: func(ctx context.Context, repo *gitprovider.GitRepository, initialSha, currentSha string) (int, error) {
-			gitProvider, _, err := gitProviderService.GetGitProviderForUrl(repo.Url)
+			gitProvider, _, err := gitProviderService.GetGitProviderForUrl(ctx, repo.Url)
 			if err != nil {
 				return 0, err
 			}
@@ -247,7 +249,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		},
 	})
 
-	err = workspaceTemplateService.StartRetentionPoller()
+	err = workspaceTemplateService.StartRetentionPoller(context.Background())
 	if err != nil {
 		return nil, err
 	}
@@ -256,7 +258,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	if c.BuilderRegistryServer != "local" {
 		envVarService := server.GetInstance(nil).EnvironmentVariableService
-		envVars, err := envVarService.Map()
+		envVars, err := envVarService.Map(context.Background())
 		if err != nil || envVars.FindContainerRegistry(c.BuilderRegistryServer) == nil {
 			log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
 			log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server by adding them as environment variables using `daytona env set` and restart the server\n", c.BuilderRegistryServer)
@@ -294,16 +296,16 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		TargetStore:         targetStore,
 		TargetMetadataStore: targetMetadataStore,
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
-			return targetConfigService.Find(name)
+			return targetConfigService.Find(ctx, name)
 		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)
+			return apiKeyService.Generate(ctx, models.ApiKeyTypeTarget, name)
 		},
 		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(name)
+			return apiKeyService.Revoke(ctx, name)
 		},
 		CreateJob: func(ctx context.Context, targetId string, action models.JobAction) error {
-			return jobService.Create(&models.Job{
+			return jobService.Create(ctx, &models.Job{
 				ResourceId:   targetId,
 				ResourceType: models.ResourceTypeTarget,
 				Action:       action,
@@ -336,7 +338,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				models.ResourceStateNameRunSuccessful,
 			}
 
-			build, err := buildService.Find(&services.BuildFilter{
+			build, err := buildService.Find(ctx, &services.BuildFilter{
 				StateNames: &validStates,
 				StoreFilter: stores.BuildFilter{
 					RepositoryUrl: &w.Repository.Url,
@@ -360,22 +362,22 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			}, nil
 		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(models.ApiKeyTypeWorkspace, name)
+			return apiKeyService.Generate(ctx, models.ApiKeyTypeWorkspace, name)
 		},
 		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(name)
+			return apiKeyService.Revoke(ctx, name)
 		},
 		ListGitProviderConfigs: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
-			return gitProviderService.ListConfigsForUrl(repoUrl)
+			return gitProviderService.ListConfigsForUrl(ctx, repoUrl)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			return gitProviderService.GetConfig(id)
+			return gitProviderService.GetConfig(ctx, id)
 		},
 		GetLastCommitSha: func(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
-			return gitProviderService.GetLastCommitSha(repo)
+			return gitProviderService.GetLastCommitSha(ctx, repo)
 		},
 		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction) error {
-			return jobService.Create(&models.Job{
+			return jobService.Create(ctx, &models.Job{
 				ResourceId:   workspaceId,
 				ResourceType: models.ResourceTypeWorkspace,
 				Action:       action,

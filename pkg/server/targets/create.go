@@ -17,7 +17,15 @@ import (
 )
 
 func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTargetDTO) (*models.Target, error) {
-	_, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &req.Id})
+	var err error
+	ctx, err = s.targetStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.targetStore)
+
+	_, err = s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &req.Id})
 	if err == nil {
 		return nil, services.ErrTargetAlreadyExists
 	}
@@ -54,12 +62,12 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 	})
 	tg.EnvVars = util.MergeEnvVars(daytonaTargetEnvVars, tg.EnvVars)
 
-	err = s.targetStore.Save(tg)
+	err = s.targetStore.Save(ctx, tg)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
 
-	err = s.targetMetadataStore.Save(&models.TargetMetadata{
+	err = s.targetMetadataStore.Save(ctx, &models.TargetMetadata{
 		TargetId: tg.Id,
 		Uptime:   0,
 	})
@@ -68,6 +76,11 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 	}
 
 	err = s.createJob(ctx, tg.Id, models.JobActionCreate)
+	if err != nil {
+		return s.handleCreateError(ctx, tg, err)
+	}
+
+	err = s.targetStore.CommitTransaction(ctx)
 	return s.handleCreateError(ctx, tg, err)
 }
 
@@ -76,6 +89,10 @@ func (s *TargetService) HandleSuccessfulCreation(ctx context.Context, targetId s
 }
 
 func (s *TargetService) handleCreateError(ctx context.Context, target *models.Target, err error) (*models.Target, error) {
+	if err != nil {
+		err = s.targetStore.RollbackTransaction(ctx, err)
+	}
+
 	if !telemetry.TelemetryEnabled(ctx) {
 		return target, err
 	}
