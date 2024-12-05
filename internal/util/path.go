@@ -11,13 +11,13 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 )
 
-func GetHomeDir(activeProfile config.Profile, workspaceId string, gpgKey string) (string, error) {
+func GetHomeDir(activeProfile config.Profile, workspaceId string, gpgKey *string) (string, error) {
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	homeDir, err := exec.Command("ssh", workspaceHostname, "echo", "$HOME").Output()
 	if err != nil {
@@ -27,13 +27,13 @@ func GetHomeDir(activeProfile config.Profile, workspaceId string, gpgKey string)
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetWorkspaceDir(activeProfile config.Profile, workspaceId string, gpgKey string) (string, error) {
+func GetWorkspaceDir(activeProfile config.Profile, workspaceId string, gpgKey *string) (string, error) {
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	daytonaWorkspaceDir, err := exec.Command("ssh", workspaceHostname, "echo", "$DAYTONA_WORKSPACE_DIR").Output()
 	if err != nil {

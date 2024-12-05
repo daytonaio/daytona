@@ -205,7 +205,7 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 		modifiedContent += "\n"
 	}
 
-	err = config.UpdateWorkspaceSshEntry(activeProfile.Id, workspace.Id, modifiedContent)
+	err = config.UpdateSshEntry(activeProfile.Id, workspace.Id, modifiedContent)
 	if err != nil {
 		return err
 	}

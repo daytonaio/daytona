@@ -124,7 +124,7 @@ func init() {
 
 func AutoStartWorkspace(workspace apiclient.WorkspaceDTO) (bool, error) {
 	if !yesFlag {
-		if !ide_views.RunStartWorkspaceForm(workspace.Id) {
+		if !ide_views.RunStartWorkspaceForm(workspace.Name) {
 			return false, nil
 		}
 	}

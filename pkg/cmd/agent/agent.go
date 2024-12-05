@@ -99,9 +99,9 @@ var AgentCmd = &cobra.Command{
 			DefaultWorkspaceDir: os.Getenv("HOME"),
 		}
 
-		tailscaleHostname := c.TargetId
+		tailscaleHostname := common.GetTailscaleHostname(c.TargetId)
 		if agentMode == agent_config.ModeWorkspace {
-			tailscaleHostname = common.GetWorkspaceHostname(ws.Id)
+			tailscaleHostname = common.GetTailscaleHostname(ws.Id)
 		}
 
 		toolBoxServer := &toolbox.Server{
