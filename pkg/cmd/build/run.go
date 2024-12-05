@@ -8,9 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -75,11 +73,6 @@ var buildRunCmd = &cobra.Command{
 func CreateBuild(apiClient *apiclient.APIClient, workspaceTemplate *apiclient.WorkspaceTemplate, branch string, prebuildId *string) (string, error) {
 	ctx := context.Background()
 
-	envVars, res, err := apiClient.EnvVarAPI.ListEnvironmentVariables(ctx).Execute()
-	if err != nil {
-		return "", apiclient_util.HandleErrorResponse(res, err)
-	}
-
 	if workspaceTemplate.BuildConfig == nil {
 		return "", errors.New("the chosen workspace template does not have a build configuration")
 	}
@@ -88,12 +81,6 @@ func CreateBuild(apiClient *apiclient.APIClient, workspaceTemplate *apiclient.Wo
 		WorkspaceTemplateName: workspaceTemplate.Name,
 		Branch:                branch,
 		PrebuildId:            prebuildId,
-	}
-
-	if envVars != nil {
-		createBuildDto.EnvVars = util.MergeEnvVars(conversion.ToEnvVarsMap(envVars), workspaceTemplate.EnvVars)
-	} else {
-		createBuildDto.EnvVars = util.MergeEnvVars(workspaceTemplate.EnvVars)
 	}
 
 	buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()

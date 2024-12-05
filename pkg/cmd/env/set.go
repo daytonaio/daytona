@@ -32,7 +32,7 @@ var setCmd = &cobra.Command{
 				envVarsMap[kv[0]] = kv[1]
 			}
 		} else {
-			err := env.AddEnvVarsView(&envVarsMap)
+			err := env.SetEnvVarsView(&envVarsMap)
 			if err != nil {
 				return err
 			}

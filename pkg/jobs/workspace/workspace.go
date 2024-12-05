@@ -16,11 +16,12 @@ import (
 type WorkspaceJob struct {
 	models.Job
 
-	findWorkspace         func(ctx context.Context, workspaceId string) (*models.Workspace, error)
-	findTarget            func(ctx context.Context, targetId string) (*models.Target, error)
-	findContainerRegistry func(ctx context.Context, image string) (*models.ContainerRegistry, error)
-	findGitProviderConfig func(ctx context.Context, id string) (*models.GitProviderConfig, error)
-	trackTelemetryEvent   func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	findWorkspace                    func(ctx context.Context, workspaceId string) (*models.Workspace, error)
+	findTarget                       func(ctx context.Context, targetId string) (*models.Target, error)
+	findContainerRegistry            func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
+	findGitProviderConfig            func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	getWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
+	trackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
 	loggerFactory logs.LoggerFactory
 	provisioner   provisioner.IProvisioner

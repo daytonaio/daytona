@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/pkg/jobs/util"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -25,15 +26,15 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
 
-	cr, err := wj.findContainerRegistry(ctx, w.Image)
-	if err != nil && !stores.IsContainerRegistryNotFound(err) {
+	workspaceEnvVars, err := wj.getWorkspaceEnvironmentVariables(ctx, w)
+	if err != nil {
 		return err
 	}
+	w.EnvVars = workspaceEnvVars
 
-	builderCr, err := wj.findContainerRegistry(ctx, wj.builderImage)
-	if err != nil && !stores.IsContainerRegistryNotFound(err) {
-		return err
-	}
+	cr := wj.findContainerRegistry(ctx, w.Image, workspaceEnvVars)
+
+	builderCr := wj.findContainerRegistry(ctx, wj.builderImage, workspaceEnvVars)
 
 	var gc *models.GitProviderConfig
 
@@ -43,6 +44,8 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 			return err
 		}
 	}
+
+	w.EnvVars = util.ExtractContainerRegistryFromEnvVars(workspaceEnvVars)
 
 	err = wj.provisioner.StartWorkspace(provisioner.WorkspaceParams{
 		Workspace:                     w,
