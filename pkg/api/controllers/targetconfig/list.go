@@ -25,7 +25,7 @@ import (
 func ListTargetConfigs(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	targetConfigs, err := server.TargetConfigService.List()
+	targetConfigs, err := server.TargetConfigService.List(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list target configs: %w", err))
 		return

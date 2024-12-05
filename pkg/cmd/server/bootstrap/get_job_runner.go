@@ -49,16 +49,16 @@ func GetJobRunner(c *server.Config, configDir string, version string, telemetryS
 
 	return runner.NewJobRunner(runner.JobRunnerConfig{
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, error) {
-			return jobService.List(&stores.JobFilter{
+			return jobService.List(ctx, &stores.JobFilter{
 				States: &[]models.JobState{models.JobStatePending},
 			})
 		},
 		UpdateJobState: func(ctx context.Context, job *models.Job, state models.JobState, err *error) error {
-			job.State = state
+			var jobErr *string
 			if err != nil {
-				job.Error = util.Pointer((*err).Error())
+				jobErr = util.Pointer((*err).Error())
 			}
-			return jobService.Update(job)
+			return jobService.SetState(ctx, job.Id, state, jobErr)
 		},
 		WorkspaceJobFactory: workspaceJobFactory,
 		TargetJobFactory:    targetJobFactory,
@@ -110,10 +110,10 @@ func GetWorkspaceJobFactory(c *server.Config, configDir string, version string, 
 			return services.EnvironmentVariables(envVars).FindContainerRegistryByImageName(image)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			return gitProviderService.GetConfig(id)
+			return gitProviderService.GetConfig(ctx, id)
 		},
 		GetWorkspaceEnvironmentVariables: func(ctx context.Context, w *models.Workspace) (map[string]string, error) {
-			serverEnvVars, err := envVarService.Map()
+			serverEnvVars, err := envVarService.Map(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -195,7 +195,7 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 
 	envVarService := server.GetInstance(nil).EnvironmentVariableService
 
-	envVars, err := envVarService.Map()
+	envVars, err := envVarService.Map(context.Background())
 	if err != nil {
 		builderRegistry = &models.ContainerRegistry{
 			Server: c.BuilderRegistryServer,
@@ -208,14 +208,14 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 
 	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
 		FindBuild: func(ctx context.Context, buildId string) (*services.BuildDTO, error) {
-			return buildService.Find(&services.BuildFilter{
+			return buildService.Find(ctx, &services.BuildFilter{
 				StoreFilter: stores.BuildFilter{
 					Id: &buildId,
 				},
 			})
 		},
 		ListSuccessfulBuilds: func(ctx context.Context, repoUrl string) ([]*models.Build, error) {
-			buildDtos, err := buildService.List(&services.BuildFilter{
+			buildDtos, err := buildService.List(ctx, &services.BuildFilter{
 				StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
 				StoreFilter: stores.BuildFilter{
 					RepositoryUrl: &repoUrl,
@@ -232,7 +232,7 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 			return builds, nil
 		},
 		ListConfigsForUrl: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
-			return server.GetInstance(nil).GitProviderService.ListConfigsForUrl(repoUrl)
+			return server.GetInstance(nil).GitProviderService.ListConfigsForUrl(ctx, repoUrl)
 		},
 		CheckImageExists: func(ctx context.Context, image string) bool {
 			_, _, err = cli.ImageInspectWithRaw(context.Background(), image)

@@ -18,10 +18,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, createPrebuildDto services.CreatePrebuildDTO) (*services.PrebuildDTO, error) {
-	ctx := context.Background()
-
-	workspaceTemplate, err := s.Find(&stores.WorkspaceTemplateFilter{
+func (s *WorkspaceTemplateService) SetPrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto services.CreatePrebuildDTO) (*services.PrebuildDTO, error) {
+	workspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplateName,
 	})
 	if err != nil {
@@ -81,7 +79,7 @@ func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, cre
 		}
 	}
 
-	err = s.templateStore.Save(workspaceTemplate)
+	err = s.templateStore.Save(ctx, workspaceTemplate)
 	if err != nil {
 		if newWebhookId != "" {
 			err = s.unregisterPrebuildWebhook(ctx, gitProviderId, repository, newWebhookId)
@@ -103,8 +101,8 @@ func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, cre
 	}, nil
 }
 
-func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*services.PrebuildDTO, error) {
-	wt, err := s.templateStore.Find(workspaceTemplateFilter)
+func (s *WorkspaceTemplateService) FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*services.PrebuildDTO, error) {
+	wt, err := s.templateStore.Find(ctx, workspaceTemplateFilter)
 	if err != nil {
 		return nil, stores.ErrWorkspaceTemplateNotFound
 	}
@@ -130,9 +128,9 @@ func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.
 	}, nil
 }
 
-func (s *WorkspaceTemplateService) ListPrebuilds(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*services.PrebuildDTO, error) {
+func (s *WorkspaceTemplateService) ListPrebuilds(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*services.PrebuildDTO, error) {
 	var result []*services.PrebuildDTO
-	wts, err := s.templateStore.List(workspaceTemplateFilter)
+	wts, err := s.templateStore.List(ctx, workspaceTemplateFilter)
 	if err != nil {
 		return nil, stores.ErrWorkspaceTemplateNotFound
 	}
@@ -153,10 +151,8 @@ func (s *WorkspaceTemplateService) ListPrebuilds(workspaceTemplateFilter *stores
 	return result, nil
 }
 
-func (s *WorkspaceTemplateService) DeletePrebuild(workspaceTemplateName string, id string, force bool) []error {
-	ctx := context.Background()
-
-	workspaceTemplate, err := s.Find(&stores.WorkspaceTemplateFilter{
+func (s *WorkspaceTemplateService) DeletePrebuild(ctx context.Context, workspaceTemplateName string, id string, force bool) []error {
+	workspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
 		Name: &workspaceTemplateName,
 	})
 	if err != nil {
@@ -165,7 +161,7 @@ func (s *WorkspaceTemplateService) DeletePrebuild(workspaceTemplateName string, 
 
 	// Get all prebuilds for this workspace template's repository URL and
 	// if this is the last prebuild, unregister the Git provider webhook
-	prebuilds, err := s.ListPrebuilds(&stores.WorkspaceTemplateFilter{
+	prebuilds, err := s.ListPrebuilds(ctx, &stores.WorkspaceTemplateFilter{
 		Url: &workspaceTemplate.RepositoryUrl,
 	}, nil)
 	if err != nil {
@@ -215,7 +211,7 @@ func (s *WorkspaceTemplateService) DeletePrebuild(workspaceTemplateName string, 
 		return []error{err}
 	}
 
-	err = s.templateStore.Save(workspaceTemplate)
+	err = s.templateStore.Save(ctx, workspaceTemplate)
 	if err != nil {
 		return []error{err}
 	}
@@ -225,10 +221,8 @@ func (s *WorkspaceTemplateService) DeletePrebuild(workspaceTemplateName string, 
 
 // TODO: revise build trigger strategy
 // We should discuss if the function should throw if the build can not be created or move on to the next one
-func (s *WorkspaceTemplateService) ProcessGitEvent(data gitprovider.GitEventData) error {
-	ctx := context.Background()
-
-	workspaceTemplates, err := s.List(&stores.WorkspaceTemplateFilter{
+func (s *WorkspaceTemplateService) ProcessGitEvent(ctx context.Context, data gitprovider.GitEventData) error {
+	workspaceTemplates, err := s.List(ctx, &stores.WorkspaceTemplateFilter{
 		Url: &data.Url,
 	})
 	if err != nil {
@@ -286,10 +280,8 @@ func (s *WorkspaceTemplateService) ProcessGitEvent(data gitprovider.GitEventData
 }
 
 // Marks the [retention] oldest published builds for deletion for each prebuild
-func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
-	ctx := context.Background()
-
-	prebuilds, err := s.ListPrebuilds(nil, nil)
+func (s *WorkspaceTemplateService) EnforceRetentionPolicy(ctx context.Context) error {
+	prebuilds, err := s.ListPrebuilds(ctx, nil, nil)
 	if err != nil {
 		return err
 	}
@@ -334,11 +326,11 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy() error {
 	return nil
 }
 
-func (s *WorkspaceTemplateService) StartRetentionPoller() error {
+func (s *WorkspaceTemplateService) StartRetentionPoller(ctx context.Context) error {
 	scheduler := scheduler.NewCronScheduler()
 
 	err := scheduler.AddFunc(runners.DEFAULT_JOB_POLL_INTERVAL, func() {
-		err := s.EnforceRetentionPolicy()
+		err := s.EnforceRetentionPolicy(ctx)
 		if err != nil {
 			log.Error(err)
 		}

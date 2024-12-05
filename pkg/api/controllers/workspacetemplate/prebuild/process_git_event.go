@@ -25,7 +25,7 @@ import (
 func ProcessGitEvent(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetGitProviderForHttpRequest(ctx.Request)
+	gitProvider, err := server.GitProviderService.GetGitProviderForHttpRequest(ctx.Request.Context(), ctx.Request)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for request: %s", err.Error()))
 		return
@@ -41,7 +41,7 @@ func ProcessGitEvent(ctx *gin.Context) {
 		return
 	}
 
-	err = server.WorkspaceTemplateService.ProcessGitEvent(*gitEventData)
+	err = server.WorkspaceTemplateService.ProcessGitEvent(ctx.Request.Context(), *gitEventData)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to process git event: %s", err.Error()))
 		return

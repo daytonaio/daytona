@@ -53,7 +53,7 @@ func GetRepoPRs(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepoPRs(gitProviderId, namespaceId, repositoryId, options)
+	response, err := server.GitProviderService.GetRepoPRs(ctx.Request.Context(), gitProviderId, namespaceId, repositoryId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

@@ -4,6 +4,7 @@
 package db
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -15,25 +16,27 @@ import (
 )
 
 type BuildStore struct {
-	db   *gorm.DB
+	Store
 	Lock sync.Mutex
 }
 
-func NewBuildStore(db *gorm.DB) (stores.BuildStore, error) {
-	err := db.AutoMigrate(&models.Build{})
+func NewBuildStore(store Store) (stores.BuildStore, error) {
+	err := store.db.AutoMigrate(&models.Build{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &BuildStore{db: db}, nil
+	return &BuildStore{store, sync.Mutex{}}, nil
 }
 
-func (b *BuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
+func (b *BuildStore) Find(ctx context.Context, filter *stores.BuildFilter) (*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
+	tx := b.getTransaction(ctx)
+
 	build := &models.Build{}
-	tx := preloadBuildEntities(processBuildFilters(b.db, filter)).First(build)
+	tx = preloadBuildEntities(processBuildFilters(tx, filter)).First(build)
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
@@ -45,12 +48,14 @@ func (b *BuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
 	return build, nil
 }
 
-func (b *BuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
+func (b *BuildStore) List(ctx context.Context, filter *stores.BuildFilter) ([]*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
+	tx := b.getTransaction(ctx)
+
 	builds := []*models.Build{}
-	tx := preloadBuildEntities(processBuildFilters(b.db, filter)).Find(&builds)
+	tx = preloadBuildEntities(processBuildFilters(tx, filter)).Find(&builds)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -59,11 +64,13 @@ func (b *BuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
 	return builds, nil
 }
 
-func (b *BuildStore) Save(build *models.Build) error {
+func (b *BuildStore) Save(ctx context.Context, build *models.Build) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.db.Save(build)
+	tx := b.getTransaction(ctx)
+
+	tx = tx.Save(build)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -71,11 +78,12 @@ func (b *BuildStore) Save(build *models.Build) error {
 	return nil
 }
 
-func (b *BuildStore) Delete(id string) error {
+func (b *BuildStore) Delete(ctx context.Context, id string) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
+	tx := b.getTransaction(ctx)
 
-	tx := b.db.Where("id = ?", id).Delete(&models.Build{})
+	tx = tx.Where("id = ?", id).Delete(&models.Build{})
 	if tx.Error != nil {
 		return tx.Error
 	}

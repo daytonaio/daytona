@@ -4,6 +4,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -14,9 +16,9 @@ type AddTargetConfigDTO struct {
 } // @name AddTargetConfigDTO
 
 type ITargetConfigService interface {
-	Add(targetConfig AddTargetConfigDTO) (*models.TargetConfig, error)
-	Find(idOrName string) (*models.TargetConfig, error)
-	List() ([]*models.TargetConfig, error)
-	Map() (map[string]*models.TargetConfig, error)
-	Delete(targetConfigId string) error
+	Add(ctx context.Context, targetConfig AddTargetConfigDTO) (*models.TargetConfig, error)
+	Find(ctx context.Context, idOrName string) (*models.TargetConfig, error)
+	List(ctx context.Context) ([]*models.TargetConfig, error)
+	Map(ctx context.Context) (map[string]*models.TargetConfig, error)
+	Delete(ctx context.Context, targetConfigId string) error
 }

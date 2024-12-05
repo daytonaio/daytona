@@ -32,7 +32,7 @@ func GetPrebuild(ctx *gin.Context) {
 	prebuildId := ctx.Param("prebuildId")
 
 	server := server.GetInstance(nil)
-	res, err := server.WorkspaceTemplateService.FindPrebuild(&stores.WorkspaceTemplateFilter{
+	res, err := server.WorkspaceTemplateService.FindPrebuild(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
 		Name: &templateName,
 	}, &stores.PrebuildFilter{
 		Id: &prebuildId,
@@ -72,7 +72,7 @@ func SetPrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	prebuild, err := server.WorkspaceTemplateService.SetPrebuild(templateName, dto)
+	prebuild, err := server.WorkspaceTemplateService.SetPrebuild(ctx.Request.Context(), templateName, dto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set prebuild: %s", err.Error()))
 		return
@@ -93,7 +93,7 @@ func SetPrebuild(ctx *gin.Context) {
 // @id				ListPrebuilds
 func ListPrebuilds(ctx *gin.Context) {
 	server := server.GetInstance(nil)
-	res, err := server.WorkspaceTemplateService.ListPrebuilds(nil, nil)
+	res, err := server.WorkspaceTemplateService.ListPrebuilds(ctx.Request.Context(), nil, nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get prebuilds: %s", err.Error()))
 		return
@@ -125,7 +125,7 @@ func ListPrebuildsForWorkspaceTemplate(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	res, err := server.WorkspaceTemplateService.ListPrebuilds(workspaceTemplateFilter, nil)
+	res, err := server.WorkspaceTemplateService.ListPrebuilds(ctx.Request.Context(), workspaceTemplateFilter, nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get prebuilds: %s", err.Error()))
 		return
@@ -164,7 +164,7 @@ func DeletePrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	errs := server.WorkspaceTemplateService.DeletePrebuild(templateName, prebuildId, force)
+	errs := server.WorkspaceTemplateService.DeletePrebuild(ctx.Request.Context(), templateName, prebuildId, force)
 	if len(errs) > 0 {
 		if stores.IsPrebuildNotFound(errs[0]) {
 			ctx.AbortWithError(http.StatusNotFound, errors.New("prebuild not found"))

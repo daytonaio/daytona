@@ -24,7 +24,7 @@ import (
 func ListClientApiKeys(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	response, err := server.ApiKeyService.ListClientKeys()
+	response, err := server.ApiKeyService.ListClientKeys(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get client API keys: %w", err))
 		return
@@ -48,7 +48,7 @@ func RevokeApiKey(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.ApiKeyService.Revoke(apiKeyName)
+	err := server.ApiKeyService.Revoke(ctx.Request.Context(), apiKeyName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to revoke api key: %w", err))
 		return

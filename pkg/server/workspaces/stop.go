@@ -13,12 +13,16 @@ import (
 )
 
 func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string) error {
-	ws, err := s.workspaceStore.Find(workspaceId)
+	ws, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleStopError(ctx, ws, stores.ErrWorkspaceNotFound)
 	}
 
 	err = s.createJob(ctx, ws.Id, models.JobActionStop)
+	if err != nil {
+		return s.handleStopError(ctx, ws, err)
+	}
+
 	return s.handleStopError(ctx, ws, err)
 }
 
