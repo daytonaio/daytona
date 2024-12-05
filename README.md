@@ -254,7 +254,7 @@ If you would like to contribute to the software, you must:
 
       Please review the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) to understand the contribution requirements.
 
-  2. **Signing all commits to the Daytona project** 
+  2. **Sign all commits to the Daytona project** 
 
       Ensure that all your commits are signed to comply with the Daytona project's contribution policies.
 
@@ -273,7 +273,6 @@ Before creating a new issue, search the existing issues [here](https://github.co
       * **Bug Report:** If you encounter unexpected behavior or errors.
       * **Feature Request:** If you have an idea for a new feature or improvement.
       * **Documentation Improvement:** If you notice gaps or areas for improvement in the documentation.
-
    2. **Create a new issue**
       * Navigate to Issues: Go to the Issues tab [here](https://github.com/daytonaio/daytona/issues).
       * Click on "New Issue": Choose the appropriate template (Bug Report, Feature Request, etc.) if available.
@@ -304,7 +303,9 @@ If you're interested in contributing code to Daytona, follow these steps:
     git checkout -b my-new-feature
     ```
 
-4. **Run the Project Locally**
+4. **Running Daytona in development mode**
+    A dtn alias is automatically created inside the Workspace. You can use it to compile and run daytona.
+    For example:
     ```bash
     dtn serve
     ```
@@ -335,7 +336,7 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 9. **Check for lint errors**
 
-    Ensure that you have no lint errors. We use golangci-lint as our linter which you can install by following instructions found [here](https://golangci-lint.run/usage/install/) (or simply open Daytona in a Dev Container). You can check for linting errors by running golangci-lint run in the root of the project.
+    Ensure that you have no lint errors. We use golangci-lint as our linter which is automaticalled installed. You can check for linting errors by running golangci-lint run in the root of the project.
 
     ```bash
     golangci-lint run
@@ -343,7 +344,18 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 10. **Sign off on your commits**
 
-    Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](#prepare-your-changes).
+    Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](https://github.com/daytonaio/daytona/blob/main/PREPARING_YOUR_CHANGES.md).
+
+    To sign off on your Git commits more easily, you can use the -s or --signoff option when making a commit. This adds a "Signed-off-by" line to your commit message automatically, which is required to comply with the DCO v1.1.
+
+    Here's how you can do it:
+
+    ```bash
+    git commit -s -m "Your commit message"
+    ```
+    This command adds the necessary sign-off to your commit without needing to rebase later.
+
+    If you've already made commits without the sign-off, you can add it retrospectively by rebasing:
 
     ```bash
     git rebase HEAD~1 --signoff
