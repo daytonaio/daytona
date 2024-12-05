@@ -9,7 +9,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
@@ -38,7 +37,7 @@ var prebuild3 = &models.PrebuildConfig{
 	TriggerFiles:   []string{"file1", "file2"},
 }
 
-var prebuild1Dto = &dto.PrebuildDTO{
+var prebuild1Dto = &services.PrebuildDTO{
 	WorkspaceTemplateName: workspaceTemplate1.Name,
 	Id:                    prebuild1.Id,
 	Branch:                prebuild1.Branch,
@@ -68,7 +67,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSetPrebuild() {
 	}).Return(repository1, nil)
 	s.gitProviderService.On("GetPrebuildWebhook", "github", repository1, "").Return(util.Pointer("webhook-id"), nil)
 
-	newPrebuildDto, err := s.workspaceTemplateService.SetPrebuild(workspaceTemplate1.Name, dto.CreatePrebuildDTO{
+	newPrebuildDto, err := s.workspaceTemplateService.SetPrebuild(workspaceTemplate1.Name, services.CreatePrebuildDTO{
 		Id:             &prebuild3.Id,
 		Branch:         prebuild3.Branch,
 		CommitInterval: prebuild3.CommitInterval,
@@ -122,7 +121,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestDeletePrebuild() {
 		Name: &workspaceTemplate1.Name,
 	}, nil)
 	require.Nil(errs)
-	require.ElementsMatch([]*dto.PrebuildDTO{
+	require.ElementsMatch([]*services.PrebuildDTO{
 		prebuild1Dto,
 	}, prebuildDtos)
 }

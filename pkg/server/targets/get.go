@@ -11,13 +11,12 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) (*dto.TargetDTO, error) {
+func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) (*services.TargetDTO, error) {
 	tg, err := s.targetStore.Find(filter)
 	if err != nil {
 		return nil, stores.ErrTargetNotFound
@@ -38,7 +37,7 @@ func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilt
 	}
 	tg.Workspaces = updatedWorkspaces
 
-	response := dto.TargetDTO{
+	response := services.TargetDTO{
 		Target: *tg,
 		State:  state,
 	}
