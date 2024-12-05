@@ -10,6 +10,8 @@ replace github.com/samber/lo => github.com/samber/lo v1.39.0
 
 require (
 	code.gitea.io/sdk/gitea v0.17.1
+	gitee.com/openeuler/go-gitee v0.0.0-20220530104019-3af895bc380c
+	github.com/antihax/optional v1.0.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.26
 	github.com/aws/aws-sdk-go-v2/service/iam v1.34.3
 	github.com/charmbracelet/bubbles v0.20.0
