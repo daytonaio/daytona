@@ -25,10 +25,12 @@ import (
 var projectConfigList []apiclient.ProjectConfig
 
 var projectConfigImportCmd = &cobra.Command{
-	Use:     "import",
-	Aliases: []string{"imp"},
-	Short:   "Import project config from JSON",
-	Args:    cobra.MaximumNArgs(1),
+	Use:                   "import [-]",
+	Aliases:               []string{"imp"},
+	Short:                 "Import project config from JSON",
+	Long:                  "Import project config from a JSON input. Use '-' to read from stdin.",
+	Args:                  cobra.MaximumNArgs(1),
+	DisableFlagsInUseLine: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputText string
 		var res *http.Response
