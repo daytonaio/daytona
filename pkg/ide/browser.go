@@ -23,7 +23,7 @@ import (
 
 const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder="
 
-func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey string) error {
+func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey *string) error {
 	// Download and start IDE
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
@@ -31,7 +31,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, workspaceP
 	}
 
 	views.RenderInfoMessageBold("Downloading OpenVSCode Server...")
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	installServerCommand := exec.Command("ssh", workspaceHostname, "curl -fsSL https://download.daytona.io/daytona/get-openvscode-server.sh | sh")
 	installServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})

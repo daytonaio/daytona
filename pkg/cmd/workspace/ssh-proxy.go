@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
@@ -27,7 +29,7 @@ import (
 )
 
 var SshProxyCmd = &cobra.Command{
-	Use:    "ssh-proxy [PROFILE_ID] [WORKSPACE]",
+	Use:    "ssh-proxy [PROFILE_ID] [TARGET_ID | WORKSPACE_ID]",
 	Args:   cobra.ExactArgs(2),
 	Hidden: true,
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -37,24 +39,33 @@ var SshProxyCmd = &cobra.Command{
 		}
 
 		profileId := args[0]
-		workspaceId := args[1]
+		resourceId := args[1]
 
 		profile, err := c.GetProfile(profileId)
 		if err != nil {
 			return err
 		}
 
-		ws, _, err := apiclient_util.GetWorkspace(workspaceId, true)
-		if err != nil {
+		var target *apiclient.TargetDTO
+
+		ws, statusCode, err := apiclient_util.GetWorkspace(resourceId, true)
+		if err != nil && statusCode != http.StatusNotFound {
 			return err
 		}
 
-		target, _, err := apiclient_util.GetTarget(ws.TargetId, true)
-		if err != nil {
-			return err
+		if ws == nil {
+			target, _, err = apiclient_util.GetTarget(resourceId, true)
+			if err != nil {
+				return err
+			}
+		} else {
+			target, _, err = apiclient_util.GetTarget(ws.TargetId, true)
+			if err != nil {
+				return err
+			}
 		}
 
-		if create.IsLocalDockerTarget(target) && profile.Id == "default" {
+		if ws != nil && create.IsLocalDockerTarget(target) && profile.Id == "default" {
 			// If the target is local, we directly access the ssh port through the container
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -125,7 +136,12 @@ var SshProxyCmd = &cobra.Command{
 
 		errChan := make(chan error)
 
-		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", common.GetWorkspaceHostname(ws.Id), ssh_config.SSH_PORT))
+		hostname := common.GetTailscaleHostname(target.Id)
+		if ws != nil {
+			hostname = common.GetTailscaleHostname(ws.Id)
+		}
+
+		dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", hostname, ssh_config.SSH_PORT))
 		if err != nil {
 			return err
 		}

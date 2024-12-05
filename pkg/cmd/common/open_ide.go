@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
-func OpenIDE(ideId string, activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, yesFlag bool, gpgKey string) error {
+func OpenIDE(ideId string, activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, yesFlag bool, gpgKey *string) error {
 	telemetry.AdditionalData["ide"] = ideId
 
 	switch ideId {

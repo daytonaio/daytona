@@ -328,14 +328,14 @@ func init() {
 	cmd_common.AddWorkspaceConfigurationFlags(CreateCmd, workspaceConfigurationFlags, true)
 }
 
-func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey string) error {
+func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey *string) error {
 	if IsLocalDockerTarget(target) && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 		if err != nil {
 			return err
 		}
 
-		workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+		workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 		for {
 			sshCommand := exec.Command("ssh", workspaceHostname, "daytona", "version")
@@ -358,7 +358,7 @@ func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile 
 
 	go func() {
 		for {
-			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", common.GetWorkspaceHostname(workspaceId), ssh_config.SSH_PORT))
+			dialConn, err := tsConn.Dial(context.Background(), "tcp", fmt.Sprintf("%s:%d", common.GetTailscaleHostname(workspaceId), ssh_config.SSH_PORT))
 			if err == nil {
 				connectChan <- dialConn.Close()
 				return
