@@ -51,7 +51,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 
 	var client *http.Client
 
-	workspaceHostname := common.GetWorkspaceHostname(w.Id)
+	workspaceHostname := common.GetTailscaleHostname(w.Id)
 	route := strings.Replace(ctx.Request.URL.Path, fmt.Sprintf("/workspace/%s/toolbox/", workspaceId), "", 1)
 	query := ctx.Request.URL.Query().Encode()
 

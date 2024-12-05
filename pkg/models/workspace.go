@@ -12,24 +12,24 @@ import (
 
 type Workspace struct {
 	Id                  string                     `json:"id" validate:"required" gorm:"primaryKey"`
-	Name                string                     `json:"name" validate:"required"`
-	Image               string                     `json:"image" validate:"required"`
-	User                string                     `json:"user" validate:"required"`
+	Name                string                     `json:"name" validate:"required" gorm:"not null"`
+	Image               string                     `json:"image" validate:"required" gorm:"not null"`
+	User                string                     `json:"user" validate:"required" gorm:"not null"`
 	BuildConfig         *BuildConfig               `json:"buildConfig,omitempty" validate:"optional" gorm:"serializer:json"`
-	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json"`
-	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json"`
-	TargetId            string                     `json:"targetId" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
+	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
+	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
 	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
-	ApiKey              string                     `json:"-"`
-	Metadata            *WorkspaceMetadata         `gorm:"foreignKey:WorkspaceId;references:Id" validate:"optional"`
+	ApiKey              string                     `json:"-" validate:"required" gorm:"not null"`
+	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
-	LastJob             *Job                       `gorm:"foreignKey:ResourceId;references:Id"`
+	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
 } // @name Workspace
 
 type WorkspaceMetadata struct {
-	WorkspaceId string     `json:"workspaceId" validate:"required" gorm:"primaryKey;foreignKey:WorkspaceId;references:Id"`
-	UpdatedAt   time.Time  `json:"updatedAt" validate:"required"`
-	Uptime      uint64     `json:"uptime" validate:"required"`
+	WorkspaceId string     `json:"workspaceId" validate:"required" gorm:"primaryKey"`
+	UpdatedAt   time.Time  `json:"updatedAt" validate:"required" gorm:"not null"`
+	Uptime      uint64     `json:"uptime" validate:"required" gorm:"not null"`
 	GitStatus   *GitStatus `json:"gitStatus" validate:"optional" gorm:"serializer:json"`
 } // @name WorkspaceMetadata
 
