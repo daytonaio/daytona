@@ -2793,7 +2793,6 @@
             "type": "object",
             "required": [
                 "branch",
-                "commitInterval",
                 "id",
                 "retention",
                 "triggerFiles"

@@ -517,7 +517,6 @@ definitions:
         type: array
     required:
     - branch
-    - commitInterval
     - id
     - retention
     - triggerFiles

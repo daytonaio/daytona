@@ -86,7 +86,7 @@ func (wt *WorkspaceTemplate) RemovePrebuild(id string) error {
 type PrebuildConfig struct {
 	Id             string   `json:"id" validate:"required" gorm:"not null"`
 	Branch         string   `json:"branch" validate:"required" gorm:"not null"`
-	CommitInterval *int     `json:"commitInterval" validate:"required" gorm:"not null"`
+	CommitInterval *int     `json:"commitInterval" validate:"optional"`
 	TriggerFiles   []string `json:"triggerFiles" validate:"required" gorm:"not null"`
 	Retention      int      `json:"retention" validate:"required" gorm:"not null"`
 } // @name PrebuildConfig

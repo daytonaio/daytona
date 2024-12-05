@@ -2796,7 +2796,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "branch",
-                "commitInterval",
                 "id",
                 "retention",
                 "triggerFiles"
