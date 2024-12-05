@@ -82,7 +82,7 @@ func (m *Model) createForm() *huh.Form {
 				Value(&m.config.BuilderImage),
 			huh.NewInput().
 				Title("Builder Registry Server").
-				Description("Add container regitistry credentials to the server by adding them as environment variables using `daytona env set`").
+				Description("Add container registry credentials to the server by adding them as environment variables using `daytona env set`").
 				Value(&m.config.BuilderRegistryServer),
 			huh.NewInput().
 				Title("Build Image Namespace").
