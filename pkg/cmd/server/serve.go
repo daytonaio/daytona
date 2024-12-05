@@ -84,17 +84,6 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
-		jobRunner, err := bootstrap.GetJobRunner(c, configDir, internal.Version, telemetryService)
-		if err != nil {
-			return err
-		}
-
-		// TODO: context?
-		err = jobRunner.StartRunner(context.Background())
-		if err != nil {
-			return err
-		}
-
 		apiServerErrChan := make(chan error)
 
 		go func() {
@@ -140,6 +129,19 @@ var ServeCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		log.Info("Starting job runner...")
+		jobRunner, err := bootstrap.GetJobRunner(c, configDir, internal.Version, telemetryService)
+		if err != nil {
+			return err
+		}
+
+		// TODO: context?
+		err = jobRunner.StartRunner(context.Background())
+		if err != nil {
+			return err
+		}
+		log.Info("Job runner started")
 
 		err = waitForApiServerToStart(apiServer)
 		if err != nil {
