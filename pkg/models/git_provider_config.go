@@ -16,7 +16,7 @@ type GitProviderConfig struct {
 	Username      string         `json:"username" validate:"required" gorm:"not null"`
 	BaseApiUrl    *string        `json:"baseApiUrl,omitempty" validate:"optional"`
 	Token         string         `json:"token" validate:"required" gorm:"not null"`
-	Alias         string         `json:"alias" validate:"required" gorm:"uniqueIndex"`
+	Alias         string         `json:"alias" validate:"required" gorm:"uniqueIndex;not null"`
 	SigningKey    *string        `json:"signingKey,omitempty" validate:"optional"`
 	SigningMethod *SigningMethod `json:"signingMethod,omitempty" validate:"optional"`
 } // @name GitProvider
