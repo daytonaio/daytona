@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
@@ -64,7 +64,7 @@ func GetPrebuild(ctx *gin.Context) {
 func SetPrebuild(ctx *gin.Context) {
 	templateName := ctx.Param("templateName")
 
-	var dto dto.CreatePrebuildDTO
+	var dto services.CreatePrebuildDTO
 	err := ctx.BindJSON(&dto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))

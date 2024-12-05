@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	wt_dto "github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 )
 
 func ToWorkspace(workspaceDTO *apiclient.WorkspaceDTO) *models.Workspace {
@@ -154,7 +154,7 @@ func ToGitStatusDTO(gitStatus *models.GitStatus) *apiclient.GitStatus {
 	}
 }
 
-func ToWorkspaceTemplate(createWorkspaceTemplateDto wt_dto.CreateWorkspaceTemplateDTO) *models.WorkspaceTemplate {
+func ToWorkspaceTemplate(createWorkspaceTemplateDto services.CreateWorkspaceTemplateDTO) *models.WorkspaceTemplate {
 	result := &models.WorkspaceTemplate{
 		Name:                createWorkspaceTemplateDto.Name,
 		BuildConfig:         createWorkspaceTemplateDto.BuildConfig,
