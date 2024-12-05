@@ -8,7 +8,6 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
@@ -40,7 +39,7 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 	return s.targetStore.Save(TargetDtoToTarget(*currentTarget))
 }
 
-func TargetDtoToTarget(targetDto dto.TargetDTO) *models.Target {
+func TargetDtoToTarget(targetDto services.TargetDTO) *models.Target {
 	return &models.Target{
 		Id:             targetDto.Id,
 		Name:           targetDto.Name,
