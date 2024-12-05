@@ -44,13 +44,13 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read from stdin: %w", err)
 			}
-			return HandleTargetInputs(input)
+			return HandleTargetJSON(input)
 		} else if pipeFile != "" {
 			input, err = os.ReadFile(pipeFile)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s: %w", pipeFile, err)
 			}
-			return HandleTargetInputs(input)
+			return HandleTargetJSON(input)
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -190,7 +190,7 @@ var TargetSetCmd = &cobra.Command{
 	},
 }
 
-func HandleTargetInputs(data []byte) error {
+func HandleTargetJSON(data []byte) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -258,7 +258,11 @@ func HandleTargetInputs(data []byte) error {
 	if selectedTarget.Options == "" {
 		return errors.New("option fields are required to setup your target")
 	}
-	err = provider_view.ValidateProviderTarget(selectedProvider.Name, selectedTarget.Options)
+	targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(ctx, selectedProvider.Name).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+	err = provider_view.ValidateProperty(*targetManifest, selectedTarget.Options)
 	if err != nil {
 		return err
 	}
@@ -276,4 +280,8 @@ func HandleTargetInputs(data []byte) error {
 	}
 	views.RenderInfoMessage("Target set successfully and will be used by default")
 	return nil
+}
+
+func init() {
+	TargetSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
 }

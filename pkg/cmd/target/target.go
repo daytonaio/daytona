@@ -19,5 +19,4 @@ func init() {
 	TargetCmd.AddCommand(TargetSetCmd)
 	TargetCmd.AddCommand(targetRemoveCmd)
 	TargetCmd.AddCommand(targetSetDefaultCmd)
-	TargetSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
 }
