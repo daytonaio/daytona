@@ -5,5 +5,5 @@ package models
 
 type EnvironmentVariable struct {
 	Key   string `json:"key" validate:"required" gorm:"primaryKey"`
-	Value string `json:"value" validate:"required"`
+	Value string `json:"value" validate:"required" gorm:"not null"`
 } // @name EnvironmentVariable

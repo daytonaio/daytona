@@ -3105,7 +3105,8 @@ const docTemplate = `{
                 "id",
                 "name",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {
@@ -3223,7 +3224,8 @@ const docTemplate = `{
                 "name",
                 "state",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {

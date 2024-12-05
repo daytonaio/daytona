@@ -9,13 +9,13 @@ import (
 
 type Job struct {
 	Id           string       `json:"id" validate:"required" gorm:"primaryKey"`
-	ResourceId   string       `json:"resourceId" validate:"required"`
-	ResourceType ResourceType `json:"resourceType" validate:"required"`
-	State        JobState     `json:"state" validate:"required"`
-	Action       JobAction    `json:"action" validate:"required"`
+	ResourceId   string       `json:"resourceId" validate:"required" gorm:"not null"`
+	ResourceType ResourceType `json:"resourceType" validate:"required" gorm:"not null"`
+	State        JobState     `json:"state" validate:"required" gorm:"not null"`
+	Action       JobAction    `json:"action" validate:"required" gorm:"not null"`
 	Error        *string      `json:"error" validate:"optional"`
-	CreatedAt    time.Time    `json:"createdAt" validate:"required"`
-	UpdatedAt    time.Time    `json:"updatedAt" validate:"required"`
+	CreatedAt    time.Time    `json:"createdAt" validate:"required" gorm:"not null"`
+	UpdatedAt    time.Time    `json:"updatedAt" validate:"required" gorm:"not null"`
 } // @name Job
 
 type ResourceType string // @name ResourceType

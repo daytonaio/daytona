@@ -13,7 +13,7 @@ const (
 
 type ApiKey struct {
 	KeyHash string     `json:"keyHash" validate:"required" gorm:"primaryKey"`
-	Type    ApiKeyType `json:"type" validate:"required"`
+	Type    ApiKeyType `json:"type" validate:"required" gorm:"not null" `
 	// Workspace or client name
 	Name string `json:"name" validate:"required" gorm:"uniqueIndex"`
 } // @name ApiKey

@@ -3102,7 +3102,8 @@
                 "id",
                 "name",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {
@@ -3220,7 +3221,8 @@
                 "name",
                 "state",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {

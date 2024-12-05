@@ -12,25 +12,25 @@ import (
 
 type Workspace struct {
 	Id                  string                     `json:"id" validate:"required" gorm:"primaryKey"`
-	Name                string                     `json:"name" validate:"required"`
-	Image               string                     `json:"image" validate:"required"`
-	User                string                     `json:"user" validate:"required"`
+	Name                string                     `json:"name" validate:"required" gorm:"not null"`
+	Image               string                     `json:"image" validate:"required" gorm:"not null"`
+	User                string                     `json:"user" validate:"required" gorm:"not null"`
 	BuildConfig         *BuildConfig               `json:"buildConfig,omitempty" validate:"optional" gorm:"serializer:json"`
-	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json"`
-	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json"`
-	TargetId            string                     `json:"targetId" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
-	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
-	ApiKey              string                     `json:"-"`
-	Metadata            *WorkspaceMetadata         `gorm:"foreignKey:WorkspaceId;references:Id" validate:"optional"`
+	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
+	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
+	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId;not nulls"`
+	ApiKey              string                     `json:"-" validate:"required" gorm:"not null"`
+	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
-	LastJob             *Job                       `gorm:"foreignKey:ResourceId;references:Id"`
+	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
 } // @name Workspace
 
 type WorkspaceMetadata struct {
-	WorkspaceId string     `json:"workspaceId" validate:"required" gorm:"primaryKey;foreignKey:WorkspaceId;references:Id"`
-	UpdatedAt   time.Time  `json:"updatedAt" validate:"required"`
-	Uptime      uint64     `json:"uptime" validate:"required"`
-	GitStatus   *GitStatus `json:"gitStatus" validate:"required" gorm:"serializer:json"`
+	WorkspaceId string     `json:"workspaceId" validate:"required" gorm:"primaryKey"`
+	UpdatedAt   time.Time  `json:"updatedAt" validate:"required" gorm:"not null"`
+	Uptime      uint64     `json:"uptime" validate:"required" gorm:"not null"`
+	GitStatus   *GitStatus `json:"gitStatus" validate:"required" gorm:"serializer:json;not null"`
 } // @name WorkspaceMetadata
 
 func (w *Workspace) WorkspaceFolderName() string {
@@ -61,26 +61,26 @@ type CachedBuild struct {
 } // @name CachedBuild
 
 type WorkspaceInfo struct {
-	Name             string `json:"name" validate:"required"`
-	Created          string `json:"created" validate:"required"`
-	IsRunning        bool   `json:"isRunning" validate:"required"`
+	Name             string `json:"name" validate:"required" gorm:"not null"`
+	Created          string `json:"created" validate:"required" gorm:"not null"`
+	IsRunning        bool   `json:"isRunning" validate:"required" gorm:"not null"`
 	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
-	TargetId         string `json:"targetId" validate:"required"`
+	TargetId         string `json:"targetId" validate:"required" gorm:"not null"`
 } // @name WorkspaceInfo
 
 type GitStatus struct {
-	CurrentBranch   string        `json:"currentBranch" validate:"required"`
-	Files           []*FileStatus `json:"fileStatus" validate:"required"`
+	CurrentBranch   string        `json:"currentBranch" validate:"required" gorm:"not null"`
+	Files           []*FileStatus `json:"fileStatus" validate:"required" gorm:"not null"`
 	BranchPublished bool          `json:"branchPublished" validate:"optional"`
 	Ahead           int           `json:"ahead" validate:"optional"`
 	Behind          int           `json:"behind" validate:"optional"`
 } // @name GitStatus
 
 type FileStatus struct {
-	Name     string `json:"name" validate:"required"`
-	Extra    string `json:"extra" validate:"required"`
-	Staging  Status `json:"staging" validate:"required"`
-	Worktree Status `json:"worktree" validate:"required"`
+	Name     string `json:"name" validate:"required" gorm:"not null"`
+	Extra    string `json:"extra" validate:"required" gorm:"not null"`
+	Staging  Status `json:"staging" validate:"required" gorm:"not null"`
+	Worktree Status `json:"worktree" validate:"required" gorm:"not null"`
 } // @name FileStatus
 
 // Status status code of a file in the Worktree

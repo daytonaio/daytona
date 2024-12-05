@@ -12,10 +12,10 @@ const (
 
 type GitProviderConfig struct {
 	Id            string         `json:"id" validate:"required" gorm:"primaryKey"`
-	ProviderId    string         `json:"providerId" validate:"required"`
-	Username      string         `json:"username" validate:"required"`
+	ProviderId    string         `json:"providerId" validate:"required" gorm:"not null"`
+	Username      string         `json:"username" validate:"required" gorm:"not null"`
 	BaseApiUrl    *string        `json:"baseApiUrl,omitempty" validate:"optional"`
-	Token         string         `json:"token" validate:"required"`
+	Token         string         `json:"token" validate:"required" gorm:"not null"`
 	Alias         string         `json:"alias" validate:"required" gorm:"uniqueIndex"`
 	SigningKey    *string        `json:"signingKey,omitempty" validate:"optional"`
 	SigningMethod *SigningMethod `json:"signingMethod,omitempty" validate:"optional"`

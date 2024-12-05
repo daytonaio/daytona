@@ -13,12 +13,12 @@ import (
 
 type WorkspaceTemplate struct {
 	Name                string            `json:"name" validate:"required" gorm:"primaryKey"`
-	Image               string            `json:"image" validate:"required"`
-	User                string            `json:"user" validate:"required"`
+	Image               string            `json:"image" validate:"required" gorm:"not null"`
+	User                string            `json:"user" validate:"required" gorm:"not null"`
 	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty" validate:"optional" gorm:"serializer:json"`
-	RepositoryUrl       string            `json:"repositoryUrl" validate:"required"`
-	EnvVars             map[string]string `json:"envVars" validate:"required" gorm:"serializer:json"`
-	IsDefault           bool              `json:"default" validate:"required"`
+	RepositoryUrl       string            `json:"repositoryUrl" validate:"required" gorm:"not null"`
+	EnvVars             map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	IsDefault           bool              `json:"default" validate:"required" gorm:"not null"`
 	Prebuilds           []*PrebuildConfig `json:"prebuilds" validate:"optional" gorm:"serializer:json"`
 	GitProviderConfigId *string           `json:"gitProviderConfigId" validate:"optional"`
 } // @name WorkspaceTemplate
@@ -84,11 +84,11 @@ func (wt *WorkspaceTemplate) RemovePrebuild(id string) error {
 
 // PrebuildConfig holds configuration for the prebuild process
 type PrebuildConfig struct {
-	Id             string   `json:"id" validate:"required"`
-	Branch         string   `json:"branch" validate:"required"`
-	CommitInterval *int     `json:"commitInterval" validate:"required"`
-	TriggerFiles   []string `json:"triggerFiles" validate:"required"`
-	Retention      int      `json:"retention" validate:"required"`
+	Id             string   `json:"id" validate:"required" gorm:"not null"`
+	Branch         string   `json:"branch" validate:"required" gorm:"not null"`
+	CommitInterval *int     `json:"commitInterval" validate:"required" gorm:"not null"`
+	TriggerFiles   []string `json:"triggerFiles" validate:"required" gorm:"not null"`
+	Retention      int      `json:"retention" validate:"required" gorm:"not null"`
 } // @name PrebuildConfig
 
 func (p *PrebuildConfig) GenerateId() error {

@@ -747,6 +747,7 @@ definitions:
     - name
     - targetConfig
     - targetConfigId
+    - workspaces
     type: object
   TargetConfig:
     properties:
@@ -840,6 +841,7 @@ definitions:
     - state
     - targetConfig
     - targetConfigId
+    - workspaces
     type: object
   TargetInfo:
     properties:

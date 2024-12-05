@@ -2582,6 +2582,7 @@ components:
       - name
       - targetConfig
       - targetConfigId
+      - workspaces
       type: object
     TargetConfig:
       example:
@@ -2889,6 +2890,7 @@ components:
       - state
       - targetConfig
       - targetConfigId
+      - workspaces
       type: object
     TargetInfo:
       example:
