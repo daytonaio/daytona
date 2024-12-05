@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,7 +25,7 @@ import (
 //
 //	@id				CreateTarget
 func CreateTarget(ctx *gin.Context) {
-	var createTargetReq dto.CreateTargetDTO
+	var createTargetReq services.CreateTargetDTO
 	err := ctx.BindJSON(&createTargetReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))

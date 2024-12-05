@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
@@ -121,7 +121,7 @@ func ListWorkspaceTemplates(ctx *gin.Context) {
 //
 //	@id				SetWorkspaceTemplate
 func SetWorkspaceTemplate(ctx *gin.Context) {
-	var req dto.CreateWorkspaceTemplateDTO
+	var req services.CreateWorkspaceTemplateDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %s", err.Error()))

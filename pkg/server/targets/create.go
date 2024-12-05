@@ -8,7 +8,6 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -16,7 +15,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) CreateTarget(ctx context.Context, req dto.CreateTargetDTO) (*models.Target, error) {
+func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTargetDTO) (*models.Target, error) {
 	_, err := s.targetStore.Find(&stores.TargetFilter{IdOrName: &req.Id})
 	if err == nil {
 		return nil, services.ErrTargetAlreadyExists
