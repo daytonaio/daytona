@@ -19,7 +19,7 @@ import (
 
 var commonGitProviderIds = []string{"github", "gitlab", "bitbucket"}
 
-func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient, gitProviderAddView *apiclient.SetGitProviderConfig, existingAliases []string) error {
+func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient, gitProviderAddView *apiclient.SetGitProviderConfig, existingAliases []string, flags map[string]string) error {
 	supportedProviders := config.GetSupportedGitProviders()
 
 	var gitProviderOptions []huh.Option[string]
@@ -73,6 +73,39 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 		gitProviderAddView.SigningKey = nil
 	}
 
+	aliasFlag := flags["alias"]
+	tokenFlag := flags["token"]
+	baseApiUrlFlag := flags["base-api-url"]
+	usernameFlag := flags["username"]
+	signingMethodFlag := flags["signing-method"]
+	signingKeyFlag := flags["signing-key"]
+
+	if usernameFlag != "" {
+		if ProviderRequiresUsername(gitProviderAddView.ProviderId) {
+			gitProviderAddView.Username = &usernameFlag
+		} else {
+			return fmt.Errorf("username is not required for '%s' provider", gitProviderAddView.ProviderId)
+		}
+	}
+
+	if baseApiUrlFlag != "" {
+		if ProviderRequiresApiUrl(gitProviderAddView.ProviderId) {
+			gitProviderAddView.BaseApiUrl = &baseApiUrlFlag
+		} else {
+			return fmt.Errorf("base API URL is not required for '%s' provider", gitProviderAddView.ProviderId)
+		}
+	}
+
+	if signingMethodFlag != "" || signingKeyFlag != "" {
+		err := ValidateSigningMethodAndKey(signingMethodFlag, signingKeyFlag, gitProviderAddView.ProviderId)
+		if err != nil {
+			return err
+		}
+		signingMethod := apiclient.SigningMethod(signingMethodFlag)
+		gitProviderAddView.SigningMethod = &signingMethod
+		gitProviderAddView.SigningKey = &signingKeyFlag
+	}
+
 	userDataForm := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
@@ -85,7 +118,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					return nil
 				}),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return !providerRequiresUsername(gitProviderAddView.ProviderId)
+			return usernameFlag != "" || !ProviderRequiresUsername(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -99,7 +132,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					return nil
 				}),
 		).WithHeight(6).WithHideFunc(func() bool {
-			return !providerRequiresApiUrl(gitProviderAddView.ProviderId)
+			return baseApiUrlFlag != "" || !ProviderRequiresApiUrl(gitProviderAddView.ProviderId)
 		}),
 
 		huh.NewGroup(
@@ -113,7 +146,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					}
 					return nil
 				}),
-		).WithHeight(5),
+		).WithHeight(5).WithHideFunc(func() bool {
+			return tokenFlag != ""
+		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Alias").
@@ -129,7 +164,9 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					}
 					return nil
 				}),
-		).WithHeight(6),
+		).WithHeight(6).WithHideFunc(func() bool {
+			return aliasFlag != ""
+		}),
 
 		huh.NewGroup(huh.NewSelect[string]().
 			Title("Commit Signing Method").
@@ -143,7 +180,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 			).
 			Value(&selectedSigningMethod).WithHeight(6),
 		).WithHeight(8).WithHideFunc(func() bool {
-			return commitSigningNotSupported(gitProviderAddView.ProviderId)
+			return signingMethodFlag != "" || CommitSigningNotSupported(gitProviderAddView.ProviderId)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
@@ -158,14 +195,14 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 					}
 
 					if selectedSigningMethod == "ssh" {
-						if err := isValidSSHKey(str); err != nil {
+						if err := IsValidSSHKey(str); err != nil {
 							return err
 						}
 					}
 					return nil
 				}),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return selectedSigningMethod == "none"
+			return signingKeyFlag != "" || selectedSigningMethod == "none"
 		}),
 	).WithTheme(views.GetCustomTheme())
 
@@ -186,7 +223,7 @@ func GitProviderCreationView(ctx context.Context, apiClient *apiclient.APIClient
 	return nil
 
 }
-func isValidSSHKey(key string) error {
+func IsValidSSHKey(key string) error {
 	sshKeyPattern := regexp.MustCompile(`^(ssh-(rsa|ed25519|dss|ecdsa-sha2-nistp(256|384|521)))\s+[A-Za-z0-9+/=]+(\s+.+)?$`)
 	if !sshKeyPattern.MatchString(key) {
 		return errors.New("invalid SSH key: must start with valid SSH key type (e.g., ssh-rsa, ssh-ed25519)")
@@ -195,11 +232,11 @@ func isValidSSHKey(key string) error {
 	return nil
 }
 
-func providerRequiresUsername(gitProviderId string) bool {
+func ProviderRequiresUsername(gitProviderId string) bool {
 	return gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server" || gitProviderId == "aws-codecommit"
 }
 
-func providerRequiresApiUrl(gitProviderId string) bool {
+func ProviderRequiresApiUrl(gitProviderId string) bool {
 	providersRequiringApiUrl := []string{
 		"gitness",
 		"github-enterprise-server",
@@ -213,7 +250,7 @@ func providerRequiresApiUrl(gitProviderId string) bool {
 	return slices.Contains(providersRequiringApiUrl, gitProviderId)
 }
 
-func commitSigningNotSupported(gitProviderId string) bool {
+func CommitSigningNotSupported(gitProviderId string) bool {
 	return gitProviderId == "gitness" || gitProviderId == "bitbucket" || gitProviderId == "bitbucket-server"
 }
 
@@ -279,4 +316,41 @@ func getGitProviderSigningHelpMessage(gitProviderId string) string {
 		return signingDocsLink
 	}
 	return ""
+}
+
+func CheckIfAliasExists(alias string, initialAlias *string, existingAliases []string) error {
+	for _, existingAlias := range existingAliases {
+		if alias == existingAlias {
+			if initialAlias == nil || *initialAlias != alias {
+				return fmt.Errorf("alias '%s' is already in use", alias)
+			}
+		}
+	}
+	return nil
+}
+
+func ValidateSigningMethodAndKey(signingMethod string, signingKey, providerId string) error {
+	if CommitSigningNotSupported(providerId) {
+		return fmt.Errorf("commit signing is not supported for '%s' provider", providerId)
+	} else {
+		if signingMethod == "" || signingKey == "" {
+			return fmt.Errorf("both signing method and key must be provided")
+		}
+		isValidSigningMethod := false
+		for _, signingMethod := range apiclient.AllowedSigningMethodEnumValues {
+			if signingMethod == apiclient.SigningMethod(signingMethod) {
+				isValidSigningMethod = true
+				break
+			}
+		}
+		if !isValidSigningMethod {
+			return fmt.Errorf("invalid signing method '%s'", signingMethod)
+		}
+		if signingMethod == "ssh" {
+			if err := IsValidSSHKey(signingKey); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
