@@ -10,6 +10,7 @@ daytona env list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
+  -v, --show-values     Show environment variable values
 ```
 
 ### Options inherited from parent commands

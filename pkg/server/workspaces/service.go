@@ -21,7 +21,7 @@ type WorkspaceServiceConfig struct {
 	WorkspaceMetadataStore stores.WorkspaceMetadataStore
 
 	FindTarget             func(ctx context.Context, targetId string) (*models.Target, error)
-	FindContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
+	FindContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	FindCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
 	GenerateApiKey         func(ctx context.Context, name string) (string, error)
 	RevokeApiKey           func(ctx context.Context, name string) error
@@ -71,7 +71,7 @@ type WorkspaceService struct {
 	workspaceMetadataStore stores.WorkspaceMetadataStore
 
 	findTarget             func(ctx context.Context, targetId string) (*models.Target, error)
-	findContainerRegistry  func(ctx context.Context, image string) (*models.ContainerRegistry, error)
+	findContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	findCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
 	generateApiKey         func(ctx context.Context, name string) (string, error)
 	revokeApiKey           func(ctx context.Context, name string) error

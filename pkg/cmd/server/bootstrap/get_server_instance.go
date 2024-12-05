@@ -23,7 +23,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
 	"github.com/daytonaio/daytona/pkg/server/env"
 	"github.com/daytonaio/daytona/pkg/server/gitproviders"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -59,10 +58,6 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	dbConnection := db.GetSQLiteConnection(dbPath)
 
 	apiKeyStore, err := db.NewApiKeyStore(dbConnection)
-	if err != nil {
-		return nil, err
-	}
-	containerRegistryStore, err := db.NewContainerRegistryStore(dbConnection)
 	if err != nil {
 		return nil, err
 	}
@@ -121,10 +116,6 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	if err != nil {
 		return nil, err
 	}
-
-	containerRegistryService := containerregistries.NewContainerRegistryService(containerregistries.ContainerRegistryServiceConfig{
-		Store: containerRegistryStore,
-	})
 
 	gitProviderService := gitproviders.NewGitProviderService(gitproviders.GitProviderServiceConfig{
 		ConfigStore: gitProviderConfigStore,
@@ -264,10 +255,11 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	var localContainerRegistry server.ILocalContainerRegistry
 
 	if c.BuilderRegistryServer != "local" {
-		_, err := containerRegistryService.Find(c.BuilderRegistryServer)
-		if err != nil {
+		envVarService := server.GetInstance(nil).EnvironmentVariableService
+		envVars, err := envVarService.Map()
+		if err != nil || envVars.FindContainerRegistry(c.BuilderRegistryServer) == nil {
 			log.Errorf("Failed to find container registry credentials for builder registry server %s\n", c.BuilderRegistryServer)
-			log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server with 'daytona container-registry set' and restart the server\n", c.BuilderRegistryServer)
+			log.Errorf("Defaulting to local container registry. To use %s as the builder registry, add credentials for the registry server by adding them as environment variables using `daytona env set` and restart the server\n", c.BuilderRegistryServer)
 			c.BuilderRegistryServer = "local"
 		}
 	}
@@ -336,8 +328,8 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			}
 			return &t.Target, nil
 		},
-		FindContainerRegistry: func(ctx context.Context, image string) (*models.ContainerRegistry, error) {
-			return containerRegistryService.FindByImageName(image)
+		FindContainerRegistry: func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry {
+			return services.EnvironmentVariables(envVars).FindContainerRegistryByImageName(image)
 		},
 		FindCachedBuild: func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error) {
 			validStates := []models.ResourceStateName{
@@ -409,7 +401,6 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		Version:                    version,
 		TailscaleServer:            headscaleServer,
 		TargetConfigService:        targetConfigService,
-		ContainerRegistryService:   containerRegistryService,
 		BuildService:               buildService,
 		WorkspaceTemplateService:   workspaceTemplateService,
 		WorkspaceService:           workspaceService,

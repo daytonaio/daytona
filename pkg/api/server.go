@@ -35,7 +35,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
-	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/env"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
@@ -227,7 +226,7 @@ func (a *ApiServer) Start() error {
 
 	jobController := protected.Group("/job")
 	{
-		jobController.GET("/", job.ListJobs)
+		jobController.GET("", job.ListJobs)
 	}
 
 	workspaceTemplateController := protected.Group("/workspace-template")
@@ -264,14 +263,6 @@ func (a *ApiServer) Start() error {
 		providerController.GET("", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
 		providerController.GET("/:provider/target-config-manifest", provider.GetTargetConfigManifest)
-	}
-
-	containerRegistryController := protected.Group("/container-registry")
-	{
-		containerRegistryController.GET("", containerregistry.ListContainerRegistries)
-		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
-		containerRegistryController.PUT("/:server", containerregistry.SetContainerRegistry)
-		containerRegistryController.DELETE("/:server", containerregistry.RemoveContainerRegistry)
 	}
 
 	buildController := protected.Group("/build")

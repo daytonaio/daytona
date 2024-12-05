@@ -26,12 +26,7 @@ var configureCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
-		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig, containerRegistries)
+		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig)
 		if err != nil {
 			return err
 		}

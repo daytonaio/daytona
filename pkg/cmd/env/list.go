@@ -13,6 +13,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var showValuesFlag bool
+
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List server environment variables",
@@ -29,10 +31,17 @@ var listCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
+		if !showValuesFlag {
+			for i := range envVars {
+				envVars[i].Value = "****************"
+			}
+		}
+
 		if format.FormatFlag != "" {
 			if envVars == nil {
 				envVars = []apiclient.EnvironmentVariable{}
 			}
+
 			formattedData := format.NewFormatter(envVars)
 			formattedData.Print()
 			return nil
@@ -45,4 +54,6 @@ var listCmd = &cobra.Command{
 
 func init() {
 	format.RegisterFormatFlag(listCmd)
+
+	listCmd.Flags().BoolVarP(&showValuesFlag, "show-values", "v", false, "Show environment variable values")
 }

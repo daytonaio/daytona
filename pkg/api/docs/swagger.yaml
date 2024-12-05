@@ -151,19 +151,6 @@ definitions:
     - image
     - user
     type: object
-  ContainerRegistry:
-    properties:
-      password:
-        type: string
-      server:
-        type: string
-      username:
-        type: string
-    required:
-    - password
-    - server
-    - username
-    type: object
   CreateBuildDTO:
     properties:
       branch:
@@ -1658,78 +1645,6 @@ paths:
       summary: Delete builds
       tags:
       - build
-  /container-registry:
-    get:
-      description: List container registries
-      operationId: ListContainerRegistries
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/ContainerRegistry'
-            type: array
-      summary: List container registries
-      tags:
-      - container-registry
-  /container-registry/{server}:
-    delete:
-      description: Remove a container registry credentials
-      operationId: RemoveContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        type: string
-      responses:
-        "204":
-          description: No Content
-      summary: Remove a container registry credentials
-      tags:
-      - container-registry
-    get:
-      description: Get container registry credentials
-      operationId: GetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ContainerRegistry'
-      summary: Get container registry credentials
-      tags:
-      - container-registry
-    put:
-      description: Set container registry credentials
-      operationId: SetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        type: string
-      - description: Container Registry credentials to set
-        in: body
-        name: containerRegistry
-        required: true
-        schema:
-          $ref: '#/definitions/ContainerRegistry'
-      responses:
-        "201":
-          description: Created
-      summary: Set container registry credentials
-      tags:
-      - container-registry
   /env:
     get:
       description: List environment variables
