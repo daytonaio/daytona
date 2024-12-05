@@ -5,9 +5,7 @@ package runner
 
 import (
 	"context"
-	"time"
 
-	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/jobs"
 	"github.com/daytonaio/daytona/pkg/jobs/build"
 	"github.com/daytonaio/daytona/pkg/jobs/target"
@@ -49,15 +47,6 @@ type JobRunner struct {
 
 func (s *JobRunner) StartRunner(ctx context.Context) error {
 	scheduler := scheduler.NewCronScheduler()
-
-	// Make sure the API is up
-	for {
-		_, err := apiclient.GetApiClient(nil)
-		if err != nil {
-			break
-		}
-		time.Sleep(500 * time.Millisecond)
-	}
 
 	err := scheduler.AddFunc(runners.DEFAULT_JOB_POLL_INTERVAL, func() {
 		err := s.CheckAndRunJobs(ctx)
