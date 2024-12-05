@@ -20,7 +20,6 @@ type ServerInstanceConfig struct {
 	Version                    string
 	TailscaleServer            TailscaleServer
 	TargetConfigService        services.ITargetConfigService
-	ContainerRegistryService   services.IContainerRegistryService
 	BuildService               services.IBuildService
 	WorkspaceTemplateService   services.IWorkspaceTemplateService
 	WorkspaceService           services.IWorkspaceService
@@ -51,7 +50,6 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			Version:                    serverConfig.Version,
 			TailscaleServer:            serverConfig.TailscaleServer,
 			TargetConfigService:        serverConfig.TargetConfigService,
-			ContainerRegistryService:   serverConfig.ContainerRegistryService,
 			BuildService:               serverConfig.BuildService,
 			WorkspaceTemplateService:   serverConfig.WorkspaceTemplateService,
 			WorkspaceService:           serverConfig.WorkspaceService,
@@ -75,7 +73,6 @@ type Server struct {
 	Version                    string
 	TailscaleServer            TailscaleServer
 	TargetConfigService        services.ITargetConfigService
-	ContainerRegistryService   services.IContainerRegistryService
 	BuildService               services.IBuildService
 	WorkspaceTemplateService   services.IWorkspaceTemplateService
 	WorkspaceService           services.IWorkspaceService

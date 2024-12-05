@@ -86,10 +86,6 @@ Class | Method | HTTP request | Description
 *BuildAPI* | [**DeleteBuildsFromPrebuild**](docs/BuildAPI.md#deletebuildsfromprebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
 *BuildAPI* | [**GetBuild**](docs/BuildAPI.md#getbuild) | **Get** /build/{buildId} | Get build data
 *BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
-*ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry credentials
-*ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
-*ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
-*ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *EnvVarAPI* | [**DeleteEnvironmentVariable**](docs/EnvVarAPI.md#deleteenvironmentvariable) | **Delete** /env/{key} | Delete environment variable
 *EnvVarAPI* | [**ListEnvironmentVariables**](docs/EnvVarAPI.md#listenvironmentvariables) | **Get** /env | List environment variables
@@ -190,7 +186,6 @@ Class | Method | HTTP request | Description
  - [CompletionItem](docs/CompletionItem.md)
  - [CompletionList](docs/CompletionList.md)
  - [ContainerConfig](docs/ContainerConfig.md)
- - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
  - [CreateTargetDTO](docs/CreateTargetDTO.md)
