@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/huh"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
@@ -35,9 +36,18 @@ var deleteCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			return err
+		}
 
 		if allFlag {
-			return deleteAllTargetsView(ctx, apiClient)
+			return deleteAllTargetsView(ctx, activeProfile.Id, apiClient)
 		}
 
 		if len(args) == 0 {
@@ -93,7 +103,7 @@ var deleteCmd = &cobra.Command{
 			fmt.Println("Operation canceled.")
 		} else {
 			for _, target := range targetDeleteList {
-				err := deleteTarget(ctx, apiClient, target)
+				err := deleteTarget(ctx, activeProfile.Id, apiClient, target)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", target.Name, err))
 				} else {
@@ -114,12 +124,12 @@ func init() {
 	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete a target by force")
 }
 
-func deleteAllTargetsView(ctx context.Context, apiClient *apiclient.APIClient) error {
+func deleteAllTargetsView(ctx context.Context, activeProfileId string, apiClient *apiclient.APIClient) error {
 	var deleteAllTargetsFlag bool
 
 	if yesFlag {
 		fmt.Println("Deleting all targets.")
-		err := deleteAllTargets(ctx, apiClient)
+		err := deleteAllTargets(ctx, activeProfileId, apiClient)
 		if err != nil {
 			return err
 		}
@@ -139,7 +149,7 @@ func deleteAllTargetsView(ctx context.Context, apiClient *apiclient.APIClient) e
 		}
 
 		if deleteAllTargetsFlag {
-			err := deleteAllTargets(ctx, apiClient)
+			err := deleteAllTargets(ctx, activeProfileId, apiClient)
 			if err != nil {
 				return err
 			}
@@ -151,14 +161,14 @@ func deleteAllTargetsView(ctx context.Context, apiClient *apiclient.APIClient) e
 	return nil
 }
 
-func deleteAllTargets(ctx context.Context, apiClient *apiclient.APIClient) error {
+func deleteAllTargets(ctx context.Context, activeProfileId string, apiClient *apiclient.APIClient) error {
 	targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	for _, target := range targetList {
-		err := deleteTarget(ctx, apiClient, &target)
+		err := deleteTarget(ctx, activeProfileId, apiClient, &target)
 		if err != nil {
 			log.Errorf("Failed to delete target %s: %v", target.Name, err)
 			continue
@@ -168,7 +178,7 @@ func deleteAllTargets(ctx context.Context, apiClient *apiclient.APIClient) error
 	return nil
 }
 
-func deleteTarget(ctx context.Context, apiClient *apiclient.APIClient, target *apiclient.TargetDTO) error {
+func deleteTarget(ctx context.Context, activeProfileId string, apiClient *apiclient.APIClient, target *apiclient.TargetDTO) error {
 	if len(target.Workspaces) > 0 {
 		err := deleteWorkspacesForTarget(ctx, apiClient, target)
 		if err != nil {
@@ -181,6 +191,11 @@ func deleteTarget(ctx context.Context, apiClient *apiclient.APIClient, target *a
 		res, err := apiClient.TargetAPI.RemoveTarget(ctx, target.Id).Force(forceFlag).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		err = config.RemoveSshEntries(activeProfileId, target.Id)
+		if err != nil {
+			return err
 		}
 
 		err = common.AwaitTargetDeleted(target.Id)

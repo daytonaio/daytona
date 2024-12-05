@@ -12,12 +12,20 @@ import (
 )
 
 func RunStartWorkspaceForm(workspaceName string) bool {
+	return runStartForm("workspace", workspaceName)
+}
+
+func RunStartTargetForm(targetName string) bool {
+	return runStartForm("target", targetName)
+}
+
+func runStartForm(resource, name string) bool {
 	confirmCheck := true
 
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewConfirm().
-				Title(fmt.Sprintf("The workspace %s is stopped, would you like to start it?", workspaceName)).
+				Title(fmt.Sprintf("The %s %s is stopped, would you like to start it?", resource, name)).
 				Value(&confirmCheck),
 		),
 	).WithTheme(views.GetCustomTheme())
