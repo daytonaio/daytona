@@ -10,7 +10,7 @@ import (
 
 var TargetCmd = &cobra.Command{
 	Use:     "target",
-	Aliases: []string{"targets"},
+	Aliases: []string{"targets", "tg"},
 	Short:   "Manage targets",
 	GroupID: util.TARGET_GROUP,
 }

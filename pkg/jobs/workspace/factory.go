@@ -22,11 +22,12 @@ type WorkspaceJobFactory struct {
 }
 
 type WorkspaceJobFactoryConfig struct {
-	FindWorkspace         func(ctx context.Context, workspaceId string) (*models.Workspace, error)
-	FindTarget            func(ctx context.Context, targetId string) (*models.Target, error)
-	FindContainerRegistry func(ctx context.Context, image string) (*models.ContainerRegistry, error)
-	FindGitProviderConfig func(ctx context.Context, id string) (*models.GitProviderConfig, error)
-	TrackTelemetryEvent   func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	FindWorkspace                    func(ctx context.Context, workspaceId string) (*models.Workspace, error)
+	FindTarget                       func(ctx context.Context, targetId string) (*models.Target, error)
+	FindContainerRegistry            func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
+	FindGitProviderConfig            func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	GetWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
+	TrackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
 	LoggerFactory logs.LoggerFactory
 	Provisioner   provisioner.IProvisioner
@@ -43,13 +44,14 @@ func (f *WorkspaceJobFactory) Create(job models.Job) jobs.IJob {
 	return &WorkspaceJob{
 		Job: job,
 
-		findWorkspace:         f.config.FindWorkspace,
-		findTarget:            f.config.FindTarget,
-		findContainerRegistry: f.config.FindContainerRegistry,
-		findGitProviderConfig: f.config.FindGitProviderConfig,
-		trackTelemetryEvent:   f.config.TrackTelemetryEvent,
-		loggerFactory:         f.config.LoggerFactory,
-		provisioner:           f.config.Provisioner,
-		builderImage:          f.config.BuilderImage,
+		findWorkspace:                    f.config.FindWorkspace,
+		findTarget:                       f.config.FindTarget,
+		findContainerRegistry:            f.config.FindContainerRegistry,
+		findGitProviderConfig:            f.config.FindGitProviderConfig,
+		getWorkspaceEnvironmentVariables: f.config.GetWorkspaceEnvironmentVariables,
+		trackTelemetryEvent:              f.config.TrackTelemetryEvent,
+		loggerFactory:                    f.config.LoggerFactory,
+		provisioner:                      f.config.Provisioner,
+		builderImage:                     f.config.BuilderImage,
 	}
 }

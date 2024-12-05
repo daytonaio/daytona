@@ -182,85 +182,6 @@ paths:
       summary: Get build data
       tags:
       - build
-  /container-registry:
-    get:
-      description: List container registries
-      operationId: ListContainerRegistries
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ContainerRegistry'
-                type: array
-          description: OK
-      summary: List container registries
-      tags:
-      - container-registry
-  /container-registry/{server}:
-    delete:
-      description: Remove a container registry credentials
-      operationId: RemoveContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        schema:
-          type: string
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Remove a container registry credentials
-      tags:
-      - container-registry
-    get:
-      description: Get container registry credentials
-      operationId: GetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ContainerRegistry'
-          description: OK
-      summary: Get container registry credentials
-      tags:
-      - container-registry
-    put:
-      description: Set container registry credentials
-      operationId: SetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/ContainerRegistry'
-        description: Container Registry credentials to set
-        required: true
-      responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set container registry credentials
-      tags:
-      - container-registry
-      x-codegen-request-body-name: containerRegistry
   /env:
     get:
       description: List environment variables
@@ -1643,23 +1564,6 @@ components:
       required:
       - image
       - user
-      type: object
-    ContainerRegistry:
-      example:
-        server: server
-        password: password
-        username: username
-      properties:
-        password:
-          type: string
-        server:
-          type: string
-        username:
-          type: string
-      required:
-      - password
-      - server
-      - username
       type: object
     CreateBuildDTO:
       example:

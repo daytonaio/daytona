@@ -7,6 +7,7 @@ import (
 	"context"
 	"regexp"
 
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -44,13 +45,14 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 	}
 	tg.ApiKey = apiKey
 
-	tg.EnvVars = GetTargetEnvVars(tg, TargetEnvVarParams{
+	daytonaTargetEnvVars := GetTargetEnvVars(tg, TargetEnvVarParams{
 		ApiUrl:           s.serverApiUrl,
 		ServerUrl:        s.serverUrl,
 		ServerVersion:    s.serverVersion,
 		ClientId:         telemetry.ClientId(ctx),
 		TelemetryEnabled: telemetry.TelemetryEnabled(ctx),
 	})
+	tg.EnvVars = util.MergeEnvVars(daytonaTargetEnvVars, tg.EnvVars)
 
 	err = s.targetStore.Save(tg)
 	if err != nil {

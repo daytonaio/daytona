@@ -17,7 +17,6 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
 	. "github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	. "github.com/daytonaio/daytona/pkg/cmd/build"
-	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
 	. "github.com/daytonaio/daytona/pkg/cmd/env"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
@@ -65,7 +64,6 @@ func Execute() error {
 	rootCmd.AddCommand(DaemonServeCmd)
 	rootCmd.AddCommand(ServerCmd)
 	rootCmd.AddCommand(ApiKeyCmd)
-	rootCmd.AddCommand(ContainerRegistryCmd)
 	rootCmd.AddCommand(ProviderCmd)
 	rootCmd.AddCommand(TargetConfigCmd)
 	rootCmd.AddCommand(configCmd)

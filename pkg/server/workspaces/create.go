@@ -81,20 +81,14 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 
 	w.ApiKey = apiKey
 
-	workspaceWithEnv := *w
-	workspaceWithEnv.EnvVars = GetWorkspaceEnvVars(w, WorkspaceEnvVarParams{
+	daytonaWorkspaceEnvVars := GetWorkspaceEnvVars(w, WorkspaceEnvVarParams{
 		ApiUrl:           s.serverApiUrl,
 		ServerUrl:        s.serverUrl,
 		ServerVersion:    s.serverVersion,
 		ClientId:         telemetry.ClientId(ctx),
 		TelemetryEnabled: telemetry.TelemetryEnabled(ctx),
 	})
-
-	for k, v := range w.EnvVars {
-		workspaceWithEnv.EnvVars[k] = v
-	}
-
-	w = &workspaceWithEnv
+	w.EnvVars = util.MergeEnvVars(daytonaWorkspaceEnvVars, w.EnvVars)
 
 	err = s.workspaceStore.Save(w)
 	if err != nil {
