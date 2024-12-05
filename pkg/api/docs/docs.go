@@ -4470,7 +4470,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "branch",
-                "commitInterval",
                 "id",
                 "retention",
                 "triggerFiles"
@@ -4875,7 +4874,8 @@ const docTemplate = `{
                 "id",
                 "name",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {
@@ -4993,7 +4993,8 @@ const docTemplate = `{
                 "name",
                 "state",
                 "targetConfig",
-                "targetConfigId"
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
                 "default": {

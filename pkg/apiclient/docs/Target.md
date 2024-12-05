@@ -12,13 +12,13 @@ Name | Type | Description | Notes
 **Name** | **string** |  | 
 **TargetConfig** | [**TargetConfig**](TargetConfig.md) |  | 
 **TargetConfigId** | **string** |  | 
-**Workspaces** | Pointer to [**[]Workspace**](Workspace.md) |  | [optional] 
+**Workspaces** | [**[]Workspace**](Workspace.md) |  | 
 
 ## Methods
 
 ### NewTarget
 
-`func NewTarget(default_ bool, envVars map[string]string, id string, name string, targetConfig TargetConfig, targetConfigId string, ) *Target`
+`func NewTarget(default_ bool, envVars map[string]string, id string, name string, targetConfig TargetConfig, targetConfigId string, workspaces []Workspace, ) *Target`
 
 NewTarget instantiates a new Target object
 This constructor will assign default values to properties that have it defined,
@@ -222,11 +222,6 @@ and a boolean to check if the value has been set.
 
 SetWorkspaces sets Workspaces field to given value.
 
-### HasWorkspaces
-
-`func (o *Target) HasWorkspaces() bool`
-
-HasWorkspaces returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

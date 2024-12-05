@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenVSCodeInsiders(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey string) error {
+func OpenVSCodeInsiders(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey *string) error {
 	path, err := GetVSCodeInsidersBinaryPath()
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func OpenVSCodeInsiders(activeProfile config.Profile, workspaceId string, worksp
 		return err
 	}
 
-	workspaceHostname := config.GetWorkspaceHostname(activeProfile.Id, workspaceId)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
