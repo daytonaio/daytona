@@ -4,6 +4,8 @@
 package db
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
@@ -12,32 +14,36 @@ import (
 )
 
 type TargetStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewTargetStore(db *gorm.DB) (stores.TargetStore, error) {
-	err := db.AutoMigrate(&models.Target{})
+func NewTargetStore(store Store) (stores.TargetStore, error) {
+	err := store.db.AutoMigrate(&models.Target{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &TargetStore{db: db}, nil
+	return &TargetStore{store}, nil
 }
 
-func (s *TargetStore) List(filter *stores.TargetFilter) ([]*models.Target, error) {
+func (s *TargetStore) List(ctx context.Context, filter *stores.TargetFilter) ([]*models.Target, error) {
+	tx := s.getTransaction(ctx)
+
 	targets := []*models.Target{}
 
-	tx := preloadTargetEntities(processTargetFilters(s.db, filter)).Find(&targets)
+	tx = preloadTargetEntities(processTargetFilters(tx, filter)).Find(&targets)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 	return targets, nil
 }
 
-func (s *TargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) {
+func (s *TargetStore) Find(ctx context.Context, filter *stores.TargetFilter) (*models.Target, error) {
+	tx := s.getTransaction(ctx)
+
 	tg := &models.Target{}
 
-	tx := preloadTargetEntities(processTargetFilters(s.db, filter)).First(tg)
+	tx = preloadTargetEntities(processTargetFilters(tx, filter)).First(tg)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -51,8 +57,10 @@ func (s *TargetStore) Find(filter *stores.TargetFilter) (*models.Target, error) 
 	return tg, nil
 }
 
-func (s *TargetStore) Save(target *models.Target) error {
-	tx := s.db.Save(target)
+func (s *TargetStore) Save(ctx context.Context, target *models.Target) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(target)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -60,8 +68,10 @@ func (s *TargetStore) Save(target *models.Target) error {
 	return nil
 }
 
-func (s *TargetStore) Delete(t *models.Target) error {
-	tx := s.db.Delete(t)
+func (s *TargetStore) Delete(ctx context.Context, t *models.Target) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(t)
 	if tx.Error != nil {
 		return tx.Error
 	}

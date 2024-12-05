@@ -24,7 +24,7 @@ import (
 func ListJobs(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	jobs, err := server.JobService.List(nil)
+	jobs, err := server.JobService.List(ctx.Request.Context(), nil)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list jobs: %s", err.Error()))
 		return

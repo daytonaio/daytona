@@ -34,7 +34,7 @@ func ListGitProviders(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.ListConfigs()
+	response, err := server.GitProviderService.ListConfigs(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list git providers: %w", err))
 		return
@@ -70,7 +70,7 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProviders, err := server.GitProviderService.ListConfigsForUrl(decodedUrl)
+	gitProviders, err := server.GitProviderService.ListConfigsForUrl(ctx.Request.Context(), decodedUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
@@ -102,7 +102,7 @@ func GetGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetConfig(id)
+	gitProvider, err := server.GitProviderService.GetConfig(ctx.Request.Context(), id)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -142,7 +142,7 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(decodedUrl)
+	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(ctx.Request.Context(), decodedUrl)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -194,7 +194,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.GitProviderService.SetGitProviderConfig(&gitProviderConfig)
+	err = server.GitProviderService.SetGitProviderConfig(ctx.Request.Context(), &gitProviderConfig)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -223,7 +223,7 @@ func RemoveGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.GitProviderService.RemoveGitProvider(gitProviderId)
+	err := server.GitProviderService.RemoveGitProvider(ctx.Request.Context(), gitProviderId)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

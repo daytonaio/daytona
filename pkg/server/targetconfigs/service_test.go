@@ -4,6 +4,7 @@
 package targetconfigs_test
 
 import (
+	"context"
 	"testing"
 
 	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/server/targetconfigs"
@@ -80,7 +81,7 @@ func (s *TargetConfigServiceTestSuite) SetupTest() {
 	})
 
 	for _, targetConfig := range expectedConfigs {
-		tc, err := s.targetConfigService.Add(services.AddTargetConfigDTO{
+		tc, err := s.targetConfigService.Add(context.TODO(), services.AddTargetConfigDTO{
 			Name:         targetConfig.Name,
 			ProviderInfo: targetConfig.ProviderInfo,
 			Options:      targetConfig.Options,
@@ -99,7 +100,7 @@ func TestTargetConfigService(t *testing.T) {
 func (s *TargetConfigServiceTestSuite) TestList() {
 	require := s.Require()
 
-	targetConfigs, err := s.targetConfigService.List()
+	targetConfigs, err := s.targetConfigService.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedConfigs, targetConfigs)
 }
@@ -107,7 +108,7 @@ func (s *TargetConfigServiceTestSuite) TestList() {
 func (s *TargetConfigServiceTestSuite) TestMap() {
 	require := s.Require()
 
-	targetConfigsMap, err := s.targetConfigService.Map()
+	targetConfigsMap, err := s.targetConfigService.Map(context.TODO())
 	require.Nil(err)
 	require.Equal(expectedConfigMap, targetConfigsMap)
 }
@@ -115,7 +116,7 @@ func (s *TargetConfigServiceTestSuite) TestMap() {
 func (s *TargetConfigServiceTestSuite) TestFind() {
 	require := s.Require()
 
-	targetConfig, err := s.targetConfigService.Find(targetConfig1.Id)
+	targetConfig, err := s.targetConfigService.Find(context.TODO(), targetConfig1.Id)
 	require.Nil(err)
 	require.Equal(targetConfig1, targetConfig)
 }
@@ -123,7 +124,7 @@ func (s *TargetConfigServiceTestSuite) TestFind() {
 func (s *TargetConfigServiceTestSuite) TestSave() {
 	require := s.Require()
 
-	tc, err := s.targetConfigService.Add(services.AddTargetConfigDTO{
+	tc, err := s.targetConfigService.Add(context.TODO(), services.AddTargetConfigDTO{
 		Name:         targetConfig4.Name,
 		ProviderInfo: targetConfig4.ProviderInfo,
 		Options:      targetConfig4.Options,
@@ -133,7 +134,7 @@ func (s *TargetConfigServiceTestSuite) TestSave() {
 	targetConfig4.Id = tc.Id
 	expectedConfigs = append(expectedConfigs, targetConfig4)
 
-	targetConfigs, err := s.targetConfigService.List()
+	targetConfigs, err := s.targetConfigService.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedConfigs, targetConfigs)
 }
@@ -143,10 +144,10 @@ func (s *TargetConfigServiceTestSuite) TestDelete() {
 
 	require := s.Require()
 
-	err := s.targetConfigService.Delete(targetConfig3.Id)
+	err := s.targetConfigService.Delete(context.TODO(), targetConfig3.Id)
 	require.Nil(err)
 
-	targetConfigs, err := s.targetConfigService.List()
+	targetConfigs, err := s.targetConfigService.List(context.TODO())
 	require.Nil(err)
 
 	require.ElementsMatch(expected, targetConfigs)

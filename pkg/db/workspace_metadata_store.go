@@ -4,6 +4,8 @@
 package db
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -11,21 +13,23 @@ import (
 )
 
 type WorkspaceMetadataStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewWorkspaceMetadataStore(db *gorm.DB) (*WorkspaceMetadataStore, error) {
-	err := db.AutoMigrate(&models.WorkspaceMetadata{})
+func NewWorkspaceMetadataStore(store Store) (stores.WorkspaceMetadataStore, error) {
+	err := store.db.AutoMigrate(&models.WorkspaceMetadata{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &WorkspaceMetadataStore{db: db}, nil
+	return &WorkspaceMetadataStore{store}, nil
 }
 
-func (s *WorkspaceMetadataStore) Find(filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
+func (s *WorkspaceMetadataStore) Find(ctx context.Context, filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
+	tx := s.getTransaction(ctx)
+
 	workspaceMetadata := &models.WorkspaceMetadata{}
-	tx := processWorkspaceMetadataFilters(s.db, filter).First(&workspaceMetadata)
+	tx = processWorkspaceMetadataFilters(tx, filter).First(&workspaceMetadata)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrWorkspaceMetadataNotFound
@@ -36,8 +40,10 @@ func (s *WorkspaceMetadataStore) Find(filter *stores.WorkspaceMetadataFilter) (*
 	return workspaceMetadata, nil
 }
 
-func (s *WorkspaceMetadataStore) Save(workspaceMetadata *models.WorkspaceMetadata) error {
-	tx := s.db.Save(workspaceMetadata)
+func (s *WorkspaceMetadataStore) Save(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(workspaceMetadata)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -45,8 +51,10 @@ func (s *WorkspaceMetadataStore) Save(workspaceMetadata *models.WorkspaceMetadat
 	return nil
 }
 
-func (s *WorkspaceMetadataStore) Delete(workspaceMetadata *models.WorkspaceMetadata) error {
-	tx := s.db.Delete(workspaceMetadata)
+func (s *WorkspaceMetadataStore) Delete(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(workspaceMetadata)
 	if tx.Error != nil {
 		return tx.Error
 	}

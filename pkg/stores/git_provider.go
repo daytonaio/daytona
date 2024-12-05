@@ -4,16 +4,18 @@
 package stores
 
 import (
+	"context"
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type GitProviderConfigStore interface {
-	List() ([]*models.GitProviderConfig, error)
-	Find(id string) (*models.GitProviderConfig, error)
-	Save(*models.GitProviderConfig) error
-	Delete(*models.GitProviderConfig) error
+	IStore
+	List(ctx context.Context) ([]*models.GitProviderConfig, error)
+	Find(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	Save(ctx context.Context, gpc *models.GitProviderConfig) error
+	Delete(ctx context.Context, gpc *models.GitProviderConfig) error
 }
 
 var (

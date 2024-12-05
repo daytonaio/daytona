@@ -12,13 +12,22 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*services.WorkspaceDTO, error) {
-	_, err := s.workspaceStore.Find(req.Name)
+	var err error
+	ctx, err = s.workspaceStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
+
+	_, err = s.workspaceStore.Find(ctx, req.Name)
 	if err == nil {
 		return s.handleCreateError(ctx, nil, services.ErrWorkspaceAlreadyExists)
 	}
@@ -90,12 +99,12 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	})
 	w.EnvVars = util.MergeEnvVars(daytonaWorkspaceEnvVars, w.EnvVars)
 
-	err = s.workspaceStore.Save(w)
+	err = s.workspaceStore.Save(ctx, w)
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	err = s.workspaceMetadataStore.Save(&models.WorkspaceMetadata{
+	err = s.workspaceMetadataStore.Save(ctx, &models.WorkspaceMetadata{
 		WorkspaceId: w.Id,
 		Uptime:      0,
 		GitStatus:   &models.GitStatus{},
@@ -105,11 +114,19 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	}
 
 	err = s.createJob(ctx, w.Id, models.JobActionCreate)
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
 
+	err = s.workspaceStore.CommitTransaction(ctx)
 	return s.handleCreateError(ctx, w, err)
 }
 
 func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Workspace, err error) (*services.WorkspaceDTO, error) {
+	if err != nil {
+		err = s.workspaceStore.RollbackTransaction(ctx, err)
+	}
+
 	if !telemetry.TelemetryEnabled(ctx) {
 		if w == nil {
 			return nil, err

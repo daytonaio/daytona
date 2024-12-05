@@ -6,11 +6,15 @@
 package env
 
 import (
+	"context"
+
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryEnvironmentVariableStore struct {
+	common.InMemoryStore
 	envVars map[string]*models.EnvironmentVariable
 }
 
@@ -20,7 +24,7 @@ func NewInMemoryEnvironmentVariableStore() stores.EnvironmentVariableStore {
 	}
 }
 
-func (s *InMemoryEnvironmentVariableStore) List() ([]*models.EnvironmentVariable, error) {
+func (s *InMemoryEnvironmentVariableStore) List(ctx context.Context) ([]*models.EnvironmentVariable, error) {
 	envVars := []*models.EnvironmentVariable{}
 	for _, envVar := range s.envVars {
 		envVars = append(envVars, envVar)
@@ -29,12 +33,12 @@ func (s *InMemoryEnvironmentVariableStore) List() ([]*models.EnvironmentVariable
 	return envVars, nil
 }
 
-func (s *InMemoryEnvironmentVariableStore) Save(environmentVariable *models.EnvironmentVariable) error {
+func (s *InMemoryEnvironmentVariableStore) Save(ctx context.Context, environmentVariable *models.EnvironmentVariable) error {
 	s.envVars[environmentVariable.Key] = environmentVariable
 	return nil
 }
 
-func (s *InMemoryEnvironmentVariableStore) Delete(key string) error {
+func (s *InMemoryEnvironmentVariableStore) Delete(ctx context.Context, key string) error {
 	_, ok := s.envVars[key]
 	if !ok {
 		return stores.ErrEnvironmentVariableNotFound

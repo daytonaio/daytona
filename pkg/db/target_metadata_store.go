@@ -4,6 +4,8 @@
 package db
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 
 	"github.com/daytonaio/daytona/pkg/models"
@@ -11,21 +13,23 @@ import (
 )
 
 type TargetMetadataStore struct {
-	db *gorm.DB
+	Store
 }
 
-func NewTargetMetadataStore(db *gorm.DB) (*TargetMetadataStore, error) {
-	err := db.AutoMigrate(&models.TargetMetadata{})
+func NewTargetMetadataStore(store Store) (stores.TargetMetadataStore, error) {
+	err := store.db.AutoMigrate(&models.TargetMetadata{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &TargetMetadataStore{db: db}, nil
+	return &TargetMetadataStore{store}, nil
 }
 
-func (s *TargetMetadataStore) Find(filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
+func (s *TargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
+	tx := s.getTransaction(ctx)
+
 	targetMetadata := &models.TargetMetadata{}
-	tx := processTargetMetadataFilters(s.db, filter).First(&targetMetadata)
+	tx = processTargetMetadataFilters(tx, filter).First(&targetMetadata)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrTargetMetadataNotFound
@@ -36,8 +40,10 @@ func (s *TargetMetadataStore) Find(filter *stores.TargetMetadataFilter) (*models
 	return targetMetadata, nil
 }
 
-func (s *TargetMetadataStore) Save(targetMetadata *models.TargetMetadata) error {
-	tx := s.db.Save(targetMetadata)
+func (s *TargetMetadataStore) Save(ctx context.Context, targetMetadata *models.TargetMetadata) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Save(targetMetadata)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -45,8 +51,10 @@ func (s *TargetMetadataStore) Save(targetMetadata *models.TargetMetadata) error 
 	return nil
 }
 
-func (s *TargetMetadataStore) Delete(targetMetadata *models.TargetMetadata) error {
-	tx := s.db.Delete(targetMetadata)
+func (s *TargetMetadataStore) Delete(ctx context.Context, targetMetadata *models.TargetMetadata) error {
+	tx := s.getTransaction(ctx)
+
+	tx = tx.Delete(targetMetadata)
 	if tx.Error != nil {
 		return tx.Error
 	}

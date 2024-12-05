@@ -25,7 +25,7 @@ type ITargetService interface {
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 	HandleSuccessfulRemoval(ctx context.Context, targetId string) error
 
-	SetTargetMetadata(targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
+	SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 }
 
 type TargetDTO struct {

@@ -6,13 +6,16 @@
 package build
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/testing/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryBuildStore struct {
+	common.InMemoryStore
 	builds map[string]*models.Build
 }
 
@@ -22,7 +25,7 @@ func NewInMemoryBuildStore() stores.BuildStore {
 	}
 }
 
-func (s *InMemoryBuildStore) Find(filter *stores.BuildFilter) (*models.Build, error) {
+func (s *InMemoryBuildStore) Find(ctx context.Context, filter *stores.BuildFilter) (*models.Build, error) {
 	b, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -34,7 +37,7 @@ func (s *InMemoryBuildStore) Find(filter *stores.BuildFilter) (*models.Build, er
 	return b[0], nil
 }
 
-func (s *InMemoryBuildStore) List(filter *stores.BuildFilter) ([]*models.Build, error) {
+func (s *InMemoryBuildStore) List(ctx context.Context, filter *stores.BuildFilter) ([]*models.Build, error) {
 	builds, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -43,12 +46,12 @@ func (s *InMemoryBuildStore) List(filter *stores.BuildFilter) ([]*models.Build, 
 	return builds, nil
 }
 
-func (s *InMemoryBuildStore) Save(result *models.Build) error {
+func (s *InMemoryBuildStore) Save(ctx context.Context, result *models.Build) error {
 	s.builds[result.Id] = result
 	return nil
 }
 
-func (s *InMemoryBuildStore) Delete(id string) error {
+func (s *InMemoryBuildStore) Delete(ctx context.Context, id string) error {
 	delete(s.builds, id)
 	return nil
 }
