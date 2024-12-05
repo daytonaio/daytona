@@ -278,7 +278,7 @@ Before creating a new issue, search the existing issues [here](https://github.co
       * Click on "New Issue": Choose the appropriate template (Bug Report, Feature Request, etc.) if available.
       * Fill Out the Issue Template: Provide a clear and concise description of the issue, including steps to reproduce (for bugs) or detailed feature descriptions.
       * Submit the Issue: Click "Submit new issue" to create the issue.
-   3. Engage with the Community
+   3. **Engage with the Community**
       * **Respond to Feedback:** Be prepared to provide additional information or clarification if maintainers or other contributors have questions.
       * **Collaborate on Solutions:** If you have ideas for resolving the issue, share them in the comments.
 
@@ -316,7 +316,12 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 6. **Test your changes**
 
-    Ensure to test your changes by running the project locally. You can also run the tests by running `go test ./...` in the root of the project.
+    Ensure to test your changes by running the project locally. 
+    Run the following command in the daytona root directory to run the tests:
+    
+    ```bash
+    go test ./...
+    ```
 
 7. **Generate docs**
 
