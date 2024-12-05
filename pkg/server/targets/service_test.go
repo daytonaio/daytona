@@ -14,7 +14,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/targets"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -43,7 +42,7 @@ var tg = &models.Target{
 	TargetConfig:   tc,
 }
 
-var createTargetDTO = dto.CreateTargetDTO{
+var createTargetDTO = services.CreateTargetDTO{
 	Name:             "test",
 	Id:               "test",
 	TargetConfigName: "test",
@@ -247,7 +246,7 @@ func targetEquals(t *testing.T, t1, t2 *models.Target) {
 	require.Equal(t, t1.IsDefault, t2.IsDefault)
 }
 
-func targetDtoEquals(t *testing.T, req dto.CreateTargetDTO, target dto.TargetDTO, targetInfo models.TargetInfo, verbose bool) {
+func targetDtoEquals(t *testing.T, req services.CreateTargetDTO, target services.TargetDTO, targetInfo models.TargetInfo, verbose bool) {
 	t.Helper()
 
 	require.Equal(t, req.Id, target.Id)

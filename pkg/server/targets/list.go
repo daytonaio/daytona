@@ -12,20 +12,19 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/targets/dto"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) ListTargets(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) ([]dto.TargetDTO, error) {
+func (s *TargetService) ListTargets(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) ([]services.TargetDTO, error) {
 	targets, err := s.targetStore.List(filter)
 	if err != nil {
 		return nil, err
 	}
 
 	var wg sync.WaitGroup
-	response := []dto.TargetDTO{}
+	response := []services.TargetDTO{}
 
 	for i, t := range targets {
 		state := t.GetState()
@@ -43,7 +42,7 @@ func (s *TargetService) ListTargets(ctx context.Context, filter *stores.TargetFi
 		}
 		t.Workspaces = updatedWorkspaces
 
-		response = append(response, dto.TargetDTO{
+		response = append(response, services.TargetDTO{
 			Target: *t,
 			State:  state,
 		})

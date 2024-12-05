@@ -13,12 +13,12 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/runners"
 	"github.com/daytonaio/daytona/pkg/scheduler"
-	"github.com/daytonaio/daytona/pkg/server/workspacetemplates/dto"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, createPrebuildDto dto.CreatePrebuildDTO) (*dto.PrebuildDTO, error) {
+func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, createPrebuildDto services.CreatePrebuildDTO) (*services.PrebuildDTO, error) {
 	ctx := context.Background()
 
 	workspaceTemplate, err := s.Find(&stores.WorkspaceTemplateFilter{
@@ -93,7 +93,7 @@ func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, cre
 		return nil, err
 	}
 
-	return &dto.PrebuildDTO{
+	return &services.PrebuildDTO{
 		Id:                    prebuild.Id,
 		WorkspaceTemplateName: workspaceTemplate.Name,
 		Branch:                prebuild.Branch,
@@ -103,7 +103,7 @@ func (s *WorkspaceTemplateService) SetPrebuild(workspaceTemplateName string, cre
 	}, nil
 }
 
-func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*dto.PrebuildDTO, error) {
+func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*services.PrebuildDTO, error) {
 	wt, err := s.templateStore.Find(workspaceTemplateFilter)
 	if err != nil {
 		return nil, stores.ErrWorkspaceTemplateNotFound
@@ -120,7 +120,7 @@ func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.
 		return nil, err
 	}
 
-	return &dto.PrebuildDTO{
+	return &services.PrebuildDTO{
 		Id:                    prebuild.Id,
 		WorkspaceTemplateName: wt.Name,
 		Branch:                prebuild.Branch,
@@ -130,8 +130,8 @@ func (s *WorkspaceTemplateService) FindPrebuild(workspaceTemplateFilter *stores.
 	}, nil
 }
 
-func (s *WorkspaceTemplateService) ListPrebuilds(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*dto.PrebuildDTO, error) {
-	var result []*dto.PrebuildDTO
+func (s *WorkspaceTemplateService) ListPrebuilds(workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*services.PrebuildDTO, error) {
+	var result []*services.PrebuildDTO
 	wts, err := s.templateStore.List(workspaceTemplateFilter)
 	if err != nil {
 		return nil, stores.ErrWorkspaceTemplateNotFound
@@ -139,7 +139,7 @@ func (s *WorkspaceTemplateService) ListPrebuilds(workspaceTemplateFilter *stores
 
 	for _, wt := range wts {
 		for _, prebuild := range wt.Prebuilds {
-			result = append(result, &dto.PrebuildDTO{
+			result = append(result, &services.PrebuildDTO{
 				Id:                    prebuild.Id,
 				WorkspaceTemplateName: wt.Name,
 				Branch:                prebuild.Branch,
