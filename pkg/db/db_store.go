@@ -12,15 +12,25 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-type Store struct {
+type IStore interface {
+	stores.IStore
+	AutoMigrate(interface{}) error
+	GetTransaction(ctx context.Context) *gorm.DB
+}
+
+type dbStore struct {
 	db *gorm.DB
 }
 
-func NewStore(db *gorm.DB) Store {
-	return Store{db}
+func NewStore(db *gorm.DB) IStore {
+	return &dbStore{db}
 }
 
-func (s *Store) BeginTransaction(ctx context.Context) (context.Context, error) {
+func (s *dbStore) AutoMigrate(value interface{}) error {
+	return s.db.AutoMigrate(value)
+}
+
+func (s *dbStore) BeginTransaction(ctx context.Context) (context.Context, error) {
 	if ctx.Value(stores.TransactionKey{}) != nil {
 		return ctx, nil
 	}
@@ -34,7 +44,7 @@ func (s *Store) BeginTransaction(ctx context.Context) (context.Context, error) {
 	return ctx, nil
 }
 
-func (s *Store) CommitTransaction(ctx context.Context) error {
+func (s *dbStore) CommitTransaction(ctx context.Context) error {
 	tx, ok := ctx.Value(stores.TransactionKey{}).(*gorm.DB)
 	if !ok {
 		return nil
@@ -43,7 +53,7 @@ func (s *Store) CommitTransaction(ctx context.Context) error {
 	return tx.Commit().Error
 }
 
-func (s *Store) RollbackTransaction(ctx context.Context, err error) error {
+func (s *dbStore) RollbackTransaction(ctx context.Context, err error) error {
 	tx, ok := ctx.Value(stores.TransactionKey{}).(*gorm.DB)
 	if !ok {
 		return err
@@ -57,7 +67,7 @@ func (s *Store) RollbackTransaction(ctx context.Context, err error) error {
 	return fmt.Errorf("%w. Transaction rollback error: %w", err, txErr)
 }
 
-func (s *Store) getTransaction(ctx context.Context) *gorm.DB {
+func (s *dbStore) GetTransaction(ctx context.Context) *gorm.DB {
 	tx, ok := ctx.Value(stores.TransactionKey{}).(*gorm.DB)
 	if !ok {
 		return s.db
