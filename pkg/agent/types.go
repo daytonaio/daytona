@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/models"
 )
@@ -23,6 +24,7 @@ type TailscaleServer interface {
 type Agent struct {
 	Config           *config.Config
 	Git              git.IGitService
+	DockerCredHelper docker.IDockerCredHelper
 	Ssh              SshServer
 	Tailscale        TailscaleServer
 	LogWriter        io.Writer

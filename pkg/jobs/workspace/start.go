@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/jobs/util"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provisioner"
@@ -30,11 +30,6 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 	if err != nil {
 		return err
 	}
-	w.EnvVars = workspaceEnvVars
-
-	cr := wj.findContainerRegistry(ctx, w.Image, workspaceEnvVars)
-
-	builderCr := wj.findContainerRegistry(ctx, wj.builderImage, workspaceEnvVars)
 
 	var gc *models.GitProviderConfig
 
@@ -45,14 +40,15 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		}
 	}
 
-	w.EnvVars = util.ExtractContainerRegistryFromEnvVars(workspaceEnvVars)
+	extractedEnvVars, containerRegistries := common.ExtractContainerRegistryFromEnvVars(workspaceEnvVars)
+
+	w.EnvVars = extractedEnvVars
 
 	err = wj.provisioner.StartWorkspace(provisioner.WorkspaceParams{
-		Workspace:                     w,
-		ContainerRegistry:             cr,
-		GitProviderConfig:             gc,
-		BuilderImage:                  wj.builderImage,
-		BuilderImageContainerRegistry: builderCr,
+		Workspace:           w,
+		ContainerRegistries: containerRegistries,
+		GitProviderConfig:   gc,
+		BuilderImage:        wj.builderImage,
 	})
 	if err != nil {
 		return err

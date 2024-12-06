@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
@@ -24,7 +25,7 @@ type Builder struct {
 	id                          string
 	workspaceDir                string
 	image                       string
-	containerRegistry           *models.ContainerRegistry
+	containerRegistries         common.ContainerRegistries
 	buildImageContainerRegistry *models.ContainerRegistry
 	buildService                services.IBuildService
 	buildImageNamespace         string
