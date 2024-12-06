@@ -298,13 +298,13 @@ If you're interested in contributing code to Daytona, follow these steps:
     ```
 3.  **Create a new branch**
     
-    Once in the development conatiner, create a new branch for your changes:
+    Once in the development container, create a new branch for your changes:
     ```bash
     git checkout -b my-new-feature
     ```
 
 4. **Running Daytona in development mode**
-    A dtn alias is automatically created inside the Workspace. You can use it to compile and run daytona.
+    A `dtn` alias is automatically created inside the Workspace. You can use it to compile and run daytona.
     For example:
     ```bash
     dtn serve
@@ -342,7 +342,7 @@ If you're interested in contributing code to Daytona, follow these steps:
 
 9. **Check for lint errors**
 
-    Ensure that you have no lint errors. We use golangci-lint as our linter which is automaticalled installed.
+    Ensure that you have no lint errors. We use golangci-lint as our linter which is automatically installed.
     Run the following command in the daytona root directory to check for linting errors:
 
     ```bash
