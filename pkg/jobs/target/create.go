@@ -34,5 +34,10 @@ func (tj *TargetJob) create(ctx context.Context, j *models.Job) error {
 	}
 
 	targetLogger.Write([]byte(views.GetPrettyLogLine("Target creation complete")))
+
+	if tg.TargetConfig.ProviderInfo.AgentlessTarget {
+		return nil
+	}
+
 	return tj.start(ctx, j)
 }
