@@ -72,7 +72,7 @@ func (d *DockerClient) startImageProject(opts *CreateProjectOptions) error {
 			break
 		}
 
-		time.Sleep(1 * time.Second)
+		time.Sleep(100 * time.Millisecond)
 	}
 
 	//	Find entrypoint metadata

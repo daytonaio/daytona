@@ -488,7 +488,7 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 				return nil
 			}
 
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}
 
@@ -503,7 +503,7 @@ func waitForDial(workspace *apiclient.Workspace, activeProfile *config.Profile, 
 				connectChan <- dialConn.Close()
 				return
 			}
-			time.Sleep(time.Second)
+			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 

@@ -17,9 +17,9 @@ import (
 
 // pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
 // This is only an optimisation for images with tag 'latest'
-func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool) error {
+func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulledImages map[string]bool, mountProjectDir bool) error {
 	if pulledImages[opts.Project.Image] {
-		return d.initProjectContainer(opts)
+		return d.initProjectContainer(opts, mountProjectDir)
 	}
 
 	err := d.PullImage(opts.Project.Image, opts.ContainerRegistry, opts.LogWriter)
@@ -28,21 +28,24 @@ func (d *DockerClient) createProjectFromImage(opts *CreateProjectOptions, pulled
 	}
 	pulledImages[opts.Project.Image] = true
 
-	return d.initProjectContainer(opts)
+	return d.initProjectContainer(opts, mountProjectDir)
 }
 
-func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions) error {
+func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountProjectDir bool) error {
 	ctx := context.Background()
+
+	mounts := []mount.Mount{}
+	if mountProjectDir {
+		mounts = append(mounts, mount.Mount{
+			Type:   mount.TypeBind,
+			Source: opts.ProjectDir,
+			Target: fmt.Sprintf("/home/%s/%s", opts.Project.User, opts.Project.Name),
+		})
+	}
 
 	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Project), &container.HostConfig{
 		Privileged: true,
-		Mounts: []mount.Mount{
-			{
-				Type:   mount.TypeBind,
-				Source: opts.ProjectDir,
-				Target: fmt.Sprintf("/home/%s/%s", opts.Project.User, opts.Project.Name),
-			},
-		},
+		Mounts:     mounts,
 		ExtraHosts: []string{
 			"host.docker.internal:host-gateway",
 		},
@@ -67,11 +70,13 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions) error {
 		}
 	}()
 
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS != "windows" && mountProjectDir {
 		_, err = d.updateContainerUserUidGid(c.ID, opts)
 	}
 
-	err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{})
+	err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{
+		Signal: "SIGKILL",
+	})
 	if err != nil {
 		return err
 	}
