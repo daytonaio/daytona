@@ -183,9 +183,11 @@ func RemoveWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 			return err
 		}
 
-		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id)
-		if err != nil {
-			return err
+		for _, project := range workspace.Projects {
+			err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id, project.Name)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	})
