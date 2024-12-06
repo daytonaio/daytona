@@ -182,7 +182,7 @@ var updateCmd = &cobra.Command{
 			return err
 		}
 		if !isCurrEqualPrev {
-			changeLog = "There are more changes in the version. Please visit https://github.com/daytonaio/daytona/releases for all the complete chnageLog"
+			changeLog += "\nThere are more changes in the version. Please visit https://github.com/daytonaio/daytona/releases for all the complete chnageLog"
 		}
 		fmt.Println("Updating to version ", version, "from ", currentVersion)
 		fmt.Println("ChangeLog:")
