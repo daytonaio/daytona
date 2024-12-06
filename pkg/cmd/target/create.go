@@ -87,7 +87,7 @@ var targetCreateCmd = &cobra.Command{
 			return err
 		}
 
-		// Ensure reading remaining logs is completed
+		// Ensure reading remaining logs is complete
 		time.Sleep(100 * time.Millisecond)
 
 		views.RenderInfoMessage(fmt.Sprintf("Target '%s' set successfully and will be used by default", createTargetDto.Name))

@@ -67,7 +67,7 @@ var stopCmd = &cobra.Command{
 			selectedTargets := selection.GetTargetsFromPrompt(targetList, "Stop")
 
 			for _, target := range selectedTargets {
-				err := StopTarget(apiClient, target.Name)
+				err := StopTarget(apiClient, *target)
 				if err != nil {
 					log.Errorf("Failed to stop target %s: %v\n\n", target.Name, err)
 					continue
@@ -89,12 +89,12 @@ var stopCmd = &cobra.Command{
 		} else {
 			targetId := args[0]
 
-			err = StopTarget(apiClient, targetId)
+			target, _, err := apiclient_util.GetTarget(targetId, false)
 			if err != nil {
 				return err
 			}
 
-			target, _, err := apiclient_util.GetTarget(targetId, false)
+			err = StopTarget(apiClient, *target)
 			if err != nil {
 				return err
 			}
@@ -132,7 +132,7 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 	}
 
 	for _, target := range targetList {
-		err := StopTarget(apiClient, target.Name)
+		err := StopTarget(apiClient, target)
 		if err != nil {
 			log.Errorf("Failed to stop target %s: %v\n\n", target.Name, err)
 			continue
@@ -154,25 +154,20 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 	return nil
 }
 
-func StopTarget(apiClient *apiclient.APIClient, targetId string) error {
+func StopTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) error {
 	ctx := context.Background()
-
-	target, _, err := apiclient_util.GetTarget(targetId, false)
-	if err != nil {
-		return err
-	}
 
 	if target.TargetConfig.ProviderInfo.AgentlessTarget != nil && *target.TargetConfig.ProviderInfo.AgentlessTarget {
 		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
 	}
 
-	err = views_util.WithInlineSpinner(fmt.Sprintf("Target '%s' is stopping", targetId), func() error {
-		res, err := apiClient.TargetAPI.StopTarget(ctx, targetId).Execute()
+	err := views_util.WithInlineSpinner(fmt.Sprintf("Target '%s' is stopping", target.Name), func() error {
+		res, err := apiClient.TargetAPI.StopTarget(ctx, target.Id).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		return cmd_common.AwaitTargetState(targetId, apiclient.ResourceStateNameStarted)
+		return cmd_common.AwaitTargetState(target.Id, apiclient.ResourceStateNameStarted)
 	})
 	if err != nil {
 		return err

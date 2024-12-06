@@ -62,20 +62,30 @@ var startCmd = &cobra.Command{
 		if len(selectedTargetsNames) == 1 {
 			targetName := selectedTargetsNames[0]
 
-			err = StartTarget(apiClient, targetName)
+			target, _, err := apiclient_util.GetTarget(targetName, false)
+			if err != nil {
+				return err
+			}
+
+			err = StartTarget(apiClient, *target)
 			if err != nil {
 				return err
 			}
 
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' started successfully", targetName))
 		} else {
-			for _, target := range selectedTargetsNames {
-				err := StartTarget(apiClient, target)
+			for _, targetName := range selectedTargetsNames {
+				target, _, err := apiclient_util.GetTarget(targetName, false)
 				if err != nil {
-					log.Errorf("Failed to start target %s: %v\n\n", target, err)
+					return err
+				}
+
+				err = StartTarget(apiClient, *target)
+				if err != nil {
+					log.Errorf("Failed to start target %s: %v\n\n", targetName, err)
 					continue
 				}
-				views.RenderInfoMessage(fmt.Sprintf("- Target '%s' started successfully", target))
+				views.RenderInfoMessage(fmt.Sprintf("- Target '%s' started successfully", targetName))
 			}
 		}
 		return nil
@@ -103,7 +113,7 @@ func startAllTargets() error {
 	}
 
 	for _, target := range targetList {
-		err := StartTarget(apiClient, target.Name)
+		err := StartTarget(apiClient, target)
 		if err != nil {
 			log.Errorf("Failed to start target %s: %v\n\n", target.Name, err)
 			continue
@@ -146,7 +156,7 @@ func getAllTargetsByState(state *apiclient.ModelsResourceStateName) ([]string, c
 	return choices, cobra.ShellCompDirectiveNoFileComp
 }
 
-func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
+func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) error {
 	ctx := context.Background()
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
 	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
@@ -164,11 +174,6 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 		return err
 	}
 
-	target, _, err := apiclient_util.GetTarget(targetId, false)
-	if err != nil {
-		return err
-	}
-
 	if target.TargetConfig.ProviderInfo.AgentlessTarget != nil && *target.TargetConfig.ProviderInfo.AgentlessTarget {
 		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
 	}
@@ -182,13 +187,13 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 		From:          &from,
 	})
 
-	res, err := apiClient.TargetAPI.StartTarget(ctx, targetId).Execute()
+	res, err := apiClient.TargetAPI.StartTarget(ctx, target.Id).Execute()
 	if err != nil {
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	err = cmd_common.AwaitTargetState(targetId, apiclient.ResourceStateNameStarted)
+	err = cmd_common.AwaitTargetState(target.Id, apiclient.ResourceStateNameStarted)
 
 	// Ensure reading remaining logs is completed
 	time.Sleep(100 * time.Millisecond)

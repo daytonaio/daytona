@@ -34,7 +34,11 @@ func (t *Target) GetState() ResourceState {
 	state := getResourceStateFromJob(t.LastJob)
 
 	// Some providers do not utilize agents in target mode
-	if state.Name != ResourceStateNameDeleted && t.TargetConfig.ProviderInfo.AgentlessTarget {
+	if t.TargetConfig.ProviderInfo.AgentlessTarget {
+		if state.Name == ResourceStateNameDeleted || state.Name == ResourceStateNamePendingCreate || state.Name == ResourceStateNameCreating {
+			return state
+		}
+
 		return ResourceState{
 			Name:      ResourceStateNameUndefined,
 			UpdatedAt: time.Now(),
