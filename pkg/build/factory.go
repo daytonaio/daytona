@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
@@ -22,7 +23,7 @@ type IBuilderFactory interface {
 }
 
 type BuilderFactory struct {
-	containerRegistry           *models.ContainerRegistry
+	containerRegistries         common.ContainerRegistries
 	buildImageContainerRegistry *models.ContainerRegistry
 	buildImageNamespace         string
 	buildService                services.IBuildService
@@ -34,7 +35,7 @@ type BuilderFactory struct {
 
 type BuilderFactoryConfig struct {
 	Image                       string
-	ContainerRegistry           *models.ContainerRegistry
+	ContainerRegistries         common.ContainerRegistries
 	BuildImageContainerRegistry *models.ContainerRegistry
 	BuildService                services.IBuildService
 	BuildImageNamespace         string // Namespace to be used when tagging and pushing the build image
@@ -46,7 +47,7 @@ type BuilderFactoryConfig struct {
 func NewBuilderFactory(config BuilderFactoryConfig) IBuilderFactory {
 	return &BuilderFactory{
 		image:                       config.Image,
-		containerRegistry:           config.ContainerRegistry,
+		containerRegistries:         config.ContainerRegistries,
 		buildImageNamespace:         config.BuildImageNamespace,
 		buildImageContainerRegistry: config.BuildImageContainerRegistry,
 		buildService:                config.BuildService,
@@ -96,7 +97,7 @@ func (f *BuilderFactory) newDevcontainerBuilder(workspaceDir string) (*Devcontai
 			id:                          id,
 			workspaceDir:                workspaceDir,
 			image:                       f.image,
-			containerRegistry:           f.containerRegistry,
+			containerRegistries:         f.containerRegistries,
 			buildImageContainerRegistry: f.buildImageContainerRegistry,
 			buildImageNamespace:         f.buildImageNamespace,
 			buildService:                f.buildService,

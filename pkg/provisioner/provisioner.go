@@ -6,17 +6,17 @@ package provisioner
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/manager"
 )
 
 type WorkspaceParams struct {
-	Workspace                     *models.Workspace
-	Target                        *models.Target
-	ContainerRegistry             *models.ContainerRegistry
-	GitProviderConfig             *models.GitProviderConfig
-	BuilderImage                  string
-	BuilderImageContainerRegistry *models.ContainerRegistry
+	Workspace           *models.Workspace
+	Target              *models.Target
+	ContainerRegistries common.ContainerRegistries
+	GitProviderConfig   *models.GitProviderConfig
+	BuilderImage        string
 }
 
 type IProvisioner interface {

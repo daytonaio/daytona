@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/models"
 	log "github.com/sirupsen/logrus"
@@ -63,6 +64,7 @@ var AgentCmd = &cobra.Command{
 		}
 
 		gitLogWriter := io.MultiWriter(os.Stdout)
+		dockerCredHelperLogWriter := io.MultiWriter(os.Stdout)
 		var agentLogWriter io.Writer
 		if c.LogFilePath != nil {
 			logFile, err := os.OpenFile(*c.LogFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
@@ -71,6 +73,7 @@ var AgentCmd = &cobra.Command{
 			}
 			defer logFile.Close()
 			gitLogWriter = io.MultiWriter(os.Stdout, logFile)
+			dockerCredHelperLogWriter = io.MultiWriter(os.Stdout, logFile)
 			agentLogWriter = logFile
 		}
 
@@ -78,6 +81,12 @@ var AgentCmd = &cobra.Command{
 			WorkspaceDir:      c.WorkspaceDir,
 			GitConfigFileName: filepath.Join(os.Getenv("HOME"), ".gitconfig"),
 			LogWriter:         gitLogWriter,
+		}
+
+		dockerCredHelper := &docker.DockerCredHelper{
+			DockerConfigFileName: filepath.Join(os.Getenv("HOME"), ".docker", "config.json"),
+			LogWriter:            dockerCredHelperLogWriter,
+			HomeDir:              os.Getenv("HOME"),
 		}
 
 		sshServer := &ssh.Server{
@@ -100,6 +109,7 @@ var AgentCmd = &cobra.Command{
 		agent := agent.Agent{
 			Config:           c,
 			Git:              git,
+			DockerCredHelper: dockerCredHelper,
 			Ssh:              sshServer,
 			Tailscale:        tailscaleServer,
 			LogWriter:        agentLogWriter,
