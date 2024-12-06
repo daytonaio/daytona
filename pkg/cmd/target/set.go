@@ -247,7 +247,7 @@ func HandleTargetJSON(data []byte) error {
 	}
 
 	var selectedTarget *target_view.TargetView
-	err = provider_view.ParseJSON(data, &selectedTarget)
+	err = target.ParseJSON(data, &selectedTarget)
 	if err != nil {
 		return fmt.Errorf("failed to parse input: %w", err)
 	}
@@ -262,7 +262,7 @@ func HandleTargetJSON(data []byte) error {
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
-	err = provider_view.ValidateProperty(*targetManifest, selectedTarget.Options)
+	err = target.ValidateProperty(*targetManifest, selectedTarget)
 	if err != nil {
 		return err
 	}
