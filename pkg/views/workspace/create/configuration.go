@@ -57,7 +57,7 @@ func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePa
 	return projectConfigurationData
 }
 
-func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults views_util.ProjectConfigDefaults) (bool, error) {
+func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults views_util.ProjectConfigDefaults, isConfigImport bool) (bool, error) {
 	var currentProject *apiclient.CreateProjectDTO
 
 	if len(*projectList) > 1 {
@@ -92,10 +92,12 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults
 
 	projectConfigurationData := NewConfigurationData(builderChoice, devContainerFilePath, currentProject, &defaults)
 
-	form := GetProjectConfigurationForm(projectConfigurationData)
-	err := form.WithProgramOptions(tea.WithAltScreen()).Run()
-	if err != nil {
-		log.Fatal(err)
+	if !isConfigImport {
+		form := GetProjectConfigurationForm(projectConfigurationData)
+		err := form.WithProgramOptions(tea.WithAltScreen()).Run()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	for i := range *projectList {
@@ -136,7 +138,7 @@ func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults
 		return true, nil
 	}
 
-	return RunProjectConfiguration(projectList, defaults)
+	return RunProjectConfiguration(projectList, defaults, isConfigImport)
 }
 
 func validateDevcontainerFilename(filename string) error {
