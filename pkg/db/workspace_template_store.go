@@ -13,11 +13,11 @@ import (
 )
 
 type WorkspaceTemplateStore struct {
-	Store
+	IStore
 }
 
-func NewWorkspaceTemplateStore(store Store) (stores.WorkspaceTemplateStore, error) {
-	err := store.db.AutoMigrate(&models.WorkspaceTemplate{})
+func NewWorkspaceTemplateStore(store IStore) (stores.WorkspaceTemplateStore, error) {
+	err := store.AutoMigrate(&models.WorkspaceTemplate{})
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewWorkspaceTemplateStore(store Store) (stores.WorkspaceTemplateStore, erro
 }
 
 func (s *WorkspaceTemplateStore) List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	workspaceTemplates := []*models.WorkspaceTemplate{}
 	tx = processWorkspaceTemplateFilters(tx, filter).Find(&workspaceTemplates)
@@ -39,7 +39,7 @@ func (s *WorkspaceTemplateStore) List(ctx context.Context, filter *stores.Worksp
 }
 
 func (s *WorkspaceTemplateStore) Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	workspaceTemplate := &models.WorkspaceTemplate{}
 	tx = processWorkspaceTemplateFilters(tx, filter).First(workspaceTemplate)
@@ -55,7 +55,7 @@ func (s *WorkspaceTemplateStore) Find(ctx context.Context, filter *stores.Worksp
 }
 
 func (s *WorkspaceTemplateStore) Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(workspaceTemplate)
 	if tx.Error != nil {
@@ -66,7 +66,7 @@ func (s *WorkspaceTemplateStore) Save(ctx context.Context, workspaceTemplate *mo
 }
 
 func (s *WorkspaceTemplateStore) Delete(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(workspaceTemplate)
 	if tx.Error != nil {

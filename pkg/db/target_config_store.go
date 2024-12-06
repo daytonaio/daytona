@@ -13,11 +13,11 @@ import (
 )
 
 type TargetConfigStore struct {
-	Store
+	IStore
 }
 
-func NewTargetConfigStore(store Store) (stores.TargetConfigStore, error) {
-	err := store.db.AutoMigrate(&models.TargetConfig{})
+func NewTargetConfigStore(store IStore) (stores.TargetConfigStore, error) {
+	err := store.AutoMigrate(&models.TargetConfig{})
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewTargetConfigStore(store Store) (stores.TargetConfigStore, error) {
 }
 
 func (s *TargetConfigStore) List(ctx context.Context, allowDeleted bool) ([]*models.TargetConfig, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	targetConfigs := []*models.TargetConfig{}
 	tx = processTargetConfigFilters(tx, "", allowDeleted).Find(&targetConfigs)
@@ -39,7 +39,7 @@ func (s *TargetConfigStore) List(ctx context.Context, allowDeleted bool) ([]*mod
 }
 
 func (s *TargetConfigStore) Find(ctx context.Context, idOrName string, allowDeleted bool) (*models.TargetConfig, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	targetConfig := &models.TargetConfig{}
 	tx = processTargetConfigFilters(tx, idOrName, allowDeleted).First(targetConfig)
@@ -55,7 +55,7 @@ func (s *TargetConfigStore) Find(ctx context.Context, idOrName string, allowDele
 }
 
 func (s *TargetConfigStore) Save(ctx context.Context, targetConfig *models.TargetConfig) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(targetConfig)
 	if tx.Error != nil {
