@@ -15,8 +15,13 @@
       "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
   },
   {
-      "name": "C/C++",
-      "description": "Develop C++ applications on Linux. Includes Debian C++ build tools.",
+      "name": "C",
+      "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
+      "gitUrl": "https://github.com/daytonaio/sample-c"
+  },
+  {
+      "name": C++",
+      "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
       "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
   {
