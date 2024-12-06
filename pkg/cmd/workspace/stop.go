@@ -157,6 +157,7 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspace
 		return err
 	}
 
+	// Ensure reading remaining logs is completed
 	time.Sleep(100 * time.Millisecond)
 
 	stopLogs()

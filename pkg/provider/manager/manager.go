@@ -191,9 +191,10 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 
 			err = m.createTargetConfig(ctx, targetConfig.Name, targetConfig.Options,
 				models.ProviderInfo{
-					Name:    providerInfo.Name,
-					Version: providerInfo.Version,
-					Label:   providerInfo.Label,
+					Name:            providerInfo.Name,
+					Version:         providerInfo.Version,
+					Label:           providerInfo.Label,
+					AgentlessTarget: providerInfo.AgentlessTarget,
 				})
 			if err != nil {
 				log.Errorf("Failed to set target config %s: %s", targetConfig.Name, err)

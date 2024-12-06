@@ -853,6 +853,8 @@ definitions:
     type: object
   TargetProviderInfo:
     properties:
+      agentlessTarget:
+        type: boolean
       label:
         type: string
       name:

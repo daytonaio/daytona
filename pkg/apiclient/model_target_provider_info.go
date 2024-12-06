@@ -21,9 +21,10 @@ var _ MappedNullable = &TargetProviderInfo{}
 
 // TargetProviderInfo struct for TargetProviderInfo
 type TargetProviderInfo struct {
-	Label   *string `json:"label,omitempty"`
-	Name    string  `json:"name"`
-	Version string  `json:"version"`
+	AgentlessTarget *bool   `json:"agentlessTarget,omitempty"`
+	Label           *string `json:"label,omitempty"`
+	Name            string  `json:"name"`
+	Version         string  `json:"version"`
 }
 
 type _TargetProviderInfo TargetProviderInfo
@@ -45,6 +46,38 @@ func NewTargetProviderInfo(name string, version string) *TargetProviderInfo {
 func NewTargetProviderInfoWithDefaults() *TargetProviderInfo {
 	this := TargetProviderInfo{}
 	return &this
+}
+
+// GetAgentlessTarget returns the AgentlessTarget field value if set, zero value otherwise.
+func (o *TargetProviderInfo) GetAgentlessTarget() bool {
+	if o == nil || IsNil(o.AgentlessTarget) {
+		var ret bool
+		return ret
+	}
+	return *o.AgentlessTarget
+}
+
+// GetAgentlessTargetOk returns a tuple with the AgentlessTarget field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TargetProviderInfo) GetAgentlessTargetOk() (*bool, bool) {
+	if o == nil || IsNil(o.AgentlessTarget) {
+		return nil, false
+	}
+	return o.AgentlessTarget, true
+}
+
+// HasAgentlessTarget returns a boolean if a field has been set.
+func (o *TargetProviderInfo) HasAgentlessTarget() bool {
+	if o != nil && !IsNil(o.AgentlessTarget) {
+		return true
+	}
+
+	return false
+}
+
+// SetAgentlessTarget gets a reference to the given bool and assigns it to the AgentlessTarget field.
+func (o *TargetProviderInfo) SetAgentlessTarget(v bool) {
+	o.AgentlessTarget = &v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
@@ -137,6 +170,9 @@ func (o TargetProviderInfo) MarshalJSON() ([]byte, error) {
 
 func (o TargetProviderInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.AgentlessTarget) {
+		toSerialize["agentlessTarget"] = o.AgentlessTarget
+	}
 	if !IsNil(o.Label) {
 		toSerialize["label"] = o.Label
 	}
