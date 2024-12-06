@@ -43,5 +43,10 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 	}
 
 	currentTarget.IsDefault = true
-	return s.targetStore.Save(ctx, &currentTarget.Target)
+	err = s.targetStore.Save(ctx, &currentTarget.Target)
+	if err != nil {
+		return s.targetStore.RollbackTransaction(ctx, err)
+	}
+
+	return s.targetStore.CommitTransaction(ctx)
 }
