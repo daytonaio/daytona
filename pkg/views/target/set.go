@@ -324,7 +324,7 @@ func ValidateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 
 	for _, name := range sortedKeys {
 		property := targetManifest[name]
-		//docker local targets 
+		//docker local targets
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
 				continue
