@@ -5078,6 +5078,9 @@ const docTemplate = `{
                 "version"
             ],
             "properties": {
+                "agentlessTarget": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },

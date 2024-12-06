@@ -2391,6 +2391,7 @@ components:
         name: name
         options: options
         providerInfo:
+          agentlessTarget: true
           name: name
           label: label
           version: version
@@ -3971,6 +3972,7 @@ components:
           options: options
           id: id
           providerInfo:
+            agentlessTarget: true
             name: name
             label: label
             version: version
@@ -4030,6 +4032,7 @@ components:
         options: options
         id: id
         providerInfo:
+          agentlessTarget: true
           name: name
           label: label
           version: version
@@ -4101,6 +4104,7 @@ components:
           options: options
           id: id
           providerInfo:
+            agentlessTarget: true
             name: name
             label: label
             version: version
@@ -4187,6 +4191,7 @@ components:
               options: options
               id: id
               providerInfo:
+                agentlessTarget: true
                 name: name
                 label: label
                 version: version
@@ -4271,6 +4276,7 @@ components:
               options: options
               id: id
               providerInfo:
+                agentlessTarget: true
                 name: name
                 label: label
                 version: version
@@ -4362,10 +4368,13 @@ components:
       type: object
     TargetProviderInfo:
       example:
+        agentlessTarget: true
         name: name
         label: label
         version: version
       properties:
+        agentlessTarget:
+          type: boolean
         label:
           type: string
         name:
@@ -4442,6 +4451,7 @@ components:
             options: options
             id: id
             providerInfo:
+              agentlessTarget: true
               name: name
               label: label
               version: version
@@ -4547,6 +4557,7 @@ components:
             options: options
             id: id
             providerInfo:
+              agentlessTarget: true
               name: name
               label: label
               version: version
