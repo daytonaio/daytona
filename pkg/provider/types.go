@@ -4,6 +4,7 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -27,11 +28,10 @@ type TargetRequest struct {
 }
 
 type WorkspaceRequest struct {
-	BuilderImage             string
-	BuilderContainerRegistry *models.ContainerRegistry
-	ContainerRegistry        *models.ContainerRegistry
-	Workspace                *models.Workspace
-	GitProviderConfig        *models.GitProviderConfig
+	BuilderImage        string
+	ContainerRegistries common.ContainerRegistries
+	Workspace           *models.Workspace
+	GitProviderConfig   *models.GitProviderConfig
 }
 
 type ProviderInfo struct {

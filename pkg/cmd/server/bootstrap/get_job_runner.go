@@ -11,6 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
 	jobs_build "github.com/daytonaio/daytona/pkg/jobs/build"
 	"github.com/daytonaio/daytona/pkg/jobs/target"
@@ -105,9 +106,6 @@ func GetWorkspaceJobFactory(c *server.Config, configDir string, version string, 
 				return nil, err
 			}
 			return &targetDto.Target, nil
-		},
-		FindContainerRegistry: func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry {
-			return services.EnvironmentVariables(envVars).FindContainerRegistryByImageName(image)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
 			return gitProviderService.GetConfig(ctx, id)
@@ -204,7 +202,7 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 		builderRegistry = envVars.FindContainerRegistry(c.BuilderRegistryServer)
 	}
 
-	cr := envVars.FindContainerRegistryByImageName(c.BuilderImage)
+	_, containerRegistries := common.ExtractContainerRegistryFromEnvVars(envVars)
 
 	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
 		FindBuild: func(ctx context.Context, buildId string) (*services.BuildDTO, error) {
@@ -247,7 +245,7 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 		LoggerFactory: loggerFactory,
 		BuilderFactory: build.NewBuilderFactory(build.BuilderFactoryConfig{
 			Image:                       c.BuilderImage,
-			ContainerRegistry:           cr,
+			ContainerRegistries:         containerRegistries,
 			BuildImageContainerRegistry: builderRegistry,
 			BuildService:                buildService,
 			BuildImageNamespace:         buildImageNamespace,

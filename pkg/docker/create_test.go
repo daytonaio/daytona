@@ -100,13 +100,13 @@ func (s *DockerClientTestSuite) TestCreateWorkspace() {
 	).Return(container.CreateResponse{ID: "123"}, nil)
 
 	err := s.dockerClient.CreateWorkspace(&docker.CreateWorkspaceOptions{
-		Workspace:         workspace1,
-		WorkspaceDir:      workspaceDir,
-		ContainerRegistry: nil,
-		LogWriter:         nil,
-		Gpc:               nil,
-		SshClient:         nil,
-		BuilderImage:      "daytonaio/workspace-project",
+		Workspace:           workspace1,
+		WorkspaceDir:        workspaceDir,
+		ContainerRegistries: nil,
+		LogWriter:           nil,
+		Gpc:                 nil,
+		SshClient:           nil,
+		BuilderImage:        "daytonaio/workspace-project",
 	})
 	require.Nil(s.T(), err)
 }
