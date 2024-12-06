@@ -12,11 +12,11 @@ import (
 )
 
 type EnvironmentVariableStore struct {
-	Store
+	IStore
 }
 
-func NewEnvironmentVariableStore(store Store) (stores.EnvironmentVariableStore, error) {
-	err := store.db.AutoMigrate(&models.EnvironmentVariable{})
+func NewEnvironmentVariableStore(store IStore) (stores.EnvironmentVariableStore, error) {
+	err := store.AutoMigrate(&models.EnvironmentVariable{})
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +25,7 @@ func NewEnvironmentVariableStore(store Store) (stores.EnvironmentVariableStore, 
 }
 
 func (store *EnvironmentVariableStore) List(ctx context.Context) ([]*models.EnvironmentVariable, error) {
-	tx := store.getTransaction(ctx)
+	tx := store.GetTransaction(ctx)
 
 	environmentVariables := []*models.EnvironmentVariable{}
 	tx = tx.Find(&environmentVariables)
@@ -40,7 +40,7 @@ func (store *EnvironmentVariableStore) List(ctx context.Context) ([]*models.Envi
 }
 
 func (store *EnvironmentVariableStore) Save(ctx context.Context, environmentVariable *models.EnvironmentVariable) error {
-	tx := store.getTransaction(ctx)
+	tx := store.GetTransaction(ctx)
 
 	tx = tx.Save(environmentVariable)
 	if tx.Error != nil {
@@ -51,7 +51,7 @@ func (store *EnvironmentVariableStore) Save(ctx context.Context, environmentVari
 }
 
 func (store *EnvironmentVariableStore) Delete(ctx context.Context, key string) error {
-	tx := store.getTransaction(ctx)
+	tx := store.GetTransaction(ctx)
 
 	tx = tx.Where("key = ?", key).Delete(&models.EnvironmentVariable{})
 	if tx.Error != nil {

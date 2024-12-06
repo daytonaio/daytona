@@ -16,12 +16,12 @@ import (
 )
 
 type BuildStore struct {
-	Store
+	IStore
 	Lock sync.Mutex
 }
 
-func NewBuildStore(store Store) (stores.BuildStore, error) {
-	err := store.db.AutoMigrate(&models.Build{})
+func NewBuildStore(store IStore) (stores.BuildStore, error) {
+	err := store.AutoMigrate(&models.Build{})
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func (b *BuildStore) Find(ctx context.Context, filter *stores.BuildFilter) (*mod
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.getTransaction(ctx)
+	tx := b.GetTransaction(ctx)
 
 	build := &models.Build{}
 	tx = preloadBuildEntities(processBuildFilters(tx, filter)).First(build)
@@ -52,7 +52,7 @@ func (b *BuildStore) List(ctx context.Context, filter *stores.BuildFilter) ([]*m
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.getTransaction(ctx)
+	tx := b.GetTransaction(ctx)
 
 	builds := []*models.Build{}
 	tx = preloadBuildEntities(processBuildFilters(tx, filter)).Find(&builds)
@@ -68,7 +68,7 @@ func (b *BuildStore) Save(ctx context.Context, build *models.Build) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	tx := b.getTransaction(ctx)
+	tx := b.GetTransaction(ctx)
 
 	tx = tx.Save(build)
 	if tx.Error != nil {
@@ -81,7 +81,7 @@ func (b *BuildStore) Save(ctx context.Context, build *models.Build) error {
 func (b *BuildStore) Delete(ctx context.Context, id string) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
-	tx := b.getTransaction(ctx)
+	tx := b.GetTransaction(ctx)
 
 	tx = tx.Where("id = ?", id).Delete(&models.Build{})
 	if tx.Error != nil {

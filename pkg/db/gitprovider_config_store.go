@@ -11,11 +11,11 @@ import (
 )
 
 type GitProviderConfigStore struct {
-	Store
+	IStore
 }
 
-func NewGitProviderConfigStore(store Store) (stores.GitProviderConfigStore, error) {
-	err := store.db.AutoMigrate(&models.GitProviderConfig{})
+func NewGitProviderConfigStore(store IStore) (stores.GitProviderConfigStore, error) {
+	err := store.AutoMigrate(&models.GitProviderConfig{})
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func NewGitProviderConfigStore(store Store) (stores.GitProviderConfigStore, erro
 }
 
 func (p *GitProviderConfigStore) List(ctx context.Context) ([]*models.GitProviderConfig, error) {
-	tx := p.getTransaction(ctx)
+	tx := p.GetTransaction(ctx)
 
 	gitProviders := []*models.GitProviderConfig{}
 	tx = tx.Find(&gitProviders)
@@ -36,7 +36,7 @@ func (p *GitProviderConfigStore) List(ctx context.Context) ([]*models.GitProvide
 }
 
 func (p *GitProviderConfigStore) Find(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-	tx := p.getTransaction(ctx)
+	tx := p.GetTransaction(ctx)
 
 	gitProvider := &models.GitProviderConfig{}
 	tx = tx.Where("id = ?", id).First(gitProvider)
@@ -51,7 +51,7 @@ func (p *GitProviderConfigStore) Find(ctx context.Context, id string) (*models.G
 }
 
 func (p *GitProviderConfigStore) Save(ctx context.Context, gitProvider *models.GitProviderConfig) error {
-	tx := p.getTransaction(ctx)
+	tx := p.GetTransaction(ctx)
 
 	tx = tx.Save(gitProvider)
 	if tx.Error != nil {
@@ -62,7 +62,7 @@ func (p *GitProviderConfigStore) Save(ctx context.Context, gitProvider *models.G
 }
 
 func (p *GitProviderConfigStore) Delete(ctx context.Context, gitProvider *models.GitProviderConfig) error {
-	tx := p.getTransaction(ctx)
+	tx := p.GetTransaction(ctx)
 
 	tx = tx.Delete(gitProvider)
 	if tx.Error != nil {

@@ -14,11 +14,11 @@ import (
 )
 
 type WorkspaceStore struct {
-	Store
+	IStore
 }
 
-func NewWorkspaceStore(store Store) (stores.WorkspaceStore, error) {
-	err := store.db.AutoMigrate(&models.Workspace{})
+func NewWorkspaceStore(store IStore) (stores.WorkspaceStore, error) {
+	err := store.AutoMigrate(&models.Workspace{})
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewWorkspaceStore(store Store) (stores.WorkspaceStore, error) {
 }
 
 func (s *WorkspaceStore) List(ctx context.Context) ([]*models.Workspace, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	workspaces := []*models.Workspace{}
 	tx = preloadWorkspaceEntities(tx).Find(&workspaces)
@@ -39,7 +39,7 @@ func (s *WorkspaceStore) List(ctx context.Context) ([]*models.Workspace, error) 
 }
 
 func (s *WorkspaceStore) Find(ctx context.Context, idOrName string) (*models.Workspace, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	workspace := &models.Workspace{}
 	tx = preloadWorkspaceEntities(tx).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
@@ -54,7 +54,7 @@ func (s *WorkspaceStore) Find(ctx context.Context, idOrName string) (*models.Wor
 }
 
 func (s *WorkspaceStore) Save(ctx context.Context, workspace *models.Workspace) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(workspace)
 	if tx.Error != nil {
@@ -65,7 +65,7 @@ func (s *WorkspaceStore) Save(ctx context.Context, workspace *models.Workspace) 
 }
 
 func (s *WorkspaceStore) Delete(ctx context.Context, workspace *models.Workspace) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(workspace)
 	if tx.Error != nil {

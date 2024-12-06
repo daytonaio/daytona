@@ -11,11 +11,11 @@ import (
 )
 
 type ApiKeyStore struct {
-	Store
+	IStore
 }
 
-func NewApiKeyStore(store Store) (stores.ApiKeyStore, error) {
-	err := store.db.AutoMigrate(&models.ApiKey{})
+func NewApiKeyStore(store IStore) (stores.ApiKeyStore, error) {
+	err := store.AutoMigrate(&models.ApiKey{})
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func NewApiKeyStore(store Store) (stores.ApiKeyStore, error) {
 }
 
 func (a *ApiKeyStore) List(ctx context.Context) ([]*models.ApiKey, error) {
-	tx := a.getTransaction(ctx)
+	tx := a.GetTransaction(ctx)
 
 	apiKeys := []*models.ApiKey{}
 	tx = tx.Find(&apiKeys)
@@ -36,7 +36,7 @@ func (a *ApiKeyStore) List(ctx context.Context) ([]*models.ApiKey, error) {
 }
 
 func (a *ApiKeyStore) Find(ctx context.Context, key string) (*models.ApiKey, error) {
-	tx := a.getTransaction(ctx)
+	tx := a.GetTransaction(ctx)
 
 	apiKey := &models.ApiKey{}
 	tx = tx.Where("key_hash = ?", key).First(apiKey)
@@ -51,7 +51,7 @@ func (a *ApiKeyStore) Find(ctx context.Context, key string) (*models.ApiKey, err
 }
 
 func (a *ApiKeyStore) FindByName(ctx context.Context, name string) (*models.ApiKey, error) {
-	tx := a.getTransaction(ctx)
+	tx := a.GetTransaction(ctx)
 
 	apiKey := &models.ApiKey{}
 	tx = tx.Where("name = ?", name).First(apiKey)
@@ -66,7 +66,7 @@ func (a *ApiKeyStore) FindByName(ctx context.Context, name string) (*models.ApiK
 }
 
 func (a *ApiKeyStore) Save(ctx context.Context, apiKey *models.ApiKey) error {
-	tx := a.getTransaction(ctx)
+	tx := a.GetTransaction(ctx)
 
 	tx = tx.Save(apiKey)
 	if tx.Error != nil {
@@ -77,7 +77,7 @@ func (a *ApiKeyStore) Save(ctx context.Context, apiKey *models.ApiKey) error {
 }
 
 func (a *ApiKeyStore) Delete(ctx context.Context, apiKey *models.ApiKey) error {
-	tx := a.getTransaction(ctx)
+	tx := a.GetTransaction(ctx)
 
 	tx = tx.Where("key_hash = ?", apiKey.KeyHash).Delete(&models.ApiKey{})
 	if tx.Error != nil {
