@@ -38,9 +38,11 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 		if err != nil {
 			return err
 		}
+
 		if t.State.Name == stateName || t.State.Name == apiclient.ResourceStateNameUndefined {
 			return nil
 		}
+
 		if t.State.Name == apiclient.ResourceStateNameError {
 			var errorMessage string
 			if t.State.Error != nil {

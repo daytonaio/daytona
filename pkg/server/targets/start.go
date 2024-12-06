@@ -7,19 +7,24 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
 func (s *TargetService) StartTarget(ctx context.Context, targetId string) error {
-	t, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
+	target, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStartError(ctx, nil, stores.ErrTargetNotFound)
 	}
 
-	err = s.createJob(ctx, t.Id, models.JobActionStart)
-	return s.handleStartError(ctx, t, err)
+	if target.TargetConfig.ProviderInfo.AgentlessTarget {
+		return s.handleStartError(ctx, target, services.ErrAgentlessTarget)
+	}
+
+	err = s.createJob(ctx, target.Id, models.JobActionStart)
+	return s.handleStartError(ctx, target, err)
 }
 
 func (s *TargetService) handleStartError(ctx context.Context, target *models.Target, err error) error {

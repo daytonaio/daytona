@@ -21,8 +21,7 @@ var restartCmd = &cobra.Command{
 	Short: "Restart a target",
 	Args:  cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var targetId string
-
+		var target *apiclient.TargetDTO
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -41,20 +40,22 @@ var restartCmd = &cobra.Command{
 				return nil
 			}
 
-			target := selection.GetTargetFromPrompt(targetList, false, "Restart")
+			target = selection.GetTargetFromPrompt(targetList, false, "Restart")
 			if target == nil {
 				return nil
 			}
-			targetId = target.Name
 		} else {
-			targetId = args[0]
+			target, _, err = apiclient_util.GetTarget(args[0], false)
+			if err != nil {
+				return err
+			}
 		}
 
-		err = RestartTarget(apiClient, targetId)
+		err = RestartTarget(apiClient, *target)
 		if err != nil {
 			return err
 		}
-		views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully restarted", targetId))
+		views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully restarted", target.Name))
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -62,10 +63,10 @@ var restartCmd = &cobra.Command{
 	},
 }
 
-func RestartTarget(apiClient *apiclient.APIClient, targetId string) error {
-	err := StopTarget(apiClient, targetId)
+func RestartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) error {
+	err := StopTarget(apiClient, target)
 	if err != nil {
 		return err
 	}
-	return StartTarget(apiClient, targetId)
+	return StartTarget(apiClient, target)
 }
