@@ -13,11 +13,11 @@ import (
 )
 
 type TargetMetadataStore struct {
-	Store
+	IStore
 }
 
-func NewTargetMetadataStore(store Store) (stores.TargetMetadataStore, error) {
-	err := store.db.AutoMigrate(&models.TargetMetadata{})
+func NewTargetMetadataStore(store IStore) (stores.TargetMetadataStore, error) {
+	err := store.AutoMigrate(&models.TargetMetadata{})
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewTargetMetadataStore(store Store) (stores.TargetMetadataStore, error) {
 }
 
 func (s *TargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	targetMetadata := &models.TargetMetadata{}
 	tx = processTargetMetadataFilters(tx, filter).First(&targetMetadata)
@@ -41,7 +41,7 @@ func (s *TargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMet
 }
 
 func (s *TargetMetadataStore) Save(ctx context.Context, targetMetadata *models.TargetMetadata) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(targetMetadata)
 	if tx.Error != nil {
@@ -52,7 +52,7 @@ func (s *TargetMetadataStore) Save(ctx context.Context, targetMetadata *models.T
 }
 
 func (s *TargetMetadataStore) Delete(ctx context.Context, targetMetadata *models.TargetMetadata) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(targetMetadata)
 	if tx.Error != nil {

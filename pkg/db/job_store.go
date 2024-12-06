@@ -14,11 +14,11 @@ import (
 )
 
 type JobStore struct {
-	Store
+	IStore
 }
 
-func NewJobStore(store Store) (stores.JobStore, error) {
-	err := store.db.AutoMigrate(&models.Job{})
+func NewJobStore(store IStore) (stores.JobStore, error) {
+	err := store.AutoMigrate(&models.Job{})
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewJobStore(store Store) (stores.JobStore, error) {
 }
 
 func (s *JobStore) List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	jobs := []*models.Job{}
 	tx = processJobFilters(tx, filter).Find(&jobs)
@@ -40,7 +40,7 @@ func (s *JobStore) List(ctx context.Context, filter *stores.JobFilter) ([]*model
 }
 
 func (s *JobStore) Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	job := &models.Job{}
 	tx = processJobFilters(tx, filter).First(&job)
@@ -56,7 +56,7 @@ func (s *JobStore) Find(ctx context.Context, filter *stores.JobFilter) (*models.
 }
 
 func (s *JobStore) Save(ctx context.Context, job *models.Job) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(job)
 	if tx.Error != nil {
@@ -67,7 +67,7 @@ func (s *JobStore) Save(ctx context.Context, job *models.Job) error {
 }
 
 func (s *JobStore) Delete(ctx context.Context, job *models.Job) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(job)
 	if tx.Error != nil {

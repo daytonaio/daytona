@@ -13,11 +13,11 @@ import (
 )
 
 type WorkspaceMetadataStore struct {
-	Store
+	IStore
 }
 
-func NewWorkspaceMetadataStore(store Store) (stores.WorkspaceMetadataStore, error) {
-	err := store.db.AutoMigrate(&models.WorkspaceMetadata{})
+func NewWorkspaceMetadataStore(store IStore) (stores.WorkspaceMetadataStore, error) {
+	err := store.AutoMigrate(&models.WorkspaceMetadata{})
 	if err != nil {
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func NewWorkspaceMetadataStore(store Store) (stores.WorkspaceMetadataStore, erro
 }
 
 func (s *WorkspaceMetadataStore) Find(ctx context.Context, filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	workspaceMetadata := &models.WorkspaceMetadata{}
 	tx = processWorkspaceMetadataFilters(tx, filter).First(&workspaceMetadata)
@@ -41,7 +41,7 @@ func (s *WorkspaceMetadataStore) Find(ctx context.Context, filter *stores.Worksp
 }
 
 func (s *WorkspaceMetadataStore) Save(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(workspaceMetadata)
 	if tx.Error != nil {
@@ -52,7 +52,7 @@ func (s *WorkspaceMetadataStore) Save(ctx context.Context, workspaceMetadata *mo
 }
 
 func (s *WorkspaceMetadataStore) Delete(ctx context.Context, workspaceMetadata *models.WorkspaceMetadata) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(workspaceMetadata)
 	if tx.Error != nil {

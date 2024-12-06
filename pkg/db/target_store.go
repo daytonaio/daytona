@@ -14,11 +14,11 @@ import (
 )
 
 type TargetStore struct {
-	Store
+	IStore
 }
 
-func NewTargetStore(store Store) (stores.TargetStore, error) {
-	err := store.db.AutoMigrate(&models.Target{})
+func NewTargetStore(store IStore) (stores.TargetStore, error) {
+	err := store.AutoMigrate(&models.Target{})
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +27,7 @@ func NewTargetStore(store Store) (stores.TargetStore, error) {
 }
 
 func (s *TargetStore) List(ctx context.Context, filter *stores.TargetFilter) ([]*models.Target, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	targets := []*models.Target{}
 
@@ -39,7 +39,7 @@ func (s *TargetStore) List(ctx context.Context, filter *stores.TargetFilter) ([]
 }
 
 func (s *TargetStore) Find(ctx context.Context, filter *stores.TargetFilter) (*models.Target, error) {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tg := &models.Target{}
 
@@ -58,7 +58,7 @@ func (s *TargetStore) Find(ctx context.Context, filter *stores.TargetFilter) (*m
 }
 
 func (s *TargetStore) Save(ctx context.Context, target *models.Target) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(target)
 	if tx.Error != nil {
@@ -69,7 +69,7 @@ func (s *TargetStore) Save(ctx context.Context, target *models.Target) error {
 }
 
 func (s *TargetStore) Delete(ctx context.Context, t *models.Target) error {
-	tx := s.getTransaction(ctx)
+	tx := s.GetTransaction(ctx)
 
 	tx = tx.Delete(t)
 	if tx.Error != nil {
