@@ -49,6 +49,7 @@ var (
 	ErrTargetAlreadyExists = errors.New("target already exists")
 	ErrInvalidTargetName   = errors.New("name is not a valid alphanumeric string")
 	ErrTargetDeleted       = errors.New("target is deleted")
+	ErrAgentlessTarget     = errors.New("provider uses an agentless target")
 )
 
 func IsTargetDeleted(err error) bool {
