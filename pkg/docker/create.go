@@ -40,31 +40,35 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 	// This is only an optimisation for images with tag 'latest'
 	pulledImages := map[string]bool{}
 
-	err := d.PullImage(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
-	if err != nil {
-		return err
-	}
-	pulledImages[opts.BuilderImage] = true
+	if opts.Project.BuildConfig != nil {
+		err := d.PullImage(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+		if err != nil {
+			return err
+		}
+		pulledImages[opts.BuilderImage] = true
 
-	err = d.cloneProjectRepository(opts)
-	if err != nil {
-		return err
+		err = d.cloneProjectRepository(opts)
+		if err != nil {
+			return err
+		}
+
+		builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
+		if err != nil {
+			return err
+		}
+
+		switch builderType {
+		case detect.BuilderTypeDevcontainer:
+			_, _, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, true))
+			return err
+		case detect.BuilderTypeImage:
+			return d.createProjectFromImage(opts, pulledImages, true)
+		default:
+			return fmt.Errorf("unknown builder type: %s", builderType)
+		}
 	}
 
-	builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
-	if err != nil {
-		return err
-	}
-
-	switch builderType {
-	case detect.BuilderTypeDevcontainer:
-		_, _, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, true))
-		return err
-	case detect.BuilderTypeImage:
-		return d.createProjectFromImage(opts, pulledImages)
-	default:
-		return fmt.Errorf("unknown builder type: %s", builderType)
-	}
+	return d.createProjectFromImage(opts, pulledImages, false)
 }
 
 func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error {

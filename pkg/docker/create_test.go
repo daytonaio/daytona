@@ -55,7 +55,9 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 	s.mockClient.On("ContainerRemove", mock.Anything, mock.Anything, container.RemoveOptions{RemoveVolumes: true, Force: true}).Return(nil)
 	s.mockClient.On("ContainerStart", mock.Anything, mock.Anything, container.StartOptions{}).Return(nil)
 	s.mockClient.On("ContainerExecCreate", mock.Anything, mock.Anything, mock.Anything).Return(types.IDResponse{ID: "exec-id"}, nil)
-	s.mockClient.On("ContainerStop", mock.Anything, "123", container.StopOptions{}).Return(nil)
+	s.mockClient.On("ContainerStop", mock.Anything, "123", container.StopOptions{
+		Signal: "SIGKILL",
+	}).Return(nil)
 
 	_, client := net.Pipe()
 	s.mockClient.On("ContainerExecAttach", mock.Anything, "exec-id", container.ExecStartOptions{}).
