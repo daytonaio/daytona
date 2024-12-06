@@ -2846,7 +2846,6 @@ components:
         version:
           type: string
       required:
-      - agentlessTarget
       - name
       - version
       type: object

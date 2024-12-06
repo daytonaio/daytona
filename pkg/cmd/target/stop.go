@@ -162,7 +162,7 @@ func StopTarget(apiClient *apiclient.APIClient, targetId string) error {
 		return err
 	}
 
-	if target.TargetConfig.ProviderInfo.AgentlessTarget {
+	if target.TargetConfig.ProviderInfo.AgentlessTarget != nil && *target.TargetConfig.ProviderInfo.AgentlessTarget {
 		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
 	}
 

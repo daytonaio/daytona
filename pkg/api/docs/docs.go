@@ -3178,7 +3178,6 @@ const docTemplate = `{
         "TargetProviderInfo": {
             "type": "object",
             "required": [
-                "agentlessTarget",
                 "name",
                 "version"
             ],

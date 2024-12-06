@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AgentlessTarget** | **bool** |  | 
+**AgentlessTarget** | Pointer to **bool** |  | [optional] 
 **Label** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **Version** | **string** |  | 
@@ -13,7 +13,7 @@ Name | Type | Description | Notes
 
 ### NewTargetProviderInfo
 
-`func NewTargetProviderInfo(agentlessTarget bool, name string, version string, ) *TargetProviderInfo`
+`func NewTargetProviderInfo(name string, version string, ) *TargetProviderInfo`
 
 NewTargetProviderInfo instantiates a new TargetProviderInfo object
 This constructor will assign default values to properties that have it defined,
@@ -47,6 +47,11 @@ and a boolean to check if the value has been set.
 
 SetAgentlessTarget sets AgentlessTarget field to given value.
 
+### HasAgentlessTarget
+
+`func (o *TargetProviderInfo) HasAgentlessTarget() bool`
+
+HasAgentlessTarget returns a boolean if a field has been set.
 
 ### GetLabel
 
