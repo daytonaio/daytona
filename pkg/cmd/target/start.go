@@ -190,7 +190,9 @@ func StartTarget(apiClient *apiclient.APIClient, targetId string) error {
 
 	err = cmd_common.AwaitTargetState(targetId, apiclient.ResourceStateNameStarted)
 
+	// Ensure reading remaining logs is completed
 	time.Sleep(100 * time.Millisecond)
+
 	stopLogs()
 	return err
 }

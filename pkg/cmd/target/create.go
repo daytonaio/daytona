@@ -6,6 +6,7 @@ package target
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -85,6 +86,9 @@ var targetCreateCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// Ensure reading remaining logs is completed
+		time.Sleep(100 * time.Millisecond)
 
 		views.RenderInfoMessage(fmt.Sprintf("Target '%s' set successfully and will be used by default", createTargetDto.Name))
 		return nil

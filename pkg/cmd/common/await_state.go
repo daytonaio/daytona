@@ -39,7 +39,6 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 			return err
 		}
 		if t.State.Name == stateName || t.TargetConfig.ProviderInfo.AgentlessTarget != nil && *t.TargetConfig.ProviderInfo.AgentlessTarget {
-			time.Sleep(time.Second)
 			return nil
 		}
 		if t.State.Name == apiclient.ResourceStateNameError {
