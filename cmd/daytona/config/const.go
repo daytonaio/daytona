@@ -59,6 +59,7 @@ func GetSupportedGitProviders() []GitProvider {
 		{"azure-devops", "Azure DevOps"},
 		{"aws-codecommit", "AWS CodeCommit"},
 		{"gogs", "Gogs"},
+		{"gitee", "Gitee"},
 	}
 }
 
@@ -88,6 +89,8 @@ func GetDocsLinkFromGitProvider(providerId string) string {
 		return "https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-gc.html and to configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY & AWS_DEFAULT_REGION read https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-configure.html"
 	case "gogs":
 		return "https://www.daytona.io/docs/configuration/git-providers/#gogs"
+	case "gitee":
+		return "https://www.daytona.io/docs/configuration/git-providers/#gitee"
 	default:
 		return ""
 	}
@@ -134,6 +137,8 @@ func GetRequiredScopesFromGitProviderId(providerId string) string {
 		return "Code (Status, Read & Write); User Profile (Read); Project and Team (Read)"
 	case "aws-codecommit":
 		return "/"
+	case "gitee":
+		return "user_info, pull_requests, groups, projects, emails"
 	case "gogs":
 		fallthrough
 	default:

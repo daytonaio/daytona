@@ -9,6 +9,7 @@ daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
 ### Options
 
 ```
+  -e, --edit                 Edit the project's SSH config
   -o, --option stringArray   Specify SSH options in KEY=VALUE format.
   -y, --yes                  Automatically confirm any prompts
 ```
