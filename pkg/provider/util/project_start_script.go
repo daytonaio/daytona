@@ -12,6 +12,7 @@ func GetProjectStartScript(daytonaDownloadUrl string, apiKey string) string {
   command -v sudo > /dev/null 2>&1 || missing_deps="$missing_deps sudo"
   command -v curl > /dev/null 2>&1 || missing_deps="$missing_deps curl"
   command -v bash > /dev/null 2>&1 || missing_deps="$missing_deps bash"
+  command -v git > /dev/null 2>&1 || missing_deps="$missing_deps git"
   
   # Print missing dependencies
   if [ -n "$missing_deps" ]; then
