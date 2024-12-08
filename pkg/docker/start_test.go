@@ -39,7 +39,7 @@ func (s *DockerClientTestSuite) TestStartProject() {
 		},
 	}, nil)
 
-	s.setupExecTest([]string{"bash", "-c", util.GetProjectStartScript("", project1.ApiKey)}, containerName, project1.User, []string{})
+	s.setupExecTest([]string{"sh", "-c", util.GetProjectStartScript("", project1.ApiKey)}, containerName, project1.User, []string{})
 
 	err := s.dockerClient.StartProject(&docker.CreateProjectOptions{
 		Project: project1,
