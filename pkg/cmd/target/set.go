@@ -7,6 +7,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"os"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
@@ -24,6 +26,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var pipeFile string
+
 var TargetSetCmd = &cobra.Command{
 	Use:     "set",
 	Short:   "Set provider target",
@@ -32,6 +36,22 @@ var TargetSetCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var isNewProvider bool
+		var input []byte
+		var err error
+
+		if pipeFile == "-" {
+			input, err = io.ReadAll(os.Stdin)
+			if err != nil {
+				return fmt.Errorf("failed to read from stdin: %w", err)
+			}
+			return HandleTargetJSON(input)
+		} else if pipeFile != "" {
+			input, err = os.ReadFile(pipeFile)
+			if err != nil {
+				return fmt.Errorf("failed to read file %s: %w", pipeFile, err)
+			}
+			return HandleTargetJSON(input)
+		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -168,4 +188,100 @@ var TargetSetCmd = &cobra.Command{
 		views.RenderInfoMessage("Target set successfully and will be used by default")
 		return nil
 	},
+}
+
+func HandleTargetJSON(data []byte) error {
+	ctx := context.Background()
+
+	apiClient, err := apiclient_util.GetApiClient(nil)
+	if err != nil {
+		return err
+	}
+	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
+		RegistryUrl: serverConfig.RegistryUrl,
+	}).GetProvidersManifest()
+	if err != nil {
+		log.Error(err)
+	}
+
+	var latestProviders []apiclient.Provider
+	if providersManifest != nil {
+		providersManifestLatest := providersManifest.GetLatestVersions()
+		if providersManifestLatest == nil {
+			return errors.New("could not get latest provider versions")
+		}
+
+		latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+	} else {
+		fmt.Println("Could not get provider manifest. Can't check for new providers to install")
+	}
+	providerList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+	if err != nil {
+		return err
+	}
+
+	selectedProvider, err := provider_view.GetProviderFromPrompt(providerList, "Choose a Provider", false)
+	if err != nil {
+		if common.IsCtrlCAbort(err) {
+			return nil
+		} else {
+			return err
+		}
+	}
+	if selectedProvider == nil {
+		return errors.New("no provider selected")
+	}
+	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+		if providersManifest == nil {
+			return errors.New("could not get providers manifest")
+		}
+		err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
+		if err != nil {
+			return err
+		}
+	}
+
+	var selectedTarget *target_view.TargetView
+	err = target.ParseJSON(data, &selectedTarget)
+	if err != nil {
+		return fmt.Errorf("failed to parse input: %w", err)
+	}
+
+	if selectedTarget.Name == "" {
+		return errors.New("invalid input: 'name' field is required")
+	}
+	if selectedTarget.Options == "" {
+		return errors.New("option fields are required to setup your target")
+	}
+	targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(ctx, selectedProvider.Name).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+	err = target.ValidateProperty(*targetManifest, selectedTarget)
+	if err != nil {
+		return err
+	}
+	targetData := apiclient.CreateProviderTargetDTO{
+		Name:    selectedTarget.Name,
+		Options: selectedTarget.Options,
+		ProviderInfo: apiclient.ProviderProviderInfo{
+			Name:    selectedProvider.Name,
+			Version: selectedProvider.Version,
+		},
+	}
+	res, err = apiClient.TargetAPI.SetTarget(ctx).Target(targetData).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+	views.RenderInfoMessage("Target set successfully and will be used by default")
+	return nil
+}
+
+func init() {
+	TargetSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
 }
