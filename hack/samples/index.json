@@ -20,7 +20,7 @@
       "gitUrl": "https://github.com/daytonaio/sample-c"
   },
   {
-      "name": C++",
+      "name": "C++",
       "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
       "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
