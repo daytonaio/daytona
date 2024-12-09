@@ -1,82 +1,82 @@
 [
-    {
-        "name": "Alpine",
-        "description": "Simple Alpine container with Git installed.",
-        "gitUrl": "https://github.com/daytonaio/sample-alpine"
-    },
-    {
-        "name": "Debian",
-        "description": "Simple Debian container with Git installed.",
-        "gitUrl": "https://github.com/daytonaio/sample-debian"
-    },
-    {
-        "name": "Ubuntu",
-        "description": "A simple Ubuntu container with Git and other common utilities installed.",
-        "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
-    },
-    {
-        "name": "C",
-        "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
-        "gitUrl": "https://github.com/daytonaio/sample-c"
-    },
-    {
-        "name": "C++",
-        "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
-        "gitUrl": "https://github.com/daytonaio/sample-cpp"
-    },
-    {
-        "name": "C# (.NET)",
-        "description": "Develop C# and .NET based applications. Includes all needed SDKs, extensions, and dependencies.",
-        "gitUrl": "https://github.com/daytonaio/sample-dotnet"
-    },
-    {
-        "name": "Go",
-        "description": "Develop Go based applications. Includes appropriate runtime args, Go, common tools, extensions, and dependencies.",
-        "gitUrl": "https://github.com/daytonaio/sample-go"
-    },
-    {
-        "name": "Java",
-        "description": "Develop Java applications. Includes the JDK and Java extensions.",
-        "gitUrl": "https://github.com/daytonaio/sample-java"
-    },
-    {
-        "name": "Julia (Genie)",
-        "description": "Develop Julia based applications with Genie framework. Includes needed tools, extensions, framework and dependencies.",
-        "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
-    },
-    {
-        "name": "Julia",
-        "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
-        "gitUrl": "https://github.com/daytonaio/sample-julia"
-    },
-    {
-        "name": "PHP",
-        "description": "Develop PHP based applications. Includes needed tools, extensions, and dependencies.",
-        "gitUrl": "https://github.com/daytonaio/sample-php"
-    },
-    {
-        "name": "Python",
-        "description": "Develop Python applications.",
-        "gitUrl": "https://github.com/daytonaio/sample-python"
-    },
-    {
-        "name": "Ruby",
-        "description": "Develop Ruby based applications. includes everything you need to get up and running.",
-        "gitUrl": "https://github.com/daytonaio/sample-ruby"
-    },
-    {
-        "name": "Rust",
-        "description": "Develop Rust based applications. Includes appropriate runtime args and everything you need to get up and running.",
-        "gitUrl": "https://github.com/daytonaio/sample-rust"
-    },
-    {
-        "name": "Node / TypeScript",
-        "description": "Develop Node.js based applications in TypeScript. Includes Node.js, eslint, nvm, yarn, and the TypeScript compiler.",
-        "gitUrl": "https://github.com/daytonaio/sample-typescript-node"
-    },
-    {
-        "name": "Next.js - OpenSourceSmith",
-        "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
-        "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
-    }
+  {
+      "name": "Alpine",
+      "description": "Simple Alpine container with Git installed.",
+      "gitUrl": "https://github.com/daytonaio/sample-alpine"
+  },
+  {
+      "name": "Debian",
+      "description": "Simple Debian container with Git installed.",
+      "gitUrl": "https://github.com/daytonaio/sample-debian"
+  },
+  {
+      "name": "Ubuntu",
+      "description": "A simple Ubuntu container with Git and other common utilities installed.",
+      "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
+  },
+  {
+      "name": "C",
+      "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
+      "gitUrl": "https://github.com/daytonaio/sample-c"
+  },
+  {
+      "name": "C++",
+      "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
+      "gitUrl": "https://github.com/daytonaio/sample-cpp"
+  },
+  {
+      "name": "C# (.NET)",
+      "description": "Develop C# and .NET based applications. Includes all needed SDKs, extensions, and dependencies.",
+      "gitUrl": "https://github.com/daytonaio/sample-dotnet"
+  },
+  {
+      "name": "Go",
+      "description": "Develop Go based applications. Includes appropriate runtime args, Go, common tools, extensions, and dependencies.",
+      "gitUrl": "https://github.com/daytonaio/sample-go"
+  },
+  {
+      "name": "Java",
+      "description": "Develop Java applications. Includes the JDK and Java extensions.",
+      "gitUrl": "https://github.com/daytonaio/sample-java"
+  },
+  {
+    "name": "Julia (Genie)",
+    "description": "Develop Julia based applications with Genie framework. Includes needed tools, extensions, framework and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
+  },
+  {
+    "name": "Julia",
+    "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
+    "gitUrl": "https://github.com/daytonaio/sample-julia"
+  },
+  {
+      "name": "PHP",
+      "description": "Develop PHP based applications. Includes needed tools, extensions, and dependencies.",
+      "gitUrl": "https://github.com/daytonaio/sample-php"
+  },
+  {
+      "name": "Python",
+      "description": "Develop Python applications.",
+      "gitUrl": "https://github.com/daytonaio/sample-python"
+  },
+  {
+      "name": "Ruby",
+      "description": "Develop Ruby based applications. includes everything you need to get up and running.",
+      "gitUrl": "https://github.com/daytonaio/sample-ruby"
+  },
+  {
+      "name": "Rust",
+      "description": "Develop Rust based applications. Includes appropriate runtime args and everything you need to get up and running.",
+      "gitUrl": "https://github.com/daytonaio/sample-rust"
+  },
+  {
+      "name": "Node / TypeScript",
+      "description": "Develop Node.js based applications in TypeScript. Includes Node.js, eslint, nvm, yarn, and the TypeScript compiler.",
+      "gitUrl": "https://github.com/daytonaio/sample-typescript-node"
+  },
+  {
+      "name": "Next.js - OpenSourceSmith",
+      "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
+      "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
+  }
 ]
