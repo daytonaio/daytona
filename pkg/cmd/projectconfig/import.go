@@ -22,15 +22,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var projectConfigList []apiclient.ProjectConfig
+var (
+	projectConfigList []apiclient.ProjectConfig
+	filePath          string
+)
 
 var projectConfigImportCmd = &cobra.Command{
-	Use:                   "import [-]",
-	Aliases:               []string{"imp"},
-	Short:                 "Import project config from JSON",
-	Long:                  "Import project config from a JSON input. Use '-' to read from stdin.",
-	Args:                  cobra.MaximumNArgs(1),
-	DisableFlagsInUseLine: true,
+	Use:     "import [-]",
+	Aliases: []string{"imp"},
+	Short:   "Import project config from JSON",
+	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputText string
 		var res *http.Response
@@ -47,12 +48,21 @@ var projectConfigImportCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		if len(args) == 1 && args[0] == "-" {
-			inputBytes, err := io.ReadAll(os.Stdin)
-			if err != nil {
-				return fmt.Errorf("error reading stdin: %v", err)
+		if filePath != "" {
+			if filePath == "-" {
+				inputBytes, err := io.ReadAll(os.Stdin)
+				if err != nil {
+					return fmt.Errorf("error reading stdin: %v", err)
+				}
+				inputText = string(inputBytes)
+			} else {
+				inputBytes, err := os.ReadFile(filePath)
+				if err != nil {
+					return fmt.Errorf("error reading file: %v", err)
+				}
+				inputText = string(inputBytes)
 			}
-			inputText = string(inputBytes)
+
 		} else {
 			form := huh.NewForm(
 				huh.NewGroup(
@@ -92,6 +102,10 @@ var projectConfigImportCmd = &cobra.Command{
 		}
 		return nil
 	},
+}
+
+func init() {
+	projectConfigImportCmd.Flags().StringVarP(&filePath, "file", "f", "", "Import project config from a JSON file. Use '-' to read from stdin.")
 }
 
 func isProjectConfigAlreadyExists(configName string) bool {

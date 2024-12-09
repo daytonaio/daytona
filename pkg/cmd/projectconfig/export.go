@@ -78,6 +78,10 @@ func init() {
 }
 
 func exportProjectConfig(projectConfigs []apiclient.ProjectConfig) error {
+	if len(projectConfigs) == 0 {
+		return nil
+	}
+
 	var pbFlag bool
 
 	for i := range projectConfigs {
