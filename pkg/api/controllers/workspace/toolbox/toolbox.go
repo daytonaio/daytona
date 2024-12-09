@@ -17,37 +17,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// ExecuteCommand 			godoc
+// GetProjectDir 			godoc
 //
-//	@Tags			workspace
-//	@Summary		Execute command inside workspace project
-//	@Description	Execute command inside workspace project
+//	@Tags			workspace toolbox
+//	@Summary		Get project dir
+//	@Description	Get project directory
 //	@Produce		json
-//	@Param			workspaceId	path		string			true	"Workspace ID or Name"
-//	@Param			projectId	path		string			true	"Project Id"
-//	@Param			command		body		ExecuteRequest	true	"Execute command"
-//	@Success		200			{object}	ExecuteResponse
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/execute [post]
+//	@Param			workspaceId	path		string	true	"Workspace ID or Name"
+//	@Param			projectId	path		string	true	"Project Id"
+//	@Success		200			{object}	ProjectDirResponse
+//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/projectdir [get]
 //
-//	@id				ExecuteCommand
-func ExecuteCommand(ctx *gin.Context) {
-	forwardRequestToToolbox(ctx)
-}
-
-// ListFiles 			godoc
-//
-//	@Tags			workspace
-//	@Summary		List files inside workspace project
-//	@Description	List files inside workspace project
-//	@Produce		json
-//	@Param			workspaceId	path	string	true	"Workspace ID or Name"
-//	@Param			projectId	path	string	true	"Project Id"
-//	@Param			path		query	string	false	"Path"
-//	@Success		200			{array}	FileInfo
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/files [get]
-//
-//	@id				ListFiles
-func ListFiles(ctx *gin.Context) {
+//	@id				GetProjectDir
+func GetProjectDir(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }
 

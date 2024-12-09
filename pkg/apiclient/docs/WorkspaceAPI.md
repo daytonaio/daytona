@@ -5,9 +5,7 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CreateWorkspace**](WorkspaceAPI.md#CreateWorkspace) | **Post** /workspace | Create a workspace
-[**ExecuteCommand**](WorkspaceAPI.md#ExecuteCommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/execute | Execute command inside workspace project
 [**GetWorkspace**](WorkspaceAPI.md#GetWorkspace) | **Get** /workspace/{workspaceId} | Get workspace info
-[**ListFiles**](WorkspaceAPI.md#ListFiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files | List files inside workspace project
 [**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces
 [**RemoveWorkspace**](WorkspaceAPI.md#RemoveWorkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
 [**SetProjectState**](WorkspaceAPI.md#SetProjectState) | **Post** /workspace/{workspaceId}/{projectId}/state | Set project state
@@ -84,81 +82,6 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## ExecuteCommand
-
-> ExecuteResponse ExecuteCommand(ctx, workspaceId, projectId).Command(command).Execute()
-
-Execute command inside workspace project
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project Id
-	command := *openapiclient.NewExecuteRequest("Command_example") // ExecuteRequest | Execute command
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.ExecuteCommand(context.Background(), workspaceId, projectId).Command(command).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ExecuteCommand``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `ExecuteCommand`: ExecuteResponse
-	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.ExecuteCommand`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID or Name | 
-**projectId** | **string** | Project Id | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiExecuteCommandRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **command** | [**ExecuteRequest**](ExecuteRequest.md) | Execute command | 
-
-### Return type
-
-[**ExecuteResponse**](ExecuteResponse.md)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
 ## GetWorkspace
 
 > WorkspaceDTO GetWorkspace(ctx, workspaceId).Verbose(verbose).Execute()
@@ -216,81 +139,6 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**WorkspaceDTO**](WorkspaceDTO.md)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## ListFiles
-
-> []FileInfo ListFiles(ctx, workspaceId, projectId).Path(path).Execute()
-
-List files inside workspace project
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	projectId := "projectId_example" // string | Project Id
-	path := "path_example" // string | Path (optional)
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.ListFiles(context.Background(), workspaceId, projectId).Path(path).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListFiles``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-	// response from `ListFiles`: []FileInfo
-	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.ListFiles`: %v\n", resp)
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**workspaceId** | **string** | Workspace ID or Name | 
-**projectId** | **string** | Project Id | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiListFilesRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **path** | **string** | Path | 
-
-### Return type
-
-[**[]FileInfo**](FileInfo.md)
 
 ### Authorization
 

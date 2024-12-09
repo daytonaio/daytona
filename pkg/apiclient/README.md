@@ -133,9 +133,7 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{target}/set-default | Set target to default
 *TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
-*WorkspaceAPI* | [**ExecuteCommand**](docs/WorkspaceAPI.md#executecommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/execute | Execute command inside workspace project
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
-*WorkspaceAPI* | [**ListFiles**](docs/WorkspaceAPI.md#listfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files | List files inside workspace project
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
 *WorkspaceAPI* | [**SetProjectState**](docs/WorkspaceAPI.md#setprojectstate) | **Post** /workspace/{workspaceId}/{projectId}/state | Set project state
@@ -143,6 +141,33 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+*WorkspaceToolboxAPI* | [**FsCreateFolder**](docs/WorkspaceToolboxAPI.md#fscreatefolder) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/createfolder | Create folder
+*WorkspaceToolboxAPI* | [**FsDeleteFile**](docs/WorkspaceToolboxAPI.md#fsdeletefile) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/files | Delete file
+*WorkspaceToolboxAPI* | [**FsDownloadFile**](docs/WorkspaceToolboxAPI.md#fsdownloadfile) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/download | Download file
+*WorkspaceToolboxAPI* | [**FsFindInFiles**](docs/WorkspaceToolboxAPI.md#fsfindinfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/find | Search for text/pattern in files
+*WorkspaceToolboxAPI* | [**FsGetFileDetails**](docs/WorkspaceToolboxAPI.md#fsgetfiledetails) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/info | Get file info
+*WorkspaceToolboxAPI* | [**FsListFiles**](docs/WorkspaceToolboxAPI.md#fslistfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files | List files
+*WorkspaceToolboxAPI* | [**FsMoveFile**](docs/WorkspaceToolboxAPI.md#fsmovefile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/move | Create folder
+*WorkspaceToolboxAPI* | [**FsReplaceInFiles**](docs/WorkspaceToolboxAPI.md#fsreplaceinfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/replace | Repleace text/pattern in files
+*WorkspaceToolboxAPI* | [**FsSearchFiles**](docs/WorkspaceToolboxAPI.md#fssearchfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/search | Search for files
+*WorkspaceToolboxAPI* | [**FsSetFilePermissions**](docs/WorkspaceToolboxAPI.md#fssetfilepermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
+*WorkspaceToolboxAPI* | [**FsUploadFile**](docs/WorkspaceToolboxAPI.md#fsuploadfile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
+*WorkspaceToolboxAPI* | [**GetProjectDir**](docs/WorkspaceToolboxAPI.md#getprojectdir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/projectdir | Get project dir
+*WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branchs | Get branch list
+*WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
+*WorkspaceToolboxAPI* | [**GitCommitChanges**](docs/WorkspaceToolboxAPI.md#gitcommitchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/commit | Commit changes
+*WorkspaceToolboxAPI* | [**GitCommitHistory**](docs/WorkspaceToolboxAPI.md#gitcommithistory) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/history | Get commit history
+*WorkspaceToolboxAPI* | [**GitCreateBranch**](docs/WorkspaceToolboxAPI.md#gitcreatebranch) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/branchs | Create branch
+*WorkspaceToolboxAPI* | [**GitGitStatus**](docs/WorkspaceToolboxAPI.md#gitgitstatus) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/status | Get git status
+*WorkspaceToolboxAPI* | [**GitPushChanges**](docs/WorkspaceToolboxAPI.md#gitpushchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/push | Push changes
+*WorkspaceToolboxAPI* | [**LspCompletions**](docs/WorkspaceToolboxAPI.md#lspcompletions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions | Get Lsp Completions
+*WorkspaceToolboxAPI* | [**LspDidClose**](docs/WorkspaceToolboxAPI.md#lspdidclose) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/didclose | Call Lsp DidClose
+*WorkspaceToolboxAPI* | [**LspDidOpen**](docs/WorkspaceToolboxAPI.md#lspdidopen) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/didopen | Call Lsp DidOpen
+*WorkspaceToolboxAPI* | [**LspDocumentSymbols**](docs/WorkspaceToolboxAPI.md#lspdocumentsymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/documentSymbols | Call Lsp DocumentSymbols
+*WorkspaceToolboxAPI* | [**LspStart**](docs/WorkspaceToolboxAPI.md#lspstart) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/start | Start Lsp server
+*WorkspaceToolboxAPI* | [**LspStop**](docs/WorkspaceToolboxAPI.md#lspstop) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop | Stop Lsp server
+*WorkspaceToolboxAPI* | [**LspWorkspaceSymbols**](docs/WorkspaceToolboxAPI.md#lspworkspacesymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspaceSymbols | Call Lsp WorkspaceSymbols
+*WorkspaceToolboxAPI* | [**ProcessExecuteCommand**](docs/WorkspaceToolboxAPI.md#processexecutecommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/execute | Execute command
 
 
 ## Documentation For Models
@@ -171,20 +196,32 @@ Class | Method | HTTP request | Description
  - [FileStatus](docs/FileStatus.md)
  - [GetRepositoryContext](docs/GetRepositoryContext.md)
  - [GitBranch](docs/GitBranch.md)
+ - [GitBranchRequest](docs/GitBranchRequest.md)
+ - [GitCloneRequest](docs/GitCloneRequest.md)
+ - [GitCommitRequest](docs/GitCommitRequest.md)
  - [GitNamespace](docs/GitNamespace.md)
  - [GitProvider](docs/GitProvider.md)
  - [GitPullRequest](docs/GitPullRequest.md)
+ - [GitPushRequest](docs/GitPushRequest.md)
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
+ - [GithubComDaytonaioDaytonaPkgAgentToolboxLspCompletionContext](docs/GithubComDaytonaioDaytonaPkgAgentToolboxLspCompletionContext.md)
+ - [GithubComDaytonaioDaytonaPkgAgentToolboxLspPosition](docs/GithubComDaytonaioDaytonaPkgAgentToolboxLspPosition.md)
+ - [GithubComDaytonaioDaytonaPkgAgentToolboxLspTextDocumentIdentifier](docs/GithubComDaytonaioDaytonaPkgAgentToolboxLspTextDocumentIdentifier.md)
  - [InstallProviderRequest](docs/InstallProviderRequest.md)
  - [LogFileConfig](docs/LogFileConfig.md)
+ - [LspCompletionParams](docs/LspCompletionParams.md)
+ - [LspDocumentRequest](docs/LspDocumentRequest.md)
+ - [LspServerRequest](docs/LspServerRequest.md)
+ - [Match](docs/Match.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProfileData](docs/ProfileData.md)
  - [Project](docs/Project.md)
  - [ProjectConfig](docs/ProjectConfig.md)
+ - [ProjectDirResponse](docs/ProjectDirResponse.md)
  - [ProjectInfo](docs/ProjectInfo.md)
  - [ProjectState](docs/ProjectState.md)
  - [Provider](docs/Provider.md)
@@ -192,6 +229,7 @@ Class | Method | HTTP request | Description
  - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
  - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
  - [ProviderTarget](docs/ProviderTarget.md)
+ - [ReplaceRequest](docs/ReplaceRequest.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
  - [Sample](docs/Sample.md)
  - [ServerConfig](docs/ServerConfig.md)

@@ -74,7 +74,9 @@ var AgentCmd = &cobra.Command{
 			tailscaleHostname = c.WorkspaceId
 		}
 
-		toolBoxServer := &toolbox.Server{}
+		toolBoxServer := &toolbox.Server{
+			ProjectDir: c.ProjectDir,
+		}
 
 		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
 

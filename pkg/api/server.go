@@ -153,8 +153,37 @@ func (a *ApiServer) Start() error {
 
 		toolboxController := workspaceController.Group("/:workspaceId/:projectId/toolbox")
 		{
-			toolboxController.POST("/execute", toolbox.ExecuteCommand)
-			toolboxController.GET("/files", toolbox.ListFiles)
+			toolboxController.GET("/projectdir", toolbox.GetProjectDir)
+
+			toolboxController.POST("/process/execute", toolbox.ProcessExecuteCommand)
+
+			toolboxController.GET("/files", toolbox.FsListFiles)
+			toolboxController.POST("/files/createfolder", toolbox.FsCreateFolder)
+			toolboxController.GET("/files/download", toolbox.FsDownloadFile)
+			toolboxController.DELETE("/files", toolbox.FsDeleteFile)
+			toolboxController.GET("/files/find", toolbox.FsFindInFiles)
+			toolboxController.GET("/files/info", toolbox.FsGetFileDetails)
+			toolboxController.POST("/files/move", toolbox.FsMoveFile)
+			toolboxController.POST("/files/replace", toolbox.FsReplaceInFiles)
+			toolboxController.POST("/files/permissions", toolbox.FsSetFilePermissions)
+			toolboxController.GET("/files/search", toolbox.FsSearchFiles)
+			toolboxController.POST("/files/upload", toolbox.FsUploadFile)
+
+			toolboxController.GET("/git/branches", toolbox.GitBranchList)
+			toolboxController.POST("/git/branches", toolbox.GitCreateBranch)
+			toolboxController.POST("/git/clone", toolbox.GitCloneRepository)
+			toolboxController.POST("/git/commit", toolbox.GitCommitChanges)
+			toolboxController.GET("/git/history", toolbox.GitCommitHistory)
+			toolboxController.POST("/git/post", toolbox.GitPushChanges)
+			toolboxController.GET("/git/status", toolbox.GitStatus)
+
+			toolboxController.POST("/lsp/start", toolbox.LspStart)
+			toolboxController.POST("/lsp/stop", toolbox.LspStop)
+			toolboxController.POST("/lsp/didopen", toolbox.LspDidOpen)
+			toolboxController.POST("/lsp/didclose", toolbox.LspDidClose)
+			toolboxController.GET("/lsp/documentSymbols", toolbox.LspDocumentSymbols)
+			toolboxController.GET("/lsp/workspaceSymbols", toolbox.LspWorkspaceSymbols)
+			toolboxController.POST("/lsp/completion", toolbox.LspCompletions)
 		}
 	}
 

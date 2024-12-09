@@ -1881,52 +1881,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/execute": {
-            "post": {
-                "description": "Execute command inside workspace project",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Execute command inside workspace project",
-                "operationId": "ExecuteCommand",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project Id",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Execute command",
-                        "name": "command",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ExecuteRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ExecuteResponse"
-                        }
-                    }
-                }
-            }
-        },
         "/workspace/{workspaceId}/{projectId}/toolbox/files": {
             "get": {
                 "description": "List files inside workspace project",
@@ -1934,10 +1888,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "workspace"
+                    "workspace toolbox"
                 ],
-                "summary": "List files inside workspace project",
-                "operationId": "ListFiles",
+                "summary": "List files",
+                "operationId": "FsListFiles",
                 "parameters": [
                     {
                         "type": "string",
@@ -1968,6 +1922,1264 @@ const docTemplate = `{
                             "items": {
                                 "$ref": "#/definitions/FileInfo"
                             }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete file inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Delete file",
+                "operationId": "FsDeleteFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/createfolder": {
+            "post": {
+                "description": "Create folder inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Create folder",
+                "operationId": "FsCreateFolder",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Mode",
+                        "name": "mode",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/download": {
+            "get": {
+                "description": "Download file from workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Download file",
+                "operationId": "FsDownloadFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "response contains the file",
+                        "schema": {
+                            "type": "file"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/find": {
+            "get": {
+                "description": "Search for text/pattern inside workspace project files",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Search for text/pattern in files",
+                "operationId": "FsFindInFiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pattern",
+                        "name": "pattern",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/info": {
+            "get": {
+                "description": "Get file info inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get file info",
+                "operationId": "FsGetFileDetails",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/FileInfo"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/move": {
+            "post": {
+                "description": "Create folder inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Create folder",
+                "operationId": "FsMoveFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Source path",
+                        "name": "source",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Destination path",
+                        "name": "destination",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/permissions": {
+            "post": {
+                "description": "Set file owner/group/permissions inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Set file owner/group/permissions",
+                "operationId": "FsSetFilePermissions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Owner",
+                        "name": "owner",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Group",
+                        "name": "group",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Mode",
+                        "name": "mode",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/replace": {
+            "post": {
+                "description": "Repleace text/pattern in mutilple files inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Repleace text/pattern in files",
+                "operationId": "FsReplaceInFiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "ReplaceParams",
+                        "name": "replace",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ReplaceRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/search": {
+            "get": {
+                "description": "Search for files inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Search for files",
+                "operationId": "FsSearchFiles",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Pattern",
+                        "name": "pattern",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/files/upload": {
+            "post": {
+                "description": "Upload file inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Upload file",
+                "operationId": "FsUploadFile",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "File",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/branchs": {
+            "get": {
+                "description": "Get branch list from git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get branch list",
+                "operationId": "GitBranchList",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path to git repository",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create branch on git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Create branch",
+                "operationId": "GitCreateBranch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GitBranchRequest",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitBranchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/clone": {
+            "post": {
+                "description": "Clone git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Clone git repository",
+                "operationId": "GitCloneRepository",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GitCloneRequest",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitCloneRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/commit": {
+            "post": {
+                "description": "Commit changes to git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Commit changes",
+                "operationId": "GitCommitChanges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GitCommitRequest",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitCommitRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/history": {
+            "get": {
+                "description": "Get commit history from git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get commit history",
+                "operationId": "GitCommitHistory",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path to git repository",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/push": {
+            "post": {
+                "description": "Push changes to remote from git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Push changes",
+                "operationId": "GitPushChanges",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GitPushRequest",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitPushRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/status": {
+            "get": {
+                "description": "Get status from git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get git status",
+                "operationId": "GitGitStatus",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Path to git repository",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions": {
+            "post": {
+                "description": "The Completion request is sent from the client to the server to compute completion items at a given cursor position.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get Lsp Completions",
+                "operationId": "LspCompletions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LspCompletionParams",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LspCompletionParams"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/didclose": {
+            "post": {
+                "description": "The document close notification is sent from the client to the server when the document got closed in the client.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Call Lsp DidClose",
+                "operationId": "LspDidClose",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LspDocumentRequest",
+                        "name": "server",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LspDocumentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/didopen": {
+            "post": {
+                "description": "The document open notification is sent from the client to the server to signal newly opened text documents.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Call Lsp DidOpen",
+                "operationId": "LspDidOpen",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LspDocumentRequest",
+                        "name": "server",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LspDocumentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/documentSymbols": {
+            "get": {
+                "description": "The document symbol request is sent from the client to the server.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Call Lsp DocumentSymbols",
+                "operationId": "LspDocumentSymbols",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Language Id",
+                        "name": "languageId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Document Uri",
+                        "name": "uri",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/start": {
+            "post": {
+                "description": "Start Lsp server process inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Start Lsp server",
+                "operationId": "LspStart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LspServerRequest",
+                        "name": "server",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LspServerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop": {
+            "post": {
+                "description": "Stop Lsp server process inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Stop Lsp server",
+                "operationId": "LspStop",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "LspServerRequest",
+                        "name": "server",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/LspServerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspaceSymbols": {
+            "get": {
+                "description": "The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Call Lsp WorkspaceSymbols",
+                "operationId": "LspWorkspaceSymbols",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Language Id",
+                        "name": "languageId",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Symbol Query",
+                        "name": "query",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Match"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/process/execute": {
+            "post": {
+                "description": "Execute command synchronously inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Execute command",
+                "operationId": "ProcessExecuteCommand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Execute command request",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ExecuteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ExecuteResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/{projectId}/toolbox/projectdir": {
+            "get": {
+                "description": "Get project directory",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get project dir",
+                "operationId": "GetProjectDir",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project Id",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ProjectDirResponse"
                         }
                     }
                 }
@@ -2446,6 +3658,67 @@ const docTemplate = `{
                 }
             }
         },
+        "GitBranchRequest": {
+            "type": "object",
+            "required": [
+                "name",
+                "path"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitCloneRequest": {
+            "type": "object",
+            "properties": {
+                "branch": {
+                    "type": "string"
+                },
+                "commit_id": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitCommitRequest": {
+            "type": "object",
+            "required": [
+                "author",
+                "email",
+                "message",
+                "path"
+            ],
+            "properties": {
+                "author": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
         "GitNamespace": {
             "type": "object",
             "required": [
@@ -2528,6 +3801,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sourceRepoUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitPushRequest": {
+            "type": "object",
+            "required": [
+                "path"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
@@ -2670,6 +3960,66 @@ const docTemplate = `{
                 },
                 "path": {
                     "type": "string"
+                }
+            }
+        },
+        "LspCompletionParams": {
+            "type": "object",
+            "required": [
+                "languageId"
+            ],
+            "properties": {
+                "context": {
+                    "$ref": "#/definitions/github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.CompletionContext"
+                },
+                "languageId": {
+                    "type": "string"
+                },
+                "position": {
+                    "$ref": "#/definitions/github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.Position"
+                },
+                "textDocument": {
+                    "$ref": "#/definitions/github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.TextDocumentIdentifier"
+                }
+            }
+        },
+        "LspDocumentRequest": {
+            "type": "object",
+            "required": [
+                "languageId",
+                "uri"
+            ],
+            "properties": {
+                "languageId": {
+                    "type": "string"
+                },
+                "uri": {
+                    "type": "string"
+                }
+            }
+        },
+        "LspServerRequest": {
+            "type": "object",
+            "required": [
+                "languageId"
+            ],
+            "properties": {
+                "languageId": {
+                    "type": "string"
+                }
+            }
+        },
+        "Match": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "file": {
+                    "type": "string"
+                },
+                "line": {
+                    "type": "integer"
                 }
             }
         },
@@ -2853,6 +4203,14 @@ const docTemplate = `{
                 }
             }
         },
+        "ProjectDirResponse": {
+            "type": "object",
+            "properties": {
+                "dir": {
+                    "type": "string"
+                }
+            }
+        },
         "ProjectInfo": {
             "type": "object",
             "required": [
@@ -2944,6 +4302,28 @@ const docTemplate = `{
             "type": "object",
             "additionalProperties": {
                 "$ref": "#/definitions/provider.ProviderTargetProperty"
+            }
+        },
+        "ReplaceRequest": {
+            "type": "object",
+            "required": [
+                "files",
+                "newValue",
+                "pattern"
+            ],
+            "properties": {
+                "files": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "newValue": {
+                    "type": "string"
+                },
+                "pattern": {
+                    "type": "string"
+                }
             }
         },
         "RepositoryUrl": {
@@ -3240,6 +4620,36 @@ const docTemplate = `{
                 "BuildStatePendingForcedDelete",
                 "BuildStateDeleting"
             ]
+        },
+        "github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.CompletionContext": {
+            "type": "object",
+            "properties": {
+                "triggerCharacter": {
+                    "type": "string"
+                },
+                "triggerKind": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.Position": {
+            "type": "object",
+            "properties": {
+                "character": {
+                    "type": "integer"
+                },
+                "line": {
+                    "type": "integer"
+                }
+            }
+        },
+        "github_com_daytonaio_daytona_pkg_agent_toolbox_lsp.TextDocumentIdentifier": {
+            "type": "object",
+            "properties": {
+                "uri": {
+                    "type": "string"
+                }
+            }
         },
         "provider.ProviderInfo": {
             "type": "object",
