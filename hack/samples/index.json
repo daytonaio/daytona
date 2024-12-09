@@ -78,5 +78,10 @@
       "name": "Next.js - OpenSourceSmith",
       "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
       "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
+  },
+  {
+      "name": "Next.js - MindmapCopilot",
+      "description": "Mindmap Copilot, a tool that can simplify the mindmap creation with the help of a copilot. Built using NextJs, TypeCcript, CopilotKit, ShadCN, Tailwind.",
+      "gitUrl": "https://github.com/daytonaio/sample-mindmap-copilot"
   }
 ]
