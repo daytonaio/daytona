@@ -81,7 +81,7 @@ var projectConfigUpdateCmd = &cobra.Command{
 			projectDefaults.DevcontainerFilePath = projectConfig.BuildConfig.Devcontainer.FilePath
 		}
 
-		_, err = create.RunProjectConfiguration(&createDto, *projectDefaults)
+		_, err = create.RunProjectConfiguration(&createDto, *projectDefaults, false)
 		if err != nil {
 			return err
 		}

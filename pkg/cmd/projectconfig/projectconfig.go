@@ -22,4 +22,6 @@ func init() {
 	ProjectConfigCmd.AddCommand(projectConfigUpdateCmd)
 	ProjectConfigCmd.AddCommand(projectConfigSetDefaultCmd)
 	ProjectConfigCmd.AddCommand(projectConfigDeleteCmd)
+	ProjectConfigCmd.AddCommand(projectConfigExportCmd)
+	ProjectConfigCmd.AddCommand(projectConfigImportCmd)
 }
