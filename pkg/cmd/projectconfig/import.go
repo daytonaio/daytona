@@ -28,7 +28,7 @@ var (
 )
 
 var projectConfigImportCmd = &cobra.Command{
-	Use:     "import [-]",
+	Use:     "import",
 	Aliases: []string{"imp"},
 	Short:   "Import project config from JSON",
 	Args:    cobra.MaximumNArgs(1),

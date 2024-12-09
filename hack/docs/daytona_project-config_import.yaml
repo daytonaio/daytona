@@ -1,8 +1,11 @@
 name: daytona project-config import
 synopsis: Import project config from JSON
-description: |
-    Import project config from a JSON input. Use '-' to read from stdin.
-usage: daytona project-config import [-]
+usage: daytona project-config import [flags]
+options:
+    - name: file
+      shorthand: f
+      usage: |
+        Import project config from a JSON file. Use '-' to read from stdin.
 inherited_options:
     - name: help
       default_value: "false"

@@ -2,12 +2,14 @@
 
 Import project config from JSON
 
-### Synopsis
+```
+daytona project-config import [flags]
+```
 
-Import project config from a JSON input. Use '-' to read from stdin.
+### Options
 
 ```
-daytona project-config import [-]
+  -f, --file string   Import project config from a JSON file. Use '-' to read from stdin.
 ```
 
 ### Options inherited from parent commands
