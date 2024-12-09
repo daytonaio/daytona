@@ -6,8 +6,6 @@ package db
 import (
 	"context"
 
-	"gorm.io/gorm"
-
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
@@ -25,11 +23,11 @@ func NewTargetMetadataStore(store IStore) (stores.TargetMetadataStore, error) {
 	return &TargetMetadataStore{store}, nil
 }
 
-func (s *TargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
+func (s *TargetMetadataStore) Find(ctx context.Context, targetId string) (*models.TargetMetadata, error) {
 	tx := s.GetTransaction(ctx)
 
 	targetMetadata := &models.TargetMetadata{}
-	tx = processTargetMetadataFilters(tx, filter).First(&targetMetadata)
+	tx = tx.Where("id = ?", targetId).First(&targetMetadata)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrTargetMetadataNotFound
@@ -63,16 +61,4 @@ func (s *TargetMetadataStore) Delete(ctx context.Context, targetMetadata *models
 	}
 
 	return nil
-}
-
-func processTargetMetadataFilters(tx *gorm.DB, filter *stores.TargetMetadataFilter) *gorm.DB {
-	if filter != nil {
-		if filter.Id != nil {
-			tx = tx.Where("id = ?", *filter.Id)
-		}
-		if filter.TargetId != nil {
-			tx = tx.Where("target_id = ?", *filter.TargetId)
-		}
-	}
-	return tx
 }

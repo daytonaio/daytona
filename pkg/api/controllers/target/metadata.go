@@ -46,3 +46,35 @@ func SetTargetMetadata(ctx *gin.Context) {
 
 	ctx.Status(200)
 }
+
+// UpdateTargetProviderMetadata 			godoc
+//
+//	@Tags			target
+//	@Summary		Update target provider metadata
+//	@Description	Update target provider metadata
+//	@Param			targetId	path	string	true	"Target ID"
+//	@Param			metadata	body	string	true	"Provider metadata"
+//	@Success		200
+//	@Router			/target/{targetId}/provider-metadata [post]
+//
+//	@id				UpdateTargetProviderMetadata
+func UpdateTargetProviderMetadata(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
+
+	var metadata string
+	err := ctx.BindJSON(&metadata)
+	if err != nil {
+		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		return
+	}
+
+	server := server.GetInstance(nil)
+
+	err = server.TargetService.UpdateTargetProviderMetadata(ctx.Request.Context(), targetId, metadata)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update target provider metadata for %s: %w", targetId, err))
+		return
+	}
+
+	ctx.Status(200)
+}

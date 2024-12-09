@@ -41,7 +41,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	"github.com/daytonaio/daytona/pkg/api/controllers/job"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
-	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
+	"github.com/daytonaio/daytona/pkg/api/controllers/runner"
+	"github.com/daytonaio/daytona/pkg/api/controllers/runner/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -101,15 +102,14 @@ func (a *ApiServer) Start() error {
 
 	binding.Validator = new(defaultValidator)
 
+	a.router = gin.New()
+	a.router.Use(gin.Recovery())
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
-		a.router = gin.Default()
 		a.router.Use(cors.New(cors.Config{
 			AllowAllOrigins: true,
 		}))
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-		a.router = gin.New()
-		a.router.Use(gin.Recovery())
 	}
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
@@ -149,6 +149,7 @@ func (a *ApiServer) Start() error {
 		targetController.POST("/:targetId/start", target.StartTarget)
 		targetController.POST("/:targetId/stop", target.StopTarget)
 		targetController.PATCH("/:targetId/set-default", target.SetDefaultTarget)
+		targetController.PATCH("/:targetId/handle-successful-creation", target.HandleSuccessfulCreation)
 		targetController.DELETE("/:targetId", target.RemoveTarget)
 	}
 
@@ -160,11 +161,6 @@ func (a *ApiServer) Start() error {
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
-	}
-
-	jobController := protected.Group("/job")
-	{
-		jobController.GET("/", job.ListJobs)
 	}
 
 	workspaceTemplateController := protected.Group("/workspace-template")
@@ -195,19 +191,12 @@ func (a *ApiServer) Start() error {
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
 
-	providerController := protected.Group("/provider")
-	{
-		providerController.POST("/install", provider.InstallProvider)
-		providerController.GET("/", provider.ListProviders)
-		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
-		providerController.GET("/:provider/target-config-manifest", provider.GetTargetConfigManifest)
-	}
-
 	buildController := protected.Group("/build")
 	{
 		buildController.POST("/", build.CreateBuild)
 		buildController.GET("/:buildId", build.GetBuild)
 		buildController.GET("/", build.ListBuilds)
+		buildController.GET("/successful/:repoUrl", build.ListSuccessfulBuilds)
 		buildController.DELETE("/", build.DeleteAllBuilds)
 		buildController.DELETE("/:buildId", build.DeleteBuild)
 		buildController.DELETE("/prebuild/:prebuildId", build.DeleteBuildsFromPrebuild)
@@ -264,9 +253,40 @@ func (a *ApiServer) Start() error {
 		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
 	}
 
+	jobController := protected.Group("/job")
+	{
+		jobController.GET("/", job.ListJobs)
+	}
+
 	samplesController := protected.Group("/sample")
 	{
 		samplesController.GET("/", sample.ListSamples)
+	}
+
+	runnerController := protected.Group("/runner")
+	{
+		// Defining the provider routes first to avoid conflicts with the runner routes
+		providerRoutePath := "/provider"
+		providersGroup := runnerController.Group(providerRoutePath)
+		{
+			providersGroup.GET("/", provider.ListProviders)
+		}
+
+		runnerIdGroup := runnerController.Group(":runnerId")
+		{
+			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
+			{
+				runnerIdProviderGroup.POST("/install", provider.InstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
+			}
+
+			runnerIdGroup.GET("/", runner.GetRunner)
+			runnerIdGroup.DELETE("/", runner.RemoveRunner)
+		}
+
+		runnerController.GET("/", runner.ListRunners)
+		runnerController.POST("/", runner.RegisterRunner)
 	}
 
 	workspaceGroup := protected.Group("/")
@@ -274,6 +294,14 @@ func (a *ApiServer) Start() error {
 	{
 		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/metadata", workspace.SetWorkspaceMetadata)
 		workspaceGroup.POST(targetController.BasePath()+"/:targetId/metadata", target.SetTargetMetadata)
+	}
+
+	runnerGroup := protected.Group("/")
+	runnerGroup.Use(middlewares.RunnerAuthMiddleware())
+	{
+		runnerGroup.POST(runnerController.BasePath()+"/:runnerId/metadata", runner.SetRunnerMetadata)
+		runnerGroup.GET(runnerController.BasePath()+"/:runnerId/jobs", runner.ListRunnerJobs)
+		runnerGroup.POST(runnerController.BasePath()+"/:runnerId/jobs/:jobId/state", runner.UpdateJobState)
 	}
 
 	a.httpServer = &http.Server{

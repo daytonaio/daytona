@@ -48,18 +48,18 @@ var SshProxyCmd = &cobra.Command{
 
 		var target *apiclient.TargetDTO
 
-		ws, statusCode, err := apiclient_util.GetWorkspace(resourceId, true)
+		ws, statusCode, err := apiclient_util.GetWorkspace(resourceId)
 		if err != nil && statusCode != http.StatusNotFound {
 			return err
 		}
 
 		if ws == nil {
-			target, _, err = apiclient_util.GetTarget(resourceId, true)
+			target, _, err = apiclient_util.GetTarget(resourceId)
 			if err != nil {
 				return err
 			}
 		} else {
-			target, _, err = apiclient_util.GetTarget(ws.TargetId, true)
+			target, _, err = apiclient_util.GetTarget(ws.TargetId)
 			if err != nil {
 				return err
 			}

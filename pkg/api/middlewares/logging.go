@@ -11,6 +11,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var ignoreLoggingPaths = map[string]bool{
+	"/job/":                            true,
+	"/workspace/:workspaceId/metadata": true,
+	"/target/:targetId/metadata":       true,
+}
+
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		startTime := time.Now()
@@ -31,12 +37,22 @@ func LoggingMiddleware() gin.HandlerFunc {
 			}).Error("API ERROR")
 			ctx.JSON(statusCode, gin.H{"error": ctx.Errors[0].Err.Error()})
 		} else {
-			log.WithFields(log.Fields{
-				"method":  reqMethod,
-				"URI":     reqUri,
-				"status":  statusCode,
-				"latency": latencyTime,
-			}).Info("API REQUEST")
+			fullPath := ctx.FullPath()
+			if ignoreLoggingPaths[fullPath] {
+				log.WithFields(log.Fields{
+					"method":  reqMethod,
+					"URI":     reqUri,
+					"status":  statusCode,
+					"latency": latencyTime,
+				}).Debug("API REQUEST")
+			} else {
+				log.WithFields(log.Fields{
+					"method":  reqMethod,
+					"URI":     reqUri,
+					"status":  statusCode,
+					"latency": latencyTime,
+				}).Info("API REQUEST")
+			}
 		}
 
 		ctx.Next()

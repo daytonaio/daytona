@@ -20,6 +20,7 @@ type IWorkspaceService interface {
 	StopWorkspace(ctx context.Context, workspaceId string) error
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
+	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, providerMetadata string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
@@ -27,12 +28,10 @@ type IWorkspaceService interface {
 
 type WorkspaceDTO struct {
 	models.Workspace
-	State models.ResourceState  `json:"state" validate:"required"`
-	Info  *models.WorkspaceInfo `json:"info" validate:"optional"`
+	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	WorkspaceDTO
 
 type WorkspaceRetrievalParams struct {
-	Verbose     bool
 	ShowDeleted bool
 }
 

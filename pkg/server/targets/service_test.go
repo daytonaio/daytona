@@ -48,11 +48,6 @@ var createTargetDTO = services.CreateTargetDTO{
 	TargetConfigName: "test",
 }
 
-var targetInfo = models.TargetInfo{
-	Name:             createTargetDTO.Name,
-	ProviderMetadata: "provider-metadata-test",
-}
-
 func TestTargetService(t *testing.T) {
 	tg.EnvVars = targets.GetTargetEnvVars(tg, targets.TargetEnvVarParams{
 		ApiUrl:    serverApiUrl,
@@ -71,7 +66,6 @@ func TestTargetService(t *testing.T) {
 	require.Nil(t, err)
 
 	apiKeyService := mocks.NewMockApiKeyService()
-	mockProvisioner := mocks.NewMockProvisioner()
 
 	tgLogsDir := t.TempDir()
 	buildLogsDir := t.TempDir()
@@ -90,14 +84,10 @@ func TestTargetService(t *testing.T) {
 		},
 		ServerApiUrl:  serverApiUrl,
 		ServerUrl:     serverUrl,
-		Provisioner:   mockProvisioner,
 		LoggerFactory: logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {
-		mockProvisioner.On("CreateTarget", tg).Return(nil)
-		mockProvisioner.On("StartTarget", tg).Return(nil)
-
 		apiKeyService.On("Generate", models.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
 
 		target, err := service.CreateTarget(ctx, createTargetDTO)
@@ -121,45 +111,29 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("GetTarget", func(t *testing.T) {
-		mockProvisioner.On("GetTargetInfo", mock.Anything, tg).Return(&targetInfo, nil)
-
-		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
+		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
 
-		targetDtoEquals(t, createTargetDTO, *target, targetInfo, true)
+		targetDtoEquals(t, createTargetDTO, *target)
 	})
 
 	t.Run("GetTarget fails when target not found", func(t *testing.T) {
-		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{Verbose: true})
+		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{})
 		require.NotNil(t, err)
 		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
 	t.Run("ListTargets", func(t *testing.T) {
-		verbose := false
-		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{Verbose: verbose})
+		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{})
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
 
 		target := targets[0]
 
-		targetDtoEquals(t, createTargetDTO, target, targetInfo, verbose)
-	})
-
-	t.Run("ListTargets - verbose", func(t *testing.T) {
-		verbose := true
-
-		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{Verbose: verbose})
-
-		require.Nil(t, err)
-		require.Len(t, targets, 1)
-
-		target := targets[0]
-
-		targetDtoEquals(t, createTargetDTO, target, targetInfo, verbose)
+		targetDtoEquals(t, createTargetDTO, target)
 	})
 
 	t.Run("StartTarget", func(t *testing.T) {
@@ -177,22 +151,19 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("StopTarget", func(t *testing.T) {
-		mockProvisioner.On("StopTarget", tg).Return(nil)
-
 		err := service.StopTarget(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("RemoveTarget", func(t *testing.T) {
-		mockProvisioner.On("DestroyTarget", tg).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
 		err := service.RemoveTarget(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
@@ -200,14 +171,13 @@ func TestTargetService(t *testing.T) {
 		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
-		mockProvisioner.On("DestroyTarget", tg).Return(nil)
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
 		err = service.ForceRemoveTarget(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{Verbose: true})
+		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
@@ -232,7 +202,6 @@ func TestTargetService(t *testing.T) {
 
 	t.Cleanup(func() {
 		apiKeyService.AssertExpectations(t)
-		mockProvisioner.AssertExpectations(t)
 	})
 }
 
@@ -246,18 +215,11 @@ func targetEquals(t *testing.T, t1, t2 *models.Target) {
 	require.Equal(t, t1.IsDefault, t2.IsDefault)
 }
 
-func targetDtoEquals(t *testing.T, req services.CreateTargetDTO, target services.TargetDTO, targetInfo models.TargetInfo, verbose bool) {
+func targetDtoEquals(t *testing.T, req services.CreateTargetDTO, target services.TargetDTO) {
 	t.Helper()
 
 	require.Equal(t, req.Id, target.Id)
 	require.Equal(t, req.Name, target.Name)
 	require.Equal(t, tc.ProviderInfo, target.TargetConfig.ProviderInfo)
 	require.Equal(t, tc.Options, target.TargetConfig.Options)
-
-	if verbose {
-		require.Equal(t, target.Info.Name, targetInfo.Name)
-		require.Equal(t, target.Info.ProviderMetadata, targetInfo.ProviderMetadata)
-	} else {
-		require.Nil(t, target.Info)
-	}
 }

@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**SetWorkspaceMetadata**](WorkspaceAPI.md#SetWorkspaceMetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 [**StartWorkspace**](WorkspaceAPI.md#StartWorkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 [**StopWorkspace**](WorkspaceAPI.md#StopWorkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+[**UpdateWorkspaceProviderMetadata**](WorkspaceAPI.md#UpdateWorkspaceProviderMetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
 
 
 
@@ -82,7 +83,7 @@ Name | Type | Description  | Notes
 
 ## GetWorkspace
 
-> WorkspaceDTO GetWorkspace(ctx, workspaceId).Verbose(verbose).Execute()
+> WorkspaceDTO GetWorkspace(ctx, workspaceId).Execute()
 
 Get workspace info
 
@@ -102,11 +103,10 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID or Name
-	verbose := true // bool | Verbose (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Verbose(verbose).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.GetWorkspace(context.Background(), workspaceId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.GetWorkspace``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -132,7 +132,6 @@ Other parameters are passed through a pointer to a apiGetWorkspaceRequest struct
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **verbose** | **bool** | Verbose | 
 
 ### Return type
 
@@ -154,7 +153,7 @@ Name | Type | Description  | Notes
 
 ## ListWorkspaces
 
-> []WorkspaceDTO ListWorkspaces(ctx).Verbose(verbose).Execute()
+> []WorkspaceDTO ListWorkspaces(ctx).Execute()
 
 List workspaces
 
@@ -173,11 +172,10 @@ import (
 )
 
 func main() {
-	verbose := true // bool | Verbose (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Verbose(verbose).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListWorkspaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -189,16 +187,12 @@ func main() {
 
 ### Path Parameters
 
-
+This endpoint does not need any parameter.
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListWorkspacesRequest struct via the builder pattern
 
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **verbose** | **bool** | Verbose | 
 
 ### Return type
 
@@ -475,6 +469,76 @@ Other parameters are passed through a pointer to a apiStopWorkspaceRequest struc
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateWorkspaceProviderMetadata
+
+> UpdateWorkspaceProviderMetadata(ctx, workspaceId).Metadata(metadata).Execute()
+
+Update workspace provider metadata
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID
+	metadata := "metadata_example" // string | Provider metadata
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.WorkspaceAPI.UpdateWorkspaceProviderMetadata(context.Background(), workspaceId).Metadata(metadata).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.UpdateWorkspaceProviderMetadata``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateWorkspaceProviderMetadataRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **metadata** | **string** | Provider metadata | 
 
 ### Return type
 

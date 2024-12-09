@@ -9,10 +9,10 @@ Name | Type | Description | Notes
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
 **Image** | **string** |  | 
-**Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
 **Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**ResourceState**](ResourceState.md) |  | 
 **Target** | [**Target**](Target.md) |  | 
@@ -148,31 +148,6 @@ and a boolean to check if the value has been set.
 SetImage sets Image field to given value.
 
 
-### GetInfo
-
-`func (o *WorkspaceDTO) GetInfo() WorkspaceInfo`
-
-GetInfo returns the Info field if non-nil, zero value otherwise.
-
-### GetInfoOk
-
-`func (o *WorkspaceDTO) GetInfoOk() (*WorkspaceInfo, bool)`
-
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetInfo
-
-`func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo)`
-
-SetInfo sets Info field to given value.
-
-### HasInfo
-
-`func (o *WorkspaceDTO) HasInfo() bool`
-
-HasInfo returns a boolean if a field has been set.
-
 ### GetLastJob
 
 `func (o *WorkspaceDTO) GetLastJob() Job`
@@ -242,6 +217,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetProviderMetadata
+
+`func (o *WorkspaceDTO) GetProviderMetadata() string`
+
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
+
+### GetProviderMetadataOk
+
+`func (o *WorkspaceDTO) GetProviderMetadataOk() (*string, bool)`
+
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderMetadata
+
+`func (o *WorkspaceDTO) SetProviderMetadata(v string)`
+
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *WorkspaceDTO) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetRepository
 

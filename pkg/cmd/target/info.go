@@ -31,7 +31,7 @@ var infoCmd = &cobra.Command{
 		var target *apiclient.TargetDTO
 
 		if len(args) == 0 {
-			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Verbose(true).Execute()
+			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -51,7 +51,7 @@ var infoCmd = &cobra.Command{
 			}
 
 		} else {
-			target, _, err = apiclient_util.GetTarget(args[0], true)
+			target, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}

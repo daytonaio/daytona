@@ -28,7 +28,7 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Verbose(verbose).Execute()
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
 
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)

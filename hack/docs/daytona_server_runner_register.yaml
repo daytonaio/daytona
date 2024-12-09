@@ -1,0 +1,13 @@
+name: daytona server runner register
+synopsis: Register runner
+usage: daytona server runner register [flags]
+options:
+    - name: alias
+      shorthand: a
+      usage: Runner alias
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona server runner - Manage runners

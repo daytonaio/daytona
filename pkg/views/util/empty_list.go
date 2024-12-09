@@ -95,3 +95,10 @@ func NotifyEmptyServerLogList(tip bool) {
 		views.RenderTip("Use 'daytona serve' in order to create server log files")
 	}
 }
+
+func NotifyEmptyRunnerList(tip bool) {
+	views.RenderInfoMessageBold("No runners found")
+	if tip {
+		views.RenderTip("Use 'daytona runner register' to register a runner")
+	}
+}

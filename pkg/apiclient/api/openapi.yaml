@@ -139,6 +139,29 @@ paths:
       summary: Delete builds
       tags:
       - build
+  /build/successful/{repoUrl}:
+    get:
+      description: List successful builds for Git repository
+      operationId: ListSuccessfulBuilds
+      parameters:
+      - description: Repository URL
+        in: path
+        name: repoUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/BuildDTO'
+                type: array
+          description: OK
+      summary: List successful builds for Git repository
+      tags:
+      - build
   /build/{buildId}:
     delete:
       description: Delete build
@@ -621,6 +644,35 @@ paths:
     get:
       description: List jobs
       operationId: ListJobs
+      parameters:
+      - description: Job States
+        explode: true
+        in: query
+        name: states
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Job Actions
+        explode: true
+        in: query
+        name: actions
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resource ID
+        in: query
+        name: resourceId
+        schema:
+          type: string
+      - description: Resource Type
+        in: query
+        name: resourceType
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -633,70 +685,224 @@ paths:
       summary: List jobs
       tags:
       - job
-  /provider:
+  /runner:
     get:
-      description: List providers
-      operationId: ListProviders
+      description: List runners
+      operationId: ListRunners
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Provider'
+                  $ref: '#/components/schemas/RunnerDTO'
+                type: array
+          description: OK
+      summary: List runners
+      tags:
+      - runner
+    post:
+      description: Register a runner
+      operationId: RegisterRunner
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/RegisterRunnerDTO'
+        description: Register runner
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterRunnerResultDTO'
+          description: OK
+      summary: Register a runner
+      tags:
+      - runner
+      x-codegen-request-body-name: runner
+  /runner/provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      parameters:
+      - description: Runner ID
+        in: query
+        name: runnerId
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderInfo'
                 type: array
           description: OK
       summary: List providers
       tags:
       - provider
-  /provider/install:
-    post:
-      description: Install a provider
-      operationId: InstallProvider
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InstallProviderRequest'
-        description: Provider to install
+  /runner/{runnerId}:
+    delete:
+      description: Remove runner
+      operationId: RemoveRunner
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
         required: true
+        schema:
+          type: string
       responses:
         "200":
           content: {}
           description: OK
-      summary: Install a provider
+      summary: Remove runner
       tags:
-      - provider
-      x-codegen-request-body-name: provider
-  /provider/{provider}/target-config-manifest:
+      - runner
     get:
-      description: Get provider target config manifest
-      operationId: GetTargetConfigManifest
+      description: Get a runner
+      operationId: GetRunner
       parameters:
-      - description: Provider name
+      - description: Runner ID
         in: path
-        name: provider
+        name: runnerId
         required: true
         schema:
           type: string
       responses:
         "200":
           content:
-            '*/*':
+            application/json:
               schema:
-                $ref: '#/components/schemas/TargetConfigManifest'
+                $ref: '#/components/schemas/RunnerDTO'
           description: OK
-      summary: Get provider target config manifest
+      summary: Get a runner
+      tags:
+      - runner
+  /runner/{runnerId}/jobs:
+    get:
+      description: List runner jobs
+      operationId: ListRunnerJobs
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Job'
+                type: array
+          description: OK
+      summary: List runner jobs
+      tags:
+      - runner
+  /runner/{runnerId}/jobs/{jobId}/state:
+    post:
+      description: Update job state
+      operationId: UpdateJobState
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Job ID
+        in: path
+        name: jobId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateJobState'
+        description: Update job state
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update job state
+      tags:
+      - runner
+      x-codegen-request-body-name: updateJobState
+  /runner/{runnerId}/metadata:
+    post:
+      description: Set runner metadata
+      operationId: SetRunnerMetadata
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SetRunnerMetadata'
+        description: Set Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set runner metadata
+      tags:
+      - runner
+      x-codegen-request-body-name: setMetadata
+  /runner/{runnerId}/provider/install:
+    post:
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/InstallProviderDTO'
+        description: Install provider
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Install provider
       tags:
       - provider
-  /provider/{provider}/uninstall:
+      x-codegen-request-body-name: installProviderDto
+  /runner/{runnerId}/provider/{providerName}/uninstall:
     post:
-      description: Uninstall a provider
+      description: Uninstall provider
       operationId: UninstallProvider
       parameters:
-      - description: Provider to uninstall
+      - description: Runner ID
         in: path
-        name: provider
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
         required: true
         schema:
           type: string
@@ -704,9 +910,41 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Uninstall a provider
+      summary: Uninstall provider
       tags:
       - provider
+  /runner/{runnerId}/provider/{providerName}/update:
+    post:
+      description: Update provider
+      operationId: UpdateProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/DownloadUrls'
+        description: Provider download URLs
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update provider
+      tags:
+      - provider
+      x-codegen-request-body-name: downloadUrls
   /sample:
     get:
       description: List samples
@@ -793,9 +1031,9 @@ paths:
       description: List targets
       operationId: ListTargets
       parameters:
-      - description: Verbose
+      - description: Show target config options
         in: query
-        name: verbose
+        name: showOptions
         schema:
           type: boolean
       responses:
@@ -835,6 +1073,12 @@ paths:
     get:
       description: List target configs
       operationId: ListTargetConfigs
+      parameters:
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
       responses:
         "200":
           content:
@@ -850,6 +1094,12 @@ paths:
     put:
       description: Add a target config
       operationId: AddTargetConfig
+      parameters:
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
       requestBody:
         content:
           '*/*':
@@ -919,9 +1169,9 @@ paths:
         required: true
         schema:
           type: string
-      - description: Verbose
+      - description: Show target config options
         in: query
-        name: verbose
+        name: showOptions
         schema:
           type: boolean
       responses:
@@ -932,6 +1182,24 @@ paths:
                 $ref: '#/components/schemas/TargetDTO'
           description: OK
       summary: Get target info
+      tags:
+      - target
+  /target/{targetId}/handle-successful-creation:
+    post:
+      description: Handles successful creation of the target
+      operationId: HandleSuccessfulCreation
+      parameters:
+      - description: Target ID or name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Handles successful creation of the target
       tags:
       - target
   /target/{targetId}/metadata:
@@ -960,6 +1228,32 @@ paths:
       tags:
       - target
       x-codegen-request-body-name: setMetadata
+  /target/{targetId}/provider-metadata:
+    post:
+      description: Update target provider metadata
+      operationId: UpdateTargetProviderMetadata
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+        description: Provider metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update target provider metadata
+      tags:
+      - target
+      x-codegen-request-body-name: metadata
   /target/{targetId}/set-default:
     patch:
       description: Set target to be used by default
@@ -1018,12 +1312,6 @@ paths:
     get:
       description: List workspaces
       operationId: ListWorkspaces
-      parameters:
-      - description: Verbose
-        in: query
-        name: verbose
-        schema:
-          type: boolean
       responses:
         "200":
           content:
@@ -1347,11 +1635,6 @@ paths:
         required: true
         schema:
           type: string
-      - description: Verbose
-        in: query
-        name: verbose
-        schema:
-          type: boolean
       responses:
         "200":
           content:
@@ -1388,6 +1671,32 @@ paths:
       tags:
       - workspace
       x-codegen-request-body-name: setMetadata
+  /workspace/{workspaceId}/provider-metadata:
+    post:
+      description: Update workspace provider metadata
+      operationId: UpdateWorkspaceProviderMetadata
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: string
+        description: Provider metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update workspace provider metadata
+      tags:
+      - workspace
+      x-codegen-request-body-name: metadata
   /workspace/{workspaceId}/start:
     post:
       description: Start workspace
@@ -1431,8 +1740,22 @@ components:
         name: name
         options: options
         providerInfo:
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
           agentlessTarget: true
           name: name
+          runnerId: runnerId
           label: label
           version: version
       properties:
@@ -1441,7 +1764,7 @@ components:
         options:
           type: string
         providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
+          $ref: '#/components/schemas/ProviderInfo'
       required:
       - name
       - options
@@ -1494,8 +1817,10 @@ components:
         prebuildId: prebuildId
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
+          runnerId: runnerId
           id: id
           state: null
           error: error
@@ -1795,6 +2120,10 @@ components:
       required:
       - filePath
       type: object
+    DownloadUrls:
+      additionalProperties:
+        type: string
+      type: object
     EnvironmentVariable:
       example:
         value: value
@@ -2067,7 +2396,7 @@ components:
       - name
       - username
       type: object
-    InstallProviderRequest:
+    InstallProviderDTO:
       example:
         downloadUrls:
           key: downloadUrls
@@ -2086,8 +2415,10 @@ components:
     Job:
       example:
         createdAt: createdAt
+        metadata: metadata
         resourceId: resourceId
         action: null
+        runnerId: runnerId
         id: id
         state: null
         error: error
@@ -2102,10 +2433,15 @@ components:
           type: string
         id:
           type: string
+        metadata:
+          description: JSON encoded metadata
+          type: string
         resourceId:
           type: string
         resourceType:
           $ref: '#/components/schemas/ResourceType'
+        runnerId:
+          type: string
         state:
           $ref: '#/components/schemas/JobState'
         updatedAt:
@@ -2226,21 +2562,120 @@ components:
       - retention
       - workspaceTemplateName
       type: object
-    Provider:
+    ProviderInfo:
       example:
+        targetConfigManifest:
+          key:
+            defaultValue: defaultValue
+            options:
+            - options
+            - options
+            description: description
+            suggestions:
+            - suggestions
+            - suggestions
+            type: null
+            disabledPredicate: disabledPredicate
+            inputMasked: true
+        agentlessTarget: true
         name: name
+        runnerId: runnerId
         label: label
         version: version
       properties:
+        agentlessTarget:
+          type: boolean
         label:
           type: string
         name:
           type: string
+        runnerId:
+          type: string
+        targetConfigManifest:
+          additionalProperties:
+            $ref: '#/components/schemas/TargetConfigProperty'
+          type: object
         version:
           type: string
       required:
       - name
+      - runnerId
+      - targetConfigManifest
       - version
+      type: object
+    RegisterRunnerDTO:
+      example:
+        alias: alias
+        id: id
+      properties:
+        alias:
+          type: string
+        id:
+          type: string
+      required:
+      - alias
+      - id
+      type: object
+    RegisterRunnerResultDTO:
+      example:
+        metadata:
+          runningJobs: 0
+          runnerId: runnerId
+          providers:
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          updatedAt: updatedAt
+          uptime: 6
+        apiKey: apiKey
+        alias: alias
+        id: id
+      properties:
+        alias:
+          type: string
+        apiKey:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/RunnerMetadata'
+      required:
+      - alias
+      - apiKey
+      - id
       type: object
     RepositoryUrl:
       example:
@@ -2272,11 +2707,136 @@ components:
       - workspace
       - target
       - build
+      - runner
       type: string
       x-enum-varnames:
       - ResourceTypeWorkspace
       - ResourceTypeTarget
       - ResourceTypeBuild
+      - ResourceTypeRunner
+    RunnerDTO:
+      example:
+        metadata:
+          runningJobs: 0
+          runnerId: runnerId
+          providers:
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          updatedAt: updatedAt
+          uptime: 6
+        alias: alias
+        id: id
+        state: state
+      properties:
+        alias:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/RunnerMetadata'
+        state:
+          type: string
+      required:
+      - alias
+      - id
+      - state
+      type: object
+    RunnerMetadata:
+      example:
+        runningJobs: 0
+        runnerId: runnerId
+        providers:
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        updatedAt: updatedAt
+        uptime: 6
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/ProviderInfo'
+          type: array
+        runnerId:
+          type: string
+        runningJobs:
+          type: integer
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
+      required:
+      - providers
+      - runnerId
+      - updatedAt
+      - uptime
+      type: object
     Sample:
       example:
         name: name
@@ -2304,6 +2864,7 @@ components:
         defaultWorkspaceImage: defaultWorkspaceImage
         apiPort: 0
         headscalePort: 1
+        localRunnerDisabled: true
         buildImageNamespace: buildImageNamespace
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
@@ -2315,7 +2876,6 @@ components:
           maxBackups: 2
           maxSize: 7
         samplesIndexUrl: samplesIndexUrl
-        providersDir: providersDir
         defaultWorkspaceUser: defaultWorkspaceUser
         id: id
         frps:
@@ -2347,10 +2907,10 @@ components:
           type: string
         localBuilderRegistryPort:
           type: integer
+        localRunnerDisabled:
+          type: boolean
         logFile:
           $ref: '#/components/schemas/LogFileConfig'
-        providersDir:
-          type: string
         registryUrl:
           type: string
         samplesIndexUrl:
@@ -2369,7 +2929,6 @@ components:
       - localBuilderRegistryImage
       - localBuilderRegistryPort
       - logFile
-      - providersDir
       - registryUrl
       - serverDownloadUrl
       type: object
@@ -2404,10 +2963,67 @@ components:
       - providerId
       - token
       type: object
+    SetRunnerMetadata:
+      example:
+        runningJobs: 0
+        providers:
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        uptime: 6
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/ProviderInfo'
+          type: array
+        runningJobs:
+          type: integer
+        uptime:
+          type: integer
+      required:
+      - providers
+      - uptime
+      type: object
     SetTargetMetadata:
       example:
+        providerMetadata: providerMetadata
         uptime: 0
       properties:
+        providerMetadata:
+          type: string
         uptime:
           type: integer
       required:
@@ -2415,6 +3031,7 @@ components:
       type: object
     SetWorkspaceMetadata:
       example:
+        providerMetadata: providerMetadata
         gitStatus:
           behind: 1
           fileStatus:
@@ -2433,6 +3050,8 @@ components:
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
+        providerMetadata:
+          type: string
         uptime:
           type: integer
       required:
@@ -2479,14 +3098,31 @@ components:
           options: options
           id: id
           providerInfo:
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
             agentlessTarget: true
             name: name
+            runnerId: runnerId
             label: label
             version: version
+        providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
+          runnerId: runnerId
           id: id
           state: null
           error: error
@@ -2515,6 +3151,8 @@ components:
           $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
+        providerMetadata:
+          type: string
         targetConfig:
           $ref: '#/components/schemas/TargetConfig'
         targetConfigId:
@@ -2539,8 +3177,22 @@ components:
         options: options
         id: id
         providerInfo:
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
           agentlessTarget: true
           name: name
+          runnerId: runnerId
           label: label
           version: version
       properties:
@@ -2554,7 +3206,7 @@ components:
           description: JSON encoded map of options
           type: string
         providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
+          $ref: '#/components/schemas/ProviderInfo'
       required:
       - deleted
       - id
@@ -2567,6 +3219,18 @@ components:
         $ref: '#/components/schemas/TargetConfigProperty'
       type: object
     TargetConfigProperty:
+      example:
+        defaultValue: defaultValue
+        options:
+        - options
+        - options
+        description: description
+        suggestions:
+        - suggestions
+        - suggestions
+        type: null
+        disabledPredicate: disabledPredicate
+        inputMasked: true
       properties:
         defaultValue:
           description: |-
@@ -2596,7 +3260,7 @@ components:
             type: string
           type: array
         type:
-          $ref: '#/components/schemas/provider.TargetConfigPropertyType'
+          $ref: '#/components/schemas/models.TargetConfigPropertyType'
       type: object
     TargetDTO:
       example:
@@ -2611,14 +3275,31 @@ components:
           options: options
           id: id
           providerInfo:
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
             agentlessTarget: true
             name: name
+            runnerId: runnerId
             label: label
             version: version
+        providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
+          runnerId: runnerId
           id: id
           state: null
           error: error
@@ -2634,13 +3315,7 @@ components:
           error: error
           updatedAt: updatedAt
         workspaces:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
+        - gitProviderConfigId: gitProviderConfigId
           image: image
           metadata:
             gitStatus:
@@ -2660,153 +3335,196 @@ components:
             updatedAt: updatedAt
             uptime: 5
             workspaceId: workspaceId
-          targetId: targetId
-          lastJob:
-            createdAt: createdAt
-            resourceId: resourceId
-            action: null
-            id: id
-            state: null
-            error: error
-            resourceType: null
-            updatedAt: updatedAt
-          envVars:
-            key: envVars
-          name: name
-          id: id
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target:
-            default: true
-            metadata:
-              targetId: targetId
-              updatedAt: updatedAt
-              uptime: 0
-            targetConfig:
-              deleted: true
-              name: name
-              options: options
-              id: id
-              providerInfo:
-                agentlessTarget: true
-                name: name
-                label: label
-                version: version
-            lastJob:
-              createdAt: createdAt
-              resourceId: resourceId
-              action: null
-              id: id
-              state: null
-              error: error
-              resourceType: null
-              updatedAt: updatedAt
-            envVars:
-              key: envVars
-            name: name
-            targetConfigId: targetConfigId
-            id: id
-            workspaces:
-            - null
-            - null
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          metadata:
-            gitStatus:
-              behind: 1
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 6
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 5
-            workspaceId: workspaceId
-          targetId: targetId
-          lastJob:
-            createdAt: createdAt
-            resourceId: resourceId
-            action: null
-            id: id
-            state: null
-            error: error
-            resourceType: null
-            updatedAt: updatedAt
-          envVars:
-            key: envVars
-          name: name
-          id: id
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target:
-            default: true
-            metadata:
-              targetId: targetId
-              updatedAt: updatedAt
-              uptime: 0
-            targetConfig:
-              deleted: true
-              name: name
-              options: options
-              id: id
-              providerInfo:
-                agentlessTarget: true
-                name: name
-                label: label
-                version: version
-            lastJob:
-              createdAt: createdAt
-              resourceId: resourceId
-              action: null
-              id: id
-              state: null
-              error: error
-              resourceType: null
-              updatedAt: updatedAt
-            envVars:
-              key: envVars
-            name: name
-            targetConfigId: targetConfigId
-            id: id
-            workspaces:
-            - null
-            - null
-        info:
           providerMetadata: providerMetadata
+          targetId: targetId
+          envVars:
+            key: envVars
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+          target:
+            default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
+                agentlessTarget: true
+                name: name
+                runnerId: runnerId
+                label: label
+                version: version
+            providerMetadata: providerMetadata
+            lastJob:
+              createdAt: createdAt
+              metadata: metadata
+              resourceId: resourceId
+              action: null
+              runnerId: runnerId
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
+            name: name
+            targetConfigId: targetConfigId
+            id: id
+            workspaces:
+            - null
+            - null
+          buildConfig:
+            cachedBuild:
+              image: image
+              user: user
+            devcontainer:
+              filePath: filePath
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
           name: name
+          id: id
+          user: user
+        - gitProviderConfigId: gitProviderConfigId
+          image: image
+          metadata:
+            gitStatus:
+              behind: 1
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              ahead: 6
+              branchPublished: true
+              currentBranch: currentBranch
+            updatedAt: updatedAt
+            uptime: 5
+            workspaceId: workspaceId
+          providerMetadata: providerMetadata
+          targetId: targetId
+          envVars:
+            key: envVars
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+          target:
+            default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
+                agentlessTarget: true
+                name: name
+                runnerId: runnerId
+                label: label
+                version: version
+            providerMetadata: providerMetadata
+            lastJob:
+              createdAt: createdAt
+              metadata: metadata
+              resourceId: resourceId
+              action: null
+              runnerId: runnerId
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
+            name: name
+            targetConfigId: targetConfigId
+            id: id
+            workspaces:
+            - null
+            - null
+          buildConfig:
+            cachedBuild:
+              image: image
+              user: user
+            devcontainer:
+              filePath: filePath
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          name: name
+          id: id
+          user: user
       properties:
         default:
           type: boolean
@@ -2816,13 +3534,13 @@ components:
           type: object
         id:
           type: string
-        info:
-          $ref: '#/components/schemas/TargetInfo'
         lastJob:
           $ref: '#/components/schemas/Job'
         metadata:
           $ref: '#/components/schemas/TargetMetadata'
         name:
+          type: string
+        providerMetadata:
           type: string
         state:
           $ref: '#/components/schemas/ResourceState'
@@ -2844,18 +3562,6 @@ components:
       - targetConfigId
       - workspaces
       type: object
-    TargetInfo:
-      example:
-        providerMetadata: providerMetadata
-        name: name
-      properties:
-        name:
-          type: string
-        providerMetadata:
-          type: string
-      required:
-      - name
-      type: object
     TargetMetadata:
       example:
         targetId: targetId
@@ -2873,33 +3579,20 @@ components:
       - updatedAt
       - uptime
       type: object
-    TargetProviderInfo:
+    UpdateJobState:
       example:
-        agentlessTarget: true
-        name: name
-        label: label
-        version: version
+        errorMessage: errorMessage
+        state: null
       properties:
-        agentlessTarget:
-          type: boolean
-        label:
+        errorMessage:
           type: string
-        name:
-          type: string
-        version:
-          type: string
+        state:
+          $ref: '#/components/schemas/JobState'
       required:
-      - name
-      - version
+      - state
       type: object
     Workspace:
       example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
         gitProviderConfigId: gitProviderConfigId
         image: image
         metadata:
@@ -2920,20 +3613,10 @@ components:
           updatedAt: updatedAt
           uptime: 5
           workspaceId: workspaceId
+        providerMetadata: providerMetadata
         targetId: targetId
-        lastJob:
-          createdAt: createdAt
-          resourceId: resourceId
-          action: null
-          id: id
-          state: null
-          error: error
-          resourceType: null
-          updatedAt: updatedAt
         envVars:
           key: envVars
-        name: name
-        id: id
         repository:
           owner: owner
           path: path
@@ -2945,7 +3628,6 @@ components:
           cloneTarget: null
           sha: sha
           url: url
-        user: user
         target:
           default: true
           metadata:
@@ -2958,14 +3640,31 @@ components:
             options: options
             id: id
             providerInfo:
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
               agentlessTarget: true
               name: name
+              runnerId: runnerId
               label: label
               version: version
+          providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
+            runnerId: runnerId
             id: id
             state: null
             error: error
@@ -2979,6 +3678,26 @@ components:
           workspaces:
           - null
           - null
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        name: name
+        id: id
+        user: user
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
@@ -2997,6 +3716,8 @@ components:
         metadata:
           $ref: '#/components/schemas/WorkspaceMetadata'
         name:
+          type: string
+        providerMetadata:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
@@ -3038,6 +3759,7 @@ components:
           updatedAt: updatedAt
           uptime: 5
           workspaceId: workspaceId
+        providerMetadata: providerMetadata
         targetId: targetId
         envVars:
           key: envVars
@@ -3064,14 +3786,31 @@ components:
             options: options
             id: id
             providerInfo:
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
               agentlessTarget: true
               name: name
+              runnerId: runnerId
               label: label
               version: version
+          providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
+            runnerId: runnerId
             id: id
             state: null
             error: error
@@ -3093,8 +3832,10 @@ components:
             filePath: filePath
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
+          runnerId: runnerId
           id: id
           state: null
           error: error
@@ -3107,12 +3848,6 @@ components:
           error: error
           updatedAt: updatedAt
         user: user
-        info:
-          providerMetadata: providerMetadata
-          targetId: targetId
-          isRunning: true
-          created: created
-          name: name
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
@@ -3126,13 +3861,13 @@ components:
           type: string
         image:
           type: string
-        info:
-          $ref: '#/components/schemas/WorkspaceInfo'
         lastJob:
           $ref: '#/components/schemas/Job'
         metadata:
           $ref: '#/components/schemas/WorkspaceMetadata'
         name:
+          type: string
+        providerMetadata:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
@@ -3154,30 +3889,6 @@ components:
       - target
       - targetId
       - user
-      type: object
-    WorkspaceInfo:
-      example:
-        providerMetadata: providerMetadata
-        targetId: targetId
-        isRunning: true
-        created: created
-        name: name
-      properties:
-        created:
-          type: string
-        isRunning:
-          type: boolean
-        name:
-          type: string
-        providerMetadata:
-          type: string
-        targetId:
-          type: string
-      required:
-      - created
-      - isRunning
-      - name
-      - targetId
       type: object
     WorkspaceMetadata:
       example:
@@ -3280,11 +3991,13 @@ components:
       - client
       - workspace
       - target
+      - runner
       type: string
       x-enum-varnames:
       - ApiKeyTypeClient
       - ApiKeyTypeWorkspace
       - ApiKeyTypeTarget
+      - ApiKeyTypeRunner
     models.JobAction:
       enum:
       - create
@@ -3294,6 +4007,9 @@ components:
       - delete
       - force-delete
       - run
+      - install-provider
+      - uninstall-provider
+      - update-provider
       type: string
       x-enum-varnames:
       - JobActionCreate
@@ -3303,6 +4019,9 @@ components:
       - JobActionDelete
       - JobActionForceDelete
       - JobActionRun
+      - JobActionInstallProvider
+      - JobActionUninstallProvider
+      - JobActionUpdateProvider
     models.ResourceStateName:
       enum:
       - undefined
@@ -3345,7 +4064,7 @@ components:
       - ResourceStateNamePendingForcedDelete
       - ResourceStateNameDeleting
       - ResourceStateNameDeleted
-    provider.TargetConfigPropertyType:
+    models.TargetConfigPropertyType:
       enum:
       - string
       - option

@@ -43,7 +43,7 @@ var providerListCmd = &cobra.Command{
 	},
 }
 
-func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.Provider, ctx context.Context) ([]provider.ProviderView, error) {
+func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient, latestProviders []apiclient.ProviderInfo) ([]provider.ProviderView, error) {
 	var result []provider.ProviderView
 
 	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
@@ -55,20 +55,24 @@ func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []ap
 
 	for _, installedProvider := range installedProviders {
 		providerMap[installedProvider.Name] = provider.ProviderView{
-			Name:      installedProvider.Name,
-			Label:     installedProvider.Label,
-			Version:   installedProvider.Version,
-			Installed: util.Pointer(true),
+			Name:                 installedProvider.Name,
+			Label:                installedProvider.Label,
+			Version:              installedProvider.Version,
+			Installed:            util.Pointer(true),
+			RunnerId:             installedProvider.RunnerId,
+			TargetConfigManifest: installedProvider.TargetConfigManifest,
 		}
 	}
 
 	for _, latestProvider := range latestProviders {
 		if _, exists := providerMap[latestProvider.Name]; !exists {
 			providerMap[latestProvider.Name] = provider.ProviderView{
-				Name:      latestProvider.Name,
-				Label:     latestProvider.Label,
-				Version:   latestProvider.Version,
-				Installed: util.Pointer(false),
+				Name:                 latestProvider.Name,
+				Label:                latestProvider.Label,
+				Version:              latestProvider.Version,
+				Installed:            util.Pointer(false),
+				RunnerId:             latestProvider.RunnerId,
+				TargetConfigManifest: latestProvider.TargetConfigManifest,
 			}
 		}
 	}

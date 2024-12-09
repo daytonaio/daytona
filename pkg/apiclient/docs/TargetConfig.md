@@ -8,13 +8,13 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Name** | **string** |  | 
 **Options** | **string** | JSON encoded map of options | 
-**ProviderInfo** | [**TargetProviderInfo**](TargetProviderInfo.md) |  | 
+**ProviderInfo** | [**ProviderInfo**](ProviderInfo.md) |  | 
 
 ## Methods
 
 ### NewTargetConfig
 
-`func NewTargetConfig(deleted bool, id string, name string, options string, providerInfo TargetProviderInfo, ) *TargetConfig`
+`func NewTargetConfig(deleted bool, id string, name string, options string, providerInfo ProviderInfo, ) *TargetConfig`
 
 NewTargetConfig instantiates a new TargetConfig object
 This constructor will assign default values to properties that have it defined,
@@ -111,20 +111,20 @@ SetOptions sets Options field to given value.
 
 ### GetProviderInfo
 
-`func (o *TargetConfig) GetProviderInfo() TargetProviderInfo`
+`func (o *TargetConfig) GetProviderInfo() ProviderInfo`
 
 GetProviderInfo returns the ProviderInfo field if non-nil, zero value otherwise.
 
 ### GetProviderInfoOk
 
-`func (o *TargetConfig) GetProviderInfoOk() (*TargetProviderInfo, bool)`
+`func (o *TargetConfig) GetProviderInfoOk() (*ProviderInfo, bool)`
 
 GetProviderInfoOk returns a tuple with the ProviderInfo field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProviderInfo
 
-`func (o *TargetConfig) SetProviderInfo(v TargetProviderInfo)`
+`func (o *TargetConfig) SetProviderInfo(v ProviderInfo)`
 
 SetProviderInfo sets ProviderInfo field to given value.
 

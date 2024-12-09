@@ -29,6 +29,7 @@ type Workspace struct {
 	LastJob             *Job               `json:"lastJob,omitempty"`
 	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
 	Name                string             `json:"name"`
+	ProviderMetadata    *string            `json:"providerMetadata,omitempty"`
 	Repository          GitRepository      `json:"repository"`
 	Target              Target             `json:"target"`
 	TargetId            string             `json:"targetId"`
@@ -286,6 +287,38 @@ func (o *Workspace) SetName(v string) {
 	o.Name = v
 }
 
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *Workspace) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ProviderMetadata
+}
+
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		return nil, false
+	}
+	return o.ProviderMetadata, true
+}
+
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *Workspace) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *Workspace) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
+}
+
 // GetRepository returns the Repository field value
 func (o *Workspace) GetRepository() GitRepository {
 	if o == nil {
@@ -408,6 +441,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
+	}
 	toSerialize["repository"] = o.Repository
 	toSerialize["target"] = o.Target
 	toSerialize["targetId"] = o.TargetId

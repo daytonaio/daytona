@@ -89,7 +89,7 @@ var stopCmd = &cobra.Command{
 		} else {
 			targetId := args[0]
 
-			target, _, err := apiclient_util.GetTarget(targetId, false)
+			target, _, err := apiclient_util.GetTarget(targetId)
 			if err != nil {
 				return err
 			}

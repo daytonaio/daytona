@@ -256,7 +256,7 @@ var CreateCmd = &cobra.Command{
 
 		createdWorkspaces := []apiclient.WorkspaceDTO{}
 		for _, createWorkspaceDto := range createWorkspaceDtos {
-			ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDto.Id, true)
+			ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDto.Id)
 			if err != nil {
 				return err
 			}
@@ -276,7 +276,7 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].Info.ProviderMetadata, YesFlag, gpgKey)
+		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].ProviderMetadata, YesFlag, gpgKey)
 	},
 }
 

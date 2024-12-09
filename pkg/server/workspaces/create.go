@@ -112,7 +112,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 		return s.handleCreateError(ctx, w, err)
 	}
 
-	err = s.createJob(ctx, w.Id, models.JobActionCreate)
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionCreate)
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}

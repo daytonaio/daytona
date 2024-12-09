@@ -24,6 +24,7 @@ type Workspace struct {
 	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
 	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	ProviderMetadata    *string                    `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Workspace
 
 type WorkspaceMetadata struct {
@@ -59,14 +60,6 @@ type CachedBuild struct {
 	User  string `json:"user" validate:"required"`
 	Image string `json:"image" validate:"required"`
 } // @name CachedBuild
-
-type WorkspaceInfo struct {
-	Name             string `json:"name" validate:"required"`
-	Created          string `json:"created" validate:"required"`
-	IsRunning        bool   `json:"isRunning" validate:"required"`
-	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
-	TargetId         string `json:"targetId" validate:"required"`
-} // @name WorkspaceInfo
 
 type GitStatus struct {
 	CurrentBranch   string        `json:"currentBranch" validate:"required"`

@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 ## AddTargetConfig
 
-> TargetConfig AddTargetConfig(ctx).TargetConfig(targetConfig).Execute()
+> TargetConfig AddTargetConfig(ctx).TargetConfig(targetConfig).ShowOptions(showOptions).Execute()
 
 Add a target config
 
@@ -31,11 +31,12 @@ import (
 )
 
 func main() {
-	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewTargetProviderInfo("Name_example", "Version_example")) // AddTargetConfigDTO | Target config to add
+	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderInfo("Name_example", "RunnerId_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")) // AddTargetConfigDTO | Target config to add
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TargetConfigAPI.AddTargetConfig(context.Background()).TargetConfig(targetConfig).Execute()
+	resp, r, err := apiClient.TargetConfigAPI.AddTargetConfig(context.Background()).TargetConfig(targetConfig).ShowOptions(showOptions).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetConfigAPI.AddTargetConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -57,6 +58,7 @@ Other parameters are passed through a pointer to a apiAddTargetConfigRequest str
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **targetConfig** | [**AddTargetConfigDTO**](AddTargetConfigDTO.md) | Target config to add | 
+ **showOptions** | **bool** | Show target config options | 
 
 ### Return type
 
@@ -78,7 +80,7 @@ Name | Type | Description  | Notes
 
 ## ListTargetConfigs
 
-> []TargetConfig ListTargetConfigs(ctx).Execute()
+> []TargetConfig ListTargetConfigs(ctx).ShowOptions(showOptions).Execute()
 
 List target configs
 
@@ -97,10 +99,11 @@ import (
 )
 
 func main() {
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TargetConfigAPI.ListTargetConfigs(context.Background()).Execute()
+	resp, r, err := apiClient.TargetConfigAPI.ListTargetConfigs(context.Background()).ShowOptions(showOptions).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetConfigAPI.ListTargetConfigs``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -112,12 +115,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListTargetConfigsRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **showOptions** | **bool** | Show target config options | 
 
 ### Return type
 

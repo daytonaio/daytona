@@ -12,16 +12,17 @@ import (
 const AGENT_UNRESPONSIVE_THRESHOLD = 30 * time.Second
 
 type Target struct {
-	Id             string            `json:"id" validate:"required" gorm:"primaryKey"`
-	Name           string            `json:"name" validate:"required" gorm:"not null"`
-	TargetConfigId string            `json:"targetConfigId" validate:"required" gorm:"not null"`
-	TargetConfig   TargetConfig      `json:"targetConfig" validate:"required" gorm:"foreignKey:TargetConfigId"`
-	ApiKey         string            `json:"-" validate:"required" gorm:"not null"`
-	EnvVars        map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
-	IsDefault      bool              `json:"default" validate:"required" gorm:"not null"`
-	Workspaces     []Workspace       `json:"workspaces" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
-	Metadata       *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:TargetId;references:Id"`
-	LastJob        *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	Id               string            `json:"id" validate:"required" gorm:"primaryKey"`
+	Name             string            `json:"name" validate:"required" gorm:"not null"`
+	TargetConfigId   string            `json:"targetConfigId" validate:"required" gorm:"not null"`
+	TargetConfig     TargetConfig      `json:"targetConfig" validate:"required" gorm:"foreignKey:TargetConfigId"`
+	ApiKey           string            `json:"-" validate:"required" gorm:"not null"`
+	EnvVars          map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	IsDefault        bool              `json:"default" validate:"required" gorm:"not null"`
+	Workspaces       []Workspace       `json:"workspaces" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
+	Metadata         *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:TargetId;references:Id"`
+	LastJob          *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	ProviderMetadata *string           `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Target
 
 type TargetMetadata struct {
@@ -56,15 +57,3 @@ func (t *Target) GetState() ResourceState {
 
 	return state
 }
-
-type TargetInfo struct {
-	Name             string `json:"name" validate:"required"`
-	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
-} // @name TargetInfo
-
-type ProviderInfo struct {
-	Name            string  `json:"name" validate:"required"`
-	Version         string  `json:"version" validate:"required"`
-	AgentlessTarget bool    `json:"agentlessTarget" validate:"optional"`
-	Label           *string `json:"label" validate:"optional"`
-} // @name TargetProviderInfo

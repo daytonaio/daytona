@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -23,8 +24,14 @@ func (tj *TargetJob) stop(ctx context.Context, j *models.Job) error {
 
 	targetLogger.Write([]byte(fmt.Sprintf("Stopping target %s\n", t.Name)))
 
-	//	todo: go routines
-	err = tj.provisioner.StopTarget(t)
+	targetProvider, err := tj.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
+	if err != nil {
+		return err
+	}
+
+	_, err = (*targetProvider).StopTarget(&provider.TargetRequest{
+		Target: t,
+	})
 	if err != nil {
 		return err
 	}

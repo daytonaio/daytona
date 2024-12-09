@@ -152,13 +152,6 @@ type ApiGetWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
-	verbose     *bool
-}
-
-// Verbose
-func (r ApiGetWorkspaceRequest) Verbose(verbose bool) ApiGetWorkspaceRequest {
-	r.verbose = &verbose
-	return r
 }
 
 func (r ApiGetWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
@@ -205,9 +198,6 @@ func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Wo
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -279,13 +269,6 @@ func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*Wo
 type ApiListWorkspacesRequest struct {
 	ctx        context.Context
 	ApiService *WorkspaceAPIService
-	verbose    *bool
-}
-
-// Verbose
-func (r ApiListWorkspacesRequest) Verbose(verbose bool) ApiListWorkspacesRequest {
-	r.verbose = &verbose
-	return r
 }
 
 func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceDTO, *http.Response, error) {
@@ -329,9 +312,6 @@ func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) 
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "")
-	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -804,6 +784,124 @@ func (a *WorkspaceAPIService) StopWorkspaceExecute(r ApiStopWorkspaceRequest) (*
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiUpdateWorkspaceProviderMetadataRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceAPIService
+	workspaceId string
+	metadata    *string
+}
+
+// Provider metadata
+func (r ApiUpdateWorkspaceProviderMetadataRequest) Metadata(metadata string) ApiUpdateWorkspaceProviderMetadataRequest {
+	r.metadata = &metadata
+	return r
+}
+
+func (r ApiUpdateWorkspaceProviderMetadataRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateWorkspaceProviderMetadataExecute(r)
+}
+
+/*
+UpdateWorkspaceProviderMetadata Update workspace provider metadata
+
+Update workspace provider metadata
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID
+	@return ApiUpdateWorkspaceProviderMetadataRequest
+*/
+func (a *WorkspaceAPIService) UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId string) ApiUpdateWorkspaceProviderMetadataRequest {
+	return ApiUpdateWorkspaceProviderMetadataRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) UpdateWorkspaceProviderMetadataExecute(r ApiUpdateWorkspaceProviderMetadataRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.UpdateWorkspaceProviderMetadata")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/provider-metadata"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.metadata == nil {
+		return nil, reportError("metadata is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.metadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

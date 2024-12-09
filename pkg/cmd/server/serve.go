@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"time"
@@ -15,12 +16,15 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/cmd/server/bootstrap"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/registry"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
@@ -61,6 +65,11 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
+		runnerConfig, err := runner.GetConfig()
+		if err != nil {
+			return err
+		}
+
 		telemetryService := posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
@@ -74,11 +83,6 @@ var ServeCmd = &cobra.Command{
 			ServerId:         c.Id,
 			Frps:             c.Frps,
 		})
-
-		err = bootstrap.InitProviderManager(c, configDir)
-		if err != nil {
-			return err
-		}
 
 		server, err := bootstrap.GetInstance(c, configDir, internal.Version, telemetryService)
 		if err != nil {
@@ -126,23 +130,36 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
-		err = server.Start()
-		if err != nil {
-			return err
-		}
+		localRunnerErrChan := make(chan error)
 
-		log.Info("Starting job runner...")
-		jobRunner, err := bootstrap.GetJobRunner(c, configDir, internal.Version, telemetryService)
-		if err != nil {
-			return err
-		}
+		go func() {
+			if c.LocalRunnerDisabled != nil && *c.LocalRunnerDisabled {
+				err = handleDisabledLocalRunner()
+				if err != nil {
+					localRunnerErrChan <- err
+				}
+				return
+			}
+			var runnerLogWriter io.Writer
 
-		// TODO: context?
-		err = jobRunner.StartRunner(context.Background())
-		if err != nil {
-			return err
-		}
-		log.Info("Job runner started")
+			if runnerConfig.LogFile != nil {
+				logFile, err := os.OpenFile(runnerConfig.LogFile.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+				if err != nil {
+					localRunnerErrChan <- err
+					return
+				}
+				defer logFile.Close()
+				runnerLogWriter = logFile
+			}
+
+			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
+				ServerConfig:     c,
+				RunnerConfig:     runnerConfig,
+				ConfigDir:        configDir,
+				TelemetryService: telemetryService,
+				LogWriter:        runnerLogWriter,
+			})
+		}()
 
 		err = waitForApiServerToStart(apiServer)
 		if err != nil {
@@ -165,6 +182,8 @@ var ServeCmd = &cobra.Command{
 		signal.Notify(interruptChannel, os.Interrupt)
 
 		select {
+		case err := <-localRunnerErrChan:
+			return err
 		case err := <-apiServerErrChan:
 			return err
 		case err := <-headscaleServerErrChan:
@@ -225,4 +244,51 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 			Key: apiKey,
 		},
 	})
+}
+
+func startLocalRunner(params bootstrap.LocalRunnerParams) error {
+	runnerService := server.GetInstance(nil).RunnerService
+
+	_, err := runnerService.GetRunner(context.Background(), "local")
+	if err != nil {
+		if stores.IsRunnerNotFound(err) {
+			_, err := runnerService.RegisterRunner(context.Background(), services.RegisterRunnerDTO{
+				Id:    "local",
+				Alias: "local",
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	log.Info("Starting local job runner...")
+
+	err = bootstrap.InitProviderManager(params.ServerConfig, params.RunnerConfig, params.ConfigDir)
+	if err != nil {
+		return err
+	}
+
+	runner, err := bootstrap.GetLocalRunner(params)
+	if err != nil {
+		return err
+	}
+
+	// TODO: context?
+	return runner.Start(context.Background())
+}
+
+func handleDisabledLocalRunner() error {
+	runnerService := server.GetInstance(nil).RunnerService
+
+	_, err := runnerService.GetRunner(context.Background(), "local")
+	if err != nil {
+		if stores.IsRunnerNotFound(err) {
+			return nil
+		}
+	}
+
+	return runnerService.RemoveRunner(context.Background(), "local")
 }

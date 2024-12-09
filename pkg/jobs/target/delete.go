@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/provider"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,12 +23,24 @@ func (tj *TargetJob) delete(ctx context.Context, j *models.Job, force bool) erro
 
 	targetLogger.Write([]byte(fmt.Sprintf("Destroying target %s", t.Name)))
 
-	err = tj.provisioner.DestroyTarget(t)
+	targetProvider, err := tj.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
 	if err != nil {
-		if !force {
-			return err
+		if force {
+			log.Error(err)
+			return nil
 		}
-		log.Error(err)
+		return err
+	}
+
+	_, err = (*targetProvider).DestroyTarget(&provider.TargetRequest{
+		Target: t,
+	})
+	if err != nil {
+		if force {
+			log.Error(err)
+			return nil
+		}
+		return err
 	}
 
 	targetLogger.Write([]byte(fmt.Sprintf("Target %s destroyed", t.Name)))

@@ -108,7 +108,7 @@ func ToGitStatus(gitStatusDTO apiclient.GitStatus) *models.GitStatus {
 	}
 }
 
-func ToGitStatusDTO(gitStatus *models.GitStatus) *apiclient.GitStatus {
+func ToApiClientGitStatus(gitStatus *models.GitStatus) *apiclient.GitStatus {
 	if gitStatus == nil {
 		return nil
 	}

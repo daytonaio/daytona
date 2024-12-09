@@ -16,13 +16,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-var ignorePaths = map[string]bool{
+var ignoreTelemetryPaths = map[string]bool{
 	"/health":                          true,
 	"/target/:targetId/metadata":       true,
 	"/target/:targetId":                true,
 	"/workspace/:workspaceId/metadata": true,
 	"/workspace/:workspaceId":          true,
+	"/runner/:runnerId/metadata":       true,
+	"/runner/:runnerId":                true,
 	"/server/network-key":              true,
+	"/job/":                            true,
 }
 
 func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.HandlerFunc {
@@ -38,7 +41,7 @@ func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.Handle
 		}
 
 		reqUri := ctx.FullPath()
-		if ignorePaths[reqUri] {
+		if ignoreTelemetryPaths[reqUri] {
 			ctx.Next()
 			return
 		}

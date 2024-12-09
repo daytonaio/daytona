@@ -51,7 +51,7 @@ var logsCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			target, _, err = apiclient_util.GetTarget(args[0], false)
+			target, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}

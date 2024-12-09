@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -20,12 +20,13 @@ type WorkspaceJob struct {
 	findTarget                       func(ctx context.Context, targetId string) (*models.Target, error)
 	findContainerRegistry            func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	findGitProviderConfig            func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	updateWorkspaceProviderMetadata  func(ctx context.Context, workspaceId, providerMetadata string) error
 	getWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
 	trackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	loggerFactory logs.LoggerFactory
-	provisioner   provisioner.IProvisioner
-	builderImage  string
+	loggerFactory   logs.LoggerFactory
+	providerManager providermanager.IProviderManager
+	builderImage    string
 }
 
 func (wj *WorkspaceJob) Execute(ctx context.Context) error {

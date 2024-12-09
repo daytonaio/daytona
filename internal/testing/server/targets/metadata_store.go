@@ -24,16 +24,13 @@ func NewInMemoryTargetMetadataStore() stores.TargetMetadataStore {
 	}
 }
 
-func (s *InMemoryTargetMetadataStore) Find(ctx context.Context, filter *stores.TargetMetadataFilter) (*models.TargetMetadata, error) {
-	metadatas, err := s.processFilters(filter)
-	if err != nil {
-		return nil, err
-	}
-	if len(metadatas) == 0 {
+func (s *InMemoryTargetMetadataStore) Find(ctx context.Context, targetId string) (*models.TargetMetadata, error) {
+	metadata, ok := s.targetMetadataEntries[targetId]
+	if !ok {
 		return nil, stores.ErrTargetMetadataNotFound
 	}
 
-	return metadatas[0], nil
+	return metadata, nil
 }
 
 func (s *InMemoryTargetMetadataStore) Save(ctx context.Context, targetMetadata *models.TargetMetadata) error {
@@ -44,36 +41,4 @@ func (s *InMemoryTargetMetadataStore) Save(ctx context.Context, targetMetadata *
 func (s *InMemoryTargetMetadataStore) Delete(ctx context.Context, targetMetadata *models.TargetMetadata) error {
 	delete(s.targetMetadataEntries, targetMetadata.TargetId)
 	return nil
-}
-
-func (s *InMemoryTargetMetadataStore) processFilters(filter *stores.TargetMetadataFilter) ([]*models.TargetMetadata, error) {
-	var result []*models.TargetMetadata
-	filteredTargetMetadata := make(map[string]*models.TargetMetadata)
-	for k, v := range s.targetMetadataEntries {
-		filteredTargetMetadata[k] = v
-	}
-
-	if filter != nil {
-		if filter.Id != nil {
-			m, ok := s.targetMetadataEntries[*filter.Id]
-			if ok {
-				return []*models.TargetMetadata{m}, nil
-			} else {
-				return []*models.TargetMetadata{}, nil
-			}
-		}
-		if filter.TargetId != nil {
-			for _, m := range filteredTargetMetadata {
-				if m.TargetId != *filter.TargetId {
-					delete(filteredTargetMetadata, m.TargetId)
-				}
-			}
-		}
-	}
-
-	for _, m := range filteredTargetMetadata {
-		result = append(result, m)
-	}
-
-	return result, nil
 }

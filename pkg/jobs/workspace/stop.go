@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
@@ -23,8 +24,14 @@ func (wj *WorkspaceJob) stop(ctx context.Context, j *models.Job) error {
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Stopping workspace %s\n", w.Name)))
 
-	//	todo: go routines
-	err = wj.provisioner.StopWorkspace(w)
+	targetProvider, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
+	if err != nil {
+		return err
+	}
+
+	_, err = (*targetProvider).StopWorkspace(&provider.WorkspaceRequest{
+		Workspace: w,
+	})
 	if err != nil {
 		return err
 	}

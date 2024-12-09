@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
@@ -244,7 +245,7 @@ func (a *Agent) updateWorkspaceMetadata() error {
 	uptime := a.uptime()
 	res, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).SetMetadata(apiclient.SetWorkspaceMetadata{
 		Uptime:    uptime,
-		GitStatus: conversion.ToGitStatusDTO(gitStatus),
+		GitStatus: conversion.ToApiClientGitStatus(gitStatus),
 	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
@@ -268,4 +269,15 @@ func (a *Agent) updateTargetMetadata() error {
 	}
 
 	return nil
+}
+
+func (s *Agent) initLogs() {
+	logFormatter := &util.LogFormatter{
+		TextFormatter: &log.TextFormatter{
+			ForceColors: true,
+		},
+		ProcessLogWriter: s.LogWriter,
+	}
+
+	log.SetFormatter(logFormatter)
 }

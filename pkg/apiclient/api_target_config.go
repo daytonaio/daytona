@@ -26,11 +26,18 @@ type ApiAddTargetConfigRequest struct {
 	ctx          context.Context
 	ApiService   *TargetConfigAPIService
 	targetConfig *AddTargetConfigDTO
+	showOptions  *bool
 }
 
 // Target config to add
 func (r ApiAddTargetConfigRequest) TargetConfig(targetConfig AddTargetConfigDTO) ApiAddTargetConfigRequest {
 	r.targetConfig = &targetConfig
+	return r
+}
+
+// Show target config options
+func (r ApiAddTargetConfigRequest) ShowOptions(showOptions bool) ApiAddTargetConfigRequest {
+	r.showOptions = &showOptions
 	return r
 }
 
@@ -78,6 +85,9 @@ func (a *TargetConfigAPIService) AddTargetConfigExecute(r ApiAddTargetConfigRequ
 		return localVarReturnValue, nil, reportError("targetConfig is required and must be specified")
 	}
 
+	if r.showOptions != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -149,8 +159,15 @@ func (a *TargetConfigAPIService) AddTargetConfigExecute(r ApiAddTargetConfigRequ
 }
 
 type ApiListTargetConfigsRequest struct {
-	ctx        context.Context
-	ApiService *TargetConfigAPIService
+	ctx         context.Context
+	ApiService  *TargetConfigAPIService
+	showOptions *bool
+}
+
+// Show target config options
+func (r ApiListTargetConfigsRequest) ShowOptions(showOptions bool) ApiListTargetConfigsRequest {
+	r.showOptions = &showOptions
+	return r
 }
 
 func (r ApiListTargetConfigsRequest) Execute() ([]TargetConfig, *http.Response, error) {
@@ -194,6 +211,9 @@ func (a *TargetConfigAPIService) ListTargetConfigsExecute(r ApiListTargetConfigs
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.showOptions != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
