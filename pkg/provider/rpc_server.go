@@ -4,6 +4,7 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
 )
 
@@ -16,7 +17,7 @@ func (m *ProviderRPCServer) Initialize(arg InitializeProviderRequest, resp *util
 	return err
 }
 
-func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
+func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *models.ProviderInfo) error {
 	info, err := m.Impl.GetInfo()
 	if err != nil {
 		return err
@@ -32,16 +33,6 @@ func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]Requireme
 		return err
 	}
 	*resp = *result
-	return nil
-}
-
-func (m *ProviderRPCServer) GetTargetConfigManifest(arg interface{}, resp *TargetConfigManifest) error {
-	targetConfigManifest, err := m.Impl.GetTargetConfigManifest()
-	if err != nil {
-		return err
-	}
-
-	*resp = *targetConfigManifest
 	return nil
 }
 

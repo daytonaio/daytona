@@ -1,4 +1,4 @@
-# TargetProviderInfo
+# ProviderInfo
 
 ## Properties
 
@@ -8,133 +8,154 @@ Name | Type | Description | Notes
 **Label** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **RunnerId** | **string** |  | 
+**TargetConfigManifest** | [**map[string]TargetConfigProperty**](TargetConfigProperty.md) |  | 
 **Version** | **string** |  | 
 
 ## Methods
 
-### NewTargetProviderInfo
+### NewProviderInfo
 
-`func NewTargetProviderInfo(name string, runnerId string, version string, ) *TargetProviderInfo`
+`func NewProviderInfo(name string, runnerId string, targetConfigManifest map[string]TargetConfigProperty, version string, ) *ProviderInfo`
 
-NewTargetProviderInfo instantiates a new TargetProviderInfo object
+NewProviderInfo instantiates a new ProviderInfo object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewTargetProviderInfoWithDefaults
+### NewProviderInfoWithDefaults
 
-`func NewTargetProviderInfoWithDefaults() *TargetProviderInfo`
+`func NewProviderInfoWithDefaults() *ProviderInfo`
 
-NewTargetProviderInfoWithDefaults instantiates a new TargetProviderInfo object
+NewProviderInfoWithDefaults instantiates a new ProviderInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetAgentlessTarget
 
-`func (o *TargetProviderInfo) GetAgentlessTarget() bool`
+`func (o *ProviderInfo) GetAgentlessTarget() bool`
 
 GetAgentlessTarget returns the AgentlessTarget field if non-nil, zero value otherwise.
 
 ### GetAgentlessTargetOk
 
-`func (o *TargetProviderInfo) GetAgentlessTargetOk() (*bool, bool)`
+`func (o *ProviderInfo) GetAgentlessTargetOk() (*bool, bool)`
 
 GetAgentlessTargetOk returns a tuple with the AgentlessTarget field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAgentlessTarget
 
-`func (o *TargetProviderInfo) SetAgentlessTarget(v bool)`
+`func (o *ProviderInfo) SetAgentlessTarget(v bool)`
 
 SetAgentlessTarget sets AgentlessTarget field to given value.
 
 ### HasAgentlessTarget
 
-`func (o *TargetProviderInfo) HasAgentlessTarget() bool`
+`func (o *ProviderInfo) HasAgentlessTarget() bool`
 
 HasAgentlessTarget returns a boolean if a field has been set.
 
 ### GetLabel
 
-`func (o *TargetProviderInfo) GetLabel() string`
+`func (o *ProviderInfo) GetLabel() string`
 
 GetLabel returns the Label field if non-nil, zero value otherwise.
 
 ### GetLabelOk
 
-`func (o *TargetProviderInfo) GetLabelOk() (*string, bool)`
+`func (o *ProviderInfo) GetLabelOk() (*string, bool)`
 
 GetLabelOk returns a tuple with the Label field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetLabel
 
-`func (o *TargetProviderInfo) SetLabel(v string)`
+`func (o *ProviderInfo) SetLabel(v string)`
 
 SetLabel sets Label field to given value.
 
 ### HasLabel
 
-`func (o *TargetProviderInfo) HasLabel() bool`
+`func (o *ProviderInfo) HasLabel() bool`
 
 HasLabel returns a boolean if a field has been set.
 
 ### GetName
 
-`func (o *TargetProviderInfo) GetName() string`
+`func (o *ProviderInfo) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *TargetProviderInfo) GetNameOk() (*string, bool)`
+`func (o *ProviderInfo) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *TargetProviderInfo) SetName(v string)`
+`func (o *ProviderInfo) SetName(v string)`
 
 SetName sets Name field to given value.
 
 
 ### GetRunnerId
 
-`func (o *TargetProviderInfo) GetRunnerId() string`
+`func (o *ProviderInfo) GetRunnerId() string`
 
 GetRunnerId returns the RunnerId field if non-nil, zero value otherwise.
 
 ### GetRunnerIdOk
 
-`func (o *TargetProviderInfo) GetRunnerIdOk() (*string, bool)`
+`func (o *ProviderInfo) GetRunnerIdOk() (*string, bool)`
 
 GetRunnerIdOk returns a tuple with the RunnerId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRunnerId
 
-`func (o *TargetProviderInfo) SetRunnerId(v string)`
+`func (o *ProviderInfo) SetRunnerId(v string)`
 
 SetRunnerId sets RunnerId field to given value.
 
 
+### GetTargetConfigManifest
+
+`func (o *ProviderInfo) GetTargetConfigManifest() map[string]TargetConfigProperty`
+
+GetTargetConfigManifest returns the TargetConfigManifest field if non-nil, zero value otherwise.
+
+### GetTargetConfigManifestOk
+
+`func (o *ProviderInfo) GetTargetConfigManifestOk() (*map[string]TargetConfigProperty, bool)`
+
+GetTargetConfigManifestOk returns a tuple with the TargetConfigManifest field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetConfigManifest
+
+`func (o *ProviderInfo) SetTargetConfigManifest(v map[string]TargetConfigProperty)`
+
+SetTargetConfigManifest sets TargetConfigManifest field to given value.
+
+
 ### GetVersion
 
-`func (o *TargetProviderInfo) GetVersion() string`
+`func (o *ProviderInfo) GetVersion() string`
 
 GetVersion returns the Version field if non-nil, zero value otherwise.
 
 ### GetVersionOk
 
-`func (o *TargetProviderInfo) GetVersionOk() (*string, bool)`
+`func (o *ProviderInfo) GetVersionOk() (*string, bool)`
 
 GetVersionOk returns a tuple with the Version field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetVersion
 
-`func (o *TargetProviderInfo) SetVersion(v string)`
+`func (o *ProviderInfo) SetVersion(v string)`
 
 SetVersion sets Version field to given value.
 

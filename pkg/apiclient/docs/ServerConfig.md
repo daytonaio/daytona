@@ -17,7 +17,7 @@ Name | Type | Description | Notes
 **LocalBuilderRegistryImage** | **string** |  | 
 **LocalBuilderRegistryPort** | **int32** |  | 
 **LogFile** | [**LogFileConfig**](LogFileConfig.md) |  | 
-**ProvidersDir** | **string** |  | 
+**ProvidersDir** | **string** | TODO: Move to runner config | 
 **RegistryUrl** | **string** |  | 
 **SamplesIndexUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | **string** |  | 

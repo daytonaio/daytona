@@ -869,7 +869,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/provider.ProviderInfo"
+                                "$ref": "#/definitions/ProviderInfo"
                             }
                         }
                     }
@@ -1997,7 +1997,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
+                    "$ref": "#/definitions/ProviderInfo"
                 }
             }
         },
@@ -2736,6 +2736,35 @@ const docTemplate = `{
                 }
             }
         },
+        "ProviderInfo": {
+            "type": "object",
+            "required": [
+                "name",
+                "runnerId",
+                "targetConfigManifest",
+                "version"
+            ],
+            "properties": {
+                "agentlessTarget": {
+                    "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "runnerId": {
+                    "type": "string"
+                },
+                "targetConfigManifest": {
+                    "$ref": "#/definitions/TargetConfigManifest"
+                },
+                "version": {
+                    "type": "string"
+                }
+            }
+        },
         "RegisterRunnerDTO": {
             "type": "object",
             "required": [
@@ -2828,7 +2857,7 @@ const docTemplate = `{
                 "providers": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/TargetProviderInfo"
+                        "$ref": "#/definitions/ProviderInfo"
                     }
                 },
                 "runnerId": {
@@ -2923,6 +2952,7 @@ const docTemplate = `{
                     "$ref": "#/definitions/LogFileConfig"
                 },
                 "providersDir": {
+                    "description": "TODO: Move to runner config",
                     "type": "string"
                 },
                 "registryUrl": {
@@ -3067,6 +3097,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "providerMetadata": {
+                    "type": "string"
+                },
                 "targetConfig": {
                     "$ref": "#/definitions/TargetConfig"
                 },
@@ -3105,7 +3138,50 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
+                    "$ref": "#/definitions/ProviderInfo"
+                }
+            }
+        },
+        "TargetConfigManifest": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/TargetConfigProperty"
+            }
+        },
+        "TargetConfigProperty": {
+            "type": "object",
+            "properties": {
+                "defaultValue": {
+                    "description": "DefaultValue is converted into the appropriate type based on the Type\nIf the property is a FilePath, the DefaultValue is a path to a directory",
+                    "type": "string"
+                },
+                "description": {
+                    "description": "Brief description of the property",
+                    "type": "string"
+                },
+                "disabledPredicate": {
+                    "description": "A regex string matched with the name of the target config to determine if the property should be disabled\nIf the regex matches the target config name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "type": "string"
+                },
+                "inputMasked": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "description": "Options is only used if the Type is TargetConfigPropertyTypeOption",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "suggestions": {
+                    "description": "Suggestions is an optional list of auto-complete values to assist the user while filling the field",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "type": {
+                    "$ref": "#/definitions/models.TargetConfigPropertyType"
                 }
             }
         },
@@ -3143,6 +3219,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "providerMetadata": {
+                    "type": "string"
+                },
                 "state": {
                     "$ref": "#/definitions/ResourceState"
                 },
@@ -3168,9 +3247,6 @@ const docTemplate = `{
                 "uptime"
             ],
             "properties": {
-                "providerMetadata": {
-                    "type": "string"
-                },
                 "targetId": {
                     "type": "string"
                 },
@@ -3179,31 +3255,6 @@ const docTemplate = `{
                 },
                 "uptime": {
                     "type": "integer"
-                }
-            }
-        },
-        "TargetProviderInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "runnerId",
-                "version"
-            ],
-            "properties": {
-                "agentlessTarget": {
-                    "type": "boolean"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "runnerId": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
@@ -3475,26 +3526,24 @@ const docTemplate = `{
                 "ResourceStateNameDeleted"
             ]
         },
-        "provider.ProviderInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
+        "models.TargetConfigPropertyType": {
+            "type": "string",
+            "enum": [
+                "string",
+                "option",
+                "boolean",
+                "int",
+                "float",
+                "file-path"
             ],
-            "properties": {
-                "agentlessTarget": {
-                    "type": "boolean"
-                },
-                "label": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
+            "x-enum-varnames": [
+                "TargetConfigPropertyTypeString",
+                "TargetConfigPropertyTypeOption",
+                "TargetConfigPropertyTypeBoolean",
+                "TargetConfigPropertyTypeInt",
+                "TargetConfigPropertyTypeFloat",
+                "TargetConfigPropertyTypeFilePath"
+            ]
         }
     },
     "securityDefinitions": {

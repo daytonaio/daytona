@@ -21,10 +21,11 @@ daytona server [flags]
 ### SEE ALSO
 
 * [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
-* [daytona server config](daytona_server_config.md)	 - Output local Daytona Server config
+* [daytona server config](daytona_server_config.md)	 - Output Daytona Runner config
 * [daytona server configure](daytona_server_configure.md)	 - Configure Daytona Server
 * [daytona server logs](daytona_server_logs.md)	 - Output Daytona Server logs
 * [daytona server restart](daytona_server_restart.md)	 - Restarts the Daytona Server daemon
+* [daytona server runner](daytona_server_runner.md)	 - Manage runners
 * [daytona server start](daytona_server_start.md)	 - Start the Daytona Server daemon
 * [daytona server stop](daytona_server_stop.md)	 - Stops the Daytona Server daemon
 

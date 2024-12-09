@@ -21,10 +21,9 @@ var _ MappedNullable = &TargetMetadata{}
 
 // TargetMetadata struct for TargetMetadata
 type TargetMetadata struct {
-	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	TargetId         string  `json:"targetId"`
-	UpdatedAt        string  `json:"updatedAt"`
-	Uptime           int32   `json:"uptime"`
+	TargetId  string `json:"targetId"`
+	UpdatedAt string `json:"updatedAt"`
+	Uptime    int32  `json:"uptime"`
 }
 
 type _TargetMetadata TargetMetadata
@@ -47,38 +46,6 @@ func NewTargetMetadata(targetId string, updatedAt string, uptime int32) *TargetM
 func NewTargetMetadataWithDefaults() *TargetMetadata {
 	this := TargetMetadata{}
 	return &this
-}
-
-// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
-func (o *TargetMetadata) GetProviderMetadata() string {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		var ret string
-		return ret
-	}
-	return *o.ProviderMetadata
-}
-
-// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *TargetMetadata) GetProviderMetadataOk() (*string, bool) {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		return nil, false
-	}
-	return o.ProviderMetadata, true
-}
-
-// HasProviderMetadata returns a boolean if a field has been set.
-func (o *TargetMetadata) HasProviderMetadata() bool {
-	if o != nil && !IsNil(o.ProviderMetadata) {
-		return true
-	}
-
-	return false
-}
-
-// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
-func (o *TargetMetadata) SetProviderMetadata(v string) {
-	o.ProviderMetadata = &v
 }
 
 // GetTargetId returns the TargetId field value
@@ -163,9 +130,6 @@ func (o TargetMetadata) MarshalJSON() ([]byte, error) {
 
 func (o TargetMetadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ProviderMetadata) {
-		toSerialize["providerMetadata"] = o.ProviderMetadata
-	}
 	toSerialize["targetId"] = o.TargetId
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["uptime"] = o.Uptime

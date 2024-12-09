@@ -6,6 +6,7 @@ package provider
 import (
 	"net/rpc"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
 )
 
@@ -18,8 +19,8 @@ func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*util.Emp
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
-	var resp ProviderInfo
+func (m *ProviderRPCClient) GetInfo() (models.ProviderInfo, error) {
+	var resp models.ProviderInfo
 	err := m.client.Call("Plugin.GetInfo", new(interface{}), &resp)
 	return resp, err
 }
@@ -28,13 +29,6 @@ func (m *ProviderRPCClient) CheckRequirements() (*[]RequirementStatus, error) {
 	var result []RequirementStatus
 	err := m.client.Call("Plugin.CheckRequirements", new(interface{}), &result)
 	return &result, err
-}
-
-func (m *ProviderRPCClient) GetTargetConfigManifest() (*TargetConfigManifest, error) {
-	var resp TargetConfigManifest
-	err := m.client.Call("Plugin.GetTargetConfigManifest", new(interface{}), &resp)
-
-	return &resp, err
 }
 
 func (m *ProviderRPCClient) GetPresetTargetConfigs() (*[]TargetConfig, error) {

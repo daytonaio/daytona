@@ -58,7 +58,7 @@ func GetProviderFromPrompt(providers []ProviderView, title string, withNewProvid
 	return nil, common.ErrCtrlCAbort
 }
 
-func ProviderListToView(providers []apiclient.Provider) []ProviderView {
+func ProviderListToView(providers []apiclient.ProviderInfo) []ProviderView {
 	var providerViews []ProviderView
 
 	for _, p := range providers {

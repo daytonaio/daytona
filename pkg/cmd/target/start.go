@@ -62,7 +62,7 @@ var startCmd = &cobra.Command{
 		if len(selectedTargetsNames) == 1 {
 			targetName := selectedTargetsNames[0]
 
-			target, _, err := apiclient_util.GetTarget(targetName, false)
+			target, _, err := apiclient_util.GetTarget(targetName)
 			if err != nil {
 				return err
 			}
@@ -75,7 +75,7 @@ var startCmd = &cobra.Command{
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' started successfully", targetName))
 		} else {
 			for _, targetName := range selectedTargetsNames {
-				target, _, err := apiclient_util.GetTarget(targetName, false)
+				target, _, err := apiclient_util.GetTarget(targetName)
 				if err != nil {
 					return err
 				}

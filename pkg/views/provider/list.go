@@ -18,7 +18,7 @@ type rowData struct {
 	Version string
 }
 
-func List(providerList []apiclient.Provider) {
+func List(providerList []apiclient.ProviderInfo) {
 	if len(providerList) == 0 {
 		views_util.NotifyEmptyProviderList(true)
 		return
@@ -39,7 +39,7 @@ func List(providerList []apiclient.Provider) {
 	fmt.Println(table)
 }
 
-func getRowFromData(provider *apiclient.Provider) []string {
+func getRowFromData(provider *apiclient.ProviderInfo) []string {
 	var data rowData
 
 	if provider.Label != nil {
@@ -57,7 +57,7 @@ func getRowFromData(provider *apiclient.Provider) []string {
 	}
 }
 
-func renderUnstyledList(providerList []apiclient.Provider) {
+func renderUnstyledList(providerList []apiclient.ProviderInfo) {
 	output := "\n"
 
 	for _, provider := range providerList {

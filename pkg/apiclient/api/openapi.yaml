@@ -617,7 +617,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/provider.ProviderInfo'
+                  $ref: '#/components/schemas/ProviderInfo'
                 type: array
           description: OK
       summary: List providers
@@ -1427,6 +1427,19 @@ components:
         name: name
         options: options
         providerInfo:
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
           agentlessTarget: true
           name: name
           runnerId: runnerId
@@ -1438,7 +1451,7 @@ components:
         options:
           type: string
         providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
+          $ref: '#/components/schemas/ProviderInfo'
       required:
       - name
       - options
@@ -2190,6 +2203,47 @@ components:
       - retention
       - workspaceTemplateName
       type: object
+    ProviderInfo:
+      example:
+        targetConfigManifest:
+          key:
+            defaultValue: defaultValue
+            options:
+            - options
+            - options
+            description: description
+            suggestions:
+            - suggestions
+            - suggestions
+            type: null
+            disabledPredicate: disabledPredicate
+            inputMasked: true
+        agentlessTarget: true
+        name: name
+        runnerId: runnerId
+        label: label
+        version: version
+      properties:
+        agentlessTarget:
+          type: boolean
+        label:
+          type: string
+        name:
+          type: string
+        runnerId:
+          type: string
+        targetConfigManifest:
+          additionalProperties:
+            $ref: '#/components/schemas/TargetConfigProperty'
+          type: object
+        version:
+          type: string
+      required:
+      - name
+      - runnerId
+      - targetConfigManifest
+      - version
+      type: object
     RegisterRunnerDTO:
       example:
         alias: alias
@@ -2244,12 +2298,38 @@ components:
           runningJobs: 0
           runnerId: runnerId
           providers:
-          - agentlessTarget: true
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
             name: name
             runnerId: runnerId
             label: label
             version: version
-          - agentlessTarget: true
+          - targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
             name: name
             runnerId: runnerId
             label: label
@@ -2278,12 +2358,38 @@ components:
         runningJobs: 0
         runnerId: runnerId
         providers:
-        - agentlessTarget: true
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
           name: name
           runnerId: runnerId
           label: label
           version: version
-        - agentlessTarget: true
+        - targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
           name: name
           runnerId: runnerId
           label: label
@@ -2293,7 +2399,7 @@ components:
       properties:
         providers:
           items:
-            $ref: '#/components/schemas/TargetProviderInfo'
+            $ref: '#/components/schemas/ProviderInfo'
           type: array
         runnerId:
           type: string
@@ -2383,6 +2489,7 @@ components:
         logFile:
           $ref: '#/components/schemas/LogFileConfig'
         providersDir:
+          description: "TODO: Move to runner config"
           type: string
         registryUrl:
           type: string
@@ -2509,7 +2616,6 @@ components:
       example:
         default: true
         metadata:
-          providerMetadata: providerMetadata
           targetId: targetId
           updatedAt: updatedAt
           uptime: 0
@@ -2519,11 +2625,25 @@ components:
           options: options
           id: id
           providerInfo:
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
             agentlessTarget: true
             name: name
             runnerId: runnerId
             label: label
             version: version
+        providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
           resourceId: resourceId
@@ -2556,6 +2676,8 @@ components:
           $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
+        providerMetadata:
+          type: string
         targetConfig:
           $ref: '#/components/schemas/TargetConfig'
         targetConfigId:
@@ -2580,6 +2702,19 @@ components:
         options: options
         id: id
         providerInfo:
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
           agentlessTarget: true
           name: name
           runnerId: runnerId
@@ -2596,7 +2731,7 @@ components:
           description: JSON encoded map of options
           type: string
         providerInfo:
-          $ref: '#/components/schemas/TargetProviderInfo'
+          $ref: '#/components/schemas/ProviderInfo'
       required:
       - deleted
       - id
@@ -2604,11 +2739,58 @@ components:
       - options
       - providerInfo
       type: object
+    TargetConfigManifest:
+      additionalProperties:
+        $ref: '#/components/schemas/TargetConfigProperty'
+      type: object
+    TargetConfigProperty:
+      example:
+        defaultValue: defaultValue
+        options:
+        - options
+        - options
+        description: description
+        suggestions:
+        - suggestions
+        - suggestions
+        type: null
+        disabledPredicate: disabledPredicate
+        inputMasked: true
+      properties:
+        defaultValue:
+          description: |-
+            DefaultValue is converted into the appropriate type based on the Type
+            If the property is a FilePath, the DefaultValue is a path to a directory
+          type: string
+        description:
+          description: Brief description of the property
+          type: string
+        disabledPredicate:
+          description: |-
+            A regex string matched with the name of the target config to determine if the property should be disabled
+            If the regex matches the target config name, the property will be disabled
+            E.g. "^local$" will disable the property for the local target
+          type: string
+        inputMasked:
+          type: boolean
+        options:
+          description: Options is only used if the Type is TargetConfigPropertyTypeOption
+          items:
+            type: string
+          type: array
+        suggestions:
+          description: Suggestions is an optional list of auto-complete values to
+            assist the user while filling the field
+          items:
+            type: string
+          type: array
+        type:
+          $ref: '#/components/schemas/models.TargetConfigPropertyType'
+      type: object
     TargetDTO:
       example:
         default: true
         metadata:
-          providerMetadata: providerMetadata
           targetId: targetId
           updatedAt: updatedAt
           uptime: 0
@@ -2618,11 +2800,25 @@ components:
           options: options
           id: id
           providerInfo:
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
             agentlessTarget: true
             name: name
             runnerId: runnerId
             label: label
             version: version
+        providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
           resourceId: resourceId
@@ -2680,7 +2876,6 @@ components:
           target:
             default: true
             metadata:
-              providerMetadata: providerMetadata
               targetId: targetId
               updatedAt: updatedAt
               uptime: 0
@@ -2690,11 +2885,25 @@ components:
               options: options
               id: id
               providerInfo:
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
                 agentlessTarget: true
                 name: name
                 runnerId: runnerId
                 label: label
                 version: version
+            providerMetadata: providerMetadata
             lastJob:
               createdAt: createdAt
               resourceId: resourceId
@@ -2768,7 +2977,6 @@ components:
           target:
             default: true
             metadata:
-              providerMetadata: providerMetadata
               targetId: targetId
               updatedAt: updatedAt
               uptime: 0
@@ -2778,11 +2986,25 @@ components:
               options: options
               id: id
               providerInfo:
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
                 agentlessTarget: true
                 name: name
                 runnerId: runnerId
                 label: label
                 version: version
+            providerMetadata: providerMetadata
             lastJob:
               createdAt: createdAt
               resourceId: resourceId
@@ -2833,6 +3055,8 @@ components:
           $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
+        providerMetadata:
+          type: string
         state:
           $ref: '#/components/schemas/ResourceState'
         targetConfig:
@@ -2855,13 +3079,10 @@ components:
       type: object
     TargetMetadata:
       example:
-        providerMetadata: providerMetadata
         targetId: targetId
         updatedAt: updatedAt
         uptime: 0
       properties:
-        providerMetadata:
-          type: string
         targetId:
           type: string
         updatedAt:
@@ -2872,29 +3093,6 @@ components:
       - targetId
       - updatedAt
       - uptime
-      type: object
-    TargetProviderInfo:
-      example:
-        agentlessTarget: true
-        name: name
-        runnerId: runnerId
-        label: label
-        version: version
-      properties:
-        agentlessTarget:
-          type: boolean
-        label:
-          type: string
-        name:
-          type: string
-        runnerId:
-          type: string
-        version:
-          type: string
-      required:
-      - name
-      - runnerId
-      - version
       type: object
     Workspace:
       example:
@@ -2936,7 +3134,6 @@ components:
         target:
           default: true
           metadata:
-            providerMetadata: providerMetadata
             targetId: targetId
             updatedAt: updatedAt
             uptime: 0
@@ -2946,11 +3143,25 @@ components:
             options: options
             id: id
             providerInfo:
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
               agentlessTarget: true
               name: name
               runnerId: runnerId
               label: label
               version: version
+          providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
             resourceId: resourceId
@@ -3065,7 +3276,6 @@ components:
         target:
           default: true
           metadata:
-            providerMetadata: providerMetadata
             targetId: targetId
             updatedAt: updatedAt
             uptime: 0
@@ -3075,11 +3285,25 @@ components:
             options: options
             id: id
             providerInfo:
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
               agentlessTarget: true
               name: name
               runnerId: runnerId
               label: label
               version: version
+          providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
             resourceId: resourceId
@@ -3329,25 +3553,22 @@ components:
       - ResourceStateNamePendingForcedDelete
       - ResourceStateNameDeleting
       - ResourceStateNameDeleted
-    provider.ProviderInfo:
-      example:
-        agentlessTarget: true
-        name: name
-        label: label
-        version: version
-      properties:
-        agentlessTarget:
-          type: boolean
-        label:
-          type: string
-        name:
-          type: string
-        version:
-          type: string
-      required:
-      - name
-      - version
-      type: object
+    models.TargetConfigPropertyType:
+      enum:
+      - string
+      - option
+      - boolean
+      - int
+      - float
+      - file-path
+      type: string
+      x-enum-varnames:
+      - TargetConfigPropertyTypeString
+      - TargetConfigPropertyTypeOption
+      - TargetConfigPropertyTypeBoolean
+      - TargetConfigPropertyTypeInt
+      - TargetConfigPropertyTypeFloat
+      - TargetConfigPropertyTypeFilePath
   securitySchemes:
     Bearer:
       description: '"Type ''Bearer TOKEN'' to correctly set the API Key"'

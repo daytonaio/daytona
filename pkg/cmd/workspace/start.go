@@ -63,7 +63,7 @@ var StartCmd = &cobra.Command{
 			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, selection.StartActionVerb)
 		} else {
 			for _, arg := range args {
-				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
+				workspace, _, err := apiclient_util.GetWorkspace(arg)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
@@ -90,12 +90,12 @@ var StartCmd = &cobra.Command{
 				ideList = config.GetIdeList()
 				ideId = c.DefaultIdeId
 
-				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Verbose(true).Execute()
+				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
 				if ideId != "ssh" {
-					workspaceProviderMetadata = *ws.Info.ProviderMetadata
+					workspaceProviderMetadata = *ws.ProviderMetadata
 				}
 			}
 

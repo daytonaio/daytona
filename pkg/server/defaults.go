@@ -12,6 +12,7 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -30,14 +31,6 @@ const defaultLocalBuilderRegistryPort = 3988
 const defaultLocalBuilderRegistryImage = "registry:2.8.3"
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
-
-var defaultLogFileConfig = LogFileConfig{
-	MaxSize:    100, // megabytes
-	MaxBackups: 7,
-	MaxAge:     15, // days
-	LocalTime:  true,
-	Compress:   true,
-}
 
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
@@ -94,74 +87,6 @@ func getDefaultFRPSConfig() *FRPSConfig {
 	}
 }
 
-func getDefaultLogFileConfig() *LogFileConfig {
-	logFilePath, err := getDefaultLogFilePath()
-	if err != nil {
-		log.Error("failed to get default log file path")
-	}
-
-	logFileConfig := LogFileConfig{
-		Path:       logFilePath,
-		MaxSize:    defaultLogFileConfig.MaxSize,
-		MaxBackups: defaultLogFileConfig.MaxBackups,
-		MaxAge:     defaultLogFileConfig.MaxAge,
-		LocalTime:  defaultLogFileConfig.LocalTime,
-		Compress:   defaultLogFileConfig.Compress,
-	}
-
-	logFileMaxSize := os.Getenv("DEFAULT_LOG_FILE_MAX_SIZE")
-	if logFileMaxSize != "" {
-		value, err := strconv.Atoi(logFileMaxSize)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max size.", err))
-		} else {
-			logFileConfig.MaxSize = value
-		}
-	}
-
-	logFileMaxBackups := os.Getenv("DEFAULT_LOG_FILE_MAX_BACKUPS")
-	if logFileMaxBackups != "" {
-		value, err := strconv.Atoi(logFileMaxBackups)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max backups.", err))
-		} else {
-			logFileConfig.MaxBackups = value
-		}
-	}
-
-	logFileMaxAge := os.Getenv("DEFAULT_LOG_FILE_MAX_AGE")
-	if logFileMaxAge != "" {
-		value, err := strconv.Atoi(logFileMaxAge)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max age.", err))
-		} else {
-			logFileConfig.MaxAge = value
-		}
-	}
-
-	logFileLocalTime := os.Getenv("DEFAULT_LOG_FILE_LOCAL_TIME")
-	if logFileLocalTime != "" {
-		value, err := strconv.ParseBool(logFileLocalTime)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file local time.", err))
-		} else {
-			logFileConfig.LocalTime = value
-		}
-	}
-
-	logFileCompress := os.Getenv("DEFAULT_LOG_FILE_COMPRESS")
-	if logFileCompress != "" {
-		value, err := strconv.ParseBool(logFileCompress)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file compress.", err))
-		} else {
-			logFileConfig.Compress = value
-		}
-	}
-
-	return &logFileConfig
-}
-
 func getDefaultConfig() (*Config, error) {
 	providersDir, err := getDefaultProvidersDir()
 	if err != nil {
@@ -173,6 +98,11 @@ func getDefaultConfig() (*Config, error) {
 		return nil, errors.New("failed to get default binaries path")
 	}
 
+	logFilePath, err := getDefaultLogFilePath()
+	if err != nil {
+		log.Error("failed to get default log file path")
+	}
+
 	c := Config{
 		Id:                        uuid.NewString(),
 		RegistryUrl:               defaultRegistryUrl,
@@ -182,7 +112,7 @@ func getDefaultConfig() (*Config, error) {
 		HeadscalePort:             defaultHeadscalePort,
 		BinariesPath:              binariesPath,
 		Frps:                      getDefaultFRPSConfig(),
-		LogFile:                   getDefaultLogFileConfig(),
+		LogFile:                   logs.GetDefaultLogFileConfig(logFilePath),
 		DefaultWorkspaceImage:     defaultWorkspaceImage,
 		DefaultWorkspaceUser:      defaultWorkspaceUser,
 		BuilderImage:              defaultBuilderImage,

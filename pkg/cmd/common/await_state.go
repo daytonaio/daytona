@@ -14,7 +14,7 @@ import (
 
 func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceStateName) error {
 	for {
-		ws, _, err := apiclient_util.GetWorkspace(workspaceId, false)
+		ws, _, err := apiclient_util.GetWorkspace(workspaceId)
 		if err != nil {
 			return err
 		}
@@ -34,7 +34,7 @@ func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceS
 
 func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateName) error {
 	for {
-		t, _, err := apiclient_util.GetTarget(targetId, false)
+		t, _, err := apiclient_util.GetTarget(targetId)
 		if err != nil {
 			return err
 		}
@@ -56,7 +56,7 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 
 func AwaitWorkspaceDeleted(workspaceId string) error {
 	for {
-		_, statusCode, err := apiclient_util.GetWorkspace(workspaceId, false)
+		_, statusCode, err := apiclient_util.GetWorkspace(workspaceId)
 		if err != nil {
 			if statusCode == http.StatusNotFound {
 				return nil
@@ -69,7 +69,7 @@ func AwaitWorkspaceDeleted(workspaceId string) error {
 
 func AwaitTargetDeleted(workspaceId string) error {
 	for {
-		_, statusCode, err := apiclient_util.GetTarget(workspaceId, false)
+		_, statusCode, err := apiclient_util.GetTarget(workspaceId)
 		if err != nil {
 			if statusCode == http.StatusNotFound {
 				return nil

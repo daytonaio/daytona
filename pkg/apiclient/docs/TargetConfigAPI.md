@@ -32,7 +32,7 @@ import (
 
 func main() {
 	showOptions := true // bool | Show target config options
-	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewTargetProviderInfo("Name_example", "RunnerId_example", "Version_example")) // AddTargetConfigDTO | Target config to add
+	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderInfo("Name_example", "RunnerId_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")) // AddTargetConfigDTO | Target config to add
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

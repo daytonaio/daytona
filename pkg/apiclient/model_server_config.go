@@ -34,10 +34,11 @@ type ServerConfig struct {
 	LocalBuilderRegistryImage string        `json:"localBuilderRegistryImage"`
 	LocalBuilderRegistryPort  int32         `json:"localBuilderRegistryPort"`
 	LogFile                   LogFileConfig `json:"logFile"`
-	ProvidersDir              string        `json:"providersDir"`
-	RegistryUrl               string        `json:"registryUrl"`
-	SamplesIndexUrl           *string       `json:"samplesIndexUrl,omitempty"`
-	ServerDownloadUrl         string        `json:"serverDownloadUrl"`
+	// TODO: Move to runner config
+	ProvidersDir      string  `json:"providersDir"`
+	RegistryUrl       string  `json:"registryUrl"`
+	SamplesIndexUrl   *string `json:"samplesIndexUrl,omitempty"`
+	ServerDownloadUrl string  `json:"serverDownloadUrl"`
 }
 
 type _ServerConfig ServerConfig

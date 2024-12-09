@@ -43,7 +43,7 @@ var providerListCmd = &cobra.Command{
 	},
 }
 
-func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.Provider, ctx context.Context) ([]provider.ProviderView, error) {
+func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.ProviderInfo, ctx context.Context) ([]provider.ProviderView, error) {
 	var result []provider.ProviderView
 
 	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()

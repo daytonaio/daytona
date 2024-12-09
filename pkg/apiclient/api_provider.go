@@ -26,7 +26,7 @@ type ApiListProvidersRequest struct {
 	ApiService *ProviderAPIService
 }
 
-func (r ApiListProvidersRequest) Execute() ([]ProviderProviderInfo, *http.Response, error) {
+func (r ApiListProvidersRequest) Execute() ([]ProviderInfo, *http.Response, error) {
 	return r.ApiService.ListProvidersExecute(r)
 }
 
@@ -47,13 +47,13 @@ func (a *ProviderAPIService) ListProviders(ctx context.Context) ApiListProviders
 
 // Execute executes the request
 //
-//	@return []ProviderProviderInfo
-func (a *ProviderAPIService) ListProvidersExecute(r ApiListProvidersRequest) ([]ProviderProviderInfo, *http.Response, error) {
+//	@return []ProviderInfo
+func (a *ProviderAPIService) ListProvidersExecute(r ApiListProvidersRequest) ([]ProviderInfo, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []ProviderProviderInfo
+		localVarReturnValue []ProviderInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ProviderAPIService.ListProviders")

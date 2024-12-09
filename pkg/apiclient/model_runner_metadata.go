@@ -21,11 +21,11 @@ var _ MappedNullable = &RunnerMetadata{}
 
 // RunnerMetadata struct for RunnerMetadata
 type RunnerMetadata struct {
-	Providers   []TargetProviderInfo `json:"providers"`
-	RunnerId    string               `json:"runnerId"`
-	RunningJobs int32                `json:"runningJobs"`
-	UpdatedAt   string               `json:"updatedAt"`
-	Uptime      int32                `json:"uptime"`
+	Providers   []ProviderInfo `json:"providers"`
+	RunnerId    string         `json:"runnerId"`
+	RunningJobs int32          `json:"runningJobs"`
+	UpdatedAt   string         `json:"updatedAt"`
+	Uptime      int32          `json:"uptime"`
 }
 
 type _RunnerMetadata RunnerMetadata
@@ -34,7 +34,7 @@ type _RunnerMetadata RunnerMetadata
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerMetadata(providers []TargetProviderInfo, runnerId string, runningJobs int32, updatedAt string, uptime int32) *RunnerMetadata {
+func NewRunnerMetadata(providers []ProviderInfo, runnerId string, runningJobs int32, updatedAt string, uptime int32) *RunnerMetadata {
 	this := RunnerMetadata{}
 	this.Providers = providers
 	this.RunnerId = runnerId
@@ -53,9 +53,9 @@ func NewRunnerMetadataWithDefaults() *RunnerMetadata {
 }
 
 // GetProviders returns the Providers field value
-func (o *RunnerMetadata) GetProviders() []TargetProviderInfo {
+func (o *RunnerMetadata) GetProviders() []ProviderInfo {
 	if o == nil {
-		var ret []TargetProviderInfo
+		var ret []ProviderInfo
 		return ret
 	}
 
@@ -64,7 +64,7 @@ func (o *RunnerMetadata) GetProviders() []TargetProviderInfo {
 
 // GetProvidersOk returns a tuple with the Providers field value
 // and a boolean to check if the value has been set.
-func (o *RunnerMetadata) GetProvidersOk() ([]TargetProviderInfo, bool) {
+func (o *RunnerMetadata) GetProvidersOk() ([]ProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -72,7 +72,7 @@ func (o *RunnerMetadata) GetProvidersOk() ([]TargetProviderInfo, bool) {
 }
 
 // SetProviders sets field value
-func (o *RunnerMetadata) SetProviders(v []TargetProviderInfo) {
+func (o *RunnerMetadata) SetProviders(v []ProviderInfo) {
 	o.Providers = v
 }
 

@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **TargetId** | **string** |  | 
 **UpdatedAt** | **string** |  | 
 **Uptime** | **int32** |  | 
@@ -27,31 +26,6 @@ will change when the set of required properties is changed
 NewTargetMetadataWithDefaults instantiates a new TargetMetadata object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetProviderMetadata
-
-`func (o *TargetMetadata) GetProviderMetadata() string`
-
-GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
-
-### GetProviderMetadataOk
-
-`func (o *TargetMetadata) GetProviderMetadataOk() (*string, bool)`
-
-GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProviderMetadata
-
-`func (o *TargetMetadata) SetProviderMetadata(v string)`
-
-SetProviderMetadata sets ProviderMetadata field to given value.
-
-### HasProviderMetadata
-
-`func (o *TargetMetadata) HasProviderMetadata() bool`
-
-HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetTargetId
 

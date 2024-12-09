@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Providers** | [**[]TargetProviderInfo**](TargetProviderInfo.md) |  | 
+**Providers** | [**[]ProviderInfo**](ProviderInfo.md) |  | 
 **RunnerId** | **string** |  | 
 **RunningJobs** | **int32** |  | 
 **UpdatedAt** | **string** |  | 
@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewRunnerMetadata
 
-`func NewRunnerMetadata(providers []TargetProviderInfo, runnerId string, runningJobs int32, updatedAt string, uptime int32, ) *RunnerMetadata`
+`func NewRunnerMetadata(providers []ProviderInfo, runnerId string, runningJobs int32, updatedAt string, uptime int32, ) *RunnerMetadata`
 
 NewRunnerMetadata instantiates a new RunnerMetadata object
 This constructor will assign default values to properties that have it defined,
@@ -31,20 +31,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetProviders
 
-`func (o *RunnerMetadata) GetProviders() []TargetProviderInfo`
+`func (o *RunnerMetadata) GetProviders() []ProviderInfo`
 
 GetProviders returns the Providers field if non-nil, zero value otherwise.
 
 ### GetProvidersOk
 
-`func (o *RunnerMetadata) GetProvidersOk() (*[]TargetProviderInfo, bool)`
+`func (o *RunnerMetadata) GetProvidersOk() (*[]ProviderInfo, bool)`
 
 GetProvidersOk returns a tuple with the Providers field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProviders
 
-`func (o *RunnerMetadata) SetProviders(v []TargetProviderInfo)`
+`func (o *RunnerMetadata) SetProviders(v []ProviderInfo)`
 
 SetProviders sets Providers field to given value.
 

@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## ListProviders
 
-> []ProviderProviderInfo ListProviders(ctx).Execute()
+> []ProviderInfo ListProviders(ctx).Execute()
 
 List providers
 
@@ -37,7 +37,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.ListProviders``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListProviders`: []ProviderProviderInfo
+	// response from `ListProviders`: []ProviderInfo
 	fmt.Fprintf(os.Stdout, "Response from `ProviderAPI.ListProviders`: %v\n", resp)
 }
 ```
@@ -53,7 +53,7 @@ Other parameters are passed through a pointer to a apiListProvidersRequest struc
 
 ### Return type
 
-[**[]ProviderProviderInfo**](ProviderProviderInfo.md)
+[**[]ProviderInfo**](ProviderInfo.md)
 
 ### Authorization
 

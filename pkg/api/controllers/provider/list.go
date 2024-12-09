@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
+	_ "github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +18,7 @@ import (
 //	@Summary		List providers
 //	@Description	List providers
 //	@Produce		json
-//	@Success		200	{array}	ProviderInfo
+//	@Success		200	{array}	models.ProviderInfo
 //	@Router			/provider [get]
 //
 //	@id				ListProviders

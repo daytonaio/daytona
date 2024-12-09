@@ -9,12 +9,11 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/provider"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
+	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
@@ -66,14 +65,14 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providersManifest, err := manager.GetProviderManager(&manager.ProviderManagerConfig{
+	providersManifest, err := providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
 		RegistryUrl: serverConfig.RegistryUrl,
 	}).GetProvidersManifest()
 	if err != nil {
 		log.Error(err)
 	}
 
-	var latestProviders []apiclient.Provider
+	var latestProviders []apiclient.ProviderInfo
 	if providersManifest != nil {
 		providersManifestLatest := providersManifest.GetLatestVersions()
 		if providersManifestLatest == nil {
@@ -123,32 +122,32 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		},
 	}
 
-	targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
+	// targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
+	// if err != nil {
+	// 	return nil, apiclient_util.HandleErrorResponse(res, err)
+	// }
 	selectedTargetConfig.Name = ""
-	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
-		return t.Name
-	}))
+	// err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+	// 	return t.Name
+	// }))
 	if err != nil {
 		return nil, err
 	}
 
-	targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
+	// targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
+	// if err != nil {
+	// 	return nil, apiclient_util.HandleErrorResponse(res, err)
+	// }
 
-	err = targetconfig.SetTargetConfigForm(selectedTargetConfig, *targetConfigManifest)
-	if err != nil {
-		return nil, err
-	}
+	// err = targetconfig.SetTargetConfigForm(selectedTargetConfig, *targetConfigManifest)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	targetConfigData := apiclient.AddTargetConfigDTO{
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
-		ProviderInfo: apiclient.TargetProviderInfo{
+		ProviderInfo: apiclient.ProviderInfo{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
 			Label:   selectedProvider.Label,

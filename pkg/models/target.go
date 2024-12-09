@@ -57,11 +57,3 @@ func (t *Target) GetState() ResourceState {
 
 	return state
 }
-
-type ProviderInfo struct {
-	RunnerId        string  `json:"runnerId" validate:"required"`
-	Name            string  `json:"name" validate:"required"`
-	Version         string  `json:"version" validate:"required"`
-	AgentlessTarget bool    `json:"agentlessTarget" validate:"optional"`
-	Label           *string `json:"label" validate:"optional"`
-} // @name TargetProviderInfo

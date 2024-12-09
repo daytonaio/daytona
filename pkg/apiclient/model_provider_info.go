@@ -16,40 +16,44 @@ import (
 	"fmt"
 )
 
-// checks if the ProviderProviderInfo type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ProviderProviderInfo{}
+// checks if the ProviderInfo type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ProviderInfo{}
 
-// ProviderProviderInfo struct for ProviderProviderInfo
-type ProviderProviderInfo struct {
-	AgentlessTarget *bool   `json:"agentlessTarget,omitempty"`
-	Label           *string `json:"label,omitempty"`
-	Name            string  `json:"name"`
-	Version         string  `json:"version"`
+// ProviderInfo struct for ProviderInfo
+type ProviderInfo struct {
+	AgentlessTarget      *bool                           `json:"agentlessTarget,omitempty"`
+	Label                *string                         `json:"label,omitempty"`
+	Name                 string                          `json:"name"`
+	RunnerId             string                          `json:"runnerId"`
+	TargetConfigManifest map[string]TargetConfigProperty `json:"targetConfigManifest"`
+	Version              string                          `json:"version"`
 }
 
-type _ProviderProviderInfo ProviderProviderInfo
+type _ProviderInfo ProviderInfo
 
-// NewProviderProviderInfo instantiates a new ProviderProviderInfo object
+// NewProviderInfo instantiates a new ProviderInfo object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProviderProviderInfo(name string, version string) *ProviderProviderInfo {
-	this := ProviderProviderInfo{}
+func NewProviderInfo(name string, runnerId string, targetConfigManifest map[string]TargetConfigProperty, version string) *ProviderInfo {
+	this := ProviderInfo{}
 	this.Name = name
+	this.RunnerId = runnerId
+	this.TargetConfigManifest = targetConfigManifest
 	this.Version = version
 	return &this
 }
 
-// NewProviderProviderInfoWithDefaults instantiates a new ProviderProviderInfo object
+// NewProviderInfoWithDefaults instantiates a new ProviderInfo object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewProviderProviderInfoWithDefaults() *ProviderProviderInfo {
-	this := ProviderProviderInfo{}
+func NewProviderInfoWithDefaults() *ProviderInfo {
+	this := ProviderInfo{}
 	return &this
 }
 
 // GetAgentlessTarget returns the AgentlessTarget field value if set, zero value otherwise.
-func (o *ProviderProviderInfo) GetAgentlessTarget() bool {
+func (o *ProviderInfo) GetAgentlessTarget() bool {
 	if o == nil || IsNil(o.AgentlessTarget) {
 		var ret bool
 		return ret
@@ -59,7 +63,7 @@ func (o *ProviderProviderInfo) GetAgentlessTarget() bool {
 
 // GetAgentlessTargetOk returns a tuple with the AgentlessTarget field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProviderProviderInfo) GetAgentlessTargetOk() (*bool, bool) {
+func (o *ProviderInfo) GetAgentlessTargetOk() (*bool, bool) {
 	if o == nil || IsNil(o.AgentlessTarget) {
 		return nil, false
 	}
@@ -67,7 +71,7 @@ func (o *ProviderProviderInfo) GetAgentlessTargetOk() (*bool, bool) {
 }
 
 // HasAgentlessTarget returns a boolean if a field has been set.
-func (o *ProviderProviderInfo) HasAgentlessTarget() bool {
+func (o *ProviderInfo) HasAgentlessTarget() bool {
 	if o != nil && !IsNil(o.AgentlessTarget) {
 		return true
 	}
@@ -76,12 +80,12 @@ func (o *ProviderProviderInfo) HasAgentlessTarget() bool {
 }
 
 // SetAgentlessTarget gets a reference to the given bool and assigns it to the AgentlessTarget field.
-func (o *ProviderProviderInfo) SetAgentlessTarget(v bool) {
+func (o *ProviderInfo) SetAgentlessTarget(v bool) {
 	o.AgentlessTarget = &v
 }
 
 // GetLabel returns the Label field value if set, zero value otherwise.
-func (o *ProviderProviderInfo) GetLabel() string {
+func (o *ProviderInfo) GetLabel() string {
 	if o == nil || IsNil(o.Label) {
 		var ret string
 		return ret
@@ -91,7 +95,7 @@ func (o *ProviderProviderInfo) GetLabel() string {
 
 // GetLabelOk returns a tuple with the Label field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *ProviderProviderInfo) GetLabelOk() (*string, bool) {
+func (o *ProviderInfo) GetLabelOk() (*string, bool) {
 	if o == nil || IsNil(o.Label) {
 		return nil, false
 	}
@@ -99,7 +103,7 @@ func (o *ProviderProviderInfo) GetLabelOk() (*string, bool) {
 }
 
 // HasLabel returns a boolean if a field has been set.
-func (o *ProviderProviderInfo) HasLabel() bool {
+func (o *ProviderInfo) HasLabel() bool {
 	if o != nil && !IsNil(o.Label) {
 		return true
 	}
@@ -108,12 +112,12 @@ func (o *ProviderProviderInfo) HasLabel() bool {
 }
 
 // SetLabel gets a reference to the given string and assigns it to the Label field.
-func (o *ProviderProviderInfo) SetLabel(v string) {
+func (o *ProviderInfo) SetLabel(v string) {
 	o.Label = &v
 }
 
 // GetName returns the Name field value
-func (o *ProviderProviderInfo) GetName() string {
+func (o *ProviderInfo) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -124,7 +128,7 @@ func (o *ProviderProviderInfo) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *ProviderProviderInfo) GetNameOk() (*string, bool) {
+func (o *ProviderInfo) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -132,12 +136,60 @@ func (o *ProviderProviderInfo) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *ProviderProviderInfo) SetName(v string) {
+func (o *ProviderInfo) SetName(v string) {
 	o.Name = v
 }
 
+// GetRunnerId returns the RunnerId field value
+func (o *ProviderInfo) GetRunnerId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.RunnerId
+}
+
+// GetRunnerIdOk returns a tuple with the RunnerId field value
+// and a boolean to check if the value has been set.
+func (o *ProviderInfo) GetRunnerIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RunnerId, true
+}
+
+// SetRunnerId sets field value
+func (o *ProviderInfo) SetRunnerId(v string) {
+	o.RunnerId = v
+}
+
+// GetTargetConfigManifest returns the TargetConfigManifest field value
+func (o *ProviderInfo) GetTargetConfigManifest() map[string]TargetConfigProperty {
+	if o == nil {
+		var ret map[string]TargetConfigProperty
+		return ret
+	}
+
+	return o.TargetConfigManifest
+}
+
+// GetTargetConfigManifestOk returns a tuple with the TargetConfigManifest field value
+// and a boolean to check if the value has been set.
+func (o *ProviderInfo) GetTargetConfigManifestOk() (*map[string]TargetConfigProperty, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetConfigManifest, true
+}
+
+// SetTargetConfigManifest sets field value
+func (o *ProviderInfo) SetTargetConfigManifest(v map[string]TargetConfigProperty) {
+	o.TargetConfigManifest = v
+}
+
 // GetVersion returns the Version field value
-func (o *ProviderProviderInfo) GetVersion() string {
+func (o *ProviderInfo) GetVersion() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -148,7 +200,7 @@ func (o *ProviderProviderInfo) GetVersion() string {
 
 // GetVersionOk returns a tuple with the Version field value
 // and a boolean to check if the value has been set.
-func (o *ProviderProviderInfo) GetVersionOk() (*string, bool) {
+func (o *ProviderInfo) GetVersionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -156,11 +208,11 @@ func (o *ProviderProviderInfo) GetVersionOk() (*string, bool) {
 }
 
 // SetVersion sets field value
-func (o *ProviderProviderInfo) SetVersion(v string) {
+func (o *ProviderInfo) SetVersion(v string) {
 	o.Version = v
 }
 
-func (o ProviderProviderInfo) MarshalJSON() ([]byte, error) {
+func (o ProviderInfo) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -168,7 +220,7 @@ func (o ProviderProviderInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ProviderProviderInfo) ToMap() (map[string]interface{}, error) {
+func (o ProviderInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.AgentlessTarget) {
 		toSerialize["agentlessTarget"] = o.AgentlessTarget
@@ -177,16 +229,20 @@ func (o ProviderProviderInfo) ToMap() (map[string]interface{}, error) {
 		toSerialize["label"] = o.Label
 	}
 	toSerialize["name"] = o.Name
+	toSerialize["runnerId"] = o.RunnerId
+	toSerialize["targetConfigManifest"] = o.TargetConfigManifest
 	toSerialize["version"] = o.Version
 	return toSerialize, nil
 }
 
-func (o *ProviderProviderInfo) UnmarshalJSON(data []byte) (err error) {
+func (o *ProviderInfo) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"name",
+		"runnerId",
+		"targetConfigManifest",
 		"version",
 	}
 
@@ -204,53 +260,53 @@ func (o *ProviderProviderInfo) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varProviderProviderInfo := _ProviderProviderInfo{}
+	varProviderInfo := _ProviderInfo{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varProviderProviderInfo)
+	err = decoder.Decode(&varProviderInfo)
 
 	if err != nil {
 		return err
 	}
 
-	*o = ProviderProviderInfo(varProviderProviderInfo)
+	*o = ProviderInfo(varProviderInfo)
 
 	return err
 }
 
-type NullableProviderProviderInfo struct {
-	value *ProviderProviderInfo
+type NullableProviderInfo struct {
+	value *ProviderInfo
 	isSet bool
 }
 
-func (v NullableProviderProviderInfo) Get() *ProviderProviderInfo {
+func (v NullableProviderInfo) Get() *ProviderInfo {
 	return v.value
 }
 
-func (v *NullableProviderProviderInfo) Set(val *ProviderProviderInfo) {
+func (v *NullableProviderInfo) Set(val *ProviderInfo) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableProviderProviderInfo) IsSet() bool {
+func (v NullableProviderInfo) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableProviderProviderInfo) Unset() {
+func (v *NullableProviderInfo) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableProviderProviderInfo(val *ProviderProviderInfo) *NullableProviderProviderInfo {
-	return &NullableProviderProviderInfo{value: val, isSet: true}
+func NewNullableProviderInfo(val *ProviderInfo) *NullableProviderInfo {
+	return &NullableProviderInfo{value: val, isSet: true}
 }
 
-func (v NullableProviderProviderInfo) MarshalJSON() ([]byte, error) {
+func (v NullableProviderInfo) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableProviderProviderInfo) UnmarshalJSON(src []byte) error {
+func (v *NullableProviderInfo) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

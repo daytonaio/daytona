@@ -6,16 +6,16 @@ package provider
 import (
 	"net/rpc"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
 	"github.com/hashicorp/go-plugin"
 )
 
 type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
-	GetInfo() (ProviderInfo, error)
+	GetInfo() (models.ProviderInfo, error)
 	CheckRequirements() (*[]RequirementStatus, error)
 
-	GetTargetConfigManifest() (*TargetConfigManifest, error)
 	GetPresetTargetConfigs() (*[]TargetConfig, error)
 
 	CreateTarget(*TargetRequest) (*util.Empty, error)

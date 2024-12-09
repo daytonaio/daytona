@@ -25,8 +25,8 @@ type TargetConfig struct {
 	Id      string `json:"id"`
 	Name    string `json:"name"`
 	// JSON encoded map of options
-	Options      string             `json:"options"`
-	ProviderInfo TargetProviderInfo `json:"providerInfo"`
+	Options      string       `json:"options"`
+	ProviderInfo ProviderInfo `json:"providerInfo"`
 }
 
 type _TargetConfig TargetConfig
@@ -35,7 +35,7 @@ type _TargetConfig TargetConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewTargetConfig(deleted bool, id string, name string, options string, providerInfo TargetProviderInfo) *TargetConfig {
+func NewTargetConfig(deleted bool, id string, name string, options string, providerInfo ProviderInfo) *TargetConfig {
 	this := TargetConfig{}
 	this.Deleted = deleted
 	this.Id = id
@@ -150,9 +150,9 @@ func (o *TargetConfig) SetOptions(v string) {
 }
 
 // GetProviderInfo returns the ProviderInfo field value
-func (o *TargetConfig) GetProviderInfo() TargetProviderInfo {
+func (o *TargetConfig) GetProviderInfo() ProviderInfo {
 	if o == nil {
-		var ret TargetProviderInfo
+		var ret ProviderInfo
 		return ret
 	}
 
@@ -161,7 +161,7 @@ func (o *TargetConfig) GetProviderInfo() TargetProviderInfo {
 
 // GetProviderInfoOk returns a tuple with the ProviderInfo field value
 // and a boolean to check if the value has been set.
-func (o *TargetConfig) GetProviderInfoOk() (*TargetProviderInfo, bool) {
+func (o *TargetConfig) GetProviderInfoOk() (*ProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -169,7 +169,7 @@ func (o *TargetConfig) GetProviderInfoOk() (*TargetProviderInfo, bool) {
 }
 
 // SetProviderInfo sets field value
-func (o *TargetConfig) SetProviderInfo(v TargetProviderInfo) {
+func (o *TargetConfig) SetProviderInfo(v ProviderInfo) {
 	o.ProviderInfo = v
 }
 

@@ -53,6 +53,7 @@ func Execute() error {
 	rootCmd.AddGroup(&cobra.Group{ID: TARGET_GROUP, Title: "Targets & Workspaces"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
 	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
+	rootCmd.AddGroup(&cobra.Group{ID: RUNNER_GROUP, Title: "Runner"})
 
 	rootCmd.AddCommand(CodeCmd)
 	rootCmd.AddCommand(SshCmd)

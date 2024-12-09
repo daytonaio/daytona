@@ -21,16 +21,17 @@ var _ MappedNullable = &TargetDTO{}
 
 // TargetDTO struct for TargetDTO
 type TargetDTO struct {
-	Default        bool              `json:"default"`
-	EnvVars        map[string]string `json:"envVars"`
-	Id             string            `json:"id"`
-	LastJob        *Job              `json:"lastJob,omitempty"`
-	Metadata       *TargetMetadata   `json:"metadata,omitempty"`
-	Name           string            `json:"name"`
-	State          ResourceState     `json:"state"`
-	TargetConfig   TargetConfig      `json:"targetConfig"`
-	TargetConfigId string            `json:"targetConfigId"`
-	Workspaces     []Workspace       `json:"workspaces"`
+	Default          bool              `json:"default"`
+	EnvVars          map[string]string `json:"envVars"`
+	Id               string            `json:"id"`
+	LastJob          *Job              `json:"lastJob,omitempty"`
+	Metadata         *TargetMetadata   `json:"metadata,omitempty"`
+	Name             string            `json:"name"`
+	ProviderMetadata *string           `json:"providerMetadata,omitempty"`
+	State            ResourceState     `json:"state"`
+	TargetConfig     TargetConfig      `json:"targetConfig"`
+	TargetConfigId   string            `json:"targetConfigId"`
+	Workspaces       []Workspace       `json:"workspaces"`
 }
 
 type _TargetDTO TargetDTO
@@ -220,6 +221,38 @@ func (o *TargetDTO) SetName(v string) {
 	o.Name = v
 }
 
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *TargetDTO) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ProviderMetadata
+}
+
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		return nil, false
+	}
+	return o.ProviderMetadata, true
+}
+
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *TargetDTO) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *TargetDTO) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
+}
+
 // GetState returns the State field value
 func (o *TargetDTO) GetState() ResourceState {
 	if o == nil {
@@ -336,6 +369,9 @@ func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
+	}
 	toSerialize["state"] = o.State
 	toSerialize["targetConfig"] = o.TargetConfig
 	toSerialize["targetConfigId"] = o.TargetConfigId

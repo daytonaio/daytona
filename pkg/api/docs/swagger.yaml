@@ -7,7 +7,7 @@ definitions:
       options:
         type: string
       providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
+        $ref: '#/definitions/ProviderInfo'
     required:
     - name
     - options
@@ -518,6 +518,26 @@ definitions:
     - retention
     - workspaceTemplateName
     type: object
+  ProviderInfo:
+    properties:
+      agentlessTarget:
+        type: boolean
+      label:
+        type: string
+      name:
+        type: string
+      runnerId:
+        type: string
+      targetConfigManifest:
+        $ref: '#/definitions/TargetConfigManifest'
+      version:
+        type: string
+    required:
+    - name
+    - runnerId
+    - targetConfigManifest
+    - version
+    type: object
   RegisterRunnerDTO:
     properties:
       alias:
@@ -576,7 +596,7 @@ definitions:
     properties:
       providers:
         items:
-          $ref: '#/definitions/TargetProviderInfo'
+          $ref: '#/definitions/ProviderInfo'
         type: array
       runnerId:
         type: string
@@ -635,6 +655,7 @@ definitions:
       logFile:
         $ref: '#/definitions/LogFileConfig'
       providersDir:
+        description: 'TODO: Move to runner config'
         type: string
       registryUrl:
         type: string
@@ -744,6 +765,8 @@ definitions:
         $ref: '#/definitions/TargetMetadata'
       name:
         type: string
+      providerMetadata:
+        type: string
       targetConfig:
         $ref: '#/definitions/TargetConfig'
       targetConfigId:
@@ -773,13 +796,49 @@ definitions:
         description: JSON encoded map of options
         type: string
       providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
+        $ref: '#/definitions/ProviderInfo'
     required:
     - deleted
     - id
     - name
     - options
     - providerInfo
+    type: object
+  TargetConfigManifest:
+    additionalProperties:
+      $ref: '#/definitions/TargetConfigProperty'
+    type: object
+  TargetConfigProperty:
+    properties:
+      defaultValue:
+        description: |-
+          DefaultValue is converted into the appropriate type based on the Type
+          If the property is a FilePath, the DefaultValue is a path to a directory
+        type: string
+      description:
+        description: Brief description of the property
+        type: string
+      disabledPredicate:
+        description: |-
+          A regex string matched with the name of the target config to determine if the property should be disabled
+          If the regex matches the target config name, the property will be disabled
+          E.g. "^local$" will disable the property for the local target
+        type: string
+      inputMasked:
+        type: boolean
+      options:
+        description: Options is only used if the Type is TargetConfigPropertyTypeOption
+        items:
+          type: string
+        type: array
+      suggestions:
+        description: Suggestions is an optional list of auto-complete values to assist
+          the user while filling the field
+        items:
+          type: string
+        type: array
+      type:
+        $ref: '#/definitions/models.TargetConfigPropertyType'
     type: object
   TargetDTO:
     properties:
@@ -796,6 +855,8 @@ definitions:
       metadata:
         $ref: '#/definitions/TargetMetadata'
       name:
+        type: string
+      providerMetadata:
         type: string
       state:
         $ref: '#/definitions/ResourceState'
@@ -819,8 +880,6 @@ definitions:
     type: object
   TargetMetadata:
     properties:
-      providerMetadata:
-        type: string
       targetId:
         type: string
       updatedAt:
@@ -831,23 +890,6 @@ definitions:
     - targetId
     - updatedAt
     - uptime
-    type: object
-  TargetProviderInfo:
-    properties:
-      agentlessTarget:
-        type: boolean
-      label:
-        type: string
-      name:
-        type: string
-      runnerId:
-        type: string
-      version:
-        type: string
-    required:
-    - name
-    - runnerId
-    - version
     type: object
   Workspace:
     properties:
@@ -1052,20 +1094,22 @@ definitions:
     - ResourceStateNamePendingForcedDelete
     - ResourceStateNameDeleting
     - ResourceStateNameDeleted
-  provider.ProviderInfo:
-    properties:
-      agentlessTarget:
-        type: boolean
-      label:
-        type: string
-      name:
-        type: string
-      version:
-        type: string
-    required:
-    - name
-    - version
-    type: object
+  models.TargetConfigPropertyType:
+    enum:
+    - string
+    - option
+    - boolean
+    - int
+    - float
+    - file-path
+    type: string
+    x-enum-varnames:
+    - TargetConfigPropertyTypeString
+    - TargetConfigPropertyTypeOption
+    - TargetConfigPropertyTypeBoolean
+    - TargetConfigPropertyTypeInt
+    - TargetConfigPropertyTypeFloat
+    - TargetConfigPropertyTypeFilePath
 host: localhost:3986
 info:
   contact: {}
@@ -1644,7 +1688,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/provider.ProviderInfo'
+              $ref: '#/definitions/ProviderInfo'
             type: array
       summary: List providers
       tags:

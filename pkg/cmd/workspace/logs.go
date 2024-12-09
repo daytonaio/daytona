@@ -46,7 +46,7 @@ var LogsCmd = &cobra.Command{
 		var ws *apiclient.WorkspaceDTO
 
 		if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -66,7 +66,7 @@ var LogsCmd = &cobra.Command{
 			}
 
 		} else {
-			ws, _, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				return err
 			}
