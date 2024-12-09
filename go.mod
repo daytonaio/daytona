@@ -36,6 +36,7 @@ require (
 	github.com/gorilla/websocket v1.5.1
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-plugin v1.6.0
+	github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf
 	github.com/juanfont/headscale v0.23.0
 	github.com/kardianos/service v1.2.2
 	github.com/kelseyhightower/envconfig v1.4.0
