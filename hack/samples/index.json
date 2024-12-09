@@ -93,5 +93,10 @@
     "name": "React.js - Cropify",
     "description": "Cropify, a fast and user-friendly image cropping tool with features like adjustable crop areas, aspect ratio presets, and instant previews. Built using React.js, Vite, Mantine, and React Easy Crop.",
     "gitUrl": "https://github.com/daytonaio/sample-image-crop"
+  },
+  {
+    "name": "Next.js - Cal Buddy",
+    "description": "Cal Buddy, is a smart calendar assistant that helps you schedule, manage, and chat with your calendar. It helps you boost your productivity with AI-powered task management.",
+    "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
   }
 ]
