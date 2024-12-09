@@ -88,5 +88,10 @@
       "name": "Next.js - RecipeGenie",
       "description": "Recipe Genie, an app for exploring delicious recipes, powered by TheMealDB. Built using NextJs, JavaScript, react-shepherd, Tailwind, DaisyUI.",
       "gitUrl": "https://github.com/daytonaio/sample-recipe-genie"
+  },
+  {
+    "name": "React.js - Cropify",
+    "description": "Cropify, a fast and user-friendly image cropping tool with features like adjustable crop areas, aspect ratio presets, and instant previews. Built using React.js, Vite, Mantine, and React Easy Crop.",
+    "gitUrl": "https://github.com/daytonaio/sample-image-crop"
   }
 ]
