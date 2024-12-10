@@ -47,13 +47,13 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read from stdin: %w", err)
 			}
-			return handletargetjson(input)
+			return handleTargetJSON(input)
 		} else if pipeFile != "" {
 			input, err = os.ReadFile(pipeFile)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s: %w", pipeFile, err)
 			}
-			return handletargetjson(input)
+			return handleTargetJSON(input)
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -193,7 +193,7 @@ var TargetSetCmd = &cobra.Command{
 	},
 }
 
-func handletargetjson(data []byte) error {
+func handleTargetJSON(data []byte) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -201,7 +201,7 @@ func handletargetjson(data []byte) error {
 		return err
 	}
 	var selectedTarget *target_view.TargetView
-	err = parsejson(data, &selectedTarget)
+	err = parseJSON(data, &selectedTarget)
 	if err != nil {
 		return fmt.Errorf("failed to parse input: %w", err)
 	}
@@ -216,7 +216,7 @@ func handletargetjson(data []byte) error {
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
-	err = validateproperty(*targetManifest, selectedTarget)
+	err = validateProperty(*targetManifest, selectedTarget)
 	if err != nil {
 		return err
 	}
@@ -236,14 +236,14 @@ func handletargetjson(data []byte) error {
 	return nil
 }
 
-func parsejson(data []byte, v interface{}) error {
+func parseJSON(data []byte, v interface{}) error {
 	if err := json.Unmarshal(data, v); err == nil {
 		return nil
 	}
 	return errors.New("input is not a valid JSON")
 }
 
-func validateproperty(targetManifest map[string]apiclient.ProviderProviderTargetProperty, target *target_view.TargetView) error {
+func validateProperty(targetManifest map[string]apiclient.ProviderProviderTargetProperty, target *target_view.TargetView) error {
 	optionMap := make(map[string]interface{})
 	if err := json.Unmarshal([]byte(target.Options), &optionMap); err != nil {
 		return fmt.Errorf("failed to parse options JSON: %w", err)
