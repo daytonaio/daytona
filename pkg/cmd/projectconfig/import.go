@@ -78,7 +78,7 @@ var projectConfigImportCmd = &cobra.Command{
 		if err == nil {
 			err = importProjectConfig(ctx, apiClient, config, &projectConfigList)
 			if err != nil {
-				return err
+				return fmt.Errorf("error importing project config: %v", err)
 			}
 		} else {
 			var configs []apiclient.ProjectConfig
@@ -90,7 +90,7 @@ var projectConfigImportCmd = &cobra.Command{
 			for _, config := range configs {
 				err = importProjectConfig(ctx, apiClient, config, &projectConfigList)
 				if err != nil {
-					return err
+					return fmt.Errorf("error importing project config: %v", err)
 				}
 			}
 		}
@@ -113,8 +113,7 @@ func isProjectConfigAlreadyExists(configName string, projectConfigList *[]apicli
 
 func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.ProjectConfig, projectConfigList *[]apiclient.ProjectConfig) error {
 	if isProjectConfigAlreadyExists(config.Name, projectConfigList) {
-		views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
-		return nil
+		return fmt.Errorf("project config already present with name \"%s\"", config.Name)
 	}
 
 	var verifiedGitProvider bool
