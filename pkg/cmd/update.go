@@ -77,7 +77,7 @@ var updateCmd = &cobra.Command{
 			changelog += "\n\nThere might be more important changes since you updated. Please visit https://github.com/daytonaio/daytona/releases for the complete changelog\n"
 		}
 		fmt.Println("Updating to version", version, "from", currentVersion)
-		fmt.Println("\nChangelog:\n")
+		fmt.Println("\nChangelog:")
 		fmt.Println(changelog)
 		return updateToVersion(version)
 
