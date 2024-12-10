@@ -9,7 +9,7 @@ import (
 )
 
 func ErrHealthCheckFailed(healthUrl string) error {
-	return fmt.Errorf("failed to check server health at: %s. Make sure Daytona is running on the appropriate port", healthUrl)
+	return fmt.Errorf("failed to check server health at: %s. Make sure all Daytona services are running on the appropriate ports", healthUrl)
 }
 
 func IsHealthCheckFailed(err error) bool {
