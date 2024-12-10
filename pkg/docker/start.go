@@ -47,7 +47,7 @@ func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, dayt
 
 	go func() {
 		result, err := d.ExecSync(d.GetProjectContainerName(p), container.ExecOptions{
-			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, p.ApiKey)},
+			Cmd:          []string{"sh", "-c", util.GetProjectStartScript(daytonaDownloadUrl, p.ApiKey)},
 			AttachStdout: true,
 			AttachStderr: true,
 			User:         containerUser,
