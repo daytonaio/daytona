@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/os"
 )
 
 type IRunnerService interface {
@@ -17,6 +18,10 @@ type IRunnerService interface {
 	SetRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error
 	RemoveRunner(ctx context.Context, runnerId string) error
 	ListProviders(ctx context.Context) ([]models.ProviderInfo, error)
+
+	InstallProvider(ctx context.Context, runnerId string, providerMetadata InstallProviderDTO) error
+	UninstallProvider(ctx context.Context, runnerId string, providerName string) error
+	UpdateProvider(ctx context.Context, runnerId string, providerName string, downloadUrls ProviderDownloadUrlsDTO) error
 }
 
 type RunnerDTO struct {
@@ -28,6 +33,13 @@ type RegisterRunnerDTO struct {
 	Id    string `json:"id" validate:"required"`
 	Alias string `json:"alias" validate:"required"`
 } // @name RegisterRunnerDTO
+
+type InstallProviderDTO struct {
+	Name                    string                  `json:"name" validate:"required"`
+	ProviderDownloadUrlsDTO ProviderDownloadUrlsDTO `json:"providerDownloadUrlsDTO" validate:"required"`
+} // @name InstallProviderDTO
+
+type ProviderDownloadUrlsDTO map[os.OperatingSystem]string // @name ProviderDownloadUrlsDTO
 
 var (
 	ErrRunnerAlreadyExists = errors.New("runner already exists")

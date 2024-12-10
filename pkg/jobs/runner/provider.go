@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package provider
+package runner
 
 import (
 	"context"
@@ -14,12 +14,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
-type ProviderJob struct {
+type RunnerJob struct {
 	models.Job
 
 	findBuild            func(ctx context.Context, buildId string) (*services.BuildDTO, error)
 	listSuccessfulBuilds func(ctx context.Context, repoUrl string) ([]*models.Build, error)
-	listConfigsForUrl    func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	checkImageExists     func(ctx context.Context, image string) bool
 	deleteImage          func(ctx context.Context, image string, force bool) error
 
@@ -30,13 +29,13 @@ type ProviderJob struct {
 	basePath string
 }
 
-func (pj *ProviderJob) Execute(ctx context.Context) error {
+func (pj *RunnerJob) Execute(ctx context.Context) error {
 	switch pj.Action {
-	case models.JobActionInstall:
+	case models.JobActionInstallProvider:
 		return pj.install(ctx, &pj.Job)
-	case models.JobActionUpdate:
+	case models.JobActionUpdateProvider:
 		return pj.update(ctx, &pj.Job)
-	case models.JobActionUninstall:
+	case models.JobActionUninstallProvider:
 		return pj.uninstall(ctx, &pj.Job)
 	}
 	return errors.New("invalid job action")

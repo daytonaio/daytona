@@ -4,6 +4,7 @@
 package provider
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
@@ -132,14 +133,18 @@ func ConvertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string
 }
 
 func InstallProvider(apiClient *apiclient.APIClient, providerToInstall provider.ProviderView, providersManifest *providermanager.ProvidersManifest) error {
-	// downloadUrls := ConvertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
+	downloadUrls := ConvertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
+
 	err := views_util.WithInlineSpinner("Installing", func() error {
 
-		// downloadPath, err := server.ProviderManager.DownloadProvider(ctx.Request.Context(), downloadUrls, providerToInstall.Name)
-		// if err != nil {
-		// 	return fmt.Errorf("failed to download provider: %w", err)
-		// }
-		return nil
+		_, err := apiClient.ProviderAPI.InstallProvider(context.Background(), "TEMP").InstallProviderDto(apiclient.InstallProviderDTO{
+			Name:                    providerToInstall.Name,
+			ProviderDownloadUrlsDTO: downloadUrls,
+		}).Execute()
+
+		// await provider exists in runner body
+
+		return err
 	})
 
 	return err

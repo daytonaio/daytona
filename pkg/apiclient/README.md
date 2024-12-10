@@ -110,7 +110,11 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
-*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
+*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/provider/install | Install provider
+*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
+*ProviderAPI* | [**ListProvidersForRunner**](docs/ProviderAPI.md#listprovidersforrunner) | **Get** /runner/:runnerId/provider | List providers for runner
+*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
+*ProviderAPI* | [**UpdateProvider**](docs/ProviderAPI.md#updateprovider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
 *RunnerAPI* | [**GetRunner**](docs/RunnerAPI.md#getrunner) | **Get** /runner/{runnerId} | Get a runner
 *RunnerAPI* | [**ListRunners**](docs/RunnerAPI.md#listrunners) | **Get** /runner | List runners
 *RunnerAPI* | [**RegisterRunner**](docs/RunnerAPI.md#registerrunner) | **Post** /runner | Register a runner
@@ -173,6 +177,7 @@ Class | Method | HTTP request | Description
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
+ - [InstallProviderDTO](docs/InstallProviderDTO.md)
  - [Job](docs/Job.md)
  - [JobState](docs/JobState.md)
  - [LogFileConfig](docs/LogFileConfig.md)

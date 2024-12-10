@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **CreatedAt** | **string** |  | 
 **Error** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
+**Metadata** | Pointer to **string** | JSON encoded metadata | [optional] 
 **ResourceId** | **string** |  | 
 **ResourceType** | [**ResourceType**](ResourceType.md) |  | 
 **State** | [**JobState**](JobState.md) |  | 
@@ -116,6 +117,31 @@ and a boolean to check if the value has been set.
 
 SetId sets Id field to given value.
 
+
+### GetMetadata
+
+`func (o *Job) GetMetadata() string`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *Job) GetMetadataOk() (*string, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *Job) SetMetadata(v string)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *Job) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
 
 ### GetResourceId
 

@@ -20,16 +20,16 @@ type ModelsJobAction string
 
 // List of models.JobAction
 const (
-	JobActionCreate      ModelsJobAction = "create"
-	JobActionStart       ModelsJobAction = "start"
-	JobActionStop        ModelsJobAction = "stop"
-	JobActionRestart     ModelsJobAction = "restart"
-	JobActionDelete      ModelsJobAction = "delete"
-	JobActionForceDelete ModelsJobAction = "force-delete"
-	JobActionRun         ModelsJobAction = "run"
-	JobActionInstall     ModelsJobAction = "install"
-	JobActionUninstall   ModelsJobAction = "uninstall"
-	JobActionUpdate      ModelsJobAction = "update"
+	JobActionCreate            ModelsJobAction = "create"
+	JobActionStart             ModelsJobAction = "start"
+	JobActionStop              ModelsJobAction = "stop"
+	JobActionRestart           ModelsJobAction = "restart"
+	JobActionDelete            ModelsJobAction = "delete"
+	JobActionForceDelete       ModelsJobAction = "force-delete"
+	JobActionRun               ModelsJobAction = "run"
+	JobActionInstallProvider   ModelsJobAction = "install-provider"
+	JobActionUninstallProvider ModelsJobAction = "uninstall-provider"
+	JobActionUpdateProvider    ModelsJobAction = "update-provider"
 )
 
 // All allowed values of ModelsJobAction enum
@@ -41,9 +41,9 @@ var AllowedModelsJobActionEnumValues = []ModelsJobAction{
 	"delete",
 	"force-delete",
 	"run",
-	"install",
-	"uninstall",
-	"update",
+	"install-provider",
+	"uninstall-provider",
+	"update-provider",
 }
 
 func (v *ModelsJobAction) UnmarshalJSON(src []byte) error {

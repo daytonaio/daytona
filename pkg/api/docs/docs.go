@@ -886,30 +886,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider": {
-            "get": {
-                "description": "List providers",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "provider"
-                ],
-                "summary": "List providers",
-                "operationId": "ListProviders",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ProviderInfo"
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/runner": {
             "get": {
                 "description": "List runners",
@@ -964,6 +940,87 @@ const docTemplate = `{
                 }
             }
         },
+        "/runner/:runnerId/provider": {
+            "get": {
+                "description": "List providers for runner",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers for runner",
+                "operationId": "ListProvidersForRunner",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/provider": {
+            "get": {
+                "description": "List providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers",
+                "operationId": "ListProviders",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/provider/install": {
+            "post": {
+                "description": "Install provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Install provider",
+                "operationId": "InstallProvider",
+                "parameters": [
+                    {
+                        "description": "Install provider",
+                        "name": "installProviderDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InstallProviderDTO"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/runner/{runnerId}": {
             "get": {
                 "description": "Get a runner",
@@ -1005,6 +1062,77 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/{providerName}/uninstall": {
+            "post": {
+                "description": "Uninstall provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Uninstall provider",
+                "operationId": "UninstallProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/{providerName}/update": {
+            "post": {
+                "description": "Update provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Update provider",
+                "operationId": "UpdateProvider",
+                "parameters": [
+                    {
+                        "description": "Provider download URLs",
+                        "name": "providerDownloadUrlsDTO",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/ProviderDownloadUrlsDTO"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
                         "in": "path",
                         "required": true
                     }
@@ -2612,6 +2740,21 @@ const docTemplate = `{
                 }
             }
         },
+        "InstallProviderDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "providerDownloadUrlsDTO"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "providerDownloadUrlsDTO": {
+                    "$ref": "#/definitions/ProviderDownloadUrlsDTO"
+                }
+            }
+        },
         "Job": {
             "type": "object",
             "required": [
@@ -2634,6 +2777,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "description": "JSON encoded metadata",
                     "type": "string"
                 },
                 "resourceId": {
@@ -2766,6 +2913,12 @@ const docTemplate = `{
                 }
             }
         },
+        "ProviderDownloadUrlsDTO": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
         "ProviderInfo": {
             "type": "object",
             "required": [
@@ -2844,12 +2997,14 @@ const docTemplate = `{
             "enum": [
                 "workspace",
                 "target",
-                "build"
+                "build",
+                "runner"
             ],
             "x-enum-varnames": [
                 "ResourceTypeWorkspace",
                 "ResourceTypeTarget",
-                "ResourceTypeBuild"
+                "ResourceTypeBuild",
+                "ResourceTypeRunner"
             ]
         },
         "RunnerDTO": {
@@ -3500,9 +3655,9 @@ const docTemplate = `{
                 "delete",
                 "force-delete",
                 "run",
-                "install",
-                "uninstall",
-                "update"
+                "install-provider",
+                "uninstall-provider",
+                "update-provider"
             ],
             "x-enum-varnames": [
                 "JobActionCreate",
@@ -3512,9 +3667,9 @@ const docTemplate = `{
                 "JobActionDelete",
                 "JobActionForceDelete",
                 "JobActionRun",
-                "JobActionInstall",
-                "JobActionUninstall",
-                "JobActionUpdate"
+                "JobActionInstallProvider",
+                "JobActionUninstallProvider",
+                "JobActionUpdateProvider"
             ]
         },
         "models.ResourceStateName": {

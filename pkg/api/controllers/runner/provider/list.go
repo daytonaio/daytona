@@ -19,7 +19,7 @@ import (
 //	@Description	List providers
 //	@Produce		json
 //	@Success		200	{array}	models.ProviderInfo
-//	@Router			/provider [get]
+//	@Router			/runner/provider [get]
 //
 //	@id				ListProviders
 func ListProviders(ctx *gin.Context) {
@@ -31,4 +31,18 @@ func ListProviders(ctx *gin.Context) {
 	}
 
 	ctx.JSON(200, providers)
+}
+
+// ListProvidersForRunner godoc
+//
+//	@Tags			provider
+//	@Summary		List providers for runner
+//	@Description	List providers for runner
+//	@Produce		json
+//	@Success		200	{array}	models.ProviderInfo
+//	@Router			/runner/:runnerId/provider [get]
+//
+//	@id				ListProvidersForRunner
+func ListProvidersForRunner(ctx *gin.Context) {
+	// TODO: implement
 }

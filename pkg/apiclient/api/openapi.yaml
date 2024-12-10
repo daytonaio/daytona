@@ -636,22 +636,6 @@ paths:
       summary: List jobs
       tags:
       - job
-  /provider:
-    get:
-      description: List providers
-      operationId: ListProviders
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ProviderInfo'
-                type: array
-          description: OK
-      summary: List providers
-      tags:
-      - provider
   /runner:
     get:
       description: List runners
@@ -689,6 +673,64 @@ paths:
       tags:
       - runner
       x-codegen-request-body-name: runner
+  /runner/:runnerId/provider:
+    get:
+      description: List providers for runner
+      operationId: ListProvidersForRunner
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderInfo'
+                type: array
+          description: OK
+      summary: List providers for runner
+      tags:
+      - provider
+  /runner/provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderInfo'
+                type: array
+          description: OK
+      summary: List providers
+      tags:
+      - provider
+  /runner/provider/install:
+    post:
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/InstallProviderDTO'
+        description: Install provider
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Install provider
+      tags:
+      - provider
+      x-codegen-request-body-name: installProviderDto
   /runner/{runnerId}:
     delete:
       description: Remove runner
@@ -727,6 +769,62 @@ paths:
       summary: Get a runner
       tags:
       - runner
+  /runner/{runnerId}/provider/{providerName}/uninstall:
+    post:
+      description: Uninstall provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Uninstall provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/{providerName}/update:
+    post:
+      description: Update provider
+      operationId: UpdateProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ProviderDownloadUrlsDTO'
+        description: Provider download URLs
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update provider
+      tags:
+      - provider
+      x-codegen-request-body-name: providerDownloadUrlsDTO
   /sample:
     get:
       description: List samples
@@ -1529,6 +1627,7 @@ components:
         prebuildId: prebuildId
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
           id: id
@@ -2085,9 +2184,26 @@ components:
       - name
       - username
       type: object
+    InstallProviderDTO:
+      example:
+        name: name
+        providerDownloadUrlsDTO:
+          key: providerDownloadUrlsDTO
+      properties:
+        name:
+          type: string
+        providerDownloadUrlsDTO:
+          additionalProperties:
+            type: string
+          type: object
+      required:
+      - name
+      - providerDownloadUrlsDTO
+      type: object
     Job:
       example:
         createdAt: createdAt
+        metadata: metadata
         resourceId: resourceId
         action: null
         id: id
@@ -2103,6 +2219,9 @@ components:
         error:
           type: string
         id:
+          type: string
+        metadata:
+          description: JSON encoded metadata
           type: string
         resourceId:
           type: string
@@ -2228,6 +2347,10 @@ components:
       - retention
       - workspaceTemplateName
       type: object
+    ProviderDownloadUrlsDTO:
+      additionalProperties:
+        type: string
+      type: object
     ProviderInfo:
       example:
         targetConfigManifest:
@@ -2312,11 +2435,13 @@ components:
       - workspace
       - target
       - build
+      - runner
       type: string
       x-enum-varnames:
       - ResourceTypeWorkspace
       - ResourceTypeTarget
       - ResourceTypeBuild
+      - ResourceTypeRunner
     RunnerDTO:
       example:
         metadata:
@@ -2671,6 +2796,7 @@ components:
         providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
           id: id
@@ -2846,6 +2972,7 @@ components:
         providerMetadata: providerMetadata
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
           id: id
@@ -2931,6 +3058,7 @@ components:
             providerMetadata: providerMetadata
             lastJob:
               createdAt: createdAt
+              metadata: metadata
               resourceId: resourceId
               action: null
               id: id
@@ -2954,6 +3082,7 @@ components:
               filePath: filePath
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
             id: id
@@ -3032,6 +3161,7 @@ components:
             providerMetadata: providerMetadata
             lastJob:
               createdAt: createdAt
+              metadata: metadata
               resourceId: resourceId
               action: null
               id: id
@@ -3055,6 +3185,7 @@ components:
               filePath: filePath
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
             id: id
@@ -3189,6 +3320,7 @@ components:
           providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
             id: id
@@ -3212,6 +3344,7 @@ components:
             filePath: filePath
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
           id: id
@@ -3331,6 +3464,7 @@ components:
           providerMetadata: providerMetadata
           lastJob:
             createdAt: createdAt
+            metadata: metadata
             resourceId: resourceId
             action: null
             id: id
@@ -3354,6 +3488,7 @@ components:
             filePath: filePath
         lastJob:
           createdAt: createdAt
+          metadata: metadata
           resourceId: resourceId
           action: null
           id: id
@@ -3527,9 +3662,9 @@ components:
       - delete
       - force-delete
       - run
-      - install
-      - uninstall
-      - update
+      - install-provider
+      - uninstall-provider
+      - update-provider
       type: string
       x-enum-varnames:
       - JobActionCreate
@@ -3539,9 +3674,9 @@ components:
       - JobActionDelete
       - JobActionForceDelete
       - JobActionRun
-      - JobActionInstall
-      - JobActionUninstall
-      - JobActionUpdate
+      - JobActionInstallProvider
+      - JobActionUninstallProvider
+      - JobActionUpdateProvider
     models.ResourceStateName:
       enum:
       - undefined

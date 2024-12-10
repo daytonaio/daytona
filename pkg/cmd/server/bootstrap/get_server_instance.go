@@ -400,6 +400,15 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	runnerService := runners.NewRunnerService(runners.RunnerServiceConfig{
 		RunnerStore:         runnerStore,
 		RunnerMetadataStore: runnerMetadataStore,
+		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction, metadata string) error {
+			return jobService.Create(ctx, &models.Job{
+				ResourceId:   workspaceId,
+				ResourceType: models.ResourceTypeRunner,
+				Action:       action,
+				State:        models.JobStatePending,
+				Metadata:     &metadata,
+			})
+		},
 		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
 			return apiKeyService.Generate(ctx, models.ApiKeyTypeRunner, name)
 		},

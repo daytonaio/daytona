@@ -40,8 +40,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	"github.com/daytonaio/daytona/pkg/api/controllers/job"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
-	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/runner"
+	"github.com/daytonaio/daytona/pkg/api/controllers/runner/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
@@ -189,11 +189,6 @@ func (a *ApiServer) Start() error {
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
 
-	providerController := protected.Group("/provider")
-	{
-		providerController.GET("/", provider.ListProviders)
-	}
-
 	buildController := protected.Group("/build")
 	{
 		buildController.POST("/", build.CreateBuild)
@@ -257,10 +252,29 @@ func (a *ApiServer) Start() error {
 
 	runnerController := protected.Group("/runner")
 	{
+		// Defining the provider routes first to avoid conflicts with the runner routes
+		providerRoutePath := "/provider"
+		runnerProvidersGroup := runnerController.Group(providerRoutePath)
+		{
+			runnerProvidersGroup.GET("/", provider.ListProviders)
+		}
+
+		runnerIdGroup := runnerController.Group(":runnerId")
+		{
+			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
+			{
+				runnerIdProviderGroup.POST("/install", provider.InstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
+				runnerIdProviderGroup.GET("/", provider.ListProvidersForRunner)
+			}
+
+			runnerController.GET("/", runner.GetRunner)
+			runnerController.DELETE("/", runner.RemoveRunner)
+		}
+
 		runnerController.GET("/", runner.ListRunners)
 		runnerController.POST("/", runner.RegisterRunner)
-		runnerController.GET("/:runnerId", runner.GetRunner)
-		runnerController.DELETE("/:runnerId", runner.RemoveRunner)
 	}
 
 	workspaceGroup := protected.Group("/")

@@ -410,6 +410,16 @@ definitions:
     - name
     - username
     type: object
+  InstallProviderDTO:
+    properties:
+      name:
+        type: string
+      providerDownloadUrlsDTO:
+        $ref: '#/definitions/ProviderDownloadUrlsDTO'
+    required:
+    - name
+    - providerDownloadUrlsDTO
+    type: object
   Job:
     properties:
       action:
@@ -419,6 +429,9 @@ definitions:
       error:
         type: string
       id:
+        type: string
+      metadata:
+        description: JSON encoded metadata
         type: string
       resourceId:
         type: string
@@ -518,6 +531,10 @@ definitions:
     - retention
     - workspaceTemplateName
     type: object
+  ProviderDownloadUrlsDTO:
+    additionalProperties:
+      type: string
+    type: object
   ProviderInfo:
     properties:
       agentlessTarget:
@@ -572,11 +589,13 @@ definitions:
     - workspace
     - target
     - build
+    - runner
     type: string
     x-enum-varnames:
     - ResourceTypeWorkspace
     - ResourceTypeTarget
     - ResourceTypeBuild
+    - ResourceTypeRunner
   RunnerDTO:
     properties:
       alias:
@@ -1043,9 +1062,9 @@ definitions:
     - delete
     - force-delete
     - run
-    - install
-    - uninstall
-    - update
+    - install-provider
+    - uninstall-provider
+    - update-provider
     type: string
     x-enum-varnames:
     - JobActionCreate
@@ -1055,9 +1074,9 @@ definitions:
     - JobActionDelete
     - JobActionForceDelete
     - JobActionRun
-    - JobActionInstall
-    - JobActionUninstall
-    - JobActionUpdate
+    - JobActionInstallProvider
+    - JobActionUninstallProvider
+    - JobActionUpdateProvider
   models.ResourceStateName:
     enum:
     - undefined
@@ -1706,22 +1725,6 @@ paths:
       summary: List jobs
       tags:
       - job
-  /provider:
-    get:
-      description: List providers
-      operationId: ListProviders
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            items:
-              $ref: '#/definitions/ProviderInfo'
-            type: array
-      summary: List providers
-      tags:
-      - provider
   /runner:
     get:
       description: List runners
@@ -1758,6 +1761,22 @@ paths:
       summary: Register a runner
       tags:
       - runner
+  /runner/:runnerId/provider:
+    get:
+      description: List providers for runner
+      operationId: ListProvidersForRunner
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderInfo'
+            type: array
+      summary: List providers for runner
+      tags:
+      - provider
   /runner/{runnerId}:
     delete:
       description: Remove runner
@@ -1793,6 +1812,92 @@ paths:
       summary: Get a runner
       tags:
       - runner
+  /runner/{runnerId}/provider/{providerName}/uninstall:
+    post:
+      description: Uninstall provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/{providerName}/update:
+    post:
+      description: Update provider
+      operationId: UpdateProvider
+      parameters:
+      - description: Provider download URLs
+        in: body
+        name: providerDownloadUrlsDTO
+        required: true
+        schema:
+          $ref: '#/definitions/ProviderDownloadUrlsDTO'
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Update provider
+      tags:
+      - provider
+  /runner/provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderInfo'
+            type: array
+      summary: List providers
+      tags:
+      - provider
+  /runner/provider/install:
+    post:
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Install provider
+        in: body
+        name: installProviderDto
+        required: true
+        schema:
+          $ref: '#/definitions/InstallProviderDTO'
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Install provider
+      tags:
+      - provider
   /sample:
     get:
       description: List samples
