@@ -10,34 +10,39 @@ func GetProjectStartScript(daytonaDownloadUrl string, apiKey string) string {
 # List of supported package managers
 PACKAGE_MANAGERS="apt-get yum dnf apk brew pacman"
 
-# Ensure sudo is installed
-if ! command -v sudo > /dev/null 2>&1; then
+# Check if sudo exists
+if ! command -v sudo >/dev/null 2>&1; then
+  echo "Sudo not found."
+  
   for pm in $PACKAGE_MANAGERS; do
-    if command -v "$pm" > /dev/null 2>&1; then
+    if command -v "$pm" >/dev/null 2>&1; then
+      echo "Trying to install sudo using $pm..."
+      
       case "$pm" in
         apt-get)
-          apt-get update
-          apt-get install -y sudo > /dev/null 2>&1
+          apt-get update >/dev/null 2>&1
+          apt-get install -y sudo >/dev/null 2>&1
           ;;
         yum)
-          yum install -y sudo > /dev/null 2>&1
+          yum install -y sudo >/dev/null 2>&1
           ;;
         dnf)
-          dnf install -y sudo > /dev/null 2>&1
+          dnf install -y sudo >/dev/null 2>&1
           ;;
         apk)
-          apk add --no-cache sudo > /dev/null 2>&1
+          apk add --no-cache sudo >/dev/null 2>&1
           ;;
         brew)
-          brew install sudo > /dev/null 2>&1
+          brew install sudo >/dev/null 2>&1
           ;;
         pacman)
-          pacman -Sy --noconfirm sudo > /dev/null 2>&1
+          pacman -Sy --noconfirm sudo >/dev/null 2>&1
           ;;
       esac
       
-      # Break after first successful installation
-      [ $? -eq 0 ] && break
+      if command -v sudo >/dev/null 2>&1; then
+        break
+      fi
     fi
   done
 fi
@@ -53,46 +58,45 @@ DEPENDENCIES="curl bash git"
 MISSING_DEPS=""
 
 for dep in $DEPENDENCIES; do
-  if ! command -v "$dep" > /dev/null 2>&1; then
+  if ! command -v "$dep" >/dev/null 2>&1; then
     MISSING_DEPS="$MISSING_DEPS $dep"
   fi
 done
 
 # Install missing dependencies
-if [ -n "$MISSING_DEPS" ]; then
+if test -n "$MISSING_DEPS"; then
   echo "Missing dependencies:$MISSING_DEPS"
   
   for pm in $PACKAGE_MANAGERS; do
-    if command -v "$pm" > /dev/null 2>&1; then
+    if command -v "$pm" >/dev/null 2>&1; then
       case "$pm" in
         apt-get)
-          sudo apt-get update
-          sudo apt-get install -y $MISSING_DEPS > /dev/null 2>&1
+          sudo apt-get update >/dev/null 2>&1
+          sudo apt-get install -y $MISSING_DEPS >/dev/null 2>&1
           ;;
         yum)
-          sudo yum install -y $MISSING_DEPS > /dev/null 2>&1
+          sudo yum install -y $MISSING_DEPS >/dev/null 2>&1
           ;;
         dnf)
-          sudo dnf install -y $MISSING_DEPS > /dev/null 2>&1
+          sudo dnf install -y $MISSING_DEPS >/dev/null 2>&1
           ;;
         apk)
-          sudo apk add --no-cache $MISSING_DEPS > /dev/null 2>&1
+          sudo apk add --no-cache $MISSING_DEPS >/dev/null 2>&1
           ;;
         brew)
-          sudo brew install $MISSING_DEPS > /dev/null 2>&1
+          sudo brew install $MISSING_DEPS >/dev/null 2>&1
           ;;
         pacman)
-          sudo pacman -Sy --noconfirm $MISSING_DEPS > /dev/null 2>&1
+          sudo pacman -Sy --noconfirm $MISSING_DEPS >/dev/null 2>&1
           ;;
       esac
       
-      # Break after first successful installation
-      [ $? -eq 0 ] && break
+      break
     fi
   done
 fi
 
 # Download and install Daytona agent
-curl -sfL -H "Authorization: Bearer %s" %s | sudo -E sh && daytona agent
+curl -sfL -H "Authorization: Bearer %s" %s | sudo -E bash && daytona agent
 `, apiKey, daytonaDownloadUrl)
 }
