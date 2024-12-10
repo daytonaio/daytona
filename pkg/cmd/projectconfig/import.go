@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"net/http"
 	"net/url"
 	"os"
 
@@ -22,10 +21,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	projectConfigList []apiclient.ProjectConfig
-	filePath          string
-)
+var filePath string
 
 var projectConfigImportCmd = &cobra.Command{
 	Use:     "import",
@@ -34,8 +30,6 @@ var projectConfigImportCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputText string
-		var res *http.Response
-		var err error
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -43,7 +37,7 @@ var projectConfigImportCmd = &cobra.Command{
 			return err
 		}
 
-		projectConfigList, res, err = apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
+		projectConfigList, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -82,7 +76,7 @@ var projectConfigImportCmd = &cobra.Command{
 		var config apiclient.ProjectConfig
 		err = json.Unmarshal([]byte(inputText), &config)
 		if err == nil {
-			err = importProjectConfig(ctx, apiClient, config)
+			err = importProjectConfig(ctx, apiClient, config, &projectConfigList)
 			if err != nil {
 				return err
 			}
@@ -94,7 +88,7 @@ var projectConfigImportCmd = &cobra.Command{
 			}
 
 			for _, config := range configs {
-				err = importProjectConfig(ctx, apiClient, config)
+				err = importProjectConfig(ctx, apiClient, config, &projectConfigList)
 				if err != nil {
 					return err
 				}
@@ -108,8 +102,8 @@ func init() {
 	projectConfigImportCmd.Flags().StringVarP(&filePath, "file", "f", "", "Import project config from a JSON file. Use '-' to read from stdin.")
 }
 
-func isProjectConfigAlreadyExists(configName string) bool {
-	for _, projectConfig := range projectConfigList {
+func isProjectConfigAlreadyExists(configName string, projectConfigList *[]apiclient.ProjectConfig) bool {
+	for _, projectConfig := range *projectConfigList {
 		if projectConfig.Name == configName {
 			return true
 		}
@@ -117,8 +111,8 @@ func isProjectConfigAlreadyExists(configName string) bool {
 	return false
 }
 
-func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.ProjectConfig) error {
-	if isProjectConfigAlreadyExists(config.Name) {
+func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.ProjectConfig, projectConfigList *[]apiclient.ProjectConfig) error {
+	if isProjectConfigAlreadyExists(config.Name, projectConfigList) {
 		views.RenderInfoMessage(fmt.Sprintf("Project config already present with name \"%s\"", config.Name))
 		return nil
 	}
@@ -239,7 +233,7 @@ func importProjectConfig(ctx context.Context, apiClient *apiclient.APIClient, co
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		projectConfigList = append(projectConfigList, config)
+		*projectConfigList = append(*projectConfigList, config)
 		views.RenderInfoMessage(fmt.Sprintf("Project config %s imported successfully", newProjectConfig.Name))
 		return nil
 	}

@@ -6,6 +6,9 @@ options:
       shorthand: a
       default_value: "false"
       usage: Export all project configs
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
 inherited_options:
     - name: help
       default_value: "false"

@@ -9,7 +9,8 @@ daytona project-config export [flags]
 ### Options
 
 ```
-  -a, --all   Export all project configs
+  -a, --all             Export all project configs
+  -f, --format string   Output format. Must be one of (yaml, json)
 ```
 
 ### Options inherited from parent commands

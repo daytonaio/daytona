@@ -12,6 +12,7 @@ import (
 	"github.com/atotto/clipboard"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -43,7 +44,7 @@ var projectConfigExportCmd = &cobra.Command{
 				return nil
 			}
 
-			return exportProjectConfig(projectConfigs)
+			return exportProjectConfigs(projectConfigs)
 		}
 
 		if len(args) == 0 {
@@ -57,9 +58,17 @@ var projectConfigExportCmd = &cobra.Command{
 				return nil
 			}
 
+			if format.FormatFlag != "" {
+				format.UnblockStdOut()
+			}
+
 			selectedProjectConfig = selection.GetProjectConfigFromPrompt(projectConfigs, 0, false, false, "Export")
 			if selectedProjectConfig == nil {
 				return nil
+			}
+
+			if format.FormatFlag != "" {
+				format.BlockStdOut()
 			}
 		} else {
 			var res *http.Response
@@ -69,15 +78,16 @@ var projectConfigExportCmd = &cobra.Command{
 			}
 		}
 
-		return exportProjectConfig([]apiclient.ProjectConfig{*selectedProjectConfig})
+		return exportProjectConfigs([]apiclient.ProjectConfig{*selectedProjectConfig})
 	},
 }
 
 func init() {
 	projectConfigExportCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Export all project configs")
+	format.RegisterFormatFlag(projectConfigExportCmd)
 }
 
-func exportProjectConfig(projectConfigs []apiclient.ProjectConfig) error {
+func exportProjectConfigs(projectConfigs []apiclient.ProjectConfig) error {
 	if len(projectConfigs) == 0 {
 		return nil
 	}
@@ -103,6 +113,17 @@ func exportProjectConfig(projectConfigs []apiclient.ProjectConfig) error {
 		if pbFlag {
 			views.RenderContainerLayout("Prebuilds have been removed from your configs.")
 		}
+	}
+
+	if format.FormatFlag != "" {
+		if len(projectConfigs) == 1 {
+			formattedData := format.NewFormatter(projectConfigs[0])
+			formattedData.Print()
+		} else {
+			formattedData := format.NewFormatter(projectConfigs)
+			formattedData.Print()
+		}
+		return nil
 	}
 
 	if err != nil {
