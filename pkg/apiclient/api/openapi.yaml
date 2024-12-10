@@ -595,6 +595,16 @@ paths:
     get:
       description: List jobs
       operationId: ListJobs
+      parameters:
+      - description: Job states
+        explode: false
+        in: query
+        name: states
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
       responses:
         "200":
           content:
@@ -787,7 +797,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         schema:
           type: boolean
       responses:
@@ -831,7 +840,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         schema:
           type: boolean
       responses:
@@ -853,7 +861,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         schema:
           type: boolean
       requestBody:
@@ -928,7 +935,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         schema:
           type: boolean
       responses:

@@ -204,11 +204,10 @@ func (a *TargetAPIService) GetTargetExecute(r ApiGetTargetRequest) (*TargetDTO, 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.showOptions == nil {
-		return localVarReturnValue, nil, reportError("showOptions is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	if r.showOptions != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -329,11 +328,10 @@ func (a *TargetAPIService) ListTargetsExecute(r ApiListTargetsRequest) ([]Target
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.showOptions == nil {
-		return localVarReturnValue, nil, reportError("showOptions is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	if r.showOptions != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "showOptions", r.showOptions, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

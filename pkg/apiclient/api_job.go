@@ -24,6 +24,13 @@ type JobAPIService service
 type ApiListJobsRequest struct {
 	ctx        context.Context
 	ApiService *JobAPIService
+	states     *[]string
+}
+
+// Job states
+func (r ApiListJobsRequest) States(states []string) ApiListJobsRequest {
+	r.states = &states
+	return r
 }
 
 func (r ApiListJobsRequest) Execute() ([]Job, *http.Response, error) {
@@ -67,6 +74,9 @@ func (a *JobAPIService) ListJobsExecute(r ApiListJobsRequest) ([]Job, *http.Resp
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.states != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "states", r.states, "csv")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

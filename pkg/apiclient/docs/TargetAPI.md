@@ -103,7 +103,7 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID or Name
-	showOptions := true // bool | Show target config options
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -174,7 +174,7 @@ import (
 )
 
 func main() {
-	showOptions := true // bool | Show target config options
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

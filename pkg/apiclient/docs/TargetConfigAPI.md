@@ -12,7 +12,7 @@ Method | HTTP request | Description
 
 ## AddTargetConfig
 
-> TargetConfig AddTargetConfig(ctx).ShowOptions(showOptions).TargetConfig(targetConfig).Execute()
+> TargetConfig AddTargetConfig(ctx).TargetConfig(targetConfig).ShowOptions(showOptions).Execute()
 
 Add a target config
 
@@ -31,12 +31,12 @@ import (
 )
 
 func main() {
-	showOptions := true // bool | Show target config options
 	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderInfo("Name_example", "RunnerId_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")) // AddTargetConfigDTO | Target config to add
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TargetConfigAPI.AddTargetConfig(context.Background()).ShowOptions(showOptions).TargetConfig(targetConfig).Execute()
+	resp, r, err := apiClient.TargetConfigAPI.AddTargetConfig(context.Background()).TargetConfig(targetConfig).ShowOptions(showOptions).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetConfigAPI.AddTargetConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -57,8 +57,8 @@ Other parameters are passed through a pointer to a apiAddTargetConfigRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **showOptions** | **bool** | Show target config options | 
  **targetConfig** | [**AddTargetConfigDTO**](AddTargetConfigDTO.md) | Target config to add | 
+ **showOptions** | **bool** | Show target config options | 
 
 ### Return type
 
@@ -99,7 +99,7 @@ import (
 )
 
 func main() {
-	showOptions := true // bool | Show target config options
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

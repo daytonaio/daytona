@@ -18,7 +18,7 @@ import (
 //	@Summary		Add a target config
 //	@Description	Add a target config
 //	@Param			targetConfig	body		AddTargetConfigDTO	true	"Target config to add"
-//	@Param			showOptions		query		bool				true	"Show target config options"
+//	@Param			showOptions		query		bool				false	"Show target config options"
 //	@Success		200				{object}	TargetConfig
 //	@Router			/target-config [put]
 //

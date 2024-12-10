@@ -1671,6 +1671,14 @@ paths:
     get:
       description: List jobs
       operationId: ListJobs
+      parameters:
+      - collectionFormat: csv
+        description: Job states
+        in: query
+        items:
+          type: string
+        name: states
+        type: array
       produces:
       - application/json
       responses:
@@ -1860,7 +1868,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         type: boolean
       produces:
       - application/json
@@ -1902,7 +1909,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         type: boolean
       produces:
       - application/json
@@ -1929,7 +1935,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         type: boolean
       responses:
         "200":
@@ -1987,7 +1992,6 @@ paths:
       - description: Show target config options
         in: query
         name: showOptions
-        required: true
         type: boolean
       produces:
       - application/json

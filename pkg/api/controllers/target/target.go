@@ -21,7 +21,7 @@ import (
 //	@Description	Get target info
 //	@Produce		json
 //	@Param			targetId	path		string	true	"Target ID or Name"
-//	@Param			showOptions	query		bool	true	"Show target config options"
+//	@Param			showOptions	query		bool	false	"Show target config options"
 //	@Success		200			{object}	TargetDTO
 //	@Router			/target/{targetId} [get]
 //
@@ -64,7 +64,7 @@ func GetTarget(ctx *gin.Context) {
 //	@Tags			target
 //	@Summary		List targets
 //	@Description	List targets
-//	@Param			showOptions	query	bool	true	"Show target config options"
+//	@Param			showOptions	query	bool	false	"Show target config options"
 //	@Produce		json
 //	@Success		200	{array}	TargetDTO
 //	@Router			/target [get]

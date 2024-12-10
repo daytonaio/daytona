@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## ListJobs
 
-> []Job ListJobs(ctx).Execute()
+> []Job ListJobs(ctx).States(states).Execute()
 
 List jobs
 
@@ -29,10 +29,11 @@ import (
 )
 
 func main() {
+	states := []string{"Inner_example"} // []string | Job states (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.JobAPI.ListJobs(context.Background()).Execute()
+	resp, r, err := apiClient.JobAPI.ListJobs(context.Background()).States(states).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `JobAPI.ListJobs``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -44,12 +45,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListJobsRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **states** | **[]string** | Job states | 
 
 ### Return type
 

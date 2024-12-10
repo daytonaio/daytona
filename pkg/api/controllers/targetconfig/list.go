@@ -16,7 +16,7 @@ import (
 //	@Tags			target-config
 //	@Summary		List target configs
 //	@Description	List target configs
-//	@Param			showOptions	query	bool	true	"Show target config options"
+//	@Param			showOptions	query	bool	false	"Show target config options"
 //	@Produce		json
 //	@Success		200	{array}	TargetConfig
 //	@Router			/target-config [get]

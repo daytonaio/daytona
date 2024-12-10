@@ -839,6 +839,18 @@ const docTemplate = `{
                 ],
                 "summary": "List jobs",
                 "operationId": "ListJobs",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Job states",
+                        "name": "states",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1121,8 +1133,7 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "Show target config options",
                         "name": "showOptions",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1184,8 +1195,7 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "Show target config options",
                         "name": "showOptions",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1221,8 +1231,7 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "Show target config options",
                         "name": "showOptions",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1282,8 +1291,7 @@ const docTemplate = `{
                         "type": "boolean",
                         "description": "Show target config options",
                         "name": "showOptions",
-                        "in": "query",
-                        "required": true
+                        "in": "query"
                     }
                 ],
                 "responses": {
