@@ -5,10 +5,13 @@ package target
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"sort"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	internal_util "github.com/daytonaio/daytona/internal/util"
@@ -44,13 +47,13 @@ var TargetSetCmd = &cobra.Command{
 			if err != nil {
 				return fmt.Errorf("failed to read from stdin: %w", err)
 			}
-			return HandleTargetJSON(input)
+			return handletargetjson(input)
 		} else if pipeFile != "" {
 			input, err = os.ReadFile(pipeFile)
 			if err != nil {
 				return fmt.Errorf("failed to read file %s: %w", pipeFile, err)
 			}
-			return HandleTargetJSON(input)
+			return handletargetjson(input)
 		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
@@ -190,64 +193,15 @@ var TargetSetCmd = &cobra.Command{
 	},
 }
 
-func HandleTargetJSON(data []byte) error {
+func handletargetjson(data []byte) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
 		return err
 	}
-	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
-	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	providersManifest, err := manager.NewProviderManager(manager.ProviderManagerConfig{
-		RegistryUrl: serverConfig.RegistryUrl,
-	}).GetProvidersManifest()
-	if err != nil {
-		log.Error(err)
-	}
-
-	var latestProviders []apiclient.Provider
-	if providersManifest != nil {
-		providersManifestLatest := providersManifest.GetLatestVersions()
-		if providersManifestLatest == nil {
-			return errors.New("could not get latest provider versions")
-		}
-
-		latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
-	} else {
-		fmt.Println("Could not get provider manifest. Can't check for new providers to install")
-	}
-	providerList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
-	if err != nil {
-		return err
-	}
-
-	selectedProvider, err := provider_view.GetProviderFromPrompt(providerList, "Choose a Provider", false)
-	if err != nil {
-		if common.IsCtrlCAbort(err) {
-			return nil
-		} else {
-			return err
-		}
-	}
-	if selectedProvider == nil {
-		return errors.New("no provider selected")
-	}
-	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
-		if providersManifest == nil {
-			return errors.New("could not get providers manifest")
-		}
-		err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
-		if err != nil {
-			return err
-		}
-	}
-
 	var selectedTarget *target_view.TargetView
-	err = target.ParseJSON(data, &selectedTarget)
+	err = parsejson(data, &selectedTarget)
 	if err != nil {
 		return fmt.Errorf("failed to parse input: %w", err)
 	}
@@ -258,11 +212,11 @@ func HandleTargetJSON(data []byte) error {
 	if selectedTarget.Options == "" {
 		return errors.New("option fields are required to setup your target")
 	}
-	targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(ctx, selectedProvider.Name).Execute()
+	targetManifest, res, err := apiClient.ProviderAPI.GetTargetManifest(ctx, selectedTarget.ProviderInfo.Name).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
-	err = target.ValidateProperty(*targetManifest, selectedTarget)
+	err = validateproperty(*targetManifest, selectedTarget)
 	if err != nil {
 		return err
 	}
@@ -270,8 +224,8 @@ func HandleTargetJSON(data []byte) error {
 		Name:    selectedTarget.Name,
 		Options: selectedTarget.Options,
 		ProviderInfo: apiclient.ProviderProviderInfo{
-			Name:    selectedProvider.Name,
-			Version: selectedProvider.Version,
+			Name:    selectedTarget.ProviderInfo.Name,
+			Version: selectedTarget.ProviderInfo.Version,
 		},
 	}
 	res, err = apiClient.TargetAPI.SetTarget(ctx).Target(targetData).Execute()
@@ -279,6 +233,70 @@ func HandleTargetJSON(data []byte) error {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 	views.RenderInfoMessage("Target set successfully and will be used by default")
+	return nil
+}
+
+func parsejson(data []byte, v interface{}) error {
+	if err := json.Unmarshal(data, v); err == nil {
+		return nil
+	}
+	return errors.New("input is not a valid JSON")
+}
+
+func validateproperty(targetManifest map[string]apiclient.ProviderProviderTargetProperty, target *target_view.TargetView) error {
+	optionMap := make(map[string]interface{})
+	if err := json.Unmarshal([]byte(target.Options), &optionMap); err != nil {
+		return fmt.Errorf("failed to parse options JSON: %w", err)
+	}
+
+	sortedKeys := make([]string, 0, len(targetManifest))
+	for k := range targetManifest {
+		sortedKeys = append(sortedKeys, k)
+	}
+	sort.Strings(sortedKeys)
+
+	for _, name := range sortedKeys {
+		property := targetManifest[name]
+		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
+			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
+				continue
+			}
+		}
+		switch *property.Type {
+		case apiclient.ProviderTargetPropertyTypeFloat, apiclient.ProviderTargetPropertyTypeInt:
+			_, isNumber := optionMap[name].(float64)
+			if !isNumber {
+				return fmt.Errorf("invalid type for %s, expected number", name)
+			}
+
+		case apiclient.ProviderTargetPropertyTypeString:
+			_, isString := optionMap[name].(string)
+			if !isString {
+				return fmt.Errorf("invalid type for %s, expected string", name)
+			}
+
+		case apiclient.ProviderTargetPropertyTypeBoolean:
+			_, isBool := optionMap[name].(bool)
+			if !isBool {
+				return fmt.Errorf("invalid type for %s, expected boolean", name)
+			}
+
+		case apiclient.ProviderTargetPropertyTypeOption:
+			_, isString := optionMap[name].(string)
+			if !isString {
+				return fmt.Errorf("invalid type for %s, expected string for option", name)
+			}
+
+		case apiclient.ProviderTargetPropertyTypeFilePath:
+			_, isString := optionMap[name].(string)
+			if !isString {
+				return fmt.Errorf("invalid type for %s, expected file path string", name)
+			}
+
+		default:
+			return fmt.Errorf("unsupported provider type: %s", *property.Type)
+		}
+	}
 	return nil
 }
 
