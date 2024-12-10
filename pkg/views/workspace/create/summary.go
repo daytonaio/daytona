@@ -55,10 +55,10 @@ var configureCheck bool
 var userCancelled bool
 var ProjectsConfigurationChanged bool
 
-func RunSubmissionForm(config SubmissionFormConfig) error {
+func RunSubmissionForm(config SubmissionFormConfig, pcImport *bool) error {
 	configureCheck = false
 
-	m := NewSummaryModel(config)
+	m := NewSummaryModel(config, pcImport)
 
 	if _, err := tea.NewProgram(m, tea.WithAltScreen()).Run(); err != nil {
 		return err
@@ -77,12 +77,12 @@ func RunSubmissionForm(config SubmissionFormConfig) error {
 	}
 
 	var err error
-	ProjectsConfigurationChanged, err = RunProjectConfiguration(config.ProjectList, *config.Defaults)
+	ProjectsConfigurationChanged, err = RunProjectConfiguration(config.ProjectList, *config.Defaults, *pcImport)
 	if err != nil {
 		return err
 	}
 
-	return RunSubmissionForm(config)
+	return RunSubmissionForm(config, pcImport)
 }
 
 func RenderSummary(name string, projectList []apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults, nameLabel string) (string, error) {
@@ -157,7 +157,7 @@ func projectDetailOutput(projectDetailKey ProjectDetail, projectDetailValue stri
 	return fmt.Sprintf("\t%s%-*s%s", lipgloss.NewStyle().Foreground(views.Green).Render(string(projectDetailKey)), DEFAULT_PADDING-len(string(projectDetailKey)), EMPTY_STRING, projectDetailValue)
 }
 
-func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
+func NewSummaryModel(config SubmissionFormConfig, pcImport *bool) SummaryModel {
 	m := SummaryModel{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -170,27 +170,37 @@ func NewSummaryModel(config SubmissionFormConfig) SummaryModel {
 		*config.ChosenName = config.SuggestedName
 	}
 
-	m.form = huh.NewForm(
-		huh.NewGroup(
-			huh.NewInput().
-				Title(fmt.Sprintf("%s name", config.NameLabel)).
-				Value(config.ChosenName).
-				Key("name").
-				Validate(func(str string) error {
-					result, err := util.GetValidatedName(str)
-					if err != nil {
-						return err
-					}
-					for _, name := range config.ExistingNames {
-						if name == result {
-							return errors.New("name already exists")
+	if !*pcImport {
+		m.form = huh.NewForm(
+			huh.NewGroup(
+				huh.NewInput().
+					Title(fmt.Sprintf("%s name", config.NameLabel)).
+					Value(config.ChosenName).
+					Key("name").
+					Validate(func(str string) error {
+						result, err := util.GetValidatedName(str)
+						if err != nil {
+							return err
 						}
-					}
-					*config.ChosenName = result
-					return nil
-				}),
-		),
-	).WithShowHelp(false).WithTheme(views.GetCustomTheme())
+						for _, name := range config.ExistingNames {
+							if name == result {
+								return errors.New("name already exists")
+							}
+						}
+						*config.ChosenName = result
+						return nil
+					}),
+			),
+		).WithShowHelp(false).WithTheme(views.GetCustomTheme())
+	} else {
+		m.form = huh.NewForm(
+			huh.NewGroup(
+				huh.NewConfirm().
+					Title("Is the above information correct?").
+					Value(pcImport),
+			),
+		).WithShowHelp(false).WithTheme(views.GetCustomTheme())
+	}
 
 	return m
 }

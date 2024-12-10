@@ -331,7 +331,8 @@ func processPrompting(ctx context.Context, apiClient *apiclient.APIClient, works
 		Defaults:      projectDefaults,
 	}
 
-	err = create.RunSubmissionForm(submissionFormConfig)
+	pcImportFlag := false
+	err = create.RunSubmissionForm(submissionFormConfig, &pcImportFlag)
 	if err != nil {
 		return err
 	}
