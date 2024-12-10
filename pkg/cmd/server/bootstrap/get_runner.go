@@ -46,6 +46,8 @@ func GetRunner(c *server.Config, configDir string, version string, telemetryServ
 	}
 
 	return runner.NewRunner(runner.RunnerConfig{
+		ProviderManager: providermanager.GetProviderManager(nil),
+		ProvidersDir:    c.ProvidersDir,
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, error) {
 			return jobService.List(ctx, &stores.JobFilter{
 				States: &[]models.JobState{models.JobStatePending},
