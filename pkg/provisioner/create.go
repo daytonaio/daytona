@@ -28,11 +28,10 @@ func (p *Provisioner) CreateWorkspace(params WorkspaceParams) error {
 	}
 
 	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
-		Workspace:                params.Workspace,
-		ContainerRegistry:        params.ContainerRegistry,
-		GitProviderConfig:        params.GitProviderConfig,
-		BuilderImage:             params.BuilderImage,
-		BuilderContainerRegistry: params.BuilderImageContainerRegistry,
+		Workspace:           params.Workspace,
+		ContainerRegistries: params.ContainerRegistries,
+		GitProviderConfig:   params.GitProviderConfig,
+		BuilderImage:        params.BuilderImage,
 	})
 
 	return err

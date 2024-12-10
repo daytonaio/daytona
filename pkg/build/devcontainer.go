@@ -78,18 +78,18 @@ func (b *DevcontainerBuilder) buildDevcontainer(build models.Build) (string, str
 		ApiClient: cli,
 	})
 
-	err = dockerClient.PullImage(b.image, b.containerRegistry, buildLogger)
+	cr := b.containerRegistries.FindContainerRegistryByImageName(b.image)
+	err = dockerClient.PullImage(b.image, cr, buildLogger)
 	if err != nil {
 		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
-		BuildConfig:              build.BuildConfig,
-		WorkspaceFolderName:      build.Id,
-		ContainerRegistry:        b.buildImageContainerRegistry,
-		BuilderImage:             b.image,
-		BuilderContainerRegistry: b.containerRegistry,
-		Prebuild:                 true,
+		BuildConfig:         build.BuildConfig,
+		WorkspaceFolderName: build.Id,
+		ContainerRegistries: b.containerRegistries,
+		BuilderImage:        b.image,
+		Prebuild:            true,
 		IdLabels: map[string]string{
 			"daytona.build.id": build.Id,
 		},

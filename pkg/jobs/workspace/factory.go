@@ -24,7 +24,6 @@ type WorkspaceJobFactory struct {
 type WorkspaceJobFactoryConfig struct {
 	FindWorkspace                    func(ctx context.Context, workspaceId string) (*models.Workspace, error)
 	FindTarget                       func(ctx context.Context, targetId string) (*models.Target, error)
-	FindContainerRegistry            func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	FindGitProviderConfig            func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	GetWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
 	TrackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
@@ -46,7 +45,6 @@ func (f *WorkspaceJobFactory) Create(job models.Job) jobs.IJob {
 
 		findWorkspace:                    f.config.FindWorkspace,
 		findTarget:                       f.config.FindTarget,
-		findContainerRegistry:            f.config.FindContainerRegistry,
 		findGitProviderConfig:            f.config.FindGitProviderConfig,
 		getWorkspaceEnvironmentVariables: f.config.GetWorkspaceEnvironmentVariables,
 		trackTelemetryEvent:              f.config.TrackTelemetryEvent,
