@@ -240,21 +240,151 @@ Similar to providers, plugins are independent projects that conform to the Dayto
 
 
 
-## Contributing
+## Contributing To Daytona
 
+We welcome contributions to Daytona! Whether you're fixing bugs, improving documentation, suggesting new features, or reporting issues, your help is greatly appreciated.
 
-Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, you must:
+### Open Source Licensing
 
-1. Read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/)
-2. Signing all commits to the Daytona project.
+Daytona is Open Source under the [Apache License 2.0](LICENSE), and is the [copyright of its contributors](NOTICE). 
 
-This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [License](LICENSE). No contributions will be accepted without following this process.
+If you would like to contribute to the software, you must:
 
-Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+  1. **Read the Developer Certificate of Origin Version 1.1** 
+
+      Please review the [Developer Certificate of Origin Version 1.1](https://developercertificate.org/) to understand the contribution requirements.
+
+  2. **Sign all commits to the Daytona project** 
+
+      Ensure that all your commits are signed to comply with the Daytona project's contribution policies.
+
+      This ensures that users, distributors, and other contributors can rely on all the software related to Daytona being contributed under the terms of the [Apache License 2.0](LICENSE). No contributions will be accepted without following this process.
+
+### Ways to Contribute
+
+### 1. Reporting Issues and Suggesting Features
+
+Creating issues is a valuable way to contribute by reporting bugs, suggesting features, or improving documentation.
+
+Before creating a new issue, search the existing issues [here](https://github.com/daytonaio/daytona/issues) to see if your concern has already been addressed.
+
+* If no existing issue matches your contribution, follow these steps:
+   1. **Identify the Type of Issue**
+      * **Bug Report:** If you encounter unexpected behavior or errors.
+      * **Feature Request:** If you have an idea for a new feature or improvement.
+      * **Documentation Improvement:** If you notice gaps or areas for improvement in the documentation.
+   1. **Create a new issue**
+      * Navigate to Issues: Go to the Issues tab [here](https://github.com/daytonaio/daytona/issues).
+      * Click on "New Issue": Choose the appropriate template (Bug Report, Feature Request, etc.) if available.
+      * Fill Out the Issue Template: Provide a clear and concise description of the issue, including steps to reproduce (for bugs) or detailed feature descriptions.
+      * Submit the Issue: Click "Submit new issue" to create the issue.
+   1. **Engage with the Community**
+      * **Respond to Feedback:** Be prepared to provide additional information or clarification if maintainers or other contributors have questions.
+      * **Collaborate on Solutions:** If you have ideas for resolving the issue, share them in the comments.
+
+### 2. Contributing Code
+
+If you're interested in contributing code to Daytona, follow these steps:
+
+1. **Fork the Daytona repository**
+
+    [Fork](https://github.com/daytonaio/daytona/fork) the GitHub repository to create your own copy of the repository.
+  
+1. **Add a GitHub provider (if not already registered)**
+    Before creating your workspace, ensure that you have a GitHub provider registered. If not, run:
+    ```bash
+    daytona git-provider add
+    ```
+
+1. **Create a Workspace with Daytona**
+
+    Use the Daytona CLI to create a workspace for your forked repository. Replace YOUR-FORK-URL with the URL of your forked repository.
+    ```bash
+    daytona create YOUR-FORK-URL
+    ```
+1.  **Create a new branch**
+    
+    Once in the development container, create a new branch for your changes:
+    ```bash
+    git checkout -b my-new-feature
+    ```
+
+1. **Running Daytona in development mode**
+    A `dtn` alias is automatically created inside the Workspace. You can use it to compile and run daytona.
+    For example:
+    ```bash
+    dtn serve
+    ```
+
+1. **Make changes to the project**
+
+    Prepare your changes and ensure your commits are descriptive. The document contains an optional commit template, if desired.
+
+1. **Test your changes**
+
+    Ensure to test your changes by running the project locally. 
+    Run the following command in the daytona root directory to run the tests:
+    
+    ```bash
+    go test ./...
+    ```
+
+1. **Generate docs**
+
+    Ensure to generate new docs after making command related changes, by running ./hack/generate-cli-docs.sh in the daytona root directory.
+
+    ```bash
+    ./hack/generate-cli-docs.sh
+    ```
+
+1. **Generate new API client**
+
+    Ensure to generate a new API client after making changes related to the API spec.
+    Run the following command in the daytona root directory:
+
+    ```bash
+    ./hack/swagger.sh
+    ```
+
+1. **Check for lint errors**
+
+    Ensure that you have no lint errors. We use golangci-lint as our linter which is automatically installed.
+    Run the following command in the daytona root directory to check for linting errors:
+
+    ```bash
+    golangci-lint run
+    ```
+
+1. **Sign off on your commits**
+
+    Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](https://github.com/daytonaio/daytona/blob/main/PREPARING_YOUR_CHANGES.md).
+
+    To sign off on your Git commits more easily, you can use the -s or --signoff option when making a commit. This adds a "Signed-off-by" line to your commit message automatically, which is required to comply with the DCO v1.1.
+
+    Here's how you can do it:
+
+    ```bash
+    git commit -s -m "Your commit message"
+    ```
+    This command adds the necessary sign-off to your commit without needing to rebase later.
+
+    If you've already made commits without the sign-off, you can add it retrospectively by rebasing:
+
+    ```bash
+    git rebase HEAD~1 --signoff
+    git push --force-with-lease origin my-new-feature
+    ```
+
+1. **Push your changes and create a pull request**
+
+    Push your changes to your forked repository and create a pull request from your branch in your forked repository to the main Daytona repository.
+    If you're new to GitHub, read about [pull requests](https://help.github.com/articles/about-pull-requests/). You are welcome to submit your pull request for commentary or review before it is complete by creating a [draft pull request](https://help.github.com/en/articles/about-pull-requests#draft-pull-requests). Please include specific questions or items you'd like feedback on.
+
+1. **Wait for review**
+
+    A Daytona team member will take a look at your PR and either merge, comment, and/or assign someone for review.
 
 ## License
-
-
 
 This repository contains Daytona, covered under the [Apache License 2.0](LICENSE), except where noted (any Daytona logos or trademarks are not covered under the Apache License, and should be explicitly noted by a LICENSE file.)
 
