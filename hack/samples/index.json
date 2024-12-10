@@ -98,5 +98,10 @@
     "name": "Next.js - Cal Buddy",
     "description": "Cal Buddy, is a smart calendar assistant that helps you schedule, manage, and chat with your calendar. It helps you boost your productivity with AI-powered task management.",
     "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
+  },
+  {
+    "name": "React.js - TerraGrow",
+    "description": "TerraGrow is an AI-powered app that provides crop recommendations and yield improvement strategies by analyzing environmental factors like soil nutrients, temperature, humidity, and pH. It helps farmers optimize planting decisions for higher yields.",
+    "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
   }
 ]
