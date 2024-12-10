@@ -273,12 +273,12 @@ Before creating a new issue, search the existing issues [here](https://github.co
       * **Bug Report:** If you encounter unexpected behavior or errors.
       * **Feature Request:** If you have an idea for a new feature or improvement.
       * **Documentation Improvement:** If you notice gaps or areas for improvement in the documentation.
-   2. **Create a new issue**
+   1. **Create a new issue**
       * Navigate to Issues: Go to the Issues tab [here](https://github.com/daytonaio/daytona/issues).
       * Click on "New Issue": Choose the appropriate template (Bug Report, Feature Request, etc.) if available.
       * Fill Out the Issue Template: Provide a clear and concise description of the issue, including steps to reproduce (for bugs) or detailed feature descriptions.
       * Submit the Issue: Click "Submit new issue" to create the issue.
-   3. **Engage with the Community**
+   1. **Engage with the Community**
       * **Respond to Feedback:** Be prepared to provide additional information or clarification if maintainers or other contributors have questions.
       * **Collaborate on Solutions:** If you have ideas for resolving the issue, share them in the comments.
 
@@ -290,31 +290,37 @@ If you're interested in contributing code to Daytona, follow these steps:
 
     [Fork](https://github.com/daytonaio/daytona/fork) the GitHub repository to create your own copy of the repository.
   
-2. **Create a Workspace with Daytona**
+1. **Add a GitHub provider (if not already registered)**
+    Before creating your workspace, ensure that you have a GitHub provider registered. If not, run:
+    ```bash
+    daytona git-provider add
+    ```
+
+1. **Create a Workspace with Daytona**
 
     Use the Daytona CLI to create a workspace for your forked repository. Replace YOUR-FORK-URL with the URL of your forked repository.
     ```bash
     daytona create YOUR-FORK-URL
     ```
-3.  **Create a new branch**
+1.  **Create a new branch**
     
     Once in the development container, create a new branch for your changes:
     ```bash
     git checkout -b my-new-feature
     ```
 
-4. **Running Daytona in development mode**
+1. **Running Daytona in development mode**
     A `dtn` alias is automatically created inside the Workspace. You can use it to compile and run daytona.
     For example:
     ```bash
     dtn serve
     ```
 
-5. **Make changes to the project**
+1. **Make changes to the project**
 
     Prepare your changes and ensure your commits are descriptive. The document contains an optional commit template, if desired.
 
-6. **Test your changes**
+1. **Test your changes**
 
     Ensure to test your changes by running the project locally. 
     Run the following command in the daytona root directory to run the tests:
@@ -323,7 +329,7 @@ If you're interested in contributing code to Daytona, follow these steps:
     go test ./...
     ```
 
-7. **Generate docs**
+1. **Generate docs**
 
     Ensure to generate new docs after making command related changes, by running ./hack/generate-cli-docs.sh in the daytona root directory.
 
@@ -331,7 +337,7 @@ If you're interested in contributing code to Daytona, follow these steps:
     ./hack/generate-cli-docs.sh
     ```
 
-8. **Generate new API client**
+1. **Generate new API client**
 
     Ensure to generate a new API client after making changes related to the API spec.
     Run the following command in the daytona root directory:
@@ -340,7 +346,7 @@ If you're interested in contributing code to Daytona, follow these steps:
     ./hack/swagger.sh
     ```
 
-9. **Check for lint errors**
+1. **Check for lint errors**
 
     Ensure that you have no lint errors. We use golangci-lint as our linter which is automatically installed.
     Run the following command in the daytona root directory to check for linting errors:
@@ -349,7 +355,7 @@ If you're interested in contributing code to Daytona, follow these steps:
     golangci-lint run
     ```
 
-10. **Sign off on your commits**
+1. **Sign off on your commits**
 
     Ensure that you sign off on all your commits to comply with the DCO v1.1. We have more details in [Prepare your changes](https://github.com/daytonaio/daytona/blob/main/PREPARING_YOUR_CHANGES.md).
 
@@ -369,14 +375,14 @@ If you're interested in contributing code to Daytona, follow these steps:
     git push --force-with-lease origin my-new-feature
     ```
 
-11. **Push your changes and create a pull request**
+1. **Push your changes and create a pull request**
 
     Push your changes to your forked repository and create a pull request from your branch in your forked repository to the main Daytona repository.
     If you're new to GitHub, read about [pull requests](https://help.github.com/articles/about-pull-requests/). You are welcome to submit your pull request for commentary or review before it is complete by creating a [draft pull request](https://help.github.com/en/articles/about-pull-requests#draft-pull-requests). Please include specific questions or items you'd like feedback on.
 
-12. **Wait for review**
+1. **Wait for review**
 
-    A Daytona team member will review your PR within three business days (excluding any holidays) and either merge, comment, and/or assign someone for review.
+    A Daytona team member will take a look at your PR and either merge, comment, and/or assign someone for review.
 
 ## License
 
