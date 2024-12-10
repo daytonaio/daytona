@@ -24,4 +24,4 @@ We contributors to Daytona:
 * Jay Kumar (@35C4n0r)
 * Twac (@Twacqwq)
 * Mirko Dzaja (@MDzaja)
-* Luke Bryant (LDavidBryant)
+* Luke Bryant (@LDavidBryant)
