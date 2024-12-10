@@ -11,8 +11,7 @@ import (
 
 type IApiKeyService interface {
 	Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error)
-	IsWorkspaceApiKey(ctx context.Context, apiKey string) bool
-	IsTargetApiKey(ctx context.Context, apiKey string) bool
+	GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error)
 	IsValidApiKey(ctx context.Context, apiKey string) bool
 	ListClientKeys(ctx context.Context) ([]*models.ApiKey, error)
 	Revoke(ctx context.Context, name string) error

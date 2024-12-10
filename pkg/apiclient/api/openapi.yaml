@@ -596,8 +596,8 @@ paths:
       description: List jobs
       operationId: ListJobs
       parameters:
-      - description: Job states
-        explode: false
+      - description: Job States
+        explode: true
         in: query
         name: states
         schema:
@@ -605,6 +605,25 @@ paths:
             type: string
           type: array
         style: form
+      - description: Job Actions
+        explode: true
+        in: query
+        name: actions
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resource ID
+        in: query
+        name: resourceId
+        schema:
+          type: string
+      - description: Resource Type
+        in: query
+        name: resourceType
+        schema:
+          type: string
       responses:
         "200":
           content:

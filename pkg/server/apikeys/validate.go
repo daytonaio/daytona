@@ -17,19 +17,15 @@ func (s *ApiKeyService) IsValidApiKey(ctx context.Context, apiKey string) bool {
 	return err == nil
 }
 
-func (s *ApiKeyService) IsWorkspaceApiKey(ctx context.Context, apiKey string) bool {
+func (s *ApiKeyService) GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error) {
 	keyHash := apikeys.HashKey(apiKey)
 
 	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
-		return false
+		return models.ApiKeyTypeClient, err
 	}
 
-	if key.Type != models.ApiKeyTypeWorkspace {
-		return false
-	}
-
-	return true
+	return key.Type, nil
 }
 
 func (s *ApiKeyService) IsTargetApiKey(ctx context.Context, apiKey string) bool {

@@ -101,15 +101,14 @@ func (a *ApiServer) Start() error {
 
 	binding.Validator = new(defaultValidator)
 
+	a.router = gin.New()
+	a.router.Use(gin.Recovery())
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
-		a.router = gin.Default()
 		a.router.Use(cors.New(cors.Config{
 			AllowAllOrigins: true,
 		}))
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-		a.router = gin.New()
-		a.router.Use(gin.Recovery())
 	}
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
@@ -160,11 +159,6 @@ func (a *ApiServer) Start() error {
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
-	}
-
-	jobController := protected.Group("/job")
-	{
-		jobController.GET("/", job.ListJobs)
 	}
 
 	workspaceTemplateController := protected.Group("/workspace-template")
@@ -274,6 +268,15 @@ func (a *ApiServer) Start() error {
 	{
 		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/metadata", workspace.SetWorkspaceMetadata)
 		workspaceGroup.POST(targetController.BasePath()+"/:targetId/metadata", target.SetTargetMetadata)
+	}
+
+	runnerGroup := protected.Group("/")
+	runnerGroup.Use(middlewares.RunnerAuthMiddleware())
+	{
+		jobController := runnerGroup.Group("/job")
+		{
+			jobController.GET("/", job.ListJobs)
+		}
 	}
 
 	a.httpServer = &http.Server{

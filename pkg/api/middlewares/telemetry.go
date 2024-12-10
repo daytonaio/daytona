@@ -23,7 +23,7 @@ var ignoreTelemetryPaths = map[string]bool{
 	"/workspace/:workspaceId/metadata": true,
 	"/workspace/:workspaceId":          true,
 	"/server/network-key":              true,
-	"/job":                             true,
+	"/job/":                            true,
 }
 
 func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.HandlerFunc {

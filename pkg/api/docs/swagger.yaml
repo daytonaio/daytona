@@ -1672,13 +1672,28 @@ paths:
       description: List jobs
       operationId: ListJobs
       parameters:
-      - collectionFormat: csv
-        description: Job states
+      - collectionFormat: multi
+        description: Job States
         in: query
         items:
           type: string
         name: states
         type: array
+      - collectionFormat: multi
+        description: Job Actions
+        in: query
+        items:
+          type: string
+        name: actions
+        type: array
+      - description: Resource ID
+        in: query
+        name: resourceId
+        type: string
+      - description: Resource Type
+        in: query
+        name: resourceType
+        type: string
       produces:
       - application/json
       responses:

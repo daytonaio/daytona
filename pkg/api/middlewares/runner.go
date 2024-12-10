@@ -5,13 +5,13 @@ package middlewares
 
 import (
 	"errors"
-	"strings"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
 
-func AuthMiddleware() gin.HandlerFunc {
+func RunnerAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		bearerToken := ctx.GetHeader("Authorization")
 		if bearerToken == "" {
@@ -27,26 +27,17 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		server := server.GetInstance(nil)
 
-		if !server.ApiKeyService.IsValidApiKey(ctx.Request.Context(), token) {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
-			return
-		}
-
 		apiKeyType, err := server.ApiKeyService.GetApiKeyType(ctx.Request.Context(), token)
 		if err != nil {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return
 		}
 
-		ctx.Set("apiKeyType", apiKeyType)
+		if apiKeyType != models.ApiKeyTypeRunner {
+			ctx.AbortWithError(401, errors.New("unauthorized"))
+			return
+		}
+
 		ctx.Next()
 	}
-}
-
-func ExtractToken(bearerToken string) string {
-	if !strings.HasPrefix(bearerToken, "Bearer ") {
-		return ""
-	}
-
-	return strings.TrimPrefix(bearerToken, "Bearer ")
 }

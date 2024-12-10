@@ -10,7 +10,7 @@ Method | HTTP request | Description
 
 ## ListJobs
 
-> []Job ListJobs(ctx).States(states).Execute()
+> []Job ListJobs(ctx).States(states).Actions(actions).ResourceId(resourceId).ResourceType(resourceType).Execute()
 
 List jobs
 
@@ -29,11 +29,14 @@ import (
 )
 
 func main() {
-	states := []string{"Inner_example"} // []string | Job states (optional)
+	states := []string{"Inner_example"} // []string | Job States (optional)
+	actions := []string{"Inner_example"} // []string | Job Actions (optional)
+	resourceId := "resourceId_example" // string | Resource ID (optional)
+	resourceType := "resourceType_example" // string | Resource Type (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.JobAPI.ListJobs(context.Background()).States(states).Execute()
+	resp, r, err := apiClient.JobAPI.ListJobs(context.Background()).States(states).Actions(actions).ResourceId(resourceId).ResourceType(resourceType).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `JobAPI.ListJobs``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -54,7 +57,10 @@ Other parameters are passed through a pointer to a apiListJobsRequest struct via
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **states** | **[]string** | Job states | 
+ **states** | **[]string** | Job States | 
+ **actions** | **[]string** | Job Actions | 
+ **resourceId** | **string** | Resource ID | 
+ **resourceType** | **string** | Resource Type | 
 
 ### Return type
 

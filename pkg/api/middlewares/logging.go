@@ -12,7 +12,9 @@ import (
 )
 
 var ignoreLoggingPaths = map[string]bool{
-	"/job": true,
+	"/job/":                            true,
+	"/workspace/:workspaceId/metadata": true,
+	"/target/:targetId/metadata":       true,
 }
 
 func LoggingMiddleware() gin.HandlerFunc {
@@ -42,8 +44,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 					"URI":     reqUri,
 					"status":  statusCode,
 					"latency": latencyTime,
-				}).Trace("API REQUEST")
-				return
+				}).Debug("API REQUEST")
 			} else {
 				log.WithFields(log.Fields{
 					"method":  reqMethod,

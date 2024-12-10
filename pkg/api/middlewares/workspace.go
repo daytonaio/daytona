@@ -6,6 +6,7 @@ package middlewares
 import (
 	"errors"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +27,20 @@ func WorkspaceAuthMiddleware() gin.HandlerFunc {
 
 		server := server.GetInstance(nil)
 
-		if !server.ApiKeyService.IsWorkspaceApiKey(ctx.Request.Context(), token) && !server.ApiKeyService.IsTargetApiKey(ctx.Request.Context(), token) {
+		apiKeyType, err := server.ApiKeyService.GetApiKeyType(ctx.Request.Context(), token)
+		if err != nil {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
+			return
+		}
+
+		switch apiKeyType {
+		case models.ApiKeyTypeWorkspace:
+			fallthrough
+		case models.ApiKeyTypeTarget:
+			ctx.Next()
+		default:
+			ctx.AbortWithError(401, errors.New("unauthorized"))
+			return
 		}
 
 		ctx.Next()
