@@ -106,7 +106,7 @@
   },
   {
     "name": "React.js - AI Text Summarization and Analysis",
-    "description":"A beginner-friendly application designed to transform long texts into quick summaries, key insights, and fun mnemonics. It prompts you to enter a text and helps you get the gist of it.",
+    "description": "A beginner-friendly application designed to transform long texts into quick summaries, key insights, and fun mnemonics. It prompts you to enter a text and helps you get the gist of it.",
     "gitUrl": "https://github.com/daytonaio/sample-react-text-AI"
   },
   {
