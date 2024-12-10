@@ -105,6 +105,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
   },
   {
+    "name": "React.js - AI Text Summarization and Analysis",
+    "description":"A beginner-friendly application designed to transform long texts into quick summaries, key insights, and fun mnemonics. It prompts you to enter a text and helps you get the gist of it.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-text-AI"
+  },
+  {
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
