@@ -1,0 +1,9 @@
+name: daytona runner logs
+synopsis: View runner logs
+usage: daytona runner logs [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona runner - Manage the runner

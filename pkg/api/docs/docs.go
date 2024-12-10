@@ -3469,7 +3469,10 @@ const docTemplate = `{
                 "restart",
                 "delete",
                 "force-delete",
-                "run"
+                "run",
+                "install",
+                "uninstall",
+                "update"
             ],
             "x-enum-varnames": [
                 "JobActionCreate",
@@ -3478,7 +3481,10 @@ const docTemplate = `{
                 "JobActionRestart",
                 "JobActionDelete",
                 "JobActionForceDelete",
-                "JobActionRun"
+                "JobActionRun",
+                "JobActionInstall",
+                "JobActionUninstall",
+                "JobActionUpdate"
             ]
         },
         "models.ResourceStateName": {

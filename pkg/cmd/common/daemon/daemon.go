@@ -16,14 +16,12 @@ import (
 	"github.com/kardianos/service"
 )
 
-const serviceName = "DaytonaServerDaemon"
-
 type program struct {
 	service.Interface
 }
 
-func Start(logFilePath string) error {
-	cfg, err := getServiceConfig()
+func Start(logFilePath string, svcConfig *service.Config) error {
+	cfg, err := getServiceConfig(svcConfig)
 	if err != nil {
 		return err
 	}
@@ -77,7 +75,7 @@ func Start(logFilePath string) error {
 		return nil
 	}
 
-	err = Stop()
+	err = Stop(svcConfig)
 	if err != nil {
 		return err
 	}
@@ -89,8 +87,8 @@ func Start(logFilePath string) error {
 	}
 }
 
-func Stop() error {
-	cfg, err := getServiceConfig()
+func Stop(svcConfig *service.Config) error {
+	cfg, err := getServiceConfig(svcConfig)
 	if err != nil {
 		return err
 	}
@@ -115,7 +113,7 @@ func Stop() error {
 	return s.Uninstall()
 }
 
-func getServiceConfig() (*service.Config, error) {
+func getServiceConfig(svcConfig *service.Config) (*service.Config, error) {
 	if runtime.GOOS == "windows" {
 		return nil, errors.New("daemon mode not supported on Windows")
 	}
@@ -123,13 +121,6 @@ func getServiceConfig() (*service.Config, error) {
 	user, ok := os.LookupEnv("USER")
 	if !ok {
 		return nil, errors.New("could not determine user")
-	}
-
-	svcConfig := &service.Config{
-		Name:        serviceName,
-		DisplayName: "Daytona Server",
-		Description: "Daytona Server daemon.",
-		Arguments:   []string{"daemon-serve"},
 	}
 
 	switch runtime.GOOS {

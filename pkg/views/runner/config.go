@@ -40,7 +40,7 @@ func RenderConfig(config *runner.Config, showKey bool) {
 
 	output += fmt.Sprintf("To edit these values run: %s", lipgloss.NewStyle().Foreground(views.Green).Render("daytona runner configure")) + "\n\n"
 
-	output += views.SeparatorString + "\n\n"
+	output += views.SeparatorString
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 }

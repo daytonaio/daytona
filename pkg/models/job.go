@@ -45,6 +45,9 @@ const (
 	JobActionDelete      JobAction = "delete"
 	JobActionForceDelete JobAction = "force-delete"
 	JobActionRun         JobAction = "run"
+	JobActionInstall     JobAction = "install"
+	JobActionUninstall   JobAction = "uninstall"
+	JobActionUpdate      JobAction = "update"
 )
 
 func getResourceStateFromJob(job *Job) ResourceState {

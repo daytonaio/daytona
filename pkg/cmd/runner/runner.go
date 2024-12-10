@@ -15,6 +15,8 @@ var RunnerCmd = &cobra.Command{
 }
 
 func init() {
+	RunnerCmd.AddCommand(configCmd)
+	RunnerCmd.AddCommand(configureCmd)
 	RunnerCmd.AddCommand(startRunnerCmd)
 	RunnerCmd.AddCommand(stopRunnerCmd)
 	RunnerCmd.AddCommand(restartRunnerCmd)

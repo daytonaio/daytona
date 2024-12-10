@@ -1043,6 +1043,9 @@ definitions:
     - delete
     - force-delete
     - run
+    - install
+    - uninstall
+    - update
     type: string
     x-enum-varnames:
     - JobActionCreate
@@ -1052,6 +1055,9 @@ definitions:
     - JobActionDelete
     - JobActionForceDelete
     - JobActionRun
+    - JobActionInstall
+    - JobActionUninstall
+    - JobActionUpdate
   models.ResourceStateName:
     enum:
     - undefined

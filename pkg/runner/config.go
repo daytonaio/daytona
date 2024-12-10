@@ -19,11 +19,13 @@ import (
 )
 
 type Config struct {
-	Id           string              `json:"id" validate:"required"`
-	ServerApiKey string              `json:"serverApiKey" validate:"required"`
-	ServerApiUrl string              `json:"serverApiUrl" validate:"required"`
-	ProvidersDir string              `json:"providersDir" validate:"required"`
-	LogFile      *logs.LogFileConfig `json:"logFile" validate:"required"`
+	Id               string              `json:"id"`
+	ServerApiKey     string              `json:"serverApiKey"`
+	ServerApiUrl     string              `json:"serverApiUrl"`
+	ProvidersDir     string              `json:"providersDir"`
+	LogFile          *logs.LogFileConfig `json:"logFile"`
+	ClientId         string              `envconfig:"DAYTONA_CLIENT_ID"`
+	TelemetryEnabled bool                `json:"telemetryEnabled"`
 } // @name RunnerConfig
 
 func GetConfig() (*Config, error) {
@@ -118,6 +120,18 @@ func Save(c Config) error {
 	}
 
 	return nil
+}
+
+func EnableTelemetry(c Config) error {
+	c.TelemetryEnabled = true
+
+	return Save(c)
+}
+
+func DisableTelemetry(c Config) error {
+	c.TelemetryEnabled = false
+
+	return Save(c)
 }
 
 func configFilePath() (string, error) {

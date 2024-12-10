@@ -4,6 +4,8 @@
 package runner
 
 import (
+	"github.com/daytonaio/daytona/pkg/cmd/common/daemon"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/spf13/cobra"
 )
 
@@ -12,6 +14,7 @@ var stopRunnerCmd = &cobra.Command{
 	Short: "Stops the runner",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return nil
+		views.RenderInfoMessageBold("Stopping the Daytona Runner daemon...")
+		return daemon.Stop(svcConfig)
 	},
 }

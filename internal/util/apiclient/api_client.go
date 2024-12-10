@@ -87,6 +87,33 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	return apiClient, nil
 }
 
+func GetRunnerApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
+		{
+			URL: apiUrl,
+		},
+	}
+
+	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
+
+	if telemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, clientId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.RUNNER_SOURCE))
+	}
+
+	apiClient = apiclient.NewAPIClient(clientConfig)
+
+	apiClient.GetConfig().HTTPClient = &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	return apiClient, nil
+}
+
 func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{

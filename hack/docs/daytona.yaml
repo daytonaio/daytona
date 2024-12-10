@@ -31,6 +31,7 @@ see_also:
     - daytona provider - Manage providers
     - daytona purge - Purges all Daytona data from the current device
     - daytona restart - Restart a workspace
+    - daytona runner - Manage the runner
     - daytona serve - Run the server process in the current terminal session
     - daytona server - Start the server process in daemon mode
     - daytona ssh - SSH into a workspace using the terminal
