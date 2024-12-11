@@ -5,11 +5,12 @@ package docker_test
 
 import (
 	"bufio"
+	"io"
 	"net"
 
-	t_docker "github.com/daytonaio/daytona/internal/testing/docker"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -19,19 +20,26 @@ func (s *DockerClientTestSuite) TestExecSync() {
 
 	containerName := s.dockerClient.GetProjectContainerName(project1)
 
-	s.setupExecTest([]string{"test-cmd"}, containerName, project1.User, []string{})
+	s.setupExecTest([]string{"test-cmd"}, containerName, project1.User, []string{}, "")
 
 	result, err := s.dockerClient.ExecSync(containerName, container.ExecOptions{
 		Cmd:  []string{"test-cmd"},
 		User: project1.User,
-	}, nil)
+	}, io.Discard)
 	require.Nil(s.T(), err)
 	require.Equal(s.T(), 0, result.ExitCode)
 	require.Equal(s.T(), "", result.StdOut)
 }
 
-func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user string, env []string) {
+func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user string, env []string, output string) {
 	_, client := net.Pipe()
+
+	r, w := io.Pipe()
+	go func() {
+		wr := stdcopy.NewStdWriter(w, stdcopy.Stdout)
+		_, _ = wr.Write([]byte(output))
+		w.Close()
+	}()
 
 	s.mockClient.On("ContainerExecCreate", mock.Anything, containerName, container.ExecOptions{
 		AttachStdout: true,
@@ -46,7 +54,7 @@ func (s *DockerClientTestSuite) setupExecTest(cmd []string, containerName, user 
 	}, nil)
 	s.mockClient.On("ContainerExecAttach", mock.Anything, "123", container.ExecStartOptions{}).Return(types.HijackedResponse{
 		Conn:   client,
-		Reader: bufio.NewReader(t_docker.NewPipeReader("")),
+		Reader: bufio.NewReader(r),
 	}, nil)
 	s.mockClient.On("ContainerExecInspect", mock.Anything, "123").Return(container.ExecInspect{
 		ExitCode: 0,
