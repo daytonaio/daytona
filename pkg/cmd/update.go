@@ -70,8 +70,8 @@ var updateCmd = &cobra.Command{
 		}
 
 		if semver.Compare(currentVersion, version) >= 0 {
-			fmt.Println("Current version is greater than the version you are trying to update to")
-			return nil
+			return errors.New("current version is greater than the version you are trying to update to")
+
 		}
 		if !isCurrVerEqToPrev {
 			changelog += "\n\nThere might be more important changes since you updated. Please visit https://github.com/daytonaio/daytona/releases for the complete changelog\n"
@@ -80,13 +80,11 @@ var updateCmd = &cobra.Command{
 		fmt.Print("\nChangelog:\n\n")
 		fmt.Println(changelog)
 		return updateToVersion(version)
-
 	},
 }
 
 func init() {
 	updateCmd.Flags().StringVarP(&versionFlag, "version", "v", "", "Version to update to")
-
 }
 
 func fetchLatestRelase() (*GitHubRelease, error) {
@@ -151,6 +149,7 @@ func updateToVersion(version string) error {
 		return fmt.Errorf("failed to update binary: %w", err)
 	}
 	fmt.Println("\nSuccessfully updated to version", version)
+	fmt.Println("If your Server is running, you need to restart it for the changes to take effect.")
 	return nil
 }
 
