@@ -69,7 +69,11 @@ func ToProject(projectDTO *apiclient.Project) *project.Project {
 	return project
 }
 
-func ToGitStatus(gitStatusDTO apiclient.GitStatus) *project.GitStatus {
+func ToGitStatus(gitStatusDTO *apiclient.GitStatus) *project.GitStatus {
+	if gitStatusDTO == nil {
+		return nil
+	}
+
 	files := []*project.FileStatus{}
 	for _, fileDTO := range gitStatusDTO.FileStatus {
 		staging := project.Status(string(fileDTO.Staging))
