@@ -4533,7 +4533,6 @@ const docTemplate = `{
         "ProjectState": {
             "type": "object",
             "required": [
-                "gitStatus",
                 "updatedAt",
                 "uptime"
             ],
