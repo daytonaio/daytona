@@ -69,15 +69,15 @@ var updateCmd = &cobra.Command{
 			return err
 		}
 
-		if isCurrVerEqToPrev {
+		if semver.Compare(currentVersion, version) >= 0 {
 			fmt.Println("Current version is greater than the version you are trying to update to")
 			return nil
 		}
-		if semver.Compare(currentVersion, version) != 0 {
+		if !isCurrVerEqToPrev {
 			changelog += "\n\nThere might be more important changes since you updated. Please visit https://github.com/daytonaio/daytona/releases for the complete changelog\n"
 		}
 		fmt.Println("Updating to version", version, "from", currentVersion)
-		fmt.Println("\nChangelog:")
+		fmt.Print("\nChangelog:\n\n")
 		fmt.Println(changelog)
 		return updateToVersion(version)
 
