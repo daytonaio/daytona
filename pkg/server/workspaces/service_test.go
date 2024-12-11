@@ -5,7 +5,6 @@ package workspaces_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
@@ -171,7 +170,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("CreateWorkspace", func(t *testing.T) {
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
-		apiKeyService.On("Generate", models.ApiKeyTypeWorkspace, fmt.Sprintf("ws-%s", createWorkspaceDTO.Id)).Return(createWorkspaceDTO.Name, nil)
+		apiKeyService.On("Generate", models.ApiKeyTypeWorkspace, createWorkspaceDTO.Id).Return(createWorkspaceDTO.Name, nil)
 
 		ws := &models.Workspace{
 			Name:                createWorkspaceDTO.Name,

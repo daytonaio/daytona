@@ -20,7 +20,6 @@ type IWorkspaceService interface {
 	StopWorkspace(ctx context.Context, workspaceId string) error
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
-	HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)

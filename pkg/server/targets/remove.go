@@ -34,6 +34,21 @@ func (s *TargetService) RemoveTarget(ctx context.Context, targetId string) error
 		return s.handleRemoveError(ctx, t, err)
 	}
 
+	err = s.revokeApiKey(ctx, targetId)
+	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
+
+	metadata, err := s.targetMetadataStore.Find(ctx, &stores.TargetMetadataFilter{TargetId: &targetId})
+	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
+
+	err = s.targetMetadataStore.Delete(ctx, metadata)
+	if err != nil {
+		return s.handleRemoveError(ctx, t, err)
+	}
+
 	err = s.createJob(ctx, t.Id, models.JobActionDelete)
 	if err != nil {
 		return s.handleRemoveError(ctx, t, err)
@@ -65,46 +80,25 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 		return s.handleRemoveError(ctx, t, err)
 	}
 
-	err = s.createJob(ctx, t.Id, models.JobActionForceDelete)
-	if err != nil {
-		return s.handleRemoveError(ctx, t, err)
-	}
-
-	err = s.targetStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, t, err)
-}
-
-func (s *TargetService) HandleSuccessfulRemoval(ctx context.Context, targetId string) error {
-	var err error
-	ctx, err = s.targetStore.BeginTransaction(ctx)
-	if err != nil {
-		return s.handleRemoveError(ctx, nil, err)
-	}
-
-	defer stores.RecoverAndRollback(ctx, s.targetStore)
-
 	err = s.revokeApiKey(ctx, targetId)
 	if err != nil {
 		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
 	}
 
-	t, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
-	if err != nil {
-		return s.handleRemoveError(ctx, t, stores.ErrTargetNotFound)
-	}
-
 	metadata, err := s.targetMetadataStore.Find(ctx, &stores.TargetMetadataFilter{TargetId: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, t, err)
+		// Should not fail the whole operation if the metadata cannot be found
+		log.Error(err)
+	} else {
+		err = s.targetMetadataStore.Delete(ctx, metadata)
+		if err != nil {
+			// Should not fail the whole operation if the metadata cannot be deleted
+			log.Error(err)
+		}
 	}
 
-	err = s.targetMetadataStore.Delete(ctx, metadata)
-	if err != nil {
-		return s.handleRemoveError(ctx, t, err)
-	}
-
-	err = s.targetStore.Delete(ctx, t)
+	err = s.createJob(ctx, t.Id, models.JobActionForceDelete)
 	if err != nil {
 		return s.handleRemoveError(ctx, t, err)
 	}
