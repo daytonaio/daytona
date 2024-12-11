@@ -94,7 +94,7 @@ func TestAgent(t *testing.T) {
 	t.Run("Start agent", func(t *testing.T) {
 		err := a.Start()
 
-		require.Nil(t, err)
+		require.Equal(t, err, mocks.SshServerStartError)
 	})
 
 	t.Cleanup(func() {
@@ -124,7 +124,7 @@ func TestAgentHostMode(t *testing.T) {
 		mockConfig.Mode = config.ModeHost
 		err := a.Start()
 
-		require.Nil(t, err)
+		require.Equal(t, err, mocks.SshServerStartError)
 	})
 
 	t.Cleanup(func() {

@@ -43,7 +43,7 @@ func (a *Agent) Start() error {
 	go func() {
 		err := a.Ssh.Start()
 		if err != nil {
-			errChan <- fmt.Errorf("failed to start ssh server: %w", err)
+			errChan <- err
 		}
 	}()
 

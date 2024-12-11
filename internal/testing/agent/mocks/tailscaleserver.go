@@ -6,8 +6,6 @@
 package mocks
 
 import (
-	"time"
-
 	"github.com/stretchr/testify/mock"
 )
 
@@ -16,8 +14,6 @@ type mockTailscaleServer struct {
 }
 
 func (m *mockTailscaleServer) Start() error {
-	// Give time to start the server goroutines
-	time.Sleep(1 * time.Second)
 	args := m.Called()
 	return args.Error(0)
 }

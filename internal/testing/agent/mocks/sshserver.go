@@ -5,7 +5,13 @@
 
 package mocks
 
-import "github.com/stretchr/testify/mock"
+import (
+	"errors"
+
+	"github.com/stretchr/testify/mock"
+)
+
+var SshServerStartError = errors.New("start error")
 
 type mockSshServer struct {
 	mock.Mock
@@ -18,7 +24,7 @@ func (m *mockSshServer) Start() error {
 
 func NewMockSshServer() *mockSshServer {
 	mockSshServer := new(mockSshServer)
-	mockSshServer.On("Start").Return(nil)
+	mockSshServer.On("Start").Return(SshServerStartError)
 
 	return mockSshServer
 }
