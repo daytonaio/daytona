@@ -4530,7 +4530,6 @@
         "ProjectState": {
             "type": "object",
             "required": [
-                "gitStatus",
                 "updatedAt",
                 "uptime"
             ],

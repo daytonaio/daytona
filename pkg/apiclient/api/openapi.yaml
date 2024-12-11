@@ -3779,7 +3779,6 @@ components:
         uptime:
           type: integer
       required:
-      - gitStatus
       - updatedAt
       - uptime
       type: object

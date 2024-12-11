@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**GitStatus** | [**GitStatus**](GitStatus.md) |  | 
+**GitStatus** | Pointer to [**GitStatus**](GitStatus.md) |  | [optional] 
 **UpdatedAt** | **string** |  | 
 **Uptime** | **int32** |  | 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewProjectState
 
-`func NewProjectState(gitStatus GitStatus, updatedAt string, uptime int32, ) *ProjectState`
+`func NewProjectState(updatedAt string, uptime int32, ) *ProjectState`
 
 NewProjectState instantiates a new ProjectState object
 This constructor will assign default values to properties that have it defined,
@@ -46,6 +46,11 @@ and a boolean to check if the value has been set.
 
 SetGitStatus sets GitStatus field to given value.
 
+### HasGitStatus
+
+`func (o *ProjectState) HasGitStatus() bool`
+
+HasGitStatus returns a boolean if a field has been set.
 
 ### GetUpdatedAt
 
