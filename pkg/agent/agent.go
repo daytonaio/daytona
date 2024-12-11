@@ -54,10 +54,12 @@ func (a *Agent) Start() error {
 		}
 	}()
 
-	err := a.Tailscale.Start()
-	if err != nil {
-		return err
-	}
+	go func() {
+		err := a.Tailscale.Start()
+		if err != nil {
+			errChan <- err
+		}
+	}()
 
 	log.Info("Daytona Agent started")
 	return <-errChan
