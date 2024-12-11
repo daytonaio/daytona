@@ -25,6 +25,8 @@ import (
 )
 
 func (a *Agent) Start() error {
+	errChan := make(chan error)
+
 	a.initLogs()
 
 	log.Info("Starting Daytona Agent")
@@ -41,11 +43,17 @@ func (a *Agent) Start() error {
 	go func() {
 		err := a.Ssh.Start()
 		if err != nil {
-			log.Error(fmt.Sprintf("failed to start ssh server: %s", err))
+			errChan <- err
 		}
 	}()
 
-	return a.Tailscale.Start()
+	err := a.Tailscale.Start()
+	if err != nil {
+		return err
+	}
+
+	log.Info("Daytona Agent started")
+	return <-errChan
 }
 
 func (a *Agent) startProjectMode() error {

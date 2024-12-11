@@ -4,10 +4,11 @@
 package docker
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
-	"time"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/provider/util"
@@ -45,15 +46,19 @@ func (d *DockerClient) StartProject(opts *CreateProjectOptions, daytonaDownloadU
 func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, daytonaDownloadUrl string, logWriter io.Writer) error {
 	errChan := make(chan error)
 
+	r, w := io.Pipe()
+	writer := io.MultiWriter(w, logWriter)
+
 	go func() {
 		result, err := d.ExecSync(d.GetProjectContainerName(p), container.ExecOptions{
 			Cmd:          []string{"bash", "-c", util.GetProjectStartScript(daytonaDownloadUrl, p.ApiKey)},
 			AttachStdout: true,
 			AttachStderr: true,
 			User:         containerUser,
-		}, logWriter)
+		}, writer)
 		if err != nil {
 			errChan <- err
+			return
 		}
 
 		if result.ExitCode != 0 {
@@ -62,9 +67,13 @@ func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, dayt
 	}()
 
 	go func() {
-		// TODO: Figure out how to check if the agent is running here
-		time.Sleep(5 * time.Second)
-		errChan <- nil
+		scanner := bufio.NewScanner(r)
+		for scanner.Scan() {
+			if strings.Contains(scanner.Text(), "Daytona Agent started") {
+				errChan <- nil
+				return
+			}
+		}
 	}()
 
 	return <-errChan
