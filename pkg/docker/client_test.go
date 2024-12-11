@@ -26,13 +26,13 @@ var project1 = &project.Project{
 	Image:       "test-image:tag",
 	User:        "test-user",
 	WorkspaceId: "123",
-	Target:      "local",
+	Target:      "test",
 }
 
 var workspace1 = &workspace.Workspace{
 	Id:     "123",
 	Name:   "test",
-	Target: "local",
+	Target: "test",
 	Projects: []*project.Project{
 		project1,
 	},
