@@ -9,9 +9,11 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/go-connections/nat"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -43,12 +45,32 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 		})
 	}
 
-	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Project), &container.HostConfig{
+	var availablePort *uint16
+	var portBindings map[nat.Port][]nat.PortBinding
+
+	if opts.Project.Target == "local" {
+		p, err := ports.GetAvailableEphemeralPort()
+		if err != nil {
+			log.Error(err)
+		} else {
+			availablePort = &p
+			portBindings = make(map[nat.Port][]nat.PortBinding)
+			portBindings["2280/tcp"] = []nat.PortBinding{
+				{
+					HostIP:   "0.0.0.0",
+					HostPort: fmt.Sprintf("%d", *availablePort),
+				},
+			}
+		}
+	}
+
+	c, err := d.apiClient.ContainerCreate(ctx, GetContainerCreateConfig(opts.Project, availablePort), &container.HostConfig{
 		Privileged: true,
 		Mounts:     mounts,
 		ExtraHosts: []string{
 			"host.docker.internal:host-gateway",
 		},
+		PortBindings: portBindings,
 	}, nil, nil, d.GetProjectContainerName(opts.Project))
 	if err != nil {
 		return err
@@ -84,25 +106,37 @@ func (d *DockerClient) initProjectContainer(opts *CreateProjectOptions, mountPro
 	return nil
 }
 
-func GetContainerCreateConfig(project *project.Project) *container.Config {
+func GetContainerCreateConfig(project *project.Project, toolboxApiHostPort *uint16) *container.Config {
 	envVars := []string{}
 
 	for key, value := range project.EnvVars {
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
 	}
 
+	labels := map[string]string{
+		"daytona.workspace.id":                     project.WorkspaceId,
+		"daytona.workspace.project.name":           project.Name,
+		"daytona.workspace.project.repository.url": project.Repository.Url,
+	}
+
+	if toolboxApiHostPort != nil {
+		labels["daytona.toolbox.api.hostPort"] = fmt.Sprintf("%d", *toolboxApiHostPort)
+	}
+
+	exposedPorts := nat.PortSet{}
+	if toolboxApiHostPort != nil {
+		exposedPorts["2280/tcp"] = struct{}{}
+	}
+
 	return &container.Config{
-		Hostname: project.Name,
-		Image:    project.Image,
-		Labels: map[string]string{
-			"daytona.workspace.id":                     project.WorkspaceId,
-			"daytona.workspace.project.name":           project.Name,
-			"daytona.workspace.project.repository.url": project.Repository.Url,
-		},
+		Hostname:     project.Name,
+		Image:        project.Image,
+		Labels:       labels,
 		User:         project.User,
 		Env:          envVars,
 		Entrypoint:   []string{"sleep", "infinity"},
 		AttachStdout: true,
 		AttachStderr: true,
+		ExposedPorts: exposedPorts,
 	}
 }
