@@ -71,7 +71,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 	}
 
 	var createDtos []apiclient.CreateProjectDTO
-	existingProjectConfigNames, err := getExistingProjectConfigNames(apiClient)
+	existingProjectConfigNames, err := GetExistingProjectConfigNames(apiClient)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +105,7 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		}
 	}
 
-	create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDtos, *projectDefaults)
+	create.ProjectsConfigurationChanged, err = create.RunProjectConfiguration(&createDtos, *projectDefaults, false)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,8 @@ func RunProjectConfigAddFlow(apiClient *apiclient.APIClient, gitProviders []apic
 		Defaults:      projectDefaults,
 	}
 
-	err = create.RunSubmissionForm(submissionFormConfig)
+	pcFlag := false
+	err = create.RunSubmissionForm(submissionFormConfig, &pcFlag)
 	if err != nil {
 		return nil, err
 	}
@@ -190,7 +191,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	existingProjectConfigNames, err := getExistingProjectConfigNames(apiClient)
+	existingProjectConfigNames, err := GetExistingProjectConfigNames(apiClient)
 	if err != nil {
 		return nil, err
 	}
@@ -259,7 +260,7 @@ func processCmdArgument(argument string, apiClient *apiclient.APIClient, ctx con
 	return &newProjectConfig.Name, nil
 }
 
-func getExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, error) {
+func GetExistingProjectConfigNames(apiClient *apiclient.APIClient) ([]string, error) {
 	var existingProjectConfigNames []string
 
 	existingProjectConfigs, res, err := apiClient.ProjectConfigAPI.ListProjectConfigs(context.Background()).Execute()

@@ -31,8 +31,6 @@ type Server struct {
 }
 
 func (s *Server) Start() error {
-	errChan := make(chan error)
-
 	tsnetServer, err := s.connect()
 	if err != nil {
 		return fmt.Errorf("failed to connect to server: %w", err)
@@ -80,7 +78,7 @@ func (s *Server) Start() error {
 		}
 	}(tsnetServer)
 
-	return <-errChan
+	return nil
 }
 
 func (s *Server) getNetworkKey() (string, error) {
