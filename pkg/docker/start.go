@@ -58,6 +58,7 @@ func (d *DockerClient) startDaytonaAgent(p *project.Project, containerUser, dayt
 		}, writer)
 		if err != nil {
 			errChan <- err
+			return
 		}
 
 		if result.ExitCode != 0 {
