@@ -259,14 +259,12 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
-				// if target.Name == *property.DisabledPredicate {
-				// 	allowedKeys := []string{"Sock Path"}
-				// 	for key := range optionMap {
-				// 		if !contains(allowedKeys, key) {
-				// 			return fmt.Errorf("unexpected property '%s' in options for target '%s'", key, target.Name)
-				// 		}
-				// 	}
-				// }
+				allowedKeys := []string{"Sock Path"}
+				for key := range optionMap {
+					if !contains(allowedKeys, key) {
+						return fmt.Errorf("unexpected property '%s' in options for target '%s'", key, target.Name)
+					}
+				}
 				continue
 			}
 		}
@@ -318,6 +316,14 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	return nil
 }
 
+func contains(slice []string, item string) bool {
+	for _, v := range slice {
+		if v == item {
+			return true
+		}
+	}
+	return false
+}
 
 func init() {
 	TargetSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
