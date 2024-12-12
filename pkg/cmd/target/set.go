@@ -250,7 +250,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	}
 	for optionKey := range optionMap {
 		if _, exists := targetManifest[optionKey]; !exists {
-			return fmt.Errorf("unexpected property '%s' in options for target Manifest '%s'", optionKey, target.Name)
+			return fmt.Errorf("invalid property '%s' for target Manifest '%s'", optionKey, target.Name)
 		}
 	}
 
