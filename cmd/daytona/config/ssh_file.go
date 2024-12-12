@@ -335,7 +335,7 @@ func RemoveWorkspaceSshEntries(profileId, workspaceId, projectName string) error
 	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
 	contentToDelete := regex.FindString(existingContent)
 	if contentToDelete == "" {
-		return fmt.Errorf("no SSH entry found for project %s", projectName)
+		return nil
 	}
 
 	newContent := strings.ReplaceAll(existingContent, contentToDelete, "")
