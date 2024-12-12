@@ -259,9 +259,18 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
+				// if target.Name == *property.DisabledPredicate {
+				// 	allowedKeys := []string{"Sock Path"}
+				// 	for key := range optionMap {
+				// 		if !contains(allowedKeys, key) {
+				// 			return fmt.Errorf("unexpected property '%s' in options for target '%s'", key, target.Name)
+				// 		}
+				// 	}
+				// }
 				continue
 			}
 		}
+
 		switch *property.Type {
 		case apiclient.ProviderTargetPropertyTypeFloat, apiclient.ProviderTargetPropertyTypeInt:
 			_, isNumber := optionMap[name].(float64)
@@ -280,11 +289,20 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 			if !isBool {
 				return fmt.Errorf("invalid type for %s, expected boolean", name)
 			}
-
 		case apiclient.ProviderTargetPropertyTypeOption:
-			_, isString := optionMap[name].(string)
-			if !isString {
-				return fmt.Errorf("invalid type for %s, expected string for option", name)
+			optionValue, ok := optionMap[name].(string)
+			if !ok {
+				return fmt.Errorf("invalid value for '%s': expected a string", name)
+			}
+			valid := false
+			for _, allowedOption := range property.Options {
+				if optionValue == allowedOption {
+					valid = true
+					break
+				}
+			}
+			if !valid {
+				return fmt.Errorf("invalid value '%s' for '%s': valid options are %v", optionValue, target.Name, property.Options)
 			}
 
 		case apiclient.ProviderTargetPropertyTypeFilePath:
@@ -299,6 +317,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	}
 	return nil
 }
+
 
 func init() {
 	TargetSetCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
