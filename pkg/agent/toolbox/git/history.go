@@ -6,9 +6,8 @@ package git
 import (
 	"errors"
 
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
 func GetCommitHistory(c *gin.Context) {
@@ -18,39 +17,15 @@ func GetCommitHistory(c *gin.Context) {
 		return
 	}
 
-	repo, err := git.PlainOpen(path)
+	gitService := git.Service{
+		ProjectDir: path,
+	}
+
+	log, err := gitService.Log()
 	if err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
 
-	ref, err := repo.Head()
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	commits, err := repo.Log(&git.LogOptions{From: ref.Hash()})
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	var history []GitCommitInfo
-	err = commits.ForEach(func(commit *object.Commit) error {
-		history = append(history, GitCommitInfo{
-			Hash:      commit.Hash.String(),
-			Author:    commit.Author.Name,
-			Email:     commit.Author.Email,
-			Message:   commit.Message,
-			Timestamp: commit.Author.When,
-		})
-		return nil
-	})
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	c.JSON(200, history)
+	c.JSON(200, log)
 }

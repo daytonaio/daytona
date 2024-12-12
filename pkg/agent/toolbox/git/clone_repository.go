@@ -4,11 +4,9 @@
 package git
 
 import (
-	"fmt"
-
+	"github.com/daytonaio/daytona/pkg/git"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -19,48 +17,39 @@ func CloneRepository(c *gin.Context) {
 		return
 	}
 
-	options := &git.CloneOptions{
-		URL:      req.URL,
-		Progress: nil,
+	branch := "main"
+	if req.Branch != nil {
+		branch = *req.Branch
 	}
+
+	repo := gitprovider.GitRepository{
+		Url:    req.URL,
+		Branch: branch,
+	}
+
+	if req.CommitID != nil {
+		repo.Target = gitprovider.CloneTargetCommit
+		repo.Sha = *req.CommitID
+	}
+
+	gitService := git.Service{
+		ProjectDir: req.Path,
+	}
+
+	var auth *http.BasicAuth
 
 	// Set authentication if provided
 	if req.Username != nil && req.Password != nil {
-		options.Auth = &http.BasicAuth{
+		auth = &http.BasicAuth{
 			Username: *req.Username,
 			Password: *req.Password,
 		}
 	}
 
-	// Handle branch or commit specification
-	if req.Branch != nil {
-		options.ReferenceName = plumbing.NewBranchReferenceName(*req.Branch)
-		options.SingleBranch = true
-	}
-
-	// Clone the repository
-	repo, err := git.PlainClone(req.Path, false, options)
+	err := gitService.CloneRepository(&repo, auth)
 	if err != nil {
 		c.AbortWithError(400, err)
 		return
-	}
-
-	// If a specific commit is requested, checkout that commit
-	if req.CommitID != nil {
-		worktree, err := repo.Worktree()
-		if err != nil {
-			c.AbortWithError(400, fmt.Errorf("failed to get worktree: %w", err))
-			return
-		}
-
-		hash := plumbing.NewHash(*req.CommitID)
-		err = worktree.Checkout(&git.CheckoutOptions{
-			Hash: hash,
-		})
-		if err != nil {
-			c.AbortWithError(400, fmt.Errorf("failed to checkout commit: %w", err))
-			return
-		}
 	}
 
 	c.Status(200)

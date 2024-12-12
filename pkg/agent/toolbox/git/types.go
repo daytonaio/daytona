@@ -3,8 +3,6 @@
 
 package git
 
-import "time"
-
 type GitAddRequest struct {
 	Path string `json:"path" validate:"required"`
 	// files to add (use . for all files)
@@ -35,14 +33,6 @@ type GitBranchRequest struct {
 	Path string `json:"path" validate:"required"`
 	Name string `json:"name" validate:"required"`
 } // @name GitBranchRequest
-
-type GitCommitInfo struct {
-	Hash      string    `json:"hash" validate:"required"`
-	Author    string    `json:"author" validate:"required"`
-	Email     string    `json:"email" validate:"required"`
-	Message   string    `json:"message" validate:"required"`
-	Timestamp time.Time `json:"timestamp" validate:"required"`
-} // @name GitCommitInfo
 
 type ListBranchResponse struct {
 	Branches []string `json:"branches" validate:"required"`

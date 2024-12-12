@@ -6,8 +6,9 @@ package git
 import (
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
+	go_git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 )
 
@@ -18,19 +19,11 @@ func CommitChanges(c *gin.Context) {
 		return
 	}
 
-	repo, err := git.PlainOpen(req.Path)
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
+	gitService := git.Service{
+		ProjectDir: req.Path,
 	}
 
-	worktree, err := repo.Worktree()
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	commit, err := worktree.Commit(req.Message, &git.CommitOptions{
+	commitSha, err := gitService.Commit(req.Message, &go_git.CommitOptions{
 		Author: &object.Signature{
 			Name:  req.Author,
 			Email: req.Email,
@@ -44,6 +37,6 @@ func CommitChanges(c *gin.Context) {
 	}
 
 	c.JSON(200, GitCommitResponse{
-		Hash: commit.String(),
+		Hash: commitSha,
 	})
 }
