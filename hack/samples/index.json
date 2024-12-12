@@ -111,12 +111,12 @@
   },
   {
     "name": "Next.js - Video Generation AI",
-    "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.",
+    "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
   },
   {
     "name": "Rust - Actix Web Server",
-    "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
+    "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.",
     "gitUrl": "https://github.com/daytonaio/sample-rust-actix"
   } 
 ]
