@@ -4,9 +4,8 @@
 package git
 
 import (
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 func CreateBranch(c *gin.Context) {
@@ -16,24 +15,11 @@ func CreateBranch(c *gin.Context) {
 		return
 	}
 
-	repo, err := git.PlainOpen(req.Path)
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
+	gitService := git.Service{
+		ProjectDir: req.Path,
 	}
 
-	worktree, err := repo.Worktree()
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	err = worktree.Checkout(&git.CheckoutOptions{
-		Create: true,
-		Branch: plumbing.NewBranchReferenceName(req.Name),
-	})
-
-	if err != nil {
+	if err := gitService.CreateBranch(req.Name); err != nil {
 		c.AbortWithError(400, err)
 		return
 	}
