@@ -248,6 +248,11 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	if err := json.Unmarshal([]byte(target.Options), &optionMap); err != nil {
 		return fmt.Errorf("failed to parse options JSON: %w", err)
 	}
+	for optionKey := range optionMap {
+		if _, exists := targetManifest[optionKey]; !exists {
+			return fmt.Errorf("unexpected property '%s' in options for target Manifest '%s'", optionKey, target.Name)
+		}
+	}
 
 	sortedKeys := make([]string, 0, len(targetManifest))
 	for k := range targetManifest {
@@ -259,12 +264,6 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
-				allowedKeys := []string{"Sock Path"}
-				for key := range optionMap {
-					if !contains(allowedKeys, key) {
-						return fmt.Errorf("unexpected property '%s' in options for target '%s'", key, target.Name)
-					}
-				}
 				continue
 			}
 		}
@@ -314,15 +313,6 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		}
 	}
 	return nil
-}
-
-func contains(slice []string, item string) bool {
-	for _, v := range slice {
-		if v == item {
-			return true
-		}
-	}
-	return false
 }
 
 func init() {
