@@ -6,9 +6,8 @@ package git
 import (
 	"errors"
 
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 func ListBranches(c *gin.Context) {
@@ -18,23 +17,11 @@ func ListBranches(c *gin.Context) {
 		return
 	}
 
-	repo, err := git.PlainOpen(path)
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
+	gitService := git.Service{
+		ProjectDir: path,
 	}
 
-	branches, err := repo.Branches()
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	var branchList []string
-	err = branches.ForEach(func(ref *plumbing.Reference) error {
-		branchList = append(branchList, ref.Name().Short())
-		return nil
-	})
+	branchList, err := gitService.ListBranches()
 	if err != nil {
 		c.AbortWithError(400, err)
 		return

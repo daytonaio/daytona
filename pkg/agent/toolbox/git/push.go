@@ -4,8 +4,9 @@
 package git
 
 import (
+	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
+	go_git "github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
@@ -16,22 +17,20 @@ func PushChanges(c *gin.Context) {
 		return
 	}
 
-	repo, err := git.PlainOpen(req.Path)
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
-	}
-
-	options := &git.PushOptions{}
+	var auth *http.BasicAuth
 	if req.Username != nil && req.Password != nil {
-		options.Auth = &http.BasicAuth{
+		auth = &http.BasicAuth{
 			Username: *req.Username,
 			Password: *req.Password,
 		}
 	}
 
-	err = repo.Push(options)
-	if err != nil && err != git.NoErrAlreadyUpToDate {
+	gitService := git.Service{
+		ProjectDir: req.Path,
+	}
+
+	err := gitService.Push(auth)
+	if err != nil && err != go_git.NoErrAlreadyUpToDate {
 		c.AbortWithError(400, err)
 		return
 	}
