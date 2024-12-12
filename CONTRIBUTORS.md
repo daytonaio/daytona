@@ -25,3 +25,4 @@ We contributors to Daytona:
 * Twac (@Twacqwq)
 * Mirko Dzaja (@MDzaja)
 * Luke Bryant (@LDavidBryant)
+* Marijan Cipcic (@marijancip123)
