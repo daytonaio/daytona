@@ -227,12 +227,19 @@ func GetBranchFromWorkspaceTemplate(ctx context.Context, workspaceTemplate *apic
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
+	gitProviderId := gitProviderConfigId
+	gitProvider, _, err := apiClient.GitProviderAPI.GetGitProvider(ctx, gitProviderConfigId).Execute()
+	if err == nil && gitProvider != nil {
+		gitProviderId = gitProvider.ProviderId
+	}
+
 	branchWizardConfig := BranchWizardParams{
 		ApiClient:           apiClient,
 		GitProviderConfigId: gitProviderConfigId,
 		NamespaceId:         repoResponse.Owner,
 		ChosenRepo:          repoResponse,
 		WorkspaceOrder:      workspaceOrder,
+		ProviderId:          gitProviderId,
 	}
 
 	repo, err := SetBranchFromWizard(branchWizardConfig)
@@ -282,7 +289,7 @@ func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags cmd_common.Works
 		if len(parts) == 2 {
 			envVars[parts[0]] = parts[1]
 		} else {
-			return nil, fmt.Errorf("Invalid environment variable format: %s\n", envVar)
+			return nil, fmt.Errorf("invalid environment variable format: %s", envVar)
 		}
 	}
 
