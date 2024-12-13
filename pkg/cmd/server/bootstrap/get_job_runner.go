@@ -204,6 +204,12 @@ func GetBuildJobFactory(c *server.Config, configDir string, version string, tele
 		builderRegistry = envVars.FindContainerRegistry(c.BuilderRegistryServer)
 	}
 
+	if builderRegistry == nil {
+		builderRegistry = &models.ContainerRegistry{
+			Server: util.GetFrpcRegistryDomain(c.Id, c.Frps.Domain),
+		}
+	}
+
 	cr := envVars.FindContainerRegistryByImageName(c.BuilderImage)
 
 	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
