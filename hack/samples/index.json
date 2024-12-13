@@ -119,6 +119,11 @@
     "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
     "gitUrl": "https://github.com/daytonaio/sample-django-crisis-monitor"
   },
+  { 
+     "name": "Rust - Actix Web Server", 
+     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.", 
+     "gitUrl": "https://github.com/daytonaio/sample-rust-actix" 
+  },
   {
     "name": "Next.js - Festigo",
     "description": "Festigo is an event planning and event organizing website that bring guests, vendors and event organizers(the people hosting the event) under a single umbrella.",
