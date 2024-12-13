@@ -5,7 +5,6 @@ package workspaces
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -31,6 +30,21 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 	ws.Name = util.AddDeletedToName(ws.Name)
 
 	err = s.workspaceStore.Save(ctx, ws)
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	err = s.revokeApiKey(ctx, workspaceId)
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	metadata, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{WorkspaceId: &workspaceId})
+	if err != nil {
+		return s.handleRemoveError(ctx, ws, err)
+	}
+
+	err = s.workspaceMetadataStore.Delete(ctx, metadata)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}
@@ -66,46 +80,25 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 		return s.handleRemoveError(ctx, ws, err)
 	}
 
-	err = s.createJob(ctx, ws.Id, models.JobActionForceDelete)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.workspaceStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, ws, err)
-}
-
-func (s *WorkspaceService) HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error {
-	var err error
-	ctx, err = s.workspaceStore.BeginTransaction(ctx)
-	if err != nil {
-		return s.handleRemoveError(ctx, nil, err)
-	}
-
-	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
-
-	err = s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", workspaceId))
+	err = s.revokeApiKey(ctx, workspaceId)
 	if err != nil {
 		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
 	}
 
-	ws, err := s.workspaceStore.Find(ctx, workspaceId)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
-	}
-
 	metadata, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{WorkspaceId: &workspaceId})
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		// Should not fail the whole operation if the metadata cannot be found
+		log.Error(err)
+	} else {
+		err = s.workspaceMetadataStore.Delete(ctx, metadata)
+		if err != nil {
+			// Should not fail the whole operation if the metadata cannot be deleted
+			log.Error(err)
+		}
 	}
 
-	err = s.workspaceMetadataStore.Delete(ctx, metadata)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.workspaceStore.Delete(ctx, ws)
+	err = s.createJob(ctx, ws.Id, models.JobActionForceDelete)
 	if err != nil {
 		return s.handleRemoveError(ctx, ws, err)
 	}

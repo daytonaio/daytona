@@ -23,7 +23,6 @@ type ITargetService interface {
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
-	HandleSuccessfulRemoval(ctx context.Context, targetId string) error
 
 	SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 }
