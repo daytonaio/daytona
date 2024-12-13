@@ -113,7 +113,6 @@
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
-
   },
   {
     "name": "Rust - Actix Web Server",
