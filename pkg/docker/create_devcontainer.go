@@ -19,6 +19,7 @@ import (
 	"github.com/compose-spec/compose-go/v2/cli"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/docker/docker/api/types/container"
@@ -41,16 +42,15 @@ type DevcontainerPaths struct {
 type CreateDevcontainerOptions struct {
 	WorkspaceDir string
 	// Name of the project inside the devcontainer
-	WorkspaceFolderName      string
-	BuildConfig              *models.BuildConfig
-	LogWriter                io.Writer
-	SshClient                *ssh.Client
-	ContainerRegistry        *models.ContainerRegistry
-	Prebuild                 bool
-	EnvVars                  map[string]string
-	IdLabels                 map[string]string
-	BuilderImage             string
-	BuilderContainerRegistry *models.ContainerRegistry
+	WorkspaceFolderName string
+	BuildConfig         *models.BuildConfig
+	LogWriter           io.Writer
+	SshClient           *ssh.Client
+	ContainerRegistries common.ContainerRegistries
+	Prebuild            bool
+	EnvVars             map[string]string
+	IdLabels            map[string]string
+	BuilderImage        string
 }
 
 func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error) {
@@ -67,7 +67,8 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 		}
 	}
 
-	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+	cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuilderImage)
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, cr, opts.LogWriter)
 	if err != nil {
 		return "", "", err
 	}
@@ -278,7 +279,8 @@ func (d *DockerClient) CreateFromDevcontainer(opts CreateDevcontainerOptions) (s
 	}
 
 	if opts.BuildConfig.CachedBuild != nil {
-		err := d.PullImage(opts.BuildConfig.CachedBuild.Image, opts.ContainerRegistry, opts.LogWriter)
+		cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuildConfig.CachedBuild.Image)
+		err := d.PullImage(opts.BuildConfig.CachedBuild.Image, cr, opts.LogWriter)
 		if err != nil {
 			opts.LogWriter.Write([]byte(fmt.Sprintf("Error pulling cached build image: %v. Continuing without cache.\n", err)))
 		}

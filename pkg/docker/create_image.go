@@ -24,7 +24,8 @@ func (d *DockerClient) createWorkspaceFromImage(opts *CreateWorkspaceOptions, pu
 		return d.initWorkspaceContainer(opts, mountWorkspaceDir)
 	}
 
-	err := d.PullImage(opts.Workspace.Image, opts.ContainerRegistry, opts.LogWriter)
+	cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.Workspace.Image)
+	err := d.PullImage(opts.Workspace.Image, cr, opts.LogWriter)
 	if err != nil {
 		return err
 	}

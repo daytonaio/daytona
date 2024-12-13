@@ -35,6 +35,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey"
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
+	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/env"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
@@ -319,6 +320,11 @@ func (a *ApiServer) Start() error {
 		envVarController.GET("", env.ListEnvironmentVariables)
 		envVarController.PUT("", env.SetEnvironmentVariable)
 		envVarController.DELETE("/:key", env.DeleteEnvironmentVariable)
+	}
+
+	containerRegistryController := protected.Group("/container-registry")
+	{
+		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
 	}
 
 	samplesController := protected.Group("/sample")
