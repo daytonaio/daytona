@@ -81,6 +81,7 @@ func CreateBuild(apiClient *apiclient.APIClient, workspaceTemplate *apiclient.Wo
 		WorkspaceTemplateName: workspaceTemplate.Name,
 		Branch:                branch,
 		PrebuildId:            prebuildId,
+		EnvVars:               workspaceTemplate.EnvVars,
 	}
 
 	buildId, res, err := apiClient.BuildAPI.CreateBuild(ctx).CreateBuildDto(createBuildDto).Execute()
