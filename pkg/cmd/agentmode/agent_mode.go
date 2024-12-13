@@ -34,6 +34,7 @@ func Execute() error {
 	cmd.SetupRootCommand(agentModeRootCmd)
 	agentModeRootCmd.AddGroup(&cobra.Group{ID: util.TARGET_GROUP, Title: "Workspace & Target"})
 	agentModeRootCmd.AddCommand(gitCredCmd)
+	agentModeRootCmd.AddCommand(dockerCredCmd)
 	agentModeRootCmd.AddCommand(AgentCmd)
 	agentModeRootCmd.AddCommand(startCmd)
 	agentModeRootCmd.AddCommand(stopCmd)
