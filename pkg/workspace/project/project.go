@@ -36,7 +36,7 @@ type ProjectInfo struct {
 type ProjectState struct {
 	UpdatedAt string     `json:"updatedAt" validate:"required"`
 	Uptime    uint64     `json:"uptime" validate:"required"`
-	GitStatus *GitStatus `json:"gitStatus" validate:"required"`
+	GitStatus *GitStatus `json:"gitStatus" validate:"optional"`
 } // @name ProjectState
 
 type GitStatus struct {

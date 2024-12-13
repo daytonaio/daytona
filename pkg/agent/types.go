@@ -19,10 +19,15 @@ type TailscaleServer interface {
 	Start() error
 }
 
+type ToolboxServer interface {
+	Start() error
+}
+
 type Agent struct {
 	Config           *config.Config
 	Git              git.IGitService
 	Ssh              SshServer
+	Toolbox          ToolboxServer
 	Tailscale        TailscaleServer
 	LogWriter        io.Writer
 	TelemetryEnabled bool

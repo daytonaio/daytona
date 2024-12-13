@@ -28,6 +28,8 @@ type Config struct {
 	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
 	Server      DaytonaServerConfig
 	Mode        Mode
+
+	SkipClone string `envconfig:"DAYTONA_SKIP_CLONE"`
 }
 
 type Mode string

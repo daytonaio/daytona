@@ -113,5 +113,15 @@
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
-  } 
+  }, 
+  {
+    "name": "Django - CrisisMonitor",
+    "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
+    "gitUrl": "https://github.com/daytonaio/sample-django-crisis-monitor"
+  },
+  {
+    "name": "Next.js - Festigo",
+    "description": "Festigo is an event planning and event organizing website that bring guests, vendors and event organizers(the people hosting the event) under a single umbrella.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-event-planner"
+  }
 ]
