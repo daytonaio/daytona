@@ -24,7 +24,8 @@ func (d *DockerClient) startDevcontainerWorkspace(opts *CreateWorkspaceOptions) 
 }
 
 func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions) error {
-	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+	cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuilderImage)
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, cr, opts.LogWriter)
 	if err != nil {
 		return err
 	}

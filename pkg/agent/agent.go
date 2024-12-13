@@ -160,6 +160,11 @@ func (a *Agent) startWorkspaceMode() error {
 		}
 	}
 
+	err := a.DockerCredHelper.SetDockerConfig()
+	if err != nil {
+		log.Error(fmt.Sprintf("failed to set docker config: %s", err))
+	}
+
 	go func() {
 		for {
 			err := a.updateWorkspaceMetadata()

@@ -12,6 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
 	t_workspaces "github.com/daytonaio/daytona/internal/testing/server/workspaces"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -168,8 +169,6 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {
-		var containerRegistry *models.ContainerRegistry
-
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
 		apiKeyService.On("Generate", models.ApiKeyTypeWorkspace, fmt.Sprintf("ws-%s", createWorkspaceDTO.Id)).Return(createWorkspaceDTO.Name, nil)
@@ -192,21 +191,27 @@ func TestTargetService(t *testing.T) {
 			ClientId:      "test",
 		})
 
+		containerRegistries := common.ContainerRegistries{
+			"test": &models.ContainerRegistry{
+				Server:   "test",
+				Username: "test",
+				Password: "test",
+			},
+		}
+
 		mockProvisioner.On("CreateWorkspace", provisioner.WorkspaceParams{
-			Workspace:                     ws,
-			Target:                        tg,
-			ContainerRegistry:             containerRegistry,
-			GitProviderConfig:             &gitProviderConfig,
-			BuilderImage:                  defaultWorkspaceImage,
-			BuilderImageContainerRegistry: containerRegistry,
+			Workspace:           ws,
+			Target:              tg,
+			ContainerRegistries: containerRegistries,
+			GitProviderConfig:   &gitProviderConfig,
+			BuilderImage:        defaultWorkspaceImage,
 		}).Return(nil)
 		mockProvisioner.On("StartWorkspace", provisioner.WorkspaceParams{
-			Workspace:                     ws,
-			Target:                        tg,
-			ContainerRegistry:             containerRegistry,
-			GitProviderConfig:             &gitProviderConfig,
-			BuilderImage:                  defaultWorkspaceImage,
-			BuilderImageContainerRegistry: containerRegistry,
+			Workspace:           ws,
+			Target:              tg,
+			ContainerRegistries: containerRegistries,
+			GitProviderConfig:   &gitProviderConfig,
+			BuilderImage:        defaultWorkspaceImage,
 		}).Return(nil)
 
 		gitProviderService.On("GetConfig", "github").Return(&gitProviderConfig, nil)

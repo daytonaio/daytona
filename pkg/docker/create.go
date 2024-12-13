@@ -41,7 +41,8 @@ func (d *DockerClient) CreateWorkspace(opts *CreateWorkspaceOptions) error {
 	pulledImages := map[string]bool{}
 
 	if opts.Workspace.BuildConfig != nil {
-		err := d.PullImage(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+		cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuilderImage)
+		err := d.PullImage(opts.BuilderImage, cr, opts.LogWriter)
 		if err != nil {
 			return err
 		}
@@ -202,15 +203,14 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 
 func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateWorkspaceOptions, prebuild bool) CreateDevcontainerOptions {
 	return CreateDevcontainerOptions{
-		WorkspaceDir:             opts.WorkspaceDir,
-		WorkspaceFolderName:      opts.Workspace.WorkspaceFolderName(),
-		BuildConfig:              opts.Workspace.BuildConfig,
-		LogWriter:                opts.LogWriter,
-		SshClient:                opts.SshClient,
-		ContainerRegistry:        opts.ContainerRegistry,
-		BuilderImage:             opts.BuilderImage,
-		BuilderContainerRegistry: opts.BuilderContainerRegistry,
-		EnvVars:                  opts.Workspace.EnvVars,
+		WorkspaceDir:        opts.WorkspaceDir,
+		WorkspaceFolderName: opts.Workspace.WorkspaceFolderName(),
+		BuildConfig:         opts.Workspace.BuildConfig,
+		LogWriter:           opts.LogWriter,
+		SshClient:           opts.SshClient,
+		ContainerRegistries: opts.ContainerRegistries,
+		BuilderImage:        opts.BuilderImage,
+		EnvVars:             opts.Workspace.EnvVars,
 		IdLabels: map[string]string{
 			"daytona.target.id":    opts.Workspace.TargetId,
 			"daytona.workspace.id": opts.Workspace.Id,

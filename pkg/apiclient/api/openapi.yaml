@@ -182,6 +182,32 @@ paths:
       summary: Get build data
       tags:
       - build
+  /container-registry/{server}:
+    get:
+      description: Get container registry
+      operationId: GetContainerRegistry
+      parameters:
+      - description: Container registry server
+        in: path
+        name: server
+        required: true
+        schema:
+          type: string
+      - description: Workspace ID or Name
+        in: query
+        name: workspaceId
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContainerRegistry'
+          description: OK
+      summary: Get container registry
+      tags:
+      - container registry
   /env:
     get:
       description: List environment variables
@@ -2477,6 +2503,23 @@ components:
       required:
       - image
       - user
+      type: object
+    ContainerRegistry:
+      example:
+        server: server
+        password: password
+        username: username
+      properties:
+        password:
+          type: string
+        server:
+          type: string
+        username:
+          type: string
+      required:
+      - password
+      - server
+      - username
       type: object
     CreateBuildDTO:
       example:
