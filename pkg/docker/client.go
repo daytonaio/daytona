@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
 	"github.com/docker/docker/api/types"
@@ -17,14 +18,13 @@ import (
 )
 
 type CreateWorkspaceOptions struct {
-	Workspace                *models.Workspace
-	WorkspaceDir             string
-	ContainerRegistry        *models.ContainerRegistry
-	LogWriter                io.Writer
-	Gpc                      *models.GitProviderConfig
-	SshClient                *ssh.Client
-	BuilderImage             string
-	BuilderContainerRegistry *models.ContainerRegistry
+	Workspace           *models.Workspace
+	WorkspaceDir        string
+	ContainerRegistries common.ContainerRegistries
+	LogWriter           io.Writer
+	Gpc                 *models.GitProviderConfig
+	SshClient           *ssh.Client
+	BuilderImage        string
 }
 
 type IDockerClient interface {
