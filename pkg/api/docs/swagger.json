@@ -251,6 +251,42 @@
                 }
             }
         },
+        "/container-registry/{server}": {
+            "get": {
+                "description": "Get container registry",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "container registry"
+                ],
+                "summary": "Get container registry",
+                "operationId": "GetContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container registry server",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                }
+            }
+        },
         "/env": {
             "get": {
                 "description": "List environment variables",
@@ -3502,6 +3538,25 @@
                     "type": "string"
                 },
                 "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "ContainerRegistry": {
+            "type": "object",
+            "required": [
+                "password",
+                "server",
+                "username"
+            ],
+            "properties": {
+                "password": {
+                    "type": "string"
+                },
+                "server": {
+                    "type": "string"
+                },
+                "username": {
                     "type": "string"
                 }
             }
