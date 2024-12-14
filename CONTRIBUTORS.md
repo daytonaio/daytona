@@ -29,3 +29,4 @@ We contributors to Daytona:
 * Sara Lucija Dragicevic (@saralucijad)
 * Ante Projić (@aprojic)
 * Bruno Grbavac (@brunogrbavac)
+* Juraj Štefanić (@stefanicjuraj)
