@@ -27,3 +27,4 @@ We contributors to Daytona:
 * Luke Bryant (@LDavidBryant)
 * Marijan Cipcic (@marijancip123)
 * Sara Lucija Dragicevic (@saralucijad)
+* Ante Projić (@aprojic)
