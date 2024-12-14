@@ -80,6 +80,7 @@ func TestAgent(t *testing.T) {
 
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
+	mockToolboxServer := mocks.NewMockToolboxServer()
 
 	mockConfig.ProjectDir = t.TempDir()
 
@@ -89,6 +90,7 @@ func TestAgent(t *testing.T) {
 		Git:       mockGitService,
 		Ssh:       mockSshServer,
 		Tailscale: mockTailscaleServer,
+		Toolbox:   mockToolboxServer,
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
@@ -101,6 +103,7 @@ func TestAgent(t *testing.T) {
 		mockGitService.AssertExpectations(t)
 		mockSshServer.AssertExpectations(t)
 		mockTailscaleServer.AssertExpectations(t)
+		mockToolboxServer.AssertExpectations(t)
 	})
 }
 

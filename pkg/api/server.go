@@ -47,6 +47,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -97,7 +98,7 @@ func (a *ApiServer) Start() error {
 		return fmt.Errorf("cannot start API server, port %d is already in use", a.apiPort)
 	}
 
-	binding.Validator = new(defaultValidator)
+	binding.Validator = new(DefaultValidator)
 
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
 		a.router = gin.Default()
@@ -149,6 +150,56 @@ func (a *ApiServer) Start() error {
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
 		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
 		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
+
+		toolboxController := workspaceController.Group("/:workspaceId/:projectId/toolbox")
+		{
+			toolboxController.GET("/project-dir", toolbox.GetProjectDir)
+
+			toolboxController.POST("/process/execute", toolbox.ProcessExecuteCommand)
+
+			fsController := toolboxController.Group("/files")
+			{
+				fsController.DELETE("/", toolbox.FsDeleteFile)
+
+				fsController.GET("/", toolbox.FsListFiles)
+				fsController.GET("/download", toolbox.FsDownloadFile)
+				fsController.GET("/find", toolbox.FsFindInFiles)
+				fsController.GET("/info", toolbox.FsGetFileDetails)
+				fsController.GET("/search", toolbox.FsSearchFiles)
+
+				fsController.POST("/folder", toolbox.FsCreateFolder)
+				fsController.POST("/move", toolbox.FsMoveFile)
+				fsController.POST("/replace", toolbox.FsReplaceInFiles)
+				fsController.POST("/permissions", toolbox.FsSetFilePermissions)
+				fsController.POST("/upload", toolbox.FsUploadFile)
+			}
+
+			gitController := toolboxController.Group("/git")
+			{
+				gitController.GET("/branches", toolbox.GitBranchList)
+				gitController.GET("/history", toolbox.GitCommitHistory)
+				gitController.GET("/status", toolbox.GitStatus)
+
+				gitController.POST("/add", toolbox.GitAddFiles)
+				gitController.POST("/branches", toolbox.GitCreateBranch)
+				gitController.POST("/clone", toolbox.GitCloneRepository)
+				gitController.POST("/commit", toolbox.GitCommitChanges)
+				gitController.POST("/pull", toolbox.GitPushChanges)
+				gitController.POST("/push", toolbox.GitPushChanges)
+			}
+
+			lspController := toolboxController.Group("/lsp")
+			{
+				lspController.GET("/document-symbols", toolbox.LspDocumentSymbols)
+				lspController.GET("/workspacesymbols", toolbox.LspWorkspaceSymbols)
+
+				lspController.POST("/completions", toolbox.LspCompletions)
+				lspController.POST("/did-close", toolbox.LspDidClose)
+				lspController.POST("/did-open", toolbox.LspDidOpen)
+				lspController.POST("/start", toolbox.LspStart)
+				lspController.POST("/stop", toolbox.LspStop)
+			}
+		}
 	}
 
 	projectConfigController := protected.Group("/project-config")
