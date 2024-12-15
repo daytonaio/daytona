@@ -5,8 +5,8 @@ package util
 
 import "fmt"
 
-func GetProjectStartScript(daytonaDownloadUrl string, apiKey string) string {
-	return fmt.Sprintf(`
+// INSTALL_DEPENDENCIES_SCRIPT is a shell script to check and install dependencies.
+const INSTALL_DEPENDENCIES_SCRIPT = `
 # List of supported package managers
 PACKAGE_MANAGERS="apt-get yum dnf apk brew pacman"
 
@@ -95,8 +95,12 @@ if test -n "$MISSING_DEPS"; then
     fi
   done
 fi
+`
 
+func GetProjectStartScript(daytonaDownloadUrl string, apiKey string) string {
+	return fmt.Sprintf(`
+%s
 # Download and install Daytona agent
 curl -sfL -H "Authorization: Bearer %s" %s | sudo -E bash && daytona agent
-`, apiKey, daytonaDownloadUrl)
+`, INSTALL_DEPENDENCIES_SCRIPT, apiKey, daytonaDownloadUrl)
 }
