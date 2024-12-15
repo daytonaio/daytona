@@ -5,7 +5,6 @@ package util
 
 import "fmt"
 
-// INSTALL_DEPENDENCIES_SCRIPT is a shell script to check and install dependencies.
 const INSTALL_DEPENDENCIES_SCRIPT = `
 # List of supported package managers
 PACKAGE_MANAGERS="apt-get yum dnf apk brew pacman"
