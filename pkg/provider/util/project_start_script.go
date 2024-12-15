@@ -81,7 +81,7 @@ if test -n "$MISSING_DEPS"; then
           sudo dnf install -y $MISSING_DEPS >/dev/null 2>&1
           ;;
         apk)
-          sudo apk add --no-cache $MISSING_DEPS >/dev/null 2>&1
+          sudo apk add --no-cache $MISSING_DEPS libc6-compat >/dev/null 2>&1
           ;;
         brew)
           sudo brew install $MISSING_DEPS >/dev/null 2>&1
