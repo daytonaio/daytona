@@ -33,3 +33,4 @@ We contributors to Daytona:
 * Mo Jaafar (@mojafa)
 * Ivan Novak (@inovak)
 * Nikola Radisic (@radisicc)
+* Andre Johnson (@andrejohnson2)
