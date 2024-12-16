@@ -21,9 +21,9 @@ var _ MappedNullable = &ProjectState{}
 
 // ProjectState struct for ProjectState
 type ProjectState struct {
-	GitStatus *GitStatus `json:"gitStatus,omitempty"`
-	UpdatedAt string     `json:"updatedAt"`
-	Uptime    int32      `json:"uptime"`
+	GitStatus GitStatus `json:"gitStatus"`
+	UpdatedAt string    `json:"updatedAt"`
+	Uptime    int32     `json:"uptime"`
 }
 
 type _ProjectState ProjectState
@@ -32,8 +32,9 @@ type _ProjectState ProjectState
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProjectState(updatedAt string, uptime int32) *ProjectState {
+func NewProjectState(gitStatus GitStatus, updatedAt string, uptime int32) *ProjectState {
 	this := ProjectState{}
+	this.GitStatus = gitStatus
 	this.UpdatedAt = updatedAt
 	this.Uptime = uptime
 	return &this
@@ -47,36 +48,28 @@ func NewProjectStateWithDefaults() *ProjectState {
 	return &this
 }
 
-// GetGitStatus returns the GitStatus field value if set, zero value otherwise.
+// GetGitStatus returns the GitStatus field value
 func (o *ProjectState) GetGitStatus() GitStatus {
-	if o == nil || IsNil(o.GitStatus) {
+	if o == nil {
 		var ret GitStatus
 		return ret
 	}
-	return *o.GitStatus
+
+	return o.GitStatus
 }
 
-// GetGitStatusOk returns a tuple with the GitStatus field value if set, nil otherwise
+// GetGitStatusOk returns a tuple with the GitStatus field value
 // and a boolean to check if the value has been set.
 func (o *ProjectState) GetGitStatusOk() (*GitStatus, bool) {
-	if o == nil || IsNil(o.GitStatus) {
+	if o == nil {
 		return nil, false
 	}
-	return o.GitStatus, true
+	return &o.GitStatus, true
 }
 
-// HasGitStatus returns a boolean if a field has been set.
-func (o *ProjectState) HasGitStatus() bool {
-	if o != nil && !IsNil(o.GitStatus) {
-		return true
-	}
-
-	return false
-}
-
-// SetGitStatus gets a reference to the given GitStatus and assigns it to the GitStatus field.
+// SetGitStatus sets field value
 func (o *ProjectState) SetGitStatus(v GitStatus) {
-	o.GitStatus = &v
+	o.GitStatus = v
 }
 
 // GetUpdatedAt returns the UpdatedAt field value
@@ -137,9 +130,7 @@ func (o ProjectState) MarshalJSON() ([]byte, error) {
 
 func (o ProjectState) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.GitStatus) {
-		toSerialize["gitStatus"] = o.GitStatus
-	}
+	toSerialize["gitStatus"] = o.GitStatus
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["uptime"] = o.Uptime
 	return toSerialize, nil
@@ -150,6 +141,7 @@ func (o *ProjectState) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"gitStatus",
 		"updatedAt",
 		"uptime",
 	}

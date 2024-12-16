@@ -96,7 +96,7 @@ func getSingleProjectOutput(project *apiclient.Project, isCreationView bool) str
 
 	if project.State != nil {
 		output += getInfoLineState("State", project.State) + "\n"
-		output += getInfoLineGitStatus("Branch", project.State.GitStatus) + "\n"
+		output += getInfoLineGitStatus("Branch", &project.State.GitStatus) + "\n"
 	}
 
 	output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
@@ -120,7 +120,7 @@ func getProjectsOutputs(projects []apiclient.Project, isCreationView bool) strin
 		output += getInfoLine(fmt.Sprintf("Project #%d", i+1), project.Name)
 		output += getInfoLineState("State", project.State)
 		if project.State != nil {
-			output += getInfoLineGitStatus("Branch", project.State.GitStatus)
+			output += getInfoLineGitStatus("Branch", &project.State.GitStatus)
 		}
 		output += getInfoLinePrNumber(project.Repository.PrNumber, project.Repository, project.State)
 
@@ -159,10 +159,6 @@ func getInfoLineState(key string, state *apiclient.ProjectState) string {
 }
 
 func getInfoLineGitStatus(key string, status *apiclient.GitStatus) string {
-	if status == nil {
-		return ""
-	}
-
 	output := propertyNameStyle.Render(fmt.Sprintf("%-*s", propertyNameWidth, key))
 	output += propertyNameStyle.Foreground(views.Gray).Render(fmt.Sprintf("%-*s", propertyNameWidth, status.CurrentBranch))
 

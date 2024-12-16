@@ -6,7 +6,6 @@
 package agent
 
 import (
-	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -15,7 +14,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
-	"github.com/daytonaio/daytona/pkg/agent/toolbox"
 	"github.com/daytonaio/daytona/pkg/git"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
 	log "github.com/sirupsen/logrus"
@@ -47,12 +45,6 @@ var AgentCmd = &cobra.Command{
 			c.ProjectDir = projectDir
 		}
 
-		if _, err := os.Stat(c.ProjectDir); os.IsNotExist(err) {
-			if err := os.MkdirAll(c.ProjectDir, 0755); err != nil {
-				return fmt.Errorf("failed to create project directory: %w", err)
-			}
-		}
-
 		gitLogWriter := io.MultiWriter(os.Stdout)
 		var agentLogWriter io.Writer
 		if c.LogFilePath != nil {
@@ -81,10 +73,6 @@ var AgentCmd = &cobra.Command{
 			tailscaleHostname = c.WorkspaceId
 		}
 
-		toolBoxServer := &toolbox.Server{
-			ProjectDir: c.ProjectDir,
-		}
-
 		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"
 
 		tailscaleServer := &tailscale.Server{
@@ -98,7 +86,6 @@ var AgentCmd = &cobra.Command{
 			Config:           c,
 			Git:              git,
 			Ssh:              sshServer,
-			Toolbox:          toolBoxServer,
 			Tailscale:        tailscaleServer,
 			LogWriter:        agentLogWriter,
 			TelemetryEnabled: telemetryEnabled,

@@ -82,7 +82,7 @@ func (s *DockerClientTestSuite) TestCreateProject() {
 		},
 	}, networkingConfig, platform, fmt.Sprintf("git-clone-%s-%s", project1.WorkspaceId, project1.Name),
 	).Return(container.CreateResponse{ID: "123"}, nil)
-	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1, nil),
+	s.mockClient.On("ContainerCreate", mock.Anything, docker.GetContainerCreateConfig(project1),
 		&container.HostConfig{
 			Privileged: true,
 			ExtraHosts: []string{

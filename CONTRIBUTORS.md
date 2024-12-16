@@ -26,4 +26,3 @@ We contributors to Daytona:
 * Mirko Dzaja (@MDzaja)
 * Luke Bryant (@LDavidBryant)
 * Marijan Cipcic (@marijancip123)
-* Sara Lucija Dragicevic (@saralucijad)
