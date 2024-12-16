@@ -86,11 +86,12 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 		LogWriter:       params.LogWriter,
 		ProviderManager: providermanager,
 		RegistryUrl:     params.ServerConfig.RegistryUrl,
-		ListPendingJobs: func(ctx context.Context) ([]*models.Job, error) {
-			return jobService.List(ctx, &stores.JobFilter{
+		ListPendingJobs: func(ctx context.Context) ([]*models.Job, int, error) {
+			jobs, err := jobService.List(ctx, &stores.JobFilter{
 				RunnerIdOrIsNil: util.Pointer("local"),
 				States:          &[]models.JobState{models.JobStatePending},
 			})
+			return jobs, 0, err
 		},
 		UpdateJobState: func(ctx context.Context, jobId string, state models.JobState, err *error) error {
 			var jobErr *string
@@ -326,6 +327,7 @@ func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDi
 	}
 
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
+	binaryUrl, _ := url.JoinPath(util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), "binary", "script")
 
 	dbPath, err := getDbPath()
 	if err != nil {
@@ -348,8 +350,9 @@ func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDi
 	_ = providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
 		LogsDir:            targetLogsDir,
 		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+		ApiKey:             "TODO",
 		RunnerId:           runnerConfig.Id,
-		DaytonaDownloadUrl: getDaytonaScriptUrl(c),
+		DaytonaDownloadUrl: binaryUrl,
 		ServerUrl:          headscaleUrl,
 		BaseDir:            runnerConfig.ProvidersDir,
 		CreateProviderNetworkKey: func(ctx context.Context, providerName string) (string, error) {
@@ -382,9 +385,4 @@ func getLocalRunnerJobFactory(params LocalJobFactoryParams) (jobs_runner.IRunner
 		},
 		ProviderManager: providerManager,
 	}), nil
-}
-
-func getDaytonaScriptUrl(config *server.Config) string {
-	url, _ := url.JoinPath(util.GetFrpcApiUrl(config.Frps.Protocol, config.Id, config.Frps.Domain), "binary", "script")
-	return url
 }

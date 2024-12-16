@@ -21,7 +21,10 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	workspaceLogger := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer workspaceLogger.Close()
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
@@ -44,7 +47,7 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 
 	w.EnvVars = extractedEnvVars
 
-	targetProvider, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
+	p, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
@@ -56,12 +59,12 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		BuilderImage:        wj.builderImage,
 	}
 
-	_, err = (*targetProvider).StartWorkspace(req)
+	_, err = (*p).StartWorkspace(req)
 	if err != nil {
 		return err
 	}
 
-	providerMetadata, err := (*targetProvider).GetWorkspaceProviderMetadata(req)
+	providerMetadata, err := (*p).GetWorkspaceProviderMetadata(req)
 	if err != nil {
 		return err
 	}

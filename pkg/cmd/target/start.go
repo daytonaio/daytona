@@ -179,12 +179,13 @@ func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) err
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
-		Id:            target.Id,
-		Label:         &target.Name,
-		ActiveProfile: activeProfile,
-		Follow:        util.Pointer(true),
-		From:          &from,
+	go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
+		Id:        target.Id,
+		Label:     &target.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Follow:    util.Pointer(true),
+		From:      &from,
 	})
 
 	res, err := apiClient.TargetAPI.StartTarget(ctx, target.Id).Execute()

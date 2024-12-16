@@ -960,8 +960,24 @@ definitions:
     required:
     - state
     type: object
+  UpdateTargetProviderMetadataDTO:
+    properties:
+      metadata:
+        type: string
+    required:
+    - metadata
+    type: object
+  UpdateWorkspaceProviderMetadataDTO:
+    properties:
+      metadata:
+        type: string
+    required:
+    - metadata
+    type: object
   Workspace:
     properties:
+      apiKey:
+        type: string
       buildConfig:
         $ref: '#/definitions/BuildConfig'
       envVars:
@@ -991,6 +1007,7 @@ definitions:
       user:
         type: string
     required:
+    - apiKey
     - envVars
     - id
     - image
@@ -1002,6 +1019,8 @@ definitions:
     type: object
   WorkspaceDTO:
     properties:
+      apiKey:
+        type: string
       buildConfig:
         $ref: '#/definitions/BuildConfig'
       envVars:
@@ -1033,6 +1052,7 @@ definitions:
       user:
         type: string
     required:
+    - apiKey
     - envVars
     - id
     - image
@@ -2334,7 +2354,7 @@ paths:
         name: metadata
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/UpdateTargetProviderMetadataDTO'
       responses:
         "200":
           description: OK
@@ -2741,7 +2761,7 @@ paths:
         name: metadata
         required: true
         schema:
-          type: string
+          $ref: '#/definitions/UpdateWorkspaceProviderMetadataDTO'
       responses:
         "200":
           description: OK

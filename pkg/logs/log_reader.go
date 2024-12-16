@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package util
+package logs
 
 import (
 	"archive/zip"
@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/daytonaio/daytona/pkg/logs"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -50,8 +48,8 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan i
 		default:
 			line, readErr := reader.ReadString('\n')
 			if line != "" {
-				stripped := strings.TrimSuffix(line, logs.LogDelimiter)
-				var logEntry logs.LogEntry
+				stripped := strings.TrimSuffix(line, LogDelimiter)
+				var logEntry LogEntry
 
 				err := json.Unmarshal([]byte(stripped), &logEntry)
 				if err != nil {
@@ -62,10 +60,10 @@ func ReadJSONLog(ctx context.Context, logReader io.Reader, follow bool, c chan i
 			}
 			if readErr != nil {
 				if readErr != io.EOF {
-					c <- logs.LogEntry{}
+					c <- LogEntry{}
 					errChan <- readErr
 				} else if !follow {
-					c <- logs.LogEntry{}
+					c <- LogEntry{}
 					errChan <- io.EOF
 					return
 				}

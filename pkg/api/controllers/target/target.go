@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -50,11 +51,16 @@ func GetTarget(ctx *gin.Context) {
 		t.TargetConfig.Options = ""
 	}
 
-	for i := range t.Workspaces {
-		util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
-	}
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		for i := range t.Workspaces {
+			util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
+			t.Workspaces[i].ApiKey = "<HIDDEN>"
+		}
 
-	util.HideDaytonaEnvVars(&t.EnvVars)
+		util.HideDaytonaEnvVars(&t.EnvVars)
+		t.ApiKey = "<HIDDEN>"
+	}
 
 	ctx.JSON(200, t)
 }
@@ -89,11 +95,16 @@ func ListTargets(ctx *gin.Context) {
 			targetList[i].TargetConfig.Options = ""
 		}
 
-		for j := range targetList[i].Workspaces {
-			util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
-		}
+		apiKeyType, ok := ctx.Get("apiKeyType")
+		if !ok || apiKeyType == models.ApiKeyTypeClient {
+			for j := range targetList[i].Workspaces {
+				util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
+				targetList[i].Workspaces[j].ApiKey = "<HIDDEN>"
+			}
 
-		util.HideDaytonaEnvVars(&targetList[i].EnvVars)
+			util.HideDaytonaEnvVars(&targetList[i].EnvVars)
+			targetList[i].ApiKey = "<HIDDEN>"
+		}
 	}
 
 	ctx.JSON(200, targetList)

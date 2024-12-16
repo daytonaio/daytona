@@ -159,10 +159,11 @@ var CreateCmd = &cobra.Command{
 		defer stopLogs()
 
 		if createTargetDto != nil {
-			go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
+			go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
 				Id:                    targetId,
 				Label:                 &createTargetDto.Name,
-				ActiveProfile:         activeProfile,
+				ServerUrl:             activeProfile.Api.Url,
+				ApiKey:                activeProfile.Api.Key,
 				Follow:                util.Pointer(true),
 				SkipPrefixLengthSetup: true,
 			})
@@ -200,10 +201,11 @@ var CreateCmd = &cobra.Command{
 
 		for i := range createWorkspaceDtos {
 			createWorkspaceDtos[i].TargetId = targetId
-			go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
+			go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
 				Id:                    createWorkspaceDtos[i].Id,
 				Label:                 &createWorkspaceDtos[i].Name,
-				ActiveProfile:         activeProfile,
+				ServerUrl:             activeProfile.Api.Url,
+				ApiKey:                activeProfile.Api.Key,
 				Index:                 util.Pointer(i),
 				Follow:                util.Pointer(true),
 				SkipPrefixLengthSetup: true,
@@ -377,5 +379,5 @@ func IsLocalDockerTarget(target *apiclient.TargetDTO) bool {
 		return false
 	}
 
-	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname")
+	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname") && target.TargetConfig.ProviderInfo.RunnerId == "local"
 }

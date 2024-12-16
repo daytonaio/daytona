@@ -46,7 +46,10 @@ func (b *DevcontainerBuilder) CleanUp() error {
 }
 
 func (b *DevcontainerBuilder) Publish(build models.Build) error {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	buildLogger, err := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	if err != nil {
+		return err
+	}
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -66,7 +69,10 @@ func (b *DevcontainerBuilder) Publish(build models.Build) error {
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build models.Build) (string, string, error) {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	buildLogger, err := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	if err != nil {
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
+	}
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

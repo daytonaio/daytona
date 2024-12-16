@@ -29,7 +29,7 @@ func NotifyEmptyTargetConfigList(tip bool) {
 func NotifyEmptyWorkspaceTemplateList(tip bool) {
 	views.RenderInfoMessageBold("No workspace templates found")
 	if tip {
-		views.RenderTip("Use 'daytona workspace-template add' to add a workspace template")
+		views.RenderTip("Use 'daytona template add' to add a workspace template")
 	}
 }
 

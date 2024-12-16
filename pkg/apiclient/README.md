@@ -218,6 +218,8 @@ Class | Method | HTTP request | Description
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetMetadata](docs/TargetMetadata.md)
  - [UpdateJobState](docs/UpdateJobState.md)
+ - [UpdateTargetProviderMetadataDTO](docs/UpdateTargetProviderMetadataDTO.md)
+ - [UpdateWorkspaceProviderMetadataDTO](docs/UpdateWorkspaceProviderMetadataDTO.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceMetadata](docs/WorkspaceMetadata.md)

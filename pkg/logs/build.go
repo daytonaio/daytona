@@ -36,17 +36,10 @@ func (bl *buildLogger) Write(p []byte) (n int, err error) {
 		bl.logger.SetOutput(bl.logFile)
 	}
 
-	var entry LogEntry
-	entry.Msg = string(p)
-	entry.Source = string(bl.source)
-	entry.BuildId = &bl.buildId
-
-	b, err := json.Marshal(entry)
+	b, err := bl.ConstructJsonLogEntry(p)
 	if err != nil {
 		return len(p), err
 	}
-
-	b = append(b, []byte(LogDelimiter)...)
 
 	_, err = bl.logFile.Write(b)
 	if err != nil {
@@ -54,6 +47,20 @@ func (bl *buildLogger) Write(p []byte) (n int, err error) {
 	}
 
 	return len(p), nil
+}
+
+func (bl *buildLogger) ConstructJsonLogEntry(p []byte) ([]byte, error) {
+	var entry LogEntry
+	entry.Msg = string(p)
+	entry.Source = string(bl.source)
+	entry.BuildId = &bl.buildId
+
+	b, err := json.Marshal(entry)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(b, []byte(LogDelimiter)...), nil
 }
 
 func (bl *buildLogger) Close() error {
@@ -78,7 +85,7 @@ func (bl *buildLogger) Cleanup() error {
 	return os.RemoveAll(buildLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) Logger {
+func (l *loggerFactory) CreateBuildLogger(buildId string, source LogSource) (Logger, error) {
 	logger := logrus.New()
 
 	return &buildLogger{
@@ -86,10 +93,10 @@ func (l *loggerFactoryImpl) CreateBuildLogger(buildId string, source LogSource) 
 		buildId: buildId,
 		logger:  logger,
 		source:  source,
-	}
+	}, nil
 }
 
-func (l *loggerFactoryImpl) CreateBuildLogReader(buildId string) (io.Reader, error) {
+func (l *loggerFactory) CreateBuildLogReader(buildId string) (io.Reader, error) {
 	filePath := filepath.Join(l.buildLogsDir, buildId, "log")
 	return os.Open(filePath)
 }

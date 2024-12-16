@@ -6,10 +6,13 @@ package workspaces
 import (
 	"context"
 	"io"
+	"os"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -30,7 +33,7 @@ type WorkspaceServiceConfig struct {
 	CreateJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
 	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	LoggerFactory         logs.LoggerFactory
+	LoggerFactory         logs.ILoggerFactory
 	ServerApiUrl          string
 	ServerUrl             string
 	ServerVersion         string
@@ -83,11 +86,30 @@ type WorkspaceService struct {
 	serverVersion         string
 	defaultWorkspaceImage string
 	defaultWorkspaceUser  string
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {
 	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error) {
+	configDir, err := server.GetConfigDir()
+	if err != nil {
+		return nil, err
+	}
+
+	targetLogsDir, err := server.GetTargetLogsDir(configDir)
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.MkdirAll(targetLogsDir, 0755)
+	if err != nil {
+		return nil, err
+	}
+
+	return os.OpenFile(filepath.Join(targetLogsDir, workspaceId, "log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 }
 
 func (s *WorkspaceService) UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error {

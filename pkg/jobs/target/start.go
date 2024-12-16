@@ -19,24 +19,27 @@ func (tj *TargetJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	targetLogger := tj.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer targetLogger.Close()
 
 	targetLogger.Write([]byte("Starting target\n"))
 
-	targetProvider, err := tj.providerManager.GetProvider(tg.TargetConfig.ProviderInfo.Name)
+	p, err := tj.providerManager.GetProvider(tg.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).StartTarget(&provider.TargetRequest{
+	_, err = (*p).StartTarget(&provider.TargetRequest{
 		Target: tg,
 	})
 	if err != nil {
 		return err
 	}
 
-	providerMetadata, err := (*targetProvider).GetTargetProviderMetadata(&provider.TargetRequest{
+	providerMetadata, err := (*p).GetTargetProviderMetadata(&provider.TargetRequest{
 		Target: tg,
 	})
 	if err != nil {

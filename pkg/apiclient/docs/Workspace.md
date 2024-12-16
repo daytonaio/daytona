@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ApiKey** | **string** |  | 
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
@@ -22,7 +23,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspace
 
-`func NewWorkspace(envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string, ) *Workspace`
+`func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string, ) *Workspace`
 
 NewWorkspace instantiates a new Workspace object
 This constructor will assign default values to properties that have it defined,
@@ -36,6 +37,26 @@ will change when the set of required properties is changed
 NewWorkspaceWithDefaults instantiates a new Workspace object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetApiKey
+
+`func (o *Workspace) GetApiKey() string`
+
+GetApiKey returns the ApiKey field if non-nil, zero value otherwise.
+
+### GetApiKeyOk
+
+`func (o *Workspace) GetApiKeyOk() (*string, bool)`
+
+GetApiKeyOk returns a tuple with the ApiKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetApiKey
+
+`func (o *Workspace) SetApiKey(v string)`
+
+SetApiKey sets ApiKey field to given value.
+
 
 ### GetBuildConfig
 

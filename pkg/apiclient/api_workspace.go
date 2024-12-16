@@ -830,11 +830,11 @@ type ApiUpdateWorkspaceProviderMetadataRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
-	metadata    *string
+	metadata    *UpdateWorkspaceProviderMetadataDTO
 }
 
 // Provider metadata
-func (r ApiUpdateWorkspaceProviderMetadataRequest) Metadata(metadata string) ApiUpdateWorkspaceProviderMetadataRequest {
+func (r ApiUpdateWorkspaceProviderMetadataRequest) Metadata(metadata UpdateWorkspaceProviderMetadataDTO) ApiUpdateWorkspaceProviderMetadataRequest {
 	r.metadata = &metadata
 	return r
 }

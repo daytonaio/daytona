@@ -43,7 +43,7 @@ type RegisterRunnerResultDTO struct {
 
 type UpdateJobStateDTO struct {
 	State        models.JobState `json:"state" validate:"required"`
-	ErrorMessage *string         `json:"errorMessage" validate:"omitempty"`
+	ErrorMessage *string         `json:"errorMessage,omitempty" validate:"optional"`
 } // @name UpdateJobState
 
 type InstallProviderDTO struct {

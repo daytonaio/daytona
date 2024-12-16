@@ -19,17 +19,20 @@ func (tj *TargetJob) stop(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	targetLogger := tj.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer targetLogger.Close()
 
 	targetLogger.Write([]byte(fmt.Sprintf("Stopping target %s\n", t.Name)))
 
-	targetProvider, err := tj.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
+	p, err := tj.providerManager.GetProvider(t.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).StopTarget(&provider.TargetRequest{
+	_, err = (*p).StopTarget(&provider.TargetRequest{
 		Target: t,
 	})
 	if err != nil {

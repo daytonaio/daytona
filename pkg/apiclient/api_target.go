@@ -1062,11 +1062,11 @@ type ApiUpdateTargetProviderMetadataRequest struct {
 	ctx        context.Context
 	ApiService *TargetAPIService
 	targetId   string
-	metadata   *string
+	metadata   *UpdateTargetProviderMetadataDTO
 }
 
 // Provider metadata
-func (r ApiUpdateTargetProviderMetadataRequest) Metadata(metadata string) ApiUpdateTargetProviderMetadataRequest {
+func (r ApiUpdateTargetProviderMetadataRequest) Metadata(metadata UpdateTargetProviderMetadataDTO) ApiUpdateTargetProviderMetadataRequest {
 	r.metadata = &metadata
 	return r
 }

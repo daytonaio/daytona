@@ -1243,7 +1243,7 @@ paths:
         content:
           '*/*':
             schema:
-              type: string
+              $ref: '#/components/schemas/UpdateTargetProviderMetadataDTO'
         description: Provider metadata
         required: true
       responses:
@@ -1686,7 +1686,7 @@ paths:
         content:
           '*/*':
             schema:
-              type: string
+              $ref: '#/components/schemas/UpdateWorkspaceProviderMetadataDTO'
         description: Provider metadata
         required: true
       responses:
@@ -3336,6 +3336,7 @@ components:
             uptime: 5
             workspaceId: workspaceId
           providerMetadata: providerMetadata
+          apiKey: apiKey
           targetId: targetId
           envVars:
             key: envVars
@@ -3441,6 +3442,7 @@ components:
             uptime: 5
             workspaceId: workspaceId
           providerMetadata: providerMetadata
+          apiKey: apiKey
           targetId: targetId
           envVars:
             key: envVars
@@ -3591,6 +3593,24 @@ components:
       required:
       - state
       type: object
+    UpdateTargetProviderMetadataDTO:
+      example:
+        metadata: metadata
+      properties:
+        metadata:
+          type: string
+      required:
+      - metadata
+      type: object
+    UpdateWorkspaceProviderMetadataDTO:
+      example:
+        metadata: metadata
+      properties:
+        metadata:
+          type: string
+      required:
+      - metadata
+      type: object
     Workspace:
       example:
         gitProviderConfigId: gitProviderConfigId
@@ -3614,6 +3634,7 @@ components:
           uptime: 5
           workspaceId: workspaceId
         providerMetadata: providerMetadata
+        apiKey: apiKey
         targetId: targetId
         envVars:
           key: envVars
@@ -3699,6 +3720,8 @@ components:
         id: id
         user: user
       properties:
+        apiKey:
+          type: string
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
         envVars:
@@ -3728,6 +3751,7 @@ components:
         user:
           type: string
       required:
+      - apiKey
       - envVars
       - id
       - image
@@ -3760,6 +3784,7 @@ components:
           uptime: 5
           workspaceId: workspaceId
         providerMetadata: providerMetadata
+        apiKey: apiKey
         targetId: targetId
         envVars:
           key: envVars
@@ -3849,6 +3874,8 @@ components:
           updatedAt: updatedAt
         user: user
       properties:
+        apiKey:
+          type: string
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
         envVars:
@@ -3880,6 +3907,7 @@ components:
         user:
           type: string
       required:
+      - apiKey
       - envVars
       - id
       - image

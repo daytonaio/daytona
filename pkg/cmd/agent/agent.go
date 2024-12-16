@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/git"
@@ -153,5 +154,5 @@ func getWorkspace(c *config.Config, telemetryEnabled bool) (*models.Workspace, e
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	return conversion.ToWorkspace(workspace), nil
+	return conversion.Convert[apiclient.WorkspaceDTO, models.Workspace](workspace)
 }

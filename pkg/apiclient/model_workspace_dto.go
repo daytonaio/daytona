@@ -21,6 +21,7 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
+	ApiKey              string             `json:"apiKey"`
 	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
 	EnvVars             map[string]string  `json:"envVars"`
 	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
@@ -43,8 +44,9 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
+func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
+	this.ApiKey = apiKey
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
@@ -63,6 +65,30 @@ func NewWorkspaceDTO(envVars map[string]string, id string, image string, name st
 func NewWorkspaceDTOWithDefaults() *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	return &this
+}
+
+// GetApiKey returns the ApiKey field value
+func (o *WorkspaceDTO) GetApiKey() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ApiKey
+}
+
+// GetApiKeyOk returns a tuple with the ApiKey field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetApiKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ApiKey, true
+}
+
+// SetApiKey sets field value
+func (o *WorkspaceDTO) SetApiKey(v string) {
+	o.ApiKey = v
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
@@ -451,6 +477,7 @@ func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
 
 func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["apiKey"] = o.ApiKey
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
@@ -483,6 +510,7 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"apiKey",
 		"envVars",
 		"id",
 		"image",

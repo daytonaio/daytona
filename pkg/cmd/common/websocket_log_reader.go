@@ -1,14 +1,15 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package apiclient
+package common
 
 import (
 	"context"
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/logs"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/gorilla/websocket"
@@ -18,7 +19,8 @@ import (
 type ReadLogParams struct {
 	Id                    string
 	Label                 *string
-	ActiveProfile         config.Profile
+	ServerUrl             string
+	ApiKey                string
 	SkipPrefixLengthSetup bool
 	Index                 *int
 	Follow                *bool
@@ -37,10 +39,10 @@ func ReadTargetLogs(ctx context.Context, params ReadLogParams) {
 	}
 
 	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", params.Id), &params.ActiveProfile, &query)
+		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/target/%s", params.Id), params.ServerUrl, params.ApiKey, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
+			log.Trace(apiclient.HandleErrorResponse(res, err))
 			time.Sleep(250 * time.Millisecond)
 			continue
 		}
@@ -60,10 +62,10 @@ func ReadWorkspaceLogs(ctx context.Context, params ReadLogParams) {
 	}
 
 	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", params.Id), &params.ActiveProfile, &query)
+		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", params.Id), params.ServerUrl, params.ApiKey, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
+			log.Trace(apiclient.HandleErrorResponse(res, err))
 			time.Sleep(500 * time.Millisecond)
 			continue
 		}
@@ -88,10 +90,10 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 			query = *params.Query
 		}
 
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", params.Id), &params.ActiveProfile, &query)
+		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", params.Id), params.ServerUrl, params.ApiKey, &query)
 		// We want to retry getting the logs if it fails
 		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
+			log.Trace(apiclient.HandleErrorResponse(res, err))
 			time.Sleep(250 * time.Millisecond)
 			continue
 		}

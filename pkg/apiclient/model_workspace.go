@@ -21,6 +21,7 @@ var _ MappedNullable = &Workspace{}
 
 // Workspace struct for Workspace
 type Workspace struct {
+	ApiKey              string             `json:"apiKey"`
 	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
 	EnvVars             map[string]string  `json:"envVars"`
 	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
@@ -42,8 +43,9 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string) *Workspace {
+func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string) *Workspace {
 	this := Workspace{}
+	this.ApiKey = apiKey
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
@@ -61,6 +63,30 @@ func NewWorkspace(envVars map[string]string, id string, image string, name strin
 func NewWorkspaceWithDefaults() *Workspace {
 	this := Workspace{}
 	return &this
+}
+
+// GetApiKey returns the ApiKey field value
+func (o *Workspace) GetApiKey() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ApiKey
+}
+
+// GetApiKeyOk returns a tuple with the ApiKey field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetApiKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ApiKey, true
+}
+
+// SetApiKey sets field value
+func (o *Workspace) SetApiKey(v string) {
+	o.ApiKey = v
 }
 
 // GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
@@ -425,6 +451,7 @@ func (o Workspace) MarshalJSON() ([]byte, error) {
 
 func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["apiKey"] = o.ApiKey
 	if !IsNil(o.BuildConfig) {
 		toSerialize["buildConfig"] = o.BuildConfig
 	}
@@ -456,6 +483,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"apiKey",
 		"envVars",
 		"id",
 		"image",

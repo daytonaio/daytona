@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package apiclient
+package util
 
 import (
 	"context"
@@ -11,39 +11,16 @@ import (
 	"net/url"
 	"regexp"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/gorilla/websocket"
 )
 
-func GetWebsocketConn(ctx context.Context, path string, profile *config.Profile, query *string) (*websocket.Conn, *http.Response, error) {
-	c, err := config.GetConfig()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var serverUrl string
-	var apiKey string
-
-	var activeProfile config.Profile
-	if profile == nil {
-		var err error
-		activeProfile, err = c.GetActiveProfile()
-		if err != nil {
-			return nil, nil, err
-		}
-	} else {
-		activeProfile = *profile
-	}
-
-	serverUrl = activeProfile.Api.Url
-	apiKey = activeProfile.Api.Key
-
+func GetWebsocketConn(ctx context.Context, path string, serverUrl string, apiKey string, query *string) (*websocket.Conn, *http.Response, error) {
 	url, err := url.JoinPath(serverUrl, path)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	wsUrl, err := GetWebSocketUrl(url)
+	wsUrl, err := getWebSocketUrl(url)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -57,7 +34,7 @@ func GetWebsocketConn(ctx context.Context, path string, profile *config.Profile,
 	})
 }
 
-func GetWebSocketUrl(apiUrl string) (string, error) {
+func getWebSocketUrl(apiUrl string) (string, error) {
 	hostRegex := regexp.MustCompile(`(https*)://(.*)`)
 
 	matches := hostRegex.FindStringSubmatch(apiUrl)

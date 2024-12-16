@@ -77,10 +77,11 @@ var stopCmd = &cobra.Command{
 					return t.Name
 				}))
 
-				apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+				cmd_common.ReadTargetLogs(ctx, cmd_common.ReadLogParams{
 					Id:                    target.Id,
 					Label:                 &target.Name,
-					ActiveProfile:         activeProfile,
+					ServerUrl:             activeProfile.Api.Url,
+					ApiKey:                activeProfile.Api.Key,
 					From:                  &from,
 					SkipPrefixLengthSetup: true,
 				})
@@ -99,11 +100,12 @@ var stopCmd = &cobra.Command{
 				return err
 			}
 
-			apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
-				Id:            target.Id,
-				Label:         &target.Name,
-				ActiveProfile: activeProfile,
-				From:          &from,
+			cmd_common.ReadTargetLogs(ctx, cmd_common.ReadLogParams{
+				Id:        target.Id,
+				Label:     &target.Name,
+				ServerUrl: activeProfile.Api.Url,
+				ApiKey:    activeProfile.Api.Key,
+				From:      &from,
 			})
 
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' successfully stopped", targetId))
@@ -142,10 +144,11 @@ func stopAllTargets(activeProfile config.Profile, from time.Time) error {
 			return t.Name
 		}))
 
-		apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
+		cmd_common.ReadTargetLogs(ctx, cmd_common.ReadLogParams{
 			Id:                    target.Id,
 			Label:                 &target.Name,
-			ActiveProfile:         activeProfile,
+			ServerUrl:             activeProfile.Api.Url,
+			ApiKey:                activeProfile.Api.Key,
 			From:                  &from,
 			SkipPrefixLengthSetup: true,
 		})

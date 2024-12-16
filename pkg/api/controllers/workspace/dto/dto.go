@@ -12,3 +12,7 @@ type SetWorkspaceMetadata struct {
 	GitStatus        *models.GitStatus `json:"gitStatus,omitempty" validate:"optional"`
 	ProviderMetadata *string           `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name SetWorkspaceMetadata
+
+type UpdateWorkspaceProviderMetadataDTO struct {
+	Metadata string `json:"metadata" validate:"required"`
+} // @name UpdateWorkspaceProviderMetadataDTO

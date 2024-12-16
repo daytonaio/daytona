@@ -1723,7 +1723,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/UpdateTargetProviderMetadataDTO"
                         }
                     }
                 ],
@@ -2331,7 +2331,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/UpdateWorkspaceProviderMetadataDTO"
                         }
                     }
                 ],
@@ -3771,9 +3771,32 @@ const docTemplate = `{
                 }
             }
         },
+        "UpdateTargetProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateWorkspaceProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
         "Workspace": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -3784,6 +3807,9 @@ const docTemplate = `{
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },
@@ -3831,6 +3857,7 @@ const docTemplate = `{
         "WorkspaceDTO": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -3842,6 +3869,9 @@ const docTemplate = `{
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },

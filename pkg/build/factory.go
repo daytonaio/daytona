@@ -21,7 +21,7 @@ type BuilderFactory struct {
 	containerRegistries         common.ContainerRegistries
 	buildImageContainerRegistry *models.ContainerRegistry
 	buildImageNamespace         string
-	loggerFactory               logs.LoggerFactory
+	loggerFactory               logs.ILoggerFactory
 	image                       string
 	defaultWorkspaceImage       string
 	defaultWorkspaceUser        string
@@ -32,7 +32,7 @@ type BuilderFactoryConfig struct {
 	ContainerRegistries         common.ContainerRegistries
 	BuildImageContainerRegistry *models.ContainerRegistry
 	BuildImageNamespace         string // Namespace to be used when tagging and pushing the build image
-	LoggerFactory               logs.LoggerFactory
+	LoggerFactory               logs.ILoggerFactory
 	DefaultWorkspaceImage       string
 	DefaultWorkspaceUser        string
 }

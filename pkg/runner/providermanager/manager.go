@@ -55,6 +55,7 @@ type ProviderManagerConfig struct {
 	DaytonaDownloadUrl       string
 	ServerUrl                string
 	ApiUrl                   string
+	ApiKey                   string
 	LogsDir                  string
 	BaseDir                  string
 	ServerPort               uint32
@@ -79,6 +80,7 @@ func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
 			daytonaDownloadUrl:       config.DaytonaDownloadUrl,
 			serverUrl:                config.ServerUrl,
 			apiUrl:                   config.ApiUrl,
+			apiKey:                   config.ApiKey,
 			logsDir:                  config.LogsDir,
 			getTargetConfigMap:       config.GetTargetConfigMap,
 			createTargetConfig:       config.CreateTargetConfig,
@@ -102,6 +104,7 @@ type ProviderManager struct {
 	serverUrl                string
 	serverVersion            string
 	apiUrl                   string
+	apiKey                   string
 	serverPort               uint32
 	apiPort                  uint32
 	logsDir                  string
@@ -325,6 +328,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 		DaytonaVersion:     m.serverVersion,
 		ServerUrl:          m.serverUrl,
 		ApiUrl:             m.apiUrl,
+		ApiKey:             m.apiKey,
 		LogsDir:            m.logsDir,
 		NetworkKey:         networkKey,
 		ServerPort:         m.serverPort,

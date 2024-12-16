@@ -31,7 +31,10 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 		return fmt.Errorf("build config is not set")
 	}
 
-	buildLogger := bj.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
+	buildLogger, err := bj.loggerFactory.CreateBuildLogger(b.Id, logs.LogSourceBuilder)
+	if err != nil {
+		return err
+	}
 	defer buildLogger.Close()
 
 	workspaceDir := filepath.Join(bj.basePath, b.Id, "workspace")

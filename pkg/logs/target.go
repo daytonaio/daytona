@@ -22,9 +22,9 @@ type targetLogger struct {
 	source     LogSource
 }
 
-func (w *targetLogger) Write(p []byte) (n int, err error) {
-	if w.logFile == nil {
-		filePath := filepath.Join(w.logsDir, w.targetId, "log")
+func (t *targetLogger) Write(p []byte) (n int, err error) {
+	if t.logFile == nil {
+		filePath := filepath.Join(t.logsDir, t.targetId, "log")
 		err = os.MkdirAll(filepath.Dir(filePath), 0755)
 		if err != nil {
 			return len(p), err
@@ -33,24 +33,16 @@ func (w *targetLogger) Write(p []byte) (n int, err error) {
 		if err != nil {
 			return len(p), err
 		}
-		w.logFile = logFile
-		w.logger.SetOutput(w.logFile)
+		t.logFile = logFile
+		t.logger.SetOutput(t.logFile)
 	}
 
-	var entry LogEntry
-	entry.Msg = string(p)
-	entry.Source = string(w.source)
-	entry.TargetName = &w.targetName
-	entry.Time = time.Now().Format(time.RFC3339)
-
-	b, err := json.Marshal(entry)
+	b, err := t.ConstructJsonLogEntry(p)
 	if err != nil {
 		return len(p), err
 	}
 
-	b = append(b, []byte(LogDelimiter)...)
-
-	_, err = w.logFile.Write(b)
+	_, err = t.logFile.Write(b)
 	if err != nil {
 		return len(p), err
 	}
@@ -58,17 +50,32 @@ func (w *targetLogger) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func (w *targetLogger) Close() error {
-	if w.logFile != nil {
-		err := w.logFile.Close()
-		w.logFile = nil
+func (t *targetLogger) ConstructJsonLogEntry(p []byte) ([]byte, error) {
+	var entry LogEntry
+	entry.Msg = string(p)
+	entry.Source = string(t.source)
+	entry.TargetName = &t.targetName
+	entry.Time = time.Now().Format(time.RFC3339)
+
+	b, err := json.Marshal(entry)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(b, []byte(LogDelimiter)...), nil
+}
+
+func (t *targetLogger) Close() error {
+	if t.logFile != nil {
+		err := t.logFile.Close()
+		t.logFile = nil
 		return err
 	}
 	return nil
 }
 
-func (w *targetLogger) Cleanup() error {
-	targetLogsDir := filepath.Join(w.logsDir, w.targetId)
+func (t *targetLogger) Cleanup() error {
+	targetLogsDir := filepath.Join(t.logsDir, t.targetId)
 
 	_, err := os.Stat(targetLogsDir)
 	if os.IsNotExist(err) {
@@ -80,7 +87,7 @@ func (w *targetLogger) Cleanup() error {
 	return os.RemoveAll(targetLogsDir)
 }
 
-func (l *loggerFactoryImpl) CreateTargetLogger(targetId, targetName string, source LogSource) Logger {
+func (l *loggerFactory) CreateTargetLogger(targetId, targetName string, source LogSource) (Logger, error) {
 	logger := logrus.New()
 
 	return &targetLogger{
@@ -89,10 +96,10 @@ func (l *loggerFactoryImpl) CreateTargetLogger(targetId, targetName string, sour
 		logsDir:    l.targetLogsDir,
 		logger:     logger,
 		source:     source,
-	}
+	}, nil
 }
 
-func (l *loggerFactoryImpl) CreateTargetLogReader(targetId string) (io.Reader, error) {
+func (l *loggerFactory) CreateTargetLogReader(targetId string) (io.Reader, error) {
 	filePath := filepath.Join(l.targetLogsDir, targetId, "log")
 	return os.Open(filePath)
 }

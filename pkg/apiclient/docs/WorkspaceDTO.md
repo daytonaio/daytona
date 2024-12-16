@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ApiKey** | **string** |  | 
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
@@ -23,7 +24,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -37,6 +38,26 @@ will change when the set of required properties is changed
 NewWorkspaceDTOWithDefaults instantiates a new WorkspaceDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetApiKey
+
+`func (o *WorkspaceDTO) GetApiKey() string`
+
+GetApiKey returns the ApiKey field if non-nil, zero value otherwise.
+
+### GetApiKeyOk
+
+`func (o *WorkspaceDTO) GetApiKeyOk() (*string, bool)`
+
+GetApiKeyOk returns a tuple with the ApiKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetApiKey
+
+`func (o *WorkspaceDTO) SetApiKey(v string)`
+
+SetApiKey sets ApiKey field to given value.
+
 
 ### GetBuildConfig
 

@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -123,7 +123,7 @@ func ReadServerLog(ctx *gin.Context) {
 				return
 			}
 			if err == nil {
-				readLog(ctx, reader, util.ReadLog, writeToWs)
+				readLog(ctx, reader, logs.ReadLog, writeToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -140,7 +140,7 @@ func ReadServerLog(ctx *gin.Context) {
 		return
 	}
 
-	readLog(ctx, reader, util.ReadLog, writeToWs)
+	readLog(ctx, reader, logs.ReadLog, writeToWs)
 }
 
 func ReadTargetLog(ctx *gin.Context) {
@@ -154,7 +154,7 @@ func ReadTargetLog(ctx *gin.Context) {
 		for {
 			targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
 			if err == nil {
-				readLog(ctx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
+				readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -167,7 +167,7 @@ func ReadTargetLog(ctx *gin.Context) {
 		return
 	}
 
-	readLog(ctx, targetLogReader, util.ReadJSONLog, writeJSONToWs)
+	readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
 }
 
 func ReadWorkspaceLog(ctx *gin.Context) {
@@ -181,7 +181,7 @@ func ReadWorkspaceLog(ctx *gin.Context) {
 		for {
 			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
 			if err == nil {
-				readLog(ctx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
+				readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -194,7 +194,7 @@ func ReadWorkspaceLog(ctx *gin.Context) {
 		return
 	}
 
-	readLog(ctx, workspaceLogReader, util.ReadJSONLog, writeJSONToWs)
+	readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
 }
 
 func ReadBuildLog(ctx *gin.Context) {
@@ -209,7 +209,7 @@ func ReadBuildLog(ctx *gin.Context) {
 			buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
 
 			if err == nil {
-				readLog(ctx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
+				readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -222,5 +222,5 @@ func ReadBuildLog(ctx *gin.Context) {
 		return
 	}
 
-	readLog(ctx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
+	readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
 }

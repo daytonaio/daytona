@@ -52,8 +52,8 @@ func SetTargetMetadata(ctx *gin.Context) {
 //	@Tags			target
 //	@Summary		Update target provider metadata
 //	@Description	Update target provider metadata
-//	@Param			targetId	path	string	true	"Target ID"
-//	@Param			metadata	body	string	true	"Provider metadata"
+//	@Param			targetId	path	string							true	"Target ID"
+//	@Param			metadata	body	UpdateTargetProviderMetadataDTO	true	"Provider metadata"
 //	@Success		200
 //	@Router			/target/{targetId}/provider-metadata [post]
 //
@@ -61,7 +61,7 @@ func SetTargetMetadata(ctx *gin.Context) {
 func UpdateTargetProviderMetadata(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
 
-	var metadata string
+	var metadata dto.UpdateTargetProviderMetadataDTO
 	err := ctx.BindJSON(&metadata)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
@@ -70,7 +70,7 @@ func UpdateTargetProviderMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.TargetService.UpdateTargetProviderMetadata(ctx.Request.Context(), targetId, metadata)
+	err = server.TargetService.UpdateTargetProviderMetadata(ctx.Request.Context(), targetId, metadata.Metadata)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update target provider metadata for %s: %w", targetId, err))
 		return

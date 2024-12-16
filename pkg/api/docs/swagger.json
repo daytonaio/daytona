@@ -1720,7 +1720,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/UpdateTargetProviderMetadataDTO"
                         }
                     }
                 ],
@@ -2328,7 +2328,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/UpdateWorkspaceProviderMetadataDTO"
                         }
                     }
                 ],
@@ -3768,9 +3768,32 @@
                 }
             }
         },
+        "UpdateTargetProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateWorkspaceProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
         "Workspace": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -3781,6 +3804,9 @@
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },
@@ -3828,6 +3854,7 @@
         "WorkspaceDTO": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -3839,6 +3866,9 @@
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },

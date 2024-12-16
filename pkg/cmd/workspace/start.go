@@ -14,6 +14,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -183,13 +184,14 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspac
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
-		Id:            workspace.Id,
-		Label:         &workspace.Name,
-		ActiveProfile: activeProfile,
-		Index:         util.Pointer(0),
-		Follow:        util.Pointer(true),
-		From:          &from,
+	go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
+		Id:        workspace.Id,
+		Label:     &workspace.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Index:     util.Pointer(0),
+		Follow:    util.Pointer(true),
+		From:      &from,
 	})
 
 	res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()

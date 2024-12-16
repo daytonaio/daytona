@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/api/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -31,6 +32,13 @@ func GetWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
+
+		fmt.Println(err)
+		fmt.Println(err)
+		fmt.Println(err)
+		fmt.Println(err)
+		fmt.Println(err)
+
 		statusCode := http.StatusInternalServerError
 		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
 			statusCode = http.StatusNotFound
@@ -39,8 +47,13 @@ func GetWorkspace(ctx *gin.Context) {
 		return
 	}
 
-	util.HideDaytonaEnvVars(&w.EnvVars)
-	util.HideDaytonaEnvVars(&w.Target.EnvVars)
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		util.HideDaytonaEnvVars(&w.EnvVars)
+		util.HideDaytonaEnvVars(&w.Target.EnvVars)
+		w.ApiKey = "<HIDDEN>"
+		w.Target.ApiKey = "<HIDDEN>"
+	}
 
 	ctx.JSON(200, w)
 }
@@ -64,9 +77,14 @@ func ListWorkspaces(ctx *gin.Context) {
 		return
 	}
 
-	for i, _ := range workspaceList {
-		util.HideDaytonaEnvVars(&workspaceList[i].EnvVars)
-		util.HideDaytonaEnvVars(&workspaceList[i].Target.EnvVars)
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		for i, _ := range workspaceList {
+			util.HideDaytonaEnvVars(&workspaceList[i].EnvVars)
+			util.HideDaytonaEnvVars(&workspaceList[i].Target.EnvVars)
+			workspaceList[i].ApiKey = "<HIDDEN>"
+			workspaceList[i].Target.ApiKey = "<HIDDEN>"
+		}
 	}
 
 	ctx.JSON(200, workspaceList)

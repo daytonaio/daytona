@@ -7,8 +7,11 @@ import (
 	"context"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -22,7 +25,7 @@ type BuildServiceConfig struct {
 	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	CreateJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
-	LoggerFactory         logs.LoggerFactory
+	LoggerFactory         logs.ILoggerFactory
 }
 
 type BuildService struct {
@@ -30,7 +33,7 @@ type BuildService struct {
 	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	createJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 }
 
 func NewBuildService(config BuildServiceConfig) services.IBuildService {
@@ -195,4 +198,18 @@ func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duratio
 
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
 	return s.loggerFactory.CreateBuildLogReader(buildId)
+}
+
+func (s *BuildService) GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error) {
+	targetLogsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+
+	err = os.MkdirAll(targetLogsDir, 0755)
+	if err != nil {
+		return nil, err
+	}
+
+	return os.OpenFile(filepath.Join(targetLogsDir, buildId, "log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 }

@@ -79,7 +79,7 @@ func UpdateJobState(ctx *gin.Context) {
 
 	err = server.RunnerService.UpdateJobState(ctx.Request.Context(), jobId, updateJobState)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get runner: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update job state: %w", err))
 		return
 	}
 

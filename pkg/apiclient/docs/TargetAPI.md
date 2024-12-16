@@ -655,7 +655,7 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID
-	metadata := "metadata_example" // string | Provider metadata
+	metadata := *openapiclient.NewUpdateTargetProviderMetadataDTO("Metadata_example") // UpdateTargetProviderMetadataDTO | Provider metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -683,7 +683,7 @@ Other parameters are passed through a pointer to a apiUpdateTargetProviderMetada
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **metadata** | **string** | Provider metadata | 
+ **metadata** | [**UpdateTargetProviderMetadataDTO**](UpdateTargetProviderMetadataDTO.md) | Provider metadata | 
 
 ### Return type
 

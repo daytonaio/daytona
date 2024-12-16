@@ -243,9 +243,15 @@ func (a *Agent) updateWorkspaceMetadata() error {
 	}
 
 	uptime := a.uptime()
+
+	gitStatusDto, err := conversion.Convert[models.GitStatus, apiclient.GitStatus](gitStatus)
+	if err != nil {
+		return err
+	}
+
 	res, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).SetMetadata(apiclient.SetWorkspaceMetadata{
 		Uptime:    uptime,
-		GitStatus: conversion.ToApiClientGitStatus(gitStatus),
+		GitStatus: gitStatusDto,
 	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)

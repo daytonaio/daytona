@@ -7,3 +7,7 @@ type SetTargetMetadata struct {
 	Uptime           uint64  `json:"uptime" validate:"required"`
 	ProviderMetadata *string `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name SetTargetMetadata
+
+type UpdateTargetProviderMetadataDTO struct {
+	Metadata string `json:"metadata" validate:"required"`
+} // @name UpdateTargetProviderMetadataDTO

@@ -13,10 +13,10 @@ type InitializeProviderRequest struct {
 	DaytonaDownloadUrl string
 	DaytonaVersion     string
 	LogsDir            string
-
-	NetworkKey string
-	ServerUrl  string
-	ApiUrl     string
+	NetworkKey         string
+	ServerUrl          string
+	ApiUrl             string
+	ApiKey             string
 	// ServerPort is used if the target supports direct server access
 	ServerPort uint32
 	// ApiPort is used if the target supports direct server access

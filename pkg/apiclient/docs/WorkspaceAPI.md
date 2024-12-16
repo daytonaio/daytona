@@ -510,7 +510,7 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID
-	metadata := "metadata_example" // string | Provider metadata
+	metadata := *openapiclient.NewUpdateWorkspaceProviderMetadataDTO("Metadata_example") // UpdateWorkspaceProviderMetadataDTO | Provider metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -538,7 +538,7 @@ Other parameters are passed through a pointer to a apiUpdateWorkspaceProviderMet
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **metadata** | **string** | Provider metadata | 
+ **metadata** | [**UpdateWorkspaceProviderMetadataDTO**](UpdateWorkspaceProviderMetadataDTO.md) | Provider metadata | 
 
 ### Return type
 

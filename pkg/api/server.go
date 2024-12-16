@@ -149,7 +149,8 @@ func (a *ApiServer) Start() error {
 		targetController.POST("/:targetId/start", target.StartTarget)
 		targetController.POST("/:targetId/stop", target.StopTarget)
 		targetController.PATCH("/:targetId/set-default", target.SetDefaultTarget)
-		targetController.PATCH("/:targetId/handle-successful-creation", target.HandleSuccessfulCreation)
+		targetController.POST("/:targetId/handle-successful-creation", target.HandleSuccessfulCreation)
+		targetController.POST("/:targetId/provider-metadata", target.UpdateTargetProviderMetadata)
 		targetController.DELETE("/:targetId", target.RemoveTarget)
 	}
 
@@ -161,6 +162,7 @@ func (a *ApiServer) Start() error {
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
+		workspaceController.POST("/:workspaceId/provider-metadata", workspace.UpdateWorkspaceProviderMetadata)
 	}
 
 	workspaceTemplateController := protected.Group("/workspace-template")
@@ -213,8 +215,11 @@ func (a *ApiServer) Start() error {
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
 		logController.GET("/target/:targetId", log_controller.ReadTargetLog)
+		logController.GET("/target/:targetId/write", log_controller.WriteTargetLog)
 		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
+		logController.GET("/workspace/:workspaceId/write", log_controller.WriteWorkspaceLog)
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
+		logController.GET("/build/:buildId/write", log_controller.WriteBuildLog)
 	}
 
 	gitProviderController := protected.Group("/gitprovider")

@@ -28,7 +28,7 @@ type Builder struct {
 	buildImageContainerRegistry *models.ContainerRegistry
 
 	buildImageNamespace   string
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 	defaultWorkspaceImage string
 	defaultWorkspaceUser  string
 }

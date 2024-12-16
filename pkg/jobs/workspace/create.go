@@ -21,7 +21,10 @@ func (wj *WorkspaceJob) create(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	workspaceLogger := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer workspaceLogger.Close()
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Creating workspace %s\n", w.Name)))
@@ -44,12 +47,12 @@ func (wj *WorkspaceJob) create(ctx context.Context, j *models.Job) error {
 
 	w.EnvVars = extractedEnvVars
 
-	targetProvider, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
+	p, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
 	if err != nil {
 		return err
 	}
 
-	_, err = (*targetProvider).CreateWorkspace(&provider.WorkspaceRequest{
+	_, err = (*p).CreateWorkspace(&provider.WorkspaceRequest{
 		Workspace:           w,
 		ContainerRegistries: containerRegistries,
 		GitProviderConfig:   gc,

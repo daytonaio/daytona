@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -77,7 +78,12 @@ var SshProxyCmd = &cobra.Command{
 				ApiClient: cli,
 			})
 
-			containerName := dockerClient.GetWorkspaceContainerName(conversion.ToWorkspace(ws))
+			workspace, err := conversion.Convert[apiclient.WorkspaceDTO, models.Workspace](ws)
+			if err != nil {
+				return err
+			}
+
+			containerName := dockerClient.GetWorkspaceContainerName(workspace)
 
 			ctx := context.Background()
 

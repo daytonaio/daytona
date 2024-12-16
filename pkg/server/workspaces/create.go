@@ -44,6 +44,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 	}
 
 	w.Repository.Url = util.CleanUpRepositoryUrl(w.Repository.Url)
+
 	if w.GitProviderConfigId == nil || *w.GitProviderConfigId == "" {
 		configs, err := s.listGitProviderConfigs(ctx, w.Repository.Url)
 		if err != nil {
@@ -57,6 +58,10 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 		if len(configs) == 1 {
 			w.GitProviderConfigId = &configs[0].Id
 		}
+	}
+
+	if w.GitProviderConfigId != nil && *w.GitProviderConfigId == "" {
+		w.GitProviderConfigId = nil
 	}
 
 	if w.Repository.Sha == "" {
