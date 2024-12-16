@@ -146,16 +146,6 @@ func (o *ProviderProviderTargetProperty) SetDisabledPredicate(v string) {
 	o.DisabledPredicate = &v
 }
 
-// DisabledPredicateOptions ensures the required option is set for the DisabledPredicate field
-func (o *ProviderProviderTargetProperty) DisabledPredicateOptions(option string) bool {
-	for _, allowedOption := range o.Options {
-		if allowedOption == option {
-			return true
-		}
-	}
-	return false
-}
-
 // GetInputMasked returns the InputMasked field value if set, zero value otherwise.
 func (o *ProviderProviderTargetProperty) GetInputMasked() bool {
 	if o == nil || IsNil(o.InputMasked) {

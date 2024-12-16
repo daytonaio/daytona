@@ -268,7 +268,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
-				if !property.DisabledPredicateOptions(name) {
+				if !contains(property.Options, optionMap[name]) {
 					return fmt.Errorf("unexpected property '%s' for target manifest '%s'", name, target.Name)
 				}
 				continue
@@ -321,6 +321,15 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 		}
 	}
 	return nil
+}
+
+func contains(slice []string, item interface{}) bool {
+	for _, val := range slice {
+		if val == item {
+			return true
+		}
+	}
+	return false
 }
 
 func init() {
