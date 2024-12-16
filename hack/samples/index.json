@@ -128,5 +128,20 @@
     "name": "Next.js - Festigo",
     "description": "Festigo is an event planning and event organizing website that bring guests, vendors and event organizers(the people hosting the event) under a single umbrella.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-event-planner"
+  },
+  {
+    "name": "Next.js - Cooperword",
+    "description":"The COOPER WORD is a web-based tool designed to help users create, manage, and view events in a calendar format. Built using React, Next.js, and TypeScript, this application provides a user-friendly interface with intuitive functionality for effective event management.",
+    "gitUrl":"https://github.com/daytonaio/sample-nextjs-ai-event-manager.git"
+  },
+  {
+      "name": "Python/Flask - ai-code-reviwer",
+      "description": "Get the feedback on your code and also can translate it to another programming language",
+      "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
+  },
+  {
+      "name": "Python/Streamlit - LinearPredictor",
+      "description": "LinearPredictor is an interactive web application designed to help users build and explore simple linear regression models.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-linear-predictor"
   }
 ]
