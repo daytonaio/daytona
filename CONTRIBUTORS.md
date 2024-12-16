@@ -29,3 +29,6 @@ We contributors to Daytona:
 * Sara Lucija Dragicevic (@saralucijad)
 * Ante Projić (@aprojic)
 * Ivan Kunjasic (@IvanKunjasic)
+* Bruno Grbavac (@brunogrbavac)
+* Mo Jaafar (@mojafa)
+* Ivan Novak (@inovak)
