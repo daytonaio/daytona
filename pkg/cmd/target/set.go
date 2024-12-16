@@ -250,7 +250,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	}
 	for optionKey := range optionMap {
 		if _, exists := targetManifest[optionKey]; !exists {
-			return fmt.Errorf("invalid property '%s' for target Manifest '%s'", optionKey, target.Name)
+			return fmt.Errorf("invalid property '%s' for target manifest '%s'", optionKey, target.Name)
 		}
 	}
 
@@ -261,9 +261,16 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 	sort.Strings(sortedKeys)
 
 	for _, name := range sortedKeys {
+		if _, present := optionMap[name]; !present {
+			continue
+		}
+
 		property := targetManifest[name]
 		if property.DisabledPredicate != nil && *property.DisabledPredicate != "" {
 			if matched, err := regexp.Match(*property.DisabledPredicate, []byte(target.Name)); err == nil && matched {
+				if !property.DisabledPredicateOptions(name) {
+					return fmt.Errorf("unexpected property '%s' for target manifest '%s'", name, target.Name)
+				}
 				continue
 			}
 		}
@@ -286,6 +293,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 			if !isBool {
 				return fmt.Errorf("invalid type for %s, expected boolean", name)
 			}
+
 		case apiclient.ProviderTargetPropertyTypeOption:
 			optionValue, ok := optionMap[name].(string)
 			if !ok {
@@ -299,7 +307,7 @@ func validateProperty(targetManifest map[string]apiclient.ProviderProviderTarget
 				}
 			}
 			if !valid {
-				return fmt.Errorf("invalid value '%s' for '%s': valid options are %v", optionValue, target.Name, property.Options)
+				return fmt.Errorf("unexpected property '%s' for target manifest '%s' : valid properties are %v", optionValue, target.Name, property.Options)
 			}
 
 		case apiclient.ProviderTargetPropertyTypeFilePath:
