@@ -32,3 +32,4 @@ We contributors to Daytona:
 * Bruno Grbavac (@brunogrbavac)
 * Mo Jaafar (@mojafa)
 * Ivan Novak (@inovak)
+* Nikola Radisic (@radisicc)
