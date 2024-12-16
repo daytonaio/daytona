@@ -30,3 +30,4 @@ We contributors to Daytona:
 * Ante Projić (@aprojic)
 * Bruno Grbavac (@brunogrbavac)
 * Mo Jaafar (@mojafa)
+* Ivan Novak (@inovak)
