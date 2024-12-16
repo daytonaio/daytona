@@ -133,5 +133,15 @@
     "name": "Next.js - Cooperword",
     "description":"The COOPER WORD is a web-based tool designed to help users create, manage, and view events in a calendar format. Built using React, Next.js, and TypeScript, this application provides a user-friendly interface with intuitive functionality for effective event management.",
     "gitUrl":"https://github.com/daytonaio/sample-nextjs-ai-event-manager.git"
+  },
+  {
+      "name": "Node / TypeScript",
+      "description": "Develop Node.js based applications in TypeScript. Includes Node.js, eslint, nvm, yarn, and the TypeScript compiler.",
+      "gitUrl": "https://github.com/daytonaio/sample-typescript-node"
+  },
+  {
+      "name": "Python/Flask - ai-code-reviwer",
+      "description": "Get the feedback on your code and also can translate it to another programming language",
+      "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
   }
 ]
