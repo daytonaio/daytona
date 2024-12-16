@@ -138,5 +138,10 @@
       "name": "Python/Flask - ai-code-reviwer",
       "description": "Get the feedback on your code and also can translate it to another programming language",
       "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
+  },
+  {
+      "name": "Python/Streamlit - LinearPredictor",
+      "description": "LinearPredictor is an interactive web application designed to help users build and explore simple linear regression models.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-linear-predictor"
   }
 ]
