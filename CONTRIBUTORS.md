@@ -31,7 +31,6 @@ We contributors to Daytona:
 * Bruno Grbavac (@brunogrbavac)
 * Juraj Štefanić (@stefanicjuraj)
 * Ivan Kunjasic (@IvanKunjasic)
-* Bruno Grbavac (@brunogrbavac)
 * Mo Jaafar (@mojafa)
 * Ivan Novak (@inovak)
 * Nikola Radisic (@radisicc)
