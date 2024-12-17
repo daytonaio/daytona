@@ -14,7 +14,7 @@ import (
 
 type IStore interface {
 	stores.IStore
-	AutoMigrate(interface{}) error
+	AutoMigrate(...interface{}) error
 	GetTransaction(ctx context.Context) *gorm.DB
 }
 
@@ -26,8 +26,8 @@ func NewStore(db *gorm.DB) IStore {
 	return &dbStore{db}
 }
 
-func (s *dbStore) AutoMigrate(value interface{}) error {
-	return s.db.AutoMigrate(value)
+func (s *dbStore) AutoMigrate(dst ...interface{}) error {
+	return s.db.AutoMigrate(dst...)
 }
 
 func (s *dbStore) BeginTransaction(ctx context.Context) (context.Context, error) {
