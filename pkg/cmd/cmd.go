@@ -82,6 +82,7 @@ func Execute() error {
 	rootCmd.AddCommand(PortForwardCmd)
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)
+	rootCmd.AddCommand(updateCmd)
 
 	SetupRootCommand(rootCmd)
 
