@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (m *ProviderManager) DownloadProvider(ctx context.Context, downloadUrls map[os.OperatingSystem]string, providerName string) (string, error) {
+func (m *providerManagerImpl) DownloadProvider(ctx context.Context, downloadUrls map[os.OperatingSystem]string, providerName string) (string, error) {
 	downloadPath := filepath.Join(m.baseDir, providerName, providerName)
 	if runtime.GOOS == "windows" {
 		downloadPath += ".exe"

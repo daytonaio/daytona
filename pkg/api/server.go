@@ -220,6 +220,8 @@ func (a *ApiServer) Start() error {
 		logController.GET("/workspace/:workspaceId/write", log_controller.WriteWorkspaceLog)
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
 		logController.GET("/build/:buildId/write", log_controller.WriteBuildLog)
+		logController.GET("/runner/:runnerId", log_controller.ReadRunnerLog)
+		logController.GET("/runner/:runnerId/write", log_controller.WriteRunnerLog)
 	}
 
 	gitProviderController := protected.Group("/gitprovider")

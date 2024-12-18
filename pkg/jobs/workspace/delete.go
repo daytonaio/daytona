@@ -19,7 +19,7 @@ func (wj *WorkspaceJob) delete(ctx context.Context, j *models.Job, force bool) e
 		return err
 	}
 
-	workspaceLogger, err := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateLogger(w.Id, w.Name, logs.LogSourceServer)
 	if err != nil {
 		return err
 	}

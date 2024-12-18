@@ -5,8 +5,10 @@ package runners
 
 import (
 	"context"
+	"io"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -16,6 +18,7 @@ import (
 type RunnerServiceConfig struct {
 	RunnerStore         stores.RunnerStore
 	RunnerMetadataStore stores.RunnerMetadataStore
+	LoggerFactory       logs.ILoggerFactory
 
 	CreateJob          func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error
 	ListJobsForRunner  func(ctx context.Context, runnerId string) ([]*models.Job, error)
@@ -31,6 +34,7 @@ func NewRunnerService(config RunnerServiceConfig) services.IRunnerService {
 	return &RunnerService{
 		runnerStore:         config.RunnerStore,
 		runnerMetadataStore: config.RunnerMetadataStore,
+		loggerFactory:       config.LoggerFactory,
 
 		createJob:          config.CreateJob,
 		listJobsForRunner:  config.ListJobsForRunner,
@@ -46,6 +50,7 @@ func NewRunnerService(config RunnerServiceConfig) services.IRunnerService {
 type RunnerService struct {
 	runnerStore         stores.RunnerStore
 	runnerMetadataStore stores.RunnerMetadataStore
+	loggerFactory       logs.ILoggerFactory
 
 	createJob          func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error
 	listJobsForRunner  func(ctx context.Context, runnerId string) ([]*models.Job, error)
@@ -94,4 +99,12 @@ func (s *RunnerService) SetRunnerMetadata(ctx context.Context, runnerId string, 
 	m.Providers = metadata.Providers
 	m.UpdatedAt = metadata.UpdatedAt
 	return s.runnerMetadataStore.Save(ctx, m)
+}
+
+func (s *RunnerService) GetRunnerLogReader(ctx context.Context, runnerId string) (io.Reader, error) {
+	return s.loggerFactory.CreateLogReader(runnerId)
+}
+
+func (s *RunnerService) GetRunnerLogWriter(ctx context.Context, runnerId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(runnerId)
 }

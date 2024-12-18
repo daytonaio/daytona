@@ -50,6 +50,22 @@
         "DAYTONA_DEV": "1",
         "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
       }
+    },
+    {
+      "name": "Runner",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/daytona",
+      "console": "integratedTerminal",
+      "args": [
+        "runner",
+        "serve"
+      ],
+      "env": {
+        "DAYTONA_DEV": "1",
+        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-runner",
+      }
     }
   ]
 }

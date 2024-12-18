@@ -119,6 +119,14 @@ func GetConfigDir() (string, error) {
 	return filepath.Join(configDir, "server"), nil
 }
 
-func GetTargetLogsDir(configDir string) (string, error) {
-	return filepath.Join(configDir, "logs"), nil
+func GetTargetLogsDir(configDir string) string {
+	return filepath.Join(configDir, "targets", "logs")
+}
+
+func GetRunnerLogsDir(configDir string) string {
+	return filepath.Join(configDir, "runners", "logs")
+}
+
+func GetWorkspaceLogsDir(configDir string) string {
+	return filepath.Join(configDir, "workspaces", "logs")
 }

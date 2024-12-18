@@ -25,6 +25,150 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+func ReadServerLog(ctx *gin.Context) {
+	s := server.GetInstance(nil)
+
+	logFileQuery := ctx.Query("file")
+	retryQuery := ctx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	if retry {
+		for {
+			reader, err := s.GetLogReader(logFileQuery)
+			if err != nil && server.IsLogFileNotFound(err) {
+				ctx.AbortWithError(http.StatusNotFound, err)
+				return
+			}
+			if err == nil {
+				readLog(ctx, reader, logs.ReadLog, writeToWs)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	reader, err := s.GetLogReader(logFileQuery)
+	if err != nil {
+		if server.IsLogFileNotFound(err) {
+			ctx.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ctx, reader, logs.ReadLog, writeToWs)
+}
+
+func ReadTargetLog(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			targetLogReader, err := server.TargetService.GetTargetLogReader(ctx.Request.Context(), targetId)
+			if err == nil {
+				readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	targetLogReader, err := server.TargetService.GetTargetLogReader(ctx.Request.Context(), targetId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
+}
+
+func ReadWorkspaceLog(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
+			if err == nil {
+				readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
+}
+
+func ReadBuildLog(ctx *gin.Context) {
+	buildId := ctx.Param("buildId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
+
+			if err == nil {
+				readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
+}
+
+func ReadRunnerLog(ctx *gin.Context) {
+	runnerId := ctx.Param("runnerId")
+	retryQuery := ctx.DefaultQuery("retry", "true")
+	retry := retryQuery == "true"
+
+	server := server.GetInstance(nil)
+
+	if retry {
+		for {
+			runnerLogReader, err := server.RunnerService.GetRunnerLogReader(ctx.Request.Context(), runnerId)
+			if err == nil {
+				readLog(ctx, runnerLogReader, logs.ReadJSONLog, writeJSONToWs)
+				return
+			}
+			time.Sleep(TIMEOUT)
+		}
+	}
+
+	runnerLogReader, err := server.RunnerService.GetRunnerLogReader(ctx.Request.Context(), runnerId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, err)
+		return
+	}
+
+	readLog(ctx, runnerLogReader, logs.ReadJSONLog, writeJSONToWs)
+}
+
 func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	for {
 		err := ws.WriteMessage(websocket.TextMessage, <-c)
@@ -106,121 +250,4 @@ func readLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(cont
 			}
 		}
 	}
-}
-
-func ReadServerLog(ctx *gin.Context) {
-	s := server.GetInstance(nil)
-
-	logFileQuery := ctx.Query("file")
-	retryQuery := ctx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	if retry {
-		for {
-			reader, err := s.GetLogReader(logFileQuery)
-			if err != nil && server.IsLogFileNotFound(err) {
-				ctx.AbortWithError(http.StatusNotFound, err)
-				return
-			}
-			if err == nil {
-				readLog(ctx, reader, logs.ReadLog, writeToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	reader, err := s.GetLogReader(logFileQuery)
-	if err != nil {
-		if server.IsLogFileNotFound(err) {
-			ctx.AbortWithError(http.StatusNotFound, err)
-			return
-		}
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ctx, reader, logs.ReadLog, writeToWs)
-}
-
-func ReadTargetLog(ctx *gin.Context) {
-	targetId := ctx.Param("targetId")
-	retryQuery := ctx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
-			if err == nil {
-				readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	targetLogReader, err := server.TargetService.GetTargetLogReader(targetId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ctx, targetLogReader, logs.ReadJSONLog, writeJSONToWs)
-}
-
-func ReadWorkspaceLog(ctx *gin.Context) {
-	workspaceId := ctx.Param("workspaceId")
-	retryQuery := ctx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
-			if err == nil {
-				readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	workspaceLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(ctx.Request.Context(), workspaceId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ctx, workspaceLogReader, logs.ReadJSONLog, writeJSONToWs)
-}
-
-func ReadBuildLog(ctx *gin.Context) {
-	buildId := ctx.Param("buildId")
-	retryQuery := ctx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
-
-			if err == nil {
-				readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	buildLogReader, err := server.BuildService.GetBuildLogReader(ctx.Request.Context(), buildId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ctx, buildLogReader, logs.ReadJSONLog, writeJSONToWs)
 }

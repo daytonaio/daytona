@@ -21,7 +21,7 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	workspaceLogger, err := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateLogger(w.Id, w.Name, logs.LogSourceServer)
 	if err != nil {
 		return err
 	}

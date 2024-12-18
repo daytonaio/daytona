@@ -12,7 +12,8 @@ type InitializeProviderRequest struct {
 	BasePath           string
 	DaytonaDownloadUrl string
 	DaytonaVersion     string
-	LogsDir            string
+	TargetLogsDir      string
+	WorkspaceLogsDir   string
 	NetworkKey         string
 	ServerUrl          string
 	ApiUrl             string

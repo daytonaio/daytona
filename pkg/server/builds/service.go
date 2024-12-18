@@ -7,11 +7,8 @@ import (
 	"context"
 	"errors"
 	"io"
-	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -197,19 +194,9 @@ func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duratio
 }
 
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
-	return s.loggerFactory.CreateBuildLogReader(buildId)
+	return s.loggerFactory.CreateLogReader(buildId)
 }
 
 func (s *BuildService) GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error) {
-	targetLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.MkdirAll(targetLogsDir, 0755)
-	if err != nil {
-		return nil, err
-	}
-
-	return os.OpenFile(filepath.Join(targetLogsDir, buildId, "log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	return s.loggerFactory.CreateLogWriter(buildId)
 }

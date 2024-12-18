@@ -19,7 +19,7 @@ func (tj *TargetJob) create(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	targetLogger, err := tj.loggerFactory.CreateTargetLogger(tg.Id, tg.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateLogger(tg.Id, tg.Name, logs.LogSourceServer)
 	if err != nil {
 		return err
 	}

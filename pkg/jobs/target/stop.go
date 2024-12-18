@@ -19,7 +19,7 @@ func (tj *TargetJob) stop(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	targetLogger, err := tj.loggerFactory.CreateTargetLogger(t.Id, t.Name, logs.LogSourceServer)
+	targetLogger, err := tj.loggerFactory.CreateLogger(t.Id, t.Name, logs.LogSourceServer)
 	if err != nil {
 		return err
 	}

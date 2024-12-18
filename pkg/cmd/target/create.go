@@ -65,8 +65,8 @@ var targetCreateCmd = &cobra.Command{
 		logs_view.SetupLongestPrefixLength([]string{createTargetDto.Name})
 
 		logs_view.DisplayLogEntry(logs.LogEntry{
-			TargetName: &createTargetDto.Name,
-			Msg:        views.GetPrettyLogLine("Request submitted"),
+			Label: createTargetDto.Name,
+			Msg:   views.GetPrettyLogLine("Request submitted"),
 		}, logs_view.STATIC_INDEX)
 
 		go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{

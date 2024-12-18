@@ -62,11 +62,6 @@ var serveCmd = &cobra.Command{
 			return err
 		}
 
-		err = bootstrap.InitRemoteProviderManager(apiClient, serverConfig, runnerConfig, runnerConfigDir)
-		if err != nil {
-			return err
-		}
-
 		var runnerLogWriter io.Writer
 
 		if runnerConfig.LogFile != nil {

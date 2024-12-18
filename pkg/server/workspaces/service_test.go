@@ -113,7 +113,6 @@ func TestTargetService(t *testing.T) {
 	gitProviderService := mocks.NewMockGitProviderService()
 
 	tgLogsDir := t.TempDir()
-	buildLogsDir := t.TempDir()
 
 	service := workspaces.NewWorkspaceService(workspaces.WorkspaceServiceConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
@@ -152,7 +151,7 @@ func TestTargetService(t *testing.T) {
 		ServerUrl:             serverUrl,
 		DefaultWorkspaceImage: defaultWorkspaceImage,
 		DefaultWorkspaceUser:  defaultWorkspaceUser,
-		LoggerFactory:         logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
+		LoggerFactory:         logs.NewLoggerFactory(tgLogsDir),
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {

@@ -46,7 +46,7 @@ func (b *DevcontainerBuilder) CleanUp() error {
 }
 
 func (b *DevcontainerBuilder) Publish(build models.Build) error {
-	buildLogger, err := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	buildLogger, err := b.loggerFactory.CreateLogger(build.Id, build.Id, logs.LogSourceBuilder)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (b *DevcontainerBuilder) Publish(build models.Build) error {
 }
 
 func (b *DevcontainerBuilder) buildDevcontainer(build models.Build) (string, string, error) {
-	buildLogger, err := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+	buildLogger, err := b.loggerFactory.CreateLogger(build.Id, build.Id, logs.LogSourceBuilder)
 	if err != nil {
 		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}

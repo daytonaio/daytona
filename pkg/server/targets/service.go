@@ -6,12 +6,9 @@ package targets
 import (
 	"context"
 	"io"
-	"os"
-	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -67,27 +64,12 @@ type TargetService struct {
 	telemetryService telemetry.TelemetryService
 }
 
-func (s *TargetService) GetTargetLogReader(targetId string) (io.Reader, error) {
-	return s.loggerFactory.CreateTargetLogReader(targetId)
+func (s *TargetService) GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error) {
+	return s.loggerFactory.CreateLogReader(targetId)
 }
 
 func (s *TargetService) GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error) {
-	configDir, err := server.GetConfigDir()
-	if err != nil {
-		return nil, err
-	}
-
-	targetLogsDir, err := server.GetTargetLogsDir(configDir)
-	if err != nil {
-		return nil, err
-	}
-
-	err = os.MkdirAll(targetLogsDir, 0755)
-	if err != nil {
-		return nil, err
-	}
-
-	return os.OpenFile(filepath.Join(targetLogsDir, targetId, "log"), os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	return s.loggerFactory.CreateLogWriter(targetId)
 }
 
 // TODO: revise - "remove default" is enough for now

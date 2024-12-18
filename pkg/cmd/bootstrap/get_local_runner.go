@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -22,6 +23,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/jobs/workspace"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
@@ -30,8 +32,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/client"
-
-	"github.com/daytonaio/daytona/pkg/runner"
+	log "github.com/sirupsen/logrus"
 )
 
 type LocalRunnerParams struct {
@@ -46,20 +47,42 @@ type LocalJobFactoryParams struct {
 	ServerConfig     *server.Config
 	ConfigDir        string
 	TelemetryService telemetry.TelemetryService
+	ProviderManager  providermanager.IProviderManager
 }
 
 func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
+	runnerLogsDir := server.GetRunnerLogsDir(params.ConfigDir)
+	loggerFactory := logs.NewLoggerFactory(runnerLogsDir)
+
+	runnerLogger, err := loggerFactory.CreateLogger("local", "local", logs.LogSourceRunner)
+	if err != nil {
+		return nil, err
+	}
+
+	logger := &log.Logger{
+		Out: io.MultiWriter(runnerLogger, os.Stdout),
+		Formatter: &log.TextFormatter{
+			ForceColors: true,
+		},
+		Hooks: make(log.LevelHooks),
+		Level: log.DebugLevel,
+	}
+
 	jobService := server.GetInstance(nil).JobService
+
+	providerManager, err := getProviderManager(params, logger)
+	if err != nil {
+		return nil, err
+	}
 
 	jobFactoryParams := LocalJobFactoryParams{
 		ServerConfig:     params.ServerConfig,
 		ConfigDir:        params.ConfigDir,
 		TelemetryService: params.TelemetryService,
+		ProviderManager:  providerManager,
 	}
 
 	runnerService := server.GetInstance(nil).RunnerService
-
-	providermanager := providermanager.GetProviderManager(nil)
 
 	workspaceJobFactory, err := getLocalWorkspaceJobFactory(jobFactoryParams)
 	if err != nil {
@@ -76,15 +99,17 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 		return nil, err
 	}
 
-	runnerJobFactory, err := getLocalRunnerJobFactory(jobFactoryParams)
-	if err != nil {
-		return nil, err
-	}
+	runnerJobFactory := jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
+		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
+			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
+		},
+		ProviderManager: providerManager,
+	})
 
 	return runner.NewRunner(runner.RunnerConfig{
 		Config:          params.RunnerConfig,
-		LogWriter:       params.LogWriter,
-		ProviderManager: providermanager,
+		Logger:          logger,
+		ProviderManager: providerManager,
 		RegistryUrl:     params.ServerConfig.RegistryUrl,
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, int, error) {
 			jobs, err := jobService.List(ctx, &stores.JobFilter{
@@ -118,21 +143,12 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 }
 
 func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorkspaceJobFactory, error) {
+	workspaceLogsDir := server.GetWorkspaceLogsDir(params.ConfigDir)
+	workspaceLogsFactory := logs.NewLoggerFactory(workspaceLogsDir)
+
 	envVarService := server.GetInstance(nil).EnvironmentVariableService
 
 	gitProviderService := server.GetInstance(nil).GitProviderService
-
-	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
-	if err != nil {
-		return nil, err
-	}
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
-
-	providerManager := providermanager.GetProviderManager(nil)
 
 	targetService := server.GetInstance(nil).TargetService
 
@@ -168,24 +184,15 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   loggerFactory,
-		ProviderManager: providerManager,
+		LoggerFactory:   workspaceLogsFactory,
+		ProviderManager: params.ProviderManager,
 		BuilderImage:    params.ServerConfig.BuilderImage,
 	}), nil
 }
 
 func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFactory, error) {
-	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
-	if err != nil {
-		return nil, err
-	}
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
-
-	providerManager := providermanager.GetProviderManager(nil)
+	targetLogsDir := server.GetTargetLogsDir(params.ConfigDir)
+	targetLogsFactory := logs.NewLoggerFactory(targetLogsDir)
 
 	targetService := server.GetInstance(nil).TargetService
 
@@ -204,12 +211,19 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   loggerFactory,
-		ProviderManager: providerManager,
+		LoggerFactory:   targetLogsFactory,
+		ProviderManager: params.ProviderManager,
 	}), nil
 }
 
 func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJobFactory, error) {
+	buildLogsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+
+	buildLogsFactory := logs.NewLoggerFactory(buildLogsDir)
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, err
@@ -218,12 +232,6 @@ func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJob
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
-
-	logsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewLoggerFactory(nil, &logsDir)
 
 	buildService := server.GetInstance(nil).BuildService
 
@@ -292,14 +300,14 @@ func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJob
 		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
 		},
-		LoggerFactory: loggerFactory,
+		LoggerFactory: buildLogsFactory,
 		BuilderFactory: build.NewBuilderFactory(build.BuilderFactoryConfig{
 			ContainerRegistries:         containerRegistries,
 			Image:                       params.ServerConfig.BuilderImage,
 			BuildImageContainerRegistry: builderRegistry,
 
 			BuildImageNamespace:   buildImageNamespace,
-			LoggerFactory:         loggerFactory,
+			LoggerFactory:         buildLogsFactory,
 			DefaultWorkspaceImage: params.ServerConfig.DefaultWorkspaceImage,
 			DefaultWorkspaceUser:  params.ServerConfig.DefaultWorkspaceUser,
 		}),
@@ -307,31 +315,26 @@ func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJob
 	}), nil
 }
 
-func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDir string) error {
-	targetLogsDir, err := server.GetTargetLogsDir(configDir)
-	if err != nil {
-		return err
-	}
-
+func getProviderManager(params LocalRunnerParams, logger *log.Logger) (providermanager.IProviderManager, error) {
 	headscaleServer := headscale.NewHeadscaleServer(&headscale.HeadscaleServerConfig{
-		ServerId:      c.Id,
-		FrpsDomain:    c.Frps.Domain,
-		FrpsProtocol:  c.Frps.Protocol,
-		HeadscalePort: c.HeadscalePort,
-		ConfigDir:     filepath.Join(configDir, "headscale"),
-		Frps:          c.Frps,
+		ServerId:      params.ServerConfig.Id,
+		FrpsDomain:    params.ServerConfig.Frps.Domain,
+		FrpsProtocol:  params.ServerConfig.Frps.Protocol,
+		HeadscalePort: params.ServerConfig.HeadscalePort,
+		ConfigDir:     filepath.Join(params.ConfigDir, "headscale"),
+		Frps:          params.ServerConfig.Frps,
 	})
-	err = headscaleServer.Init()
+	err := headscaleServer.Init()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
-	binaryUrl, _ := url.JoinPath(util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), "binary", "script")
+	headscaleUrl := util.GetFrpcHeadscaleUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain)
+	binaryUrl, _ := url.JoinPath(util.GetFrpcApiUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain), "binary", "script")
 
 	dbPath, err := getDbPath()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	dbConnection := db.GetSQLiteConnection(dbPath)
@@ -340,27 +343,29 @@ func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDi
 
 	targetConfigStore, err := db.NewTargetConfigStore(store)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	targetConfigService := targetconfigs.NewTargetConfigService(targetconfigs.TargetConfigServiceConfig{
 		TargetConfigStore: targetConfigStore,
 	})
 
-	_ = providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
-		LogsDir:            targetLogsDir,
-		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
+	return providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
+		TargetLogsDir:      server.GetTargetLogsDir(params.ConfigDir),
+		WorkspaceLogsDir:   server.GetWorkspaceLogsDir(params.ConfigDir),
+		Logger:             logger,
+		ApiUrl:             util.GetFrpcApiUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain),
 		ApiKey:             "TODO",
-		RunnerId:           runnerConfig.Id,
-		RunnerName:         runnerConfig.Name,
+		RunnerName:         params.RunnerConfig.Name,
+		RunnerId:           params.RunnerConfig.Id,
 		DaytonaDownloadUrl: binaryUrl,
 		ServerUrl:          headscaleUrl,
-		BaseDir:            runnerConfig.ProvidersDir,
+		BaseDir:            params.RunnerConfig.ProvidersDir,
 		CreateProviderNetworkKey: func(ctx context.Context, providerName string) (string, error) {
 			return headscaleServer.CreateAuthKey(headscale.HEADSCALE_USERNAME)
 		},
-		ServerPort: c.HeadscalePort,
-		ApiPort:    c.ApiPort,
+		ServerPort: params.ServerConfig.HeadscalePort,
+		ApiPort:    params.ServerConfig.ApiPort,
 		GetTargetConfigMap: func(ctx context.Context) (map[string]*models.TargetConfig, error) {
 			return targetConfigService.Map(ctx)
 		},
@@ -372,18 +377,5 @@ func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDi
 			})
 			return err
 		},
-	})
-
-	return nil
-}
-
-func getLocalRunnerJobFactory(params LocalJobFactoryParams) (jobs_runner.IRunnerJobFactory, error) {
-	providerManager := providermanager.GetProviderManager(nil)
-
-	return jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
-		},
-		ProviderManager: providerManager,
 	}), nil
 }

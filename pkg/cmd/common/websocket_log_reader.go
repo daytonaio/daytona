@@ -104,6 +104,29 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 	}
 }
 
+func ReadRunnerLogs(ctx context.Context, params ReadLogParams) {
+	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
+
+	for {
+		var query string
+		if params.Query != nil {
+			query = *params.Query
+		}
+
+		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/runner/%s", params.Id), params.ServerUrl, params.ApiKey, &query)
+		// We want to retry getting the logs if it fails
+		if err != nil {
+			log.Trace(apiclient.HandleErrorResponse(res, err))
+			time.Sleep(250 * time.Millisecond)
+			continue
+		}
+
+		readJSONLog(ctx, ws, logs_view.FIRST_WORKSPACE_INDEX, nil)
+		ws.Close()
+		break
+	}
+}
+
 func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.Time) {
 	logEntriesChan := make(chan logs.LogEntry)
 	readErr := make(chan error)

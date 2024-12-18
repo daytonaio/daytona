@@ -57,17 +57,19 @@ type ProviderManagerConfig struct {
 	ServerUrl                string
 	ApiUrl                   string
 	ApiKey                   string
-	LogsDir                  string
+	WorkspaceLogsDir         string
+	TargetLogsDir            string
 	BaseDir                  string
 	ServerPort               uint32
 	ApiPort                  uint32
+	Logger                   *log.Logger
 }
 
-var providerManager *ProviderManager
+var providerManager *providerManagerImpl
 
-func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
+func GetProviderManager(config *ProviderManagerConfig) *providerManagerImpl {
 	if config != nil && providerManager != nil {
-		log.Fatal("Provider manager already initialized")
+		config.Logger.Fatal("Provider manager already initialized")
 	}
 
 	if providerManager == nil {
@@ -75,7 +77,7 @@ func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
 			log.Fatal("Provider manager not initialized")
 		}
 
-		providerManager = &ProviderManager{
+		providerManager = &providerManagerImpl{
 			pluginRefs:               make(map[string]*pluginRef),
 			runnerId:                 config.RunnerId,
 			runnerName:               config.RunnerName,
@@ -83,20 +85,22 @@ func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
 			serverUrl:                config.ServerUrl,
 			apiUrl:                   config.ApiUrl,
 			apiKey:                   config.ApiKey,
-			logsDir:                  config.LogsDir,
+			workspaceLogsDir:         config.WorkspaceLogsDir,
+			targetLogsDir:            config.TargetLogsDir,
 			getTargetConfigMap:       config.GetTargetConfigMap,
 			createTargetConfig:       config.CreateTargetConfig,
 			baseDir:                  config.BaseDir,
 			createProviderNetworkKey: config.CreateProviderNetworkKey,
 			serverPort:               config.ServerPort,
 			apiPort:                  config.ApiPort,
+			logger:                   config.Logger,
 		}
 	}
 
 	return providerManager
 }
 
-type ProviderManager struct {
+type providerManagerImpl struct {
 	runnerId                 string
 	runnerName               string
 	pluginRefs               map[string]*pluginRef
@@ -110,11 +114,13 @@ type ProviderManager struct {
 	apiKey                   string
 	serverPort               uint32
 	apiPort                  uint32
-	logsDir                  string
+	workspaceLogsDir         string
+	targetLogsDir            string
 	baseDir                  string
+	logger                   *log.Logger
 }
 
-func (m *ProviderManager) GetProvider(name string) (*provider.Provider, error) {
+func (m *providerManagerImpl) GetProvider(name string) (*provider.Provider, error) {
 	pluginRef, ok := m.pluginRefs[name]
 	if !ok {
 		return nil, errors.New("provider not found")
@@ -137,12 +143,12 @@ func (m *ProviderManager) GetProvider(name string) (*provider.Provider, error) {
 	return p, nil
 }
 
-func (m *ProviderManager) GetProviders() map[string]provider.Provider {
+func (m *providerManagerImpl) GetProviders() map[string]provider.Provider {
 	providers := make(map[string]provider.Provider)
 	for name := range m.pluginRefs {
 		provider, err := m.GetProvider(name)
 		if err != nil {
-			log.Printf("Error getting provider %s: %s", name, err)
+			m.logger.Printf("Error getting provider %s: %s", name, err)
 			continue
 		}
 
@@ -152,7 +158,7 @@ func (m *ProviderManager) GetProviders() map[string]provider.Provider {
 	return providers
 }
 
-func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool) error {
+func (m *providerManagerImpl) RegisterProvider(pluginPath string, manualInstall bool) error {
 	ctx := context.Background()
 
 	pluginRef, err := m.initializeProvider(pluginPath)
@@ -185,10 +191,10 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 			return errors.New("failed to get preset target configs: " + err.Error())
 		}
 
-		log.Infof("Setting preset target configs for %s", pluginRef.name)
+		m.logger.Infof("Setting preset target configs for %s", pluginRef.name)
 		for _, targetConfig := range *presetTargetConfigs {
 			if _, ok := existingTargetConfigs[targetConfig.Name]; ok {
-				log.Infof("Target config %s already exists. Skipping...", targetConfig.Name)
+				m.logger.Infof("Target config %s already exists. Skipping...", targetConfig.Name)
 				continue
 			}
 
@@ -197,20 +203,20 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 
 			err = m.createTargetConfig(ctx, targetConfig.Name, targetConfig.Options, providerInfo)
 			if err != nil {
-				log.Errorf("Failed to set target config %s: %s", targetConfig.Name, err)
+				m.logger.Errorf("Failed to set target config %s: %s", targetConfig.Name, err)
 			} else {
-				log.Infof("Target config %s set", targetConfig.Name)
+				m.logger.Infof("Target config %s set", targetConfig.Name)
 			}
 		}
-		log.Infof("Preset target configs set for %s", pluginRef.name)
+		m.logger.Infof("Preset target configs set for %s", pluginRef.name)
 	}
 
-	log.Infof("Provider %s initialized", pluginRef.name)
+	m.logger.Infof("Provider %s initialized", pluginRef.name)
 
 	return nil
 }
 
-func (m *ProviderManager) UninstallProvider(name string) error {
+func (m *providerManagerImpl) UninstallProvider(name string) error {
 	pluginRef, ok := m.pluginRefs[name]
 	if !ok {
 		return errors.New("provider not found")
@@ -251,7 +257,7 @@ func (m *ProviderManager) UninstallProvider(name string) error {
 	return nil
 }
 
-func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) error {
+func (m *providerManagerImpl) TerminateProviderProcesses(providersBasePath string) error {
 	process, err := process.Processes()
 	if err != nil {
 		return err
@@ -261,7 +267,7 @@ func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) e
 		if e, err := p.Exe(); err == nil && strings.HasPrefix(e, providersBasePath) {
 			err := p.Kill()
 			if err != nil {
-				log.Errorf("Failed to kill process %d: %s", p.Pid, err)
+				m.logger.Errorf("Failed to kill process %d: %s", p.Pid, err)
 			}
 		}
 	}
@@ -269,7 +275,7 @@ func (m *ProviderManager) TerminateProviderProcesses(providersBasePath string) e
 	return nil
 }
 
-func (m *ProviderManager) Purge() error {
+func (m *providerManagerImpl) Purge() error {
 	for name := range m.pluginRefs {
 		err := m.UninstallProvider(name)
 		if err != nil {
@@ -282,7 +288,7 @@ func (m *ProviderManager) Purge() error {
 	return os.RemoveAll(m.baseDir)
 }
 
-func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, error) {
+func (m *providerManagerImpl) initializeProvider(pluginPath string) (*pluginRef, error) {
 	ctx := context.Background()
 
 	pluginName := filepath.Base(pluginPath)
@@ -314,7 +320,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 		Managed:         true,
 	})
 
-	log.Infof("Provider %s registered", pluginName)
+	m.logger.Infof("Provider %s registered", pluginName)
 
 	p, err := m.dispenseProvider(client, pluginName)
 	if err != nil {
@@ -333,7 +339,8 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 		ServerUrl:          m.serverUrl,
 		ApiUrl:             m.apiUrl,
 		ApiKey:             m.apiKey,
-		LogsDir:            m.logsDir,
+		WorkspaceLogsDir:   m.workspaceLogsDir,
+		TargetLogsDir:      m.targetLogsDir,
 		NetworkKey:         networkKey,
 		ServerPort:         m.serverPort,
 		ApiPort:            m.apiPort,
@@ -349,7 +356,7 @@ func (m *ProviderManager) initializeProvider(pluginPath string) (*pluginRef, err
 	}, nil
 }
 
-func (m *ProviderManager) dispenseProvider(client *plugin.Client, name string) (*provider.Provider, error) {
+func (m *providerManagerImpl) dispenseProvider(client *plugin.Client, name string) (*provider.Provider, error) {
 	rpcClient, err := client.Client()
 	if err != nil {
 		return nil, err

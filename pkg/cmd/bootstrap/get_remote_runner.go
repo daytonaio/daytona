@@ -1,4 +1,4 @@
-// Copyright 2024 Daytona Platforms Inc.
+// Copyright 2024 Daytona Platforms Inparams.ServerConfig.
 // SPDX-License-Identifier: Apache-2.0
 
 package bootstrap
@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -23,12 +24,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/jobs/target"
 	"github.com/daytonaio/daytona/pkg/jobs/workspace"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/logs/remotelogs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
-	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/client"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/daytonaio/daytona/pkg/runner"
 )
@@ -47,33 +49,43 @@ type RemoteJobFactoryParams struct {
 	ServerConfig     *apiclient.ServerConfig
 	RunnerConfig     *runner.Config
 	ConfigDir        string
-	LoggerFactory    logs.ILoggerFactory
 	TelemetryService telemetry.TelemetryService
+	ProviderManager  providermanager.IProviderManager
 }
 
 func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
-	targetLogsDir, err := server.GetTargetLogsDir(params.ConfigDir)
+	runnerLogsDir := filepath.Join(params.ConfigDir, "logs")
+	loggerFactory := remotelogs.NewRemoteLoggerFactory(remotelogs.RemoteLoggerFactoryConfig{
+		LogsDir:      runnerLogsDir,
+		ServerUrl:    params.RunnerConfig.ServerApiUrl,
+		ServerApiKey: params.RunnerConfig.ServerApiKey,
+		BasePath:     "/log/runner",
+	})
+
+	runnerLogger, err := loggerFactory.CreateLogger("local", "local", logs.LogSourceRunner)
 	if err != nil {
 		return nil, err
 	}
 
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
+	logger := &log.Logger{
+		Out: io.MultiWriter(runnerLogger, os.Stdout),
+		Formatter: &log.TextFormatter{
+			ForceColors: true,
+		},
+		Hooks: make(log.LevelHooks),
+		Level: log.DebugLevel,
 	}
 
-	loggerFactory := logs.NewRemoteLoggerFactory(&targetLogsDir, &buildLogsDir, params.RunnerConfig.ServerApiUrl, params.RunnerConfig.ServerApiKey)
+	providerManager := getRemoteProviderManager(params, logger)
 
 	jobFactoryParams := RemoteJobFactoryParams{
 		ApiClient:        params.ApiClient,
 		ServerConfig:     params.ServerConfig,
 		RunnerConfig:     params.RunnerConfig,
 		ConfigDir:        params.ConfigDir,
-		LoggerFactory:    loggerFactory,
 		TelemetryService: params.TelemetryService,
+		ProviderManager:  providerManager,
 	}
-
-	providermanager := providermanager.GetProviderManager(nil)
 
 	workspaceJobFactory, err := getRemoteWorkspaceJobFactory(jobFactoryParams)
 	if err != nil {
@@ -90,15 +102,17 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 		return nil, err
 	}
 
-	runnerJobFactory, err := getRemoteRunnerJobFactory(jobFactoryParams)
-	if err != nil {
-		return nil, err
-	}
+	runnerJobFactory := jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
+		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
+			return params.TelemetryService.TrackRunnerEvent(event, clientId, props)
+		},
+		ProviderManager: providerManager,
+	})
 
 	return runner.NewRunner(runner.RunnerConfig{
 		Config:          params.RunnerConfig,
-		LogWriter:       params.LogWriter,
-		ProviderManager: providermanager,
+		Logger:          logger,
+		ProviderManager: providerManager,
 		RegistryUrl:     params.ServerConfig.RegistryUrl,
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, int, error) {
 			jobs, res, err := params.ApiClient.RunnerAPI.ListRunnerJobs(ctx, params.RunnerConfig.Id).Execute()
@@ -121,6 +135,7 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 					Action:       models.JobAction(job.Action),
 					Metadata:     job.Metadata,
 					Error:        job.Error,
+					// TODO: Convert
 					// CreatedAt:    parseTime(job.CreatedAt),
 					// UpdatedAt:    parseTime(job.UpdatedAt),
 				})
@@ -172,36 +187,33 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 	}), nil
 }
 
-func InitRemoteProviderManager(apiClient *apiclient.APIClient, c *apiclient.ServerConfig, runnerConfig *runner.Config, configDir string) error {
-	targetLogsDir, err := server.GetTargetLogsDir(configDir)
-	if err != nil {
-		return err
-	}
+func getRemoteProviderManager(params RemoteRunnerParams, logger *log.Logger) providermanager.IProviderManager {
+	headscaleUrl := util.GetFrpcHeadscaleUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain)
+	binaryUrl, _ := url.JoinPath(params.RunnerConfig.ServerApiUrl, "binary", "script")
 
-	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)
-	binaryUrl, _ := url.JoinPath(runnerConfig.ServerApiUrl, "binary", "script")
-
-	_ = providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
-		LogsDir:            targetLogsDir,
-		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
-		ApiKey:             runnerConfig.ServerApiKey,
-		RunnerId:           runnerConfig.Id,
-		RunnerName:         runnerConfig.Name,
+	return providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
+		WorkspaceLogsDir:   filepath.Join(params.ConfigDir, "workspaces", "logs"),
+		TargetLogsDir:      filepath.Join(params.ConfigDir, "targets", "logs"),
+		ApiUrl:             util.GetFrpcApiUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain),
+		ApiKey:             params.RunnerConfig.ServerApiKey,
+		RunnerId:           params.RunnerConfig.Id,
+		RunnerName:         params.RunnerConfig.Name,
+		Logger:             logger,
 		DaytonaDownloadUrl: binaryUrl,
 		ServerUrl:          headscaleUrl,
-		BaseDir:            runnerConfig.ProvidersDir,
+		BaseDir:            params.RunnerConfig.ProvidersDir,
 		CreateProviderNetworkKey: func(ctx context.Context, providerName string) (string, error) {
-			key, _, err := apiClient.ServerAPI.GenerateNetworkKey(ctx).Execute()
+			key, _, err := params.ApiClient.ServerAPI.GenerateNetworkKey(ctx).Execute()
 			if err != nil {
 				return "", err
 			}
 
 			return key.Key, nil
 		},
-		ServerPort: uint32(c.HeadscalePort),
-		ApiPort:    uint32(c.ApiPort),
+		ServerPort: uint32(params.ServerConfig.HeadscalePort),
+		ApiPort:    uint32(params.ServerConfig.ApiPort),
 		GetTargetConfigMap: func(ctx context.Context) (map[string]*models.TargetConfig, error) {
-			list, _, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
+			list, _, err := params.ApiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
 			if err != nil {
 				return nil, err
 			}
@@ -230,7 +242,7 @@ func InitRemoteProviderManager(apiClient *apiclient.APIClient, c *apiclient.Serv
 				return errors.New("invalid provider info")
 			}
 
-			_, _, err = apiClient.TargetConfigAPI.AddTargetConfig(ctx).TargetConfig(apiclient.AddTargetConfigDTO{
+			_, _, err = params.ApiClient.TargetConfigAPI.AddTargetConfig(ctx).TargetConfig(apiclient.AddTargetConfigDTO{
 				Name:         name,
 				Options:      options,
 				ProviderInfo: *providerInfoDto,
@@ -238,12 +250,16 @@ func InitRemoteProviderManager(apiClient *apiclient.APIClient, c *apiclient.Serv
 			return err
 		},
 	})
-
-	return nil
 }
 
 func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWorkspaceJobFactory, error) {
-	providerManager := providermanager.GetProviderManager(nil)
+	logsDir := filepath.Join(params.ConfigDir, "workspaces", "logs")
+	loggerFactory := remotelogs.NewRemoteLoggerFactory(remotelogs.RemoteLoggerFactoryConfig{
+		LogsDir:      logsDir,
+		ServerUrl:    params.RunnerConfig.ServerApiUrl,
+		ServerApiKey: params.RunnerConfig.ServerApiKey,
+		BasePath:     "/log/workspace",
+	})
 
 	return workspace.NewWorkspaceJobFactory(workspace.WorkspaceJobFactoryConfig{
 		FindWorkspace: func(ctx context.Context, workspaceId string) (*models.Workspace, error) {
@@ -290,14 +306,20 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   params.LoggerFactory,
-		ProviderManager: providerManager,
+		LoggerFactory:   loggerFactory,
+		ProviderManager: params.ProviderManager,
 		BuilderImage:    params.ServerConfig.BuilderImage,
 	}), nil
 }
 
 func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJobFactory, error) {
-	providerManager := providermanager.GetProviderManager(nil)
+	logsDir := filepath.Join(params.ConfigDir, "targets", "logs")
+	loggerFactory := remotelogs.NewRemoteLoggerFactory(remotelogs.RemoteLoggerFactoryConfig{
+		LogsDir:      logsDir,
+		ServerUrl:    params.RunnerConfig.ServerApiUrl,
+		ServerApiKey: params.RunnerConfig.ServerApiKey,
+		BasePath:     "/log/target",
+	})
 
 	return target.NewTargetJobFactory(target.TargetJobFactoryConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
@@ -321,12 +343,23 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   params.LoggerFactory,
-		ProviderManager: providerManager,
+		LoggerFactory:   loggerFactory,
+		ProviderManager: params.ProviderManager,
 	}), nil
 }
 
 func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJobFactory, error) {
+	logsDir, err := build.GetBuildLogsDir()
+	if err != nil {
+		return nil, err
+	}
+	loggerFactory := remotelogs.NewRemoteLoggerFactory(remotelogs.RemoteLoggerFactoryConfig{
+		LogsDir:      logsDir,
+		ServerUrl:    params.RunnerConfig.ServerApiUrl,
+		ServerApiKey: params.RunnerConfig.ServerApiKey,
+		BasePath:     "/log/build",
+	})
+
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, err
@@ -335,12 +368,6 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
-
-	logsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-	loggerFactory := logs.NewRemoteLoggerFactory(nil, &logsDir, params.RunnerConfig.ServerApiUrl, params.RunnerConfig.ServerApiKey)
 
 	var buildImageNamespace string
 
@@ -447,16 +474,5 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 			DefaultWorkspaceUser:        params.ServerConfig.DefaultWorkspaceUser,
 		}),
 		BasePath: filepath.Join(params.ConfigDir, "builds"),
-	}), nil
-}
-
-func getRemoteRunnerJobFactory(params RemoteJobFactoryParams) (jobs_runner.IRunnerJobFactory, error) {
-	providerManager := providermanager.GetProviderManager(nil)
-
-	return jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackRunnerEvent(event, clientId, props)
-		},
-		ProviderManager: providerManager,
 	}), nil
 }

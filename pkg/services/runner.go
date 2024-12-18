@@ -6,6 +6,7 @@ package services
 import (
 	"context"
 	"errors"
+	"io"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/os"
@@ -24,6 +25,9 @@ type IRunnerService interface {
 	InstallProvider(ctx context.Context, runnerId string, providerMetadata InstallProviderDTO) error
 	UninstallProvider(ctx context.Context, runnerId string, providerName string) error
 	UpdateProvider(ctx context.Context, runnerId string, providerName string, downloadUrls DownloadUrls) error
+
+	GetRunnerLogReader(ctx context.Context, runnerId string) (io.Reader, error)
+	GetRunnerLogWriter(ctx context.Context, runnerId string) (io.WriteCloser, error)
 }
 
 type RunnerDTO struct {

@@ -39,15 +39,10 @@ import (
 )
 
 func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
-	targetLogsDir, err := server.GetTargetLogsDir(configDir)
-	if err != nil {
-		return nil, err
-	}
 	buildLogsDir, err := build.GetBuildLogsDir()
 	if err != nil {
 		return nil, err
 	}
-	loggerFactory := logs.NewLoggerFactory(&targetLogsDir, &buildLogsDir)
 
 	dbPath, err := getDbPath()
 	if err != nil {
@@ -178,7 +173,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				State:        models.JobStatePending,
 			})
 		},
-		LoggerFactory: loggerFactory,
+		LoggerFactory: logs.NewLoggerFactory(buildLogsDir),
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
@@ -317,7 +312,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ServerApiUrl:     util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:    version,
 		ServerUrl:        headscaleUrl,
-		LoggerFactory:    loggerFactory,
+		LoggerFactory:    logs.NewLoggerFactory(server.GetTargetLogsDir(configDir)),
 		TelemetryService: telemetryService,
 	})
 
@@ -392,7 +387,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ServerUrl:             headscaleUrl,
 		DefaultWorkspaceImage: c.DefaultWorkspaceImage,
 		DefaultWorkspaceUser:  c.DefaultWorkspaceUser,
-		LoggerFactory:         loggerFactory,
+		LoggerFactory:         logs.NewLoggerFactory(server.GetWorkspaceLogsDir(configDir)),
 	})
 
 	envVarService := env.NewEnvironmentVariableService(env.EnvironmentVariableServiceConfig{
@@ -402,6 +397,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	runnerService := runners.NewRunnerService(runners.RunnerServiceConfig{
 		RunnerStore:         runnerStore,
 		RunnerMetadataStore: runnerMetadataStore,
+		LoggerFactory:       logs.NewLoggerFactory(server.GetRunnerLogsDir(configDir)),
 		CreateJob: func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error {
 			return jobService.Create(ctx, &models.Job{
 				ResourceId:   runnerId,

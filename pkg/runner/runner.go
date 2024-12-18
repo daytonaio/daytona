@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"os"
 	"os/signal"
@@ -39,8 +38,8 @@ type IRunner interface {
 
 type RunnerConfig struct {
 	models.Runner
-	Config    *Config
-	LogWriter io.Writer
+	Config *Config
+	Logger *log.Logger
 
 	ProviderManager providermanager.IProviderManager
 	RegistryUrl     string
@@ -57,9 +56,9 @@ type RunnerConfig struct {
 
 func NewRunner(config RunnerConfig) IRunner {
 	return &Runner{
-		Runner:    config.Runner,
-		Config:    config.Config,
-		LogWriter: config.LogWriter,
+		Runner: config.Runner,
+		Config: config.Config,
+		logger: config.Logger,
 
 		providerManager: config.ProviderManager,
 		registryUrl:     config.RegistryUrl,
@@ -78,7 +77,7 @@ func NewRunner(config RunnerConfig) IRunner {
 type Runner struct {
 	models.Runner
 	Config    *Config
-	LogWriter io.Writer
+	logger    *log.Logger
 	startTime time.Time
 
 	providerManager providermanager.IProviderManager
@@ -95,12 +94,7 @@ type Runner struct {
 }
 
 func (r *Runner) Start(ctx context.Context) error {
-	if r.Config.Id != "local" {
-		r.initLogs()
-		log.SetLevel(log.InfoLevel)
-	}
-
-	log.Info(fmt.Sprintf("Starting runner %s\n", r.Config.Id))
+	r.logger.Info(fmt.Sprintf("Starting runner %s\n", r.Config.Id))
 
 	r.startTime = time.Now()
 
@@ -116,7 +110,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	// Terminate orphaned provider processes
 	err := r.providerManager.TerminateProviderProcesses(r.Config.ProvidersDir)
 	if err != nil {
-		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
+		r.logger.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
 
 	err = r.downloadDefaultProviders(r.registryUrl)
@@ -134,7 +128,7 @@ func (r *Runner) Start(ctx context.Context) error {
 	err = scheduler.AddFunc(DEFAULT_JOB_POLL_INTERVAL, func() {
 		err := r.CheckAndRunJobs(ctx)
 		if err != nil {
-			log.Error(err)
+			r.logger.Error(err)
 		}
 	})
 	if err != nil {
@@ -150,11 +144,11 @@ func (r *Runner) Start(ctx context.Context) error {
 		}
 	}()
 
-	log.Info("Runner started")
+	r.logger.Info("Runner started")
 
 	<-ctx.Done()
 
-	log.Info("Shutting down runner")
+	r.logger.Info("Shutting down runner")
 	scheduler.Stop()
 	return nil
 }
@@ -182,7 +176,7 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 	var job jobs.IJob
 
-	log.Info(fmt.Sprintf("Running job %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
+	r.logger.Info(fmt.Sprintf("Running job %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 
 	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
 	if err != nil {
@@ -204,11 +198,11 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	err = job.Execute(ctx)
 	if err != nil {
-		log.Info(fmt.Sprintf("Job failed %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
+		r.logger.Info(fmt.Sprintf("Job failed %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 		return r.updateJobState(ctx, j.Id, models.JobStateError, &err)
 	}
 
-	log.Info(fmt.Sprintf("Job successful %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
+	r.logger.Info(fmt.Sprintf("Job successful %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
 	return r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 }
 
@@ -225,7 +219,7 @@ func (r *Runner) UpdateRunnerMetadata(config *Config) error {
 	for _, provider := range providers {
 		info, err := provider.GetInfo()
 		if err != nil {
-			log.Info(fmt.Errorf("failed to get provider: %w", err))
+			r.logger.Info(fmt.Errorf("failed to get provider: %w", err))
 			continue
 		}
 
@@ -239,15 +233,4 @@ func (r *Runner) UpdateRunnerMetadata(config *Config) error {
 		Providers:   providerInfos,
 		RunningJobs: util.Pointer(uint64(0)),
 	})
-}
-
-func (r *Runner) initLogs() {
-	logFormatter := &util.LogFormatter{
-		TextFormatter: &log.TextFormatter{
-			ForceColors: true,
-		},
-		ProcessLogWriter: r.LogWriter,
-	}
-
-	log.SetFormatter(logFormatter)
 }

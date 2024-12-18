@@ -25,7 +25,7 @@ type ITargetService interface {
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 
-	GetTargetLogReader(targetId string) (io.Reader, error)
+	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)
 	GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error)
 	SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 }

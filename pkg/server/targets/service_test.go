@@ -68,7 +68,6 @@ func TestTargetService(t *testing.T) {
 	apiKeyService := mocks.NewMockApiKeyService()
 
 	tgLogsDir := t.TempDir()
-	buildLogsDir := t.TempDir()
 
 	service := targets.NewTargetService(targets.TargetServiceConfig{
 		TargetStore:         targetStore,
@@ -84,7 +83,7 @@ func TestTargetService(t *testing.T) {
 		},
 		ServerApiUrl:  serverApiUrl,
 		ServerUrl:     serverUrl,
-		LoggerFactory: logs.NewLoggerFactory(&tgLogsDir, &buildLogsDir),
+		LoggerFactory: logs.NewLoggerFactory(tgLogsDir),
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {

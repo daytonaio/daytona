@@ -266,11 +266,6 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 
 	log.Info("Starting local job runner...")
 
-	err = bootstrap.InitProviderManager(params.ServerConfig, params.RunnerConfig, params.ConfigDir)
-	if err != nil {
-		return err
-	}
-
 	runner, err := bootstrap.GetLocalRunner(params)
 	if err != nil {
 		return err

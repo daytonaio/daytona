@@ -15,7 +15,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
-	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -47,10 +46,11 @@ var purgeCmd = &cobra.Command{
 			return err
 		}
 
-		runnerConfig, err := runner.GetConfig()
-		if err != nil {
-			return err
-		}
+		// FIXME: TODO
+		// runnerConfig, err := runner.GetConfig()
+		// if err != nil {
+		// 	return err
+		// }
 
 		serverConfigDir, err := server.GetConfigDir()
 		if err != nil {
@@ -106,11 +106,6 @@ var purgeCmd = &cobra.Command{
 		})
 
 		defer telemetryService.Close()
-
-		err = bootstrap.InitProviderManager(serverConfig, runnerConfig, serverConfigDir)
-		if err != nil {
-			return err
-		}
 
 		fmt.Println("Purging the server")
 		server, err := bootstrap.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)

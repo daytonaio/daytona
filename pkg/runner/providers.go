@@ -11,7 +11,6 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
-	log "github.com/sirupsen/logrus"
 )
 
 func (r *Runner) downloadDefaultProviders(registryUrl string) error {
@@ -22,7 +21,7 @@ func (r *Runner) downloadDefaultProviders(registryUrl string) error {
 
 	defaultProviders := manifest.GetDefaultProviders()
 
-	log.Info("Downloading default providers")
+	r.logger.Info("Downloading default providers")
 	for providerName, provider := range defaultProviders {
 		lockFilePath := filepath.Join(r.Config.ProvidersDir, providerName, providermanager.INITIAL_SETUP_LOCK_FILE_NAME)
 
@@ -34,19 +33,19 @@ func (r *Runner) downloadDefaultProviders(registryUrl string) error {
 		_, err = r.providerManager.DownloadProvider(context.Background(), provider.DownloadUrls, providerName)
 		if err != nil {
 			if !providermanager.IsProviderAlreadyDownloaded(err, providerName) {
-				log.Error(err)
+				r.logger.Error(err)
 			}
 			continue
 		}
 	}
 
-	log.Info("Default providers downloaded")
+	r.logger.Info("Default providers downloaded")
 
 	return nil
 }
 
 func (r *Runner) registerProviders(registryUrl string) error {
-	log.Info("Registering providers")
+	r.logger.Info("Registering providers")
 
 	manifest, err := util.GetProvidersManifest(registryUrl)
 	if err != nil {
@@ -56,7 +55,7 @@ func (r *Runner) registerProviders(registryUrl string) error {
 	directoryEntries, err := os.ReadDir(r.Config.ProvidersDir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			log.Info("No providers found")
+			r.logger.Info("No providers found")
 			return nil
 		}
 		return err
@@ -69,14 +68,14 @@ func (r *Runner) registerProviders(registryUrl string) error {
 			pluginPath, err := r.getPluginPath(providerDir)
 			if err != nil {
 				if !providermanager.IsNoPluginFound(err, providerDir) {
-					log.Error(err)
+					r.logger.Error(err)
 				}
 				continue
 			}
 
 			err = r.providerManager.RegisterProvider(pluginPath, false)
 			if err != nil {
-				log.Error(err)
+				r.logger.Error(err)
 				continue
 			}
 
@@ -95,13 +94,13 @@ func (r *Runner) registerProviders(registryUrl string) error {
 			// Check for updates
 			provider, err := r.providerManager.GetProvider(entry.Name())
 			if err != nil {
-				log.Error(err)
+				r.logger.Error(err)
 				continue
 			}
 
 			info, err := (*provider).GetInfo()
 			if err != nil {
-				log.Error(err)
+				r.logger.Error(err)
 				continue
 			}
 			requirements, err := (*provider).CheckRequirements()
@@ -110,19 +109,19 @@ func (r *Runner) registerProviders(registryUrl string) error {
 			}
 			for _, req := range *requirements {
 				if req.Met {
-					log.Infof("Provider requirement met: %s", req.Reason)
+					r.logger.Infof("Provider requirement met: %s", req.Reason)
 				} else {
-					log.Warnf("Provider requirement not met: %s", req.Reason)
+					r.logger.Warnf("Provider requirement not met: %s", req.Reason)
 				}
 			}
 
 			if manifest.HasUpdateAvailable(info.Name, info.Version) {
-				log.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
+				r.logger.Infof("Update available for %s. Update with `daytona provider update`.", info.Name)
 			}
 		}
 	}
 
-	log.Info("Providers registered")
+	r.logger.Info("Providers registered")
 
 	return nil
 }

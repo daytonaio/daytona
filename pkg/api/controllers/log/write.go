@@ -62,6 +62,21 @@ func WriteBuildLog(ctx *gin.Context) {
 	writeLog(ctx, logWriter)
 }
 
+func WriteRunnerLog(ctx *gin.Context) {
+	runnerId := ctx.Param("runnerId")
+
+	server := server.GetInstance(nil)
+
+	logWriter, err := server.RunnerService.GetRunnerLogWriter(ctx, runnerId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get runner log writer: %w", err))
+		return
+	}
+	defer logWriter.Close()
+
+	writeLog(ctx, logWriter)
+}
+
 func writeLog(ginCtx *gin.Context, logWriter io.WriteCloser) {
 	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
 	if err != nil {

@@ -127,9 +127,9 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if target != nil {
-			requestLogEntry.TargetName = &target.Name
+			requestLogEntry.Label = target.Name
 		} else if createTargetDto != nil {
-			requestLogEntry.TargetName = &createTargetDto.Name
+			requestLogEntry.Label = createTargetDto.Name
 		}
 
 		logs_view.DisplayLogEntry(requestLogEntry, logs_view.STATIC_INDEX)
@@ -139,8 +139,8 @@ var CreateCmd = &cobra.Command{
 				continue
 			}
 			logs_view.DisplayLogEntry(logs.LogEntry{
-				WorkspaceName: &createWorkspaceDtos[i].Name,
-				Msg:           fmt.Sprintf("Using detected workspace template '%s'\n", workspaceTemplateName),
+				Label: createWorkspaceDtos[i].Name,
+				Msg:   fmt.Sprintf("Using detected workspace template '%s'\n", workspaceTemplateName),
 			}, i)
 		}
 

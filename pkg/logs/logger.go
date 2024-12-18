@@ -4,61 +4,86 @@
 package logs
 
 import (
-	"io"
+	"encoding/json"
+	"os"
+	"path/filepath"
+	"time"
 )
 
-var LogDelimiter = "!-#_^*|\n"
-
-type Logger interface {
-	io.WriteCloser
-	ConstructJsonLogEntry(p []byte) ([]byte, error)
-	Cleanup() error
+type logger struct {
+	logsDir              string
+	id                   string
+	label                string
+	logFile              *os.File
+	source               LogSource
+	skipEntryConstructor bool
 }
 
-type LogSource string
+func (w *logger) Write(p []byte) (n int, err error) {
+	if w.logFile == nil {
+		filePath := filepath.Join(w.logsDir, w.id, "log")
+		err = os.MkdirAll(filepath.Dir(filePath), 0755)
+		if err != nil {
+			return len(p), err
+		}
 
-const (
-	LogSourceServer   LogSource = "server"
-	LogSourceProvider LogSource = "provider"
-	LogSourceBuilder  LogSource = "builder"
-)
-
-type LogEntry struct {
-	Source        string  `json:"source"`
-	TargetName    *string `json:"targetName,omitempty"`
-	WorkspaceName *string `json:"workspaceName,omitempty"`
-	BuildId       *string `json:"buildId,omitempty"`
-	Msg           string  `json:"msg"`
-	Level         string  `json:"level"`
-	Time          string  `json:"time"`
-}
-
-type ILoggerFactory interface {
-	CreateBuildLogger(buildId string, source LogSource) (Logger, error)
-	CreateBuildLogReader(buildId string) (io.Reader, error)
-
-	CreateTargetLogger(targetId, targetName string, source LogSource) (Logger, error)
-	CreateTargetLogReader(targetId string) (io.Reader, error)
-
-	CreateWorkspaceLogger(workspaceId, workspaceName string, source LogSource) (Logger, error)
-	CreateWorkspaceLogReader(workspaceId string) (io.Reader, error)
-}
-
-type loggerFactory struct {
-	targetLogsDir string
-	buildLogsDir  string
-}
-
-func NewLoggerFactory(targetLogsDir *string, buildLogsDir *string) ILoggerFactory {
-	loggerFactoryImpl := &loggerFactory{}
-
-	if targetLogsDir != nil {
-		loggerFactoryImpl.targetLogsDir = *targetLogsDir
+		logFile, err := os.OpenFile(filePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			return len(p), err
+		}
+		w.logFile = logFile
 	}
 
-	if buildLogsDir != nil {
-		loggerFactoryImpl.buildLogsDir = *buildLogsDir
+	b := p
+
+	if !w.skipEntryConstructor {
+		b, err = w.ConstructJsonLogEntry(p)
+		if err != nil {
+			return len(p), err
+		}
 	}
 
-	return loggerFactoryImpl
+	_, err = w.logFile.Write(b)
+	if err != nil {
+		return len(p), err
+	}
+
+	return len(p), nil
+}
+
+func (w *logger) ConstructJsonLogEntry(p []byte) ([]byte, error) {
+	var entry LogEntry
+	entry.Msg = string(p)
+	entry.Source = string(w.source)
+	entry.Label = w.label
+	entry.Time = time.Now().Format(time.RFC3339)
+
+	b, err := json.Marshal(entry)
+	if err != nil {
+		return nil, err
+	}
+
+	return append(b, []byte(LogDelimiter)...), nil
+}
+
+func (w *logger) Close() error {
+	if w.logFile != nil {
+		err := w.logFile.Close()
+		w.logFile = nil
+		return err
+	}
+	return nil
+}
+
+func (w *logger) Cleanup() error {
+	workspaceLogsDir := filepath.Join(w.logsDir, w.id)
+
+	_, err := os.Stat(workspaceLogsDir)
+	if os.IsNotExist(err) {
+		return nil
+	} else if err != nil {
+		return err
+	}
+
+	return os.RemoveAll(workspaceLogsDir)
 }
