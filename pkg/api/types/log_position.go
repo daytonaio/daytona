@@ -1,15 +1,16 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
-package log
+package types
 
 import (
-    "github.com/daytonaio/daytona/pkg/api/types"
     "encoding/json"
     "time"
 )
 
-// LogPosition tracks the reading position in logs
+const (
+    MaxReconnectAttempts = 5
+    InitialRetryDelay    = 1 * time.Second
+    MaxRetryDelay        = 30 * time.Second
+)
+
 type LogPosition struct {
     Offset    int64     `json:"offset"`
     Timestamp time.Time `json:"timestamp"`
@@ -21,8 +22,8 @@ func (p *LogPosition) Marshal() string {
     return string(data)
 }
 
-func UnmarshalPosition(data string) (*types.LogPosition, error) {
-    var pos types.LogPosition
+func UnmarshalPosition(data string) (*LogPosition, error) {
+    var pos LogPosition
     if err := json.Unmarshal([]byte(data), &pos); err != nil {
         return nil, err
     }

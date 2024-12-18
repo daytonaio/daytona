@@ -12,6 +12,7 @@ import (
     "sync"
     "time"
 
+    "github.com/daytonaio/daytona/pkg/api/types"
     "github.com/gin-gonic/gin"
     "github.com/gorilla/websocket"
     log "github.com/sirupsen/logrus"
@@ -33,7 +34,7 @@ var upgrader = websocket.Upgrader{
 
 type WebSocketReader struct {
     sync.Mutex
-    position    *LogPosition
+    position    *types.LogPosition
     ws          *websocket.Conn
     readFunc    func(context.Context, io.Reader, bool, chan<- []byte, chan<- error)
     writeFunc   func(*websocket.Conn, []byte) error
@@ -44,7 +45,7 @@ func NewWebSocketReader(ws *websocket.Conn, readFunc func(context.Context, io.Re
         ws:        ws,
         readFunc:  readFunc,
         writeFunc: writeFunc,
-        position:  &LogPosition{},
+        position:  &types.LogPosition{},
     }
 }
 
@@ -58,7 +59,7 @@ func (r *WebSocketReader) UpdatePosition(offset int64, line string) {
 
 func readLog(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan<- []byte, chan<- error), writeFunc func(*websocket.Conn, []byte) error) {
     positionQuery := ginCtx.Query("position")
-    var lastPosition *LogPosition
+    var lastPosition *types.LogPosition
     if positionQuery != "" {
         var err error
         lastPosition, err = UnmarshalPosition(positionQuery)

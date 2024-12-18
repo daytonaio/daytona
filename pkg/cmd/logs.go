@@ -4,17 +4,18 @@
 package cmd
 
 import (
-    "context"
-    "errors"
-    "time"
+	"context"
+	"errors"
+	"fmt"
+	"time"
 
-    "github.com/daytonaio/daytona/cmd/daytona/config"
-    "github.com/daytonaio/daytona/internal/util"
-    apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-    "github.com/daytonaio/daytona/pkg/apiclient"
-    "github.com/daytonaio/daytona/pkg/views"
-    "github.com/daytonaio/daytona/pkg/views/workspace/selection"
-    "github.com/spf13/cobra"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	"github.com/spf13/cobra"
 )
 
 var (
