@@ -153,5 +153,10 @@
     "name": "React.js - GH-Search",
     "description": "GH-Search is a project built using github's rest api and react that allows us to search and gather information about various github users.",
     "gitUrl": "https://github.com/daytonaio/sample-github-user-search.git"
+  },
+  {
+    "name": "React.js - Ex-con-thrive",
+    "description": "Ex-Cons Thrive is a project designed to help formerly incarcerated individuals reintegrate into society by providing job search assistance, legal support, mental health services, and more.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-job-assistant"
   }
 ]
