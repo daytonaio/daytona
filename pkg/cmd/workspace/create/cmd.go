@@ -16,6 +16,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -379,5 +380,5 @@ func IsLocalDockerTarget(target *apiclient.TargetDTO) bool {
 		return false
 	}
 
-	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname") && target.TargetConfig.ProviderInfo.RunnerId == "local"
+	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname") && target.TargetConfig.ProviderInfo.RunnerId == bootstrap.LOCAL_RUNNER_ID
 }

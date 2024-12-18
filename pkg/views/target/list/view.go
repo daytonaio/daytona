@@ -25,7 +25,7 @@ type RowData struct {
 	Uptime         string
 }
 
-func ListTargets(targetList []apiclient.TargetDTO, verbose bool, activeProfileName string) {
+func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string) {
 	if len(targetList) == 0 {
 		views_util.NotifyEmptyTargetList(true)
 		return

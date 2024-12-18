@@ -62,7 +62,7 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 		BasePath:     "/log/runner",
 	})
 
-	runnerLogger, err := loggerFactory.CreateLogger("local", "local", logs.LogSourceRunner)
+	runnerLogger, err := loggerFactory.CreateLogger(params.RunnerConfig.Id, params.RunnerConfig.Name, logs.LogSourceRunner)
 	if err != nil {
 		return nil, err
 	}

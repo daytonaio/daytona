@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
-
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
@@ -67,6 +65,5 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
 	format.RegisterFormatFlag(ListCmd)
 }

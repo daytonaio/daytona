@@ -249,12 +249,12 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.GetRunner(context.Background(), "local")
+	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			_, err := runnerService.RegisterRunner(context.Background(), services.RegisterRunnerDTO{
-				Id:   "local",
-				Name: "local",
+				Id:   bootstrap.LOCAL_RUNNER_ID,
+				Name: bootstrap.LOCAL_RUNNER_ID,
 			})
 			if err != nil {
 				return err
@@ -271,19 +271,18 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 		return err
 	}
 
-	// TODO: context?
 	return runner.Start(context.Background())
 }
 
 func handleDisabledLocalRunner() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.GetRunner(context.Background(), "local")
+	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			return nil
 		}
 	}
 
-	return runnerService.RemoveRunner(context.Background(), "local")
+	return runnerService.RemoveRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
 }

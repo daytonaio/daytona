@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
-
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List targets",
@@ -28,7 +26,7 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).ShowOptions(showOptions).Execute()
 
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
@@ -50,12 +48,12 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		list_view.ListTargets(targetList, verbose, activeProfile.Name)
+		list_view.ListTargets(targetList, activeProfile.Name)
 		return nil
 	},
 }
 
 func init() {
-	listCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	listCmd.Flags().BoolVarP(&showOptions, "show-options", "v", false, "Show target options")
 	format.RegisterFormatFlag(listCmd)
 }

@@ -31,7 +31,7 @@ var infoCmd = &cobra.Command{
 		var target *apiclient.TargetDTO
 
 		if len(args) == 0 {
-			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).ShowOptions(showOptions).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -75,6 +75,9 @@ var infoCmd = &cobra.Command{
 	},
 }
 
+var showOptions bool
+
 func init() {
+	infoCmd.Flags().BoolVarP(&showOptions, "show-options", "v", false, "Show target options")
 	format.RegisterFormatFlag(infoCmd)
 }

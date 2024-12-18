@@ -32,13 +32,6 @@ func GetWorkspace(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
-
-		fmt.Println(err)
-		fmt.Println(err)
-		fmt.Println(err)
-		fmt.Println(err)
-		fmt.Println(err)
-
 		statusCode := http.StatusInternalServerError
 		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
 			statusCode = http.StatusNotFound

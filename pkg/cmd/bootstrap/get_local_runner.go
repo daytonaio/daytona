@@ -35,6 +35,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const LOCAL_RUNNER_ID = "local"
+
 type LocalRunnerParams struct {
 	ServerConfig     *server.Config
 	RunnerConfig     *runner.Config
@@ -54,7 +56,7 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 	runnerLogsDir := server.GetRunnerLogsDir(params.ConfigDir)
 	loggerFactory := logs.NewLoggerFactory(runnerLogsDir)
 
-	runnerLogger, err := loggerFactory.CreateLogger("local", "local", logs.LogSourceRunner)
+	runnerLogger, err := loggerFactory.CreateLogger(LOCAL_RUNNER_ID, LOCAL_RUNNER_ID, logs.LogSourceRunner)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +115,7 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 		RegistryUrl:     params.ServerConfig.RegistryUrl,
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, int, error) {
 			jobs, err := jobService.List(ctx, &stores.JobFilter{
-				RunnerIdOrIsNil: util.Pointer("local"),
+				RunnerIdOrIsNil: util.Pointer(LOCAL_RUNNER_ID),
 				States:          &[]models.JobState{models.JobStatePending},
 			})
 			return jobs, 0, err
