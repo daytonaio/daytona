@@ -21,8 +21,7 @@ var _ MappedNullable = &SetTargetMetadata{}
 
 // SetTargetMetadata struct for SetTargetMetadata
 type SetTargetMetadata struct {
-	ProviderMetadata *string `json:"providerMetadata,omitempty"`
-	Uptime           int32   `json:"uptime"`
+	Uptime int32 `json:"uptime"`
 }
 
 type _SetTargetMetadata SetTargetMetadata
@@ -43,38 +42,6 @@ func NewSetTargetMetadata(uptime int32) *SetTargetMetadata {
 func NewSetTargetMetadataWithDefaults() *SetTargetMetadata {
 	this := SetTargetMetadata{}
 	return &this
-}
-
-// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
-func (o *SetTargetMetadata) GetProviderMetadata() string {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		var ret string
-		return ret
-	}
-	return *o.ProviderMetadata
-}
-
-// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SetTargetMetadata) GetProviderMetadataOk() (*string, bool) {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		return nil, false
-	}
-	return o.ProviderMetadata, true
-}
-
-// HasProviderMetadata returns a boolean if a field has been set.
-func (o *SetTargetMetadata) HasProviderMetadata() bool {
-	if o != nil && !IsNil(o.ProviderMetadata) {
-		return true
-	}
-
-	return false
-}
-
-// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
-func (o *SetTargetMetadata) SetProviderMetadata(v string) {
-	o.ProviderMetadata = &v
 }
 
 // GetUptime returns the Uptime field value
@@ -111,9 +78,6 @@ func (o SetTargetMetadata) MarshalJSON() ([]byte, error) {
 
 func (o SetTargetMetadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.ProviderMetadata) {
-		toSerialize["providerMetadata"] = o.ProviderMetadata
-	}
 	toSerialize["uptime"] = o.Uptime
 	return toSerialize, nil
 }

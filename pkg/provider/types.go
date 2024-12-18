@@ -39,7 +39,7 @@ type TargetConfig struct {
 	Name string `json:"name" validate:"required"`
 	// JSON encoded map of options
 	Options string `json:"options" validate:"required"`
-} // @name TargetConfig
+} // @name ProviderTargetConfig
 
 type RequirementStatus struct {
 	Name   string

@@ -3508,9 +3508,6 @@ const docTemplate = `{
                 "uptime"
             ],
             "properties": {
-                "providerMetadata": {
-                    "type": "string"
-                },
                 "uptime": {
                     "type": "integer"
                 }
@@ -3524,9 +3521,6 @@ const docTemplate = `{
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
-                },
-                "providerMetadata": {
-                    "type": "string"
                 },
                 "uptime": {
                     "type": "integer"

@@ -1,6 +1,11 @@
 name: daytona runner logs
 synopsis: View runner logs
-usage: daytona runner logs [flags]
+usage: daytona runner logs [RUNNER_ID] [flags]
+options:
+    - name: follow
+      shorthand: f
+      default_value: "false"
+      usage: Follow logs
 inherited_options:
     - name: help
       default_value: "false"

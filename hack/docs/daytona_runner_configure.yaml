@@ -1,6 +1,15 @@
 name: daytona runner configure
 synopsis: Configure Daytona Runner
 usage: daytona runner configure [flags]
+options:
+    - name: api-key
+      usage: Runner API Key
+    - name: api-url
+      usage: Daytona Server API URL
+    - name: id
+      usage: Runner ID
+    - name: name
+      usage: Runner Name
 inherited_options:
     - name: help
       default_value: "false"

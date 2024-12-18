@@ -3505,9 +3505,6 @@
                 "uptime"
             ],
             "properties": {
-                "providerMetadata": {
-                    "type": "string"
-                },
                 "uptime": {
                     "type": "integer"
                 }
@@ -3521,9 +3518,6 @@
             "properties": {
                 "gitStatus": {
                     "$ref": "#/definitions/GitStatus"
-                },
-                "providerMetadata": {
-                    "type": "string"
                 },
                 "uptime": {
                     "type": "integer"

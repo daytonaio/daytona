@@ -2,9 +2,9 @@ name: daytona server runner register
 synopsis: Register runner
 usage: daytona server runner register [flags]
 options:
-    - name: alias
-      shorthand: a
-      usage: Runner alias
+    - name: name
+      shorthand: "n"
+      usage: Runner name
 inherited_options:
     - name: help
       default_value: "false"

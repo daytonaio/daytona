@@ -4,8 +4,7 @@
 package dto
 
 type SetTargetMetadata struct {
-	Uptime           uint64  `json:"uptime" validate:"required"`
-	ProviderMetadata *string `json:"providerMetadata,omitempty" validate:"optional"`
+	Uptime uint64 `json:"uptime" validate:"required"`
 } // @name SetTargetMetadata
 
 type UpdateTargetProviderMetadataDTO struct {

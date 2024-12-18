@@ -9,7 +9,7 @@ daytona server runner register [flags]
 ### Options
 
 ```
-  -a, --alias string   Runner alias
+  -n, --name string   Runner name
 ```
 
 ### Options inherited from parent commands

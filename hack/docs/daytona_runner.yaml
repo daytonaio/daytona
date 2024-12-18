@@ -11,5 +11,6 @@ see_also:
     - daytona runner logs - View runner logs
     - daytona runner purge - Purges the runner
     - daytona runner restart - Restarts the runner
+    - daytona runner serve - Starts the runner in the foreground
     - daytona runner start - Starts the runner
     - daytona runner stop - Stops the runner

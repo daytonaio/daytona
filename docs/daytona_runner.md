@@ -16,6 +16,7 @@ Manage the runner
 * [daytona runner logs](daytona_runner_logs.md)	 - View runner logs
 * [daytona runner purge](daytona_runner_purge.md)	 - Purges the runner
 * [daytona runner restart](daytona_runner_restart.md)	 - Restarts the runner
+* [daytona runner serve](daytona_runner_serve.md)	 - Starts the runner in the foreground
 * [daytona runner start](daytona_runner_start.md)	 - Starts the runner
 * [daytona runner stop](daytona_runner_stop.md)	 - Stops the runner
 

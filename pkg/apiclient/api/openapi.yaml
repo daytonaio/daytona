@@ -3032,11 +3032,8 @@ components:
       type: object
     SetTargetMetadata:
       example:
-        providerMetadata: providerMetadata
         uptime: 0
       properties:
-        providerMetadata:
-          type: string
         uptime:
           type: integer
       required:
@@ -3044,7 +3041,6 @@ components:
       type: object
     SetWorkspaceMetadata:
       example:
-        providerMetadata: providerMetadata
         gitStatus:
           behind: 1
           fileStatus:
@@ -3063,8 +3059,6 @@ components:
       properties:
         gitStatus:
           $ref: '#/components/schemas/GitStatus'
-        providerMetadata:
-          type: string
         uptime:
           type: integer
       required:

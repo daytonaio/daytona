@@ -21,9 +21,8 @@ var _ MappedNullable = &SetWorkspaceMetadata{}
 
 // SetWorkspaceMetadata struct for SetWorkspaceMetadata
 type SetWorkspaceMetadata struct {
-	GitStatus        *GitStatus `json:"gitStatus,omitempty"`
-	ProviderMetadata *string    `json:"providerMetadata,omitempty"`
-	Uptime           int32      `json:"uptime"`
+	GitStatus *GitStatus `json:"gitStatus,omitempty"`
+	Uptime    int32      `json:"uptime"`
 }
 
 type _SetWorkspaceMetadata SetWorkspaceMetadata
@@ -78,38 +77,6 @@ func (o *SetWorkspaceMetadata) SetGitStatus(v GitStatus) {
 	o.GitStatus = &v
 }
 
-// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
-func (o *SetWorkspaceMetadata) GetProviderMetadata() string {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		var ret string
-		return ret
-	}
-	return *o.ProviderMetadata
-}
-
-// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *SetWorkspaceMetadata) GetProviderMetadataOk() (*string, bool) {
-	if o == nil || IsNil(o.ProviderMetadata) {
-		return nil, false
-	}
-	return o.ProviderMetadata, true
-}
-
-// HasProviderMetadata returns a boolean if a field has been set.
-func (o *SetWorkspaceMetadata) HasProviderMetadata() bool {
-	if o != nil && !IsNil(o.ProviderMetadata) {
-		return true
-	}
-
-	return false
-}
-
-// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
-func (o *SetWorkspaceMetadata) SetProviderMetadata(v string) {
-	o.ProviderMetadata = &v
-}
-
 // GetUptime returns the Uptime field value
 func (o *SetWorkspaceMetadata) GetUptime() int32 {
 	if o == nil {
@@ -146,9 +113,6 @@ func (o SetWorkspaceMetadata) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.GitStatus) {
 		toSerialize["gitStatus"] = o.GitStatus
-	}
-	if !IsNil(o.ProviderMetadata) {
-		toSerialize["providerMetadata"] = o.ProviderMetadata
 	}
 	toSerialize["uptime"] = o.Uptime
 	return toSerialize, nil

@@ -1,15 +1,9 @@
-## daytona runner logs
+## daytona runner serve
 
-View runner logs
-
-```
-daytona runner logs [RUNNER_ID] [flags]
-```
-
-### Options
+Starts the runner in the foreground
 
 ```
-  -f, --follow   Follow logs
+daytona runner serve [flags]
 ```
 
 ### Options inherited from parent commands

@@ -766,8 +766,6 @@ definitions:
     type: object
   SetTargetMetadata:
     properties:
-      providerMetadata:
-        type: string
       uptime:
         type: integer
     required:
@@ -777,8 +775,6 @@ definitions:
     properties:
       gitStatus:
         $ref: '#/definitions/GitStatus'
-      providerMetadata:
-        type: string
       uptime:
         type: integer
     required:
