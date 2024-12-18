@@ -162,6 +162,24 @@ var purgeCmd = &cobra.Command{
 			return err
 		}
 
+		err = server.Start()
+		if err != nil {
+			return err
+		}
+
+		log.Info("Starting job runner...")
+		jobRunner, err := bootstrap.GetJobRunner(serverConfig, serverConfigDir, internal.Version, telemetryService)
+		if err != nil {
+			return err
+		}
+
+		// TODO: context?
+		err = jobRunner.StartRunner(context.Background())
+		if err != nil {
+			return err
+		}
+		log.Info("Job runner started")
+
 		errs := server.Purge(ctx, forceFlag)
 		if len(errs) > 0 {
 			errMessage := ""

@@ -29,13 +29,45 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		}
 	}
 
-	fmt.Println("Deleting all targets...")
+	fmt.Println("Deleting all workspaces...")
 
-	err := server.Start()
+	workspaces, err := s.WorkspaceService.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{})
 	if err != nil {
 		s.trackPurgeError(ctx, force, err)
-		return []error{err}
+		if !force {
+			return []error{err}
+		}
 	}
+
+	if err == nil {
+		for _, workspace := range workspaces {
+			err := s.WorkspaceService.RemoveWorkspace(ctx, workspace.Id)
+			if err != nil {
+				s.trackPurgeError(ctx, force, err)
+				if !force {
+					return []error{err}
+				} else {
+					fmt.Printf("Failed to delete %s: %v\n", workspace.Name, err)
+				}
+			} else {
+				fmt.Printf("Workspace %s deleted\n", workspace.Name)
+			}
+		}
+	} else {
+		fmt.Printf("Failed to list workspaces: %v\n", err)
+	}
+
+	err = s.WorkspaceService.AwaitEmptyList(ctx, time.Minute)
+	if err != nil {
+		s.trackPurgeError(ctx, force, err)
+		if !force {
+			return []error{err}
+		} else {
+			fmt.Printf("Failed to await empty workspace list: %v\n", err)
+		}
+	}
+
+	fmt.Println("Deleting all targets...")
 
 	targets, err := s.TargetService.ListTargets(ctx, nil, services.TargetRetrievalParams{})
 	if err != nil {
@@ -61,6 +93,16 @@ func (s *Server) Purge(ctx context.Context, force bool) []error {
 		}
 	} else {
 		fmt.Printf("Failed to list targets: %v\n", err)
+	}
+
+	err = s.TargetService.AwaitEmptyList(ctx, time.Minute)
+	if err != nil {
+		s.trackPurgeError(ctx, force, err)
+		if !force {
+			return []error{err}
+		} else {
+			fmt.Printf("Failed to await empty target list: %v\n", err)
+		}
 	}
 
 	fmt.Println("Purging providers...")
