@@ -32,8 +32,8 @@ type RunnerDTO struct {
 } //	@name	RunnerDTO
 
 type RegisterRunnerDTO struct {
-	Id    string `json:"id" validate:"required"`
-	Alias string `json:"alias" validate:"required"`
+	Id   string `json:"id" validate:"required"`
+	Name string `json:"name" validate:"required"`
 } // @name RegisterRunnerDTO
 
 type RegisterRunnerResultDTO struct {

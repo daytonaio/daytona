@@ -28,7 +28,7 @@ func Render(runner *apiclient.RunnerDTO, forceUnstyled bool) {
 
 	output += views.GetStyledMainTitle("Runner Info") + "\n\n"
 
-	output += getInfoLine("Alias", runner.Alias) + "\n"
+	output += getInfoLine("Name", runner.Name) + "\n"
 
 	output += getInfoLine("ID", runner.Id) + "\n"
 

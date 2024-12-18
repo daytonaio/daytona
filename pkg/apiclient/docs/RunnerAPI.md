@@ -236,7 +236,7 @@ import (
 )
 
 func main() {
-	runner := *openapiclient.NewRegisterRunnerDTO("Alias_example", "Id_example") // RegisterRunnerDTO | Register runner
+	runner := *openapiclient.NewRegisterRunnerDTO("Id_example", "Name_example") // RegisterRunnerDTO | Register runner
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

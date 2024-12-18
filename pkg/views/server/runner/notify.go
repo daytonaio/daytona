@@ -15,7 +15,7 @@ import (
 func Notify(runner *apiclient.RegisterRunnerResultDTO, apiUrl string) {
 	var output string
 
-	output += fmt.Sprintf("You can connect the Runner %s to the Daytona Server by running this command on the Runner's machine:", runner.Alias)
+	output += fmt.Sprintf("You can connect the Runner %s to the Daytona Server by running this command on the Runner's machine:", runner.Name)
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 

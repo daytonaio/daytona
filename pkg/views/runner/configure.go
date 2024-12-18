@@ -12,7 +12,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/huh"
-	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/views"
 )
@@ -172,25 +171,6 @@ func ConfigurationForm(config *runner.Config) (*runner.Config, error) {
 	}
 
 	return nil, errors.New("no changes were made")
-}
-
-func createPortValidator(config *apiclient.ServerConfig, portView *string, port *int32) func(string) error {
-	return func(string) error {
-		validatePort, err := strconv.Atoi(*portView)
-		if err != nil {
-			return errors.New("failed to parse port")
-		}
-		if validatePort < 0 || validatePort > 65535 {
-			return errors.New("port out of range")
-		}
-		*port = int32(validatePort)
-
-		if config.ApiPort == config.HeadscalePort {
-			return errors.New("port conflict")
-		}
-
-		return nil
-	}
 }
 
 func createIntValidator(viewValue *string, value *int) func(string) error {

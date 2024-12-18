@@ -4,14 +4,14 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Alias** | **string** |  | 
 **Id** | **string** |  | 
+**Name** | **string** |  | 
 
 ## Methods
 
 ### NewRegisterRunnerDTO
 
-`func NewRegisterRunnerDTO(alias string, id string, ) *RegisterRunnerDTO`
+`func NewRegisterRunnerDTO(id string, name string, ) *RegisterRunnerDTO`
 
 NewRegisterRunnerDTO instantiates a new RegisterRunnerDTO object
 This constructor will assign default values to properties that have it defined,
@@ -25,26 +25,6 @@ will change when the set of required properties is changed
 NewRegisterRunnerDTOWithDefaults instantiates a new RegisterRunnerDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetAlias
-
-`func (o *RegisterRunnerDTO) GetAlias() string`
-
-GetAlias returns the Alias field if non-nil, zero value otherwise.
-
-### GetAliasOk
-
-`func (o *RegisterRunnerDTO) GetAliasOk() (*string, bool)`
-
-GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAlias
-
-`func (o *RegisterRunnerDTO) SetAlias(v string)`
-
-SetAlias sets Alias field to given value.
-
 
 ### GetId
 
@@ -64,6 +44,26 @@ and a boolean to check if the value has been set.
 `func (o *RegisterRunnerDTO) SetId(v string)`
 
 SetId sets Id field to given value.
+
+
+### GetName
+
+`func (o *RegisterRunnerDTO) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *RegisterRunnerDTO) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *RegisterRunnerDTO) SetName(v string)`
+
+SetName sets Name field to given value.
 
 
 

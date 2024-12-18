@@ -2605,16 +2605,16 @@ components:
       type: object
     RegisterRunnerDTO:
       example:
-        alias: alias
+        name: name
         id: id
       properties:
-        alias:
-          type: string
         id:
           type: string
+        name:
+          type: string
       required:
-      - alias
       - id
+      - name
       type: object
     RegisterRunnerResultDTO:
       example:
@@ -2661,21 +2661,21 @@ components:
           updatedAt: updatedAt
           uptime: 6
         apiKey: apiKey
-        alias: alias
+        name: name
         id: id
       properties:
-        alias:
-          type: string
         apiKey:
           type: string
         id:
           type: string
         metadata:
           $ref: '#/components/schemas/RunnerMetadata'
+        name:
+          type: string
       required:
-      - alias
       - apiKey
       - id
+      - name
       type: object
     RepositoryUrl:
       example:
@@ -2758,21 +2758,21 @@ components:
             version: version
           updatedAt: updatedAt
           uptime: 6
-        alias: alias
+        name: name
         id: id
         state: state
       properties:
-        alias:
-          type: string
         id:
           type: string
         metadata:
           $ref: '#/components/schemas/RunnerMetadata'
+        name:
+          type: string
         state:
           type: string
       required:
-      - alias
       - id
+      - name
       - state
       type: object
     RunnerMetadata:

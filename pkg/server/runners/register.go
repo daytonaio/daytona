@@ -20,7 +20,7 @@ func (s *RunnerService) RegisterRunner(ctx context.Context, req services.Registe
 
 	defer stores.RecoverAndRollback(ctx, s.runnerStore)
 
-	_, err = s.runnerStore.Find(ctx, req.Alias)
+	_, err = s.runnerStore.Find(ctx, req.Name)
 	if err == nil {
 		return nil, s.runnerStore.RollbackTransaction(ctx, services.ErrRunnerAlreadyExists)
 	}
@@ -32,7 +32,7 @@ func (s *RunnerService) RegisterRunner(ctx context.Context, req services.Registe
 
 	runner := &models.Runner{
 		Id:     req.Id,
-		Alias:  req.Alias,
+		Name:   req.Name,
 		ApiKey: apiKey,
 		Metadata: &models.RunnerMetadata{
 			RunnerId: req.Id,

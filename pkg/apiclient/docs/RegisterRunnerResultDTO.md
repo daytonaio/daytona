@@ -4,16 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Alias** | **string** |  | 
 **ApiKey** | **string** |  | 
 **Id** | **string** |  | 
 **Metadata** | Pointer to [**RunnerMetadata**](RunnerMetadata.md) |  | [optional] 
+**Name** | **string** |  | 
 
 ## Methods
 
 ### NewRegisterRunnerResultDTO
 
-`func NewRegisterRunnerResultDTO(alias string, apiKey string, id string, ) *RegisterRunnerResultDTO`
+`func NewRegisterRunnerResultDTO(apiKey string, id string, name string, ) *RegisterRunnerResultDTO`
 
 NewRegisterRunnerResultDTO instantiates a new RegisterRunnerResultDTO object
 This constructor will assign default values to properties that have it defined,
@@ -27,26 +27,6 @@ will change when the set of required properties is changed
 NewRegisterRunnerResultDTOWithDefaults instantiates a new RegisterRunnerResultDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetAlias
-
-`func (o *RegisterRunnerResultDTO) GetAlias() string`
-
-GetAlias returns the Alias field if non-nil, zero value otherwise.
-
-### GetAliasOk
-
-`func (o *RegisterRunnerResultDTO) GetAliasOk() (*string, bool)`
-
-GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAlias
-
-`func (o *RegisterRunnerResultDTO) SetAlias(v string)`
-
-SetAlias sets Alias field to given value.
-
 
 ### GetApiKey
 
@@ -112,6 +92,26 @@ SetMetadata sets Metadata field to given value.
 `func (o *RegisterRunnerResultDTO) HasMetadata() bool`
 
 HasMetadata returns a boolean if a field has been set.
+
+### GetName
+
+`func (o *RegisterRunnerResultDTO) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *RegisterRunnerResultDTO) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *RegisterRunnerResultDTO) SetName(v string)`
+
+SetName sets Name field to given value.
+
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

@@ -14,8 +14,8 @@ import (
 const NewTargetConfigName = "+ New Target Config"
 
 type RunnerView struct {
-	Id    string
-	Alias string
+	Id   string
+	Name string
 }
 
 func GetRunnerFromPrompt(runners []apiclient.RunnerDTO, activeProfileName string, actionVerb string) (*RunnerView, error) {
@@ -24,8 +24,8 @@ func GetRunnerFromPrompt(runners []apiclient.RunnerDTO, activeProfileName string
 	for _, r := range runners {
 		items = append(items, item{
 			runner: RunnerView{
-				Id:    r.Id,
-				Alias: r.Alias,
+				Id:   r.Id,
+				Name: r.Name,
 			},
 		})
 	}

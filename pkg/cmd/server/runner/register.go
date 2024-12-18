@@ -34,13 +34,13 @@ var runnerRegisterCmd = &cobra.Command{
 		}
 
 		existingRunnerNames := util.ArrayMap(runnerList, func(r apiclient.RunnerDTO) string {
-			return r.Alias
+			return r.Name
 		})
 
-		alias := runnerAliasFlag
+		name := nameFlag
 
-		if alias == "" {
-			err = runner.RunnerRegistrationView(&alias, existingRunnerNames)
+		if name == "" {
+			err = runner.RunnerRegistrationView(&name, existingRunnerNames)
 			if err != nil {
 				return err
 			}
@@ -50,8 +50,8 @@ var runnerRegisterCmd = &cobra.Command{
 		id = stringid.TruncateID(id)
 
 		runner, res, err := apiClient.RunnerAPI.RegisterRunner(ctx).Runner(apiclient.RegisterRunnerDTO{
-			Id:    id,
-			Alias: alias,
+			Id:   id,
+			Name: name,
 		}).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
@@ -69,8 +69,8 @@ var runnerRegisterCmd = &cobra.Command{
 	},
 }
 
-var runnerAliasFlag string
+var nameFlag string
 
 func init() {
-	runnerRegisterCmd.Flags().StringVarP(&runnerAliasFlag, "alias", "a", "", "Runner alias")
+	runnerRegisterCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Runner name")
 }

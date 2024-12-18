@@ -37,11 +37,11 @@ func (s *RunnerStore) List(ctx context.Context) ([]*models.Runner, error) {
 	return runners, nil
 }
 
-func (s *RunnerStore) Find(ctx context.Context, idOrAlias string) (*models.Runner, error) {
+func (s *RunnerStore) Find(ctx context.Context, idOrName string) (*models.Runner, error) {
 	tx := s.GetTransaction(ctx)
 
 	runner := &models.Runner{}
-	tx = preloadRunnerEntities(tx).Where("id = ? OR alias = ?", idOrAlias, idOrAlias).First(runner)
+	tx = preloadRunnerEntities(tx).Where("id = ? OR name = ?", idOrName, idOrName).First(runner)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrRunnerNotFound

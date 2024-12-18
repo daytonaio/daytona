@@ -39,7 +39,7 @@ func (s *RunnerService) RemoveRunner(ctx context.Context, runnerId string) error
 		}
 	}
 
-	err = s.revokeApiKey(ctx, runner.Alias)
+	err = s.revokeApiKey(ctx, runner.Name)
 	if err != nil {
 		return s.runnerStore.RollbackTransaction(ctx, err)
 	}

@@ -11,19 +11,19 @@ import (
 	"github.com/charmbracelet/huh"
 )
 
-func RunnerRegistrationView(alias *string, existingAliases []string) error {
+func RunnerRegistrationView(name *string, existingNames []string) error {
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Runner Alias").
-				Value(alias).
+				Title("Runner Name").
+				Value(name).
 				Validate(func(str string) error {
 					if str == "" {
-						return errors.New("alias can not be blank")
+						return errors.New("name can not be blank")
 					}
-					for _, a := range existingAliases {
+					for _, a := range existingNames {
 						if a == str {
-							return errors.New("alias already in use")
+							return errors.New("name already in use")
 						}
 					}
 					return nil

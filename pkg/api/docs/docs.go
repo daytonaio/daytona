@@ -3225,14 +3225,14 @@ const docTemplate = `{
         "RegisterRunnerDTO": {
             "type": "object",
             "required": [
-                "alias",
-                "id"
+                "id",
+                "name"
             ],
             "properties": {
-                "alias": {
+                "id": {
                     "type": "string"
                 },
-                "id": {
+                "name": {
                     "type": "string"
                 }
             }
@@ -3240,14 +3240,11 @@ const docTemplate = `{
         "RegisterRunnerResultDTO": {
             "type": "object",
             "required": [
-                "alias",
                 "apiKey",
-                "id"
+                "id",
+                "name"
             ],
             "properties": {
-                "alias": {
-                    "type": "string"
-                },
                 "apiKey": {
                     "type": "string"
                 },
@@ -3256,6 +3253,9 @@ const docTemplate = `{
                 },
                 "metadata": {
                     "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -3306,19 +3306,19 @@ const docTemplate = `{
         "RunnerDTO": {
             "type": "object",
             "required": [
-                "alias",
                 "id",
+                "name",
                 "state"
             ],
             "properties": {
-                "alias": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "string"
                 },
                 "metadata": {
                     "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
                 },
                 "state": {
                     "type": "string"

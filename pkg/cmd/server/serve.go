@@ -253,8 +253,8 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			_, err := runnerService.RegisterRunner(context.Background(), services.RegisterRunnerDTO{
-				Id:    "local",
-				Alias: "local",
+				Id:   "local",
+				Name: "local",
 			})
 			if err != nil {
 				return err

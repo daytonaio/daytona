@@ -13,7 +13,7 @@ import (
 type RunnerStore interface {
 	IStore
 	List(ctx context.Context) ([]*models.Runner, error)
-	Find(ctx context.Context, idOrAlias string) (*models.Runner, error)
+	Find(ctx context.Context, idOrName string) (*models.Runner, error)
 	Save(ctx context.Context, runner *models.Runner) error
 	Delete(ctx context.Context, runner *models.Runner) error
 }

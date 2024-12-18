@@ -14,7 +14,7 @@ import (
 )
 
 type rowData struct {
-	Alias string
+	Name  string
 	Id    string
 	State string
 }
@@ -32,7 +32,7 @@ func ListRunners(runnerList []apiclient.RunnerDTO) {
 	}
 
 	table := util.GetTableView(data, []string{
-		"Alias", "ID", "State",
+		"Name", "ID", "State",
 	}, nil, func() {
 		renderUnstyledList(runnerList)
 	})
@@ -53,12 +53,12 @@ func renderUnstyledList(runnerList []apiclient.RunnerDTO) {
 func getRowFromData(runner apiclient.RunnerDTO) []string {
 	var data rowData
 
-	data.Alias = runner.Alias + views_util.AdditionalPropertyPadding
+	data.Name = runner.Name + views_util.AdditionalPropertyPadding
 	data.Id = runner.Id
 	data.State = runner.State
 
 	return []string{
-		views.NameStyle.Render(data.Alias),
+		views.NameStyle.Render(data.Name),
 		views.DefaultRowDataStyle.Render(data.Id),
 		views.DefaultRowDataStyle.Render(data.State),
 	}

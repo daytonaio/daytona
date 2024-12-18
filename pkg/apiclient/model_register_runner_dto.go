@@ -21,8 +21,8 @@ var _ MappedNullable = &RegisterRunnerDTO{}
 
 // RegisterRunnerDTO struct for RegisterRunnerDTO
 type RegisterRunnerDTO struct {
-	Alias string `json:"alias"`
-	Id    string `json:"id"`
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 type _RegisterRunnerDTO RegisterRunnerDTO
@@ -31,10 +31,10 @@ type _RegisterRunnerDTO RegisterRunnerDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegisterRunnerDTO(alias string, id string) *RegisterRunnerDTO {
+func NewRegisterRunnerDTO(id string, name string) *RegisterRunnerDTO {
 	this := RegisterRunnerDTO{}
-	this.Alias = alias
 	this.Id = id
+	this.Name = name
 	return &this
 }
 
@@ -44,30 +44,6 @@ func NewRegisterRunnerDTO(alias string, id string) *RegisterRunnerDTO {
 func NewRegisterRunnerDTOWithDefaults() *RegisterRunnerDTO {
 	this := RegisterRunnerDTO{}
 	return &this
-}
-
-// GetAlias returns the Alias field value
-func (o *RegisterRunnerDTO) GetAlias() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Alias
-}
-
-// GetAliasOk returns a tuple with the Alias field value
-// and a boolean to check if the value has been set.
-func (o *RegisterRunnerDTO) GetAliasOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Alias, true
-}
-
-// SetAlias sets field value
-func (o *RegisterRunnerDTO) SetAlias(v string) {
-	o.Alias = v
 }
 
 // GetId returns the Id field value
@@ -94,6 +70,30 @@ func (o *RegisterRunnerDTO) SetId(v string) {
 	o.Id = v
 }
 
+// GetName returns the Name field value
+func (o *RegisterRunnerDTO) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *RegisterRunnerDTO) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *RegisterRunnerDTO) SetName(v string) {
+	o.Name = v
+}
+
 func (o RegisterRunnerDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -104,8 +104,8 @@ func (o RegisterRunnerDTO) MarshalJSON() ([]byte, error) {
 
 func (o RegisterRunnerDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["alias"] = o.Alias
 	toSerialize["id"] = o.Id
+	toSerialize["name"] = o.Name
 	return toSerialize, nil
 }
 
@@ -114,8 +114,8 @@ func (o *RegisterRunnerDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"alias",
 		"id",
+		"name",
 	}
 
 	allProperties := make(map[string]interface{})

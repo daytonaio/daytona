@@ -572,28 +572,28 @@ definitions:
     type: object
   RegisterRunnerDTO:
     properties:
-      alias:
-        type: string
       id:
         type: string
+      name:
+        type: string
     required:
-    - alias
     - id
+    - name
     type: object
   RegisterRunnerResultDTO:
     properties:
-      alias:
-        type: string
       apiKey:
         type: string
       id:
         type: string
       metadata:
         $ref: '#/definitions/RunnerMetadata'
+      name:
+        type: string
     required:
-    - alias
     - apiKey
     - id
+    - name
     type: object
   RepositoryUrl:
     properties:
@@ -628,17 +628,17 @@ definitions:
     - ResourceTypeRunner
   RunnerDTO:
     properties:
-      alias:
-        type: string
       id:
         type: string
       metadata:
         $ref: '#/definitions/RunnerMetadata'
+      name:
+        type: string
       state:
         type: string
     required:
-    - alias
     - id
+    - name
     - state
     type: object
   RunnerMetadata:

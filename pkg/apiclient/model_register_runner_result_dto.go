@@ -21,10 +21,10 @@ var _ MappedNullable = &RegisterRunnerResultDTO{}
 
 // RegisterRunnerResultDTO struct for RegisterRunnerResultDTO
 type RegisterRunnerResultDTO struct {
-	Alias    string          `json:"alias"`
 	ApiKey   string          `json:"apiKey"`
 	Id       string          `json:"id"`
 	Metadata *RunnerMetadata `json:"metadata,omitempty"`
+	Name     string          `json:"name"`
 }
 
 type _RegisterRunnerResultDTO RegisterRunnerResultDTO
@@ -33,11 +33,11 @@ type _RegisterRunnerResultDTO RegisterRunnerResultDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRegisterRunnerResultDTO(alias string, apiKey string, id string) *RegisterRunnerResultDTO {
+func NewRegisterRunnerResultDTO(apiKey string, id string, name string) *RegisterRunnerResultDTO {
 	this := RegisterRunnerResultDTO{}
-	this.Alias = alias
 	this.ApiKey = apiKey
 	this.Id = id
+	this.Name = name
 	return &this
 }
 
@@ -47,30 +47,6 @@ func NewRegisterRunnerResultDTO(alias string, apiKey string, id string) *Registe
 func NewRegisterRunnerResultDTOWithDefaults() *RegisterRunnerResultDTO {
 	this := RegisterRunnerResultDTO{}
 	return &this
-}
-
-// GetAlias returns the Alias field value
-func (o *RegisterRunnerResultDTO) GetAlias() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Alias
-}
-
-// GetAliasOk returns a tuple with the Alias field value
-// and a boolean to check if the value has been set.
-func (o *RegisterRunnerResultDTO) GetAliasOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Alias, true
-}
-
-// SetAlias sets field value
-func (o *RegisterRunnerResultDTO) SetAlias(v string) {
-	o.Alias = v
 }
 
 // GetApiKey returns the ApiKey field value
@@ -153,6 +129,30 @@ func (o *RegisterRunnerResultDTO) SetMetadata(v RunnerMetadata) {
 	o.Metadata = &v
 }
 
+// GetName returns the Name field value
+func (o *RegisterRunnerResultDTO) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *RegisterRunnerResultDTO) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *RegisterRunnerResultDTO) SetName(v string) {
+	o.Name = v
+}
+
 func (o RegisterRunnerResultDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -163,12 +163,12 @@ func (o RegisterRunnerResultDTO) MarshalJSON() ([]byte, error) {
 
 func (o RegisterRunnerResultDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["alias"] = o.Alias
 	toSerialize["apiKey"] = o.ApiKey
 	toSerialize["id"] = o.Id
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}
+	toSerialize["name"] = o.Name
 	return toSerialize, nil
 }
 
@@ -177,9 +177,9 @@ func (o *RegisterRunnerResultDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"alias",
 		"apiKey",
 		"id",
+		"name",
 	}
 
 	allProperties := make(map[string]interface{})

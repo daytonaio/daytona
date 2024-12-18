@@ -17,10 +17,10 @@ type item struct {
 	runner RunnerView
 }
 
-func (i item) Title() string { return i.runner.Alias }
+func (i item) Title() string { return i.runner.Name }
 
 func (i item) Description() string { return i.runner.Id }
-func (i item) FilterValue() string { return fmt.Sprintf("%s%s", i.runner.Id, i.runner.Alias) }
+func (i item) FilterValue() string { return fmt.Sprintf("%s%s", i.runner.Id, i.runner.Name) }
 
 type model struct {
 	list   list.Model

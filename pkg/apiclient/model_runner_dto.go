@@ -21,9 +21,9 @@ var _ MappedNullable = &RunnerDTO{}
 
 // RunnerDTO struct for RunnerDTO
 type RunnerDTO struct {
-	Alias    string          `json:"alias"`
 	Id       string          `json:"id"`
 	Metadata *RunnerMetadata `json:"metadata,omitempty"`
+	Name     string          `json:"name"`
 	State    string          `json:"state"`
 }
 
@@ -33,10 +33,10 @@ type _RunnerDTO RunnerDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerDTO(alias string, id string, state string) *RunnerDTO {
+func NewRunnerDTO(id string, name string, state string) *RunnerDTO {
 	this := RunnerDTO{}
-	this.Alias = alias
 	this.Id = id
+	this.Name = name
 	this.State = state
 	return &this
 }
@@ -47,30 +47,6 @@ func NewRunnerDTO(alias string, id string, state string) *RunnerDTO {
 func NewRunnerDTOWithDefaults() *RunnerDTO {
 	this := RunnerDTO{}
 	return &this
-}
-
-// GetAlias returns the Alias field value
-func (o *RunnerDTO) GetAlias() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Alias
-}
-
-// GetAliasOk returns a tuple with the Alias field value
-// and a boolean to check if the value has been set.
-func (o *RunnerDTO) GetAliasOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Alias, true
-}
-
-// SetAlias sets field value
-func (o *RunnerDTO) SetAlias(v string) {
-	o.Alias = v
 }
 
 // GetId returns the Id field value
@@ -129,6 +105,30 @@ func (o *RunnerDTO) SetMetadata(v RunnerMetadata) {
 	o.Metadata = &v
 }
 
+// GetName returns the Name field value
+func (o *RunnerDTO) GetName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Name
+}
+
+// GetNameOk returns a tuple with the Name field value
+// and a boolean to check if the value has been set.
+func (o *RunnerDTO) GetNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Name, true
+}
+
+// SetName sets field value
+func (o *RunnerDTO) SetName(v string) {
+	o.Name = v
+}
+
 // GetState returns the State field value
 func (o *RunnerDTO) GetState() string {
 	if o == nil {
@@ -163,11 +163,11 @@ func (o RunnerDTO) MarshalJSON() ([]byte, error) {
 
 func (o RunnerDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["alias"] = o.Alias
 	toSerialize["id"] = o.Id
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata
 	}
+	toSerialize["name"] = o.Name
 	toSerialize["state"] = o.State
 	return toSerialize, nil
 }
@@ -177,8 +177,8 @@ func (o *RunnerDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"alias",
 		"id",
+		"name",
 		"state",
 	}
 

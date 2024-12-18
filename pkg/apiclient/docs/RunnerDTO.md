@@ -4,16 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Alias** | **string** |  | 
 **Id** | **string** |  | 
 **Metadata** | Pointer to [**RunnerMetadata**](RunnerMetadata.md) |  | [optional] 
+**Name** | **string** |  | 
 **State** | **string** |  | 
 
 ## Methods
 
 ### NewRunnerDTO
 
-`func NewRunnerDTO(alias string, id string, state string, ) *RunnerDTO`
+`func NewRunnerDTO(id string, name string, state string, ) *RunnerDTO`
 
 NewRunnerDTO instantiates a new RunnerDTO object
 This constructor will assign default values to properties that have it defined,
@@ -27,26 +27,6 @@ will change when the set of required properties is changed
 NewRunnerDTOWithDefaults instantiates a new RunnerDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetAlias
-
-`func (o *RunnerDTO) GetAlias() string`
-
-GetAlias returns the Alias field if non-nil, zero value otherwise.
-
-### GetAliasOk
-
-`func (o *RunnerDTO) GetAliasOk() (*string, bool)`
-
-GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAlias
-
-`func (o *RunnerDTO) SetAlias(v string)`
-
-SetAlias sets Alias field to given value.
-
 
 ### GetId
 
@@ -92,6 +72,26 @@ SetMetadata sets Metadata field to given value.
 `func (o *RunnerDTO) HasMetadata() bool`
 
 HasMetadata returns a boolean if a field has been set.
+
+### GetName
+
+`func (o *RunnerDTO) GetName() string`
+
+GetName returns the Name field if non-nil, zero value otherwise.
+
+### GetNameOk
+
+`func (o *RunnerDTO) GetNameOk() (*string, bool)`
+
+GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetName
+
+`func (o *RunnerDTO) SetName(v string)`
+
+SetName sets Name field to given value.
+
 
 ### GetState
 

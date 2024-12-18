@@ -7,7 +7,7 @@ import "time"
 
 type Runner struct {
 	Id       string          `json:"id" validate:"required" gorm:"primaryKey"`
-	Alias    string          `json:"alias" validate:"required" gorm:"uniqueIndex;not null"`
+	Name     string          `json:"name" validate:"required" gorm:"uniqueIndex;not null"`
 	ApiKey   string          `json:"-" validate:"required" gorm:"not null"`
 	Metadata *RunnerMetadata `json:"metadata" validate:"optional" gorm:"foreignKey:RunnerId;references:Id"`
 } // @name Runner
