@@ -148,5 +148,10 @@
     "name": "React.js - carecradle",
     "description": "CareCradle is an open-source, generative AI-powered assistant designed to provide comprehensive information, advice, and support for expectant mothers during their pregnancy journey.",
     "gitUrl": "https://github.com/daytonaio/sample-ai-carecradle"
+  },
+  {
+    "name": "React.js - GH-Search",
+    "description": "GH-Search is a project built using github's rest api and react that allows us to search and gather information about various github users.",
+    "gitUrl": "https://github.com/daytonaio/sample-github-user-search.git"
   }
 ]
