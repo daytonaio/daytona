@@ -3195,6 +3195,7 @@
             "required": [
                 "name",
                 "runnerId",
+                "runnerName",
                 "targetConfigManifest",
                 "version"
             ],
@@ -3209,6 +3210,9 @@
                     "type": "string"
                 },
                 "runnerId": {
+                    "type": "string"
+                },
+                "runnerName": {
                     "type": "string"
                 },
                 "targetConfigManifest": {

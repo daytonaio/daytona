@@ -371,7 +371,7 @@ import (
 
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
-	setMetadata := *openapiclient.NewSetRunnerMetadata([]openapiclient.ProviderInfo{*openapiclient.NewProviderInfo("Name_example", "RunnerId_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")}, int32(123)) // SetRunnerMetadata | Set Metadata
+	setMetadata := *openapiclient.NewSetRunnerMetadata([]openapiclient.ProviderInfo{*openapiclient.NewProviderInfo("Name_example", "RunnerId_example", "RunnerName_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")}, int32(123)) // SetRunnerMetadata | Set Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

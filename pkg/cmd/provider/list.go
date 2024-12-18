@@ -60,6 +60,7 @@ func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient,
 			Version:              installedProvider.Version,
 			Installed:            util.Pointer(true),
 			RunnerId:             installedProvider.RunnerId,
+			RunnerName:           installedProvider.RunnerName,
 			TargetConfigManifest: installedProvider.TargetConfigManifest,
 		}
 	}
@@ -72,6 +73,7 @@ func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient,
 				Version:              latestProvider.Version,
 				Installed:            util.Pointer(false),
 				RunnerId:             latestProvider.RunnerId,
+				RunnerName:           latestProvider.RunnerName,
 				TargetConfigManifest: latestProvider.TargetConfigManifest,
 			}
 		}

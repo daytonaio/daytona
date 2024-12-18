@@ -1740,6 +1740,7 @@ components:
         name: name
         options: options
         providerInfo:
+          runnerName: runnerName
           targetConfigManifest:
             key:
               defaultValue: defaultValue
@@ -2564,6 +2565,7 @@ components:
       type: object
     ProviderInfo:
       example:
+        runnerName: runnerName
         targetConfigManifest:
           key:
             defaultValue: defaultValue
@@ -2591,6 +2593,8 @@ components:
           type: string
         runnerId:
           type: string
+        runnerName:
+          type: string
         targetConfigManifest:
           additionalProperties:
             $ref: '#/components/schemas/TargetConfigProperty'
@@ -2600,6 +2604,7 @@ components:
       required:
       - name
       - runnerId
+      - runnerName
       - targetConfigManifest
       - version
       type: object
@@ -2622,7 +2627,8 @@ components:
           runningJobs: 0
           runnerId: runnerId
           providers:
-          - targetConfigManifest:
+          - runnerName: runnerName
+            targetConfigManifest:
               key:
                 defaultValue: defaultValue
                 options:
@@ -2640,7 +2646,8 @@ components:
             runnerId: runnerId
             label: label
             version: version
-          - targetConfigManifest:
+          - runnerName: runnerName
+            targetConfigManifest:
               key:
                 defaultValue: defaultValue
                 options:
@@ -2720,7 +2727,8 @@ components:
           runningJobs: 0
           runnerId: runnerId
           providers:
-          - targetConfigManifest:
+          - runnerName: runnerName
+            targetConfigManifest:
               key:
                 defaultValue: defaultValue
                 options:
@@ -2738,7 +2746,8 @@ components:
             runnerId: runnerId
             label: label
             version: version
-          - targetConfigManifest:
+          - runnerName: runnerName
+            targetConfigManifest:
               key:
                 defaultValue: defaultValue
                 options:
@@ -2780,7 +2789,8 @@ components:
         runningJobs: 0
         runnerId: runnerId
         providers:
-        - targetConfigManifest:
+        - runnerName: runnerName
+          targetConfigManifest:
             key:
               defaultValue: defaultValue
               options:
@@ -2798,7 +2808,8 @@ components:
           runnerId: runnerId
           label: label
           version: version
-        - targetConfigManifest:
+        - runnerName: runnerName
+          targetConfigManifest:
             key:
               defaultValue: defaultValue
               options:
@@ -2967,7 +2978,8 @@ components:
       example:
         runningJobs: 0
         providers:
-        - targetConfigManifest:
+        - runnerName: runnerName
+          targetConfigManifest:
             key:
               defaultValue: defaultValue
               options:
@@ -2985,7 +2997,8 @@ components:
           runnerId: runnerId
           label: label
           version: version
-        - targetConfigManifest:
+        - runnerName: runnerName
+          targetConfigManifest:
             key:
               defaultValue: defaultValue
               options:
@@ -3098,6 +3111,7 @@ components:
           options: options
           id: id
           providerInfo:
+            runnerName: runnerName
             targetConfigManifest:
               key:
                 defaultValue: defaultValue
@@ -3177,6 +3191,7 @@ components:
         options: options
         id: id
         providerInfo:
+          runnerName: runnerName
           targetConfigManifest:
             key:
               defaultValue: defaultValue
@@ -3275,6 +3290,7 @@ components:
           options: options
           id: id
           providerInfo:
+            runnerName: runnerName
             targetConfigManifest:
               key:
                 defaultValue: defaultValue
@@ -3363,6 +3379,7 @@ components:
               options: options
               id: id
               providerInfo:
+                runnerName: runnerName
                 targetConfigManifest:
                   key:
                     defaultValue: defaultValue
@@ -3469,6 +3486,7 @@ components:
               options: options
               id: id
               providerInfo:
+                runnerName: runnerName
                 targetConfigManifest:
                   key:
                     defaultValue: defaultValue
@@ -3661,6 +3679,7 @@ components:
             options: options
             id: id
             providerInfo:
+              runnerName: runnerName
               targetConfigManifest:
                 key:
                   defaultValue: defaultValue
@@ -3811,6 +3830,7 @@ components:
             options: options
             id: id
             providerInfo:
+              runnerName: runnerName
               targetConfigManifest:
                 key:
                   defaultValue: defaultValue

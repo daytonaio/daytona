@@ -5,6 +5,7 @@ package models
 
 type ProviderInfo struct {
 	RunnerId             string               `json:"runnerId" validate:"required"`
+	RunnerName           string               `json:"runnerName" validate:"required"`
 	Name                 string               `json:"name" validate:"required"`
 	Version              string               `json:"version" validate:"required"`
 	AgentlessTarget      bool                 `json:"agentlessTarget" validate:"optional"`

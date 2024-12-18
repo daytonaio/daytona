@@ -186,6 +186,7 @@ func InitRemoteProviderManager(apiClient *apiclient.APIClient, c *apiclient.Serv
 		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ApiKey:             runnerConfig.ServerApiKey,
 		RunnerId:           runnerConfig.Id,
+		RunnerName:         runnerConfig.Name,
 		DaytonaDownloadUrl: binaryUrl,
 		ServerUrl:          headscaleUrl,
 		BaseDir:            runnerConfig.ProvidersDir,

@@ -31,7 +31,7 @@ import (
 )
 
 func main() {
-	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderInfo("Name_example", "RunnerId_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")) // AddTargetConfigDTO | Target config to add
+	targetConfig := *openapiclient.NewAddTargetConfigDTO("Name_example", "Options_example", *openapiclient.NewProviderInfo("Name_example", "RunnerId_example", "RunnerName_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")) // AddTargetConfigDTO | Target config to add
 	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()

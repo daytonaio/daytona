@@ -18,6 +18,7 @@ type ProviderView struct {
 	Label                *string
 	Version              string
 	Installed            *bool
+	RunnerName           string
 	RunnerId             string
 	TargetConfigManifest map[string]apiclient.TargetConfigProperty
 }
@@ -70,6 +71,7 @@ func ProviderListToView(providers []apiclient.ProviderInfo) []ProviderView {
 			Version:              p.Version,
 			Installed:            nil,
 			RunnerId:             p.RunnerId,
+			RunnerName:           p.RunnerName,
 			TargetConfigManifest: p.TargetConfigManifest,
 		})
 	}

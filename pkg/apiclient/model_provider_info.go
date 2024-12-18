@@ -25,6 +25,7 @@ type ProviderInfo struct {
 	Label                *string                         `json:"label,omitempty"`
 	Name                 string                          `json:"name"`
 	RunnerId             string                          `json:"runnerId"`
+	RunnerName           string                          `json:"runnerName"`
 	TargetConfigManifest map[string]TargetConfigProperty `json:"targetConfigManifest"`
 	Version              string                          `json:"version"`
 }
@@ -35,10 +36,11 @@ type _ProviderInfo ProviderInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewProviderInfo(name string, runnerId string, targetConfigManifest map[string]TargetConfigProperty, version string) *ProviderInfo {
+func NewProviderInfo(name string, runnerId string, runnerName string, targetConfigManifest map[string]TargetConfigProperty, version string) *ProviderInfo {
 	this := ProviderInfo{}
 	this.Name = name
 	this.RunnerId = runnerId
+	this.RunnerName = runnerName
 	this.TargetConfigManifest = targetConfigManifest
 	this.Version = version
 	return &this
@@ -164,6 +166,30 @@ func (o *ProviderInfo) SetRunnerId(v string) {
 	o.RunnerId = v
 }
 
+// GetRunnerName returns the RunnerName field value
+func (o *ProviderInfo) GetRunnerName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.RunnerName
+}
+
+// GetRunnerNameOk returns a tuple with the RunnerName field value
+// and a boolean to check if the value has been set.
+func (o *ProviderInfo) GetRunnerNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.RunnerName, true
+}
+
+// SetRunnerName sets field value
+func (o *ProviderInfo) SetRunnerName(v string) {
+	o.RunnerName = v
+}
+
 // GetTargetConfigManifest returns the TargetConfigManifest field value
 func (o *ProviderInfo) GetTargetConfigManifest() map[string]TargetConfigProperty {
 	if o == nil {
@@ -230,6 +256,7 @@ func (o ProviderInfo) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["name"] = o.Name
 	toSerialize["runnerId"] = o.RunnerId
+	toSerialize["runnerName"] = o.RunnerName
 	toSerialize["targetConfigManifest"] = o.TargetConfigManifest
 	toSerialize["version"] = o.Version
 	return toSerialize, nil
@@ -242,6 +269,7 @@ func (o *ProviderInfo) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"name",
 		"runnerId",
+		"runnerName",
 		"targetConfigManifest",
 		"version",
 	}

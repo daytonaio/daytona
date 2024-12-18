@@ -52,6 +52,7 @@ type ProviderManagerConfig struct {
 	CreateTargetConfig       func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error
 	CreateProviderNetworkKey func(ctx context.Context, providerName string) (string, error)
 	RunnerId                 string
+	RunnerName               string
 	DaytonaDownloadUrl       string
 	ServerUrl                string
 	ApiUrl                   string
@@ -77,6 +78,7 @@ func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
 		providerManager = &ProviderManager{
 			pluginRefs:               make(map[string]*pluginRef),
 			runnerId:                 config.RunnerId,
+			runnerName:               config.RunnerName,
 			daytonaDownloadUrl:       config.DaytonaDownloadUrl,
 			serverUrl:                config.ServerUrl,
 			apiUrl:                   config.ApiUrl,
@@ -96,6 +98,7 @@ func GetProviderManager(config *ProviderManagerConfig) *ProviderManager {
 
 type ProviderManager struct {
 	runnerId                 string
+	runnerName               string
 	pluginRefs               map[string]*pluginRef
 	getTargetConfigMap       func(ctx context.Context) (map[string]*models.TargetConfig, error)
 	createTargetConfig       func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error
@@ -190,6 +193,7 @@ func (m *ProviderManager) RegisterProvider(pluginPath string, manualInstall bool
 			}
 
 			providerInfo.RunnerId = m.runnerId
+			providerInfo.RunnerName = m.runnerName
 
 			err = m.createTargetConfig(ctx, targetConfig.Name, targetConfig.Options, providerInfo)
 			if err != nil {

@@ -3198,6 +3198,7 @@ const docTemplate = `{
             "required": [
                 "name",
                 "runnerId",
+                "runnerName",
                 "targetConfigManifest",
                 "version"
             ],
@@ -3212,6 +3213,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "runnerId": {
+                    "type": "string"
+                },
+                "runnerName": {
                     "type": "string"
                 },
                 "targetConfigManifest": {

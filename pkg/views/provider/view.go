@@ -23,8 +23,8 @@ func (i item) Title() string {
 		title = *i.provider.Label
 	}
 
-	if i.provider.RunnerId != "" {
-		title = fmt.Sprintf("%s - Runner %s", title, i.provider.RunnerId)
+	if i.provider.RunnerName != "" {
+		title = fmt.Sprintf("%s - Runner %s", title, i.provider.RunnerName)
 	}
 
 	return title

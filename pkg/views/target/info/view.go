@@ -39,6 +39,8 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 
 	output += getInfoLine("Provider", providerLabel) + "\n"
 
+	output += getInfoLine("Runner", target.TargetConfig.ProviderInfo.RunnerName) + "\n"
+
 	if target.Default {
 		output += getInfoLine("Default", "Yes") + "\n"
 	}

@@ -19,8 +19,9 @@ var configureCmd = &cobra.Command{
 			return err
 		}
 
-		if idFlag != "" && apiUrlFlag != "" && apiKeyFlag != "" {
+		if idFlag != "" && nameFlag != "" && apiUrlFlag != "" && apiKeyFlag != "" {
 			config.Id = idFlag
+			config.Name = nameFlag
 			config.ServerApiUrl = apiUrlFlag
 			config.ServerApiKey = apiKeyFlag
 		} else {
@@ -41,11 +42,13 @@ var configureCmd = &cobra.Command{
 }
 
 var idFlag string
+var nameFlag string
 var apiUrlFlag string
 var apiKeyFlag string
 
 func init() {
 	configureCmd.Flags().StringVar(&idFlag, "id", "", "Runner ID")
+	configureCmd.Flags().StringVar(&nameFlag, "name", "", "Runner Name")
 	configureCmd.Flags().StringVar(&apiUrlFlag, "api-url", "", "Daytona Server API URL")
 	configureCmd.Flags().StringVar(&apiKeyFlag, "api-key", "", "Runner API Key")
 }

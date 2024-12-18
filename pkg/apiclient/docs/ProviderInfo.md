@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Label** | Pointer to **string** |  | [optional] 
 **Name** | **string** |  | 
 **RunnerId** | **string** |  | 
+**RunnerName** | **string** |  | 
 **TargetConfigManifest** | [**map[string]TargetConfigProperty**](TargetConfigProperty.md) |  | 
 **Version** | **string** |  | 
 
@@ -15,7 +16,7 @@ Name | Type | Description | Notes
 
 ### NewProviderInfo
 
-`func NewProviderInfo(name string, runnerId string, targetConfigManifest map[string]TargetConfigProperty, version string, ) *ProviderInfo`
+`func NewProviderInfo(name string, runnerId string, runnerName string, targetConfigManifest map[string]TargetConfigProperty, version string, ) *ProviderInfo`
 
 NewProviderInfo instantiates a new ProviderInfo object
 This constructor will assign default values to properties that have it defined,
@@ -118,6 +119,26 @@ and a boolean to check if the value has been set.
 `func (o *ProviderInfo) SetRunnerId(v string)`
 
 SetRunnerId sets RunnerId field to given value.
+
+
+### GetRunnerName
+
+`func (o *ProviderInfo) GetRunnerName() string`
+
+GetRunnerName returns the RunnerName field if non-nil, zero value otherwise.
+
+### GetRunnerNameOk
+
+`func (o *ProviderInfo) GetRunnerNameOk() (*string, bool)`
+
+GetRunnerNameOk returns a tuple with the RunnerName field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRunnerName
+
+`func (o *ProviderInfo) SetRunnerName(v string)`
+
+SetRunnerName sets RunnerName field to given value.
 
 
 ### GetTargetConfigManifest

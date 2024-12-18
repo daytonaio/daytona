@@ -229,6 +229,8 @@ func (r *Runner) UpdateRunnerMetadata(config *Config) error {
 			continue
 		}
 
+		info.RunnerId = r.Config.Id
+		info.RunnerName = r.Config.Name
 		providerInfos = append(providerInfos, info)
 	}
 

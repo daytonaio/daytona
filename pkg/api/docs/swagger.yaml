@@ -560,6 +560,8 @@ definitions:
         type: string
       runnerId:
         type: string
+      runnerName:
+        type: string
       targetConfigManifest:
         $ref: '#/definitions/TargetConfigManifest'
       version:
@@ -567,6 +569,7 @@ definitions:
     required:
     - name
     - runnerId
+    - runnerName
     - targetConfigManifest
     - version
     type: object

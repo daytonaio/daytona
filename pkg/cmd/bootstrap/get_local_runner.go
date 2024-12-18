@@ -352,6 +352,7 @@ func InitProviderManager(c *server.Config, runnerConfig *runner.Config, configDi
 		ApiUrl:             util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ApiKey:             "TODO",
 		RunnerId:           runnerConfig.Id,
+		RunnerName:         runnerConfig.Name,
 		DaytonaDownloadUrl: binaryUrl,
 		ServerUrl:          headscaleUrl,
 		BaseDir:            runnerConfig.ProvidersDir,

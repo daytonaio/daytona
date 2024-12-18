@@ -19,7 +19,7 @@ func Notify(runner *apiclient.RegisterRunnerResultDTO, apiUrl string) {
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 
-	command := fmt.Sprintf("daytona runner configure --api-url %s --api-key %s --id %s", apiUrl, runner.ApiKey, runner.Id)
+	command := fmt.Sprintf("daytona runner configure --api-url %s --api-key %s --id %s --name %s", apiUrl, runner.ApiKey, runner.Id, runner.Name)
 	fmt.Println(lipgloss.NewStyle().Padding(0).Foreground(views.Green).Render(command))
 
 	if err := clipboard.WriteAll(command); err == nil {
