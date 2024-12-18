@@ -6,6 +6,7 @@ package server
 import (
 	"errors"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/charmbracelet/bubbles/help"
@@ -75,6 +76,10 @@ func (m *Model) createForm() *huh.Form {
 				Validate(func(s string) error {
 					_, err := os.Stat(s)
 					if os.IsNotExist(err) {
+						err = os.MkdirAll(filepath.Dir(s), 0755)
+						if err != nil {
+							return err
+						}
 						_, err = os.Create(s)
 					}
 					return err

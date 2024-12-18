@@ -6,11 +6,9 @@ package runner
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/google/uuid"
@@ -29,6 +27,8 @@ type Config struct {
 	TelemetryEnabled bool                `json:"telemetryEnabled"`
 } // @name RunnerConfig
 
+var ErrConfigNotFound = errors.New("please run 'daytona runner configure' to configure the runner")
+
 func GetConfig() (*Config, error) {
 	configFilePath, err := configFilePath()
 	if err != nil {
@@ -37,17 +37,7 @@ func GetConfig() (*Config, error) {
 
 	_, err = os.Stat(configFilePath)
 	if os.IsNotExist(err) {
-		c, err := getDefaultConfig()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get default config: %w", err)
-		}
-
-		err = Save(*c)
-		if err != nil {
-			return nil, fmt.Errorf("failed to save default config file: %w", err)
-		}
-
-		return c, nil
+		return nil, ErrConfigNotFound
 	}
 
 	if err != nil {
@@ -96,12 +86,17 @@ func GetConfig() (*Config, error) {
 }
 
 func GetConfigDir() (string, error) {
-	configDir, err := config.GetConfigDir()
+	daytonaConfigDir := os.Getenv("DAYTONA_RUNNER_CONFIG_DIR")
+	if daytonaConfigDir != "" {
+		return daytonaConfigDir, nil
+	}
+
+	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
 		return "", err
 	}
 
-	return filepath.Join(configDir, "runner"), nil
+	return filepath.Join(userConfigDir, "daytona-runner"), nil
 }
 
 func Save(c Config) error {
@@ -162,7 +157,7 @@ func getDefaultLogFilePath() (string, error) {
 	return filepath.Join(configDir, "log"), nil
 }
 
-func getDefaultConfig() (*Config, error) {
+func GetDefaultConfig() (*Config, error) {
 	providersDir, err := getDefaultProvidersDir()
 	if err != nil {
 		return nil, errors.New("failed to get default providers dir")
@@ -174,9 +169,6 @@ func getDefaultConfig() (*Config, error) {
 	}
 
 	c := Config{
-		Id:           "local",
-		ServerApiKey: "",
-		ServerApiUrl: "",
 		ProvidersDir: providersDir,
 		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
 	}

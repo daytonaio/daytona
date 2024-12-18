@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -39,11 +38,6 @@ import (
 )
 
 func GetInstance(c *server.Config, configDir string, version string, telemetryService telemetry.TelemetryService) (*server.Server, error) {
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-
 	dbPath, err := getDbPath()
 	if err != nil {
 		return nil, err
@@ -173,7 +167,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				State:        models.JobStatePending,
 			})
 		},
-		LoggerFactory: logs.NewLoggerFactory(buildLogsDir),
+		LoggerFactory: logs.NewLoggerFactory(server.GetBuildLogsDir(configDir)),
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)

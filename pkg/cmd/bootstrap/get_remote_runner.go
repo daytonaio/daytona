@@ -349,12 +349,8 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 }
 
 func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJobFactory, error) {
-	logsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
 	loggerFactory := remotelogs.NewRemoteLoggerFactory(remotelogs.RemoteLoggerFactoryConfig{
-		LogsDir:      logsDir,
+		LogsDir:      filepath.Join(params.ConfigDir, "builds", "logs"),
 		ServerUrl:    params.RunnerConfig.ServerApiUrl,
 		ServerApiKey: params.RunnerConfig.ServerApiKey,
 		BasePath:     "/log/build",

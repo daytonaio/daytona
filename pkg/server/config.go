@@ -120,13 +120,17 @@ func GetConfigDir() (string, error) {
 }
 
 func GetTargetLogsDir(configDir string) string {
-	return filepath.Join(configDir, "targets", "logs")
+	return filepath.Join(configDir, "logs", "targets")
 }
 
 func GetRunnerLogsDir(configDir string) string {
-	return filepath.Join(configDir, "runners", "logs")
+	return filepath.Join(configDir, "logs", "runners")
 }
 
 func GetWorkspaceLogsDir(configDir string) string {
-	return filepath.Join(configDir, "workspaces", "logs")
+	return filepath.Join(configDir, "logs", "workspaces")
+}
+
+func GetBuildLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs", "builds")
 }

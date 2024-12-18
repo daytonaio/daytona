@@ -64,7 +64,7 @@
       ],
       "env": {
         "DAYTONA_DEV": "1",
-        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-runner",
+        "DAYTONA_RUNNER_CONFIG_DIR": "/home/daytona/.config/daytona-runner",
       }
     }
   ]

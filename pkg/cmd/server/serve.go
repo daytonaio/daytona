@@ -10,6 +10,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -17,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/runner"
@@ -61,11 +63,6 @@ var ServeCmd = &cobra.Command{
 		}
 
 		c, err := server.GetConfig()
-		if err != nil {
-			return err
-		}
-
-		runnerConfig, err := runner.GetConfig()
 		if err != nil {
 			return err
 		}
@@ -142,8 +139,10 @@ var ServeCmd = &cobra.Command{
 			}
 			var runnerLogWriter io.Writer
 
-			if runnerConfig.LogFile != nil {
-				logFile, err := os.OpenFile(runnerConfig.LogFile.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			localRunnerConfig := getLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
+
+			if localRunnerConfig.LogFile != nil {
+				logFile, err := os.OpenFile(localRunnerConfig.LogFile.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 				if err != nil {
 					localRunnerErrChan <- err
 					return
@@ -154,7 +153,7 @@ var ServeCmd = &cobra.Command{
 
 			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
 				ServerConfig:     c,
-				RunnerConfig:     runnerConfig,
+				RunnerConfig:     localRunnerConfig,
 				ConfigDir:        configDir,
 				TelemetryService: telemetryService,
 				LogWriter:        runnerLogWriter,
@@ -272,6 +271,18 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	}
 
 	return runner.Start(context.Background())
+}
+
+func getLocalRunnerConfig(configDir string) *runner.Config {
+	providersDir := filepath.Join(configDir, "providers")
+	logFilePath := filepath.Join(configDir, "runner.log")
+
+	return &runner.Config{
+		Id:           "local",
+		Name:         "local",
+		ProvidersDir: providersDir,
+		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
+	}
 }
 
 func handleDisabledLocalRunner() error {

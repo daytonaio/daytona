@@ -4,6 +4,8 @@
 package runner
 
 import (
+	"errors"
+
 	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/views"
 	runner_view "github.com/daytonaio/daytona/pkg/views/runner"
@@ -16,7 +18,14 @@ var configureCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := runner.GetConfig()
 		if err != nil {
-			return err
+			if errors.Is(err, runner.ErrConfigNotFound) {
+				config, err = runner.GetDefaultConfig()
+				if err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
 		}
 
 		if idFlag != "" && nameFlag != "" && apiUrlFlag != "" && apiKeyFlag != "" {
@@ -30,6 +39,8 @@ var configureCmd = &cobra.Command{
 				return err
 			}
 		}
+
+		config.ClientId = idFlag
 
 		err = runner.Save(*config)
 		if err != nil {

@@ -219,12 +219,7 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 }
 
 func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJobFactory, error) {
-	buildLogsDir, err := build.GetBuildLogsDir()
-	if err != nil {
-		return nil, err
-	}
-
-	buildLogsFactory := logs.NewLoggerFactory(buildLogsDir)
+	buildLogsFactory := logs.NewLoggerFactory(server.GetBuildLogsDir(params.ConfigDir))
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
