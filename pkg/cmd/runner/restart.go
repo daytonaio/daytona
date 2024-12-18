@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var restartRunnerCmd = &cobra.Command{
+var restartCmd = &cobra.Command{
 	Use:   "restart",
 	Short: "Restarts the runner",
 	Args:  cobra.NoArgs,

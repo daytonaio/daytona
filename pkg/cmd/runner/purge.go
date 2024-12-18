@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var purgeRunnerCmd = &cobra.Command{
+var purgeCmd = &cobra.Command{
 	Use:   "purge",
 	Short: "Purges the runner",
 	Args:  cobra.NoArgs,

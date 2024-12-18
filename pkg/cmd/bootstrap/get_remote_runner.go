@@ -339,7 +339,7 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 	if err != nil {
 		return nil, err
 	}
-	loggerFactory := logs.NewLoggerFactory(nil, &logsDir)
+	loggerFactory := logs.NewRemoteLoggerFactory(nil, &logsDir, params.RunnerConfig.ServerApiUrl, params.RunnerConfig.ServerApiKey)
 
 	var buildImageNamespace string
 
@@ -406,7 +406,7 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 			return builds, nil
 		},
 		ListConfigsForUrl: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
-			gitProviders, _, err := params.ApiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, repoUrl).Execute()
+			gitProviders, _, err := params.ApiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(repoUrl)).Execute()
 			if err != nil {
 				return nil, err
 			}

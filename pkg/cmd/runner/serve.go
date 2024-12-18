@@ -17,11 +17,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var startProcessRunnerCmd = &cobra.Command{
-	Use:    "start-process",
-	Short:  "Starts the runner in the foreground",
-	Hidden: true,
+var daemonServeCmd = &cobra.Command{
+	Use:    "daemon-serve",
+	Short:  "Used by the daemon to start the Daytona Runner",
 	Args:   cobra.NoArgs,
+	Hidden: true,
+	RunE:   serveCmd.RunE,
+}
+
+var serveCmd = &cobra.Command{
+	Use:   "serve",
+	Short: "Starts the runner in the foreground",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

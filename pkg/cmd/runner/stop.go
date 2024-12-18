@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var stopRunnerCmd = &cobra.Command{
+var stopCmd = &cobra.Command{
 	Use:   "stop",
 	Short: "Stops the runner",
 	Args:  cobra.NoArgs,

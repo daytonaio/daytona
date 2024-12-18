@@ -17,10 +17,11 @@ var RunnerCmd = &cobra.Command{
 func init() {
 	RunnerCmd.AddCommand(configCmd)
 	RunnerCmd.AddCommand(configureCmd)
-	RunnerCmd.AddCommand(startRunnerCmd)
-	RunnerCmd.AddCommand(startProcessRunnerCmd)
-	RunnerCmd.AddCommand(stopRunnerCmd)
-	RunnerCmd.AddCommand(restartRunnerCmd)
-	RunnerCmd.AddCommand(logsRunnerCmd)
-	RunnerCmd.AddCommand(purgeRunnerCmd)
+	RunnerCmd.AddCommand(startCmd)
+	RunnerCmd.AddCommand(serveCmd)
+	RunnerCmd.AddCommand(daemonServeCmd)
+	RunnerCmd.AddCommand(stopCmd)
+	RunnerCmd.AddCommand(restartCmd)
+	RunnerCmd.AddCommand(logsCmd)
+	RunnerCmd.AddCommand(purgeCmd)
 }

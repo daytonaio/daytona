@@ -27,7 +27,7 @@ var svcConfig = &service.Config{
 	Arguments:   []string{"runner start-process"},
 }
 
-var startRunnerCmd = &cobra.Command{
+var startCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts the runner",
 	Args:  cobra.NoArgs,

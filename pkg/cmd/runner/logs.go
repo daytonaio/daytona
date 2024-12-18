@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var logsRunnerCmd = &cobra.Command{
+var logsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "View runner logs",
 	Args:  cobra.NoArgs,
