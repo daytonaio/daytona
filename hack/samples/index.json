@@ -173,5 +173,15 @@
     "name": "React.js - effective-scrapper",
     "description": "Effective Scrapper is a web application designed to simplify the job search process for individuals interested in roles within the technology industry.",
     "gitUrl": "https://github.com/daytonaio/sample-js-job-scaper"
+  },
+  {
+    "name": "Python/Flask - CodeChatter",
+    "description": "CodeChatter v2 is an advanced Flask-based application that harnesses the power of the Groq API to provide intelligent coding assistance.",
+    "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
+  },
+  {
+    "name": "AstroJS + Sanity CMS Blog",
+    "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
+    "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
   }
 ]
