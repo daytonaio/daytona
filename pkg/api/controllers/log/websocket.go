@@ -18,20 +18,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const (
-	maxReconnectAttempts = 5
-	initialRetryDelay    = 1 * time.Second
-	maxRetryDelay        = 30 * time.Second
-)
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
-}
-
 type WebSocketReader struct {
 	sync.Mutex
 	position  *types.LogPosition
@@ -57,7 +43,15 @@ func (r *WebSocketReader) UpdatePosition(offset int64, line string) {
 	r.position.LastLine = line
 }
 
-func readLog(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan<- []byte, chan<- error), writeFunc func(*websocket.Conn, []byte) error) {
+func HandleWebSocketConnection(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan<- []byte, chan<- error), writeFunc func(*websocket.Conn, []byte) error) {
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
 	positionQuery := ginCtx.Query("position")
 	var lastPosition *types.LogPosition
 	if positionQuery != "" {
@@ -84,9 +78,11 @@ func readLog(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Con
 		if err != nil && !errors.Is(err, io.EOF) {
 			closeErr = websocket.CloseInternalServerErr
 		}
-		ws.WriteControl(websocket.CloseMessage,
+		if err := ws.WriteControl(websocket.CloseMessage,
 			websocket.FormatCloseMessage(closeErr, ""),
-			time.Now().Add(time.Second))
+			time.Now().Add(time.Second)); err != nil {
+			log.Debug("Failed to write close message: ", err)
+		}
 		ws.Close()
 	}()
 
@@ -130,7 +126,9 @@ func readLog(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Con
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
 					// Send current position before closing
 					posJSON, _ := json.Marshal(wsReader.position)
-					writeFunc(ws, posJSON)
+					if err := writeFunc(ws, posJSON); err != nil {
+						log.Debug("Failed to write position on close: ", err)
+					}
 				}
 				return
 			}

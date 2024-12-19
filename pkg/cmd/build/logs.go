@@ -5,7 +5,6 @@ package build
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
@@ -28,11 +27,6 @@ var buildLogsCmd = &cobra.Command{
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
 			return err
-		}
-
-		query := ""
-		if followFlag {
-			query += "follow=true"
 		}
 
 		ctx := context.Background()
@@ -68,12 +62,8 @@ var buildLogsCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(nil, err)
 		}
 
-		apiclient_util.NewLogReader(&activeProfile, buildId)
-
-		// Make sure the terminal cursor is reset
-		fmt.Print("\033[?25h")
-
-		return nil
+		reader := apiclient_util.NewLogReader(&activeProfile, buildId)
+		return reader.ReadWorkspaceLogs(ctx, nil, followFlag, false, nil)
 	},
 }
 

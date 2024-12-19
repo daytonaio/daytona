@@ -142,7 +142,9 @@ Examples:
 		if followFlag {
 			ctx = context.Background()
 		} else {
-			ctx, _ = context.WithTimeout(ctx, 30*time.Second)
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
 		}
 
 		// Start reading logs with new retry mechanism
