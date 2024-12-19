@@ -220,6 +220,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
   },
   {
+    "name": "Keyword Density Application",
+    "description": "A tool to calculate keyword density from large text / raw html / direct URL.",
+    "gitUrl": "https://github.com/daytonaio/sample-laravel-keyword-density"
+  },
+  {
     "name": "Github User Profile Analyzer",
     "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
