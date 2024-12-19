@@ -188,5 +188,10 @@
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
+  },
+  {
+    "name": "React.js - effective-scrapper",
+    "description": "Effective Scrapper is a web application designed to simplify the job search process for individuals interested in roles within the technology industry.",
+    "gitUrl": "https://github.com/daytonaio/sample-js-job-scaper"
   }
 ]
