@@ -95,7 +95,7 @@ var StopCmd = &cobra.Command{
 			}
 
 			if startProjectFlag != "" {
-			_ = append(projectNames, stopProjectFlag)
+				_ = append(projectNames, stopProjectFlag)
 			} else {
 				_ = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 					return p.Name
