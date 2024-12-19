@@ -168,5 +168,10 @@
     "name": "Python/Streamlit - DocBot",
     "description": "DocBot is a Streamlit web application that enables interactive conversations with PDF documents using Gemini AI, providing insightful responses based on the document's content.",
     "gitUrl": "https://github.com/daytonaio/sample-streamlit-ai-document-insights"
+  },
+  {
+    "name":"Python/Flask - CodeChatter",
+    "description":"CodeChatter v2 is an advanced Flask-based application that harnesses the power of the Groq API to provide intelligent coding assistance.",
+    "gitUrl":"https://github.com/daytonaio/sample-flask-groq-code-assistant"
   }
 ]
