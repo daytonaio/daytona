@@ -45,9 +45,27 @@ type loggerFactory struct {
 	logsDir string
 }
 
-func NewLoggerFactory(logsDir string) ILoggerFactory {
+type LoggerFactoryConfig struct {
+	LogsDir     string
+	ApiUrl      *string
+	ApiKey      *string
+	ApiBasePath *ApiBasePath
+}
+
+func NewLoggerFactory(config LoggerFactoryConfig) ILoggerFactory {
+	if config.ApiUrl != nil && config.ApiKey != nil && config.ApiBasePath != nil {
+		return &remoteLoggerFactory{
+			localLoggerFactory: &loggerFactory{
+				logsDir: config.LogsDir,
+			},
+			apiUrl:      *config.ApiUrl,
+			apiKey:      *config.ApiKey,
+			apiBasePath: *config.ApiBasePath,
+		}
+	}
+
 	return &loggerFactory{
-		logsDir: logsDir,
+		logsDir: config.LogsDir,
 	}
 }
 

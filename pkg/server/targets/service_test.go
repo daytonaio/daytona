@@ -83,7 +83,7 @@ func TestTargetService(t *testing.T) {
 		},
 		ServerApiUrl:  serverApiUrl,
 		ServerUrl:     serverUrl,
-		LoggerFactory: logs.NewLoggerFactory(tgLogsDir),
+		LoggerFactory: logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: tgLogsDir}),
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {

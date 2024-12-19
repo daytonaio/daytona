@@ -56,7 +56,7 @@ type ProviderManagerConfig struct {
 	DaytonaDownloadUrl       string
 	ServerUrl                string
 	ApiUrl                   string
-	ApiKey                   string
+	ApiKey                   *string
 	WorkspaceLogsDir         string
 	TargetLogsDir            string
 	BaseDir                  string
@@ -111,7 +111,7 @@ type providerManagerImpl struct {
 	serverUrl                string
 	serverVersion            string
 	apiUrl                   string
-	apiKey                   string
+	apiKey                   *string
 	serverPort               uint32
 	apiPort                  uint32
 	workspaceLogsDir         string

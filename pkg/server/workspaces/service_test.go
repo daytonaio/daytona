@@ -151,7 +151,7 @@ func TestTargetService(t *testing.T) {
 		ServerUrl:             serverUrl,
 		DefaultWorkspaceImage: defaultWorkspaceImage,
 		DefaultWorkspaceUser:  defaultWorkspaceUser,
-		LoggerFactory:         logs.NewLoggerFactory(tgLogsDir),
+		LoggerFactory:         logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: tgLogsDir}),
 	})
 
 	t.Run("CreateWorkspace", func(t *testing.T) {

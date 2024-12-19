@@ -5,6 +5,7 @@ package logs
 
 import (
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 
@@ -21,6 +22,17 @@ var minimumLongestPrefixLength = 4
 const maxPrefixLength = 20
 const prefixDelimiter = " | "
 const prefixPadding = " "
+
+func DisplayLogsFromReader(reader io.Reader) {
+	for {
+		buf := make([]byte, 1024)
+		n, err := reader.Read(buf)
+		if err != nil {
+			break
+		}
+		fmt.Print(string(buf[:n]))
+	}
+}
 
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 	for logEntry := range logEntriesChan {

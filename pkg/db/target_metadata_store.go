@@ -27,7 +27,7 @@ func (s *TargetMetadataStore) Find(ctx context.Context, targetId string) (*model
 	tx := s.GetTransaction(ctx)
 
 	targetMetadata := &models.TargetMetadata{}
-	tx = tx.Where("id = ?", targetId).First(&targetMetadata)
+	tx = tx.Where("target_id = ?", targetId).First(&targetMetadata)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrTargetMetadataNotFound

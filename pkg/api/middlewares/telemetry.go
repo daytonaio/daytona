@@ -17,15 +17,17 @@ import (
 )
 
 var ignoreTelemetryPaths = map[string]bool{
-	"/health":                          true,
-	"/target/:targetId/metadata":       true,
-	"/target/:targetId":                true,
-	"/workspace/:workspaceId/metadata": true,
-	"/workspace/:workspaceId":          true,
-	"/runner/:runnerId/metadata":       true,
-	"/runner/:runnerId":                true,
-	"/server/network-key":              true,
-	"/job/":                            true,
+	"/health":                             true,
+	"/target/:targetId/metadata":          true,
+	"/target/:targetId":                   true,
+	"/workspace/:workspaceId/metadata":    true,
+	"/workspace/:workspaceId":             true,
+	"/runner/:runnerId/metadata":          true,
+	"/runner/:runnerId":                   true,
+	"/server/network-key":                 true,
+	"/job/":                               true,
+	"/runner/:runnerId/jobs":              true,
+	"/runner/:runnerId/jobs/:jobId/state": true,
 }
 
 func TelemetryMiddleware(telemetryService telemetry.TelemetryService) gin.HandlerFunc {

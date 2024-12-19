@@ -12,9 +12,12 @@ import (
 )
 
 var ignoreLoggingPaths = map[string]bool{
-	"/job/":                            true,
-	"/workspace/:workspaceId/metadata": true,
-	"/target/:targetId/metadata":       true,
+	"/job/":                               true,
+	"/workspace/:workspaceId/metadata":    true,
+	"/target/:targetId/metadata":          true,
+	"/runner/:runnerId/jobs":              true,
+	"/runner/:runnerId/metadata":          true,
+	"/runner/:runnerId/jobs/:jobId/state": true,
 }
 
 func LoggingMiddleware() gin.HandlerFunc {

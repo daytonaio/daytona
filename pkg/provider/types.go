@@ -17,7 +17,7 @@ type InitializeProviderRequest struct {
 	NetworkKey         string
 	ServerUrl          string
 	ApiUrl             string
-	ApiKey             string
+	ApiKey             *string
 	// ServerPort is used if the target supports direct server access
 	ServerPort uint32
 	// ApiPort is used if the target supports direct server access

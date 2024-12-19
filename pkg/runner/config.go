@@ -188,3 +188,7 @@ func getDefaultProvidersDir() (string, error) {
 
 	return filepath.Join(configDir, "providers"), nil
 }
+
+func GetLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs")
+}

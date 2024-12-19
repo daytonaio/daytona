@@ -6,50 +6,59 @@ package runner
 import (
 	"context"
 	"errors"
+	"io"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util"
-	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
-
+	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/runner"
+	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
 	"github.com/spf13/cobra"
 )
 
 var followFlag bool
 
 var logsCmd = &cobra.Command{
-	Use:   "logs [RUNNER_ID]",
+	Use:   "logs",
 	Short: "View runner logs",
-	Args:  cobra.ExactArgs(1),
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		ctx := context.Background()
-
-		// apiClient, err := apiclient_util.GetApiClient(nil)
-		// if err != nil {
-		// 	return err
-		// }
-
-		c, err := config.GetConfig()
+		c, err := runner.GetConfig()
 		if err != nil {
 			return err
 		}
 
-		activeProfile, err := c.GetActiveProfile()
+		configDir, err := runner.GetConfigDir()
 		if err != nil {
 			return err
 		}
 
-		if len(args) == 0 {
-			return errors.New("not implemented")
-		}
-
-		cmd_common.ReadRunnerLogs(ctx, cmd_common.ReadLogParams{
-			Id:        args[0],
-			Label:     &args[0],
-			ServerUrl: activeProfile.Api.Url,
-			ApiKey:    activeProfile.Api.Key,
-			Index:     util.Pointer(0),
-			Follow:    &followFlag,
+		loggerFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{
+			LogsDir: runner.GetLogsDir(configDir),
 		})
+
+		logReader, err := loggerFactory.CreateLogReader(c.Id)
+		if err != nil {
+			return err
+		}
+
+		logs_view.SetupLongestPrefixLength([]string{c.Name})
+
+		entryChan := make(chan interface{})
+		errChan := make(chan error)
+		go func() {
+			logs.ReadJSONLog(context.Background(), logReader, followFlag, entryChan, errChan)
+		}()
+
+		go func() {
+			for entry := range entryChan {
+				logs_view.DisplayLogEntry(entry.(logs.LogEntry), logs_view.STATIC_INDEX)
+			}
+		}()
+
+		err = <-errChan
+		if err != nil && !errors.Is(err, io.EOF) {
+			return err
+		}
+
 		return nil
 	},
 }

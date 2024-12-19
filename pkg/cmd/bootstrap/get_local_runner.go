@@ -41,7 +41,6 @@ type LocalRunnerParams struct {
 	ServerConfig     *server.Config
 	RunnerConfig     *runner.Config
 	ConfigDir        string
-	LogWriter        io.Writer
 	TelemetryService telemetry.TelemetryService
 }
 
@@ -53,8 +52,7 @@ type LocalJobFactoryParams struct {
 }
 
 func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
-	runnerLogsDir := server.GetRunnerLogsDir(params.ConfigDir)
-	loggerFactory := logs.NewLoggerFactory(runnerLogsDir)
+	loggerFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetRunnerLogsDir(params.ConfigDir)})
 
 	runnerLogger, err := loggerFactory.CreateLogger(LOCAL_RUNNER_ID, LOCAL_RUNNER_ID, logs.LogSourceRunner)
 	if err != nil {
@@ -145,8 +143,7 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 }
 
 func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorkspaceJobFactory, error) {
-	workspaceLogsDir := server.GetWorkspaceLogsDir(params.ConfigDir)
-	workspaceLogsFactory := logs.NewLoggerFactory(workspaceLogsDir)
+	workspaceLogsFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetWorkspaceLogsDir(params.ConfigDir)})
 
 	envVarService := server.GetInstance(nil).EnvironmentVariableService
 
@@ -193,8 +190,7 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 }
 
 func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFactory, error) {
-	targetLogsDir := server.GetTargetLogsDir(params.ConfigDir)
-	targetLogsFactory := logs.NewLoggerFactory(targetLogsDir)
+	targetLogsFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(params.ConfigDir)})
 
 	targetService := server.GetInstance(nil).TargetService
 
@@ -219,7 +215,7 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 }
 
 func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJobFactory, error) {
-	buildLogsFactory := logs.NewLoggerFactory(server.GetBuildLogsDir(params.ConfigDir))
+	buildLogsFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetBuildLogsDir(params.ConfigDir)})
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -352,7 +348,6 @@ func getProviderManager(params LocalRunnerParams, logger *log.Logger) (providerm
 		WorkspaceLogsDir:   server.GetWorkspaceLogsDir(params.ConfigDir),
 		Logger:             logger,
 		ApiUrl:             util.GetFrpcApiUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain),
-		ApiKey:             "TODO",
 		RunnerName:         params.RunnerConfig.Name,
 		RunnerId:           params.RunnerConfig.Id,
 		DaytonaDownloadUrl: binaryUrl,

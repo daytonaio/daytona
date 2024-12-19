@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -137,26 +136,14 @@ var ServeCmd = &cobra.Command{
 				}
 				return
 			}
-			var runnerLogWriter io.Writer
 
 			localRunnerConfig := getLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
-
-			if localRunnerConfig.LogFile != nil {
-				logFile, err := os.OpenFile(localRunnerConfig.LogFile.Path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-				if err != nil {
-					localRunnerErrChan <- err
-					return
-				}
-				defer logFile.Close()
-				runnerLogWriter = logFile
-			}
 
 			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
 				ServerConfig:     c,
 				RunnerConfig:     localRunnerConfig,
 				ConfigDir:        configDir,
 				TelemetryService: telemetryService,
-				LogWriter:        runnerLogWriter,
 			})
 		}()
 

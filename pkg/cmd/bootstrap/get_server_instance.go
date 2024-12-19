@@ -167,7 +167,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				State:        models.JobStatePending,
 			})
 		},
-		LoggerFactory: logs.NewLoggerFactory(server.GetBuildLogsDir(configDir)),
+		LoggerFactory: logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetBuildLogsDir(configDir)}),
 	})
 
 	prebuildWebhookEndpoint := fmt.Sprintf("%s%s", util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain), constants.WEBHOOK_EVENT_ROUTE)
@@ -306,7 +306,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ServerApiUrl:     util.GetFrpcApiUrl(c.Frps.Protocol, c.Id, c.Frps.Domain),
 		ServerVersion:    version,
 		ServerUrl:        headscaleUrl,
-		LoggerFactory:    logs.NewLoggerFactory(server.GetTargetLogsDir(configDir)),
+		LoggerFactory:    logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(configDir)}),
 		TelemetryService: telemetryService,
 	})
 
@@ -381,7 +381,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		ServerUrl:             headscaleUrl,
 		DefaultWorkspaceImage: c.DefaultWorkspaceImage,
 		DefaultWorkspaceUser:  c.DefaultWorkspaceUser,
-		LoggerFactory:         logs.NewLoggerFactory(server.GetWorkspaceLogsDir(configDir)),
+		LoggerFactory:         logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetWorkspaceLogsDir(configDir)}),
 	})
 
 	envVarService := env.NewEnvironmentVariableService(env.EnvironmentVariableServiceConfig{
@@ -391,7 +391,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 	runnerService := runners.NewRunnerService(runners.RunnerServiceConfig{
 		RunnerStore:         runnerStore,
 		RunnerMetadataStore: runnerMetadataStore,
-		LoggerFactory:       logs.NewLoggerFactory(server.GetRunnerLogsDir(configDir)),
+		LoggerFactory:       logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetRunnerLogsDir(configDir)}),
 		CreateJob: func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error {
 			return jobService.Create(ctx, &models.Job{
 				ResourceId:   runnerId,

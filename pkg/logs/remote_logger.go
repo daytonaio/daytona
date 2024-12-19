@@ -1,17 +1,15 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package remotelogs
+package logs
 
 import (
-	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/gorilla/websocket"
 )
 
 type RemoteLogger struct {
-	localLogger logs.Logger
+	localLogger Logger
 	conn        *websocket.Conn
-	baseUrl     string
 }
 
 func (r *RemoteLogger) Write(p []byte) (n int, err error) {
