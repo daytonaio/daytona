@@ -178,5 +178,10 @@
     "name": "AstroJS + Sanity CMS Blog",
     "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
     "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
+  },
+  {
+    "name": "NextJs/MindsDb - WordWave",
+    "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
   }
 ]
