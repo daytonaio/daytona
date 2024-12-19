@@ -124,5 +124,70 @@
     "name": "Flask - AI Playlist Generator",
     "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
     "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
+  },
+  { 
+     "name": "Rust - Actix Web Server", 
+     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.", 
+     "gitUrl": "https://github.com/daytonaio/sample-rust-actix" 
+  },
+  {
+    "name": "Next.js - Festigo",
+    "description": "Festigo is an event planning and event organizing website that bring guests, vendors and event organizers(the people hosting the event) under a single umbrella.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-event-planner"
+  },
+  {
+    "name": "Next.js - Cooperword",
+    "description":"The COOPER WORD is a web-based tool designed to help users create, manage, and view events in a calendar format. Built using React, Next.js, and TypeScript, this application provides a user-friendly interface with intuitive functionality for effective event management.",
+    "gitUrl":"https://github.com/daytonaio/sample-nextjs-ai-event-manager.git"
+  },
+  {
+      "name": "Python/Flask - ai-code-reviwer",
+      "description": "Get the feedback on your code and also can translate it to another programming language",
+      "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
+  },
+  {
+      "name": "Python/Streamlit - LinearPredictor",
+      "description": "LinearPredictor is an interactive web application designed to help users build and explore simple linear regression models.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-linear-predictor"
+  },
+  {
+    "name": "React.js - carecradle",
+    "description": "CareCradle is an open-source, generative AI-powered assistant designed to provide comprehensive information, advice, and support for expectant mothers during their pregnancy journey.",
+    "gitUrl": "https://github.com/daytonaio/sample-ai-carecradle"
+  },
+  {
+    "name": "React.js - GH-Search",
+    "description": "GH-Search is a project built using github's rest api and react that allows us to search and gather information about various github users.",
+    "gitUrl": "https://github.com/daytonaio/sample-github-user-search.git"
+  },
+  {
+    "name": "React.js - Ex-con-thrive",
+    "description": "Ex-Cons Thrive is a project designed to help formerly incarcerated individuals reintegrate into society by providing job search assistance, legal support, mental health services, and more.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-job-assistant"
+  },
+  {
+    "name": "Python/Django - Project Management",
+    "description": "Project Managemment transforms the thesis project management system at Tribhuvan University into a dynamic web application using Django, enhancing collaboration and efficiency for all teachers and students.",
+    "gitUrl": "https://github.com/daytonaio/sample-django-project-manager"
+  },
+  {
+    "name": "Python/Streamlit - DocBot",
+    "description": "DocBot is a Streamlit web application that enables interactive conversations with PDF documents using Gemini AI, providing insightful responses based on the document's content.",
+    "gitUrl": "https://github.com/daytonaio/sample-streamlit-ai-document-insights"
+  },
+  {
+    "name": "Python/Flask - CodeChatter",
+    "description": "CodeChatter v2 is an advanced Flask-based application that harnesses the power of the Groq API to provide intelligent coding assistance.",
+    "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
+  },
+  {
+    "name": "AstroJS + Sanity CMS Blog",
+    "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
+    "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
+  },
+  {
+    "name": "NextJs/MindsDb - WordWave",
+    "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
   }
 ]
