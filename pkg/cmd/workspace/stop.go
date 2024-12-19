@@ -95,9 +95,9 @@ var StopCmd = &cobra.Command{
 			}
 
 			if startProjectFlag != "" {
-				projectNames = append(projectNames, stopProjectFlag)
+				_ = append(projectNames, stopProjectFlag)
 			} else {
-				projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+				_ = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 					return p.Name
 				})
 			}
@@ -120,7 +120,7 @@ func init() {
 	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all workspaces")
 }
 
-func stopAllWorkspaces(activeProfile config.Profile, from time.Time) error {
+func stopAllWorkspaces(_ config.Profile, _ time.Time) error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
