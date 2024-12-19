@@ -19,6 +19,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/server/registry"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
@@ -119,7 +120,7 @@ var ServeCmd = &cobra.Command{
 		case <-headscaleServerStartedChan:
 			log.Info("Headscale server started")
 			go func() {
-				headscaleServerErrChan <- server.TailscaleServer.Connect()
+				headscaleServerErrChan <- server.TailscaleServer.Connect(headscale.HEADSCALE_USERNAME)
 			}()
 		case err := <-headscaleServerErrChan:
 			return err
