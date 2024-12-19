@@ -1,11 +1,33 @@
 name: daytona logs
 synopsis: View logs for a workspace/project
+description: |-
+    Stream logs from a workspace or project with automatic reconnection support.
+    Examples:
+      # Stream workspace logs
+      daytona logs my-workspace
+
+      # Stream project logs with auto-reconnect
+      daytona logs my-workspace my-project --retry
+
+      # Stream logs from a specific time
+      daytona logs my-workspace --from="2024-12-18T22:00:00Z"
+
+      # Follow logs with reconnection enabled
+      daytona logs my-workspace --follow --retry
 usage: daytona logs [WORKSPACE] [PROJECT_NAME] [flags]
 options:
     - name: follow
       shorthand: f
       default_value: "false"
       usage: Follow logs
+    - name: from
+      usage: Show logs from this time (RFC3339 format)
+    - name: max-retries
+      default_value: "5"
+      usage: Maximum number of reconnection attempts
+    - name: retry
+      default_value: "true"
+      usage: Enable automatic reconnection
     - name: workspace
       shorthand: w
       default_value: "false"

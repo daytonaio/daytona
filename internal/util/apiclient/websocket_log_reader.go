@@ -1,155 +1,152 @@
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package apiclient
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"net/url"
 	"sync"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/pkg/logs"
-	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
+	"github.com/daytonaio/daytona/pkg/api/types"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
-var workspaceLogsStarted bool
+type LogReader struct {
+	sync.Mutex
+	position      *types.LogPosition
+	retryCount    int
+	maxRetries    int
+	retryDelay    time.Duration
+	activeProfile *config.Profile
+	workspaceId   string
+}
 
-func ReadWorkspaceLogs(ctx context.Context, activeProfile config.Profile, workspaceId string, projectNames []string, follow, showWorkspaceLogs bool, from *time.Time) {
-	var wg sync.WaitGroup
-	query := ""
-	if follow {
-		query = "follow=true"
+func NewLogReader(activeProfile *config.Profile, workspaceId string) *LogReader {
+	return &LogReader{
+		position:      &types.LogPosition{},
+		maxRetries:    types.MaxReconnectAttempts,
+		retryDelay:    types.InitialRetryDelay,
+		activeProfile: activeProfile,
+		workspaceId:   workspaceId,
 	}
+}
 
-	if !showWorkspaceLogs {
-		workspaceLogsStarted = true
-	}
-	logs_view.CalculateLongestPrefixLength(projectNames)
+func (r *LogReader) SetMaxRetries(max int) {
+	r.maxRetries = max
+}
 
-	for index, projectName := range projectNames {
-		wg.Add(1)
-		go func(projectName string, from *time.Time) {
-			defer wg.Done()
+func (r *LogReader) ReadWorkspaceLogs(ctx context.Context, projectNames []string, follow bool, showWorkspaceLogs bool, from *time.Time) error {
+	for {
+		posJSON, _ := json.Marshal(r.position)
+		query := fmt.Sprintf("retry=true&position=%s", url.QueryEscape(string(posJSON)))
 
-			for {
-				// Make sure workspace logs started before showing any project logs
-				if !workspaceLogsStarted {
-					time.Sleep(250 * time.Millisecond)
-					continue
-				}
+		ws, _, err := GetWebsocketConn(ctx,
+			fmt.Sprintf("/log/workspace/%s", r.workspaceId),
+			r.activeProfile, &query)
 
-				ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s/%s", workspaceId, projectName), &activeProfile, &query)
-				// We want to retry getting the logs if it fails
-				if err != nil {
-					log.Trace(HandleErrorResponse(res, err))
-					time.Sleep(500 * time.Millisecond)
-					continue
-				}
-
-				readJSONLog(ctx, ws, index, from)
-				ws.Close()
-				break
+		if err != nil {
+			if r.retryCount >= r.maxRetries {
+				return fmt.Errorf("max retries reached: %w", err)
 			}
-		}(projectName, from)
-	}
+			log.Debug("Connection failed, retrying: ", err)
+			time.Sleep(r.retryDelay)
+			r.retryDelay = min(r.retryDelay*2, types.MaxRetryDelay)
+			r.retryCount++
+			continue
+		}
 
-	if showWorkspaceLogs {
-		for {
-			ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/workspace/%s", workspaceId), &activeProfile, &query)
-			// We want to retry getting the logs if it fails
-			if err != nil {
-				log.Trace(HandleErrorResponse(res, err))
-				time.Sleep(250 * time.Millisecond)
+		// Reset retry counters on successful connection
+		r.retryCount = 0
+		r.retryDelay = types.InitialRetryDelay
+
+		if err := r.handleLogStream(ctx, ws, from, projectNames, follow, showWorkspaceLogs); err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+				log.Debug("Connection closed unexpectedly, retrying")
 				continue
 			}
+			return err
+		}
 
-			readJSONLog(ctx, ws, logs_view.STATIC_INDEX, from)
-			ws.Close()
+		if !follow {
 			break
 		}
 	}
 
-	wg.Wait()
+	return nil
 }
 
-func ReadBuildLogs(ctx context.Context, activeProfile config.Profile, buildId string, query string) {
-	logs_view.CalculateLongestPrefixLength([]string{buildId})
+func (r *LogReader) handleLogStream(ctx context.Context, ws *websocket.Conn, from *time.Time, projectNames []string, follow bool, showWorkspaceLogs bool) error {
+	defer ws.Close()
 
-	for {
-		ws, res, err := GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", buildId), &activeProfile, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			log.Trace(HandleErrorResponse(res, err))
-			time.Sleep(250 * time.Millisecond)
-			continue
-		}
-
-		readJSONLog(ctx, ws, logs_view.FIRST_PROJECT_INDEX, nil)
-		ws.Close()
-		break
-	}
-}
-
-func readJSONLog(ctx context.Context, ws *websocket.Conn, index int, from *time.Time) {
-	logEntriesChan := make(chan logs.LogEntry)
-	readErr := make(chan error)
-	go func() {
-		for {
-			var logEntry logs.LogEntry
-
-			err := ws.ReadJSON(&logEntry)
-
-			// An empty entry will be sent from the server on close/EOF
-			// We don't want to print that
-			if logEntry != (logs.LogEntry{}) {
-				logEntriesChan <- logEntry
-			}
-
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
-					log.Error(err)
-				}
-				readErr <- err
-				return
-			}
-		}
-	}()
+	ws.SetPingHandler(func(string) error {
+		return ws.WriteControl(websocket.PongMessage, []byte{}, time.Now().Add(time.Second))
+	})
 
 	for {
 		select {
 		case <-ctx.Done():
-			return
-		case logEntry := <-logEntriesChan:
-			if from != nil {
-				parsedTime, err := time.Parse(time.RFC3339Nano, logEntry.Time)
-				if err != nil {
-					log.Trace(err)
-				}
-
-				if parsedTime.After(*from) || parsedTime.Equal(*from) {
-					logs_view.DisplayLogEntry(logEntry, index)
-				}
-			} else {
-				logs_view.DisplayLogEntry(logEntry, index)
-			}
-
-		case err := <-readErr:
+			return nil
+		default:
+			_, message, err := ws.ReadMessage()
 			if err != nil {
-				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
-				if err != nil {
-					log.Trace(err)
-				}
-				ws.Close()
-				return
+				return err
 			}
-		}
 
-		if !workspaceLogsStarted && index == logs_view.STATIC_INDEX {
-			workspaceLogsStarted = true
+			// Try to parse as position update
+			var pos types.LogPosition
+			if err := json.Unmarshal(message, &pos); err == nil {
+				r.Lock()
+				r.position = &pos
+				r.Unlock()
+				continue
+			}
+
+			// Process log message
+			if err := r.processLogMessage(message, from, projectNames, showWorkspaceLogs); err != nil {
+				log.Debug("Error processing message: ", err)
+			}
 		}
 	}
+}
+
+func (r *LogReader) processLogMessage(message []byte, from *time.Time, projectNames []string, showWorkspaceLogs bool) error {
+	var logEntry struct {
+		Time      string `json:"time"`
+		ProjectID string `json:"project_id,omitempty"`
+	}
+
+	if err := json.Unmarshal(message, &logEntry); err != nil {
+		return err
+	}
+
+	if from != nil {
+		parsedTime, err := time.Parse(time.RFC3339Nano, logEntry.Time)
+		if err != nil {
+			return err
+		}
+
+		if parsedTime.Before(*from) {
+			return nil
+		}
+	}
+
+	// Filter by project if needed
+	if len(projectNames) > 0 && logEntry.ProjectID != "" {
+		found := false
+		for _, name := range projectNames {
+			if name == logEntry.ProjectID {
+				found = true
+				break
+			}
+		}
+		if !found && !showWorkspaceLogs {
+			return nil
+		}
+	}
+
+	fmt.Println(string(message))
+	return nil
 }

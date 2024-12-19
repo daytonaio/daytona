@@ -6,6 +6,8 @@ package cmd
 import (
 	"context"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -16,8 +18,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var followFlag bool
-var workspaceFlag bool
+var (
+	followFlag    bool
+	workspaceFlag bool
+	retryFlag     bool
+	maxRetries    int
+	fromTime      string
+)
 
 var logsCmd = &cobra.Command{
 	Use:     "logs [WORKSPACE] [PROJECT_NAME]",
@@ -25,6 +32,19 @@ var logsCmd = &cobra.Command{
 	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.WORKSPACE_GROUP,
 	Aliases: []string{"lg", "log"},
+	Long: `Stream logs from a workspace or project with automatic reconnection support.
+Examples:
+  # Stream workspace logs
+  daytona logs my-workspace
+
+  # Stream project logs with auto-reconnect
+  daytona logs my-workspace my-project --retry
+
+  # Stream logs from a specific time
+  daytona logs my-workspace --from="2024-12-18T22:00:00Z"
+
+  # Follow logs with reconnection enabled
+  daytona logs my-workspace --follow --retry`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		c, err := config.GetConfig()
@@ -48,6 +68,17 @@ var logsCmd = &cobra.Command{
 			projectNames      []string
 		)
 
+		// Parse fromTime if provided
+		var fromTimePtr *time.Time
+		if fromTime != "" {
+			t, err := time.Parse(time.RFC3339, fromTime)
+			if err != nil {
+				return fmt.Errorf("invalid time format for --from flag: %w", err)
+			}
+			fromTimePtr = &t
+		}
+
+		// Handle workspace selection
 		if len(args) == 0 {
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
@@ -71,6 +102,7 @@ var logsCmd = &cobra.Command{
 			return errors.New("no projects found in workspace")
 		}
 
+		// Handle project selection
 		if len(args) == 2 {
 			projects := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 				return p.Name
@@ -97,7 +129,29 @@ var logsCmd = &cobra.Command{
 			})
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, followFlag, showWorkspaceLogs, nil)
+		// Create log reader with retry support
+		reader := apiclient_util.NewLogReader(&activeProfile, workspace.Id)
+		if maxRetries > 0 {
+			reader.SetMaxRetries(maxRetries)
+		}
+
+		// Show status message
+		views.RenderInfoMessage("Connecting to logs...")
+
+		// Set context based on follow flag
+		if followFlag {
+			ctx = context.Background()
+		} else {
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+			defer cancel()
+		}
+
+		// Start reading logs with new retry mechanism
+		err = reader.ReadWorkspaceLogs(ctx, projectNames, followFlag, showWorkspaceLogs, fromTimePtr)
+		if err != nil {
+			return fmt.Errorf("failed to read logs: %w", err)
+		}
 
 		return nil
 	},
@@ -106,4 +160,7 @@ var logsCmd = &cobra.Command{
 func init() {
 	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 	logsCmd.Flags().BoolVarP(&workspaceFlag, "workspace", "w", false, "View workspace logs")
+	logsCmd.Flags().BoolVar(&retryFlag, "retry", true, "Enable automatic reconnection")
+	logsCmd.Flags().IntVar(&maxRetries, "max-retries", 5, "Maximum number of reconnection attempts")
+	logsCmd.Flags().StringVar(&fromTime, "from", "", "Show logs from this time (RFC3339 format)")
 }

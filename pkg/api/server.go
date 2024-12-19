@@ -38,7 +38,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
-	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
+	// log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig/prebuild"
@@ -264,13 +264,13 @@ func (a *ApiServer) Start() error {
 		targetController.DELETE("/:target", target.RemoveTarget)
 	}
 
-	logController := protected.Group("/log")
-	{
-		logController.GET("/server", log_controller.ReadServerLog)
-		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
-		logController.GET("/workspace/:workspaceId/:projectName", log_controller.ReadProjectLog)
-		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
-	}
+	// logController := protected.Group("/log")
+	// {
+	// 	// logController.GET("/server", log_controller.NewWebSocketReader(log_controller.ServerLogReader))
+	// 	// logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
+	// 	// logController.GET("/workspace/:workspaceId/:projectName", log_controller.ReadProjectLog)
+	// 	// logController.GET("/build/:buildId", log_controller.ReadBuildLog)
+	// }
 
 	gitProviderController := protected.Group("/gitprovider")
 	{
