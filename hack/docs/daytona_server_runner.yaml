@@ -7,5 +7,6 @@ inherited_options:
 see_also:
     - daytona server - Start the server process in daemon mode
     - daytona server runner list - List runners
+    - daytona server runner logs - View runner logs
     - daytona server runner register - Register runner
     - daytona server runner unregister - Unregister runner

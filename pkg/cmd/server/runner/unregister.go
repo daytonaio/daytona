@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runnerUnregisterCmd = &cobra.Command{
+var unregisterCmd = &cobra.Command{
 	Use:   "unregister [RUNNER]",
 	Short: "Unregister runner",
 	Args:  cobra.RangeArgs(0, 1),

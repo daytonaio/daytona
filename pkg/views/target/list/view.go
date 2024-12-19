@@ -16,16 +16,16 @@ import (
 )
 
 type RowData struct {
-	Name           string
-	Provider       string
-	WorkspaceCount string
-	Default        bool
-	Status         string
-	Options        string
-	Uptime         string
+	Name                 string
+	Provider             string
+	WorkspaceCount       string
+	Default              bool
+	Status               string
+	TargetConfigProperty string
+	Uptime               string
 }
 
-func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string) {
+func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string, showOptions bool) {
 	if len(targetList) == 0 {
 		views_util.NotifyEmptyTargetList(true)
 		return
@@ -33,7 +33,13 @@ func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string) {
 
 	SortTargets(&targetList)
 
-	headers := []string{"Target", "Options", "# Workspaces", "Default", "Status"}
+	targetConfigPropertyHeader := "Config Name"
+
+	if showOptions {
+		targetConfigPropertyHeader = "Options"
+	}
+
+	headers := []string{"Target", targetConfigPropertyHeader, "# Workspaces", "Default", "Status"}
 
 	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
 		provider := target.TargetConfig.ProviderInfo.Name
@@ -42,12 +48,16 @@ func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string) {
 		}
 
 		rowData := RowData{
-			Name:           target.Name,
-			Provider:       provider,
-			Options:        target.TargetConfig.Options,
-			WorkspaceCount: fmt.Sprint(len(target.Workspaces)),
-			Default:        target.Default,
-			Status:         views.GetStateLabel(target.State.Name),
+			Name:                 target.Name,
+			Provider:             provider,
+			TargetConfigProperty: target.TargetConfig.Name,
+			WorkspaceCount:       fmt.Sprint(len(target.Workspaces)),
+			Default:              target.Default,
+			Status:               views.GetStateLabel(target.State.Name),
+		}
+
+		if showOptions {
+			rowData.TargetConfigProperty = target.TargetConfig.Options
 		}
 
 		if target.Metadata != nil {
@@ -107,7 +117,7 @@ func getRowFromRowData(rowData RowData) []string {
 
 	return []string{
 		fmt.Sprintf("%s %s", views.NameStyle.Render(rowData.Name), views.DefaultRowDataStyle.Render(fmt.Sprintf("(%s)", rowData.Provider))),
-		views.DefaultRowDataStyle.Render(rowData.Options),
+		views.DefaultRowDataStyle.Render(rowData.TargetConfigProperty),
 		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
 		isDefault,
 		rowData.Status,

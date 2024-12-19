@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runnerListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List runners",
 	Aliases: []string{"ls"},
@@ -42,5 +42,5 @@ var runnerListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(runnerListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

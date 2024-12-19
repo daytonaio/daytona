@@ -1,6 +1,6 @@
-name: daytona runner logs
+name: daytona server runner logs
 synopsis: View runner logs
-usage: daytona runner logs [flags]
+usage: daytona server runner logs [RUNNER_ID] [flags]
 options:
     - name: follow
       shorthand: f
@@ -11,4 +11,4 @@ inherited_options:
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona runner - Manage the runner
+    - daytona server runner - Manage runners

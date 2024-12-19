@@ -19,7 +19,7 @@ type rowData struct {
 	Options    string
 }
 
-func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
+func ListTargetConfigs(targetConfigs []apiclient.TargetConfig, showOptions bool) {
 	if len(targetConfigs) == 0 {
 		util.NotifyEmptyTargetConfigList(true)
 		return
@@ -27,15 +27,23 @@ func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 
 	sortTargetConfigs(&targetConfigs)
 
+	headers := []string{
+		"Name", "Provider", "Runner", "Options",
+	}
 	data := [][]string{}
 
 	for _, targetConfig := range targetConfigs {
 		data = append(data, getRowFromRowData(&targetConfig))
 	}
 
-	table := util.GetTableView(data, []string{
-		"Name", "Provider", "Runner", "Options",
-	}, nil, func() {
+	if !showOptions {
+		headers = headers[:len(headers)-1]
+		for value := range data {
+			data[value] = data[value][:len(data[value])-1]
+		}
+	}
+
+	table := util.GetTableView(data, headers, nil, func() {
 		renderUnstyledList(targetConfigs)
 	})
 

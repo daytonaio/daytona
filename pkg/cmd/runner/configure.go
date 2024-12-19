@@ -16,9 +16,12 @@ var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure Daytona Runner",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var configExisted bool
+
 		config, err := runner.GetConfig()
 		if err != nil {
 			if errors.Is(err, runner.ErrConfigNotFound) {
+				configExisted = false
 				config, err = runner.GetDefaultConfig()
 				if err != nil {
 					return err
@@ -47,7 +50,15 @@ var configureCmd = &cobra.Command{
 			return err
 		}
 
-		views.RenderContainerLayout(views.GetInfoMessage("Runner configuration updated. You need to restart the runner for the changes to take effect."))
+		infoMessage := "Runner configuration updated. "
+
+		if configExisted {
+			infoMessage += "You need to restart the runner for the changes to take effect."
+		} else {
+			infoMessage += "To start running jobs, run 'daytona runner start'"
+		}
+
+		views.RenderContainerLayout(views.GetInfoMessage(infoMessage))
 		return nil
 	},
 }

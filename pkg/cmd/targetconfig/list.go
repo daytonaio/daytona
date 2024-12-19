@@ -36,7 +36,7 @@ var listCmd = &cobra.Command{
 			return nil
 		}
 
-		targetconfig.ListTargetConfigs(targetConfigs)
+		targetconfig.ListTargetConfigs(targetConfigs, showOptions)
 		return nil
 	},
 }

@@ -55,11 +55,11 @@ func GetTarget(ctx *gin.Context) {
 	if !ok || apiKeyType == models.ApiKeyTypeClient {
 		for i := range t.Workspaces {
 			util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
-			t.Workspaces[i].ApiKey = "<HIDDEN>"
+			t.Workspaces[i].ApiKey = ""
 		}
 
 		util.HideDaytonaEnvVars(&t.EnvVars)
-		t.ApiKey = "<HIDDEN>"
+		t.ApiKey = ""
 	}
 
 	ctx.JSON(200, t)
@@ -99,11 +99,11 @@ func ListTargets(ctx *gin.Context) {
 		if !ok || apiKeyType == models.ApiKeyTypeClient {
 			for j := range targetList[i].Workspaces {
 				util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
-				targetList[i].Workspaces[j].ApiKey = "<HIDDEN>"
+				targetList[i].Workspaces[j].ApiKey = ""
 			}
 
 			util.HideDaytonaEnvVars(&targetList[i].EnvVars)
-			targetList[i].ApiKey = "<HIDDEN>"
+			targetList[i].ApiKey = ""
 		}
 	}
 

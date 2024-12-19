@@ -27,7 +27,7 @@ type Config struct {
 	TelemetryEnabled bool                `json:"telemetryEnabled"`
 } // @name RunnerConfig
 
-var ErrConfigNotFound = errors.New("please run 'daytona runner configure' to configure the runner")
+var ErrConfigNotFound = errors.New("run 'daytona runner configure' to configure the runner")
 
 func GetConfig() (*Config, error) {
 	configFilePath, err := configFilePath()

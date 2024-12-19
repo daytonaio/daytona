@@ -48,7 +48,7 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		list_view.ListTargets(targetList, activeProfile.Name)
+		list_view.ListTargets(targetList, activeProfile.Name, showOptions)
 		return nil
 	},
 }

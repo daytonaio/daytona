@@ -1,9 +1,9 @@
-## daytona runner logs
+## daytona server runner logs
 
 View runner logs
 
 ```
-daytona runner logs [flags]
+daytona server runner logs [RUNNER_ID] [flags]
 ```
 
 ### Options
@@ -20,5 +20,5 @@ daytona runner logs [flags]
 
 ### SEE ALSO
 
-* [daytona runner](daytona_runner.md)	 - Manage the runner
+* [daytona server runner](daytona_server_runner.md)	 - Manage runners
 

@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var runnerRegisterCmd = &cobra.Command{
+var registerCmd = &cobra.Command{
 	Use:   "register",
 	Short: "Register runner",
 	Args:  cobra.NoArgs,
@@ -72,5 +72,5 @@ var runnerRegisterCmd = &cobra.Command{
 var nameFlag string
 
 func init() {
-	runnerRegisterCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Runner name")
+	registerCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Runner name")
 }
