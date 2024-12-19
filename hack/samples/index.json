@@ -158,5 +158,10 @@
     "name": "React.js - Ex-con-thrive",
     "description": "Ex-Cons Thrive is a project designed to help formerly incarcerated individuals reintegrate into society by providing job search assistance, legal support, mental health services, and more.",
     "gitUrl": "https://github.com/daytonaio/sample-react-job-assistant"
+  },
+  {
+    "name": "Python/Streamlit - DocBot",
+    "description": "DocBot is a Streamlit web application that enables interactive conversations with PDF documents using Gemini AI, providing insightful responses based on the document's content.",
+    "gitUrl": "https://github.com/daytonaio/sample-streamlit-ai-document-insights"
   }
 ]
