@@ -234,4 +234,9 @@
     "description": "A React based lightweight, and responsive music player that lets you enjoy your favorite songs with a clean and modern interface.",
     "gitUrl": "https://github.com/daytonaio/sample-react-music-player"
   }
+  {
+    "name": "Next.js & Go - Certify",
+    "description": "Sample Go/Next.js project for building a Certification System using Soulbound Tokens (SBTs) on the Kalp Blockchain.",
+    "gitUrl": "https://github.com/daytonaio/sample-go-nextjs-sbt-blockchain"
+  }
 ]
