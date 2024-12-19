@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
@@ -26,7 +27,7 @@ var ListCmd = &cobra.Command{
 		ctx := context.Background()
 		var specifyGitProviders bool
 
-		apiClient, err := apiclient.GetApiClient(nil)
+		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
 		}

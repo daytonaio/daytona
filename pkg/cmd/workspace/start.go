@@ -269,66 +269,56 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 }
 
 func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName string) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
+	ctx := context.Background()
 	var projectNames []string
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
-	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+	_, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
-		return fmt.Errorf("failed to parse time: %w", err)
+		return err
 	}
 
 	c, err := config.GetConfig()
 	if err != nil {
-		return fmt.Errorf("failed to get config: %w", err)
+		return err
 	}
 
 	activeProfile, err := c.GetActiveProfile()
 	if err != nil {
-		return fmt.Errorf("failed to get active profile: %w", err)
+		return err
 	}
 
 	workspace, err := apiclient_util.GetWorkspace(workspaceId, false)
 	if err != nil {
-		return fmt.Errorf("failed to get workspace: %w", err)
+		return err
 	}
-
 	if projectName != "" {
-		projectNames = append(projectNames, projectName)
+		_ = append(projectNames, projectName)
 	} else {
-		projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+		_ = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 			return p.Name
 		})
 	}
-
-	logsContext, stopLogs := context.WithCancel(context.Background())
-	defer stopLogs()
-
-	// Start log reading in goroutine
-	go func() {
-		if err := apiclient_util.ReadWorkspaceLogs(logsContext, &activeProfile, workspace.Id, projectNames, true, true, &from); err != nil && err != context.Canceled {
-			log.Errorf("Error reading logs: %v", err)
-		}
-	}()
-
-	// Check workspace status
-	if _, err := apiclient_util.GetWorkspace(workspace.Id, true); err != nil {
-		return fmt.Errorf("failed to get workspace status: %w", err)
-	}
+	_, stopLogs := context.WithCancel(context.Background())
+	go apiclient_util.NewLogReader(&activeProfile, workspace.Id)
+	go apiclient_util.GetWorkspace(workspace.Id, true)
 
 	if projectName == "" {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 		if err != nil {
+			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
+		time.Sleep(100 * time.Millisecond)
+		stopLogs()
+		return nil
 	} else {
 		res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
 		if err != nil {
+			stopLogs()
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
+		time.Sleep(100 * time.Millisecond)
+		stopLogs()
+		return nil
 	}
-
-	time.Sleep(100 * time.Millisecond)
-	return nil
 }
