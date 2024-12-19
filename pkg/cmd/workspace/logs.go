@@ -11,6 +11,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -46,7 +47,7 @@ var LogsCmd = &cobra.Command{
 		var ws *apiclient.WorkspaceDTO
 
 		if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -66,7 +67,7 @@ var LogsCmd = &cobra.Command{
 			}
 
 		} else {
-			ws, _, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				return err
 			}
@@ -76,12 +77,13 @@ var LogsCmd = &cobra.Command{
 			return nil
 		}
 
-		apiclient_util.ReadWorkspaceLogs(ctx, apiclient_util.ReadLogParams{
-			Id:            ws.Id,
-			Label:         &ws.Name,
-			ActiveProfile: activeProfile,
-			Index:         util.Pointer(0),
-			Follow:        &followFlag,
+		cmd_common.ReadWorkspaceLogs(ctx, cmd_common.ReadLogParams{
+			Id:        ws.Id,
+			Label:     &ws.Name,
+			ServerUrl: activeProfile.Api.Url,
+			ApiKey:    activeProfile.Api.Key,
+			Index:     util.Pointer(0),
+			Follow:    &followFlag,
 		})
 		return nil
 	},

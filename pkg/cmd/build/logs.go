@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
@@ -68,10 +69,11 @@ var buildLogsCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(nil, err)
 		}
 
-		apiclient_util.ReadBuildLogs(ctx, apiclient_util.ReadLogParams{
-			Id:            buildId,
-			ActiveProfile: activeProfile,
-			Query:         &query,
+		cmd_common.ReadBuildLogs(ctx, cmd_common.ReadLogParams{
+			Id:        buildId,
+			ServerUrl: activeProfile.Api.Url,
+			ApiKey:    activeProfile.Api.Key,
+			Query:     &query,
 		})
 
 		// Make sure the terminal cursor is reset

@@ -10,6 +10,7 @@ Method | HTTP request | Description
 [**DeleteBuildsFromPrebuild**](BuildAPI.md#DeleteBuildsFromPrebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
 [**GetBuild**](BuildAPI.md#GetBuild) | **Get** /build/{buildId} | Get build data
 [**ListBuilds**](BuildAPI.md#ListBuilds) | **Get** /build | List builds
+[**ListSuccessfulBuilds**](BuildAPI.md#ListSuccessfulBuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
 
 
 
@@ -394,6 +395,76 @@ This endpoint does not need any parameter.
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListBuildsRequest struct via the builder pattern
+
+
+### Return type
+
+[**[]BuildDTO**](BuildDTO.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListSuccessfulBuilds
+
+> []BuildDTO ListSuccessfulBuilds(ctx, repoUrl).Execute()
+
+List successful builds for Git repository
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	repoUrl := "repoUrl_example" // string | Repository URL
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.BuildAPI.ListSuccessfulBuilds(context.Background(), repoUrl).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.ListSuccessfulBuilds``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListSuccessfulBuilds`: []BuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.ListSuccessfulBuilds`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**repoUrl** | **string** | Repository URL | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListSuccessfulBuildsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
 
 
 ### Return type

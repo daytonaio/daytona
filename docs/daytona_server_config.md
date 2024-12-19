@@ -1,6 +1,6 @@
 ## daytona server config
 
-Output local Daytona Server config
+Output Daytona Runner config
 
 ```
 daytona server config [flags]

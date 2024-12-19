@@ -29,6 +29,7 @@ require (
 	github.com/go-git/go-git/v5 v5.12.1-0.20240617075238-c127d1b35535
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/go-playground/webhooks/v6 v6.4.0
+	github.com/goccy/go-json v0.10.2
 	github.com/gogs/go-gogs-client v0.0.0-20210131175652-1d7215cd8d85
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
@@ -145,7 +146,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/go-viper/mapstructure/v2 v2.1.0 // indirect
-	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/godbus/dbus/v5 v5.1.1-0.20230522191255-76236955d466 // indirect
 	github.com/gofrs/uuid/v5 v5.3.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect

@@ -10,7 +10,10 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/google/uuid"
+	log "github.com/sirupsen/logrus"
 )
 
 func GetConfig() (*Config, error) {
@@ -54,7 +57,12 @@ func GetConfig() (*Config, error) {
 	}
 
 	if c.LogFile == nil {
-		c.LogFile = getDefaultLogFileConfig()
+		logFilePath, err := getDefaultLogFilePath()
+		if err != nil {
+			log.Error("failed to get default log file path")
+		}
+
+		c.LogFile = logs.GetDefaultLogFileConfig(logFilePath)
 	}
 
 	err = Save(c)
@@ -75,10 +83,7 @@ func configFilePath() (string, error) {
 }
 
 func Save(c Config) error {
-	if err := directoryValidator(&c.BinariesPath); err != nil {
-		return err
-	}
-	if err := directoryValidator(&c.ProvidersDir); err != nil {
+	if err := util.DirectoryValidator(&c.BinariesPath); err != nil {
 		return err
 	}
 
@@ -114,14 +119,18 @@ func GetConfigDir() (string, error) {
 	return filepath.Join(configDir, "server"), nil
 }
 
-func GetTargetLogsDir(configDir string) (string, error) {
-	return filepath.Join(configDir, "logs"), nil
+func GetTargetLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs", "targets")
 }
 
-func directoryValidator(path *string) error {
-	_, err := os.Stat(*path)
-	if os.IsNotExist(err) {
-		return os.MkdirAll(*path, 0700)
-	}
-	return err
+func GetRunnerLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs", "runners")
+}
+
+func GetWorkspaceLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs", "workspaces")
+}
+
+func GetBuildLogsDir(configDir string) string {
+	return filepath.Join(configDir, "logs", "builds")
 }

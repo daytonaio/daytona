@@ -11,7 +11,7 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/internal/constants"
-	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -86,7 +86,7 @@ func (s *Server) GetLogReader(logFileQuery string) (io.Reader, error) {
 
 	var reader io.Reader
 	if regexp.MustCompile(constants.ZIP_LOG_FILE_NAME_SUFFIX_PATTERN).MatchString(logFileQuery) {
-		reader, err = util.ReadCompressedFile(logFilePath)
+		reader, err = logs.ReadCompressedFile(logFilePath)
 	} else {
 		reader, err = os.Open(logFilePath)
 	}

@@ -68,6 +68,10 @@ func SetTargetConfigForm(targetConfig *TargetConfigView, targetConfigManifest ma
 			}
 		}
 
+		if property.Type == nil {
+			continue
+		}
+
 		switch *property.Type {
 		case apiclient.TargetConfigPropertyTypeFloat, apiclient.TargetConfigPropertyTypeInt:
 			var initialValue *string
@@ -134,6 +138,11 @@ func SetTargetConfigForm(targetConfig *TargetConfigView, targetConfigManifest ma
 				continue
 			}
 		}
+
+		if property.Type == nil {
+			continue
+		}
+
 		switch *property.Type {
 		case apiclient.TargetConfigPropertyTypeInt:
 			options[name], err = strconv.Atoi(*options[name].(*string))
@@ -173,6 +182,10 @@ func getInput(name string, property apiclient.TargetConfigProperty, initialValue
 		Description(*property.Description).
 		Value(value).
 		Validate(func(s string) error {
+			if property.Type == nil {
+				return errors.New("property type is not defined")
+			}
+
 			switch *property.Type {
 			case apiclient.TargetConfigPropertyTypeInt:
 				_, err := strconv.Atoi(s)

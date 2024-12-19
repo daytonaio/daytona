@@ -215,7 +215,7 @@ import (
 )
 
 func main() {
-	config := *openapiclient.NewServerConfig(int32(123), "BinariesPath_example", "BuilderImage_example", "BuilderRegistryServer_example", "DefaultWorkspaceImage_example", "DefaultWorkspaceUser_example", int32(123), "Id_example", "LocalBuilderRegistryImage_example", int32(123), *openapiclient.NewLogFileConfig(int32(123), int32(123), int32(123), "Path_example"), "ProvidersDir_example", "RegistryUrl_example", "ServerDownloadUrl_example") // ServerConfig | Server configuration
+	config := *openapiclient.NewServerConfig(int32(123), "BinariesPath_example", "BuilderImage_example", "BuilderRegistryServer_example", "DefaultWorkspaceImage_example", "DefaultWorkspaceUser_example", int32(123), "Id_example", "LocalBuilderRegistryImage_example", int32(123), *openapiclient.NewLogFileConfig(int32(123), int32(123), int32(123), "Path_example"), "RegistryUrl_example", "ServerDownloadUrl_example") // ServerConfig | Server configuration
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

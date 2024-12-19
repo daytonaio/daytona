@@ -30,7 +30,7 @@ func (s *ApiKeyServiceTestSuite) TestIsValidKey_False() {
 	require.False(res)
 }
 
-func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_True() {
+func (s *ApiKeyServiceTestSuite) TestGetApiKeyType() {
 	keyName := "workspaceKey"
 
 	require := s.Require()
@@ -38,42 +38,7 @@ func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_True() {
 	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
-	res := s.apiKeyService.IsWorkspaceApiKey(context.TODO(), apiKey)
-	require.True(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_False() {
-	keyName := "clientKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
+	apiKeyType, err := s.apiKeyService.GetApiKeyType(context.TODO(), apiKey)
 	require.Nil(err)
-
-	res := s.apiKeyService.IsWorkspaceApiKey(context.TODO(), apiKey)
-	require.False(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsIsTargetApiKey_True() {
-	keyName := "targetKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeTarget, keyName)
-	require.Nil(err)
-
-	res := s.apiKeyService.IsTargetApiKey(context.TODO(), apiKey)
-	require.True(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsTargetApiKey_False() {
-	keyName := "clientKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
-	require.Nil(err)
-
-	res := s.apiKeyService.IsTargetApiKey(context.TODO(), apiKey)
-	require.False(res)
+	require.Equal(models.ApiKeyTypeWorkspace, apiKeyType)
 }

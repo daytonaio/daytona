@@ -8,8 +8,10 @@ Name | Type | Description | Notes
 **CreatedAt** | **string** |  | 
 **Error** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
+**Metadata** | Pointer to **string** | JSON encoded metadata | [optional] 
 **ResourceId** | **string** |  | 
 **ResourceType** | [**ResourceType**](ResourceType.md) |  | 
+**RunnerId** | Pointer to **string** |  | [optional] 
 **State** | [**JobState**](JobState.md) |  | 
 **UpdatedAt** | **string** |  | 
 
@@ -117,6 +119,31 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
+### GetMetadata
+
+`func (o *Job) GetMetadata() string`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *Job) GetMetadataOk() (*string, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *Job) SetMetadata(v string)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *Job) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
+
 ### GetResourceId
 
 `func (o *Job) GetResourceId() string`
@@ -156,6 +183,31 @@ and a boolean to check if the value has been set.
 
 SetResourceType sets ResourceType field to given value.
 
+
+### GetRunnerId
+
+`func (o *Job) GetRunnerId() string`
+
+GetRunnerId returns the RunnerId field if non-nil, zero value otherwise.
+
+### GetRunnerIdOk
+
+`func (o *Job) GetRunnerIdOk() (*string, bool)`
+
+GetRunnerIdOk returns a tuple with the RunnerId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRunnerId
+
+`func (o *Job) SetRunnerId(v string)`
+
+SetRunnerId sets RunnerId field to given value.
+
+### HasRunnerId
+
+`func (o *Job) HasRunnerId() bool`
+
+HasRunnerId returns a boolean if a field has been set.
 
 ### GetState
 

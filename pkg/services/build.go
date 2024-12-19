@@ -20,7 +20,9 @@ type IBuildService interface {
 	Delete(ctx context.Context, filter *BuildFilter, force bool) []error
 	HandleSuccessfulRemoval(ctx context.Context, id string) error
 	AwaitEmptyList(ctx context.Context, waitTime time.Duration) error
+
 	GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error)
+	GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error)
 }
 
 type BuildDTO struct {

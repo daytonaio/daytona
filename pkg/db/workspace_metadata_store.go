@@ -6,8 +6,6 @@ package db
 import (
 	"context"
 
-	"gorm.io/gorm"
-
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
@@ -25,11 +23,11 @@ func NewWorkspaceMetadataStore(store IStore) (stores.WorkspaceMetadataStore, err
 	return &WorkspaceMetadataStore{store}, nil
 }
 
-func (s *WorkspaceMetadataStore) Find(ctx context.Context, filter *stores.WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error) {
+func (s *WorkspaceMetadataStore) Find(ctx context.Context, workspaceId string) (*models.WorkspaceMetadata, error) {
 	tx := s.GetTransaction(ctx)
 
 	workspaceMetadata := &models.WorkspaceMetadata{}
-	tx = processWorkspaceMetadataFilters(tx, filter).First(&workspaceMetadata)
+	tx = tx.Where("workspace_id = ?", workspaceId).First(&workspaceMetadata)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
 			return nil, stores.ErrWorkspaceMetadataNotFound
@@ -63,16 +61,4 @@ func (s *WorkspaceMetadataStore) Delete(ctx context.Context, workspaceMetadata *
 	}
 
 	return nil
-}
-
-func processWorkspaceMetadataFilters(tx *gorm.DB, filter *stores.WorkspaceMetadataFilter) *gorm.DB {
-	if filter != nil {
-		if filter.Id != nil {
-			tx = tx.Where("id = ?", *filter.Id)
-		}
-		if filter.WorkspaceId != nil {
-			tx = tx.Where("workspace_id = ?", *filter.WorkspaceId)
-		}
-	}
-	return tx
 }

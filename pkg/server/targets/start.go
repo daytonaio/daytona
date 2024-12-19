@@ -23,7 +23,7 @@ func (s *TargetService) StartTarget(ctx context.Context, targetId string) error 
 		return s.handleStartError(ctx, target, services.ErrAgentlessTarget)
 	}
 
-	err = s.createJob(ctx, target.Id, models.JobActionStart)
+	err = s.createJob(ctx, target.Id, target.TargetConfig.ProviderInfo.RunnerId, models.JobActionStart)
 	return s.handleStartError(ctx, target, err)
 }
 

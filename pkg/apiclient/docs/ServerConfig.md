@@ -16,8 +16,8 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **LocalBuilderRegistryImage** | **string** |  | 
 **LocalBuilderRegistryPort** | **int32** |  | 
+**LocalRunnerDisabled** | Pointer to **bool** |  | [optional] 
 **LogFile** | [**LogFileConfig**](LogFileConfig.md) |  | 
-**ProvidersDir** | **string** |  | 
 **RegistryUrl** | **string** |  | 
 **SamplesIndexUrl** | Pointer to **string** |  | [optional] 
 **ServerDownloadUrl** | **string** |  | 
@@ -26,7 +26,7 @@ Name | Type | Description | Notes
 
 ### NewServerConfig
 
-`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
+`func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, registryUrl string, serverDownloadUrl string, ) *ServerConfig`
 
 NewServerConfig instantiates a new ServerConfig object
 This constructor will assign default values to properties that have it defined,
@@ -291,6 +291,31 @@ and a boolean to check if the value has been set.
 SetLocalBuilderRegistryPort sets LocalBuilderRegistryPort field to given value.
 
 
+### GetLocalRunnerDisabled
+
+`func (o *ServerConfig) GetLocalRunnerDisabled() bool`
+
+GetLocalRunnerDisabled returns the LocalRunnerDisabled field if non-nil, zero value otherwise.
+
+### GetLocalRunnerDisabledOk
+
+`func (o *ServerConfig) GetLocalRunnerDisabledOk() (*bool, bool)`
+
+GetLocalRunnerDisabledOk returns a tuple with the LocalRunnerDisabled field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLocalRunnerDisabled
+
+`func (o *ServerConfig) SetLocalRunnerDisabled(v bool)`
+
+SetLocalRunnerDisabled sets LocalRunnerDisabled field to given value.
+
+### HasLocalRunnerDisabled
+
+`func (o *ServerConfig) HasLocalRunnerDisabled() bool`
+
+HasLocalRunnerDisabled returns a boolean if a field has been set.
+
 ### GetLogFile
 
 `func (o *ServerConfig) GetLogFile() LogFileConfig`
@@ -309,26 +334,6 @@ and a boolean to check if the value has been set.
 `func (o *ServerConfig) SetLogFile(v LogFileConfig)`
 
 SetLogFile sets LogFile field to given value.
-
-
-### GetProvidersDir
-
-`func (o *ServerConfig) GetProvidersDir() string`
-
-GetProvidersDir returns the ProvidersDir field if non-nil, zero value otherwise.
-
-### GetProvidersDirOk
-
-`func (o *ServerConfig) GetProvidersDirOk() (*string, bool)`
-
-GetProvidersDirOk returns a tuple with the ProvidersDir field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetProvidersDir
-
-`func (o *ServerConfig) SetProvidersDir(v string)`
-
-SetProvidersDir sets ProvidersDir field to given value.
 
 
 ### GetRegistryUrl

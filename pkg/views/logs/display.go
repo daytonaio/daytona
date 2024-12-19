@@ -5,6 +5,7 @@ package logs
 
 import (
 	"fmt"
+	"io"
 	"slices"
 	"strings"
 
@@ -15,14 +16,23 @@ import (
 
 const FIRST_WORKSPACE_INDEX = 0
 const STATIC_INDEX = -1
-const TARGET_PREFIX = "TARGET"
-const PROVIDER_PREFIX = "PROVIDER"
 
-var longestPrefixLength = len(TARGET_PREFIX)
+var minimumLongestPrefixLength = 4
 
 const maxPrefixLength = 20
 const prefixDelimiter = " | "
 const prefixPadding = " "
+
+func DisplayLogsFromReader(reader io.Reader) {
+	for {
+		buf := make([]byte, 1024)
+		n, err := reader.Read(buf)
+		if err != nil {
+			break
+		}
+		fmt.Print(string(buf[:n]))
+	}
+}
 
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 	for logEntry := range logEntriesChan {
@@ -34,22 +44,10 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	line := logEntry.Msg
 
 	prefixColor := getPrefixColor(index, logEntry.Source)
-	var prefixText string
+	prefixText := logEntry.Label
 
-	if logEntry.WorkspaceName != nil {
-		prefixText = *logEntry.WorkspaceName
-	} else if logEntry.BuildId != nil {
-		prefixText = *logEntry.BuildId
-	} else if logEntry.TargetName != nil {
-		prefixText = *logEntry.TargetName
-	}
-
-	if index == STATIC_INDEX && prefixText == "" {
-		if logEntry.Source == string(logs.LogSourceProvider) {
-			prefixText = PROVIDER_PREFIX
-		} else {
-			prefixText = TARGET_PREFIX
-		}
+	if prefixText == "" {
+		prefixText = strings.ToUpper(logEntry.Source)
 	}
 
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
@@ -60,7 +58,7 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	}
 
 	// Ensure the cursor moving never overwrites the prefix
-	cursorOffset := longestPrefixLength + len(prefixDelimiter) + 2*len(prefixPadding)
+	cursorOffset := minimumLongestPrefixLength + len(prefixDelimiter) + 2*len(prefixPadding)
 	line = strings.ReplaceAll(line, "\r", fmt.Sprintf("\u001b[%dG", cursorOffset))
 	line = strings.ReplaceAll(line, "\u001b[0G", fmt.Sprintf("\u001b[%dG", cursorOffset))
 
@@ -86,16 +84,16 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 }
 
 func SetupLongestPrefixLength(workspaceNames []string) {
-	longestPrefixLength = len(slices.MaxFunc(workspaceNames, func(a, b string) int {
+	minimumLongestPrefixLength = len(slices.MaxFunc(workspaceNames, func(a, b string) int {
 		return len(a) - len(b)
 	}))
 }
 
 func formatPrefixText(input string) string {
-	prefixLength := longestPrefixLength
+	prefixLength := minimumLongestPrefixLength
 	if prefixLength > maxPrefixLength {
 		prefixLength = maxPrefixLength
-		longestPrefixLength = maxPrefixLength
+		minimumLongestPrefixLength = maxPrefixLength
 	}
 
 	// Trim input if longer than maxPrefixLength

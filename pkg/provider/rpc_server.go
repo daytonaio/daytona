@@ -17,7 +17,7 @@ func (m *ProviderRPCServer) Initialize(arg InitializeProviderRequest, resp *util
 	return err
 }
 
-func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
+func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *models.ProviderInfo) error {
 	info, err := m.Impl.GetInfo()
 	if err != nil {
 		return err
@@ -33,16 +33,6 @@ func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]Requireme
 		return err
 	}
 	*resp = *result
-	return nil
-}
-
-func (m *ProviderRPCServer) GetTargetConfigManifest(arg interface{}, resp *TargetConfigManifest) error {
-	targetConfigManifest, err := m.Impl.GetTargetConfigManifest()
-	if err != nil {
-		return err
-	}
-
-	*resp = *targetConfigManifest
 	return nil
 }
 
@@ -76,13 +66,13 @@ func (m *ProviderRPCServer) DestroyTarget(arg *TargetRequest, resp *util.Empty) 
 	return err
 }
 
-func (m *ProviderRPCServer) GetTargetInfo(arg *TargetRequest, resp *models.TargetInfo) error {
-	info, err := m.Impl.GetTargetInfo(arg)
+func (m *ProviderRPCServer) GetTargetProviderMetadata(arg *TargetRequest, resp *string) error {
+	metadata, err := m.Impl.GetTargetProviderMetadata(arg)
 	if err != nil {
 		return err
 	}
 
-	*resp = *info
+	*resp = metadata
 	return nil
 }
 
@@ -106,12 +96,12 @@ func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *util.E
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *models.WorkspaceInfo) error {
-	info, err := m.Impl.GetWorkspaceInfo(arg)
+func (m *ProviderRPCServer) GetWorkspaceProviderMetadata(arg *WorkspaceRequest, resp *string) error {
+	metadata, err := m.Impl.GetWorkspaceProviderMetadata(arg)
 	if err != nil {
 		return err
 	}
 
-	*resp = *info
+	*resp = metadata
 	return nil
 }

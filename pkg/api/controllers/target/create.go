@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
@@ -40,12 +39,30 @@ func CreateTarget(ctx *gin.Context) {
 		return
 	}
 
-	maskedOptions, err := util.GetMaskedOptions(server, t.TargetConfig.ProviderInfo.Name, t.TargetConfig.Options)
+	t.TargetConfig.Options = ""
+	ctx.JSON(200, t)
+}
+
+// HandleSuccessfulCreation godoc
+//
+//	@Tags			target
+//	@Summary		Handles successful creation of the target
+//	@Description	Handles successful creation of the target
+//	@Param			targetId	path	string	true	"Target ID or name"
+//	@Success		200
+//	@Router			/target/{targetId}/handle-successful-creation [post]
+//
+//	@id				HandleSuccessfulCreation
+func HandleSuccessfulCreation(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
+
+	server := server.GetInstance(nil)
+
+	err := server.TargetService.HandleSuccessfulCreation(ctx.Request.Context(), targetId)
 	if err != nil {
-		t.TargetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-	} else {
-		t.TargetConfig.Options = maskedOptions
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to handle successful creation of target: %s", err.Error()))
+		return
 	}
 
-	ctx.JSON(200, t)
+	ctx.Status(200)
 }

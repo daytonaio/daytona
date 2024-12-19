@@ -15,6 +15,7 @@ import (
 type rowData struct {
 	ConfigName string
 	Provider   string
+	RunnerName string
 	Options    string
 }
 
@@ -33,7 +34,7 @@ func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 	}
 
 	table := util.GetTableView(data, []string{
-		"Name", "Provider", "Options",
+		"Name", "Provider", "Runner", "Options",
 	}, nil, func() {
 		renderUnstyledList(targetConfigs)
 	})
@@ -46,6 +47,7 @@ func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
 
 	data.ConfigName = targetConfig.Name
 	data.Provider = targetConfig.ProviderInfo.Name
+	data.RunnerName = targetConfig.ProviderInfo.RunnerName
 	if targetConfig.ProviderInfo.Label != nil {
 		data.Provider = *targetConfig.ProviderInfo.Label
 	}
@@ -54,6 +56,7 @@ func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
 	row := []string{
 		views.NameStyle.Render(data.ConfigName),
 		views.DefaultRowDataStyle.Render(data.Provider),
+		views.DefaultRowDataStyle.Render(data.RunnerName),
 		views.DefaultRowDataStyle.Render(data.Options),
 	}
 
@@ -75,6 +78,8 @@ func renderUnstyledList(targetConfigs []apiclient.TargetConfig) {
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), targetConfig.Name) + "\n\n"
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), targetConfig.ProviderInfo.Name) + "\n\n"
+
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Runner: "), targetConfig.ProviderInfo.RunnerName) + "\n\n"
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Options: "), targetConfig.Options) + "\n\n"
 

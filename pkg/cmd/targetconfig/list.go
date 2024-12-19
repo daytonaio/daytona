@@ -25,7 +25,7 @@ var listCmd = &cobra.Command{
 			return err
 		}
 
-		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
+		targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).ShowOptions(showOptions).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -41,6 +41,9 @@ var listCmd = &cobra.Command{
 	},
 }
 
+var showOptions bool
+
 func init() {
+	listCmd.Flags().BoolVarP(&showOptions, "show-options", "v", false, "Show target options")
 	format.RegisterFormatFlag(listCmd)
 }

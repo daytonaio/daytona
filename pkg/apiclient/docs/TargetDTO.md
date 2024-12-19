@@ -7,10 +7,10 @@ Name | Type | Description | Notes
 **Default** | **bool** |  | 
 **EnvVars** | **map[string]string** |  | 
 **Id** | **string** |  | 
-**Info** | Pointer to [**TargetInfo**](TargetInfo.md) |  | [optional] 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
 **Metadata** | Pointer to [**TargetMetadata**](TargetMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **State** | [**ResourceState**](ResourceState.md) |  | 
 **TargetConfig** | [**TargetConfig**](TargetConfig.md) |  | 
 **TargetConfigId** | **string** |  | 
@@ -95,31 +95,6 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
-### GetInfo
-
-`func (o *TargetDTO) GetInfo() TargetInfo`
-
-GetInfo returns the Info field if non-nil, zero value otherwise.
-
-### GetInfoOk
-
-`func (o *TargetDTO) GetInfoOk() (*TargetInfo, bool)`
-
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetInfo
-
-`func (o *TargetDTO) SetInfo(v TargetInfo)`
-
-SetInfo sets Info field to given value.
-
-### HasInfo
-
-`func (o *TargetDTO) HasInfo() bool`
-
-HasInfo returns a boolean if a field has been set.
-
 ### GetLastJob
 
 `func (o *TargetDTO) GetLastJob() Job`
@@ -189,6 +164,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetProviderMetadata
+
+`func (o *TargetDTO) GetProviderMetadata() string`
+
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
+
+### GetProviderMetadataOk
+
+`func (o *TargetDTO) GetProviderMetadataOk() (*string, bool)`
+
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderMetadata
+
+`func (o *TargetDTO) SetProviderMetadata(v string)`
+
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *TargetDTO) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetState
 

@@ -1,0 +1,9 @@
+name: daytona server runner unregister
+synopsis: Unregister runner
+usage: daytona server runner unregister [RUNNER] [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona server runner - Manage runners

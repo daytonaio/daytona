@@ -67,7 +67,7 @@ func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 	return s.jobStore.Save(ctx, j)
 }
 
-func (s *JobService) SetState(ctx context.Context, jobId string, state models.JobState, err *string) error {
+func (s *JobService) SetState(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
 	job, findErr := s.Find(ctx, &stores.JobFilter{
 		Id: &jobId,
 	})
@@ -75,12 +75,12 @@ func (s *JobService) SetState(ctx context.Context, jobId string, state models.Jo
 		return findErr
 	}
 
-	if job.State == state {
+	if job.State == updateJobStateDto.State {
 		return errors.New("job is already in the specified state")
 	}
 
-	job.State = state
-	job.Error = err
+	job.State = updateJobStateDto.State
+	job.Error = updateJobStateDto.ErrorMessage
 
 	return s.jobStore.Save(ctx, job)
 }
@@ -110,5 +110,10 @@ var validResourceActions = map[models.ResourceType][]models.JobAction{
 		models.JobActionRun,
 		models.JobActionDelete,
 		models.JobActionForceDelete,
+	},
+	models.ResourceTypeRunner: {
+		models.JobActionInstallProvider,
+		models.JobActionUninstallProvider,
+		models.JobActionUpdateProvider,
 	},
 }

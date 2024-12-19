@@ -10,12 +10,15 @@ import (
 type Job struct {
 	Id           string       `json:"id" validate:"required" gorm:"primaryKey"`
 	ResourceId   string       `json:"resourceId" validate:"required" gorm:"not null"`
+	RunnerId     *string      `json:"runnerId" validate:"optional"`
 	ResourceType ResourceType `json:"resourceType" validate:"required" gorm:"not null"`
 	State        JobState     `json:"state" validate:"required" gorm:"not null"`
 	Action       JobAction    `json:"action" validate:"required" gorm:"not null"`
-	Error        *string      `json:"error" validate:"optional"`
-	CreatedAt    time.Time    `json:"createdAt" validate:"required" gorm:"not null"`
-	UpdatedAt    time.Time    `json:"updatedAt" validate:"required" gorm:"not null"`
+	// JSON encoded metadata
+	Metadata  *string   `json:"metadata" validate:"optional"`
+	Error     *string   `json:"error" validate:"optional"`
+	CreatedAt time.Time `json:"createdAt" validate:"required" gorm:"not null"`
+	UpdatedAt time.Time `json:"updatedAt" validate:"required" gorm:"not null"`
 } // @name Job
 
 type ResourceType string // @name ResourceType
@@ -24,6 +27,7 @@ const (
 	ResourceTypeWorkspace ResourceType = "workspace"
 	ResourceTypeTarget    ResourceType = "target"
 	ResourceTypeBuild     ResourceType = "build"
+	ResourceTypeRunner    ResourceType = "runner"
 )
 
 type JobState string // @name JobState
@@ -38,13 +42,16 @@ const (
 type JobAction string
 
 const (
-	JobActionCreate      JobAction = "create"
-	JobActionStart       JobAction = "start"
-	JobActionStop        JobAction = "stop"
-	JobActionRestart     JobAction = "restart"
-	JobActionDelete      JobAction = "delete"
-	JobActionForceDelete JobAction = "force-delete"
-	JobActionRun         JobAction = "run"
+	JobActionCreate            JobAction = "create"
+	JobActionStart             JobAction = "start"
+	JobActionStop              JobAction = "stop"
+	JobActionRestart           JobAction = "restart"
+	JobActionDelete            JobAction = "delete"
+	JobActionForceDelete       JobAction = "force-delete"
+	JobActionRun               JobAction = "run"
+	JobActionInstallProvider   JobAction = "install-provider"
+	JobActionUninstallProvider JobAction = "uninstall-provider"
+	JobActionUpdateProvider    JobAction = "update-provider"
 )
 
 func getResourceStateFromJob(job *Job) ResourceState {
