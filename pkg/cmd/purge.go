@@ -16,6 +16,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/purge"
@@ -151,7 +152,7 @@ var purgeCmd = &cobra.Command{
 		select {
 		case <-headscaleServerStartedChan:
 			go func() {
-				headscaleServerErrChan <- server.TailscaleServer.Connect()
+				headscaleServerErrChan <- server.TailscaleServer.Connect(headscale.HEADSCALE_USERNAME)
 			}()
 		case err := <-headscaleServerErrChan:
 			return err

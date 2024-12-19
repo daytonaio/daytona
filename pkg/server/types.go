@@ -10,9 +10,9 @@ import (
 )
 
 type TailscaleServer interface {
-	Connect() error
-	CreateAuthKey() (string, error)
-	CreateUser() error
+	Connect(username string) error
+	CreateAuthKey(username string) (string, error)
+	CreateUser(username string) error
 	HTTPClient() *http.Client
 	Dial(ctx context.Context, network, address string) (net.Conn, error)
 	Start(errChan chan error) error
