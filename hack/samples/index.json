@@ -118,5 +118,11 @@
     "name": "Django - CrisisMonitor",
     "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
     "gitUrl": "https://github.com/daytonaio/sample-django-crisis-monitor"
-  } 
+  },
+  
+  {
+    "name": "Flask - AI Playlist Generator",
+    "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
+  }
 ]
