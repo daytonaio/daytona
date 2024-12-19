@@ -218,5 +218,10 @@
     "name": "Typescript-Gemini - FitnessAssistant",
     "description": "Fitness Assistant demonstrates how to build a backend application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
     "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
+  },
+  {
+    "name": "Github User Profile Analyzer",
+    "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
   }
 ]
