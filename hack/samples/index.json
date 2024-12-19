@@ -216,7 +216,7 @@
   },
   {
     "name": "Typescript-Gemini - FitnessAssistant",
-    "description": "Fitness Assistant demonstrates how to build a fitness assistant application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
+    "description": "Fitness Assistant demonstrates how to build a backend application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
     "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
   }
 ]
