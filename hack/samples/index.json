@@ -160,6 +160,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-job-assistant"
   },
   {
+    "name": "Python/Django - Project Management",
+    "description": "Project Managemment transforms the thesis project management system at Tribhuvan University into a dynamic web application using Django, enhancing collaboration and efficiency for all teachers and students.",
+    "gitUrl": "https://github.com/daytonaio/sample-django-project-manager"
+  },
+  {
     "name": "Python/Streamlit - DocBot",
     "description": "DocBot is a Streamlit web application that enables interactive conversations with PDF documents using Gemini AI, providing insightful responses based on the document's content.",
     "gitUrl": "https://github.com/daytonaio/sample-streamlit-ai-document-insights"
