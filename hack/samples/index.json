@@ -218,5 +218,10 @@
     "name": "Typescript-Gemini - FitnessAssistant",
     "description": "Fitness Assistant demonstrates how to build a backend application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
     "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
+  },
+  {
+    "name": "Keyword Density Application",
+    "description": "A tool to calculate keyword density from large text / raw html / direct URL.",
+    "gitUrl": "https://github.com/daytonaio/sample-laravel-keyword-density"
   }
 ]
