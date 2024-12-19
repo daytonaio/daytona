@@ -198,5 +198,10 @@
     "name": "Bun/Next.js - Therabot",
     "description": "Therabot is a mental health chatbot that provides support and resources for individuals experiencing mental health challenges.",
     "gitUrl": "https://github.com/daytonaio/sample-bun-nextjs-therabot"
+  },
+  {
+    "name": "Go CRUD - Redis",
+    "description": "A simple backend HTTP server which does the CRUD (Create, Read, Update, Delete) operation. It uses Chi router for the http connection and Redis for the storage.",
+    "gitUrl": "https://github.com/daytonaio/sample-go-crud-redis"
   }
 ]
