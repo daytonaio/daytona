@@ -208,5 +208,10 @@
     "name": "Sample Bun Web Server",
     "description": "An HTTP server showcasing routing and template rendering with EJS, powered by Bun, a high-performance JavaScript runtime and toolkit.",
     "gitUrl": "https://github.com/daytonaio/sample-bun-web-server"
+  },
+  {
+    "name": "Python- AskPixie",
+    "description": "A Python-powered educational platform leveraging Reflex and Google's Gemini API for domain-specific insights, text and image analysis, and enhanced learning experiences.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-ask-pixie"
   }
 ]
