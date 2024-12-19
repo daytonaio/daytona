@@ -213,5 +213,10 @@
     "name": "Python - AskPixie",
     "description": "A Python-powered educational platform leveraging Reflex and Google's Gemini API for domain-specific insights, text and image analysis, and enhanced learning experiences.",
     "gitUrl": "https://github.com/daytonaio/sample-python-ask-pixie"
+  },
+  {
+    "name": "Typescript-Gemini - FitnessAssistant",
+    "description": "Fitness Assistant demonstrates how to build a fitness assistant application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
+    "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
   }
 ]
