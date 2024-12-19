@@ -18,13 +18,13 @@ var tsNetServer = &tsnet.Server{
 	Hostname: "server",
 }
 
-func (s *HeadscaleServer) Connect() error {
-	err := s.CreateUser()
+func (s *HeadscaleServer) Connect(username string) error {
+	err := s.CreateUser(username)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	authKey, err := s.CreateAuthKey()
+	authKey, err := s.CreateAuthKey(username)
 	if err != nil {
 		log.Fatal(err)
 	}
