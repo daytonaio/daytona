@@ -228,5 +228,10 @@
     "name": "Github User Profile Analyzer",
     "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
+  },
+  {
+    "name": "Music Player",
+    "description": "A react based lightweight, and responsive music player that lets you enjoy your favorite songs with a clean and modern interface.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-music-player"
   }
 ]
