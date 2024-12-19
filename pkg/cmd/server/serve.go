@@ -9,17 +9,22 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/cmd/server/bootstrap"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/registry"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/views"
 	started_view "github.com/daytonaio/daytona/pkg/views/server/started"
 
@@ -74,11 +79,6 @@ var ServeCmd = &cobra.Command{
 			Frps:             c.Frps,
 		})
 
-		err = bootstrap.InitProviderManager(c, configDir)
-		if err != nil {
-			return err
-		}
-
 		server, err := bootstrap.GetInstance(c, configDir, internal.Version, telemetryService)
 		if err != nil {
 			return err
@@ -125,23 +125,26 @@ var ServeCmd = &cobra.Command{
 			return err
 		}
 
-		err = server.Start()
-		if err != nil {
-			return err
-		}
+		localRunnerErrChan := make(chan error)
 
-		log.Info("Starting job runner...")
-		jobRunner, err := bootstrap.GetJobRunner(c, configDir, internal.Version, telemetryService)
-		if err != nil {
-			return err
-		}
+		go func() {
+			if c.LocalRunnerDisabled != nil && *c.LocalRunnerDisabled {
+				err = handleDisabledLocalRunner()
+				if err != nil {
+					localRunnerErrChan <- err
+				}
+				return
+			}
 
-		// TODO: context?
-		err = jobRunner.StartRunner(context.Background())
-		if err != nil {
-			return err
-		}
-		log.Info("Job runner started")
+			localRunnerConfig := getLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
+
+			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
+				ServerConfig:     c,
+				RunnerConfig:     localRunnerConfig,
+				ConfigDir:        configDir,
+				TelemetryService: telemetryService,
+			})
+		}()
 
 		err = waitForApiServerToStart(apiServer)
 		if err != nil {
@@ -164,6 +167,8 @@ var ServeCmd = &cobra.Command{
 		signal.Notify(interruptChannel, os.Interrupt)
 
 		select {
+		case err := <-localRunnerErrChan:
+			return err
 		case err := <-apiServerErrChan:
 			return err
 		case err := <-headscaleServerErrChan:
@@ -224,4 +229,55 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 			Key: apiKey,
 		},
 	})
+}
+
+func startLocalRunner(params bootstrap.LocalRunnerParams) error {
+	runnerService := server.GetInstance(nil).RunnerService
+
+	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+	if err != nil {
+		if stores.IsRunnerNotFound(err) {
+			_, err := runnerService.RegisterRunner(context.Background(), services.RegisterRunnerDTO{
+				Id:   bootstrap.LOCAL_RUNNER_ID,
+				Name: bootstrap.LOCAL_RUNNER_ID,
+			})
+			if err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	runner, err := bootstrap.GetLocalRunner(params)
+	if err != nil {
+		return err
+	}
+
+	return runner.Start(context.Background())
+}
+
+func getLocalRunnerConfig(configDir string) *runner.Config {
+	providersDir := filepath.Join(configDir, "providers")
+	logFilePath := filepath.Join(configDir, "runner.log")
+
+	return &runner.Config{
+		Id:           bootstrap.LOCAL_RUNNER_ID,
+		Name:         bootstrap.LOCAL_RUNNER_ID,
+		ProvidersDir: providersDir,
+		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
+	}
+}
+
+func handleDisabledLocalRunner() error {
+	runnerService := server.GetInstance(nil).RunnerService
+
+	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+	if err != nil {
+		if stores.IsRunnerNotFound(err) {
+			return nil
+		}
+	}
+
+	return runnerService.RemoveRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
 }

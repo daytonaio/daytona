@@ -56,7 +56,7 @@ func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 		return
 	}
 
-	output += getSingleWorkspaceOutput(workspace, isCreationView)
+	output += getWorkspaceDataOutput(workspace, isCreationView)
 
 	if !isCreationView {
 		output = views.GetStyledMainTitle("Workspace Info") + "\n" + output
@@ -83,8 +83,7 @@ func renderTUIView(output string, width int, isCreationView bool) {
 	fmt.Println(content)
 }
 
-// TODO: migrate to the target info view
-func getSingleWorkspaceOutput(workspace *apiclient.WorkspaceDTO, isCreationView bool) string {
+func getWorkspaceDataOutput(workspace *apiclient.WorkspaceDTO, isCreationView bool) string {
 	var output string
 	var repositoryUrl string
 

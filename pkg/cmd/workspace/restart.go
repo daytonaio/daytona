@@ -50,7 +50,7 @@ var RestartCmd = &cobra.Command{
 			}
 		} else {
 			for _, arg := range args {
-				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
+				workspace, _, err := apiclient_util.GetWorkspace(arg)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue

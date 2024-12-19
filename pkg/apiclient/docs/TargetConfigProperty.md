@@ -10,7 +10,7 @@ Name | Type | Description | Notes
 **InputMasked** | Pointer to **bool** |  | [optional] 
 **Options** | Pointer to **[]string** | Options is only used if the Type is TargetConfigPropertyTypeOption | [optional] 
 **Suggestions** | Pointer to **[]string** | Suggestions is an optional list of auto-complete values to assist the user while filling the field | [optional] 
-**Type** | Pointer to [**ProviderTargetConfigPropertyType**](ProviderTargetConfigPropertyType.md) |  | [optional] 
+**Type** | Pointer to [**ModelsTargetConfigPropertyType**](ModelsTargetConfigPropertyType.md) |  | [optional] 
 
 ## Methods
 
@@ -183,20 +183,20 @@ HasSuggestions returns a boolean if a field has been set.
 
 ### GetType
 
-`func (o *TargetConfigProperty) GetType() ProviderTargetConfigPropertyType`
+`func (o *TargetConfigProperty) GetType() ModelsTargetConfigPropertyType`
 
 GetType returns the Type field if non-nil, zero value otherwise.
 
 ### GetTypeOk
 
-`func (o *TargetConfigProperty) GetTypeOk() (*ProviderTargetConfigPropertyType, bool)`
+`func (o *TargetConfigProperty) GetTypeOk() (*ModelsTargetConfigPropertyType, bool)`
 
 GetTypeOk returns a tuple with the Type field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetType
 
-`func (o *TargetConfigProperty) SetType(v ProviderTargetConfigPropertyType)`
+`func (o *TargetConfigProperty) SetType(v ModelsTargetConfigPropertyType)`
 
 SetType sets Type field to given value.
 

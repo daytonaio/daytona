@@ -16,6 +16,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -127,9 +128,9 @@ var CreateCmd = &cobra.Command{
 		}
 
 		if target != nil {
-			requestLogEntry.TargetName = &target.Name
+			requestLogEntry.Label = target.Name
 		} else if createTargetDto != nil {
-			requestLogEntry.TargetName = &createTargetDto.Name
+			requestLogEntry.Label = createTargetDto.Name
 		}
 
 		logs_view.DisplayLogEntry(requestLogEntry, logs_view.STATIC_INDEX)
@@ -139,8 +140,8 @@ var CreateCmd = &cobra.Command{
 				continue
 			}
 			logs_view.DisplayLogEntry(logs.LogEntry{
-				WorkspaceName: &createWorkspaceDtos[i].Name,
-				Msg:           fmt.Sprintf("Using detected workspace template '%s'\n", workspaceTemplateName),
+				Label: createWorkspaceDtos[i].Name,
+				Msg:   fmt.Sprintf("Using detected workspace template '%s'\n", workspaceTemplateName),
 			}, i)
 		}
 
@@ -159,10 +160,11 @@ var CreateCmd = &cobra.Command{
 		defer stopLogs()
 
 		if createTargetDto != nil {
-			go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
+			go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
 				Id:                    targetId,
 				Label:                 &createTargetDto.Name,
-				ActiveProfile:         activeProfile,
+				ServerUrl:             activeProfile.Api.Url,
+				ApiKey:                activeProfile.Api.Key,
 				Follow:                util.Pointer(true),
 				SkipPrefixLengthSetup: true,
 			})
@@ -200,10 +202,11 @@ var CreateCmd = &cobra.Command{
 
 		for i := range createWorkspaceDtos {
 			createWorkspaceDtos[i].TargetId = targetId
-			go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
+			go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
 				Id:                    createWorkspaceDtos[i].Id,
 				Label:                 &createWorkspaceDtos[i].Name,
-				ActiveProfile:         activeProfile,
+				ServerUrl:             activeProfile.Api.Url,
+				ApiKey:                activeProfile.Api.Key,
 				Index:                 util.Pointer(i),
 				Follow:                util.Pointer(true),
 				SkipPrefixLengthSetup: true,
@@ -256,7 +259,7 @@ var CreateCmd = &cobra.Command{
 
 		createdWorkspaces := []apiclient.WorkspaceDTO{}
 		for _, createWorkspaceDto := range createWorkspaceDtos {
-			ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDto.Id, true)
+			ws, _, err := apiclient_util.GetWorkspace(createWorkspaceDto.Id)
 			if err != nil {
 				return err
 			}
@@ -276,7 +279,7 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].Info.ProviderMetadata, YesFlag, gpgKey)
+		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].ProviderMetadata, YesFlag, gpgKey)
 	},
 }
 
@@ -377,5 +380,5 @@ func IsLocalDockerTarget(target *apiclient.TargetDTO) bool {
 		return false
 	}
 
-	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname")
+	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname") && target.TargetConfig.ProviderInfo.RunnerId == bootstrap.LOCAL_RUNNER_ID
 }

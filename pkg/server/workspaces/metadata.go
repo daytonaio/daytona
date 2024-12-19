@@ -11,9 +11,7 @@ import (
 )
 
 func (s *WorkspaceService) SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error) {
-	m, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{
-		WorkspaceId: &workspaceId,
-	})
+	m, err := s.workspaceMetadataStore.Find(ctx, workspaceId)
 	if err != nil {
 		return nil, stores.ErrWorkspaceMetadataNotFound
 	}

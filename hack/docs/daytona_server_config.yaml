@@ -1,5 +1,5 @@
 name: daytona server config
-synopsis: Output local Daytona Server config
+synopsis: Output Daytona Runner config
 usage: daytona server config [flags]
 options:
     - name: format

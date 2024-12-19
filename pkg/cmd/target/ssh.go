@@ -58,7 +58,7 @@ var sshCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			tg, _, err = apiclient_util.GetTarget(args[0], true)
+			tg, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}

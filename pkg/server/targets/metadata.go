@@ -11,9 +11,7 @@ import (
 )
 
 func (s *TargetService) SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error) {
-	m, err := s.targetMetadataStore.Find(ctx, &stores.TargetMetadataFilter{
-		TargetId: &targetId,
-	})
+	m, err := s.targetMetadataStore.Find(ctx, targetId)
 	if err != nil {
 		return nil, stores.ErrTargetMetadataNotFound
 	}

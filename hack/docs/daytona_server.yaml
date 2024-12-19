@@ -12,9 +12,10 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona server config - Output local Daytona Server config
+    - daytona server config - Output Daytona Runner config
     - daytona server configure - Configure Daytona Server
     - daytona server logs - Output Daytona Server logs
     - daytona server restart - Restarts the Daytona Server daemon
+    - daytona server runner - Manage runners
     - daytona server start - Start the Daytona Server daemon
     - daytona server stop - Stops the Daytona Server daemon

@@ -15,22 +15,24 @@ import (
 type ITargetService interface {
 	CreateTarget(ctx context.Context, req CreateTargetDTO) (*models.Target, error)
 	GetTarget(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) (*TargetDTO, error)
-	GetTargetLogReader(targetId string) (io.Reader, error)
+	SaveTarget(ctx context.Context, target *models.Target) error
 	ListTargets(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) ([]TargetDTO, error)
 	StartTarget(ctx context.Context, targetId string) error
 	StopTarget(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
+	UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 
+	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)
+	GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error)
 	SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 }
 
 type TargetDTO struct {
 	models.Target
 	State models.ResourceState `json:"state" validate:"required"`
-	Info  *models.TargetInfo   `json:"info" validate:"optional"`
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {
@@ -39,8 +41,11 @@ type CreateTargetDTO struct {
 	TargetConfigName string `json:"targetConfigName" validate:"required"`
 } //	@name	CreateTargetDTO
 
+type UpdateTargetProviderMetadataDTO struct {
+	Metadata string `json:"metadata" validate:"required"`
+} // @name UpdateTargetProviderMetadataDTO
+
 type TargetRetrievalParams struct {
-	Verbose     bool
 	ShowDeleted bool
 }
 

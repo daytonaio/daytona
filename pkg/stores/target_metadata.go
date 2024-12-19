@@ -10,14 +10,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-type TargetMetadataFilter struct {
-	Id       *string
-	TargetId *string
-}
-
 type TargetMetadataStore interface {
 	IStore
-	Find(ctx context.Context, filter *TargetMetadataFilter) (*models.TargetMetadata, error)
+	Find(ctx context.Context, targetId string) (*models.TargetMetadata, error)
 	Save(ctx context.Context, metadata *models.TargetMetadata) error
 	Delete(ctx context.Context, metadata *models.TargetMetadata) error
 }

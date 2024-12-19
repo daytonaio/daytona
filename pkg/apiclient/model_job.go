@@ -21,14 +21,17 @@ var _ MappedNullable = &Job{}
 
 // Job struct for Job
 type Job struct {
-	Action       ModelsJobAction `json:"action"`
-	CreatedAt    string          `json:"createdAt"`
-	Error        *string         `json:"error,omitempty"`
-	Id           string          `json:"id"`
-	ResourceId   string          `json:"resourceId"`
-	ResourceType ResourceType    `json:"resourceType"`
-	State        JobState        `json:"state"`
-	UpdatedAt    string          `json:"updatedAt"`
+	Action    ModelsJobAction `json:"action"`
+	CreatedAt string          `json:"createdAt"`
+	Error     *string         `json:"error,omitempty"`
+	Id        string          `json:"id"`
+	// JSON encoded metadata
+	Metadata     *string      `json:"metadata,omitempty"`
+	ResourceId   string       `json:"resourceId"`
+	ResourceType ResourceType `json:"resourceType"`
+	RunnerId     *string      `json:"runnerId,omitempty"`
+	State        JobState     `json:"state"`
+	UpdatedAt    string       `json:"updatedAt"`
 }
 
 type _Job Job
@@ -161,6 +164,38 @@ func (o *Job) SetId(v string) {
 	o.Id = v
 }
 
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *Job) GetMetadata() string {
+	if o == nil || IsNil(o.Metadata) {
+		var ret string
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Job) GetMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *Job) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given string and assigns it to the Metadata field.
+func (o *Job) SetMetadata(v string) {
+	o.Metadata = &v
+}
+
 // GetResourceId returns the ResourceId field value
 func (o *Job) GetResourceId() string {
 	if o == nil {
@@ -207,6 +242,38 @@ func (o *Job) GetResourceTypeOk() (*ResourceType, bool) {
 // SetResourceType sets field value
 func (o *Job) SetResourceType(v ResourceType) {
 	o.ResourceType = v
+}
+
+// GetRunnerId returns the RunnerId field value if set, zero value otherwise.
+func (o *Job) GetRunnerId() string {
+	if o == nil || IsNil(o.RunnerId) {
+		var ret string
+		return ret
+	}
+	return *o.RunnerId
+}
+
+// GetRunnerIdOk returns a tuple with the RunnerId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Job) GetRunnerIdOk() (*string, bool) {
+	if o == nil || IsNil(o.RunnerId) {
+		return nil, false
+	}
+	return o.RunnerId, true
+}
+
+// HasRunnerId returns a boolean if a field has been set.
+func (o *Job) HasRunnerId() bool {
+	if o != nil && !IsNil(o.RunnerId) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerId gets a reference to the given string and assigns it to the RunnerId field.
+func (o *Job) SetRunnerId(v string) {
+	o.RunnerId = &v
 }
 
 // GetState returns the State field value
@@ -273,8 +340,14 @@ func (o Job) ToMap() (map[string]interface{}, error) {
 		toSerialize["error"] = o.Error
 	}
 	toSerialize["id"] = o.Id
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["resourceId"] = o.ResourceId
 	toSerialize["resourceType"] = o.ResourceType
+	if !IsNil(o.RunnerId) {
+		toSerialize["runnerId"] = o.RunnerId
+	}
 	toSerialize["state"] = o.State
 	toSerialize["updatedAt"] = o.UpdatedAt
 	return toSerialize, nil

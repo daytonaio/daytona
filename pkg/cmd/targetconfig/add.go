@@ -9,18 +9,18 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/provider"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	"github.com/spf13/cobra"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var TargetConfigAddCmd = &cobra.Command{
@@ -66,26 +66,24 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providersManifest, err := manager.GetProviderManager(&manager.ProviderManagerConfig{
-		RegistryUrl: serverConfig.RegistryUrl,
-	}).GetProvidersManifest()
+	providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
 
-	var latestProviders []apiclient.Provider
+	var latestProviders []apiclient.ProviderInfo
 	if providersManifest != nil {
 		providersManifestLatest := providersManifest.GetLatestVersions()
 		if providersManifestLatest == nil {
 			return nil, errors.New("could not get latest provider versions")
 		}
 
-		latestProviders = provider.GetProviderListFromManifest(providersManifestLatest)
+		latestProviders = conversion.GetProviderListFromManifest(providersManifestLatest)
 	} else {
 		fmt.Println("Could not get provider manifest. Can't check for new providers to install")
 	}
 
-	providerViewList, err := provider.GetProviderViewOptions(apiClient, latestProviders, ctx)
+	providerViewList, err := provider.GetProviderViewOptions(ctx, apiClient, latestProviders)
 	if err != nil {
 		return nil, err
 	}
@@ -103,24 +101,43 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, nil
 	}
 
-	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
-		if providersManifest == nil {
-			return nil, errors.New("could not get providers manifest")
-		}
-		err = provider.InstallProvider(apiClient, *selectedProvider, providersManifest)
-		if err != nil {
-			return nil, err
-		}
-	}
-
 	selectedTargetConfig := &targetconfig.TargetConfigView{
 		Name:    "",
 		Options: "{}",
 		ProviderInfo: targetconfig.ProviderInfo{
-			Name:    selectedProvider.Name,
-			Version: selectedProvider.Version,
-			Label:   selectedProvider.Label,
+			Name:       selectedProvider.Name,
+			RunnerId:   selectedProvider.RunnerId,
+			RunnerName: selectedProvider.RunnerName,
+			Version:    selectedProvider.Version,
+			Label:      selectedProvider.Label,
 		},
+	}
+
+	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
+		if providersManifest == nil {
+			return nil, errors.New("could not get providers manifest")
+		}
+
+		selectedRunner, err := cmd_common.GetRunnerFlow(apiClient, "Manage Providers")
+		if err != nil {
+			if common.IsCtrlCAbort(err) {
+				return nil, nil
+			} else {
+				return nil, err
+			}
+		}
+
+		if selectedRunner == nil {
+			return nil, nil
+		}
+
+		err = provider.InstallProvider(apiClient, selectedRunner.Id, *selectedProvider, providersManifest)
+		if err != nil {
+			return nil, err
+		}
+
+		selectedProvider.RunnerId = selectedRunner.Id
+		selectedProvider.RunnerName = selectedRunner.Name
 	}
 
 	targetConfigs, res, err := apiClient.TargetConfigAPI.ListTargetConfigs(ctx).Execute()
@@ -135,12 +152,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, err
 	}
 
-	targetConfigManifest, res, err := apiClient.ProviderAPI.GetTargetConfigManifest(context.Background(), selectedProvider.Name).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	err = targetconfig.SetTargetConfigForm(selectedTargetConfig, *targetConfigManifest)
+	err = targetconfig.SetTargetConfigForm(selectedTargetConfig, selectedProvider.TargetConfigManifest)
 	if err != nil {
 		return nil, err
 	}
@@ -148,10 +160,13 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 	targetConfigData := apiclient.AddTargetConfigDTO{
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
-		ProviderInfo: apiclient.TargetProviderInfo{
-			Name:    selectedProvider.Name,
-			Version: selectedProvider.Version,
-			Label:   selectedProvider.Label,
+		ProviderInfo: apiclient.ProviderInfo{
+			Name:                 selectedProvider.Name,
+			Version:              selectedProvider.Version,
+			Label:                selectedProvider.Label,
+			RunnerId:             selectedProvider.RunnerId,
+			RunnerName:           selectedProvider.RunnerName,
+			TargetConfigManifest: selectedProvider.TargetConfigManifest,
 		},
 	}
 
@@ -165,9 +180,11 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		Name:    targetConfig.Name,
 		Options: targetConfig.Options,
 		ProviderInfo: targetconfig.ProviderInfo{
-			Name:    targetConfig.ProviderInfo.Name,
-			Version: targetConfig.ProviderInfo.Version,
-			Label:   targetConfig.ProviderInfo.Label,
+			Name:       targetConfig.ProviderInfo.Name,
+			RunnerId:   targetConfig.ProviderInfo.RunnerId,
+			RunnerName: targetConfig.ProviderInfo.RunnerName,
+			Version:    targetConfig.ProviderInfo.Version,
+			Label:      targetConfig.ProviderInfo.Label,
 		},
 	}, nil
 }

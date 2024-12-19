@@ -39,11 +39,6 @@ func (f *MockBuilderFactory) Create(build models.Build, workspaceDir string) (bu
 	return args.Get(0).(*MockBuilder), args.Error(1)
 }
 
-func (f *MockBuilderFactory) CheckExistingBuild(b models.Build) (*models.Build, error) {
-	args := f.Called(b)
-	return args.Get(0).(*models.Build), args.Error(1)
-}
-
 type MockBuilder struct {
 	mock.Mock
 }

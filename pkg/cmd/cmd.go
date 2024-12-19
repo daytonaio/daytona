@@ -23,6 +23,7 @@ import (
 	. "github.com/daytonaio/daytona/pkg/cmd/prebuild"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
+	. "github.com/daytonaio/daytona/pkg/cmd/runner"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
 	. "github.com/daytonaio/daytona/pkg/cmd/targetconfig"
@@ -53,6 +54,7 @@ func Execute() error {
 	rootCmd.AddGroup(&cobra.Group{ID: TARGET_GROUP, Title: "Targets & Workspaces"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
 	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
+	rootCmd.AddGroup(&cobra.Group{ID: RUNNER_GROUP, Title: "Runner"})
 
 	rootCmd.AddCommand(CodeCmd)
 	rootCmd.AddCommand(SshCmd)
@@ -68,6 +70,7 @@ func Execute() error {
 	rootCmd.AddCommand(TargetConfigCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(ideCmd)
+	rootCmd.AddCommand(RunnerCmd)
 	rootCmd.AddCommand(ProfileCmd)
 	rootCmd.AddCommand(ProfileUseCmd)
 	rootCmd.AddCommand(whoamiCmd)

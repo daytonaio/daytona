@@ -23,4 +23,5 @@ var (
 	CLI_SOURCE           TelemetrySource = "cli"
 	CLI_WORKSPACE_SOURCE TelemetrySource = "cli-workspace"
 	AGENT_SOURCE         TelemetrySource = "agent"
+	RUNNER_SOURCE        TelemetrySource = "runner"
 )

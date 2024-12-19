@@ -10,7 +10,7 @@ daytona target list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
-  -v, --verbose         Show verbose output
+  -v, --show-options    Show target options
 ```
 
 ### Options inherited from parent commands
