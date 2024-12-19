@@ -228,5 +228,10 @@
     "name": "Github User Profile Analyzer",
     "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
+  },
+  {
+    "name": "Next.js & Go - Certify",
+    "description": "Sample Go/Next.js project for building a Certification System using Soulbound Tokens (SBTs) on the Kalp Blockchain.",
+    "gitUrl": "https://github.com/daytonaio/sample-go-nextjs-sbt-blockchain"
   }
 ]
