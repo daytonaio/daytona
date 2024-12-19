@@ -69,7 +69,7 @@ func InitProviderManager(c *server.Config, configDir string) error {
 		RegistryUrl:        c.RegistryUrl,
 		BaseDir:            c.ProvidersDir,
 		CreateProviderNetworkKey: func(ctx context.Context, providerName string) (string, error) {
-			return headscaleServer.CreateAuthKey()
+			return headscaleServer.CreateAuthKey(headscale.HEADSCALE_USERNAME)
 		},
 		ServerPort: c.HeadscalePort,
 		ApiPort:    c.ApiPort,

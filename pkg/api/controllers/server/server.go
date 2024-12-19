@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/gin-gonic/gin"
 )
 
@@ -73,7 +74,7 @@ func SetConfig(ctx *gin.Context) {
 func GenerateNetworkKey(ctx *gin.Context) {
 	s := server.GetInstance(nil)
 
-	authKey, err := s.TailscaleServer.CreateAuthKey()
+	authKey, err := s.TailscaleServer.CreateAuthKey(headscale.HEADSCALE_USERNAME)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to generate network key: %w", err))
 		return
