@@ -203,5 +203,10 @@
     "name": "Go CRUD - Redis",
     "description": "A simple backend HTTP server which does the CRUD (Create, Read, Update, Delete) operation. It uses Chi router for the http connection and Redis for the storage.",
     "gitUrl": "https://github.com/daytonaio/sample-go-crud-redis"
+  },
+  {
+    "name": "Sample Bun Web Server",
+    "description": "An HTTP server showcasing routing and template rendering with EJS, powered by Bun, a high-performance JavaScript runtime and toolkit.",
+    "gitUrl": "https://github.com/daytonaio/sample-bun-web-server"
   }
 ]
