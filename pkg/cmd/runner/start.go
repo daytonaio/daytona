@@ -24,7 +24,7 @@ var svcConfig = &service.Config{
 	Name:        "DaytonaRunnerDaemon",
 	DisplayName: "Daytona Runner",
 	Description: "Daytona Runner daemon.",
-	Arguments:   []string{"runner start-process"},
+	Arguments:   []string{"daemon-serve"},
 }
 
 var startCmd = &cobra.Command{

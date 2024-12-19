@@ -190,7 +190,7 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 }
 
 func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFactory, error) {
-	targetLogsFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(params.ConfigDir)})
+	loggerFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetTargetLogsDir(params.ConfigDir)})
 
 	targetService := server.GetInstance(nil).TargetService
 
@@ -209,7 +209,7 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
 			return params.TelemetryService.TrackServerEvent(event, clientId, props)
 		},
-		LoggerFactory:   targetLogsFactory,
+		LoggerFactory:   loggerFactory,
 		ProviderManager: params.ProviderManager,
 	}), nil
 }

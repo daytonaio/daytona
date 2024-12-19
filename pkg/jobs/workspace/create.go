@@ -27,7 +27,7 @@ func (wj *WorkspaceJob) create(ctx context.Context, j *models.Job) error {
 	}
 	defer workspaceLogger.Close()
 
-	workspaceLogger.Write([]byte(fmt.Sprintf("Creating workspace %s\n", w.Name)))
+	workspaceLogger.Write([]byte(fmt.Sprintf("Creating workspace %s (%s)\n", w.Name, w.Id)))
 
 	workspaceEnvVars, err := wj.getWorkspaceEnvironmentVariables(ctx, w)
 	if err != nil {

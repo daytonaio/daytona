@@ -24,7 +24,7 @@ func (i item) Title() string {
 	}
 
 	if i.provider.RunnerName != "" {
-		title = fmt.Sprintf("%s - Runner %s", title, i.provider.RunnerName)
+		title = fmt.Sprintf("%s (Runner %s)", title, i.provider.RunnerName)
 	}
 
 	return title

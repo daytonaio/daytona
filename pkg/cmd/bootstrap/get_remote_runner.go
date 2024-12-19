@@ -273,7 +273,7 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 			return conversion.Convert[apiclient.WorkspaceDTO, models.Workspace](workspaceDto)
 		},
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).ShowOptions(true).Execute()
 			if err != nil {
 				return nil, err
 			}
@@ -316,9 +316,8 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 }
 
 func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJobFactory, error) {
-	logsDir := filepath.Join(params.ConfigDir, "targets", "logs")
 	loggerFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{
-		LogsDir:     logsDir,
+		LogsDir:     filepath.Join(params.ConfigDir, "targets", "logs"),
 		ApiUrl:      &params.RunnerConfig.ServerApiUrl,
 		ApiKey:      &params.RunnerConfig.ServerApiKey,
 		ApiBasePath: &logs.ApiBasePathTarget,
@@ -326,7 +325,7 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 
 	return target.NewTargetJobFactory(target.TargetJobFactoryConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).Execute()
+			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).ShowOptions(true).Execute()
 			if err != nil {
 				return nil, err
 			}
