@@ -39,15 +39,15 @@ func (r *LogReader) SetMaxRetries(max int) {
 }
 
 func (r *LogReader) ReadWorkspaceLogs(ctx context.Context, projectNames []string, follow bool, showWorkspaceLogs bool, from *time.Time) error {
-	for {
-		posJSON, _ := json.Marshal(r.position)
-		query := fmt.Sprintf("retry=true&position=%s", url.QueryEscape(string(posJSON)))
-
-		ws, _, err := GetWebsocketConn(ctx,
-			fmt.Sprintf("/log/workspace/%s", r.workspaceId),
-			r.activeProfile, &query)
-
-		if err != nil {
+    for {
+        position := r.position.Marshal()
+        query := fmt.Sprintf("retry=true&position=%s", url.QueryEscape(position))
+        
+        ws, _, err := GetWebsocketConn(ctx, 
+            fmt.Sprintf("/log/workspace/%s?%s", r.workspaceId, query), 
+            r.activeProfile, nil)
+        
+        if err != nil {
 			if r.retryCount >= r.maxRetries {
 				return fmt.Errorf("max retries reached: %w", err)
 			}
@@ -78,7 +78,7 @@ func (r *LogReader) ReadWorkspaceLogs(ctx context.Context, projectNames []string
 	return nil
 }
 
-func (r *LogReader) handleLogStream(ctx context.Context, ws *websocket.Conn, from *time.Time, projectNames []string, follow bool, showWorkspaceLogs bool) error {
+func (r *LogReader) handleLogStream(ctx context.Context, ws *websocket.Conn, from *time.Time, projectNames []string, _ bool, showWorkspaceLogs bool) error {
 	defer ws.Close()
 
 	ws.SetPingHandler(func(string) error {
