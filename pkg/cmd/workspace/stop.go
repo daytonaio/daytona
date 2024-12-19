@@ -77,8 +77,7 @@ var StopCmd = &cobra.Command{
 					continue
 				}
 
-			
-				apiclient_util.GetWorkspace(workspace.Id,true)
+				apiclient_util.GetWorkspace(workspace.Id, true)
 				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
 			}
 		} else {
@@ -140,8 +139,7 @@ func stopAllWorkspaces(activeProfile config.Profile, from time.Time) error {
 			continue
 		}
 
-
-		apiclient_util.GetWorkspace( workspace.Id, true)
+		apiclient_util.GetWorkspace(workspace.Id, true)
 		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
 	}
 	return nil

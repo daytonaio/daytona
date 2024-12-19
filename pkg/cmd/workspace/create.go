@@ -170,8 +170,8 @@ var CreateCmd = &cobra.Command{
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		_,stopLogs := context.WithCancel(context.Background())
-	 	
+		_, stopLogs := context.WithCancel(context.Background())
+
 		createdWorkspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).Workspace(apiclient.CreateWorkspaceDTO{
 			Id:       id,
 			Name:     workspaceName,

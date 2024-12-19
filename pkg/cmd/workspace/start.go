@@ -12,7 +12,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/log"
 	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
@@ -300,7 +299,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	}
 	logsContext, stopLogs := context.WithCancel(context.Background())
 	go log.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &from)
-	go apiclient_util.GetWorkspace( workspace.Id, true)
+	go apiclient_util.GetWorkspace(workspace.Id, true)
 
 	if projectName == "" {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
