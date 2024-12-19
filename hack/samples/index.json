@@ -188,5 +188,10 @@
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
+  },
+  {
+    "name": "Bun/Next.js - Therabot",
+    "description": "Therabot is a mental health chatbot that provides support and resources for individuals experiencing mental health challenges.",
+    "gitUrl": "https://github.com/daytonaio/sample-bun-nextjs-therabot"
   }
 ]
