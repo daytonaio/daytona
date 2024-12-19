@@ -190,8 +190,48 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
   },
   {
+    "name": "React.js - effective-scrapper",
+    "description": "Effective Scrapper is a web application designed to simplify the job search process for individuals interested in roles within the technology industry.",
+    "gitUrl": "https://github.com/daytonaio/sample-js-job-scaper"
+  },
+  {
     "name": "Bun/Next.js - Therabot",
     "description": "Therabot is a mental health chatbot that provides support and resources for individuals experiencing mental health challenges.",
     "gitUrl": "https://github.com/daytonaio/sample-bun-nextjs-therabot"
+  },
+  {
+    "name": "Go CRUD - Redis",
+    "description": "A simple backend HTTP server which does the CRUD (Create, Read, Update, Delete) operation. It uses Chi router for the http connection and Redis for the storage.",
+    "gitUrl": "https://github.com/daytonaio/sample-go-crud-redis"
+  },
+  {
+    "name": "Sample Bun Web Server",
+    "description": "An HTTP server showcasing routing and template rendering with EJS, powered by Bun, a high-performance JavaScript runtime and toolkit.",
+    "gitUrl": "https://github.com/daytonaio/sample-bun-web-server"
+  },
+  {
+    "name": "Python - AskPixie",
+    "description": "A Python-powered educational platform leveraging Reflex and Google's Gemini API for domain-specific insights, text and image analysis, and enhanced learning experiences.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-ask-pixie"
+  },
+  {
+    "name": "Typescript-Gemini - FitnessAssistant",
+    "description": "Fitness Assistant demonstrates how to build a backend application using Node.js, TypeScript, and the Gemini API, and is designed to be used with Daytona. It includes features such as user authentication, get fitness advice, and get nutrition advice.",
+    "gitUrl": "https://github.com/daytonaio/sample-typescript-gemini-fitness-assitant"
+  },
+  {
+    "name": "Keyword Density Application",
+    "description": "A tool to calculate keyword density from large text / raw html / direct URL.",
+    "gitUrl": "https://github.com/daytonaio/sample-laravel-keyword-density"
+  },
+  {
+    "name": "Github User Profile Analyzer",
+    "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-github-user-insights"
+  },
+  {
+    "name": "Music Player",
+    "description": "A React based lightweight, and responsive music player that lets you enjoy your favorite songs with a clean and modern interface.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-music-player"
   }
 ]
