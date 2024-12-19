@@ -17,6 +17,7 @@ import (
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/cobra"
 )
@@ -271,7 +272,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 	ctx := context.Background()
 	var projectNames []string
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
-	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+	_, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
 		return err
 	}
@@ -291,14 +292,14 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 		return err
 	}
 	if projectName != "" {
-		projectNames = append(projectNames, projectName)
+		_ = append(projectNames, projectName)
 	} else {
-		projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+		_ = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 			return p.Name
 		})
 	}
-	logsContext, stopLogs := context.WithCancel(context.Background())
-	go log.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &from)
+	_, stopLogs := context.WithCancel(context.Background())
+	go apiclient_util.NewLogReader(&activeProfile, workspace.Id)
 	go apiclient_util.GetWorkspace(workspace.Id, true)
 
 	if projectName == "" {
