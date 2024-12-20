@@ -253,5 +253,10 @@
     "name": "Python Flask - ML Model Deployment - IRIS-C",
     "description": "IRIS-C is a Python Flask project where the iris flower classification model is deployed into a web app. With given lengths and widths of petals and sepals, we can classify a flower into one of the species of the iris flower.",
     "giturl": "https://github.com/daytonaio/sample-python-flask-ml-model-deployment"
+  },
+  {
+    "name": "React.js - Progify",
+    "description": "Progrify is an AI-powered online code editor designed to revolutionize how people learn and write code.",
+    "giturl": "https://github.com/daytonaio/sample-ai-editor-progify"
   }
 ]
