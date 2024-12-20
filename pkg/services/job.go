@@ -13,7 +13,7 @@ import (
 
 type IJobService interface {
 	Create(ctx context.Context, job *models.Job) error
-	SetState(ctx context.Context, jobId string, state models.JobState, error *string) error
+	SetState(ctx context.Context, jobId string, updateJobStateDto UpdateJobStateDTO) error
 	Find(ctx context.Context, filter *stores.JobFilter) (*models.Job, error)
 	List(ctx context.Context, filter *stores.JobFilter) ([]*models.Job, error)
 	Delete(ctx context.Context, job *models.Job) error

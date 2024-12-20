@@ -20,6 +20,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 	"github.com/docker/docker/pkg/stdcopy"
@@ -48,18 +49,18 @@ var SshProxyCmd = &cobra.Command{
 
 		var target *apiclient.TargetDTO
 
-		ws, statusCode, err := apiclient_util.GetWorkspace(resourceId, true)
+		ws, statusCode, err := apiclient_util.GetWorkspace(resourceId)
 		if err != nil && statusCode != http.StatusNotFound {
 			return err
 		}
 
 		if ws == nil {
-			target, _, err = apiclient_util.GetTarget(resourceId, true)
+			target, _, err = apiclient_util.GetTarget(resourceId)
 			if err != nil {
 				return err
 			}
 		} else {
-			target, _, err = apiclient_util.GetTarget(ws.TargetId, true)
+			target, _, err = apiclient_util.GetTarget(ws.TargetId)
 			if err != nil {
 				return err
 			}
@@ -77,7 +78,12 @@ var SshProxyCmd = &cobra.Command{
 				ApiClient: cli,
 			})
 
-			containerName := dockerClient.GetWorkspaceContainerName(conversion.ToWorkspace(ws))
+			workspace, err := conversion.Convert[apiclient.WorkspaceDTO, models.Workspace](ws)
+			if err != nil {
+				return err
+			}
+
+			containerName := dockerClient.GetWorkspaceContainerName(workspace)
 
 			ctx := context.Background()
 

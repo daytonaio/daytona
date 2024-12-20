@@ -9,7 +9,6 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -22,13 +21,12 @@ type TargetServiceConfig struct {
 	FindTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
 	GenerateApiKey   func(ctx context.Context, name string) (string, error)
 	RevokeApiKey     func(ctx context.Context, name string) error
-	CreateJob        func(ctx context.Context, targetId string, action models.JobAction) error
+	CreateJob        func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
 
 	ServerApiUrl     string
 	ServerUrl        string
 	ServerVersion    string
-	Provisioner      provisioner.IProvisioner
-	LoggerFactory    logs.LoggerFactory
+	LoggerFactory    logs.ILoggerFactory
 	TelemetryService telemetry.TelemetryService
 }
 
@@ -45,7 +43,6 @@ func NewTargetService(config TargetServiceConfig) services.ITargetService {
 		serverApiUrl:     config.ServerApiUrl,
 		serverUrl:        config.ServerUrl,
 		serverVersion:    config.ServerVersion,
-		provisioner:      config.Provisioner,
 		loggerFactory:    config.LoggerFactory,
 		telemetryService: config.TelemetryService,
 	}
@@ -58,16 +55,36 @@ type TargetService struct {
 	findTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
 	generateApiKey   func(ctx context.Context, name string) (string, error)
 	revokeApiKey     func(ctx context.Context, name string) error
-	createJob        func(ctx context.Context, targetId string, action models.JobAction) error
+	createJob        func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
 
-	provisioner      provisioner.IProvisioner
 	serverApiUrl     string
 	serverUrl        string
 	serverVersion    string
-	loggerFactory    logs.LoggerFactory
+	loggerFactory    logs.ILoggerFactory
 	telemetryService telemetry.TelemetryService
 }
 
-func (s *TargetService) GetTargetLogReader(targetId string) (io.Reader, error) {
-	return s.loggerFactory.CreateTargetLogReader(targetId)
+func (s *TargetService) GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error) {
+	return s.loggerFactory.CreateLogReader(targetId)
+}
+
+func (s *TargetService) GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(targetId)
+}
+
+// TODO: revise - "remove default" is enough for now
+func (s *TargetService) SaveTarget(ctx context.Context, target *models.Target) error {
+	return s.targetStore.Save(ctx, target)
+}
+
+func (s *TargetService) UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error {
+	tg, err := s.targetStore.Find(ctx, &stores.TargetFilter{
+		IdOrName: &targetId,
+	})
+	if err != nil {
+		return err
+	}
+
+	tg.ProviderMetadata = &metadata
+	return s.targetStore.Save(ctx, tg)
 }

@@ -21,15 +21,16 @@ var _ MappedNullable = &Target{}
 
 // Target struct for Target
 type Target struct {
-	Default        bool              `json:"default"`
-	EnvVars        map[string]string `json:"envVars"`
-	Id             string            `json:"id"`
-	LastJob        *Job              `json:"lastJob,omitempty"`
-	Metadata       *TargetMetadata   `json:"metadata,omitempty"`
-	Name           string            `json:"name"`
-	TargetConfig   TargetConfig      `json:"targetConfig"`
-	TargetConfigId string            `json:"targetConfigId"`
-	Workspaces     []Workspace       `json:"workspaces"`
+	Default          bool              `json:"default"`
+	EnvVars          map[string]string `json:"envVars"`
+	Id               string            `json:"id"`
+	LastJob          *Job              `json:"lastJob,omitempty"`
+	Metadata         *TargetMetadata   `json:"metadata,omitempty"`
+	Name             string            `json:"name"`
+	ProviderMetadata *string           `json:"providerMetadata,omitempty"`
+	TargetConfig     TargetConfig      `json:"targetConfig"`
+	TargetConfigId   string            `json:"targetConfigId"`
+	Workspaces       []Workspace       `json:"workspaces"`
 }
 
 type _Target Target
@@ -218,6 +219,38 @@ func (o *Target) SetName(v string) {
 	o.Name = v
 }
 
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *Target) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ProviderMetadata
+}
+
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Target) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		return nil, false
+	}
+	return o.ProviderMetadata, true
+}
+
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *Target) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *Target) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
+}
+
 // GetTargetConfig returns the TargetConfig field value
 func (o *Target) GetTargetConfig() TargetConfig {
 	if o == nil {
@@ -310,6 +343,9 @@ func (o Target) ToMap() (map[string]interface{}, error) {
 		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
+	}
 	toSerialize["targetConfig"] = o.TargetConfig
 	toSerialize["targetConfigId"] = o.TargetConfigId
 	toSerialize["workspaces"] = o.Workspaces

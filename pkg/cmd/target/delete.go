@@ -67,7 +67,7 @@ var deleteCmd = &cobra.Command{
 			}
 		} else {
 			for _, arg := range args {
-				target, _, err := apiclient_util.GetTarget(arg, false)
+				target, _, err := apiclient_util.GetTarget(arg)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue

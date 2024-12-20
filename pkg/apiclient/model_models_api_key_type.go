@@ -23,6 +23,7 @@ const (
 	ApiKeyTypeClient    ModelsApiKeyType = "client"
 	ApiKeyTypeWorkspace ModelsApiKeyType = "workspace"
 	ApiKeyTypeTarget    ModelsApiKeyType = "target"
+	ApiKeyTypeRunner    ModelsApiKeyType = "runner"
 )
 
 // All allowed values of ModelsApiKeyType enum
@@ -30,6 +31,7 @@ var AllowedModelsApiKeyTypeEnumValues = []ModelsApiKeyType{
 	"client",
 	"workspace",
 	"target",
+	"runner",
 }
 
 func (v *ModelsApiKeyType) UnmarshalJSON(src []byte) error {

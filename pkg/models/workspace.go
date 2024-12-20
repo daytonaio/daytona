@@ -20,10 +20,11 @@ type Workspace struct {
 	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
 	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
 	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
-	ApiKey              string                     `json:"-" validate:"required" gorm:"not null"`
+	ApiKey              string                     `json:"apiKey" validate:"required" gorm:"not null"`
 	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
 	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	ProviderMetadata    *string                    `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Workspace
 
 type WorkspaceMetadata struct {
@@ -45,7 +46,7 @@ func (w *Workspace) GetState() ResourceState {
 
 	// If the workspace should be running, check if it is unresponsive
 	if state.Name == ResourceStateNameStarted {
-		if w.Metadata != nil && time.Since(w.Metadata.UpdatedAt) > AGENT_UNRESPONSIVE_THRESHOLD {
+		if w.Metadata != nil && time.Since(w.Metadata.UpdatedAt) > RESOURCE_UNRESPONSIVE_THRESHOLD {
 			state.Name = ResourceStateNameUnresponsive
 			state.Error = util.Pointer("Workspace is unresponsive")
 			state.UpdatedAt = w.Metadata.UpdatedAt
@@ -59,14 +60,6 @@ type CachedBuild struct {
 	User  string `json:"user" validate:"required"`
 	Image string `json:"image" validate:"required"`
 } // @name CachedBuild
-
-type WorkspaceInfo struct {
-	Name             string `json:"name" validate:"required"`
-	Created          string `json:"created" validate:"required"`
-	IsRunning        bool   `json:"isRunning" validate:"required"`
-	ProviderMetadata string `json:"providerMetadata,omitempty" validate:"optional"`
-	TargetId         string `json:"targetId" validate:"required"`
-} // @name WorkspaceInfo
 
 type GitStatus struct {
 	CurrentBranch   string        `json:"currentBranch" validate:"required"`

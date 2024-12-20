@@ -33,8 +33,8 @@ type ServerConfig struct {
 	Id                        string        `json:"id"`
 	LocalBuilderRegistryImage string        `json:"localBuilderRegistryImage"`
 	LocalBuilderRegistryPort  int32         `json:"localBuilderRegistryPort"`
+	LocalRunnerDisabled       *bool         `json:"localRunnerDisabled,omitempty"`
 	LogFile                   LogFileConfig `json:"logFile"`
-	ProvidersDir              string        `json:"providersDir"`
 	RegistryUrl               string        `json:"registryUrl"`
 	SamplesIndexUrl           *string       `json:"samplesIndexUrl,omitempty"`
 	ServerDownloadUrl         string        `json:"serverDownloadUrl"`
@@ -46,7 +46,7 @@ type _ServerConfig ServerConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, providersDir string, registryUrl string, serverDownloadUrl string) *ServerConfig {
+func NewServerConfig(apiPort int32, binariesPath string, builderImage string, builderRegistryServer string, defaultWorkspaceImage string, defaultWorkspaceUser string, headscalePort int32, id string, localBuilderRegistryImage string, localBuilderRegistryPort int32, logFile LogFileConfig, registryUrl string, serverDownloadUrl string) *ServerConfig {
 	this := ServerConfig{}
 	this.ApiPort = apiPort
 	this.BinariesPath = binariesPath
@@ -59,7 +59,6 @@ func NewServerConfig(apiPort int32, binariesPath string, builderImage string, bu
 	this.LocalBuilderRegistryImage = localBuilderRegistryImage
 	this.LocalBuilderRegistryPort = localBuilderRegistryPort
 	this.LogFile = logFile
-	this.ProvidersDir = providersDir
 	this.RegistryUrl = registryUrl
 	this.ServerDownloadUrl = serverDownloadUrl
 	return &this
@@ -377,6 +376,38 @@ func (o *ServerConfig) SetLocalBuilderRegistryPort(v int32) {
 	o.LocalBuilderRegistryPort = v
 }
 
+// GetLocalRunnerDisabled returns the LocalRunnerDisabled field value if set, zero value otherwise.
+func (o *ServerConfig) GetLocalRunnerDisabled() bool {
+	if o == nil || IsNil(o.LocalRunnerDisabled) {
+		var ret bool
+		return ret
+	}
+	return *o.LocalRunnerDisabled
+}
+
+// GetLocalRunnerDisabledOk returns a tuple with the LocalRunnerDisabled field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *ServerConfig) GetLocalRunnerDisabledOk() (*bool, bool) {
+	if o == nil || IsNil(o.LocalRunnerDisabled) {
+		return nil, false
+	}
+	return o.LocalRunnerDisabled, true
+}
+
+// HasLocalRunnerDisabled returns a boolean if a field has been set.
+func (o *ServerConfig) HasLocalRunnerDisabled() bool {
+	if o != nil && !IsNil(o.LocalRunnerDisabled) {
+		return true
+	}
+
+	return false
+}
+
+// SetLocalRunnerDisabled gets a reference to the given bool and assigns it to the LocalRunnerDisabled field.
+func (o *ServerConfig) SetLocalRunnerDisabled(v bool) {
+	o.LocalRunnerDisabled = &v
+}
+
 // GetLogFile returns the LogFile field value
 func (o *ServerConfig) GetLogFile() LogFileConfig {
 	if o == nil {
@@ -399,30 +430,6 @@ func (o *ServerConfig) GetLogFileOk() (*LogFileConfig, bool) {
 // SetLogFile sets field value
 func (o *ServerConfig) SetLogFile(v LogFileConfig) {
 	o.LogFile = v
-}
-
-// GetProvidersDir returns the ProvidersDir field value
-func (o *ServerConfig) GetProvidersDir() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ProvidersDir
-}
-
-// GetProvidersDirOk returns a tuple with the ProvidersDir field value
-// and a boolean to check if the value has been set.
-func (o *ServerConfig) GetProvidersDirOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ProvidersDir, true
-}
-
-// SetProvidersDir sets field value
-func (o *ServerConfig) SetProvidersDir(v string) {
-	o.ProvidersDir = v
 }
 
 // GetRegistryUrl returns the RegistryUrl field value
@@ -531,8 +538,10 @@ func (o ServerConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["localBuilderRegistryImage"] = o.LocalBuilderRegistryImage
 	toSerialize["localBuilderRegistryPort"] = o.LocalBuilderRegistryPort
+	if !IsNil(o.LocalRunnerDisabled) {
+		toSerialize["localRunnerDisabled"] = o.LocalRunnerDisabled
+	}
 	toSerialize["logFile"] = o.LogFile
-	toSerialize["providersDir"] = o.ProvidersDir
 	toSerialize["registryUrl"] = o.RegistryUrl
 	if !IsNil(o.SamplesIndexUrl) {
 		toSerialize["samplesIndexUrl"] = o.SamplesIndexUrl
@@ -557,7 +566,6 @@ func (o *ServerConfig) UnmarshalJSON(data []byte) (err error) {
 		"localBuilderRegistryImage",
 		"localBuilderRegistryPort",
 		"logFile",
-		"providersDir",
 		"registryUrl",
 		"serverDownloadUrl",
 	}

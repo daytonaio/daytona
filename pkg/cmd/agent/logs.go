@@ -10,8 +10,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -36,7 +36,7 @@ var logsCmd = &cobra.Command{
 		msgChan := make(chan []byte)
 		errChan := make(chan error)
 
-		go util.ReadLog(context.Background(), file, followFlag, msgChan, errChan)
+		go logs.ReadLog(context.Background(), file, followFlag, msgChan, errChan)
 
 		for {
 			select {

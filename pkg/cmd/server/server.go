@@ -10,17 +10,26 @@ import (
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api"
-	"github.com/daytonaio/daytona/pkg/cmd/server/daemon"
+	"github.com/daytonaio/daytona/pkg/cmd/common/daemon"
 	"github.com/daytonaio/daytona/pkg/cmd/server/logs"
+	"github.com/daytonaio/daytona/pkg/cmd/server/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/server"
+	"github.com/kardianos/service"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var yesFlag bool
+
+var svcConfig = &service.Config{
+	Name:        "DaytonaServerDaemon",
+	DisplayName: "Daytona Server",
+	Description: "Daytona Server daemon.",
+	Arguments:   []string{"daemon-serve"},
+}
 
 var ServerCmd = &cobra.Command{
 	Use:     "server",
@@ -53,7 +62,7 @@ var ServerCmd = &cobra.Command{
 		})
 
 		views.RenderInfoMessageBold("Starting the Daytona Server daemon...")
-		err = daemon.Start(c.LogFile.Path)
+		err = daemon.Start(c.LogFile.Path, svcConfig)
 		if err != nil {
 			return err
 		}
@@ -78,6 +87,7 @@ var startCmd = &cobra.Command{
 }
 
 func init() {
+	ServerCmd.AddCommand(runner.RunnerCmd)
 	ServerCmd.AddCommand(configureCmd)
 	ServerCmd.AddCommand(configCmd)
 	ServerCmd.AddCommand(logs.LogsCmd)

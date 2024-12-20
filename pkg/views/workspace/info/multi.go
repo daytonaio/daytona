@@ -35,7 +35,7 @@ func RenderMulti(workspaces []apiclient.WorkspaceDTO, ide string, forceUnstyled 
 	output += fmt.Sprintf("%s\n\n", views.SeparatorString)
 	for index, workspace := range workspaces {
 		output += getInfoLine(fmt.Sprintf("Workspace #%d", index+1), fmt.Sprintf("%s (%s)", workspace.Name, workspace.Id)) + "\n"
-		output += getSingleWorkspaceOutput(&workspace, true)
+		output += getWorkspaceDataOutput(&workspace, true)
 		if index < len(workspaces)-1 {
 			output += fmt.Sprintf("\n%s\n\n", views.SeparatorString)
 		}

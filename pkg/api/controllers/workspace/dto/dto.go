@@ -11,3 +11,7 @@ type SetWorkspaceMetadata struct {
 	Uptime    uint64            `json:"uptime" validate:"required"`
 	GitStatus *models.GitStatus `json:"gitStatus,omitempty" validate:"optional"`
 } // @name SetWorkspaceMetadata
+
+type UpdateWorkspaceProviderMetadataDTO struct {
+	Metadata string `json:"metadata" validate:"required"`
+} // @name UpdateWorkspaceProviderMetadataDTO

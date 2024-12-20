@@ -16,14 +16,43 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 )
 
 // JobAPIService JobAPI service
 type JobAPIService service
 
 type ApiListJobsRequest struct {
-	ctx        context.Context
-	ApiService *JobAPIService
+	ctx          context.Context
+	ApiService   *JobAPIService
+	states       *[]string
+	actions      *[]string
+	resourceId   *string
+	resourceType *string
+}
+
+// Job States
+func (r ApiListJobsRequest) States(states []string) ApiListJobsRequest {
+	r.states = &states
+	return r
+}
+
+// Job Actions
+func (r ApiListJobsRequest) Actions(actions []string) ApiListJobsRequest {
+	r.actions = &actions
+	return r
+}
+
+// Resource ID
+func (r ApiListJobsRequest) ResourceId(resourceId string) ApiListJobsRequest {
+	r.resourceId = &resourceId
+	return r
+}
+
+// Resource Type
+func (r ApiListJobsRequest) ResourceType(resourceType string) ApiListJobsRequest {
+	r.resourceType = &resourceType
+	return r
 }
 
 func (r ApiListJobsRequest) Execute() ([]Job, *http.Response, error) {
@@ -67,6 +96,34 @@ func (a *JobAPIService) ListJobsExecute(r ApiListJobsRequest) ([]Job, *http.Resp
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
 
+	if r.states != nil {
+		t := *r.states
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "states", s.Index(i).Interface(), "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "states", t, "multi")
+		}
+	}
+	if r.actions != nil {
+		t := *r.actions
+		if reflect.TypeOf(t).Kind() == reflect.Slice {
+			s := reflect.ValueOf(t)
+			for i := 0; i < s.Len(); i++ {
+				parameterAddToHeaderOrQuery(localVarQueryParams, "actions", s.Index(i).Interface(), "multi")
+			}
+		} else {
+			parameterAddToHeaderOrQuery(localVarQueryParams, "actions", t, "multi")
+		}
+	}
+	if r.resourceId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "resourceId", r.resourceId, "")
+	}
+	if r.resourceType != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "resourceType", r.resourceType, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

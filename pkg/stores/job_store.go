@@ -19,11 +19,12 @@ type JobStore interface {
 }
 
 type JobFilter struct {
-	Id           *string
-	ResourceId   *string
-	ResourceType *models.ResourceType
-	States       *[]models.JobState
-	Actions      *[]models.JobAction
+	Id              *string
+	ResourceId      *string
+	RunnerIdOrIsNil *string
+	ResourceType    *models.ResourceType
+	States          *[]models.JobState
+	Actions         *[]models.JobAction
 }
 
 func (f *JobFilter) StatesToInterface() []interface{} {

@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/services"
 )
 
 type IBuilder interface {
@@ -27,11 +26,11 @@ type Builder struct {
 	image                       string
 	containerRegistries         common.ContainerRegistries
 	buildImageContainerRegistry *models.ContainerRegistry
-	buildService                services.IBuildService
-	buildImageNamespace         string
-	loggerFactory               logs.LoggerFactory
-	defaultWorkspaceImage       string
-	defaultWorkspaceUser        string
+
+	buildImageNamespace   string
+	loggerFactory         logs.ILoggerFactory
+	defaultWorkspaceImage string
+	defaultWorkspaceUser  string
 }
 
 func (b *Builder) GetImageName(build models.Build) (string, error) {

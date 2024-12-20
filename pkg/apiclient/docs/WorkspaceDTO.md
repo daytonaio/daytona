@@ -4,15 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ApiKey** | **string** |  | 
 **BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
 **Image** | **string** |  | 
-**Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
 **Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**ResourceState**](ResourceState.md) |  | 
 **Target** | [**Target**](Target.md) |  | 
@@ -23,7 +24,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -37,6 +38,26 @@ will change when the set of required properties is changed
 NewWorkspaceDTOWithDefaults instantiates a new WorkspaceDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetApiKey
+
+`func (o *WorkspaceDTO) GetApiKey() string`
+
+GetApiKey returns the ApiKey field if non-nil, zero value otherwise.
+
+### GetApiKeyOk
+
+`func (o *WorkspaceDTO) GetApiKeyOk() (*string, bool)`
+
+GetApiKeyOk returns a tuple with the ApiKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetApiKey
+
+`func (o *WorkspaceDTO) SetApiKey(v string)`
+
+SetApiKey sets ApiKey field to given value.
+
 
 ### GetBuildConfig
 
@@ -148,31 +169,6 @@ and a boolean to check if the value has been set.
 SetImage sets Image field to given value.
 
 
-### GetInfo
-
-`func (o *WorkspaceDTO) GetInfo() WorkspaceInfo`
-
-GetInfo returns the Info field if non-nil, zero value otherwise.
-
-### GetInfoOk
-
-`func (o *WorkspaceDTO) GetInfoOk() (*WorkspaceInfo, bool)`
-
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetInfo
-
-`func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo)`
-
-SetInfo sets Info field to given value.
-
-### HasInfo
-
-`func (o *WorkspaceDTO) HasInfo() bool`
-
-HasInfo returns a boolean if a field has been set.
-
 ### GetLastJob
 
 `func (o *WorkspaceDTO) GetLastJob() Job`
@@ -242,6 +238,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetProviderMetadata
+
+`func (o *WorkspaceDTO) GetProviderMetadata() string`
+
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
+
+### GetProviderMetadataOk
+
+`func (o *WorkspaceDTO) GetProviderMetadataOk() (*string, bool)`
+
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderMetadata
+
+`func (o *WorkspaceDTO) SetProviderMetadata(v string)`
+
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *WorkspaceDTO) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetRepository
 

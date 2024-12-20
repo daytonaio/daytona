@@ -11,7 +11,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/runners"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -329,7 +329,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy(ctx context.Context) e
 func (s *WorkspaceTemplateService) StartRetentionPoller(ctx context.Context) error {
 	scheduler := scheduler.NewCronScheduler()
 
-	err := scheduler.AddFunc(runners.DEFAULT_JOB_POLL_INTERVAL, func() {
+	err := scheduler.AddFunc(runner.DEFAULT_JOB_POLL_INTERVAL, func() {
 		err := s.EnforceRetentionPolicy(ctx)
 		if err != nil {
 			log.Error(err)

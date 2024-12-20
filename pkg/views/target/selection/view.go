@@ -53,8 +53,14 @@ func (i item[T]) Title() string {
 	return title
 }
 
-func (i item[T]) Id() string          { return i.id }
-func (i item[T]) Description() string { return i.desc }
+func (i item[T]) Id() string { return i.id }
+func (i item[T]) Description() string {
+	desc := i.desc
+	if i.target.TargetConfig.ProviderInfo.RunnerName != "" {
+		desc = fmt.Sprintf("%s (%s)", desc, i.target.TargetConfig.ProviderInfo.RunnerName)
+	}
+	return desc
+}
 func (i item[T]) State() string       { return i.state }
 func (i item[T]) FilterValue() string { return i.title }
 

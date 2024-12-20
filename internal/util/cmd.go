@@ -7,4 +7,5 @@ const (
 	TARGET_GROUP  = "target"
 	SERVER_GROUP  = "server"
 	PROFILE_GROUP = "profile"
+	RUNNER_GROUP  = "runner"
 )

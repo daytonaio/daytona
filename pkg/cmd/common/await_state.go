@@ -4,6 +4,7 @@
 package common
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"time"
@@ -14,7 +15,7 @@ import (
 
 func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceStateName) error {
 	for {
-		ws, _, err := apiclient_util.GetWorkspace(workspaceId, false)
+		ws, _, err := apiclient_util.GetWorkspace(workspaceId)
 		if err != nil {
 			return err
 		}
@@ -34,7 +35,7 @@ func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceS
 
 func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateName) error {
 	for {
-		t, _, err := apiclient_util.GetTarget(targetId, false)
+		t, _, err := apiclient_util.GetTarget(targetId)
 		if err != nil {
 			return err
 		}
@@ -54,9 +55,37 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 	}
 }
 
+func AwaitProviderInstalled(runnerId, providerName, version string) error {
+	for {
+		ctx := context.Background()
+
+		apiClient, err := apiclient_util.GetApiClient(nil)
+		if err != nil {
+			return err
+		}
+
+		runner, res, err := apiClient.RunnerAPI.GetRunner(ctx, runnerId).Execute()
+		if err != nil {
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
+		if runner.Metadata == nil {
+			continue
+		}
+
+		for _, provider := range runner.Metadata.Providers {
+			if provider.Name == providerName && provider.Version == version {
+				return nil
+			}
+		}
+
+		time.Sleep(time.Second)
+	}
+}
+
 func AwaitWorkspaceDeleted(workspaceId string) error {
 	for {
-		_, statusCode, err := apiclient_util.GetWorkspace(workspaceId, false)
+		_, statusCode, err := apiclient_util.GetWorkspace(workspaceId)
 		if err != nil {
 			if statusCode == http.StatusNotFound {
 				return nil
@@ -69,7 +98,7 @@ func AwaitWorkspaceDeleted(workspaceId string) error {
 
 func AwaitTargetDeleted(workspaceId string) error {
 	for {
-		_, statusCode, err := apiclient_util.GetTarget(workspaceId, false)
+		_, statusCode, err := apiclient_util.GetTarget(workspaceId)
 		if err != nil {
 			if statusCode == http.StatusNotFound {
 				return nil

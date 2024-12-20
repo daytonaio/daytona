@@ -10,6 +10,7 @@ daytona target-config list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
+  -v, --show-options    Show target options
 ```
 
 ### Options inherited from parent commands

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
@@ -19,11 +18,18 @@ import (
 //	@Summary		Add a target config
 //	@Description	Add a target config
 //	@Param			targetConfig	body		AddTargetConfigDTO	true	"Target config to add"
+//	@Param			showOptions		query		bool				false	"Show target config options"
 //	@Success		200				{object}	TargetConfig
 //	@Router			/target-config [put]
 //
 //	@id				AddTargetConfig
 func AddTargetConfig(ctx *gin.Context) {
+	showTargetConfigOptionsQuery := ctx.Query("showOptions")
+	var showTargetConfigOptions bool
+	if showTargetConfigOptionsQuery == "true" {
+		showTargetConfigOptions = true
+	}
+
 	var req services.AddTargetConfigDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
@@ -39,11 +45,8 @@ func AddTargetConfig(ctx *gin.Context) {
 		return
 	}
 
-	maskedOptions, err := util.GetMaskedOptions(server, targetConfig.ProviderInfo.Name, targetConfig.Options)
-	if err != nil {
-		targetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-	} else {
-		targetConfig.Options = maskedOptions
+	if !showTargetConfigOptions {
+		targetConfig.Options = ""
 	}
 
 	ctx.JSON(200, targetConfig)
