@@ -5,7 +5,9 @@ package workspaces
 
 import (
 	"context"
+	"errors"
 	"io"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -92,4 +94,27 @@ type WorkspaceService struct {
 
 func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {
 	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) AwaitEmptyList(ctx context.Context, waitTime time.Duration) error {
+	timeout := time.NewTimer(waitTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-timeout.C:
+			return errors.New("awaiting empty build list timed out")
+		default:
+			workspaces, err := s.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{})
+			if err != nil {
+				return err
+			}
+
+			if len(workspaces) == 0 {
+				return nil
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
 }
