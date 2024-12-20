@@ -6,6 +6,12 @@ Unregister runner
 daytona server runner unregister [RUNNER] [flags]
 ```
 
+### Options
+
+```
+  -y, --yes   Confirm deletion without prompt
+```
+
 ### Options inherited from parent commands
 
 ```

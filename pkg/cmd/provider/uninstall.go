@@ -41,6 +41,10 @@ var providerUninstallCmd = &cobra.Command{
 				}
 			}
 
+			if selectedRunner == nil {
+				return nil
+			}
+
 			selectedRunnerId = selectedRunner.Id
 		} else {
 			selectedRunnerId = args[0]

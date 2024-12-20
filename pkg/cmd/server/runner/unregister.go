@@ -5,10 +5,13 @@ package runner
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	runner "github.com/daytonaio/daytona/pkg/views/server/runner/selection"
@@ -22,6 +25,7 @@ var unregisterCmd = &cobra.Command{
 	Short: "Unregister runner",
 	Args:  cobra.RangeArgs(0, 1),
 	RunE: func(cmd *cobra.Command, args []string) error {
+
 		var selectedRunnerId string
 
 		ctx := context.Background()
@@ -65,6 +69,28 @@ var unregisterCmd = &cobra.Command{
 			selectedRunnerId = args[0]
 		}
 
+		if selectedRunnerId == bootstrap.LOCAL_RUNNER_ID {
+			return errors.New("to disable the local runner, use the 'daytona server configure' form")
+		}
+
+		var confirm bool
+
+		if !yesFlag {
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewConfirm().
+						Title(fmt.Sprintf("Unregister runner %s?", selectedRunnerId)).
+						Description("It is recommended that you remove all target configs, targets and workspaces associated with it.").
+						Value(&confirm),
+				),
+			).WithTheme(views.GetCustomTheme())
+
+			err := form.Run()
+			if err != nil {
+				return err
+			}
+		}
+
 		res, err := apiClient.RunnerAPI.RemoveRunner(ctx, selectedRunnerId).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
@@ -73,4 +99,10 @@ var unregisterCmd = &cobra.Command{
 		views.RenderInfoMessageBold(fmt.Sprintf("Runner %s unregistered successfully", selectedRunnerId))
 		return nil
 	},
+}
+
+var yesFlag bool
+
+func init() {
+	unregisterCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
