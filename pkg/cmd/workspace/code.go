@@ -54,7 +54,7 @@ var CodeCmd = &cobra.Command{
 		}
 
 		if len(args) == 0 {
-			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(true).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

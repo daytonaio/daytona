@@ -36,9 +36,6 @@ func Execute() error {
 	agentModeRootCmd.AddCommand(gitCredCmd)
 	agentModeRootCmd.AddCommand(dockerCredCmd)
 	agentModeRootCmd.AddCommand(AgentCmd)
-	agentModeRootCmd.AddCommand(startCmd)
-	agentModeRootCmd.AddCommand(stopCmd)
-	agentModeRootCmd.AddCommand(restartCmd)
 	agentModeRootCmd.AddCommand(infoCmd)
 	agentModeRootCmd.AddCommand(portForwardCmd)
 	agentModeRootCmd.AddCommand(exposeCmd)
@@ -70,4 +67,8 @@ func init() {
 	if workspaceIdEnv := os.Getenv("DAYTONA_WORKSPACE_ID"); workspaceIdEnv != "" {
 		workspaceId = workspaceIdEnv
 	}
+}
+
+func isWorkspaceAgentMode() bool {
+	return workspaceId != ""
 }
