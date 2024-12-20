@@ -268,5 +268,10 @@
     "name": "React.js & Node - Briefly",
     "description" : "Research companion where you can upload papers and get summaries, and find answers to the relevant questions on the paper",
     "gitUrl" : "https://github.com/daytonaio/sample-react-ai-paper-summary.git"
+  },
+  {
+    "name": "sample-go-web-server ",
+    "description" : "A simple Go web server using Gorilla Mux and Logrus",
+    "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
   }
 ]
