@@ -176,6 +176,7 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 	var job jobs.IJob
 
+	j.State = models.JobStateRunning
 	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
 	if err != nil {
 		return err
@@ -240,10 +241,15 @@ func (r *Runner) logJobStateUpdate(j *models.Job) {
 		return
 	}
 
-	message := "Job successful"
-	if j.State == models.JobStateError {
+	message := "Invalid Job State"
+	switch j.State {
+	case models.JobStatePending:
+		message = "Job pending"
+	case models.JobStateSuccess:
+		message = "Job succeeded"
+	case models.JobStateError:
 		message = "Job failed"
-	} else if j.State == models.JobStateRunning {
+	case models.JobStateRunning:
 		message = "Running job"
 	}
 
