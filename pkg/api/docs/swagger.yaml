@@ -638,7 +638,7 @@ definitions:
       name:
         type: string
       state:
-        type: string
+        $ref: '#/definitions/ResourceState'
     required:
     - id
     - name

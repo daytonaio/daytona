@@ -7,13 +7,13 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Metadata** | Pointer to [**RunnerMetadata**](RunnerMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
-**State** | **string** |  | 
+**State** | [**ResourceState**](ResourceState.md) |  | 
 
 ## Methods
 
 ### NewRunnerDTO
 
-`func NewRunnerDTO(id string, name string, state string, ) *RunnerDTO`
+`func NewRunnerDTO(id string, name string, state ResourceState, ) *RunnerDTO`
 
 NewRunnerDTO instantiates a new RunnerDTO object
 This constructor will assign default values to properties that have it defined,
@@ -95,20 +95,20 @@ SetName sets Name field to given value.
 
 ### GetState
 
-`func (o *RunnerDTO) GetState() string`
+`func (o *RunnerDTO) GetState() ResourceState`
 
 GetState returns the State field if non-nil, zero value otherwise.
 
 ### GetStateOk
 
-`func (o *RunnerDTO) GetStateOk() (*string, bool)`
+`func (o *RunnerDTO) GetStateOk() (*ResourceState, bool)`
 
 GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetState
 
-`func (o *RunnerDTO) SetState(v string)`
+`func (o *RunnerDTO) SetState(v ResourceState)`
 
 SetState sets State field to given value.
 

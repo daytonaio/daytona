@@ -55,11 +55,11 @@ func getRowFromData(runner apiclient.RunnerDTO) []string {
 
 	data.Name = runner.Name + views_util.AdditionalPropertyPadding
 	data.Id = runner.Id
-	data.State = runner.State
+	data.State = views.GetStateLabel(runner.State.Name)
 
 	return []string{
 		views.NameStyle.Render(data.Name),
 		views.DefaultRowDataStyle.Render(data.Id),
-		views.DefaultRowDataStyle.Render(data.State),
+		data.State,
 	}
 }

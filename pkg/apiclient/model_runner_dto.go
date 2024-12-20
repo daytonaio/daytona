@@ -24,7 +24,7 @@ type RunnerDTO struct {
 	Id       string          `json:"id"`
 	Metadata *RunnerMetadata `json:"metadata,omitempty"`
 	Name     string          `json:"name"`
-	State    string          `json:"state"`
+	State    ResourceState   `json:"state"`
 }
 
 type _RunnerDTO RunnerDTO
@@ -33,7 +33,7 @@ type _RunnerDTO RunnerDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRunnerDTO(id string, name string, state string) *RunnerDTO {
+func NewRunnerDTO(id string, name string, state ResourceState) *RunnerDTO {
 	this := RunnerDTO{}
 	this.Id = id
 	this.Name = name
@@ -130,9 +130,9 @@ func (o *RunnerDTO) SetName(v string) {
 }
 
 // GetState returns the State field value
-func (o *RunnerDTO) GetState() string {
+func (o *RunnerDTO) GetState() ResourceState {
 	if o == nil {
-		var ret string
+		var ret ResourceState
 		return ret
 	}
 
@@ -141,7 +141,7 @@ func (o *RunnerDTO) GetState() string {
 
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *RunnerDTO) GetStateOk() (*string, bool) {
+func (o *RunnerDTO) GetStateOk() (*ResourceState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -149,7 +149,7 @@ func (o *RunnerDTO) GetStateOk() (*string, bool) {
 }
 
 // SetState sets field value
-func (o *RunnerDTO) SetState(v string) {
+func (o *RunnerDTO) SetState(v ResourceState) {
 	o.State = v
 }
 

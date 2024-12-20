@@ -3325,7 +3325,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "state": {
-                    "type": "string"
+                    "$ref": "#/definitions/ResourceState"
                 }
             }
         },

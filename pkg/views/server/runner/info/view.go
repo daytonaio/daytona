@@ -32,7 +32,11 @@ func Render(runner *apiclient.RunnerDTO, forceUnstyled bool) {
 
 	output += getInfoLine("ID", runner.Id) + "\n"
 
-	output += getInfoLine("State", runner.State) + "\n"
+	output += getInfoLine("State", views.GetStateLabel(runner.State.Name)) + "\n"
+
+	if runner.State.Error != nil {
+		output += getInfoLine("Error", *runner.State.Error) + "\n"
+	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {

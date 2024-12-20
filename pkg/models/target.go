@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 )
 
-const AGENT_UNRESPONSIVE_THRESHOLD = 30 * time.Second
+const RESOURCE_UNRESPONSIVE_THRESHOLD = 30 * time.Second
 
 type Target struct {
 	Id               string            `json:"id" validate:"required" gorm:"primaryKey"`
@@ -48,7 +48,7 @@ func (t *Target) GetState() ResourceState {
 
 	// If the target should be running, check if it is unresponsive
 	if state.Name == ResourceStateNameStarted {
-		if t.Metadata != nil && time.Since(t.Metadata.UpdatedAt) > AGENT_UNRESPONSIVE_THRESHOLD {
+		if t.Metadata != nil && time.Since(t.Metadata.UpdatedAt) > RESOURCE_UNRESPONSIVE_THRESHOLD {
 			state.Name = ResourceStateNameUnresponsive
 			state.Error = util.Pointer("Target is unresponsive")
 			state.UpdatedAt = t.Metadata.UpdatedAt

@@ -3,7 +3,11 @@
 
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/daytonaio/daytona/internal/util"
+)
 
 type Runner struct {
 	Id       string          `json:"id" validate:"required" gorm:"primaryKey"`
@@ -12,16 +16,23 @@ type Runner struct {
 	Metadata *RunnerMetadata `json:"metadata" validate:"optional" gorm:"foreignKey:RunnerId;references:Id"`
 } // @name Runner
 
-func (r *Runner) GetState() RunnerState {
+func (r *Runner) GetState() ResourceState {
+	var state ResourceState
+	state.Name = ResourceStateNameUnresponsive
+	state.UpdatedAt = time.Now()
+	state.Error = util.Pointer("Runner is unresponsive")
+
 	if r.Metadata == nil {
-		return RunnerStateUnresponsive
+		return state
 	}
 
-	if r.Metadata != nil && time.Since(r.Metadata.UpdatedAt) > AGENT_UNRESPONSIVE_THRESHOLD {
-		return RunnerStateUnresponsive
+	if r.Metadata != nil && (time.Since(r.Metadata.UpdatedAt) > RESOURCE_UNRESPONSIVE_THRESHOLD || r.Metadata.Uptime == 0) {
+		state.UpdatedAt = r.Metadata.UpdatedAt
+		return state
 	}
 
-	return RunnerStateRunning
+	state.Name = ResourceStateNameStarted
+	return state
 }
 
 type RunnerMetadata struct {
@@ -31,10 +42,3 @@ type RunnerMetadata struct {
 	RunningJobs *uint64        `json:"runningJobs,omitempty" validate:"optional" gorm:"default:0"`
 	Providers   []ProviderInfo `json:"providers" validate:"required" gorm:"serializer:json;not null"`
 } // @name RunnerMetadata
-
-type RunnerState string
-
-var (
-	RunnerStateRunning      RunnerState = "running"
-	RunnerStateUnresponsive RunnerState = "unresponsive"
-)

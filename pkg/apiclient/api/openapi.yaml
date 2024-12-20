@@ -2769,7 +2769,10 @@ components:
           uptime: 6
         name: name
         id: id
-        state: state
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
       properties:
         id:
           type: string
@@ -2778,7 +2781,7 @@ components:
         name:
           type: string
         state:
-          type: string
+          $ref: '#/components/schemas/ResourceState'
       required:
       - id
       - name

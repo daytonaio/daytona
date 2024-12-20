@@ -32,7 +32,7 @@ type IRunnerService interface {
 
 type RunnerDTO struct {
 	models.Runner
-	State models.RunnerState `json:"state" validate:"required"`
+	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	RunnerDTO
 
 type RegisterRunnerDTO struct {

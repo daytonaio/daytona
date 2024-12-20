@@ -46,7 +46,7 @@ func (w *Workspace) GetState() ResourceState {
 
 	// If the workspace should be running, check if it is unresponsive
 	if state.Name == ResourceStateNameStarted {
-		if w.Metadata != nil && time.Since(w.Metadata.UpdatedAt) > AGENT_UNRESPONSIVE_THRESHOLD {
+		if w.Metadata != nil && time.Since(w.Metadata.UpdatedAt) > RESOURCE_UNRESPONSIVE_THRESHOLD {
 			state.Name = ResourceStateNameUnresponsive
 			state.Error = util.Pointer("Workspace is unresponsive")
 			state.UpdatedAt = w.Metadata.UpdatedAt
