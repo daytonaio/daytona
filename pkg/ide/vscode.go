@@ -66,7 +66,12 @@ func setupVSCodeCustomizations(projectHostname string, projectProviderMetadata s
 	if devcontainerMetadata, ok := metadata["devcontainer.metadata"]; ok {
 		var configs []devcontainer.Configuration
 		if err := json.Unmarshal([]byte(devcontainerMetadata.(string)), &configs); err != nil {
-			return err
+			// Metadata can sometimes be a single object
+			var config devcontainer.Configuration
+			if err := json.Unmarshal([]byte(devcontainerMetadata.(string)), &config); err != nil {
+				return err
+			}
+			configs = append(configs, config)
 		}
 
 		customizations := []devcontainer.Customizations{}
