@@ -24,7 +24,6 @@ type ReadLogParams struct {
 	SkipPrefixLengthSetup bool
 	Index                 *int
 	Follow                *bool
-	Query                 *string
 	From                  *time.Time
 }
 
@@ -85,9 +84,9 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
 
 	for {
-		var query string
-		if params.Query != nil {
-			query = *params.Query
+		query := ""
+		if params.Follow != nil && *params.Follow {
+			query = "follow=true"
 		}
 
 		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/build/%s", params.Id), params.ServerUrl, params.ApiKey, &query)
@@ -108,9 +107,9 @@ func ReadRunnerLogs(ctx context.Context, params ReadLogParams) {
 	checkAndSetupLongestPrefixLength(params.SkipPrefixLengthSetup, params.Id, params.Label)
 
 	for {
-		var query string
-		if params.Query != nil {
-			query = *params.Query
+		query := ""
+		if params.Follow != nil && *params.Follow {
+			query = "follow=true"
 		}
 
 		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/log/runner/%s", params.Id), params.ServerUrl, params.ApiKey, &query)

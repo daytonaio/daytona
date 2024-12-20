@@ -31,11 +31,6 @@ var buildLogsCmd = &cobra.Command{
 			return err
 		}
 
-		query := ""
-		if followFlag {
-			query += "follow=true"
-		}
-
 		ctx := context.Background()
 		var buildId string
 
@@ -73,7 +68,7 @@ var buildLogsCmd = &cobra.Command{
 			Id:        buildId,
 			ServerUrl: activeProfile.Api.Url,
 			ApiKey:    activeProfile.Api.Key,
-			Query:     &query,
+			Follow:    &followFlag,
 		})
 
 		// Make sure the terminal cursor is reset
