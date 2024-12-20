@@ -157,6 +157,13 @@ var ServeCmd = &cobra.Command{
 			log.Errorf("Failed to start local container registry: %v\nBuilds may not work properly.\nRestart the server to restart the registry.", err)
 		}
 
+		if c.LocalRunnerDisabled != nil && !*c.LocalRunnerDisabled {
+			err = awaitLocalRunnerStarted()
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+		}
+
 		printServerStartedMessage(c, false)
 
 		err = ensureDefaultProfile(server, c.ApiPort)
@@ -268,6 +275,31 @@ func getLocalRunnerConfig(configDir string) *runner.Config {
 		ProvidersDir: providersDir,
 		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
 	}
+}
+
+func awaitLocalRunnerStarted() error {
+	server := server.GetInstance(nil)
+	startTime := time.Now()
+
+	for {
+		r, err := server.RunnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
+		if err != nil {
+			return err
+		}
+
+		if r.Metadata.Uptime > 0 {
+			break
+		}
+
+		if time.Since(startTime) > 10*time.Second {
+			log.Info("Waiting for runner ...")
+			startTime = time.Now()
+		}
+
+		time.Sleep(1 * time.Second)
+	}
+
+	return nil
 }
 
 func handleDisabledLocalRunner() error {

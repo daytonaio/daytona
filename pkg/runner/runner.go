@@ -137,14 +137,14 @@ func (r *Runner) Start(ctx context.Context) error {
 
 	scheduler.Start()
 
+	r.logger.Info("Runner started")
+
 	go func() {
 		for {
 			_ = r.UpdateRunnerMetadata(r.Config)
 			time.Sleep(RUNNER_METADATA_UPDATE_INTERVAL)
 		}
 	}()
-
-	r.logger.Info("Runner started")
 
 	<-ctx.Done()
 
