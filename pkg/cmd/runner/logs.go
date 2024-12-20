@@ -50,7 +50,12 @@ var logsCmd = &cobra.Command{
 
 		go func() {
 			for entry := range entryChan {
-				logs_view.DisplayLogEntry(entry.(logs.LogEntry), logs_view.STATIC_INDEX)
+				logEntry, ok := entry.(logs.LogEntry)
+				if !ok || logEntry == (logs.LogEntry{}) {
+					continue
+				}
+
+				logs_view.DisplayLogEntry(logEntry, logs_view.STATIC_INDEX)
 			}
 		}()
 
