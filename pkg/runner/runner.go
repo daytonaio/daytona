@@ -176,12 +176,12 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 	var job jobs.IJob
 
-	r.logger.Info(fmt.Sprintf("Running job %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
-
 	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
 	if err != nil {
 		return err
 	}
+
+	r.logJobStateUpdate(j)
 
 	switch j.ResourceType {
 	case models.ResourceTypeWorkspace:
@@ -198,11 +198,11 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	err = job.Execute(ctx)
 	if err != nil {
-		r.logger.Info(fmt.Sprintf("Job failed %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
+		r.logJobStateUpdate(j)
 		return r.updateJobState(ctx, j.Id, models.JobStateError, &err)
 	}
 
-	r.logger.Info(fmt.Sprintf("Job successful %s - %s - %s\n", j.Id, j.ResourceType, j.Action))
+	r.logJobStateUpdate(j)
 	return r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 }
 
@@ -233,4 +233,19 @@ func (r *Runner) UpdateRunnerMetadata(config *Config) error {
 		Providers:   providerInfos,
 		RunningJobs: util.Pointer(uint64(0)),
 	})
+}
+
+func (r *Runner) logJobStateUpdate(j *models.Job) {
+	if j == nil {
+		return
+	}
+
+	message := "Job successful"
+	if j.State == models.JobStateError {
+		message = "Job failed"
+	} else if j.State == models.JobStateRunning {
+		message = "Running job"
+	}
+
+	r.logger.Info(fmt.Sprintf("%-16s %-16s %-12s %-12s\n", message, j.Id, j.ResourceType, j.Action))
 }
