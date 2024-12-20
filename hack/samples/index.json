@@ -243,5 +243,10 @@
     "name": "ShepherdJS - gotSeed",
     "description": "gotSeed is a web application which lets you to explore a diverse range of plants available at nearby nurseries and gardens 🌿.",
     "gitUrl": "https://github.com/daytonaio/sample-shepherd-js-gotseed"
+  },
+  {
+    "name": "Python Flask - ML Model Deployment - IRIS-C",
+    "description": "IRIS-C is a Python Flask project where the iris flower classification model is deployed into a web app. With given lengths and widths of petals and sepals, we can classify a flower into one of the species of the iris flower.",
+    "giturl": "https://github.com/daytonaio/sample-python-flask-ml-model-deployment"
   }
 ]
