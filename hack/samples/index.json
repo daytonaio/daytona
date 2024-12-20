@@ -253,5 +253,10 @@
     "name": "Python Flask - ML Model Deployment - IRIS-C",
     "description": "IRIS-C is a Python Flask project where the iris flower classification model is deployed into a web app. With given lengths and widths of petals and sepals, we can classify a flower into one of the species of the iris flower.",
     "giturl": "https://github.com/daytonaio/sample-python-flask-ml-model-deployment"
+  },
+  {
+    "name": "NextJS & SocketIO - DevOrbit",
+    "description": "It's the ultimate space for devs to pair program, share code snips, and work together. Whether you're looking to work on a project, brainstorm ideas, or just have a random chat about your favorite tech, we've has got you covered",
+    "gitUrl": "https://github.com/daytonaio/sample-typescript-nextjs-devorbit"
   }
 ]
