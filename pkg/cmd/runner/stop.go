@@ -4,6 +4,9 @@
 package runner
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/daytonaio/daytona/pkg/cmd/common/daemon"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/spf13/cobra"
@@ -15,6 +18,11 @@ var stopCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		views.RenderInfoMessageBold("Stopping the Daytona Runner daemon...")
-		return daemon.Stop(svcConfig)
+		err := daemon.Stop(svcConfig)
+		if errors.Is(err, daemon.ErrDaemonNotInstalled) {
+			return fmt.Errorf("%w. First run 'daytona runner start' to start the runner daemon", err)
+		}
+
+		return err
 	},
 }

@@ -20,6 +20,8 @@ type program struct {
 	service.Interface
 }
 
+var ErrDaemonNotInstalled = errors.New("daemon not installed")
+
 func Start(logFilePath string, svcConfig *service.Config) error {
 	cfg, err := getServiceConfig(svcConfig)
 	if err != nil {
@@ -102,7 +104,7 @@ func Stop(svcConfig *service.Config) error {
 		return err
 	}
 	if _, err := os.Stat(serviceFilePath); os.IsNotExist(err) {
-		return errors.New("daemon not installed. Run `daytona server` to start the server")
+		return ErrDaemonNotInstalled
 	}
 
 	err = s.Stop()

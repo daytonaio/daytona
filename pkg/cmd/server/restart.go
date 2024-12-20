@@ -4,6 +4,9 @@
 package server
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/daytonaio/daytona/pkg/cmd/common/daemon"
@@ -18,6 +21,9 @@ var restartCmd = &cobra.Command{
 		views.RenderInfoMessage("Stopping the Daytona Server daemon...")
 		err := daemon.Stop(svcConfig)
 		if err != nil {
+			if errors.Is(err, daemon.ErrDaemonNotInstalled) {
+				return fmt.Errorf("%w. First run 'daytona server' to start the server daemon", err)
+			}
 			return err
 		}
 
