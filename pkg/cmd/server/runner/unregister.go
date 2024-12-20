@@ -70,7 +70,7 @@ var unregisterCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessageBold(fmt.Sprintf("Runenr %s unregistered successfully", selectedRunnerId))
+		views.RenderInfoMessageBold(fmt.Sprintf("Runner %s unregistered successfully", selectedRunnerId))
 		return nil
 	},
 }
