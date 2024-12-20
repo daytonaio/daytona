@@ -14,9 +14,12 @@ import (
 func Render(key, apiUrl string) {
 	var output string
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Generated API key: "), key) + "\n\n"
+	views.RenderContainerLayout(views.GetInfoMessage("You have successfully generated a new API Key and Server URL, which you can find below:"))
 
-	output += "You can connect to the Daytona Server from a client machine by running:"
+	fmt.Println(lipgloss.NewStyle().Padding(0).Render(fmt.Sprintf("%s %s", views.GetPropertyKey("DAYTONA_API_KEY="), key)))
+	fmt.Println(lipgloss.NewStyle().Padding(0).Render(fmt.Sprintf("%s%s", views.GetPropertyKey("DAYTONA_SERVER_URL="), apiUrl)))
+
+	output += "You can also connect to the Daytona Server instantly from a client machine by running the command below:"
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 
