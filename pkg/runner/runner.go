@@ -199,10 +199,12 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	err = job.Execute(ctx)
 	if err != nil {
+		j.State = models.JobStateError
 		r.logJobStateUpdate(j)
 		return r.updateJobState(ctx, j.Id, models.JobStateError, &err)
 	}
 
+	j.State = models.JobStateSuccess
 	r.logJobStateUpdate(j)
 	return r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 }
