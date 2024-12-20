@@ -270,6 +270,11 @@
     "gitUrl" : "https://github.com/daytonaio/sample-react-ai-paper-summary.git"
   },
   {
+    "name": "NextJS - Weather-bot ",
+    "description": "This application provides real-time weather information, including temperature, descriptions, humidity, and wind speed, based on user input.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-weather-bot.git"
+  },
+  {
     "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
