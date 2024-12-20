@@ -5,6 +5,8 @@ package runner
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -68,14 +70,22 @@ var logsCmd = &cobra.Command{
 				}
 			}
 
-			selectedRunnerId = selectedRunner.Id
+			selectedRunnerId = selectedRunner.Name
 		} else {
 			selectedRunnerId = args[0]
 		}
 
+		runner, res, err := apiClient.RunnerAPI.GetRunner(ctx, selectedRunnerId).Execute()
+		if err != nil {
+			if res.StatusCode == http.StatusNotFound {
+				return fmt.Errorf("runner %s not found", selectedRunnerId)
+			}
+			return apiclient_util.HandleErrorResponse(res, err)
+		}
+
 		cmd_common.ReadRunnerLogs(ctx, cmd_common.ReadLogParams{
-			Id:        selectedRunnerId,
-			Label:     &selectedRunnerId,
+			Id:        runner.Id,
+			Label:     &runner.Name,
 			ServerUrl: activeProfile.Api.Url,
 			ApiKey:    activeProfile.Api.Key,
 			Index:     util.Pointer(0),
