@@ -60,9 +60,9 @@
       "gitUrl": "https://github.com/daytonaio/sample-python"
   },
   {
-     "name":"Python - Lunku AI",
-     "description":"Lunku AI is a Bot. Used in Discord for Image Generation using Pordia AI.",
-     "gitUrl":"https://github.com/daytonaio/sample-python-discord-image-generator"
+     "name": "Python - Lunku AI",
+     "description": "Lunku AI is a Bot. Used in Discord for Image Generation using Pordia AI.",
+     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
   },
   {
       "name": "Ruby",
