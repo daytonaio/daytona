@@ -118,7 +118,7 @@ func GetRequiredScopesFromGitProviderId(providerId string) string {
 	case "github":
 		fallthrough
 	case "github-enterprise-server":
-		return "repo,read:user,user:email"
+		return "repo, user (read:user,user:email)"
 	case "gitlab":
 		fallthrough
 	case "gitlab-self-managed":
