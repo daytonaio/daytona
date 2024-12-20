@@ -270,7 +270,7 @@
     "gitUrl" : "https://github.com/daytonaio/sample-react-ai-paper-summary.git"
   },
   {
-    "name": "sample-go-web-server ",
+    "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
   }
