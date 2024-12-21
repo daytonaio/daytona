@@ -18,6 +18,7 @@ import (
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	log "github.com/sirupsen/logrus"
+
 	"github.com/spf13/cobra"
 )
 
@@ -268,10 +269,10 @@ func getAllWorkspacesByState(state WorkspaceState) ([]string, cobra.ShellCompDir
 }
 
 func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName string) error {
-	ctx := context.Background()
+	_ = context.Background()
 	var projectNames []string
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
-	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+	_, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
 		return err
 	}
@@ -291,33 +292,60 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName str
 		return err
 	}
 	if projectName != "" {
-		projectNames = append(projectNames, projectName)
+		_ = append(projectNames, projectName)
 	} else {
-		projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
+		_ = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
 			return p.Name
 		})
 	}
 
-	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, activeProfile, workspace.Id, projectNames, true, true, &from)
+	ctx, stopLogs := context.WithCancel(context.Background())
+	errChan := make(chan error, 1)
 
+	go apiclient_util.NewLogReader(&activeProfile, workspace.Id)
+
+	// Handle GetWorkspace in a goroutine with error channel
+	go func() {
+		if _, err := apiclient_util.GetWorkspace(workspace.Id, true); err != nil {
+			errChan <- err
+		}
+		errChan <- nil
+	}()
+
+	// Start the workspace or project
+	var startErr error
 	if projectName == "" {
 		res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspaceId).Execute()
 		if err != nil {
-			stopLogs()
-			return apiclient_util.HandleErrorResponse(res, err)
+			startErr = apiclient_util.HandleErrorResponse(res, err)
 		}
-		time.Sleep(100 * time.Millisecond)
-		stopLogs()
-		return nil
 	} else {
 		res, err := apiClient.WorkspaceAPI.StartProject(ctx, workspaceId, projectName).Execute()
 		if err != nil {
-			stopLogs()
-			return apiclient_util.HandleErrorResponse(res, err)
+			startErr = apiclient_util.HandleErrorResponse(res, err)
 		}
-		time.Sleep(100 * time.Millisecond)
-		stopLogs()
-		return nil
 	}
+
+	// If we have a startup error, stop logs and return the error
+	if startErr != nil {
+		stopLogs()
+		return startErr
+	}
+
+	// Wait a bit for logs to start
+	time.Sleep(100 * time.Millisecond)
+
+	// Check for any errors from the GetWorkspace goroutine
+	select {
+	case err := <-errChan:
+		if err != nil {
+			stopLogs()
+			return fmt.Errorf("error getting workspace status: %w", err)
+		}
+	default:
+		// Don't block if no error received
+	}
+
+	stopLogs()
+	return nil
 }

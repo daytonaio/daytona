@@ -5,51 +5,62 @@ package log
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
-	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/api/types"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
-const TIMEOUT = 300 * time.Millisecond
-
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
+type WebSocketReader struct {
+	sync.Mutex
+	position  *types.LogPosition
+	ws        *websocket.Conn
+	readFunc  func(context.Context, io.Reader, bool, chan<- []byte, chan<- error)
+	writeFunc func(*websocket.Conn, []byte) error
 }
 
-func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
-	for {
-		err := ws.WriteMessage(websocket.TextMessage, <-c)
-		if err != nil {
-			errChan <- err
-			break
-		}
+func NewWebSocketReader(ws *websocket.Conn, readFunc func(context.Context, io.Reader, bool, chan<- []byte, chan<- error), writeFunc func(*websocket.Conn, []byte) error) *WebSocketReader {
+	return &WebSocketReader{
+		ws:        ws,
+		readFunc:  readFunc,
+		writeFunc: writeFunc,
+		position:  &types.LogPosition{},
 	}
 }
 
-func writeJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
-	for {
-		err := ws.WriteJSON(<-c)
-		if err != nil {
-			errChan <- err
-			break
-		}
-	}
+func (r *WebSocketReader) UpdatePosition(offset int64, line string) {
+	r.Lock()
+	defer r.Unlock()
+	r.position.Offset = offset
+	r.position.Timestamp = time.Now()
+	r.position.LastLine = line
 }
 
-// readLog reads from the logReader and writes to the websocket.
-// T is the type of the message to be read from the logReader
-func readLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan T, chan error), wsWriteFunc func(*websocket.Conn, chan T, chan error)) {
-	followQuery := ginCtx.Query("follow")
-	follow := followQuery == "true"
+func HandleWebSocketConnection(ginCtx *gin.Context, logReader io.Reader, readFunc func(context.Context, io.Reader, bool, chan<- []byte, chan<- error), writeFunc func(*websocket.Conn, []byte) error) {
+	upgrader := websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		},
+	}
+
+	positionQuery := ginCtx.Query("position")
+	var lastPosition *types.LogPosition
+	if positionQuery != "" {
+		var err error
+		lastPosition, err = UnmarshalPosition(positionQuery)
+		if err != nil {
+			log.Warn("Failed to parse position: ", err)
+		}
+	}
 
 	ws, err := upgrader.Upgrade(ginCtx.Writer, ginCtx.Request, nil)
 	if err != nil {
@@ -57,31 +68,46 @@ func readLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(cont
 		return
 	}
 
+	wsReader := NewWebSocketReader(ws, readFunc, writeFunc)
+	if lastPosition != nil {
+		wsReader.position = lastPosition
+	}
+
 	defer func() {
 		closeErr := websocket.CloseNormalClosure
-		if !errors.Is(err, io.EOF) {
+		if err != nil && !errors.Is(err, io.EOF) {
 			closeErr = websocket.CloseInternalServerErr
 		}
-		err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(closeErr, ""), time.Now().Add(time.Second))
-		if err != nil {
-			log.Trace(err)
+		if err := ws.WriteControl(websocket.CloseMessage,
+			websocket.FormatCloseMessage(closeErr, ""),
+			time.Now().Add(time.Second)); err != nil {
+			log.Debug("Failed to write close message: ", err)
 		}
 		ws.Close()
 	}()
 
-	msgChannel := make(chan T)
-	errChannel := make(chan error)
 	ctx, cancel := context.WithCancel(ginCtx.Request.Context())
-
 	defer cancel()
-	go readFunc(ctx, logReader, follow, msgChannel, errChannel)
-	go wsWriteFunc(ws, msgChannel, errChannel)
 
-	readErr := make(chan error)
+	msgChan := make(chan []byte)
+	errChan := make(chan error)
+	heartbeatTicker := time.NewTicker(15 * time.Second)
+	defer heartbeatTicker.Stop()
+
+	// Start reading from log
+	go readFunc(ctx, logReader, true, msgChan, errChan)
+
+	// Handle websocket read messages (client messages)
 	go func() {
 		for {
 			_, _, err := ws.ReadMessage()
-			readErr <- err
+			if err != nil {
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					log.Debug("Websocket read error: ", err)
+				}
+				errChan <- err
+				return
+			}
 		}
 	}()
 
@@ -89,139 +115,34 @@ func readLog[T any](ginCtx *gin.Context, logReader io.Reader, readFunc func(cont
 		select {
 		case <-ctx.Done():
 			return
-		case err = <-errChannel:
+		case msg := <-msgChan:
+			wsReader.UpdatePosition(int64(len(msg)), string(msg))
+			if err := writeFunc(ws, msg); err != nil {
+				log.Debug("Write error: ", err)
+				return
+			}
+		case err := <-errChan:
 			if err != nil {
-				if !errors.Is(err, io.EOF) {
-					log.Error(err)
+				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
+					// Send current position before closing
+					posJSON, _ := json.Marshal(wsReader.position)
+					if err := writeFunc(ws, posJSON); err != nil {
+						log.Debug("Failed to write position on close: ", err)
+					}
 				}
-				cancel()
 				return
 			}
-		case err := <-readErr:
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure, websocket.CloseAbnormalClosure) {
-				log.Error(err)
+		case <-heartbeatTicker.C:
+			// Send heartbeat and position
+			if err := ws.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(time.Second)); err != nil {
+				log.Debug("Heartbeat failed: ", err)
+				return
 			}
-			if err != nil {
+			posJSON, _ := json.Marshal(wsReader.position)
+			if err := writeFunc(ws, posJSON); err != nil {
+				log.Debug("Position update failed: ", err)
 				return
 			}
 		}
 	}
-}
-
-func ReadServerLog(ginCtx *gin.Context) {
-	s := server.GetInstance(nil)
-
-	logFileQuery := ginCtx.Query("file")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	if retry {
-		for {
-			reader, err := s.GetLogReader(logFileQuery)
-			if err != nil && server.IsLogFileNotFound(err) {
-				ginCtx.AbortWithError(http.StatusNotFound, err)
-				return
-			}
-			if err == nil {
-				readLog(ginCtx, reader, util.ReadLog, writeToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	reader, err := s.GetLogReader(logFileQuery)
-	if err != nil {
-		if server.IsLogFileNotFound(err) {
-			ginCtx.AbortWithError(http.StatusNotFound, err)
-			return
-		}
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ginCtx, reader, util.ReadLog, writeToWs)
-}
-
-func ReadWorkspaceLog(ginCtx *gin.Context) {
-	workspaceId := ginCtx.Param("workspaceId")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
-			if err == nil {
-				readLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
-	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
-}
-
-func ReadProjectLog(ginCtx *gin.Context) {
-	workspaceId := ginCtx.Param("workspaceId")
-	projectName := ginCtx.Param("projectName")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
-			if err == nil {
-				readLog(ginCtx, projectLogReader, util.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
-	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ginCtx, projectLogReader, util.ReadJSONLog, writeJSONToWs)
-}
-
-func ReadBuildLog(ginCtx *gin.Context) {
-	buildId := ginCtx.Param("buildId")
-	retryQuery := ginCtx.DefaultQuery("retry", "true")
-	retry := retryQuery == "true"
-
-	server := server.GetInstance(nil)
-
-	if retry {
-		for {
-			buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
-
-			if err == nil {
-				readLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
-				return
-			}
-			time.Sleep(TIMEOUT)
-		}
-	}
-
-	buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
-	if err != nil {
-		ginCtx.AbortWithError(http.StatusInternalServerError, err)
-		return
-	}
-
-	readLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
 }
