@@ -278,5 +278,10 @@
     "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
+  },
+    {
+    "name": "PHP/Laravel URL extractor app - URLex",
+    "description" : "A simple app to understand different parts of URL in an unique way using Laravel 11.x ",
+    "gitUrl" : "https://github.com/daytonaio/sample-laravel-url-extractor.git"
   }
 ]
