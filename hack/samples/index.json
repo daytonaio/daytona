@@ -281,7 +281,7 @@
   },
     {
     "name": "PHP/Laravel URL extractor app - URLex",
-    "description" : "A userfriendly app to understand different parts of URL in an unique way using Laravel 11.x ",
+    "description" : "A simple app to understand different parts of URL in an unique way using Laravel 11.x ",
     "gitUrl" : "https://github.com/daytonaio/sample-laravel-url-extractor.git"
   }
 ]
