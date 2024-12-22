@@ -275,6 +275,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-weather-bot.git"
   },
   {
+    "name": "Astro - Restaurant app",
+    "description" : "A modern, responsive restaurant website built with Astro.js and TailwindCSS, showcasing a restaurant's menu, team, and story.",
+    "gitUrl" : "https://github.com/daytonaio/sample-astro-tailwind-restaurant"
+  },
+  {
     "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
