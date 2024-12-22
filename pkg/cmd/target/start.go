@@ -204,5 +204,5 @@ func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) err
 }
 
 func agentlessTargetError(providerName string) error {
-	return fmt.Errorf("%s does not require target state management; you may continue without starting or stopping it", providerName)
+	return fmt.Errorf("%s does not use a target-level agent; you may continue without managing its state or trying to access it", providerName)
 }
