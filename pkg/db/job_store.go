@@ -109,11 +109,3 @@ func processJobFilters(tx *gorm.DB, filter *stores.JobFilter) *gorm.DB {
 	}
 	return tx
 }
-
-func preloadLastJob(tx *gorm.DB) *gorm.DB {
-	return tx.Where("updated_at IN (?)",
-		tx.Model(&models.Job{}).
-			Select("MAX(updated_at)").
-			Group("resource_id"),
-	)
-}

@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**LastJobId** | Pointer to **string** |  | [optional] 
 **PrebuildId** | Pointer to **string** |  | [optional] 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**ResourceState**](ResourceState.md) |  | 
@@ -190,6 +191,31 @@ SetLastJob sets LastJob field to given value.
 `func (o *BuildDTO) HasLastJob() bool`
 
 HasLastJob returns a boolean if a field has been set.
+
+### GetLastJobId
+
+`func (o *BuildDTO) GetLastJobId() string`
+
+GetLastJobId returns the LastJobId field if non-nil, zero value otherwise.
+
+### GetLastJobIdOk
+
+`func (o *BuildDTO) GetLastJobIdOk() (*string, bool)`
+
+GetLastJobIdOk returns a tuple with the LastJobId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJobId
+
+`func (o *BuildDTO) SetLastJobId(v string)`
+
+SetLastJobId sets LastJobId field to given value.
+
+### HasLastJobId
+
+`func (o *BuildDTO) HasLastJobId() bool`
+
+HasLastJobId returns a boolean if a field has been set.
 
 ### GetPrebuildId
 

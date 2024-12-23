@@ -159,6 +159,21 @@ func (s *BuildService) handleDeleteError(ctx context.Context, b *models.Build, e
 	return err
 }
 
+func (s *BuildService) UpdateLastJob(ctx context.Context, buildId, jobId string) error {
+	b, err := s.buildStore.Find(ctx, &stores.BuildFilter{
+		Id: &buildId,
+	})
+	if err != nil {
+		return err
+	}
+
+	b.LastJobId = &jobId
+	// Make sure the old relation doesn't get saved to the store
+	b.LastJob = nil
+
+	return s.buildStore.Save(ctx, b)
+}
+
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
 	return s.loggerFactory.CreateLogReader(buildId)
 }

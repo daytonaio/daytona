@@ -25,6 +25,7 @@ type TargetDTO struct {
 	EnvVars          map[string]string `json:"envVars"`
 	Id               string            `json:"id"`
 	LastJob          *Job              `json:"lastJob,omitempty"`
+	LastJobId        *string           `json:"lastJobId,omitempty"`
 	Metadata         *TargetMetadata   `json:"metadata,omitempty"`
 	Name             string            `json:"name"`
 	ProviderMetadata *string           `json:"providerMetadata,omitempty"`
@@ -163,6 +164,38 @@ func (o *TargetDTO) HasLastJob() bool {
 // SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
 func (o *TargetDTO) SetLastJob(v Job) {
 	o.LastJob = &v
+}
+
+// GetLastJobId returns the LastJobId field value if set, zero value otherwise.
+func (o *TargetDTO) GetLastJobId() string {
+	if o == nil || IsNil(o.LastJobId) {
+		var ret string
+		return ret
+	}
+	return *o.LastJobId
+}
+
+// GetLastJobIdOk returns a tuple with the LastJobId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *TargetDTO) GetLastJobIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LastJobId) {
+		return nil, false
+	}
+	return o.LastJobId, true
+}
+
+// HasLastJobId returns a boolean if a field has been set.
+func (o *TargetDTO) HasLastJobId() bool {
+	if o != nil && !IsNil(o.LastJobId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJobId gets a reference to the given string and assigns it to the LastJobId field.
+func (o *TargetDTO) SetLastJobId(v string) {
+	o.LastJobId = &v
 }
 
 // GetMetadata returns the Metadata field value if set, zero value otherwise.
@@ -364,6 +397,9 @@ func (o TargetDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.LastJobId) {
+		toSerialize["lastJobId"] = o.LastJobId
 	}
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata

@@ -28,6 +28,7 @@ type BuildDTO struct {
 	Id              string            `json:"id"`
 	Image           *string           `json:"image,omitempty"`
 	LastJob         *Job              `json:"lastJob,omitempty"`
+	LastJobId       *string           `json:"lastJobId,omitempty"`
 	PrebuildId      *string           `json:"prebuildId,omitempty"`
 	Repository      GitRepository     `json:"repository"`
 	State           ResourceState     `json:"state"`
@@ -253,6 +254,38 @@ func (o *BuildDTO) SetLastJob(v Job) {
 	o.LastJob = &v
 }
 
+// GetLastJobId returns the LastJobId field value if set, zero value otherwise.
+func (o *BuildDTO) GetLastJobId() string {
+	if o == nil || IsNil(o.LastJobId) {
+		var ret string
+		return ret
+	}
+	return *o.LastJobId
+}
+
+// GetLastJobIdOk returns a tuple with the LastJobId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildDTO) GetLastJobIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LastJobId) {
+		return nil, false
+	}
+	return o.LastJobId, true
+}
+
+// HasLastJobId returns a boolean if a field has been set.
+func (o *BuildDTO) HasLastJobId() bool {
+	if o != nil && !IsNil(o.LastJobId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJobId gets a reference to the given string and assigns it to the LastJobId field.
+func (o *BuildDTO) SetLastJobId(v string) {
+	o.LastJobId = &v
+}
+
 // GetPrebuildId returns the PrebuildId field value if set, zero value otherwise.
 func (o *BuildDTO) GetPrebuildId() string {
 	if o == nil || IsNil(o.PrebuildId) {
@@ -411,6 +444,9 @@ func (o BuildDTO) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.LastJobId) {
+		toSerialize["lastJobId"] = o.LastJobId
 	}
 	if !IsNil(o.PrebuildId) {
 		toSerialize["prebuildId"] = o.PrebuildId
