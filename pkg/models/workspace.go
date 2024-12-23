@@ -21,9 +21,9 @@ type Workspace struct {
 	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
 	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
 	ApiKey              string                     `json:"apiKey" validate:"required" gorm:"not null"`
-	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:WorkspaceId;references:Id"`
+	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:Id;references:WorkspaceId"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
-	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:Id;references:ResourceId"`
 	ProviderMetadata    *string                    `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Workspace
 
