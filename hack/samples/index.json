@@ -328,5 +328,10 @@
     "name": "Sample Next.js Sudoku Game",
     "description": "A Sudoku game built with Next.js and TailwindCSS. The game generates Sudoku puzzles of varying difficulties (easy, medium, hard, expert) and allows users to interactively fill in the grid.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-sudoku"
+  },
+  {
+    "name": "Sample React.js Calendar App",
+    "description": "The Calendar App is a React-based single-page application that allows event-scheduling , calendar navigation and categorization of events.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-calendar-app"
   }
 ]
