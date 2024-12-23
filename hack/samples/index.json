@@ -65,6 +65,11 @@
       "gitUrl": "https://github.com/daytonaio/sample-python"
   },
   {
+      "name": "Python - AI Recipe Generator",
+      "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
+  },
+  {
      "name": "Python - Lunku AI",
      "description": "Lunku AI is a Bot. Used in Discord for Image Generation using Pordia AI.",
      "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
@@ -313,5 +318,10 @@
     "name": "React.js - Progify",
     "description": "Progrify is an AI-powered online code editor designed to revolutionize how people learn and write code.",
     "gitUrl": "https://github.com/daytonaio/sample-ai-editor-progify"
+  },
+  {
+    "name": "Sample Next.js Nexus Framework",
+    "description": "Nexus is a modern Next.js frontend framework powered by Daytona, designed for rapid development, scalability, and performance. It delivers responsive, user-friendly interfaces for dynamic web applications.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-nexus-framework"
   }
 ]
