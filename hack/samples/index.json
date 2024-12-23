@@ -308,5 +308,10 @@
     "name": "Sample Nuxt.js Quote Generator",
     "description": "Quote Smith is a Nuxt.js app for creating and customizing inspirational quotes. Edit fonts, sizes, and gradients, then generate and download quotes as PNGs for sharing or personal use.",
     "gitUrl": "https://github.com/daytonaio/sample-nuxtjs-quote-generator"
+  },
+  {
+    "name": "React.js - Progify",
+    "description": "Progrify is an AI-powered online code editor designed to revolutionize how people learn and write code.",
+    "gitUrl": "https://github.com/daytonaio/sample-ai-editor-progify"
   }
 ]
