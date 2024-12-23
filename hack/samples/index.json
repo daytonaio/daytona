@@ -288,5 +288,10 @@
     "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
+  },
+  {
+    "name": "Thoughts-daytona",
+    "description" : "A web app built using nodejs that allows user to share their thoughts",
+    "gitUrl" : "https://github.com/daytonaio/sample-ejs-web-app"
   }
 ]
