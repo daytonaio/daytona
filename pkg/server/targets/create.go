@@ -53,6 +53,14 @@ func (s *TargetService) Create(ctx context.Context, req services.CreateTargetDTO
 	}
 	tg.ApiKey = apiKey
 
+	err = s.targetMetadataStore.Save(ctx, &models.TargetMetadata{
+		TargetId: tg.Id,
+		Uptime:   0,
+	})
+	if err != nil {
+		return s.handleCreateError(ctx, tg, err)
+	}
+
 	daytonaTargetEnvVars := GetTargetEnvVars(tg, TargetEnvVarParams{
 		ApiUrl:           s.serverApiUrl,
 		ServerUrl:        s.serverUrl,
@@ -65,14 +73,6 @@ func (s *TargetService) Create(ctx context.Context, req services.CreateTargetDTO
 	err = s.targetStore.Save(ctx, tg)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
-	}
-
-	err = s.targetMetadataStore.Save(ctx, &models.TargetMetadata{
-		TargetId: tg.Id,
-		Uptime:   0,
-	})
-	if err != nil {
-		return s.handleCreateError(ctx, tg, err)
 	}
 
 	err = s.createJob(ctx, tg.Id, tg.TargetConfig.ProviderInfo.RunnerId, models.JobActionCreate)

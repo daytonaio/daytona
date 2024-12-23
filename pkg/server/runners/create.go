@@ -43,12 +43,12 @@ func (s *RunnerService) Create(ctx context.Context, req services.CreateRunnerDTO
 		},
 	}
 
-	err = s.runnerStore.Save(ctx, runner)
+	err = s.runnerMetadataStore.Save(ctx, runner.Metadata)
 	if err != nil {
 		return nil, s.handleRegisterError(ctx, runner, err)
 	}
 
-	err = s.runnerMetadataStore.Save(ctx, runner.Metadata)
+	err = s.runnerStore.Save(ctx, runner)
 	if err != nil {
 		return nil, s.handleRegisterError(ctx, runner, err)
 	}
