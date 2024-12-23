@@ -29,7 +29,7 @@ func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceS
 			}
 			return errors.New(errorMessage)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -51,7 +51,7 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 			}
 			return errors.New(errorMessage)
 		}
-		time.Sleep(time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -79,7 +79,7 @@ func AwaitProviderInstalled(runnerId, providerName, version string) error {
 			}
 		}
 
-		time.Sleep(time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -92,7 +92,7 @@ func AwaitWorkspaceDeleted(workspaceId string) error {
 			}
 			return err
 		}
-		time.Sleep(time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
 
@@ -105,6 +105,6 @@ func AwaitTargetDeleted(workspaceId string) error {
 			}
 			return err
 		}
-		time.Sleep(time.Second)
+		time.Sleep(200 * time.Millisecond)
 	}
 }
