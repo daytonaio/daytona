@@ -290,8 +290,8 @@
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
   },
   {
-    "name": "Thoughts-daytona",
-    "description" : "A web app built using nodejs that allows user to share their thoughts",
-    "gitUrl" : "https://github.com/daytonaio/sample-ejs-web-app"
+    "name": "Sample React Coinbase Connect",
+    "description": "A boilerplate for React + Vite + TypeScript + shadcn/ui + CoinBase Wallet SDK project.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-coinbase-connect"
   }
 ]
