@@ -1803,36 +1803,12 @@ components:
       type: object
     BuildDTO:
       example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        createdAt: createdAt
         image: image
         containerConfig:
           image: image
           user: user
-        prebuildId: prebuildId
-        lastJob:
-          createdAt: createdAt
-          metadata: metadata
-          resourceId: resourceId
-          action: null
-          runnerId: runnerId
-          id: id
-          state: null
-          error: error
-          resourceType: null
-          updatedAt: updatedAt
         envVars:
           key: envVars
-        id: id
-        state:
-          name: null
-          error: error
-          updatedAt: updatedAt
         repository:
           owner: owner
           path: path
@@ -1844,6 +1820,31 @@ components:
           cloneTarget: null
           sha: sha
           url: url
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        createdAt: createdAt
+        prebuildId: prebuildId
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
         user: user
         updatedAt: updatedAt
       properties:
@@ -1863,6 +1864,8 @@ components:
           type: string
         lastJob:
           $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         prebuildId:
           type: string
         repository:
@@ -3076,6 +3079,7 @@ components:
             label: label
             version: version
         providerMetadata: providerMetadata
+        lastJobId: lastJobId
         lastJob:
           createdAt: createdAt
           metadata: metadata
@@ -3106,6 +3110,8 @@ components:
           type: string
         lastJob:
           $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         metadata:
           $ref: '#/components/schemas/TargetMetadata'
         name:
@@ -3255,6 +3261,7 @@ components:
             label: label
             version: version
         providerMetadata: providerMetadata
+        lastJobId: lastJobId
         lastJob:
           createdAt: createdAt
           metadata: metadata
@@ -3344,6 +3351,7 @@ components:
                 label: label
                 version: version
             providerMetadata: providerMetadata
+            lastJobId: lastJobId
             lastJob:
               createdAt: createdAt
               metadata: metadata
@@ -3369,6 +3377,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          lastJobId: lastJobId
           lastJob:
             createdAt: createdAt
             metadata: metadata
@@ -3451,6 +3460,7 @@ components:
                 label: label
                 version: version
             providerMetadata: providerMetadata
+            lastJobId: lastJobId
             lastJob:
               createdAt: createdAt
               metadata: metadata
@@ -3476,6 +3486,7 @@ components:
               user: user
             devcontainer:
               filePath: filePath
+          lastJobId: lastJobId
           lastJob:
             createdAt: createdAt
             metadata: metadata
@@ -3501,6 +3512,8 @@ components:
           type: string
         lastJob:
           $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         metadata:
           $ref: '#/components/schemas/TargetMetadata'
         name:
@@ -3750,6 +3763,7 @@ components:
               label: label
               version: version
           providerMetadata: providerMetadata
+          lastJobId: lastJobId
           lastJob:
             createdAt: createdAt
             metadata: metadata
@@ -3775,6 +3789,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        lastJobId: lastJobId
         lastJob:
           createdAt: createdAt
           metadata: metadata
@@ -3806,6 +3821,8 @@ components:
           type: string
         lastJob:
           $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         metadata:
           $ref: '#/components/schemas/WorkspaceMetadata'
         name:
@@ -3901,6 +3918,7 @@ components:
               label: label
               version: version
           providerMetadata: providerMetadata
+          lastJobId: lastJobId
           lastJob:
             createdAt: createdAt
             metadata: metadata
@@ -3926,6 +3944,7 @@ components:
             user: user
           devcontainer:
             filePath: filePath
+        lastJobId: lastJobId
         lastJob:
           createdAt: createdAt
           metadata: metadata
@@ -3961,6 +3980,8 @@ components:
           type: string
         lastJob:
           $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         metadata:
           $ref: '#/components/schemas/WorkspaceMetadata'
         name:

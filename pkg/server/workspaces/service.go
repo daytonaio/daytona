@@ -103,3 +103,16 @@ func (s *WorkspaceService) UpdateProviderMetadata(ctx context.Context, workspace
 	w.ProviderMetadata = &metadata
 	return s.workspaceStore.Save(ctx, w)
 }
+
+func (s *WorkspaceService) UpdateLastJob(ctx context.Context, workspaceId, jobId string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	w.LastJobId = &jobId
+	// Make sure the old relation doesn't get saved to the store
+	w.LastJob = nil
+
+	return s.workspaceStore.Save(ctx, w)
+}

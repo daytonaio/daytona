@@ -96,5 +96,5 @@ func processTargetFilters(tx *gorm.DB, filter *stores.TargetFilter) *gorm.DB {
 }
 
 func preloadTargetEntities(tx *gorm.DB) *gorm.DB {
-	return tx.Preload(clause.Associations).Preload("Workspaces.LastJob", preloadLastJob).Preload("LastJob", preloadLastJob)
+	return tx.Preload(clause.Associations).Preload("Workspaces.LastJob").Preload("LastJob")
 }

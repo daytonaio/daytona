@@ -23,7 +23,8 @@ type Workspace struct {
 	ApiKey              string                     `json:"apiKey" validate:"required" gorm:"not null"`
 	Metadata            *WorkspaceMetadata         `json:"metadata" validate:"optional" gorm:"foreignKey:Id;references:WorkspaceId"`
 	GitProviderConfigId *string                    `json:"gitProviderConfigId,omitempty" validate:"optional"`
-	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:Id;references:ResourceId"`
+	LastJobId           *string                    `json:"lastJobId" validate:"optional"`
+	LastJob             *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:LastJobId;references:Id"`
 	ProviderMetadata    *string                    `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Workspace
 

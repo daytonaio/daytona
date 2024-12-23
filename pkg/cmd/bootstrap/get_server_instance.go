@@ -145,6 +145,21 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
 			return telemetryService.Track(event, clientId)
 		},
+		UpdateWorkspaceLastJob: func(ctx context.Context, workspaceId string, jobId string) error {
+			workspaceService := server.GetInstance(nil).WorkspaceService
+
+			return workspaceService.UpdateLastJob(ctx, workspaceId, jobId)
+		},
+		UpdateTargetLastJob: func(ctx context.Context, targetId string, jobId string) error {
+			targetService := server.GetInstance(nil).TargetService
+
+			return targetService.UpdateLastJob(ctx, targetId, jobId)
+		},
+		UpdateBuildLastJob: func(ctx context.Context, buildId string, jobId string) error {
+			buildService := server.GetInstance(nil).BuildService
+
+			return buildService.UpdateLastJob(ctx, buildId, jobId)
+		},
 	})
 
 	buildService := builds.NewBuildService(builds.BuildServiceConfig{

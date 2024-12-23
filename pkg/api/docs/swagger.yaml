@@ -38,6 +38,8 @@ definitions:
         type: string
       lastJob:
         $ref: '#/definitions/Job'
+      lastJobId:
+        type: string
       prebuildId:
         type: string
       repository:
@@ -791,6 +793,8 @@ definitions:
         type: string
       lastJob:
         $ref: '#/definitions/Job'
+      lastJobId:
+        type: string
       metadata:
         $ref: '#/definitions/TargetMetadata'
       name:
@@ -882,6 +886,8 @@ definitions:
         type: string
       lastJob:
         $ref: '#/definitions/Job'
+      lastJobId:
+        type: string
       metadata:
         $ref: '#/definitions/TargetMetadata'
       name:
@@ -1002,6 +1008,8 @@ definitions:
         type: string
       lastJob:
         $ref: '#/definitions/Job'
+      lastJobId:
+        type: string
       metadata:
         $ref: '#/definitions/WorkspaceMetadata'
       name:
@@ -1045,6 +1053,8 @@ definitions:
         type: string
       lastJob:
         $ref: '#/definitions/Job'
+      lastJobId:
+        type: string
       metadata:
         $ref: '#/definitions/WorkspaceMetadata'
       name:

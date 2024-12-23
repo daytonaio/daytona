@@ -24,6 +24,7 @@ type IWorkspaceService interface {
 
 	UpdateMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 	UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error
+	UpdateLastJob(ctx context.Context, workspaceId, jobId string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)
