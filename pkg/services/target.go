@@ -25,6 +25,7 @@ type ITargetService interface {
 
 	UpdateMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 	UpdateProviderMetadata(ctx context.Context, targetId, metadata string) error
+	UpdateLastJob(ctx context.Context, targetId, jobId string) error
 
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)
