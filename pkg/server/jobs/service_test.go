@@ -114,7 +114,10 @@ func (s *JobServiceTestSuite) TestSetState() {
 	job4Update := *job4
 	job4Update.State = models.JobStateSuccess
 
-	err = s.jobService.SetState(context.TODO(), job4Update.Id, models.JobStateSuccess, nil)
+	err = s.jobService.SetState(context.TODO(), job4Update.Id, services.UpdateJobStateDTO{
+		State:        models.JobStateSuccess,
+		ErrorMessage: nil,
+	})
 	require.Nil(err)
 
 	updated, err := s.jobService.Find(context.TODO(), &stores.JobFilter{

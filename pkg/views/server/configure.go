@@ -53,10 +53,6 @@ func (m *Model) createForm() *huh.Form {
 	return huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Providers Directory").
-				Description("Directory will be created if it does not exist").
-				Value(&m.config.ProvidersDir),
-			huh.NewInput().
 				Title("Registry URL").
 				Value(&m.config.RegistryUrl),
 			huh.NewInput().
@@ -97,6 +93,10 @@ func (m *Model) createForm() *huh.Form {
 			huh.NewInput().
 				Title("Local Builder Registry Image").
 				Value(&m.config.LocalBuilderRegistryImage),
+			huh.NewConfirm().
+				Title("Local Runner Disabled").
+				Description("Disables the local runner").
+				Value(m.config.LocalRunnerDisabled),
 		).WithHideFunc(func() bool {
 			return m.config.BuilderRegistryServer != "local"
 		}),

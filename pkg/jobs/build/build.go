@@ -24,7 +24,7 @@ type BuildJob struct {
 	deleteImage          func(ctx context.Context, image string, force bool) error
 
 	trackTelemetryEvent func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error
-	loggerFactory       logs.LoggerFactory
+	loggerFactory       logs.ILoggerFactory
 	builderFactory      build.IBuilderFactory
 
 	basePath string

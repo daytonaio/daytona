@@ -53,16 +53,6 @@ func (c *MockClient) StopWorkspace(w *models.Workspace) error {
 	return args.Error(0)
 }
 
-func (c *MockClient) GetWorkspaceInfo(w *models.Workspace) (*models.WorkspaceInfo, error) {
-	args := c.Called(w)
-	return args.Get(0).(*models.WorkspaceInfo), args.Error(1)
-}
-
-func (c *MockClient) GetTargetInfo(t *models.Target) (*models.TargetInfo, error) {
-	args := c.Called(t)
-	return args.Get(0).(*models.TargetInfo), args.Error(1)
-}
-
 func (c *MockClient) GetWorkspaceContainerName(w *models.Workspace) string {
 	args := c.Called(w)
 	return args.String(0)

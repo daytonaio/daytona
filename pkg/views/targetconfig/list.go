@@ -15,10 +15,11 @@ import (
 type rowData struct {
 	ConfigName string
 	Provider   string
+	RunnerName string
 	Options    string
 }
 
-func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
+func ListTargetConfigs(targetConfigs []apiclient.TargetConfig, showOptions bool) {
 	if len(targetConfigs) == 0 {
 		util.NotifyEmptyTargetConfigList(true)
 		return
@@ -26,15 +27,23 @@ func ListTargetConfigs(targetConfigs []apiclient.TargetConfig) {
 
 	sortTargetConfigs(&targetConfigs)
 
+	headers := []string{
+		"Name", "Provider", "Runner", "Options",
+	}
 	data := [][]string{}
 
 	for _, targetConfig := range targetConfigs {
 		data = append(data, getRowFromRowData(&targetConfig))
 	}
 
-	table := util.GetTableView(data, []string{
-		"Name", "Provider", "Options",
-	}, nil, func() {
+	if !showOptions {
+		headers = headers[:len(headers)-1]
+		for value := range data {
+			data[value] = data[value][:len(data[value])-1]
+		}
+	}
+
+	table := util.GetTableView(data, headers, nil, func() {
 		renderUnstyledList(targetConfigs)
 	})
 
@@ -46,6 +55,7 @@ func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
 
 	data.ConfigName = targetConfig.Name
 	data.Provider = targetConfig.ProviderInfo.Name
+	data.RunnerName = targetConfig.ProviderInfo.RunnerName
 	if targetConfig.ProviderInfo.Label != nil {
 		data.Provider = *targetConfig.ProviderInfo.Label
 	}
@@ -54,6 +64,7 @@ func getRowFromRowData(targetConfig *apiclient.TargetConfig) []string {
 	row := []string{
 		views.NameStyle.Render(data.ConfigName),
 		views.DefaultRowDataStyle.Render(data.Provider),
+		views.DefaultRowDataStyle.Render(data.RunnerName),
 		views.DefaultRowDataStyle.Render(data.Options),
 	}
 
@@ -75,6 +86,8 @@ func renderUnstyledList(targetConfigs []apiclient.TargetConfig) {
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), targetConfig.Name) + "\n\n"
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), targetConfig.ProviderInfo.Name) + "\n\n"
+
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Runner: "), targetConfig.ProviderInfo.RunnerName) + "\n\n"
 
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Options: "), targetConfig.Options) + "\n\n"
 

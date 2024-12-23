@@ -58,10 +58,14 @@ var sshCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			tg, _, err = apiclient_util.GetTarget(args[0], true)
+			tg, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}
+		}
+
+		if tg.TargetConfig.ProviderInfo.AgentlessTarget != nil && *tg.TargetConfig.ProviderInfo.AgentlessTarget {
+			return agentlessTargetError(tg.TargetConfig.ProviderInfo.Name)
 		}
 
 		if tg.State.Name == apiclient.ResourceStateNameStopped {

@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
-
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
@@ -31,7 +29,7 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verbose).Execute()
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -61,12 +59,11 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		list.ListWorkspaces(workspaceList, specifyGitProviders, verbose, activeProfile.Name)
+		list.ListWorkspaces(workspaceList, specifyGitProviders, activeProfile.Name)
 		return nil
 	},
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
 	format.RegisterFormatFlag(ListCmd)
 }

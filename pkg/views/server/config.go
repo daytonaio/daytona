@@ -61,7 +61,9 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Build Image Namespace: "), config.BuildImageNamespace) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Providers Dir: "), config.ProvidersDir) + "\n\n"
+	if config.LocalRunnerDisabled != nil && *config.LocalRunnerDisabled {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Local Runner Disabled: "), "Yes") + "\n\n"
+	}
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Registry URL: "), config.RegistryUrl) + "\n\n"
 

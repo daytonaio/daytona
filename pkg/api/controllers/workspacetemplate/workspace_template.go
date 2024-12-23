@@ -11,7 +11,7 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -130,9 +130,23 @@ func SetWorkspaceTemplate(ctx *gin.Context) {
 
 	s := server.GetInstance(nil)
 
-	workspaceTemplate := conversion.ToWorkspaceTemplate(req)
+	workspaceTemplate := models.WorkspaceTemplate{
+		Name:                req.Name,
+		BuildConfig:         req.BuildConfig,
+		RepositoryUrl:       req.RepositoryUrl,
+		EnvVars:             req.EnvVars,
+		GitProviderConfigId: req.GitProviderConfigId,
+	}
 
-	err = s.WorkspaceTemplateService.Save(ctx.Request.Context(), workspaceTemplate)
+	if req.Image != nil {
+		workspaceTemplate.Image = *req.Image
+	}
+
+	if req.User != nil {
+		workspaceTemplate.User = *req.User
+	}
+
+	err = s.WorkspaceTemplateService.Save(ctx.Request.Context(), &workspaceTemplate)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to save workspace template: %s", err.Error()))
 		return

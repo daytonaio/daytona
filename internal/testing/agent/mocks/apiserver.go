@@ -21,7 +21,6 @@ func NewMockRestServer(t *testing.T) *httptest.Server {
 	{
 		serverController.GET("/config", func(ctx *gin.Context) {
 			ctx.JSON(200, &server.Config{
-				ProvidersDir:      "",
 				RegistryUrl:       "",
 				Id:                "",
 				ServerDownloadUrl: "",

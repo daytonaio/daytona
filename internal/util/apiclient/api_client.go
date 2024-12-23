@@ -87,6 +87,33 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	return apiClient, nil
 }
 
+func GetRunnerApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
+		{
+			URL: apiUrl,
+		},
+	}
+
+	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
+
+	if telemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, clientId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.RUNNER_SOURCE))
+	}
+
+	apiClient = apiclient.NewAPIClient(clientConfig)
+
+	apiClient.GetConfig().HTTPClient = &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
+	return apiClient, nil
+}
+
 func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
 	clientConfig := apiclient.NewConfiguration()
 	clientConfig.Servers = apiclient.ServerConfigurations{
@@ -114,7 +141,7 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, int, error) {
+func GetTarget(targetNameOrId string) (*apiclient.TargetDTO, int, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -122,7 +149,7 @@ func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, int, 
 		return nil, -1, err
 	}
 
-	target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetNameOrId).Verbose(verbose).Execute()
+	target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetNameOrId).Execute()
 	if err != nil {
 		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
@@ -130,7 +157,7 @@ func GetTarget(targetNameOrId string, verbose bool) (*apiclient.TargetDTO, int, 
 	return target, res.StatusCode, nil
 }
 
-func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, int, error) {
+func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, int, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
@@ -138,7 +165,7 @@ func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceD
 		return nil, -1, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
 	if err != nil {
 		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}

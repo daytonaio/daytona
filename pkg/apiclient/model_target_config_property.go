@@ -29,8 +29,8 @@ type TargetConfigProperty struct {
 	// Options is only used if the Type is TargetConfigPropertyTypeOption
 	Options []string `json:"options,omitempty"`
 	// Suggestions is an optional list of auto-complete values to assist the user while filling the field
-	Suggestions []string                          `json:"suggestions,omitempty"`
-	Type        *ProviderTargetConfigPropertyType `json:"type,omitempty"`
+	Suggestions []string                        `json:"suggestions,omitempty"`
+	Type        *ModelsTargetConfigPropertyType `json:"type,omitempty"`
 }
 
 // NewTargetConfigProperty instantiates a new TargetConfigProperty object
@@ -243,9 +243,9 @@ func (o *TargetConfigProperty) SetSuggestions(v []string) {
 }
 
 // GetType returns the Type field value if set, zero value otherwise.
-func (o *TargetConfigProperty) GetType() ProviderTargetConfigPropertyType {
+func (o *TargetConfigProperty) GetType() ModelsTargetConfigPropertyType {
 	if o == nil || IsNil(o.Type) {
-		var ret ProviderTargetConfigPropertyType
+		var ret ModelsTargetConfigPropertyType
 		return ret
 	}
 	return *o.Type
@@ -253,7 +253,7 @@ func (o *TargetConfigProperty) GetType() ProviderTargetConfigPropertyType {
 
 // GetTypeOk returns a tuple with the Type field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *TargetConfigProperty) GetTypeOk() (*ProviderTargetConfigPropertyType, bool) {
+func (o *TargetConfigProperty) GetTypeOk() (*ModelsTargetConfigPropertyType, bool) {
 	if o == nil || IsNil(o.Type) {
 		return nil, false
 	}
@@ -269,8 +269,8 @@ func (o *TargetConfigProperty) HasType() bool {
 	return false
 }
 
-// SetType gets a reference to the given ProviderTargetConfigPropertyType and assigns it to the Type field.
-func (o *TargetConfigProperty) SetType(v ProviderTargetConfigPropertyType) {
+// SetType gets a reference to the given ModelsTargetConfigPropertyType and assigns it to the Type field.
+func (o *TargetConfigProperty) SetType(v ModelsTargetConfigPropertyType) {
 	o.Type = &v
 }
 
