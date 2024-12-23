@@ -33,15 +33,15 @@ func (s *WorkspaceService) handleStartError(ctx context.Context, w *models.Works
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w)
-	event := telemetry.ServerEventWorkspaceStarted
+	eventName := telemetry.WorkspaceEventLifecycleStarted
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventWorkspaceStartError
+		eventName = telemetry.WorkspaceEventLifecycleStartFailed
 	}
-	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
-		log.Trace(err)
+		log.Trace(telemetryError)
 	}
 
 	return err

@@ -11,6 +11,7 @@ import (
 var ProviderCmd = &cobra.Command{
 	Use:     "provider",
 	Short:   "Manage providers",
+	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
 }
 

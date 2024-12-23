@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	ide_util "github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -71,7 +72,11 @@ var ideCmd = &cobra.Command{
 
 		c.DefaultIdeId = chosenIde.Id
 
-		telemetry.AdditionalData["ide"] = chosenIde.Id
+		event := telemetry.NewCliEvent(telemetry.CliEventDefaultIdeSet, nil, []string{}, nil, map[string]interface{}{"ide": chosenIde.Id})
+		telemetryErr := common.TrackTelemetryEvent(event, config.GetClientId())
+		if telemetryErr != nil {
+			log.Trace(telemetryErr)
+		}
 
 		err = c.Save()
 		if err != nil {

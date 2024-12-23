@@ -12,6 +12,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type WorkspaceTemplateServiceConfig struct {
@@ -27,6 +30,7 @@ type WorkspaceTemplateServiceConfig struct {
 	UnregisterPrebuildWebhook func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error
 	RegisterPrebuildWebhook   func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
 	GetCommitsRange           func(ctx context.Context, repo *gitprovider.GitRepository, initialSha string, currentSha string) (int, error)
+	TrackTelemetryEvent       func(event telemetry.Event, clientId string) error
 }
 
 type WorkspaceTemplateService struct {
@@ -42,6 +46,7 @@ type WorkspaceTemplateService struct {
 	findPrebuildWebhook       func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
 	unregisterPrebuildWebhook func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error
 	registerPrebuildWebhook   func(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
+	trackTelemetryEvent       func(event telemetry.Event, clientId string) error
 }
 
 func NewWorkspaceTemplateService(config WorkspaceTemplateServiceConfig) services.IWorkspaceTemplateService {
@@ -57,6 +62,7 @@ func NewWorkspaceTemplateService(config WorkspaceTemplateServiceConfig) services
 		unregisterPrebuildWebhook: config.UnregisterPrebuildWebhook,
 		registerPrebuildWebhook:   config.RegisterPrebuildWebhook,
 		getCommitsRange:           config.GetCommitsRange,
+		trackTelemetryEvent:       config.TrackTelemetryEvent,
 	}
 }
 
@@ -119,7 +125,23 @@ func (s *WorkspaceTemplateService) Find(ctx context.Context, filter *stores.Work
 func (s *WorkspaceTemplateService) Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error {
 	workspaceTemplate.RepositoryUrl = util.CleanUpRepositoryUrl(workspaceTemplate.RepositoryUrl)
 
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.WorkspaceTemplateEventLifecycleSaved
+
 	err := s.templateStore.Save(ctx, workspaceTemplate)
+	if err != nil {
+		eventName = telemetry.WorkspaceTemplateEventLifecycleSaveFailed
+	}
+
+	if telemetry.TelemetryEnabled(ctx) {
+		event := telemetry.NewWorkspaceTemplateEvent(eventName, workspaceTemplate, err, nil)
+		telemetryError := s.trackTelemetryEvent(event, clientId)
+		if telemetryError != nil {
+			log.Trace(telemetryError)
+		}
+	}
+
 	if err != nil {
 		return err
 	}
@@ -132,7 +154,7 @@ func (s *WorkspaceTemplateService) Delete(ctx context.Context, workspaceTemplate
 		Name: &workspaceTemplateName,
 	})
 	if err != nil {
-		return []error{err}
+		return []error{s.handleDeleteError(ctx, nil, err)}
 	}
 
 	// DeletePrebuild handles deleting the builds and removing the webhook
@@ -144,9 +166,31 @@ func (s *WorkspaceTemplateService) Delete(ctx context.Context, workspaceTemplate
 	}
 
 	err = s.templateStore.Delete(ctx, wt)
+	err = s.handleDeleteError(ctx, wt, err)
 	if err != nil {
 		return []error{err}
 	}
 
 	return nil
+}
+
+func (s *WorkspaceTemplateService) handleDeleteError(ctx context.Context, wt *models.WorkspaceTemplate, err error) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.WorkspaceTemplateEventLifecycleDeleted
+	if err != nil {
+		eventName = telemetry.WorkspaceTemplateEventLifecycleDeletionFailed
+	}
+	event := telemetry.NewWorkspaceTemplateEvent(eventName, wt, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }

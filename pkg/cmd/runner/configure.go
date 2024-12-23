@@ -36,6 +36,7 @@ var configureCmd = &cobra.Command{
 			config.Name = nameFlag
 			config.ServerApiUrl = apiUrlFlag
 			config.ServerApiKey = apiKeyFlag
+			config.TelemetryEnabled = !telemetryDisabled
 		} else {
 			config, err = runner_view.ConfigurationForm(config)
 			if err != nil {
@@ -43,7 +44,9 @@ var configureCmd = &cobra.Command{
 			}
 		}
 
-		config.ClientId = idFlag
+		if clientId != "" {
+			config.ClientId = clientId
+		}
 
 		err = runner.Save(*config)
 		if err != nil {
@@ -67,10 +70,14 @@ var idFlag string
 var nameFlag string
 var apiUrlFlag string
 var apiKeyFlag string
+var clientId string
+var telemetryDisabled bool
 
 func init() {
 	configureCmd.Flags().StringVar(&idFlag, "id", "", "Runner ID")
 	configureCmd.Flags().StringVar(&nameFlag, "name", "", "Runner Name")
 	configureCmd.Flags().StringVar(&apiUrlFlag, "api-url", "", "Daytona Server API URL")
 	configureCmd.Flags().StringVar(&apiKeyFlag, "api-key", "", "Runner API Key")
+	configureCmd.Flags().StringVar(&clientId, "client-id", "", "Client ID")
+	configureCmd.Flags().BoolVar(&telemetryDisabled, "disable-telemetry", false, "Disable telemetry")
 }

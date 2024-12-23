@@ -28,7 +28,7 @@ type WorkspaceServiceConfig struct {
 	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
 	CreateJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
-	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	TrackTelemetryEvent    func(event telemetry.Event, clientId string) error
 
 	LoggerFactory         logs.ILoggerFactory
 	ServerApiUrl          string
@@ -76,7 +76,7 @@ type WorkspaceService struct {
 	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
 	createJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
-	trackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent    func(event telemetry.Event, clientId string) error
 
 	serverApiUrl          string
 	serverUrl             string

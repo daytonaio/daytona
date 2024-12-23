@@ -5,7 +5,6 @@ package workspacetemplates
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"sort"
 
@@ -17,89 +16,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
-
-func (s *WorkspaceTemplateService) SetPrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto services.CreatePrebuildDTO) (*services.PrebuildDTO, error) {
-	workspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
-		Name: &workspaceTemplateName,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	existingPrebuild, _ := workspaceTemplate.FindPrebuild(&models.MatchParams{
-		Branch: &createPrebuildDto.Branch,
-	})
-
-	if existingPrebuild != nil && createPrebuildDto.Id == nil {
-		return nil, errors.New("prebuild for the specified workspace template and branch already exists")
-	}
-
-	if createPrebuildDto.CommitInterval == nil && len(createPrebuildDto.TriggerFiles) == 0 {
-		return nil, errors.New("either the commit interval or trigger files must be specified")
-	}
-
-	repository, gitProviderId, err := s.getRepositoryContext(ctx, workspaceTemplate.RepositoryUrl)
-	if err != nil {
-		return nil, err
-	}
-
-	prebuild := &models.PrebuildConfig{
-		Branch:         createPrebuildDto.Branch,
-		CommitInterval: createPrebuildDto.CommitInterval,
-		TriggerFiles:   createPrebuildDto.TriggerFiles,
-		Retention:      createPrebuildDto.Retention,
-	}
-
-	if createPrebuildDto.Id != nil {
-		prebuild.Id = *createPrebuildDto.Id
-	} else {
-		err = prebuild.GenerateId()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	err = workspaceTemplate.SetPrebuild(prebuild)
-	if err != nil {
-		return nil, err
-	}
-
-	// Remember the new webhook ID in case config saving fails
-	newWebhookId := ""
-
-	existingWebhookId, err := s.findPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
-	if err != nil {
-		return nil, err
-	}
-
-	if existingWebhookId == nil {
-		newWebhookId, err = s.registerPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	err = s.templateStore.Save(ctx, workspaceTemplate)
-	if err != nil {
-		if newWebhookId != "" {
-			err = s.unregisterPrebuildWebhook(ctx, gitProviderId, repository, newWebhookId)
-			if err != nil {
-				log.Error(err)
-			}
-		}
-
-		return nil, err
-	}
-
-	return &services.PrebuildDTO{
-		Id:                    prebuild.Id,
-		WorkspaceTemplateName: workspaceTemplate.Name,
-		Branch:                prebuild.Branch,
-		CommitInterval:        prebuild.CommitInterval,
-		TriggerFiles:          prebuild.TriggerFiles,
-		Retention:             prebuild.Retention,
-	}, nil
-}
 
 func (s *WorkspaceTemplateService) FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*services.PrebuildDTO, error) {
 	wt, err := s.templateStore.Find(ctx, workspaceTemplateFilter)
@@ -149,74 +65,6 @@ func (s *WorkspaceTemplateService) ListPrebuilds(ctx context.Context, workspaceT
 	}
 
 	return result, nil
-}
-
-func (s *WorkspaceTemplateService) DeletePrebuild(ctx context.Context, workspaceTemplateName string, id string, force bool) []error {
-	workspaceTemplate, err := s.Find(ctx, &stores.WorkspaceTemplateFilter{
-		Name: &workspaceTemplateName,
-	})
-	if err != nil {
-		return []error{err}
-	}
-
-	// Get all prebuilds for this workspace template's repository URL and
-	// if this is the last prebuild, unregister the Git provider webhook
-	prebuilds, err := s.ListPrebuilds(ctx, &stores.WorkspaceTemplateFilter{
-		Url: &workspaceTemplate.RepositoryUrl,
-	}, nil)
-	if err != nil {
-		return []error{err}
-	}
-
-	if len(prebuilds) == 1 {
-		repository, gitProviderId, err := s.getRepositoryContext(ctx, workspaceTemplate.RepositoryUrl)
-		if err != nil {
-			return []error{err}
-		}
-
-		existingWebhookId, err := s.findPrebuildWebhook(ctx, gitProviderId, repository, s.prebuildWebhookEndpoint)
-		if err != nil {
-			if force {
-				log.Error(err)
-			} else {
-				return []error{err}
-			}
-		}
-
-		if existingWebhookId != nil {
-			err = s.unregisterPrebuildWebhook(ctx, gitProviderId, repository, *existingWebhookId)
-			if err != nil {
-				if force {
-					log.Error(err)
-				} else {
-					return []error{err}
-				}
-			}
-		}
-	}
-
-	errs := s.deleteBuilds(ctx, &id, nil, force)
-	if len(errs) > 0 {
-		if force {
-			for _, err := range errs {
-				log.Error(err)
-			}
-		} else {
-			return errs
-		}
-	}
-
-	err = workspaceTemplate.RemovePrebuild(id)
-	if err != nil {
-		return []error{err}
-	}
-
-	err = s.templateStore.Save(ctx, workspaceTemplate)
-	if err != nil {
-		return []error{err}
-	}
-
-	return nil
 }
 
 // TODO: revise build trigger strategy

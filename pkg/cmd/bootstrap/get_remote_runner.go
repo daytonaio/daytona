@@ -102,8 +102,8 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 	}
 
 	runnerJobFactory := jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackRunnerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		ProviderManager: providerManager,
 	})
@@ -141,10 +141,13 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 			}
 			return response, res.StatusCode, nil
 		},
-		UpdateJobState: func(ctx context.Context, jobId string, state models.JobState, jobError *error) error {
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
+		},
+		UpdateJobState: func(ctx context.Context, jobId string, state models.JobState, jobError error) error {
 			var jobErr *string
 			if jobError != nil {
-				jobErr = util.Pointer((*jobError).Error())
+				jobErr = util.Pointer(jobError.Error())
 			}
 			_, err := params.ApiClient.RunnerAPI.UpdateJobState(ctx, params.RunnerConfig.Id, jobId).UpdateJobState(apiclient.UpdateJobState{
 				State:        apiclient.JobState(state),
@@ -306,8 +309,8 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 
 			return util.MergeEnvVars(envVarsMap, w.EnvVars), nil
 		},
-		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackServerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory:   loggerFactory,
 		ProviderManager: params.ProviderManager,
@@ -342,8 +345,8 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 			}).Execute()
 			return err
 		},
-		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackServerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory:   loggerFactory,
 		ProviderManager: params.ProviderManager,
@@ -458,8 +461,8 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 		DeleteImage: func(ctx context.Context, image string, force bool) error {
 			return dockerClient.DeleteImage(image, force, nil)
 		},
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory: loggerFactory,
 		BuilderFactory: build.NewBuilderFactory(build.BuilderFactoryConfig{

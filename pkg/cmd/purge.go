@@ -98,6 +98,7 @@ var purgeCmd = &cobra.Command{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
 			Version:  internal.Version,
+			Source:   telemetry.CLI_SOURCE,
 		})
 
 		defer telemetryService.Close()
@@ -179,12 +180,31 @@ var purgeCmd = &cobra.Command{
 			}
 		}
 
-		err = purgeLocalRunnerProviders(ctx, serverConfig, serverConfigDir, telemetryService)
+		localRunnerConfig := server_cmd.GetLocalRunnerConfig(filepath.Join(serverConfigDir, "local-runner"), c.TelemetryEnabled, c.Id)
+
+		params := bootstrap.LocalRunnerParams{
+			ServerConfig:     serverConfig,
+			RunnerConfig:     localRunnerConfig,
+			ConfigDir:        serverConfigDir,
+			TelemetryService: telemetryService,
+		}
+
+		localRunner, err := bootstrap.GetLocalRunner(params)
 		if err != nil {
-			if !forceFlag {
-				return err
+			return err
+		}
+
+		if localRunner != nil {
+			fmt.Println("Purging providers...")
+			err = localRunner.Purge(ctx)
+			if err != nil {
+				if !forceFlag {
+					return err
+				} else {
+					fmt.Printf("Failed to purge local runner providers: %v\n", err)
+				}
 			} else {
-				fmt.Printf("Failed to purge local runner providers: %v\n", err)
+				fmt.Println("Providers purged.")
 			}
 		}
 
@@ -224,29 +244,7 @@ func init() {
 	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }
 
-func purgeLocalRunnerProviders(ctx context.Context, serverConfig *server.Config, serverConfigDir string, telemetryService telemetry.TelemetryService) error {
-	localRunnerConfig := server_cmd.GetLocalRunnerConfig(filepath.Join(serverConfigDir, "local-runner"))
-
-	params := bootstrap.LocalRunnerParams{
-		ServerConfig:     serverConfig,
-		RunnerConfig:     localRunnerConfig,
-		ConfigDir:        serverConfigDir,
-		TelemetryService: telemetryService,
-	}
-
-	localRunner, err := bootstrap.GetLocalRunner(params)
-	if err != nil {
-		return err
-	}
-
-	if localRunner != nil {
-		fmt.Println("Purging providers...")
-		err = localRunner.Purge(ctx)
-		if err != nil {
-			return err
-		}
-		fmt.Println("Providers purged.")
-	}
+func purgeLocalRunnerProviders(ctx context.Context, serverConfig *server.Config, serverConfigDir string, cliConfig *config.Config, telemetryService telemetry.TelemetryService) error {
 
 	return nil
 }

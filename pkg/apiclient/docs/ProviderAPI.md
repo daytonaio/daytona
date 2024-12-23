@@ -33,7 +33,7 @@ import (
 
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
-	installProviderDto := *openapiclient.NewInstallProviderDTO(map[string]string{"key": "Inner_example"}, "Name_example") // InstallProviderDTO | Install provider
+	installProviderDto := *openapiclient.NewInstallProviderDTO(map[string]string{"key": "Inner_example"}, "Name_example", "Version_example") // InstallProviderDTO | Install provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -220,7 +220,7 @@ Name | Type | Description  | Notes
 
 ## UpdateProvider
 
-> UpdateProvider(ctx, runnerId, providerName).DownloadUrls(downloadUrls).Execute()
+> UpdateProvider(ctx, runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
 
 Update provider
 
@@ -241,11 +241,11 @@ import (
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
 	providerName := "providerName_example" // string | Provider name
-	downloadUrls := map[string]string{"key": "Inner_example"} // map[string]string | Provider download URLs
+	updateProviderDto := *openapiclient.NewUpdateProviderDTO(map[string]string{"key": "Inner_example"}, "Version_example") // UpdateProviderDTO | Update provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).DownloadUrls(downloadUrls).Execute()
+	r, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.UpdateProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -271,7 +271,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **downloadUrls** | **map[string]string** | Provider download URLs | 
+ **updateProviderDto** | [**UpdateProviderDTO**](UpdateProviderDTO.md) | Update provider | 
 
 ### Return type
 

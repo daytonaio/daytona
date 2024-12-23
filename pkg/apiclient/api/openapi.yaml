@@ -934,8 +934,8 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/DownloadUrls'
-        description: Provider download URLs
+              $ref: '#/components/schemas/UpdateProviderDTO'
+        description: Update provider
         required: true
       responses:
         "200":
@@ -944,7 +944,7 @@ paths:
       summary: Update provider
       tags:
       - provider
-      x-codegen-request-body-name: downloadUrls
+      x-codegen-request-body-name: updateProviderDto
   /sample:
     get:
       description: List samples
@@ -2438,6 +2438,7 @@ components:
         downloadUrls:
           key: downloadUrls
         name: name
+        version: version
       properties:
         downloadUrls:
           additionalProperties:
@@ -2445,9 +2446,12 @@ components:
           type: object
         name:
           type: string
+        version:
+          type: string
       required:
       - downloadUrls
       - name
+      - version
       type: object
     Job:
       example:
@@ -3553,6 +3557,22 @@ components:
           $ref: '#/components/schemas/JobState'
       required:
       - state
+      type: object
+    UpdateProviderDTO:
+      example:
+        downloadUrls:
+          key: downloadUrls
+        version: version
+      properties:
+        downloadUrls:
+          additionalProperties:
+            type: string
+          type: object
+        version:
+          type: string
+      required:
+      - downloadUrls
+      - version
       type: object
     UpdateRunnerMetadataDTO:
       example:

@@ -34,13 +34,12 @@ func (s *TargetService) handleStartError(ctx context.Context, target *models.Tar
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
-	event := telemetry.ServerEventTargetStarted
+	eventName := telemetry.TargetEventLifecycleStarted
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventTargetStartError
+		eventName = telemetry.TargetEventLifecycleStartFailed
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	event := telemetry.NewTargetEvent(eventName, target, err, nil)
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}

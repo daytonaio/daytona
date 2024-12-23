@@ -433,9 +433,12 @@ definitions:
         $ref: '#/definitions/DownloadUrls'
       name:
         type: string
+      version:
+        type: string
     required:
     - downloadUrls
     - name
+    - version
     type: object
   Job:
     properties:
@@ -928,6 +931,16 @@ definitions:
         $ref: '#/definitions/JobState'
     required:
     - state
+    type: object
+  UpdateProviderDTO:
+    properties:
+      downloadUrls:
+        $ref: '#/definitions/DownloadUrls'
+      version:
+        type: string
+    required:
+    - downloadUrls
+    - version
     type: object
   UpdateRunnerMetadataDTO:
     properties:
@@ -2010,12 +2023,12 @@ paths:
       description: Update provider
       operationId: UpdateProvider
       parameters:
-      - description: Provider download URLs
+      - description: Update provider
         in: body
-        name: downloadUrls
+        name: updateProviderDto
         required: true
         schema:
-          $ref: '#/definitions/DownloadUrls'
+          $ref: '#/definitions/UpdateProviderDTO'
       - description: Runner ID
         in: path
         name: runnerId
