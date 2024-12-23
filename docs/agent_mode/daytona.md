@@ -24,11 +24,8 @@ daytona [flags]
 * [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
 * [daytona expose](daytona_expose.md)	 - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the workspace
 * [daytona forward](daytona_forward.md)	 - Forward a port publicly via an URL
-* [daytona info](daytona_info.md)	 - Show workspace info
+* [daytona info](daytona_info.md)	 - Show resource info
 * [daytona list](daytona_list.md)	 - List workspaces
-* [daytona logs](daytona_logs.md)	 - View logs for the workspace
-* [daytona restart](daytona_restart.md)	 - Restart the workspace
-* [daytona start](daytona_start.md)	 - Start the workspace
-* [daytona stop](daytona_stop.md)	 - Stop the workspace
+* [daytona logs](daytona_logs.md)	 - View resource logs
 * [daytona version](daytona_version.md)	 - Print the version number
 

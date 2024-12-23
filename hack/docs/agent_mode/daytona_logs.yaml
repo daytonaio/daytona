@@ -1,5 +1,5 @@
 name: daytona logs
-synopsis: View logs for the workspace
+synopsis: View resource logs
 usage: daytona logs [flags]
 inherited_options:
     - name: help

@@ -1,6 +1,6 @@
 ## daytona logs
 
-View logs for the workspace
+View resource logs
 
 ```
 daytona logs [flags]

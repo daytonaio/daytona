@@ -1,5 +1,5 @@
 name: daytona info
-synopsis: Show workspace info
+synopsis: Show resource info
 usage: daytona info [flags]
 options:
     - name: format
