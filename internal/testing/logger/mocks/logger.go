@@ -53,6 +53,11 @@ func (m *mockLogger) Write(p []byte) (n int, err error) {
 	return args.Int(0), args.Error(1)
 }
 
+func (m *mockLogger) ConstructJsonLogEntry(p []byte) ([]byte, error) {
+	args := m.Called(p)
+	return args.Get(0).([]byte), args.Error(1)
+}
+
 func (m *mockLogger) Close() error {
 	args := m.Called()
 	return args.Error(0)

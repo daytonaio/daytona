@@ -5,6 +5,10 @@ options:
     - name: format
       shorthand: f
       usage: Output format. Must be one of (yaml, json)
+    - name: show-options
+      shorthand: v
+      default_value: "false"
+      usage: Show target options
 inherited_options:
     - name: help
       default_value: "false"

@@ -70,7 +70,7 @@ var SshCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			ws, _, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				return err
 			}

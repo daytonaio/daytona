@@ -16,6 +16,7 @@ type TelemetryService interface {
 	io.Closer
 	TrackCliEvent(event CliEvent, clientId string, properties map[string]interface{}) error
 	TrackServerEvent(event ServerEvent, clientId string, properties map[string]interface{}) error
+	TrackRunnerEvent(event BuildRunnerEvent, clientId string, properties map[string]interface{}) error
 	TrackBuildRunnerEvent(event BuildRunnerEvent, clientId string, properties map[string]interface{}) error
 	SetCommonProps(properties map[string]interface{})
 }

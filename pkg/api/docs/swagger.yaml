@@ -7,7 +7,7 @@ definitions:
       options:
         type: string
       providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
+        $ref: '#/definitions/ProviderInfo'
     required:
     - name
     - options
@@ -283,6 +283,10 @@ definitions:
         type: string
     required:
     - filePath
+    type: object
+  DownloadUrls:
+    additionalProperties:
+      type: string
     type: object
   EnvironmentVariable:
     properties:
@@ -623,12 +627,10 @@ definitions:
     - name
     - username
     type: object
-  InstallProviderRequest:
+  InstallProviderDTO:
     properties:
       downloadUrls:
-        additionalProperties:
-          type: string
-        type: object
+        $ref: '#/definitions/DownloadUrls'
       name:
         type: string
     required:
@@ -645,10 +647,15 @@ definitions:
         type: string
       id:
         type: string
+      metadata:
+        description: JSON encoded metadata
+        type: string
       resourceId:
         type: string
       resourceType:
         $ref: '#/definitions/ResourceType'
+      runnerId:
+        type: string
       state:
         $ref: '#/definitions/JobState'
       updatedAt:
@@ -859,17 +866,53 @@ definitions:
     - retention
     - workspaceTemplateName
     type: object
-  Provider:
+  ProviderInfo:
     properties:
+      agentlessTarget:
+        type: boolean
       label:
         type: string
       name:
         type: string
+      runnerId:
+        type: string
+      runnerName:
+        type: string
+      targetConfigManifest:
+        $ref: '#/definitions/TargetConfigManifest'
       version:
         type: string
     required:
     - name
+    - runnerId
+    - runnerName
+    - targetConfigManifest
     - version
+    type: object
+  RegisterRunnerDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  RegisterRunnerResultDTO:
+    properties:
+      apiKey:
+        type: string
+      id:
+        type: string
+      metadata:
+        $ref: '#/definitions/RunnerMetadata'
+      name:
+        type: string
+    required:
+    - apiKey
+    - id
+    - name
     type: object
   ReplaceRequest:
     properties:
@@ -919,11 +962,48 @@ definitions:
     - workspace
     - target
     - build
+    - runner
     type: string
     x-enum-varnames:
     - ResourceTypeWorkspace
     - ResourceTypeTarget
     - ResourceTypeBuild
+    - ResourceTypeRunner
+  RunnerDTO:
+    properties:
+      id:
+        type: string
+      metadata:
+        $ref: '#/definitions/RunnerMetadata'
+      name:
+        type: string
+      state:
+        $ref: '#/definitions/ResourceState'
+    required:
+    - id
+    - name
+    - state
+    type: object
+  RunnerMetadata:
+    properties:
+      providers:
+        items:
+          $ref: '#/definitions/ProviderInfo'
+        type: array
+      runnerId:
+        type: string
+      runningJobs:
+        type: integer
+      updatedAt:
+        type: string
+      uptime:
+        type: integer
+    required:
+    - providers
+    - runnerId
+    - updatedAt
+    - uptime
+    type: object
   Sample:
     properties:
       description:
@@ -972,10 +1052,10 @@ definitions:
         type: string
       localBuilderRegistryPort:
         type: integer
+      localRunnerDisabled:
+        type: boolean
       logFile:
         $ref: '#/definitions/LogFileConfig'
-      providersDir:
-        type: string
       registryUrl:
         type: string
       samplesIndexUrl:
@@ -994,7 +1074,6 @@ definitions:
     - localBuilderRegistryImage
     - localBuilderRegistryPort
     - logFile
-    - providersDir
     - registryUrl
     - serverDownloadUrl
     type: object
@@ -1050,22 +1129,6 @@ definitions:
     - providerId
     - token
     type: object
-  SetTargetMetadata:
-    properties:
-      uptime:
-        type: integer
-    required:
-    - uptime
-    type: object
-  SetWorkspaceMetadata:
-    properties:
-      gitStatus:
-        $ref: '#/definitions/GitStatus'
-      uptime:
-        type: integer
-    required:
-    - uptime
-    type: object
   SigningMethod:
     enum:
     - ssh
@@ -1110,6 +1173,8 @@ definitions:
         $ref: '#/definitions/TargetMetadata'
       name:
         type: string
+      providerMetadata:
+        type: string
       targetConfig:
         $ref: '#/definitions/TargetConfig'
       targetConfigId:
@@ -1139,7 +1204,7 @@ definitions:
         description: JSON encoded map of options
         type: string
       providerInfo:
-        $ref: '#/definitions/TargetProviderInfo'
+        $ref: '#/definitions/ProviderInfo'
     required:
     - deleted
     - id
@@ -1181,7 +1246,7 @@ definitions:
           type: string
         type: array
       type:
-        $ref: '#/definitions/provider.TargetConfigPropertyType'
+        $ref: '#/definitions/models.TargetConfigPropertyType'
     type: object
   TargetDTO:
     properties:
@@ -1193,13 +1258,13 @@ definitions:
         type: object
       id:
         type: string
-      info:
-        $ref: '#/definitions/TargetInfo'
       lastJob:
         $ref: '#/definitions/Job'
       metadata:
         $ref: '#/definitions/TargetMetadata'
       name:
+        type: string
+      providerMetadata:
         type: string
       state:
         $ref: '#/definitions/ResourceState'
@@ -1221,15 +1286,6 @@ definitions:
     - targetConfigId
     - workspaces
     type: object
-  TargetInfo:
-    properties:
-      name:
-        type: string
-      providerMetadata:
-        type: string
-    required:
-    - name
-    type: object
   TargetMetadata:
     properties:
       targetId:
@@ -1243,22 +1299,63 @@ definitions:
     - updatedAt
     - uptime
     type: object
-  TargetProviderInfo:
+  UpdateJobState:
     properties:
-      agentlessTarget:
-        type: boolean
-      label:
+      errorMessage:
         type: string
-      name:
-        type: string
-      version:
+      state:
+        $ref: '#/definitions/JobState'
+    required:
+    - state
+    type: object
+  UpdateRunnerMetadataDTO:
+    properties:
+      providers:
+        items:
+          $ref: '#/definitions/ProviderInfo'
+        type: array
+      runningJobs:
+        type: integer
+      uptime:
+        type: integer
+    required:
+    - providers
+    - uptime
+    type: object
+  UpdateTargetMetadataDTO:
+    properties:
+      uptime:
+        type: integer
+    required:
+    - uptime
+    type: object
+  UpdateTargetProviderMetadataDTO:
+    properties:
+      metadata:
         type: string
     required:
-    - name
-    - version
+    - metadata
+    type: object
+  UpdateWorkspaceMetadataDTO:
+    properties:
+      gitStatus:
+        $ref: '#/definitions/GitStatus'
+      uptime:
+        type: integer
+    required:
+    - uptime
+    type: object
+  UpdateWorkspaceProviderMetadataDTO:
+    properties:
+      metadata:
+        type: string
+    required:
+    - metadata
     type: object
   Workspace:
     properties:
+      apiKey:
+        type: string
       buildConfig:
         $ref: '#/definitions/BuildConfig'
       envVars:
@@ -1277,6 +1374,8 @@ definitions:
         $ref: '#/definitions/WorkspaceMetadata'
       name:
         type: string
+      providerMetadata:
+        type: string
       repository:
         $ref: '#/definitions/GitRepository'
       target:
@@ -1286,6 +1385,7 @@ definitions:
       user:
         type: string
     required:
+    - apiKey
     - envVars
     - id
     - image
@@ -1297,6 +1397,8 @@ definitions:
     type: object
   WorkspaceDTO:
     properties:
+      apiKey:
+        type: string
       buildConfig:
         $ref: '#/definitions/BuildConfig'
       envVars:
@@ -1309,13 +1411,13 @@ definitions:
         type: string
       image:
         type: string
-      info:
-        $ref: '#/definitions/WorkspaceInfo'
       lastJob:
         $ref: '#/definitions/Job'
       metadata:
         $ref: '#/definitions/WorkspaceMetadata'
       name:
+        type: string
+      providerMetadata:
         type: string
       repository:
         $ref: '#/definitions/GitRepository'
@@ -1328,6 +1430,7 @@ definitions:
       user:
         type: string
     required:
+    - apiKey
     - envVars
     - id
     - image
@@ -1342,24 +1445,6 @@ definitions:
     properties:
       dir:
         type: string
-    type: object
-  WorkspaceInfo:
-    properties:
-      created:
-        type: string
-      isRunning:
-        type: boolean
-      name:
-        type: string
-      providerMetadata:
-        type: string
-      targetId:
-        type: string
-    required:
-    - created
-    - isRunning
-    - name
-    - targetId
     type: object
   WorkspaceMetadata:
     properties:
@@ -1413,11 +1498,13 @@ definitions:
     - client
     - workspace
     - target
+    - runner
     type: string
     x-enum-varnames:
     - ApiKeyTypeClient
     - ApiKeyTypeWorkspace
     - ApiKeyTypeTarget
+    - ApiKeyTypeRunner
   models.JobAction:
     enum:
     - create
@@ -1427,6 +1514,9 @@ definitions:
     - delete
     - force-delete
     - run
+    - install-provider
+    - uninstall-provider
+    - update-provider
     type: string
     x-enum-varnames:
     - JobActionCreate
@@ -1436,6 +1526,9 @@ definitions:
     - JobActionDelete
     - JobActionForceDelete
     - JobActionRun
+    - JobActionInstallProvider
+    - JobActionUninstallProvider
+    - JobActionUpdateProvider
   models.ResourceStateName:
     enum:
     - undefined
@@ -1478,7 +1571,7 @@ definitions:
     - ResourceStateNamePendingForcedDelete
     - ResourceStateNameDeleting
     - ResourceStateNameDeleted
-  provider.TargetConfigPropertyType:
+  models.TargetConfigPropertyType:
     enum:
     - string
     - option
@@ -1659,6 +1752,28 @@ paths:
         "204":
           description: No Content
       summary: Delete builds
+      tags:
+      - build
+  /build/successful/{repoUrl}:
+    get:
+      description: List successful builds for Git repository
+      operationId: ListSuccessfulBuilds
+      parameters:
+      - description: Repository URL
+        in: path
+        name: repoUrl
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/BuildDTO'
+            type: array
+      summary: List successful builds for Git repository
       tags:
       - build
   /container-registry/{server}:
@@ -2073,6 +2188,29 @@ paths:
     get:
       description: List jobs
       operationId: ListJobs
+      parameters:
+      - collectionFormat: multi
+        description: Job States
+        in: query
+        items:
+          type: string
+        name: states
+        type: array
+      - collectionFormat: multi
+        description: Job Actions
+        in: query
+        items:
+          type: string
+        name: actions
+        type: array
+      - description: Resource ID
+        in: query
+        name: resourceId
+        type: string
+      - description: Resource Type
+        in: query
+        name: resourceType
+        type: string
       produces:
       - application/json
       responses:
@@ -2085,10 +2223,10 @@ paths:
       summary: List jobs
       tags:
       - job
-  /provider:
+  /runner:
     get:
-      description: List providers
-      operationId: ListProviders
+      description: List runners
+      operationId: ListRunners
       produces:
       - application/json
       responses:
@@ -2096,64 +2234,228 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/Provider'
+              $ref: '#/definitions/RunnerDTO'
             type: array
-      summary: List providers
+      summary: List runners
       tags:
-      - provider
-  /provider/{provider}/target-config-manifest:
-    get:
-      description: Get provider target config manifest
-      operationId: GetTargetConfigManifest
+      - runner
+    post:
+      description: Register a runner
+      operationId: RegisterRunner
       parameters:
-      - description: Provider name
-        in: path
-        name: provider
+      - description: Register runner
+        in: body
+        name: runner
         required: true
-        type: string
+        schema:
+          $ref: '#/definitions/RegisterRunnerDTO'
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/TargetConfigManifest'
-      summary: Get provider target config manifest
+            $ref: '#/definitions/RegisterRunnerResultDTO'
+      summary: Register a runner
       tags:
-      - provider
-  /provider/{provider}/uninstall:
-    post:
-      consumes:
-      - application/json
-      description: Uninstall a provider
-      operationId: UninstallProvider
+      - runner
+  /runner/{runnerId}:
+    delete:
+      description: Remove runner
+      operationId: RemoveRunner
       parameters:
-      - description: Provider to uninstall
+      - description: Runner ID
         in: path
-        name: provider
+        name: runnerId
         required: true
         type: string
       responses:
         "200":
           description: OK
-      summary: Uninstall a provider
+      summary: Remove runner
       tags:
-      - provider
-  /provider/install:
-    post:
-      consumes:
-      - application/json
-      description: Install a provider
-      operationId: InstallProvider
+      - runner
+    get:
+      description: Get a runner
+      operationId: GetRunner
       parameters:
-      - description: Provider to install
-        in: body
-        name: provider
+      - description: Runner ID
+        in: path
+        name: runnerId
         required: true
-        schema:
-          $ref: '#/definitions/InstallProviderRequest'
+        type: string
+      produces:
+      - application/json
       responses:
         "200":
           description: OK
-      summary: Install a provider
+          schema:
+            $ref: '#/definitions/RunnerDTO'
+      summary: Get a runner
+      tags:
+      - runner
+  /runner/{runnerId}/jobs:
+    get:
+      description: List runner jobs
+      operationId: ListRunnerJobs
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Job'
+            type: array
+      summary: List runner jobs
+      tags:
+      - runner
+  /runner/{runnerId}/jobs/{jobId}/state:
+    post:
+      description: Update job state
+      operationId: UpdateJobState
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Job ID
+        in: path
+        name: jobId
+        required: true
+        type: string
+      - description: Update job state
+        in: body
+        name: updateJobState
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateJobState'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Update job state
+      tags:
+      - runner
+  /runner/{runnerId}/metadata:
+    post:
+      description: Set runner metadata
+      operationId: SetRunnerMetadata
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Runner Metadata
+        in: body
+        name: runnerMetadata
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateRunnerMetadataDTO'
+      responses:
+        "200":
+          description: OK
+      summary: Set runner metadata
+      tags:
+      - runner
+  /runner/{runnerId}/provider/{providerName}/uninstall:
+    post:
+      description: Uninstall provider
+      operationId: UninstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Uninstall provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/{providerName}/update:
+    post:
+      description: Update provider
+      operationId: UpdateProvider
+      parameters:
+      - description: Provider download URLs
+        in: body
+        name: downloadUrls
+        required: true
+        schema:
+          $ref: '#/definitions/DownloadUrls'
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Update provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/install:
+    post:
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Install provider
+        in: body
+        name: installProviderDto
+        required: true
+        schema:
+          $ref: '#/definitions/InstallProviderDTO'
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Install provider
+      tags:
+      - provider
+  /runner/provider:
+    get:
+      description: List providers
+      operationId: ListProviders
+      parameters:
+      - description: Runner ID
+        in: query
+        name: runnerId
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderInfo'
+            type: array
+      summary: List providers
       tags:
       - provider
   /sample:
@@ -2243,9 +2545,9 @@ paths:
       description: List targets
       operationId: ListTargets
       parameters:
-      - description: Verbose
+      - description: Show target config options
         in: query
-        name: verbose
+        name: showOptions
         type: boolean
       produces:
       - application/json
@@ -2283,6 +2585,11 @@ paths:
     get:
       description: List target configs
       operationId: ListTargetConfigs
+      parameters:
+      - description: Show target config options
+        in: query
+        name: showOptions
+        type: boolean
       produces:
       - application/json
       responses:
@@ -2305,6 +2612,10 @@ paths:
         required: true
         schema:
           $ref: '#/definitions/AddTargetConfigDTO'
+      - description: Show target config options
+        in: query
+        name: showOptions
+        type: boolean
       responses:
         "200":
           description: OK
@@ -2358,9 +2669,9 @@ paths:
         name: targetId
         required: true
         type: string
-      - description: Verbose
+      - description: Show target config options
         in: query
-        name: verbose
+        name: showOptions
         type: boolean
       produces:
       - application/json
@@ -2370,6 +2681,22 @@ paths:
           schema:
             $ref: '#/definitions/TargetDTO'
       summary: Get target info
+      tags:
+      - target
+  /target/{targetId}/handle-successful-creation:
+    post:
+      description: Handles successful creation of the target
+      operationId: HandleSuccessfulCreation
+      parameters:
+      - description: Target ID or name
+        in: path
+        name: targetId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Handles successful creation of the target
       tags:
       - target
   /target/{targetId}/metadata:
@@ -2382,16 +2709,38 @@ paths:
         name: targetId
         required: true
         type: string
-      - description: Set Metadata
+      - description: Target Metadata
         in: body
-        name: setMetadata
+        name: targetMetadata
         required: true
         schema:
-          $ref: '#/definitions/SetTargetMetadata'
+          $ref: '#/definitions/UpdateTargetMetadataDTO'
       responses:
         "200":
           description: OK
       summary: Set target metadata
+      tags:
+      - target
+  /target/{targetId}/provider-metadata:
+    post:
+      description: Update target provider metadata
+      operationId: UpdateTargetProviderMetadata
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        type: string
+      - description: Provider metadata
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateTargetProviderMetadataDTO'
+      responses:
+        "200":
+          description: OK
+      summary: Update target provider metadata
       tags:
       - target
   /target/{targetId}/set-default:
@@ -2446,11 +2795,6 @@ paths:
     get:
       description: List workspaces
       operationId: ListWorkspaces
-      parameters:
-      - description: Verbose
-        in: query
-        name: verbose
-        type: boolean
       produces:
       - application/json
       responses:
@@ -2752,10 +3096,6 @@ paths:
         name: workspaceId
         required: true
         type: string
-      - description: Verbose
-        in: query
-        name: verbose
-        type: boolean
       produces:
       - application/json
       responses:
@@ -2776,16 +3116,38 @@ paths:
         name: workspaceId
         required: true
         type: string
-      - description: Set Metadata
+      - description: Workspace Metadata
         in: body
-        name: setMetadata
+        name: workspaceMetadata
         required: true
         schema:
-          $ref: '#/definitions/SetWorkspaceMetadata'
+          $ref: '#/definitions/UpdateWorkspaceMetadataDTO'
       responses:
         "200":
           description: OK
       summary: Set workspace metadata
+      tags:
+      - workspace
+  /workspace/{workspaceId}/provider-metadata:
+    post:
+      description: Update workspace provider metadata
+      operationId: UpdateWorkspaceProviderMetadata
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Provider metadata
+        in: body
+        name: metadata
+        required: true
+        schema:
+          $ref: '#/definitions/UpdateWorkspaceProviderMetadataDTO'
+      responses:
+        "200":
+          description: OK
+      summary: Update workspace provider metadata
       tags:
       - workspace
   /workspace/{workspaceId}/start:

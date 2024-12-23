@@ -196,6 +196,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/build/successful/{repoUrl}": {
+            "get": {
+                "description": "List successful builds for Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "List successful builds for Git repository",
+                "operationId": "ListSuccessfulBuilds",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository URL",
+                        "name": "repoUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/BuildDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/build/{buildId}": {
             "get": {
                 "description": "Get build data",
@@ -875,6 +908,40 @@ const docTemplate = `{
                 ],
                 "summary": "List jobs",
                 "operationId": "ListJobs",
+                "parameters": [
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Job States",
+                        "name": "states",
+                        "in": "query"
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Job Actions",
+                        "name": "actions",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource ID",
+                        "name": "resourceId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource Type",
+                        "name": "resourceType",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -888,7 +955,61 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider": {
+        "/runner": {
+            "get": {
+                "description": "List runners",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "List runners",
+                "operationId": "ListRunners",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RunnerDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Register a runner",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Register a runner",
+                "operationId": "RegisterRunner",
+                "parameters": [
+                    {
+                        "description": "Register runner",
+                        "name": "runner",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/RegisterRunnerDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RegisterRunnerResultDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/provider": {
             "get": {
                 "description": "List providers",
                 "produces": [
@@ -899,38 +1020,145 @@ const docTemplate = `{
                 ],
                 "summary": "List providers",
                 "operationId": "ListProviders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Provider"
+                                "$ref": "#/definitions/ProviderInfo"
                             }
                         }
                     }
                 }
             }
         },
-        "/provider/install": {
-            "post": {
-                "description": "Install a provider",
-                "consumes": [
+        "/runner/{runnerId}": {
+            "get": {
+                "description": "Get a runner",
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "provider"
+                    "runner"
                 ],
-                "summary": "Install a provider",
-                "operationId": "InstallProvider",
+                "summary": "Get a runner",
+                "operationId": "GetRunner",
                 "parameters": [
                     {
-                        "description": "Provider to install",
-                        "name": "provider",
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RunnerDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Remove runner",
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Remove runner",
+                "operationId": "RemoveRunner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/jobs": {
+            "get": {
+                "description": "List runner jobs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "List runner jobs",
+                "operationId": "ListRunnerJobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Job"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/jobs/{jobId}/state": {
+            "post": {
+                "description": "Update job state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Update job state",
+                "operationId": "UpdateJobState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Job ID",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update job state",
+                        "name": "updateJobState",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/InstallProviderRequest"
+                            "$ref": "#/definitions/UpdateJobState"
                         }
                     }
                 ],
@@ -941,49 +1169,132 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider/{provider}/target-config-manifest": {
-            "get": {
-                "description": "Get provider target config manifest",
+        "/runner/{runnerId}/metadata": {
+            "post": {
+                "description": "Set runner metadata",
                 "tags": [
-                    "provider"
+                    "runner"
                 ],
-                "summary": "Get provider target config manifest",
-                "operationId": "GetTargetConfigManifest",
+                "summary": "Set runner metadata",
+                "operationId": "SetRunnerMetadata",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Provider name",
-                        "name": "provider",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Runner Metadata",
+                        "name": "runnerMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateRunnerMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/install": {
+            "post": {
+                "description": "Install provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Install provider",
+                "operationId": "InstallProvider",
+                "parameters": [
+                    {
+                        "description": "Install provider",
+                        "name": "installProviderDto",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/InstallProviderDTO"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/TargetConfigManifest"
-                        }
+                        "description": "OK"
                     }
                 }
             }
         },
-        "/provider/{provider}/uninstall": {
+        "/runner/{runnerId}/provider/{providerName}/uninstall": {
             "post": {
-                "description": "Uninstall a provider",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Uninstall provider",
                 "tags": [
                     "provider"
                 ],
-                "summary": "Uninstall a provider",
+                "summary": "Uninstall provider",
                 "operationId": "UninstallProvider",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Provider to uninstall",
-                        "name": "provider",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/{providerName}/update": {
+            "post": {
+                "description": "Update provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Update provider",
+                "operationId": "UpdateProvider",
+                "parameters": [
+                    {
+                        "description": "Provider download URLs",
+                        "name": "downloadUrls",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/DownloadUrls"
+                        }
+                    },
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
                         "in": "path",
                         "required": true
                     }
@@ -1132,8 +1443,8 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
+                        "description": "Show target config options",
+                        "name": "showOptions",
                         "in": "query"
                     }
                 ],
@@ -1191,6 +1502,14 @@ const docTemplate = `{
                 ],
                 "summary": "List target configs",
                 "operationId": "ListTargetConfigs",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1219,6 +1538,12 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/AddTargetConfigDTO"
                         }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1276,8 +1601,8 @@ const docTemplate = `{
                     },
                     {
                         "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
+                        "description": "Show target config options",
+                        "name": "showOptions",
                         "in": "query"
                     }
                 ],
@@ -1319,6 +1644,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/target/{targetId}/handle-successful-creation": {
+            "post": {
+                "description": "Handles successful creation of the target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Handles successful creation of the target",
+                "operationId": "HandleSuccessfulCreation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/target/{targetId}/metadata": {
             "post": {
                 "description": "Set target metadata",
@@ -1336,12 +1685,45 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Set Metadata",
-                        "name": "setMetadata",
+                        "description": "Target Metadata",
+                        "name": "targetMetadata",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetTargetMetadata"
+                            "$ref": "#/definitions/UpdateTargetMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/provider-metadata": {
+            "post": {
+                "description": "Update target provider metadata",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Update target provider metadata",
+                "operationId": "UpdateTargetProviderMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Provider metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTargetProviderMetadataDTO"
                         }
                     }
                 ],
@@ -1435,14 +1817,6 @@ const docTemplate = `{
                 ],
                 "summary": "List workspaces",
                 "operationId": "ListWorkspaces",
-                "parameters": [
-                    {
-                        "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
-                        "in": "query"
-                    }
-                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1862,12 +2236,6 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1925,12 +2293,45 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Set Metadata",
-                        "name": "setMetadata",
+                        "description": "Workspace Metadata",
+                        "name": "workspaceMetadata",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetWorkspaceMetadata"
+                            "$ref": "#/definitions/UpdateWorkspaceMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/provider-metadata": {
+            "post": {
+                "description": "Update workspace provider metadata",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Update workspace provider metadata",
+                "operationId": "UpdateWorkspaceProviderMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Provider metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateWorkspaceProviderMetadataDTO"
                         }
                     }
                 ],
@@ -3338,7 +3739,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
+                    "$ref": "#/definitions/ProviderInfo"
                 }
             }
         },
@@ -3741,6 +4142,12 @@ const docTemplate = `{
                 "filePath": {
                     "type": "string"
                 }
+            }
+        },
+        "DownloadUrls": {
+            "type": "object",
+            "additionalProperties": {
+                "type": "string"
             }
         },
         "EnvironmentVariable": {
@@ -4238,7 +4645,7 @@ const docTemplate = `{
                 }
             }
         },
-        "InstallProviderRequest": {
+        "InstallProviderDTO": {
             "type": "object",
             "required": [
                 "downloadUrls",
@@ -4246,10 +4653,7 @@ const docTemplate = `{
             ],
             "properties": {
                 "downloadUrls": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                    "$ref": "#/definitions/DownloadUrls"
                 },
                 "name": {
                     "type": "string"
@@ -4280,11 +4684,18 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
+                "metadata": {
+                    "description": "JSON encoded metadata",
+                    "type": "string"
+                },
                 "resourceId": {
                     "type": "string"
                 },
                 "resourceType": {
                     "$ref": "#/definitions/ResourceType"
+                },
+                "runnerId": {
+                    "type": "string"
                 },
                 "state": {
                     "$ref": "#/definitions/JobState"
@@ -4582,20 +4993,72 @@ const docTemplate = `{
                 }
             }
         },
-        "Provider": {
+        "ProviderInfo": {
             "type": "object",
             "required": [
                 "name",
+                "runnerId",
+                "runnerName",
+                "targetConfigManifest",
                 "version"
             ],
             "properties": {
+                "agentlessTarget": {
+                    "type": "boolean"
+                },
                 "label": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
+                "runnerId": {
+                    "type": "string"
+                },
+                "runnerName": {
+                    "type": "string"
+                },
+                "targetConfigManifest": {
+                    "$ref": "#/definitions/TargetConfigManifest"
+                },
                 "version": {
+                    "type": "string"
+                }
+            }
+        },
+        "RegisterRunnerDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "RegisterRunnerResultDTO": {
+            "type": "object",
+            "required": [
+                "apiKey",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
                     "type": "string"
                 }
             }
@@ -4670,13 +5133,66 @@ const docTemplate = `{
             "enum": [
                 "workspace",
                 "target",
-                "build"
+                "build",
+                "runner"
             ],
             "x-enum-varnames": [
                 "ResourceTypeWorkspace",
                 "ResourceTypeTarget",
-                "ResourceTypeBuild"
+                "ResourceTypeBuild",
+                "ResourceTypeRunner"
             ]
+        },
+        "RunnerDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "state"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/ResourceState"
+                }
+            }
+        },
+        "RunnerMetadata": {
+            "type": "object",
+            "required": [
+                "providers",
+                "runnerId",
+                "updatedAt",
+                "uptime"
+            ],
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProviderInfo"
+                    }
+                },
+                "runnerId": {
+                    "type": "string"
+                },
+                "runningJobs": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
         },
         "Sample": {
             "type": "object",
@@ -4725,7 +5241,6 @@ const docTemplate = `{
                 "localBuilderRegistryImage",
                 "localBuilderRegistryPort",
                 "logFile",
-                "providersDir",
                 "registryUrl",
                 "serverDownloadUrl"
             ],
@@ -4766,11 +5281,11 @@ const docTemplate = `{
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
+                "localRunnerDisabled": {
+                    "type": "boolean"
+                },
                 "logFile": {
                     "$ref": "#/definitions/LogFileConfig"
-                },
-                "providersDir": {
-                    "type": "string"
                 },
                 "registryUrl": {
                     "type": "string"
@@ -4862,31 +5377,6 @@ const docTemplate = `{
                 }
             }
         },
-        "SetTargetMetadata": {
-            "type": "object",
-            "required": [
-                "uptime"
-            ],
-            "properties": {
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "SetWorkspaceMetadata": {
-            "type": "object",
-            "required": [
-                "uptime"
-            ],
-            "properties": {
-                "gitStatus": {
-                    "$ref": "#/definitions/GitStatus"
-                },
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
         "SigningMethod": {
             "type": "string",
             "enum": [
@@ -4954,6 +5444,9 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
+                "providerMetadata": {
+                    "type": "string"
+                },
                 "targetConfig": {
                     "$ref": "#/definitions/TargetConfig"
                 },
@@ -4992,7 +5485,7 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "providerInfo": {
-                    "$ref": "#/definitions/TargetProviderInfo"
+                    "$ref": "#/definitions/ProviderInfo"
                 }
             }
         },
@@ -5035,7 +5528,7 @@ const docTemplate = `{
                     }
                 },
                 "type": {
-                    "$ref": "#/definitions/provider.TargetConfigPropertyType"
+                    "$ref": "#/definitions/models.TargetConfigPropertyType"
                 }
             }
         },
@@ -5064,9 +5557,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "info": {
-                    "$ref": "#/definitions/TargetInfo"
-                },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
@@ -5074,6 +5564,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/TargetMetadata"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
                     "type": "string"
                 },
                 "state": {
@@ -5090,20 +5583,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/Workspace"
                     }
-                }
-            }
-        },
-        "TargetInfo": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "providerMetadata": {
-                    "type": "string"
                 }
             }
         },
@@ -5126,23 +5605,84 @@ const docTemplate = `{
                 }
             }
         },
-        "TargetProviderInfo": {
+        "UpdateJobState": {
             "type": "object",
             "required": [
-                "name",
-                "version"
+                "state"
             ],
             "properties": {
-                "agentlessTarget": {
-                    "type": "boolean"
-                },
-                "label": {
+                "errorMessage": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
+                "state": {
+                    "$ref": "#/definitions/JobState"
+                }
+            }
+        },
+        "UpdateRunnerMetadataDTO": {
+            "type": "object",
+            "required": [
+                "providers",
+                "uptime"
+            ],
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProviderInfo"
+                    }
                 },
-                "version": {
+                "runningJobs": {
+                    "type": "integer"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateTargetMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateTargetProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateWorkspaceMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateWorkspaceProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
                     "type": "string"
                 }
             }
@@ -5150,6 +5690,7 @@ const docTemplate = `{
         "Workspace": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -5160,6 +5701,9 @@ const docTemplate = `{
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },
@@ -5185,6 +5729,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/WorkspaceMetadata"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
                     "type": "string"
                 },
                 "repository": {
@@ -5204,6 +5751,7 @@ const docTemplate = `{
         "WorkspaceDTO": {
             "type": "object",
             "required": [
+                "apiKey",
                 "envVars",
                 "id",
                 "image",
@@ -5215,6 +5763,9 @@ const docTemplate = `{
                 "user"
             ],
             "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
                 "buildConfig": {
                     "$ref": "#/definitions/BuildConfig"
                 },
@@ -5233,9 +5784,6 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
-                "info": {
-                    "$ref": "#/definitions/WorkspaceInfo"
-                },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
                 },
@@ -5243,6 +5791,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/WorkspaceMetadata"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
                     "type": "string"
                 },
                 "repository": {
@@ -5266,32 +5817,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "dir": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceInfo": {
-            "type": "object",
-            "required": [
-                "created",
-                "isRunning",
-                "name",
-                "targetId"
-            ],
-            "properties": {
-                "created": {
-                    "type": "string"
-                },
-                "isRunning": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "providerMetadata": {
-                    "type": "string"
-                },
-                "targetId": {
                     "type": "string"
                 }
             }
@@ -5369,12 +5894,14 @@ const docTemplate = `{
             "enum": [
                 "client",
                 "workspace",
-                "target"
+                "target",
+                "runner"
             ],
             "x-enum-varnames": [
                 "ApiKeyTypeClient",
                 "ApiKeyTypeWorkspace",
-                "ApiKeyTypeTarget"
+                "ApiKeyTypeTarget",
+                "ApiKeyTypeRunner"
             ]
         },
         "models.JobAction": {
@@ -5386,7 +5913,10 @@ const docTemplate = `{
                 "restart",
                 "delete",
                 "force-delete",
-                "run"
+                "run",
+                "install-provider",
+                "uninstall-provider",
+                "update-provider"
             ],
             "x-enum-varnames": [
                 "JobActionCreate",
@@ -5395,7 +5925,10 @@ const docTemplate = `{
                 "JobActionRestart",
                 "JobActionDelete",
                 "JobActionForceDelete",
-                "JobActionRun"
+                "JobActionRun",
+                "JobActionInstallProvider",
+                "JobActionUninstallProvider",
+                "JobActionUpdateProvider"
             ]
         },
         "models.ResourceStateName": {
@@ -5443,7 +5976,7 @@ const docTemplate = `{
                 "ResourceStateNameDeleted"
             ]
         },
-        "provider.TargetConfigPropertyType": {
+        "models.TargetConfigPropertyType": {
             "type": "string",
             "enum": [
                 "string",

@@ -22,7 +22,7 @@ type BuildServiceConfig struct {
 	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	CreateJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
-	LoggerFactory         logs.LoggerFactory
+	LoggerFactory         logs.ILoggerFactory
 }
 
 type BuildService struct {
@@ -30,7 +30,7 @@ type BuildService struct {
 	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	createJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 }
 
 func NewBuildService(config BuildServiceConfig) services.IBuildService {
@@ -194,5 +194,9 @@ func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duratio
 }
 
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
-	return s.loggerFactory.CreateBuildLogReader(buildId)
+	return s.loggerFactory.CreateLogReader(buildId)
+}
+
+func (s *BuildService) GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(buildId)
 }

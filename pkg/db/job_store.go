@@ -91,6 +91,9 @@ func processJobFilters(tx *gorm.DB, filter *stores.JobFilter) *gorm.DB {
 		if filter.ResourceId != nil {
 			tx = tx.Where("resource_id = ?", *filter.ResourceId)
 		}
+		if filter.RunnerIdOrIsNil != nil {
+			tx = tx.Where("runner_id = ? OR runner_id IS NULL OR runner_id = ''", *filter.RunnerIdOrIsNil)
+		}
 		if filter.States != nil && len(*filter.States) > 0 {
 			placeholders := strings.Repeat("?,", len(*filter.States))
 			placeholders = placeholders[:len(placeholders)-1]
