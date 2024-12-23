@@ -333,5 +333,10 @@
     "name": "Sample React.js Calendar App",
     "description": "The Calendar App is a React-based single-page application that allows event-scheduling , calendar navigation and categorization of events.",
     "gitUrl": "https://github.com/daytonaio/sample-react-calendar-app"
+  },
+  {
+    "name": "Sample Next.js GitHub PR Tracker",
+    "description": "An AI-powered tool (using CopilotKit) designed to track your GitHub pull requests across various open-source events like Hacktoberfest, as well as general pull requests.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
   }
 ]
