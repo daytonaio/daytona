@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **EnvVars** | **map[string]string** |  | 
 **Id** | **string** |  | 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**LastJobId** | Pointer to **string** |  | [optional] 
 **Metadata** | Pointer to [**TargetMetadata**](TargetMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
@@ -118,6 +119,31 @@ SetLastJob sets LastJob field to given value.
 `func (o *Target) HasLastJob() bool`
 
 HasLastJob returns a boolean if a field has been set.
+
+### GetLastJobId
+
+`func (o *Target) GetLastJobId() string`
+
+GetLastJobId returns the LastJobId field if non-nil, zero value otherwise.
+
+### GetLastJobIdOk
+
+`func (o *Target) GetLastJobIdOk() (*string, bool)`
+
+GetLastJobIdOk returns a tuple with the LastJobId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJobId
+
+`func (o *Target) SetLastJobId(v string)`
+
+SetLastJobId sets LastJobId field to given value.
+
+### HasLastJobId
+
+`func (o *Target) HasLastJobId() bool`
+
+HasLastJobId returns a boolean if a field has been set.
 
 ### GetMetadata
 

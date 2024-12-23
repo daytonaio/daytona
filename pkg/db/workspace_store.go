@@ -79,5 +79,5 @@ func (s *WorkspaceStore) Delete(ctx context.Context, workspace *models.Workspace
 }
 
 func preloadWorkspaceEntities(tx *gorm.DB) *gorm.DB {
-	return tx.Preload(clause.Associations).Preload("Target.TargetConfig").Preload("LastJob", preloadLastJob)
+	return tx.Preload(clause.Associations).Preload("Target.TargetConfig").Preload("LastJob")
 }

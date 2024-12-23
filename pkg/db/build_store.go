@@ -95,7 +95,7 @@ func (b *BuildStore) Delete(ctx context.Context, id string) error {
 }
 
 func preloadBuildEntities(tx *gorm.DB) *gorm.DB {
-	return tx.Preload("LastJob", preloadLastJob)
+	return tx.Preload("LastJob")
 }
 
 func processBuildFilters(tx *gorm.DB, filter *stores.BuildFilter) *gorm.DB {
