@@ -13,7 +13,7 @@ import (
 
 var configCmd = &cobra.Command{
 	Use:   "config",
-	Short: "Output Daytona Runner config",
+	Short: "Output local Daytona Server config",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := server.GetConfig()
 		if err != nil {
