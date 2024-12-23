@@ -323,5 +323,10 @@
     "name": "Sample Next.js Nexus Framework",
     "description": "Nexus is a modern Next.js frontend framework powered by Daytona, designed for rapid development, scalability, and performance. It delivers responsive, user-friendly interfaces for dynamic web applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-nexus-framework"
+  },
+  {
+    "name": "Sample Next.js Sudoku Game",
+    "description": "A Sudoku game built with Next.js and TailwindCSS. The game generates Sudoku puzzles of varying difficulties (easy, medium, hard, expert) and allows users to interactively fill in the grid.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-sudoku"
   }
 ]
