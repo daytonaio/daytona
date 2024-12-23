@@ -328,5 +328,10 @@
     "name": "Sample Next.js Sudoku Game",
     "description": "A Sudoku game built with Next.js and TailwindCSS. The game generates Sudoku puzzles of varying difficulties (easy, medium, hard, expert) and allows users to interactively fill in the grid.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-sudoku"
+  },
+  {
+    "name": "Sample Next.js GitHub PR Tracker",
+    "description": "An AI-powered tool (using CopilotKit) designed to track your GitHub pull requests across various open-source events like Hacktoberfest, as well as general pull requests.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
   }
 ]
