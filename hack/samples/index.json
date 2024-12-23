@@ -298,5 +298,10 @@
     "name": "EJS Thoughts Web App",
     "description": "A web app built using nodejs that allows user to share their thoughts.",
     "gitUrl": "https://github.com/daytonaio/sample-ejs-web-app"
+  },
+  {
+    "name": "Sample Nuxt.js Quote Generator",
+    "description": "Quote Smith is a Nuxt.js app for creating and customizing inspirational quotes. Edit fonts, sizes, and gradients, then generate and download quotes as PNGs for sharing or personal use.",
+    "gitUrl": "https://github.com/daytonaio/sample-nuxtjs-quote-generator"
   }
 ]
