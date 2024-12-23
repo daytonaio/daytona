@@ -18,8 +18,8 @@ import (
 //	@Tags			workspace
 //	@Summary		Set workspace metadata
 //	@Description	Set workspace metadata
-//	@Param			workspaceId	path	string					true	"Workspace ID"
-//	@Param			setMetadata	body	SetWorkspaceMetadata	true	"Set Metadata"
+//	@Param			workspaceId			path	string						true	"Workspace ID"
+//	@Param			workspaceMetadata	body	UpdateWorkspaceMetadataDTO	true	"Workspace Metadata"
 //	@Success		200
 //	@Router			/workspace/{workspaceId}/metadata [post]
 //
@@ -27,8 +27,8 @@ import (
 func SetWorkspaceMetadata(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
-	var setWorkspaceMetadataDTO dto.SetWorkspaceMetadata
-	err := ctx.BindJSON(&setWorkspaceMetadataDTO)
+	var updateDTO dto.UpdateWorkspaceMetadataDTO
+	err := ctx.BindJSON(&updateDTO)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
@@ -37,8 +37,8 @@ func SetWorkspaceMetadata(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	_, err = server.WorkspaceService.SetWorkspaceMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
-		Uptime:    setWorkspaceMetadataDTO.Uptime,
-		GitStatus: setWorkspaceMetadataDTO.GitStatus,
+		Uptime:    updateDTO.Uptime,
+		GitStatus: updateDTO.GitStatus,
 	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set workspace metadata for %s: %w", workspaceId, err))

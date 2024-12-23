@@ -30,9 +30,7 @@ func (s *RunnerService) ListProviders(ctx context.Context, runnerId *string) ([]
 
 	providers := []models.ProviderInfo{}
 	for _, metadata := range metadatas {
-		for _, provider := range metadata.Providers {
-			providers = append(providers, provider)
-		}
+		providers = append(providers, metadata.Providers...)
 	}
 
 	return providers, nil

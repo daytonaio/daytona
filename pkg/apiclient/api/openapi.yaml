@@ -852,8 +852,8 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SetRunnerMetadata'
-        description: Set Metadata
+              $ref: '#/components/schemas/UpdateRunnerMetadataDTO'
+        description: Runner Metadata
         required: true
       responses:
         "200":
@@ -862,7 +862,7 @@ paths:
       summary: Set runner metadata
       tags:
       - runner
-      x-codegen-request-body-name: setMetadata
+      x-codegen-request-body-name: runnerMetadata
   /runner/{runnerId}/provider/install:
     post:
       description: Install provider
@@ -1217,8 +1217,8 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SetTargetMetadata'
-        description: Set Metadata
+              $ref: '#/components/schemas/UpdateTargetMetadataDTO'
+        description: Target Metadata
         required: true
       responses:
         "200":
@@ -1227,7 +1227,7 @@ paths:
       summary: Set target metadata
       tags:
       - target
-      x-codegen-request-body-name: setMetadata
+      x-codegen-request-body-name: targetMetadata
   /target/{targetId}/provider-metadata:
     post:
       description: Update target provider metadata
@@ -1660,8 +1660,8 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/SetWorkspaceMetadata'
-        description: Set Metadata
+              $ref: '#/components/schemas/UpdateWorkspaceMetadataDTO'
+        description: Workspace Metadata
         required: true
       responses:
         "200":
@@ -1670,7 +1670,7 @@ paths:
       summary: Set workspace metadata
       tags:
       - workspace
-      x-codegen-request-body-name: setMetadata
+      x-codegen-request-body-name: workspaceMetadata
   /workspace/{workspaceId}/provider-metadata:
     post:
       description: Update workspace provider metadata
@@ -2977,96 +2977,6 @@ components:
       - providerId
       - token
       type: object
-    SetRunnerMetadata:
-      example:
-        runningJobs: 0
-        providers:
-        - runnerName: runnerName
-          targetConfigManifest:
-            key:
-              defaultValue: defaultValue
-              options:
-              - options
-              - options
-              description: description
-              suggestions:
-              - suggestions
-              - suggestions
-              type: null
-              disabledPredicate: disabledPredicate
-              inputMasked: true
-          agentlessTarget: true
-          name: name
-          runnerId: runnerId
-          label: label
-          version: version
-        - runnerName: runnerName
-          targetConfigManifest:
-            key:
-              defaultValue: defaultValue
-              options:
-              - options
-              - options
-              description: description
-              suggestions:
-              - suggestions
-              - suggestions
-              type: null
-              disabledPredicate: disabledPredicate
-              inputMasked: true
-          agentlessTarget: true
-          name: name
-          runnerId: runnerId
-          label: label
-          version: version
-        uptime: 6
-      properties:
-        providers:
-          items:
-            $ref: '#/components/schemas/ProviderInfo'
-          type: array
-        runningJobs:
-          type: integer
-        uptime:
-          type: integer
-      required:
-      - providers
-      - uptime
-      type: object
-    SetTargetMetadata:
-      example:
-        uptime: 0
-      properties:
-        uptime:
-          type: integer
-      required:
-      - uptime
-      type: object
-    SetWorkspaceMetadata:
-      example:
-        gitStatus:
-          behind: 1
-          fileStatus:
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          ahead: 6
-          branchPublished: true
-          currentBranch: currentBranch
-        uptime: 0
-      properties:
-        gitStatus:
-          $ref: '#/components/schemas/GitStatus'
-        uptime:
-          type: integer
-      required:
-      - uptime
-      type: object
     SigningMethod:
       enum:
       - ssh
@@ -3608,6 +3518,71 @@ components:
       required:
       - state
       type: object
+    UpdateRunnerMetadataDTO:
+      example:
+        runningJobs: 0
+        providers:
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        uptime: 6
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/ProviderInfo'
+          type: array
+        runningJobs:
+          type: integer
+        uptime:
+          type: integer
+      required:
+      - providers
+      - uptime
+      type: object
+    UpdateTargetMetadataDTO:
+      example:
+        uptime: 0
+      properties:
+        uptime:
+          type: integer
+      required:
+      - uptime
+      type: object
     UpdateTargetProviderMetadataDTO:
       example:
         metadata: metadata
@@ -3616,6 +3591,31 @@ components:
           type: string
       required:
       - metadata
+      type: object
+    UpdateWorkspaceMetadataDTO:
+      example:
+        gitStatus:
+          behind: 1
+          fileStatus:
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          ahead: 6
+          branchPublished: true
+          currentBranch: currentBranch
+        uptime: 0
+      properties:
+        gitStatus:
+          $ref: '#/components/schemas/GitStatus'
+        uptime:
+          type: integer
+      required:
+      - uptime
       type: object
     UpdateWorkspaceProviderMetadataDTO:
       example:

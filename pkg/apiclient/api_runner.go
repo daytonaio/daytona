@@ -605,15 +605,15 @@ func (a *RunnerAPIService) RemoveRunnerExecute(r ApiRemoveRunnerRequest) (*http.
 }
 
 type ApiSetRunnerMetadataRequest struct {
-	ctx         context.Context
-	ApiService  *RunnerAPIService
-	runnerId    string
-	setMetadata *SetRunnerMetadata
+	ctx            context.Context
+	ApiService     *RunnerAPIService
+	runnerId       string
+	runnerMetadata *UpdateRunnerMetadataDTO
 }
 
-// Set Metadata
-func (r ApiSetRunnerMetadataRequest) SetMetadata(setMetadata SetRunnerMetadata) ApiSetRunnerMetadataRequest {
-	r.setMetadata = &setMetadata
+// Runner Metadata
+func (r ApiSetRunnerMetadataRequest) RunnerMetadata(runnerMetadata UpdateRunnerMetadataDTO) ApiSetRunnerMetadataRequest {
+	r.runnerMetadata = &runnerMetadata
 	return r
 }
 
@@ -657,8 +657,8 @@ func (a *RunnerAPIService) SetRunnerMetadataExecute(r ApiSetRunnerMetadataReques
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.setMetadata == nil {
-		return nil, reportError("setMetadata is required and must be specified")
+	if r.runnerMetadata == nil {
+		return nil, reportError("runnerMetadata is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -679,7 +679,7 @@ func (a *RunnerAPIService) SetRunnerMetadataExecute(r ApiSetRunnerMetadataReques
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.setMetadata
+	localVarPostBody = r.runnerMetadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

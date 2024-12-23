@@ -16,36 +16,36 @@ import (
 	"fmt"
 )
 
-// checks if the SetTargetMetadata type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &SetTargetMetadata{}
+// checks if the UpdateTargetMetadataDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateTargetMetadataDTO{}
 
-// SetTargetMetadata struct for SetTargetMetadata
-type SetTargetMetadata struct {
+// UpdateTargetMetadataDTO struct for UpdateTargetMetadataDTO
+type UpdateTargetMetadataDTO struct {
 	Uptime int32 `json:"uptime"`
 }
 
-type _SetTargetMetadata SetTargetMetadata
+type _UpdateTargetMetadataDTO UpdateTargetMetadataDTO
 
-// NewSetTargetMetadata instantiates a new SetTargetMetadata object
+// NewUpdateTargetMetadataDTO instantiates a new UpdateTargetMetadataDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSetTargetMetadata(uptime int32) *SetTargetMetadata {
-	this := SetTargetMetadata{}
+func NewUpdateTargetMetadataDTO(uptime int32) *UpdateTargetMetadataDTO {
+	this := UpdateTargetMetadataDTO{}
 	this.Uptime = uptime
 	return &this
 }
 
-// NewSetTargetMetadataWithDefaults instantiates a new SetTargetMetadata object
+// NewUpdateTargetMetadataDTOWithDefaults instantiates a new UpdateTargetMetadataDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewSetTargetMetadataWithDefaults() *SetTargetMetadata {
-	this := SetTargetMetadata{}
+func NewUpdateTargetMetadataDTOWithDefaults() *UpdateTargetMetadataDTO {
+	this := UpdateTargetMetadataDTO{}
 	return &this
 }
 
 // GetUptime returns the Uptime field value
-func (o *SetTargetMetadata) GetUptime() int32 {
+func (o *UpdateTargetMetadataDTO) GetUptime() int32 {
 	if o == nil {
 		var ret int32
 		return ret
@@ -56,7 +56,7 @@ func (o *SetTargetMetadata) GetUptime() int32 {
 
 // GetUptimeOk returns a tuple with the Uptime field value
 // and a boolean to check if the value has been set.
-func (o *SetTargetMetadata) GetUptimeOk() (*int32, bool) {
+func (o *UpdateTargetMetadataDTO) GetUptimeOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -64,11 +64,11 @@ func (o *SetTargetMetadata) GetUptimeOk() (*int32, bool) {
 }
 
 // SetUptime sets field value
-func (o *SetTargetMetadata) SetUptime(v int32) {
+func (o *UpdateTargetMetadataDTO) SetUptime(v int32) {
 	o.Uptime = v
 }
 
-func (o SetTargetMetadata) MarshalJSON() ([]byte, error) {
+func (o UpdateTargetMetadataDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -76,13 +76,13 @@ func (o SetTargetMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o SetTargetMetadata) ToMap() (map[string]interface{}, error) {
+func (o UpdateTargetMetadataDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["uptime"] = o.Uptime
 	return toSerialize, nil
 }
 
-func (o *SetTargetMetadata) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateTargetMetadataDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -104,53 +104,53 @@ func (o *SetTargetMetadata) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varSetTargetMetadata := _SetTargetMetadata{}
+	varUpdateTargetMetadataDTO := _UpdateTargetMetadataDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSetTargetMetadata)
+	err = decoder.Decode(&varUpdateTargetMetadataDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = SetTargetMetadata(varSetTargetMetadata)
+	*o = UpdateTargetMetadataDTO(varUpdateTargetMetadataDTO)
 
 	return err
 }
 
-type NullableSetTargetMetadata struct {
-	value *SetTargetMetadata
+type NullableUpdateTargetMetadataDTO struct {
+	value *UpdateTargetMetadataDTO
 	isSet bool
 }
 
-func (v NullableSetTargetMetadata) Get() *SetTargetMetadata {
+func (v NullableUpdateTargetMetadataDTO) Get() *UpdateTargetMetadataDTO {
 	return v.value
 }
 
-func (v *NullableSetTargetMetadata) Set(val *SetTargetMetadata) {
+func (v *NullableUpdateTargetMetadataDTO) Set(val *UpdateTargetMetadataDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableSetTargetMetadata) IsSet() bool {
+func (v NullableUpdateTargetMetadataDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableSetTargetMetadata) Unset() {
+func (v *NullableUpdateTargetMetadataDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableSetTargetMetadata(val *SetTargetMetadata) *NullableSetTargetMetadata {
-	return &NullableSetTargetMetadata{value: val, isSet: true}
+func NewNullableUpdateTargetMetadataDTO(val *UpdateTargetMetadataDTO) *NullableUpdateTargetMetadataDTO {
+	return &NullableUpdateTargetMetadataDTO{value: val, isSet: true}
 }
 
-func (v NullableSetTargetMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateTargetMetadataDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableSetTargetMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateTargetMetadataDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

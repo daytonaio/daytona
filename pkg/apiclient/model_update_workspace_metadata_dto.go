@@ -16,37 +16,37 @@ import (
 	"fmt"
 )
 
-// checks if the SetWorkspaceMetadata type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &SetWorkspaceMetadata{}
+// checks if the UpdateWorkspaceMetadataDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateWorkspaceMetadataDTO{}
 
-// SetWorkspaceMetadata struct for SetWorkspaceMetadata
-type SetWorkspaceMetadata struct {
+// UpdateWorkspaceMetadataDTO struct for UpdateWorkspaceMetadataDTO
+type UpdateWorkspaceMetadataDTO struct {
 	GitStatus *GitStatus `json:"gitStatus,omitempty"`
 	Uptime    int32      `json:"uptime"`
 }
 
-type _SetWorkspaceMetadata SetWorkspaceMetadata
+type _UpdateWorkspaceMetadataDTO UpdateWorkspaceMetadataDTO
 
-// NewSetWorkspaceMetadata instantiates a new SetWorkspaceMetadata object
+// NewUpdateWorkspaceMetadataDTO instantiates a new UpdateWorkspaceMetadataDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSetWorkspaceMetadata(uptime int32) *SetWorkspaceMetadata {
-	this := SetWorkspaceMetadata{}
+func NewUpdateWorkspaceMetadataDTO(uptime int32) *UpdateWorkspaceMetadataDTO {
+	this := UpdateWorkspaceMetadataDTO{}
 	this.Uptime = uptime
 	return &this
 }
 
-// NewSetWorkspaceMetadataWithDefaults instantiates a new SetWorkspaceMetadata object
+// NewUpdateWorkspaceMetadataDTOWithDefaults instantiates a new UpdateWorkspaceMetadataDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewSetWorkspaceMetadataWithDefaults() *SetWorkspaceMetadata {
-	this := SetWorkspaceMetadata{}
+func NewUpdateWorkspaceMetadataDTOWithDefaults() *UpdateWorkspaceMetadataDTO {
+	this := UpdateWorkspaceMetadataDTO{}
 	return &this
 }
 
 // GetGitStatus returns the GitStatus field value if set, zero value otherwise.
-func (o *SetWorkspaceMetadata) GetGitStatus() GitStatus {
+func (o *UpdateWorkspaceMetadataDTO) GetGitStatus() GitStatus {
 	if o == nil || IsNil(o.GitStatus) {
 		var ret GitStatus
 		return ret
@@ -56,7 +56,7 @@ func (o *SetWorkspaceMetadata) GetGitStatus() GitStatus {
 
 // GetGitStatusOk returns a tuple with the GitStatus field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *SetWorkspaceMetadata) GetGitStatusOk() (*GitStatus, bool) {
+func (o *UpdateWorkspaceMetadataDTO) GetGitStatusOk() (*GitStatus, bool) {
 	if o == nil || IsNil(o.GitStatus) {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *SetWorkspaceMetadata) GetGitStatusOk() (*GitStatus, bool) {
 }
 
 // HasGitStatus returns a boolean if a field has been set.
-func (o *SetWorkspaceMetadata) HasGitStatus() bool {
+func (o *UpdateWorkspaceMetadataDTO) HasGitStatus() bool {
 	if o != nil && !IsNil(o.GitStatus) {
 		return true
 	}
@@ -73,12 +73,12 @@ func (o *SetWorkspaceMetadata) HasGitStatus() bool {
 }
 
 // SetGitStatus gets a reference to the given GitStatus and assigns it to the GitStatus field.
-func (o *SetWorkspaceMetadata) SetGitStatus(v GitStatus) {
+func (o *UpdateWorkspaceMetadataDTO) SetGitStatus(v GitStatus) {
 	o.GitStatus = &v
 }
 
 // GetUptime returns the Uptime field value
-func (o *SetWorkspaceMetadata) GetUptime() int32 {
+func (o *UpdateWorkspaceMetadataDTO) GetUptime() int32 {
 	if o == nil {
 		var ret int32
 		return ret
@@ -89,7 +89,7 @@ func (o *SetWorkspaceMetadata) GetUptime() int32 {
 
 // GetUptimeOk returns a tuple with the Uptime field value
 // and a boolean to check if the value has been set.
-func (o *SetWorkspaceMetadata) GetUptimeOk() (*int32, bool) {
+func (o *UpdateWorkspaceMetadataDTO) GetUptimeOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -97,11 +97,11 @@ func (o *SetWorkspaceMetadata) GetUptimeOk() (*int32, bool) {
 }
 
 // SetUptime sets field value
-func (o *SetWorkspaceMetadata) SetUptime(v int32) {
+func (o *UpdateWorkspaceMetadataDTO) SetUptime(v int32) {
 	o.Uptime = v
 }
 
-func (o SetWorkspaceMetadata) MarshalJSON() ([]byte, error) {
+func (o UpdateWorkspaceMetadataDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -109,7 +109,7 @@ func (o SetWorkspaceMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o SetWorkspaceMetadata) ToMap() (map[string]interface{}, error) {
+func (o UpdateWorkspaceMetadataDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.GitStatus) {
 		toSerialize["gitStatus"] = o.GitStatus
@@ -118,7 +118,7 @@ func (o SetWorkspaceMetadata) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *SetWorkspaceMetadata) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateWorkspaceMetadataDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -140,53 +140,53 @@ func (o *SetWorkspaceMetadata) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varSetWorkspaceMetadata := _SetWorkspaceMetadata{}
+	varUpdateWorkspaceMetadataDTO := _UpdateWorkspaceMetadataDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSetWorkspaceMetadata)
+	err = decoder.Decode(&varUpdateWorkspaceMetadataDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = SetWorkspaceMetadata(varSetWorkspaceMetadata)
+	*o = UpdateWorkspaceMetadataDTO(varUpdateWorkspaceMetadataDTO)
 
 	return err
 }
 
-type NullableSetWorkspaceMetadata struct {
-	value *SetWorkspaceMetadata
+type NullableUpdateWorkspaceMetadataDTO struct {
+	value *UpdateWorkspaceMetadataDTO
 	isSet bool
 }
 
-func (v NullableSetWorkspaceMetadata) Get() *SetWorkspaceMetadata {
+func (v NullableUpdateWorkspaceMetadataDTO) Get() *UpdateWorkspaceMetadataDTO {
 	return v.value
 }
 
-func (v *NullableSetWorkspaceMetadata) Set(val *SetWorkspaceMetadata) {
+func (v *NullableUpdateWorkspaceMetadataDTO) Set(val *UpdateWorkspaceMetadataDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableSetWorkspaceMetadata) IsSet() bool {
+func (v NullableUpdateWorkspaceMetadataDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableSetWorkspaceMetadata) Unset() {
+func (v *NullableUpdateWorkspaceMetadataDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableSetWorkspaceMetadata(val *SetWorkspaceMetadata) *NullableSetWorkspaceMetadata {
-	return &NullableSetWorkspaceMetadata{value: val, isSet: true}
+func NewNullableUpdateWorkspaceMetadataDTO(val *UpdateWorkspaceMetadataDTO) *NullableUpdateWorkspaceMetadataDTO {
+	return &NullableUpdateWorkspaceMetadataDTO{value: val, isSet: true}
 }
 
-func (v NullableSetWorkspaceMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateWorkspaceMetadataDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableSetWorkspaceMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateWorkspaceMetadataDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

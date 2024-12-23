@@ -351,7 +351,7 @@ Name | Type | Description  | Notes
 
 ## SetRunnerMetadata
 
-> SetRunnerMetadata(ctx, runnerId).SetMetadata(setMetadata).Execute()
+> SetRunnerMetadata(ctx, runnerId).RunnerMetadata(runnerMetadata).Execute()
 
 Set runner metadata
 
@@ -371,11 +371,11 @@ import (
 
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
-	setMetadata := *openapiclient.NewSetRunnerMetadata([]openapiclient.ProviderInfo{*openapiclient.NewProviderInfo("Name_example", "RunnerId_example", "RunnerName_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")}, int32(123)) // SetRunnerMetadata | Set Metadata
+	runnerMetadata := *openapiclient.NewUpdateRunnerMetadataDTO([]openapiclient.ProviderInfo{*openapiclient.NewProviderInfo("Name_example", "RunnerId_example", "RunnerName_example", map[string]TargetConfigProperty{"key": *openapiclient.NewTargetConfigProperty()}, "Version_example")}, int32(123)) // UpdateRunnerMetadataDTO | Runner Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.RunnerAPI.SetRunnerMetadata(context.Background(), runnerId).SetMetadata(setMetadata).Execute()
+	r, err := apiClient.RunnerAPI.SetRunnerMetadata(context.Background(), runnerId).RunnerMetadata(runnerMetadata).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `RunnerAPI.SetRunnerMetadata``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -399,7 +399,7 @@ Other parameters are passed through a pointer to a apiSetRunnerMetadataRequest s
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **setMetadata** | [**SetRunnerMetadata**](SetRunnerMetadata.md) | Set Metadata | 
+ **runnerMetadata** | [**UpdateRunnerMetadataDTO**](UpdateRunnerMetadataDTO.md) | Runner Metadata | 
 
 ### Return type
 

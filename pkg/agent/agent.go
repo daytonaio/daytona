@@ -249,7 +249,7 @@ func (a *Agent) updateWorkspaceMetadata() error {
 		return err
 	}
 
-	res, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).SetMetadata(apiclient.SetWorkspaceMetadata{
+	res, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).WorkspaceMetadata(apiclient.UpdateWorkspaceMetadataDTO{
 		Uptime:    uptime,
 		GitStatus: gitStatusDto,
 	}).Execute()
@@ -267,7 +267,7 @@ func (a *Agent) updateTargetMetadata() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), a.Config.TargetId).SetMetadata(apiclient.SetTargetMetadata{
+	res, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), a.Config.TargetId).TargetMetadata(apiclient.UpdateTargetMetadataDTO{
 		Uptime: uptime,
 	}).Execute()
 	if err != nil {

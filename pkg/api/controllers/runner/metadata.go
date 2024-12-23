@@ -18,8 +18,8 @@ import (
 //	@Tags			runner
 //	@Summary		Set runner metadata
 //	@Description	Set runner metadata
-//	@Param			runnerId	path	string				true	"Runner ID"
-//	@Param			setMetadata	body	SetRunnerMetadata	true	"Set Metadata"
+//	@Param			runnerId		path	string					true	"Runner ID"
+//	@Param			runnerMetadata	body	UpdateRunnerMetadataDTO	true	"Runner Metadata"
 //	@Success		200
 //	@Router			/runner/{runnerId}/metadata [post]
 //
@@ -27,7 +27,7 @@ import (
 func SetRunnerMetadata(ctx *gin.Context) {
 	runnerId := ctx.Param("runnerId")
 
-	var runnerMetadata dto.SetRunnerMetadata
+	var runnerMetadata dto.UpdateRunnerMetadataDTO
 	err := ctx.BindJSON(&runnerMetadata)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))

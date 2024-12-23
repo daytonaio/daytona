@@ -284,7 +284,7 @@ Name | Type | Description  | Notes
 
 ## SetWorkspaceMetadata
 
-> SetWorkspaceMetadata(ctx, workspaceId).SetMetadata(setMetadata).Execute()
+> SetWorkspaceMetadata(ctx, workspaceId).WorkspaceMetadata(workspaceMetadata).Execute()
 
 Set workspace metadata
 
@@ -304,11 +304,11 @@ import (
 
 func main() {
 	workspaceId := "workspaceId_example" // string | Workspace ID
-	setMetadata := *openapiclient.NewSetWorkspaceMetadata(int32(123)) // SetWorkspaceMetadata | Set Metadata
+	workspaceMetadata := *openapiclient.NewUpdateWorkspaceMetadataDTO(int32(123)) // UpdateWorkspaceMetadataDTO | Workspace Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), workspaceId).SetMetadata(setMetadata).Execute()
+	r, err := apiClient.WorkspaceAPI.SetWorkspaceMetadata(context.Background(), workspaceId).WorkspaceMetadata(workspaceMetadata).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.SetWorkspaceMetadata``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -332,7 +332,7 @@ Other parameters are passed through a pointer to a apiSetWorkspaceMetadataReques
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **setMetadata** | [**SetWorkspaceMetadata**](SetWorkspaceMetadata.md) | Set Metadata | 
+ **workspaceMetadata** | [**UpdateWorkspaceMetadataDTO**](UpdateWorkspaceMetadataDTO.md) | Workspace Metadata | 
 
 ### Return type
 

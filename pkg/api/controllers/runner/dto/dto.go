@@ -7,8 +7,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-type SetRunnerMetadata struct {
+type UpdateRunnerMetadataDTO struct {
 	Uptime      uint64                `json:"uptime" validate:"required" gorm:"not null"`
 	RunningJobs *uint64               `json:"runningJobs" validate:"optional" gorm:"not null"`
 	Providers   []models.ProviderInfo `json:"providers" validate:"required" gorm:"serializer:json;not null"`
-} // @name SetRunnerMetadata
+} // @name UpdateRunnerMetadataDTO

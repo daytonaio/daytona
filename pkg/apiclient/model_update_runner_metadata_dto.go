@@ -16,39 +16,39 @@ import (
 	"fmt"
 )
 
-// checks if the SetRunnerMetadata type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &SetRunnerMetadata{}
+// checks if the UpdateRunnerMetadataDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &UpdateRunnerMetadataDTO{}
 
-// SetRunnerMetadata struct for SetRunnerMetadata
-type SetRunnerMetadata struct {
+// UpdateRunnerMetadataDTO struct for UpdateRunnerMetadataDTO
+type UpdateRunnerMetadataDTO struct {
 	Providers   []ProviderInfo `json:"providers"`
 	RunningJobs *int32         `json:"runningJobs,omitempty"`
 	Uptime      int32          `json:"uptime"`
 }
 
-type _SetRunnerMetadata SetRunnerMetadata
+type _UpdateRunnerMetadataDTO UpdateRunnerMetadataDTO
 
-// NewSetRunnerMetadata instantiates a new SetRunnerMetadata object
+// NewUpdateRunnerMetadataDTO instantiates a new UpdateRunnerMetadataDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSetRunnerMetadata(providers []ProviderInfo, uptime int32) *SetRunnerMetadata {
-	this := SetRunnerMetadata{}
+func NewUpdateRunnerMetadataDTO(providers []ProviderInfo, uptime int32) *UpdateRunnerMetadataDTO {
+	this := UpdateRunnerMetadataDTO{}
 	this.Providers = providers
 	this.Uptime = uptime
 	return &this
 }
 
-// NewSetRunnerMetadataWithDefaults instantiates a new SetRunnerMetadata object
+// NewUpdateRunnerMetadataDTOWithDefaults instantiates a new UpdateRunnerMetadataDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewSetRunnerMetadataWithDefaults() *SetRunnerMetadata {
-	this := SetRunnerMetadata{}
+func NewUpdateRunnerMetadataDTOWithDefaults() *UpdateRunnerMetadataDTO {
+	this := UpdateRunnerMetadataDTO{}
 	return &this
 }
 
 // GetProviders returns the Providers field value
-func (o *SetRunnerMetadata) GetProviders() []ProviderInfo {
+func (o *UpdateRunnerMetadataDTO) GetProviders() []ProviderInfo {
 	if o == nil {
 		var ret []ProviderInfo
 		return ret
@@ -59,7 +59,7 @@ func (o *SetRunnerMetadata) GetProviders() []ProviderInfo {
 
 // GetProvidersOk returns a tuple with the Providers field value
 // and a boolean to check if the value has been set.
-func (o *SetRunnerMetadata) GetProvidersOk() ([]ProviderInfo, bool) {
+func (o *UpdateRunnerMetadataDTO) GetProvidersOk() ([]ProviderInfo, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -67,12 +67,12 @@ func (o *SetRunnerMetadata) GetProvidersOk() ([]ProviderInfo, bool) {
 }
 
 // SetProviders sets field value
-func (o *SetRunnerMetadata) SetProviders(v []ProviderInfo) {
+func (o *UpdateRunnerMetadataDTO) SetProviders(v []ProviderInfo) {
 	o.Providers = v
 }
 
 // GetRunningJobs returns the RunningJobs field value if set, zero value otherwise.
-func (o *SetRunnerMetadata) GetRunningJobs() int32 {
+func (o *UpdateRunnerMetadataDTO) GetRunningJobs() int32 {
 	if o == nil || IsNil(o.RunningJobs) {
 		var ret int32
 		return ret
@@ -82,7 +82,7 @@ func (o *SetRunnerMetadata) GetRunningJobs() int32 {
 
 // GetRunningJobsOk returns a tuple with the RunningJobs field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *SetRunnerMetadata) GetRunningJobsOk() (*int32, bool) {
+func (o *UpdateRunnerMetadataDTO) GetRunningJobsOk() (*int32, bool) {
 	if o == nil || IsNil(o.RunningJobs) {
 		return nil, false
 	}
@@ -90,7 +90,7 @@ func (o *SetRunnerMetadata) GetRunningJobsOk() (*int32, bool) {
 }
 
 // HasRunningJobs returns a boolean if a field has been set.
-func (o *SetRunnerMetadata) HasRunningJobs() bool {
+func (o *UpdateRunnerMetadataDTO) HasRunningJobs() bool {
 	if o != nil && !IsNil(o.RunningJobs) {
 		return true
 	}
@@ -99,12 +99,12 @@ func (o *SetRunnerMetadata) HasRunningJobs() bool {
 }
 
 // SetRunningJobs gets a reference to the given int32 and assigns it to the RunningJobs field.
-func (o *SetRunnerMetadata) SetRunningJobs(v int32) {
+func (o *UpdateRunnerMetadataDTO) SetRunningJobs(v int32) {
 	o.RunningJobs = &v
 }
 
 // GetUptime returns the Uptime field value
-func (o *SetRunnerMetadata) GetUptime() int32 {
+func (o *UpdateRunnerMetadataDTO) GetUptime() int32 {
 	if o == nil {
 		var ret int32
 		return ret
@@ -115,7 +115,7 @@ func (o *SetRunnerMetadata) GetUptime() int32 {
 
 // GetUptimeOk returns a tuple with the Uptime field value
 // and a boolean to check if the value has been set.
-func (o *SetRunnerMetadata) GetUptimeOk() (*int32, bool) {
+func (o *UpdateRunnerMetadataDTO) GetUptimeOk() (*int32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -123,11 +123,11 @@ func (o *SetRunnerMetadata) GetUptimeOk() (*int32, bool) {
 }
 
 // SetUptime sets field value
-func (o *SetRunnerMetadata) SetUptime(v int32) {
+func (o *UpdateRunnerMetadataDTO) SetUptime(v int32) {
 	o.Uptime = v
 }
 
-func (o SetRunnerMetadata) MarshalJSON() ([]byte, error) {
+func (o UpdateRunnerMetadataDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -135,7 +135,7 @@ func (o SetRunnerMetadata) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o SetRunnerMetadata) ToMap() (map[string]interface{}, error) {
+func (o UpdateRunnerMetadataDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["providers"] = o.Providers
 	if !IsNil(o.RunningJobs) {
@@ -145,7 +145,7 @@ func (o SetRunnerMetadata) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *SetRunnerMetadata) UnmarshalJSON(data []byte) (err error) {
+func (o *UpdateRunnerMetadataDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -168,53 +168,53 @@ func (o *SetRunnerMetadata) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varSetRunnerMetadata := _SetRunnerMetadata{}
+	varUpdateRunnerMetadataDTO := _UpdateRunnerMetadataDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varSetRunnerMetadata)
+	err = decoder.Decode(&varUpdateRunnerMetadataDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = SetRunnerMetadata(varSetRunnerMetadata)
+	*o = UpdateRunnerMetadataDTO(varUpdateRunnerMetadataDTO)
 
 	return err
 }
 
-type NullableSetRunnerMetadata struct {
-	value *SetRunnerMetadata
+type NullableUpdateRunnerMetadataDTO struct {
+	value *UpdateRunnerMetadataDTO
 	isSet bool
 }
 
-func (v NullableSetRunnerMetadata) Get() *SetRunnerMetadata {
+func (v NullableUpdateRunnerMetadataDTO) Get() *UpdateRunnerMetadataDTO {
 	return v.value
 }
 
-func (v *NullableSetRunnerMetadata) Set(val *SetRunnerMetadata) {
+func (v *NullableUpdateRunnerMetadataDTO) Set(val *UpdateRunnerMetadataDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableSetRunnerMetadata) IsSet() bool {
+func (v NullableUpdateRunnerMetadataDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableSetRunnerMetadata) Unset() {
+func (v *NullableUpdateRunnerMetadataDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableSetRunnerMetadata(val *SetRunnerMetadata) *NullableSetRunnerMetadata {
-	return &NullableSetRunnerMetadata{value: val, isSet: true}
+func NewNullableUpdateRunnerMetadataDTO(val *UpdateRunnerMetadataDTO) *NullableUpdateRunnerMetadataDTO {
+	return &NullableUpdateRunnerMetadataDTO{value: val, isSet: true}
 }
 
-func (v NullableSetRunnerMetadata) MarshalJSON() ([]byte, error) {
+func (v NullableUpdateRunnerMetadataDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableSetRunnerMetadata) UnmarshalJSON(src []byte) error {
+func (v *NullableUpdateRunnerMetadataDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

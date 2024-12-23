@@ -429,7 +429,7 @@ Name | Type | Description  | Notes
 
 ## SetTargetMetadata
 
-> SetTargetMetadata(ctx, targetId).SetMetadata(setMetadata).Execute()
+> SetTargetMetadata(ctx, targetId).TargetMetadata(targetMetadata).Execute()
 
 Set target metadata
 
@@ -449,11 +449,11 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID
-	setMetadata := *openapiclient.NewSetTargetMetadata(int32(123)) // SetTargetMetadata | Set Metadata
+	targetMetadata := *openapiclient.NewUpdateTargetMetadataDTO(int32(123)) // UpdateTargetMetadataDTO | Target Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), targetId).SetMetadata(setMetadata).Execute()
+	r, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), targetId).TargetMetadata(targetMetadata).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetTargetMetadata``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -477,7 +477,7 @@ Other parameters are passed through a pointer to a apiSetTargetMetadataRequest s
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **setMetadata** | [**SetTargetMetadata**](SetTargetMetadata.md) | Set Metadata | 
+ **targetMetadata** | [**UpdateTargetMetadataDTO**](UpdateTargetMetadataDTO.md) | Target Metadata | 
 
 ### Return type
 

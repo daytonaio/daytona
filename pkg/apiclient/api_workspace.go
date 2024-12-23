@@ -497,15 +497,15 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 }
 
 type ApiSetWorkspaceMetadataRequest struct {
-	ctx         context.Context
-	ApiService  *WorkspaceAPIService
-	workspaceId string
-	setMetadata *SetWorkspaceMetadata
+	ctx               context.Context
+	ApiService        *WorkspaceAPIService
+	workspaceId       string
+	workspaceMetadata *UpdateWorkspaceMetadataDTO
 }
 
-// Set Metadata
-func (r ApiSetWorkspaceMetadataRequest) SetMetadata(setMetadata SetWorkspaceMetadata) ApiSetWorkspaceMetadataRequest {
-	r.setMetadata = &setMetadata
+// Workspace Metadata
+func (r ApiSetWorkspaceMetadataRequest) WorkspaceMetadata(workspaceMetadata UpdateWorkspaceMetadataDTO) ApiSetWorkspaceMetadataRequest {
+	r.workspaceMetadata = &workspaceMetadata
 	return r
 }
 
@@ -549,8 +549,8 @@ func (a *WorkspaceAPIService) SetWorkspaceMetadataExecute(r ApiSetWorkspaceMetad
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.setMetadata == nil {
-		return nil, reportError("setMetadata is required and must be specified")
+	if r.workspaceMetadata == nil {
+		return nil, reportError("workspaceMetadata is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -571,7 +571,7 @@ func (a *WorkspaceAPIService) SetWorkspaceMetadataExecute(r ApiSetWorkspaceMetad
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.setMetadata
+	localVarPostBody = r.workspaceMetadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

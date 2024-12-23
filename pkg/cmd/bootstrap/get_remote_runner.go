@@ -167,16 +167,16 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 				providers = append(providers, *providerInfoDto)
 			}
 
-			setRunnerMetadata := apiclient.SetRunnerMetadata{
+			runnerMetadata := apiclient.UpdateRunnerMetadataDTO{
 				Uptime:    int32(metadata.Uptime),
 				Providers: providers,
 			}
 
 			if metadata.RunningJobs != nil {
-				setRunnerMetadata.RunningJobs = util.Pointer(int32(*metadata.RunningJobs))
+				runnerMetadata.RunningJobs = util.Pointer(int32(*metadata.RunningJobs))
 			}
 
-			_, err := params.ApiClient.RunnerAPI.SetRunnerMetadata(ctx, runnerId).SetMetadata(setRunnerMetadata).Execute()
+			_, err := params.ApiClient.RunnerAPI.SetRunnerMetadata(ctx, runnerId).RunnerMetadata(runnerMetadata).Execute()
 			return err
 		},
 		WorkspaceJobFactory: workspaceJobFactory,

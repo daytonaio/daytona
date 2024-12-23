@@ -729,15 +729,15 @@ func (a *TargetAPIService) SetDefaultTargetExecute(r ApiSetDefaultTargetRequest)
 }
 
 type ApiSetTargetMetadataRequest struct {
-	ctx         context.Context
-	ApiService  *TargetAPIService
-	targetId    string
-	setMetadata *SetTargetMetadata
+	ctx            context.Context
+	ApiService     *TargetAPIService
+	targetId       string
+	targetMetadata *UpdateTargetMetadataDTO
 }
 
-// Set Metadata
-func (r ApiSetTargetMetadataRequest) SetMetadata(setMetadata SetTargetMetadata) ApiSetTargetMetadataRequest {
-	r.setMetadata = &setMetadata
+// Target Metadata
+func (r ApiSetTargetMetadataRequest) TargetMetadata(targetMetadata UpdateTargetMetadataDTO) ApiSetTargetMetadataRequest {
+	r.targetMetadata = &targetMetadata
 	return r
 }
 
@@ -781,8 +781,8 @@ func (a *TargetAPIService) SetTargetMetadataExecute(r ApiSetTargetMetadataReques
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.setMetadata == nil {
-		return nil, reportError("setMetadata is required and must be specified")
+	if r.targetMetadata == nil {
+		return nil, reportError("targetMetadata is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -803,7 +803,7 @@ func (a *TargetAPIService) SetTargetMetadataExecute(r ApiSetTargetMetadataReques
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.setMetadata
+	localVarPostBody = r.targetMetadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

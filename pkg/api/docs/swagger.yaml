@@ -750,36 +750,6 @@ definitions:
     - providerId
     - token
     type: object
-  SetRunnerMetadata:
-    properties:
-      providers:
-        items:
-          $ref: '#/definitions/ProviderInfo'
-        type: array
-      runningJobs:
-        type: integer
-      uptime:
-        type: integer
-    required:
-    - providers
-    - uptime
-    type: object
-  SetTargetMetadata:
-    properties:
-      uptime:
-        type: integer
-    required:
-    - uptime
-    type: object
-  SetWorkspaceMetadata:
-    properties:
-      gitStatus:
-        $ref: '#/definitions/GitStatus'
-      uptime:
-        type: integer
-    required:
-    - uptime
-    type: object
   SigningMethod:
     enum:
     - ssh
@@ -959,12 +929,42 @@ definitions:
     required:
     - state
     type: object
+  UpdateRunnerMetadataDTO:
+    properties:
+      providers:
+        items:
+          $ref: '#/definitions/ProviderInfo'
+        type: array
+      runningJobs:
+        type: integer
+      uptime:
+        type: integer
+    required:
+    - providers
+    - uptime
+    type: object
+  UpdateTargetMetadataDTO:
+    properties:
+      uptime:
+        type: integer
+    required:
+    - uptime
+    type: object
   UpdateTargetProviderMetadataDTO:
     properties:
       metadata:
         type: string
     required:
     - metadata
+    type: object
+  UpdateWorkspaceMetadataDTO:
+    properties:
+      gitStatus:
+        $ref: '#/definitions/GitStatus'
+      uptime:
+        type: integer
+    required:
+    - uptime
     type: object
   UpdateWorkspaceProviderMetadataDTO:
     properties:
@@ -1972,12 +1972,12 @@ paths:
         name: runnerId
         required: true
         type: string
-      - description: Set Metadata
+      - description: Runner Metadata
         in: body
-        name: setMetadata
+        name: runnerMetadata
         required: true
         schema:
-          $ref: '#/definitions/SetRunnerMetadata'
+          $ref: '#/definitions/UpdateRunnerMetadataDTO'
       responses:
         "200":
           description: OK
@@ -2326,12 +2326,12 @@ paths:
         name: targetId
         required: true
         type: string
-      - description: Set Metadata
+      - description: Target Metadata
         in: body
-        name: setMetadata
+        name: targetMetadata
         required: true
         schema:
-          $ref: '#/definitions/SetTargetMetadata'
+          $ref: '#/definitions/UpdateTargetMetadataDTO'
       responses:
         "200":
           description: OK
@@ -2733,12 +2733,12 @@ paths:
         name: workspaceId
         required: true
         type: string
-      - description: Set Metadata
+      - description: Workspace Metadata
         in: body
-        name: setMetadata
+        name: workspaceMetadata
         required: true
         schema:
-          $ref: '#/definitions/SetWorkspaceMetadata'
+          $ref: '#/definitions/UpdateWorkspaceMetadataDTO'
       responses:
         "200":
           description: OK

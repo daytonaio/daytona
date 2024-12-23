@@ -1183,12 +1183,12 @@
                         "required": true
                     },
                     {
-                        "description": "Set Metadata",
-                        "name": "setMetadata",
+                        "description": "Runner Metadata",
+                        "name": "runnerMetadata",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetRunnerMetadata"
+                            "$ref": "#/definitions/UpdateRunnerMetadataDTO"
                         }
                     }
                 ],
@@ -1682,12 +1682,12 @@
                         "required": true
                     },
                     {
-                        "description": "Set Metadata",
-                        "name": "setMetadata",
+                        "description": "Target Metadata",
+                        "name": "targetMetadata",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetTargetMetadata"
+                            "$ref": "#/definitions/UpdateTargetMetadataDTO"
                         }
                     }
                 ],
@@ -2290,12 +2290,12 @@
                         "required": true
                     },
                     {
-                        "description": "Set Metadata",
-                        "name": "setMetadata",
+                        "description": "Workspace Metadata",
+                        "name": "workspaceMetadata",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/SetWorkspaceMetadata"
+                            "$ref": "#/definitions/UpdateWorkspaceMetadataDTO"
                         }
                     }
                 ],
@@ -3478,52 +3478,6 @@
                 }
             }
         },
-        "SetRunnerMetadata": {
-            "type": "object",
-            "required": [
-                "providers",
-                "uptime"
-            ],
-            "properties": {
-                "providers": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ProviderInfo"
-                    }
-                },
-                "runningJobs": {
-                    "type": "integer"
-                },
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "SetTargetMetadata": {
-            "type": "object",
-            "required": [
-                "uptime"
-            ],
-            "properties": {
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "SetWorkspaceMetadata": {
-            "type": "object",
-            "required": [
-                "uptime"
-            ],
-            "properties": {
-                "gitStatus": {
-                    "$ref": "#/definitions/GitStatus"
-                },
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
         "SigningMethod": {
             "type": "string",
             "enum": [
@@ -3766,6 +3720,38 @@
                 }
             }
         },
+        "UpdateRunnerMetadataDTO": {
+            "type": "object",
+            "required": [
+                "providers",
+                "uptime"
+            ],
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProviderInfo"
+                    }
+                },
+                "runningJobs": {
+                    "type": "integer"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateTargetMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
         "UpdateTargetProviderMetadataDTO": {
             "type": "object",
             "required": [
@@ -3774,6 +3760,20 @@
             "properties": {
                 "metadata": {
                     "type": "string"
+                }
+            }
+        },
+        "UpdateWorkspaceMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "uptime": {
+                    "type": "integer"
                 }
             }
         },
