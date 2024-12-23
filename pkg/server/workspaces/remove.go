@@ -5,7 +5,6 @@ package workspaces
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -23,25 +22,38 @@ func (s *WorkspaceService) RemoveWorkspace(ctx context.Context, workspaceId stri
 
 	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
 
-	ws, err := s.workspaceStore.Find(ctx, workspaceId)
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, w, stores.ErrWorkspaceNotFound)
 	}
 
-	ws.Name = util.AddDeletedToName(ws.Name)
+	w.Name = util.AddDeletedToName(w.Name)
 
-	err = s.workspaceStore.Save(ctx, ws)
+	err = s.workspaceStore.Save(ctx, w)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, w, err)
 	}
 
-	err = s.createJob(ctx, ws.Id, models.JobActionDelete)
+	err = s.revokeApiKey(ctx, workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, w, err)
+	}
+
+	metadata, err := s.workspaceMetadataStore.Find(ctx, workspaceId)
+	if err == nil {
+		err = s.workspaceMetadataStore.Delete(ctx, metadata)
+		if err != nil {
+			return s.handleRemoveError(ctx, w, err)
+		}
+	}
+
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionDelete)
+	if err != nil {
+		return s.handleRemoveError(ctx, w, err)
 	}
 
 	err = s.workspaceStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, ws, err)
+	return s.handleRemoveError(ctx, w, err)
 }
 
 // ForceRemoveWorkspace ignores provider errors and makes sure the workspace is removed from storage.
@@ -54,64 +66,38 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
 
-	ws, err := s.workspaceStore.Find(ctx, workspaceId)
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
+		return s.handleRemoveError(ctx, w, stores.ErrWorkspaceNotFound)
 	}
 
-	ws.Name = util.AddDeletedToName(ws.Name)
+	w.Name = util.AddDeletedToName(w.Name)
 
-	err = s.workspaceStore.Save(ctx, ws)
+	err = s.workspaceStore.Save(ctx, w)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, w, err)
 	}
 
-	err = s.createJob(ctx, ws.Id, models.JobActionForceDelete)
+	err = s.revokeApiKey(ctx, workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.workspaceStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, ws, err)
-}
-
-func (s *WorkspaceService) HandleSuccessfulRemoval(ctx context.Context, workspaceId string) error {
-	var err error
-	ctx, err = s.workspaceStore.BeginTransaction(ctx)
-	if err != nil {
-		return s.handleRemoveError(ctx, nil, err)
-	}
-
-	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
-
-	err = s.revokeApiKey(ctx, fmt.Sprintf("ws-%s", workspaceId))
-	if err != nil {
-		// Should not fail the whole operation if the API key cannot be revoked
 		log.Error(err)
 	}
 
-	ws, err := s.workspaceStore.Find(ctx, workspaceId)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, stores.ErrWorkspaceNotFound)
+	metadata, err := s.workspaceMetadataStore.Find(ctx, workspaceId)
+	if err == nil {
+		err = s.workspaceMetadataStore.Delete(ctx, metadata)
+		if err != nil {
+			log.Error(err)
+		}
 	}
 
-	metadata, err := s.workspaceMetadataStore.Find(ctx, &stores.WorkspaceMetadataFilter{WorkspaceId: &workspaceId})
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionForceDelete)
 	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.workspaceMetadataStore.Delete(ctx, metadata)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
-	}
-
-	err = s.workspaceStore.Delete(ctx, ws)
-	if err != nil {
-		return s.handleRemoveError(ctx, ws, err)
+		return s.handleRemoveError(ctx, w, err)
 	}
 
 	err = s.workspaceStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, ws, err)
+	return s.handleRemoveError(ctx, w, err)
 }
 
 func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Workspace, err error) error {

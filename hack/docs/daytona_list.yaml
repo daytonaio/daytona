@@ -5,10 +5,6 @@ options:
     - name: format
       shorthand: f
       usage: Output format. Must be one of (yaml, json)
-    - name: verbose
-      shorthand: v
-      default_value: "false"
-      usage: Show verbose output
 inherited_options:
     - name: help
       default_value: "false"

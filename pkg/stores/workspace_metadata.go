@@ -10,14 +10,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-type WorkspaceMetadataFilter struct {
-	Id          *string
-	WorkspaceId *string
-}
-
 type WorkspaceMetadataStore interface {
 	IStore
-	Find(ctx context.Context, filter *WorkspaceMetadataFilter) (*models.WorkspaceMetadata, error)
+	Find(ctx context.Context, workspaceId string) (*models.WorkspaceMetadata, error)
 	Save(ctx context.Context, metadata *models.WorkspaceMetadata) error
 	Delete(ctx context.Context, metadata *models.WorkspaceMetadata) error
 }

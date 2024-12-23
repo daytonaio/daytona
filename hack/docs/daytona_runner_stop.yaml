@@ -1,0 +1,9 @@
+name: daytona runner stop
+synopsis: Stops the runner
+usage: daytona runner stop [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona runner - Manage the runner

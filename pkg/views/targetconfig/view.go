@@ -4,6 +4,7 @@
 package targetconfig
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -23,6 +24,10 @@ func (i item) Description() string {
 
 	if i.targetConfig.ProviderInfo.Label != nil {
 		desc = *i.targetConfig.ProviderInfo.Label
+	}
+
+	if i.targetConfig.ProviderInfo.RunnerName != "" {
+		desc = fmt.Sprintf("%s (Runner %s)", desc, i.targetConfig.ProviderInfo.RunnerName)
 	}
 
 	if i.targetConfig.ProviderInfo.Installed != nil {

@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/provider"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/views"
 )
@@ -21,7 +21,10 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 		return err
 	}
 
-	workspaceLogger := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateLogger(w.Id, w.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
 	defer workspaceLogger.Close()
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Starting workspace %s\n", w.Name)))
@@ -44,12 +47,29 @@ func (wj *WorkspaceJob) start(ctx context.Context, j *models.Job) error {
 
 	w.EnvVars = extractedEnvVars
 
-	err = wj.provisioner.StartWorkspace(provisioner.WorkspaceParams{
+	p, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
+	if err != nil {
+		return err
+	}
+
+	req := &provider.WorkspaceRequest{
 		Workspace:           w,
 		ContainerRegistries: containerRegistries,
 		GitProviderConfig:   gc,
 		BuilderImage:        wj.builderImage,
-	})
+	}
+
+	_, err = (*p).StartWorkspace(req)
+	if err != nil {
+		return err
+	}
+
+	providerMetadata, err := (*p).GetWorkspaceProviderMetadata(req)
+	if err != nil {
+		return err
+	}
+
+	err = wj.updateWorkspaceProviderMetadata(ctx, w.Id, providerMetadata)
 	if err != nil {
 		return err
 	}

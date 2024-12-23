@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/provider"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -18,16 +19,31 @@ func (wj *WorkspaceJob) delete(ctx context.Context, j *models.Job, force bool) e
 		return err
 	}
 
-	workspaceLogger := wj.loggerFactory.CreateWorkspaceLogger(w.Id, w.Name, logs.LogSourceServer)
+	workspaceLogger, err := wj.loggerFactory.CreateLogger(w.Id, w.Name, logs.LogSourceServer)
+	if err != nil {
+		return err
+	}
+	defer workspaceLogger.Close()
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Destroying workspace %s", w.Name)))
 
-	err = wj.provisioner.DestroyWorkspace(w)
+	p, err := wj.providerManager.GetProvider(w.Target.TargetConfig.ProviderInfo.Name)
 	if err != nil {
-		if !force {
-			return err
+		if force {
+			log.Error(err)
+			return nil
 		}
-		log.Error(err)
+		return err
+	}
+
+	_, err = (*p).DestroyWorkspace(&provider.WorkspaceRequest{
+		Workspace: w,
+	})
+	if err != nil {
+		if force {
+			log.Error(err)
+		}
+		return nil
 	}
 
 	workspaceLogger.Write([]byte(fmt.Sprintf("Workspace %s destroyed", w.Name)))

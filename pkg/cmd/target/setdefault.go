@@ -42,7 +42,7 @@ var setDefaultCmd = &cobra.Command{
 
 			target = selection.GetTargetFromPrompt(targetList, false, "Set As Default")
 		} else {
-			target, _, err = apiclient_util.GetTarget(args[0], true)
+			target, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}

@@ -1,0 +1,14 @@
+name: daytona server runner unregister
+synopsis: Unregister runner
+usage: daytona server runner unregister [RUNNER] [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Confirm deletion without prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona server runner - Manage runners

@@ -69,7 +69,7 @@ var CodeCmd = &cobra.Command{
 			}
 		} else {
 			var statusCode int
-			ws, statusCode, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]), true)
+			ws, statusCode, err = apiclient_util.GetWorkspace(url.PathEscape(args[0]))
 			if err != nil {
 				if statusCode == http.StatusNotFound {
 					log.Debug(err)
@@ -92,7 +92,7 @@ var CodeCmd = &cobra.Command{
 			}
 		}
 
-		providerMetadata := *ws.Info.ProviderMetadata
+		providerMetadata := *ws.ProviderMetadata
 
 		gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 		if err != nil {
