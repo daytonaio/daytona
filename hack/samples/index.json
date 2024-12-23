@@ -303,5 +303,10 @@
     "name": "Sample Javascript devbot",
     "description": "An application built using react and node which aids developer to optimize, explain code",
     "gitUrl": "https://github.com/daytonaio/sample-javascript-devbot"
+  },
+  {
+    "name": "Sample Nuxt.js Quote Generator",
+    "description": "Quote Smith is a Nuxt.js app for creating and customizing inspirational quotes. Edit fonts, sizes, and gradients, then generate and download quotes as PNGs for sharing or personal use.",
+    "gitUrl": "https://github.com/daytonaio/sample-nuxtjs-quote-generator"
   }
 ]
