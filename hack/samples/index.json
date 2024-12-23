@@ -1,5 +1,10 @@
 [
   {
+    "name": "Sample React Coinbase Connect",
+    "description": "A boilerplate for React + Vite + TypeScript + shadcn/ui + CoinBase Wallet SDK project.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-coinbase-connect"
+  },
+  {
     "name": "Alpine",
     "description": "Simple Alpine container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-alpine"
@@ -288,10 +293,5 @@
     "name": "Sample Go Web Server",
     "description": "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl": "https://github.com/daytonaio/sample-go-web-server"
-  },
-  {
-    "name": "Sample React Coinbase Connect",
-    "description": "A boilerplate for React + Vite + TypeScript + shadcn/ui + CoinBase Wallet SDK project.",
-    "gitUrl": "https://github.com/daytonaio/sample-react-coinbase-connect"
   }
 ]
