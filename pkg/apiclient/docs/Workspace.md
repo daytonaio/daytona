@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Image** | **string** |  | 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**LastJobId** | Pointer to **string** |  | [optional] 
 **Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
 **ProviderMetadata** | Pointer to **string** |  | [optional] 
@@ -192,6 +193,31 @@ SetLastJob sets LastJob field to given value.
 `func (o *Workspace) HasLastJob() bool`
 
 HasLastJob returns a boolean if a field has been set.
+
+### GetLastJobId
+
+`func (o *Workspace) GetLastJobId() string`
+
+GetLastJobId returns the LastJobId field if non-nil, zero value otherwise.
+
+### GetLastJobIdOk
+
+`func (o *Workspace) GetLastJobIdOk() (*string, bool)`
+
+GetLastJobIdOk returns a tuple with the LastJobId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJobId
+
+`func (o *Workspace) SetLastJobId(v string)`
+
+SetLastJobId sets LastJobId field to given value.
+
+### HasLastJobId
+
+`func (o *Workspace) HasLastJobId() bool`
+
+HasLastJobId returns a boolean if a field has been set.
 
 ### GetMetadata
 

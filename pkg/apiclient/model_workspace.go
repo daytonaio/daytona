@@ -28,6 +28,7 @@ type Workspace struct {
 	Id                  string             `json:"id"`
 	Image               string             `json:"image"`
 	LastJob             *Job               `json:"lastJob,omitempty"`
+	LastJobId           *string            `json:"lastJobId,omitempty"`
 	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
 	Name                string             `json:"name"`
 	ProviderMetadata    *string            `json:"providerMetadata,omitempty"`
@@ -257,6 +258,38 @@ func (o *Workspace) SetLastJob(v Job) {
 	o.LastJob = &v
 }
 
+// GetLastJobId returns the LastJobId field value if set, zero value otherwise.
+func (o *Workspace) GetLastJobId() string {
+	if o == nil || IsNil(o.LastJobId) {
+		var ret string
+		return ret
+	}
+	return *o.LastJobId
+}
+
+// GetLastJobIdOk returns a tuple with the LastJobId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLastJobIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LastJobId) {
+		return nil, false
+	}
+	return o.LastJobId, true
+}
+
+// HasLastJobId returns a boolean if a field has been set.
+func (o *Workspace) HasLastJobId() bool {
+	if o != nil && !IsNil(o.LastJobId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJobId gets a reference to the given string and assigns it to the LastJobId field.
+func (o *Workspace) SetLastJobId(v string) {
+	o.LastJobId = &v
+}
+
 // GetMetadata returns the Metadata field value if set, zero value otherwise.
 func (o *Workspace) GetMetadata() WorkspaceMetadata {
 	if o == nil || IsNil(o.Metadata) {
@@ -463,6 +496,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize["image"] = o.Image
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.LastJobId) {
+		toSerialize["lastJobId"] = o.LastJobId
 	}
 	if !IsNil(o.Metadata) {
 		toSerialize["metadata"] = o.Metadata

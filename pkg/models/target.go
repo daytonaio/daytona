@@ -21,7 +21,8 @@ type Target struct {
 	IsDefault        bool              `json:"default" validate:"required" gorm:"not null"`
 	Workspaces       []Workspace       `json:"workspaces" validate:"required"`
 	Metadata         *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:Id;references:TargetId"`
-	LastJob          *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:Id;references:ResourceId"`
+	LastJobId        *string           `json:"lastJobId" validate:"optional"`
+	LastJob          *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:LastJobId;references:Id"`
 	ProviderMetadata *string           `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Target
 
