@@ -19,9 +19,9 @@ type Target struct {
 	ApiKey           string            `json:"-" validate:"required" gorm:"not null"`
 	EnvVars          map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
 	IsDefault        bool              `json:"default" validate:"required" gorm:"not null"`
-	Workspaces       []Workspace       `json:"workspaces" validate:"required" gorm:"foreignKey:TargetId;references:Id"`
-	Metadata         *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:TargetId;references:Id"`
-	LastJob          *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
+	Workspaces       []Workspace       `json:"workspaces" validate:"required"`
+	Metadata         *TargetMetadata   `json:"metadata" validate:"optional" gorm:"foreignKey:Id;references:TargetId"`
+	LastJob          *Job              `json:"lastJob" validate:"optional" gorm:"foreignKey:Id;references:ResourceId"`
 	ProviderMetadata *string           `json:"providerMetadata,omitempty" validate:"optional"`
 } // @name Target
 
