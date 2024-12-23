@@ -5,7 +5,9 @@ package targets
 
 import (
 	"context"
+	"errors"
 	"io"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -87,4 +89,27 @@ func (s *TargetService) UpdateTargetProviderMetadata(ctx context.Context, target
 
 	tg.ProviderMetadata = &metadata
 	return s.targetStore.Save(ctx, tg)
+}
+
+func (s *TargetService) AwaitEmptyList(ctx context.Context, waitTime time.Duration) error {
+	timeout := time.NewTimer(waitTime)
+	defer timeout.Stop()
+
+	for {
+		select {
+		case <-timeout.C:
+			return errors.New("awaiting empty build list timed out")
+		default:
+			targets, err := s.ListTargets(ctx, nil, services.TargetRetrievalParams{})
+			if err != nil {
+				return err
+			}
+
+			if len(targets) == 0 {
+				return nil
+			}
+
+			time.Sleep(time.Second)
+		}
+	}
 }

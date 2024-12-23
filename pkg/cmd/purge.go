@@ -8,13 +8,16 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
+	server_cmd "github.com/daytonaio/daytona/pkg/cmd/server"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -45,12 +48,6 @@ var purgeCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-
-		// FIXME: TODO
-		// runnerConfig, err := runner.GetConfig()
-		// if err != nil {
-		// 	return err
-		// }
 
 		serverConfigDir, err := server.GetConfigDir()
 		if err != nil {
@@ -164,6 +161,47 @@ var purgeCmd = &cobra.Command{
 			return err
 		}
 
+		localRunnerErrChan := make(chan error)
+		var localRunner runner.IRunner
+
+		go func() {
+			if serverConfig.LocalRunnerDisabled != nil && *serverConfig.LocalRunnerDisabled {
+				err = server_cmd.HandleDisabledLocalRunner()
+				if err != nil {
+					localRunnerErrChan <- err
+				}
+				return
+			}
+
+			localRunnerConfig := server_cmd.GetLocalRunnerConfig(filepath.Join(serverConfigDir, "local-runner"))
+
+			err = server_cmd.EnsureRunnerRegistered()
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+
+			params := bootstrap.LocalRunnerParams{
+				ServerConfig:     serverConfig,
+				RunnerConfig:     localRunnerConfig,
+				ConfigDir:        serverConfigDir,
+				TelemetryService: telemetryService,
+			}
+
+			localRunner, err = bootstrap.GetLocalRunner(params)
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+
+			localRunnerErrChan <- localRunner.Start(context.Background())
+		}()
+
+		if serverConfig.LocalRunnerDisabled != nil && !*serverConfig.LocalRunnerDisabled {
+			err = server_cmd.AwaitLocalRunnerStarted()
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+		}
+
 		errs := server.Purge(ctx, forceFlag)
 		if len(errs) > 0 {
 			errMessage := ""
@@ -194,6 +232,15 @@ var purgeCmd = &cobra.Command{
 			} else {
 				fmt.Printf("Failed to purge Tailscale server: %v\n", err)
 			}
+		}
+
+		if localRunner != nil {
+			fmt.Println("Purging providers...")
+			err = localRunner.Purge(ctx)
+			if err != nil {
+				return err
+			}
+			fmt.Println("Providers purged.")
 		}
 
 		fmt.Println("Server purged.")

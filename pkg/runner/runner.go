@@ -34,6 +34,7 @@ const RUNNER_METADATA_UPDATE_INTERVAL = 2 * time.Second
 type IRunner interface {
 	Start(ctx context.Context) error
 	CheckAndRunJobs(ctx context.Context) error
+	Purge(ctx context.Context) error
 }
 
 type RunnerConfig struct {
@@ -171,6 +172,10 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (r *Runner) Purge(ctx context.Context) error {
+	return r.providerManager.Purge()
 }
 
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {

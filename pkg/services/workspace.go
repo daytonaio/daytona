@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -21,6 +22,7 @@ type IWorkspaceService interface {
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
+	AwaitEmptyList(ctx context.Context, waitTime time.Duration) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)

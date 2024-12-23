@@ -7,6 +7,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -24,6 +25,7 @@ type ITargetService interface {
 	RemoveTarget(ctx context.Context, targetId string) error
 	ForceRemoveTarget(ctx context.Context, targetId string) error
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
+	AwaitEmptyList(ctx context.Context, waitTime time.Duration) error
 
 	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)
 	GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error)
