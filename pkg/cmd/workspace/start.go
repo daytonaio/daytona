@@ -14,6 +14,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -63,7 +64,7 @@ var StartCmd = &cobra.Command{
 			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, selection.StartActionVerb)
 		} else {
 			for _, arg := range args {
-				workspace, _, err := apiclient_util.GetWorkspace(arg, false)
+				workspace, _, err := apiclient_util.GetWorkspace(arg)
 				if err != nil {
 					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
@@ -90,12 +91,12 @@ var StartCmd = &cobra.Command{
 				ideList = config.GetIdeList()
 				ideId = c.DefaultIdeId
 
-				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Verbose(true).Execute()
+				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
 				if ideId != "ssh" {
-					workspaceProviderMetadata = *ws.Info.ProviderMetadata
+					workspaceProviderMetadata = *ws.ProviderMetadata
 				}
 			}
 
@@ -183,13 +184,14 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspac
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadWorkspaceLogs(logsContext, apiclient_util.ReadLogParams{
-		Id:            workspace.Id,
-		Label:         &workspace.Name,
-		ActiveProfile: activeProfile,
-		Index:         util.Pointer(0),
-		Follow:        util.Pointer(true),
-		From:          &from,
+	go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
+		Id:        workspace.Id,
+		Label:     &workspace.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Index:     util.Pointer(0),
+		Follow:    util.Pointer(true),
+		From:      &from,
 	})
 
 	res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()

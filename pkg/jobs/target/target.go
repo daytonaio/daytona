@@ -9,7 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -19,10 +19,11 @@ type TargetJob struct {
 	findTarget               func(ctx context.Context, targetId string) (*models.Target, error)
 	handleSuccessfulCreation func(ctx context.Context, targetId string) error
 
-	trackTelemetryEvent func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent          func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	updateTargetProviderMetadata func(ctx context.Context, targetId, metadata string) error
 
-	loggerFactory logs.LoggerFactory
-	provisioner   provisioner.IProvisioner
+	loggerFactory   logs.ILoggerFactory
+	providerManager providermanager.IProviderManager
 }
 
 func (tj *TargetJob) Execute(ctx context.Context) error {

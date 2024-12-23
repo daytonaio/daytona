@@ -3,6 +3,10 @@
 
 package dto
 
-type SetTargetMetadata struct {
+type UpdateTargetMetadataDTO struct {
 	Uptime uint64 `json:"uptime" validate:"required"`
-} // @name SetTargetMetadata
+} // @name UpdateTargetMetadataDTO
+
+type UpdateTargetProviderMetadataDTO struct {
+	Metadata string `json:"metadata" validate:"required"`
+} // @name UpdateTargetProviderMetadataDTO

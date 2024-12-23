@@ -13,12 +13,13 @@ import (
 )
 
 type rowData struct {
-	Label   string
-	Name    string
-	Version string
+	Label      string
+	RunnerName string
+	Name       string
+	Version    string
 }
 
-func List(providerList []apiclient.Provider) {
+func List(providerList []apiclient.ProviderInfo) {
 	if len(providerList) == 0 {
 		views_util.NotifyEmptyProviderList(true)
 		return
@@ -31,7 +32,7 @@ func List(providerList []apiclient.Provider) {
 	}
 
 	table := util.GetTableView(data, []string{
-		"Provider", "Name", "Version",
+		"Provider", "Runner", "Name", "Version",
 	}, nil, func() {
 		renderUnstyledList(providerList)
 	})
@@ -39,7 +40,7 @@ func List(providerList []apiclient.Provider) {
 	fmt.Println(table)
 }
 
-func getRowFromData(provider *apiclient.Provider) []string {
+func getRowFromData(provider *apiclient.ProviderInfo) []string {
 	var data rowData
 
 	if provider.Label != nil {
@@ -47,23 +48,26 @@ func getRowFromData(provider *apiclient.Provider) []string {
 	} else {
 		data.Label = provider.Name
 	}
+	data.RunnerName = provider.RunnerName
 	data.Name = provider.Name
 	data.Version = provider.Version
 
 	return []string{
 		views.NameStyle.Render(data.Label),
+		views.DefaultRowDataStyle.Render(data.RunnerName),
 		views.DefaultRowDataStyle.Render(data.Name),
 		views.DefaultRowDataStyle.Render(data.Version),
 	}
 }
 
-func renderUnstyledList(providerList []apiclient.Provider) {
+func renderUnstyledList(providerList []apiclient.ProviderInfo) {
 	output := "\n"
 
 	for _, provider := range providerList {
 		if provider.Label != nil {
 			output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), *provider.Label) + "\n\n"
 		}
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Runner: "), provider.RunnerName) + "\n\n"
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), provider.Name) + "\n\n"
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Version: "), provider.Version) + "\n"
 

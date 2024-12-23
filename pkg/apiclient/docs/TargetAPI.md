@@ -6,12 +6,14 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**CreateTarget**](TargetAPI.md#CreateTarget) | **Post** /target | Create a target
 [**GetTarget**](TargetAPI.md#GetTarget) | **Get** /target/{targetId} | Get target info
+[**HandleSuccessfulCreation**](TargetAPI.md#HandleSuccessfulCreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RemoveTarget**](TargetAPI.md#RemoveTarget) | **Delete** /target/{targetId} | Remove target
 [**SetDefaultTarget**](TargetAPI.md#SetDefaultTarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 [**SetTargetMetadata**](TargetAPI.md#SetTargetMetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 [**StartTarget**](TargetAPI.md#StartTarget) | **Post** /target/{targetId}/start | Start target
 [**StopTarget**](TargetAPI.md#StopTarget) | **Post** /target/{targetId}/stop | Stop target
+[**UpdateTargetProviderMetadata**](TargetAPI.md#UpdateTargetProviderMetadata) | **Post** /target/{targetId}/provider-metadata | Update target provider metadata
 
 
 
@@ -83,7 +85,7 @@ Name | Type | Description  | Notes
 
 ## GetTarget
 
-> TargetDTO GetTarget(ctx, targetId).Verbose(verbose).Execute()
+> TargetDTO GetTarget(ctx, targetId).ShowOptions(showOptions).Execute()
 
 Get target info
 
@@ -103,11 +105,11 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID or Name
-	verbose := true // bool | Verbose (optional)
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TargetAPI.GetTarget(context.Background(), targetId).Verbose(verbose).Execute()
+	resp, r, err := apiClient.TargetAPI.GetTarget(context.Background(), targetId).ShowOptions(showOptions).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.GetTarget``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -133,7 +135,7 @@ Other parameters are passed through a pointer to a apiGetTargetRequest struct vi
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **verbose** | **bool** | Verbose | 
+ **showOptions** | **bool** | Show target config options | 
 
 ### Return type
 
@@ -153,9 +155,77 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## HandleSuccessfulCreation
+
+> HandleSuccessfulCreation(ctx, targetId).Execute()
+
+Handles successful creation of the target
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID or name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.HandleSuccessfulCreation(context.Background(), targetId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.HandleSuccessfulCreation``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID or name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiHandleSuccessfulCreationRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## ListTargets
 
-> []TargetDTO ListTargets(ctx).Verbose(verbose).Execute()
+> []TargetDTO ListTargets(ctx).ShowOptions(showOptions).Execute()
 
 List targets
 
@@ -174,11 +244,11 @@ import (
 )
 
 func main() {
-	verbose := true // bool | Verbose (optional)
+	showOptions := true // bool | Show target config options (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.TargetAPI.ListTargets(context.Background()).Verbose(verbose).Execute()
+	resp, r, err := apiClient.TargetAPI.ListTargets(context.Background()).ShowOptions(showOptions).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.ListTargets``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -199,7 +269,7 @@ Other parameters are passed through a pointer to a apiListTargetsRequest struct 
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **verbose** | **bool** | Verbose | 
+ **showOptions** | **bool** | Show target config options | 
 
 ### Return type
 
@@ -359,7 +429,7 @@ Name | Type | Description  | Notes
 
 ## SetTargetMetadata
 
-> SetTargetMetadata(ctx, targetId).SetMetadata(setMetadata).Execute()
+> SetTargetMetadata(ctx, targetId).TargetMetadata(targetMetadata).Execute()
 
 Set target metadata
 
@@ -379,11 +449,11 @@ import (
 
 func main() {
 	targetId := "targetId_example" // string | Target ID
-	setMetadata := *openapiclient.NewSetTargetMetadata(int32(123)) // SetTargetMetadata | Set Metadata
+	targetMetadata := *openapiclient.NewUpdateTargetMetadataDTO(int32(123)) // UpdateTargetMetadataDTO | Target Metadata
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), targetId).SetMetadata(setMetadata).Execute()
+	r, err := apiClient.TargetAPI.SetTargetMetadata(context.Background(), targetId).TargetMetadata(targetMetadata).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.SetTargetMetadata``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -407,7 +477,7 @@ Other parameters are passed through a pointer to a apiSetTargetMetadataRequest s
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **setMetadata** | [**SetTargetMetadata**](SetTargetMetadata.md) | Set Metadata | 
+ **targetMetadata** | [**UpdateTargetMetadataDTO**](UpdateTargetMetadataDTO.md) | Target Metadata | 
 
 ### Return type
 
@@ -544,6 +614,76 @@ Other parameters are passed through a pointer to a apiStopTargetRequest struct v
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateTargetProviderMetadata
+
+> UpdateTargetProviderMetadata(ctx, targetId).Metadata(metadata).Execute()
+
+Update target provider metadata
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID
+	metadata := *openapiclient.NewUpdateTargetProviderMetadataDTO("Metadata_example") // UpdateTargetProviderMetadataDTO | Provider metadata
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.UpdateTargetProviderMetadata(context.Background(), targetId).Metadata(metadata).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.UpdateTargetProviderMetadata``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateTargetProviderMetadataRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **metadata** | [**UpdateTargetProviderMetadataDTO**](UpdateTargetProviderMetadataDTO.md) | Provider metadata | 
 
 ### Return type
 

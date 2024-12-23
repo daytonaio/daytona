@@ -20,21 +20,17 @@ type IWorkspaceService interface {
 	StopWorkspace(ctx context.Context, workspaceId string) error
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
+	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
+	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)
 	SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 }
 
 type WorkspaceDTO struct {
 	models.Workspace
-	State models.ResourceState  `json:"state" validate:"required"`
-	Info  *models.WorkspaceInfo `json:"info" validate:"optional"`
+	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	WorkspaceDTO
-
-type WorkspaceRetrievalParams struct {
-	Verbose     bool
-	ShowDeleted bool
-}
 
 type CreateWorkspaceDTO struct {
 	Id                  string                   `json:"id" validate:"required"`
@@ -45,7 +41,7 @@ type CreateWorkspaceDTO struct {
 	Source              CreateWorkspaceSourceDTO `json:"source" validate:"required"`
 	EnvVars             map[string]string        `json:"envVars" validate:"required"`
 	TargetId            string                   `json:"targetId" validate:"required"`
-	GitProviderConfigId *string                  `json:"gitProviderConfigId" validate:"optional"`
+	GitProviderConfigId *string                  `json:"gitProviderConfigId,omitempty" validate:"optional"`
 } //	@name	CreateWorkspaceDTO
 
 func (c *CreateWorkspaceDTO) ToWorkspace() *models.Workspace {
@@ -73,6 +69,10 @@ func (c *CreateWorkspaceDTO) ToWorkspace() *models.Workspace {
 type CreateWorkspaceSourceDTO struct {
 	Repository *gitprovider.GitRepository `json:"repository" validate:"required"`
 } // @name CreateWorkspaceSourceDTO
+
+type WorkspaceRetrievalParams struct {
+	ShowDeleted bool
+}
 
 var (
 	ErrWorkspaceAlreadyExists   = errors.New("workspace already exists")

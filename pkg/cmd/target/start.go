@@ -62,7 +62,7 @@ var startCmd = &cobra.Command{
 		if len(selectedTargetsNames) == 1 {
 			targetName := selectedTargetsNames[0]
 
-			target, _, err := apiclient_util.GetTarget(targetName, false)
+			target, _, err := apiclient_util.GetTarget(targetName)
 			if err != nil {
 				return err
 			}
@@ -75,7 +75,7 @@ var startCmd = &cobra.Command{
 			views.RenderInfoMessage(fmt.Sprintf("Target '%s' started successfully", targetName))
 		} else {
 			for _, targetName := range selectedTargetsNames {
-				target, _, err := apiclient_util.GetTarget(targetName, false)
+				target, _, err := apiclient_util.GetTarget(targetName)
 				if err != nil {
 					return err
 				}
@@ -179,12 +179,13 @@ func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) err
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go apiclient_util.ReadTargetLogs(logsContext, apiclient_util.ReadLogParams{
-		Id:            target.Id,
-		Label:         &target.Name,
-		ActiveProfile: activeProfile,
-		Follow:        util.Pointer(true),
-		From:          &from,
+	go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
+		Id:        target.Id,
+		Label:     &target.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Follow:    util.Pointer(true),
+		From:      &from,
 	})
 
 	res, err := apiClient.TargetAPI.StartTarget(ctx, target.Id).Execute()
@@ -203,5 +204,5 @@ func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) err
 }
 
 func agentlessTargetError(providerName string) error {
-	return fmt.Errorf("%s does not require target state management; you may continue without starting or stopping it", providerName)
+	return fmt.Errorf("%s does not use a target-level agent; you may continue without managing its state or trying to access it", providerName)
 }

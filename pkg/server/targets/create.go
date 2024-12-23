@@ -75,7 +75,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 		return s.handleCreateError(ctx, tg, err)
 	}
 
-	err = s.createJob(ctx, tg.Id, models.JobActionCreate)
+	err = s.createJob(ctx, tg.Id, tg.TargetConfig.ProviderInfo.RunnerId, models.JobActionCreate)
 	if err != nil {
 		return s.handleCreateError(ctx, tg, err)
 	}
