@@ -300,8 +300,8 @@
     "gitUrl": "https://github.com/daytonaio/sample-ejs-web-app"
   },
   {
-    "name": "Sample Javascript devbot",
-    "description": "An application built using react and node which aids developer to optimize, explain code",
+    "name": "Sample JavaScript devbot",
+    "description": "An application built using React and Node which aids developer to optimize, explain code",
     "gitUrl": "https://github.com/daytonaio/sample-javascript-devbot"
   },
   {
