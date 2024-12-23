@@ -7,13 +7,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/google/uuid"
 )
 
 // returns the SHA-256 hash of a given key as a hexadecimal string.
 func HashKey(key string) string {
-	return util.Hash(key)
+	// TODO: fixme. Throws an encoding error when used with postgres
+	// return util.Hash(key)
+	return key
 }
 
 func GenerateRandomKey() string {
