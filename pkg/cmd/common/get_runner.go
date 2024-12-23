@@ -37,7 +37,7 @@ func GetRunnerFlow(apiClient *apiclient.APIClient, action string) (*runner.Runne
 		return nil, nil
 	}
 
-	selectedRunner, err := runner.GetRunnerFromPrompt(runners, activeProfile.Name, "Manage Providers")
+	selectedRunner, err := runner.GetRunnerFromPrompt(runners, activeProfile.Name, action)
 	if err != nil {
 		if common.IsCtrlCAbort(err) {
 			return nil, nil
