@@ -250,6 +250,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-go-nextjs-sbt-blockchain"
   },
   {
+    "name": "Next.js & FastAPI - Book Summary Generator",
+    "description": "Sample Next.js and FastAPI book summary generator. It uses the Gemini API to generate summaries of books and meilisearch to search for books.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-book-summary"
+  },
+  {
     "name": "ShepherdJS - gotSeed",
     "description": "gotSeed is a web application which lets you to explore a diverse range of plants available at nearby nurseries and gardens 🌿.",
     "gitUrl": "https://github.com/daytonaio/sample-shepherd-js-gotseed"
