@@ -120,9 +120,9 @@
     "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
   },
   {
-    "name": "Sampel React.js - Tutor Connect",
-    "description":"Tutor Connect is a web application that simplifies the process of connecting students with tutors. It features a student dashboard for managing bookings, a tutor availability system, and an admin panel for CRUD operations. Built with React, Node.js, Express.js, and MongoDB, it includes JWT and Google OAuth for secure authentication.",
-    "gitUrl":"https://github.com/daytonaio/sample-js-tutor-connect"
+    "name": "Sample React.js - Tutor Connect",
+    "description": "Tutor Connect is a web application that simplifies the process of connecting students with tutors. It features a student dashboard for managing bookings, a tutor availability system, and an admin panel for CRUD operations. Built with React, Node.js, Express.js, and MongoDB, it includes JWT and Google OAuth for secure authentication.",
+    "gitUrl": "https://github.com/daytonaio/sample-js-tutor-connect"
   },
   {
     "name": "React.js - AI Text Summarization and Analysis",
