@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
 **Metadata** | Pointer to [**TargetMetadata**](TargetMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
 **TargetConfig** | [**TargetConfig**](TargetConfig.md) |  | 
 **TargetConfigId** | **string** |  | 
 **Workspaces** | [**[]Workspace**](Workspace.md) |  | 
@@ -162,6 +163,31 @@ and a boolean to check if the value has been set.
 
 SetName sets Name field to given value.
 
+
+### GetProviderMetadata
+
+`func (o *Target) GetProviderMetadata() string`
+
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
+
+### GetProviderMetadataOk
+
+`func (o *Target) GetProviderMetadataOk() (*string, bool)`
+
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetProviderMetadata
+
+`func (o *Target) SetProviderMetadata(v string)`
+
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *Target) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
 
 ### GetTargetConfig
 

@@ -37,8 +37,8 @@ type IDockerClient interface {
 	StartWorkspace(opts *CreateWorkspaceOptions, daytonaDownloadUrl string) error
 	StopWorkspace(workspace *models.Workspace, logWriter io.Writer) error
 
-	GetWorkspaceInfo(workspace *models.Workspace) (*models.WorkspaceInfo, error)
-	GetTargetInfo(t *models.Target) (*models.TargetInfo, error)
+	GetWorkspaceProviderMetadata(workspace *models.Workspace) (string, error)
+	GetTargetProviderMetadata(t *models.Target) (string, error)
 
 	GetWorkspaceContainerName(workspace *models.Workspace) string
 	GetWorkspaceVolumeName(workspace *models.Workspace) string

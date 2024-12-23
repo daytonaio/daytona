@@ -86,6 +86,7 @@ Class | Method | HTTP request | Description
 *BuildAPI* | [**DeleteBuildsFromPrebuild**](docs/BuildAPI.md#deletebuildsfromprebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
 *BuildAPI* | [**GetBuild**](docs/BuildAPI.md#getbuild) | **Get** /build/{buildId} | Get build data
 *BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
+*BuildAPI* | [**ListSuccessfulBuilds**](docs/BuildAPI.md#listsuccessfulbuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
 *ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *EnvVarAPI* | [**DeleteEnvironmentVariable**](docs/EnvVarAPI.md#deleteenvironmentvariable) | **Delete** /env/{key} | Delete environment variable
@@ -111,10 +112,17 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
-*ProviderAPI* | [**GetTargetConfigManifest**](docs/ProviderAPI.md#gettargetconfigmanifest) | **Get** /provider/{provider}/target-config-manifest | Get provider target config manifest
-*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
-*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
-*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
+*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/install | Install provider
+*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
+*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
+*ProviderAPI* | [**UpdateProvider**](docs/ProviderAPI.md#updateprovider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
+*RunnerAPI* | [**GetRunner**](docs/RunnerAPI.md#getrunner) | **Get** /runner/{runnerId} | Get a runner
+*RunnerAPI* | [**ListRunnerJobs**](docs/RunnerAPI.md#listrunnerjobs) | **Get** /runner/{runnerId}/jobs | List runner jobs
+*RunnerAPI* | [**ListRunners**](docs/RunnerAPI.md#listrunners) | **Get** /runner | List runners
+*RunnerAPI* | [**RegisterRunner**](docs/RunnerAPI.md#registerrunner) | **Post** /runner | Register a runner
+*RunnerAPI* | [**RemoveRunner**](docs/RunnerAPI.md#removerunner) | **Delete** /runner/{runnerId} | Remove runner
+*RunnerAPI* | [**SetRunnerMetadata**](docs/RunnerAPI.md#setrunnermetadata) | **Post** /runner/{runnerId}/metadata | Set runner metadata
+*RunnerAPI* | [**UpdateJobState**](docs/RunnerAPI.md#updatejobstate) | **Post** /runner/{runnerId}/jobs/{jobId}/state | Update job state
 *SampleAPI* | [**ListSamples**](docs/SampleAPI.md#listsamples) | **Get** /sample | List samples
 *ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
@@ -122,12 +130,14 @@ Class | Method | HTTP request | Description
 *ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
 *TargetAPI* | [**CreateTarget**](docs/TargetAPI.md#createtarget) | **Post** /target | Create a target
 *TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
+*TargetAPI* | [**HandleSuccessfulCreation**](docs/TargetAPI.md#handlesuccessfulcreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
 *TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 *TargetAPI* | [**SetTargetMetadata**](docs/TargetAPI.md#settargetmetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
+*TargetAPI* | [**UpdateTargetProviderMetadata**](docs/TargetAPI.md#updatetargetprovidermetadata) | **Post** /target/{targetId}/provider-metadata | Update target provider metadata
 *TargetConfigAPI* | [**AddTargetConfig**](docs/TargetConfigAPI.md#addtargetconfig) | **Put** /target-config | Add a target config
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configId} | Remove a target config
@@ -138,6 +148,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**SetWorkspaceMetadata**](docs/WorkspaceAPI.md#setworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+*WorkspaceAPI* | [**UpdateWorkspaceProviderMetadata**](docs/WorkspaceAPI.md#updateworkspaceprovidermetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
 *WorkspaceTemplateAPI* | [**DeleteWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#deleteworkspacetemplate) | **Delete** /workspace-template/{templateName} | Delete workspace template data
 *WorkspaceTemplateAPI* | [**GetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getdefaultworkspacetemplate) | **Get** /workspace-template/default/{gitUrl} | Get workspace templates by git url
 *WorkspaceTemplateAPI* | [**GetWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getworkspacetemplate) | **Get** /workspace-template/{templateName} | Get workspace template data
@@ -216,7 +227,7 @@ Class | Method | HTTP request | Description
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
- - [InstallProviderRequest](docs/InstallProviderRequest.md)
+ - [InstallProviderDTO](docs/InstallProviderDTO.md)
  - [Job](docs/Job.md)
  - [JobState](docs/JobState.md)
  - [ListBranchResponse](docs/ListBranchResponse.md)
@@ -232,36 +243,41 @@ Class | Method | HTTP request | Description
  - [ModelsApiKeyType](docs/ModelsApiKeyType.md)
  - [ModelsJobAction](docs/ModelsJobAction.md)
  - [ModelsResourceStateName](docs/ModelsResourceStateName.md)
+ - [ModelsTargetConfigPropertyType](docs/ModelsTargetConfigPropertyType.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Position](docs/Position.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
- - [Provider](docs/Provider.md)
- - [ProviderTargetConfigPropertyType](docs/ProviderTargetConfigPropertyType.md)
+ - [ProviderInfo](docs/ProviderInfo.md)
+ - [RegisterRunnerDTO](docs/RegisterRunnerDTO.md)
+ - [RegisterRunnerResultDTO](docs/RegisterRunnerResultDTO.md)
  - [ReplaceRequest](docs/ReplaceRequest.md)
  - [ReplaceResult](docs/ReplaceResult.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
  - [ResourceState](docs/ResourceState.md)
  - [ResourceType](docs/ResourceType.md)
+ - [RunnerDTO](docs/RunnerDTO.md)
+ - [RunnerMetadata](docs/RunnerMetadata.md)
  - [Sample](docs/Sample.md)
  - [SearchFilesResponse](docs/SearchFilesResponse.md)
  - [ServerConfig](docs/ServerConfig.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
- - [SetTargetMetadata](docs/SetTargetMetadata.md)
- - [SetWorkspaceMetadata](docs/SetWorkspaceMetadata.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
  - [Target](docs/Target.md)
  - [TargetConfig](docs/TargetConfig.md)
  - [TargetConfigProperty](docs/TargetConfigProperty.md)
  - [TargetDTO](docs/TargetDTO.md)
- - [TargetInfo](docs/TargetInfo.md)
  - [TargetMetadata](docs/TargetMetadata.md)
- - [TargetProviderInfo](docs/TargetProviderInfo.md)
+ - [UpdateJobState](docs/UpdateJobState.md)
+ - [UpdateRunnerMetadataDTO](docs/UpdateRunnerMetadataDTO.md)
+ - [UpdateTargetMetadataDTO](docs/UpdateTargetMetadataDTO.md)
+ - [UpdateTargetProviderMetadataDTO](docs/UpdateTargetProviderMetadataDTO.md)
+ - [UpdateWorkspaceMetadataDTO](docs/UpdateWorkspaceMetadataDTO.md)
+ - [UpdateWorkspaceProviderMetadataDTO](docs/UpdateWorkspaceProviderMetadataDTO.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
  - [WorkspaceDirResponse](docs/WorkspaceDirResponse.md)
- - [WorkspaceInfo](docs/WorkspaceInfo.md)
  - [WorkspaceMetadata](docs/WorkspaceMetadata.md)
  - [WorkspaceTemplate](docs/WorkspaceTemplate.md)
 

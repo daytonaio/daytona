@@ -4,12 +4,11 @@
 package target
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"github.com/daytonaio/daytona/pkg/api/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -23,28 +22,22 @@ import (
 //	@Description	Get target info
 //	@Produce		json
 //	@Param			targetId	path		string	true	"Target ID or Name"
-//	@Param			verbose		query		bool	false	"Verbose"
+//	@Param			showOptions	query		bool	false	"Show target config options"
 //	@Success		200			{object}	TargetDTO
 //	@Router			/target/{targetId} [get]
 //
 //	@id				GetTarget
 func GetTarget(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
-	verboseQuery := ctx.Query("verbose")
-	verbose := false
-	var err error
-
-	if verboseQuery != "" {
-		verbose, err = strconv.ParseBool(verboseQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
-			return
-		}
+	showTargetConfigOptionsQuery := ctx.Query("showOptions")
+	var showTargetConfigOptions bool
+	if showTargetConfigOptionsQuery == "true" {
+		showTargetConfigOptions = true
 	}
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{Verbose: verbose})
+	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsTargetNotFound(err) || services.IsTargetDeleted(err) {
@@ -54,18 +47,20 @@ func GetTarget(ctx *gin.Context) {
 		return
 	}
 
-	maskedOptions, err := util.GetMaskedOptions(server, t.TargetConfig.ProviderInfo.Name, t.TargetConfig.Options)
-	if err != nil {
-		t.TargetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-	} else {
-		t.TargetConfig.Options = maskedOptions
+	if !showTargetConfigOptions {
+		t.TargetConfig.Options = ""
 	}
 
-	for i := range t.Workspaces {
-		util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
-	}
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		for i := range t.Workspaces {
+			util.HideDaytonaEnvVars(&t.Workspaces[i].EnvVars)
+			t.Workspaces[i].ApiKey = ""
+		}
 
-	util.HideDaytonaEnvVars(&t.EnvVars)
+		util.HideDaytonaEnvVars(&t.EnvVars)
+		t.ApiKey = ""
+	}
 
 	ctx.JSON(200, t)
 }
@@ -75,47 +70,41 @@ func GetTarget(ctx *gin.Context) {
 //	@Tags			target
 //	@Summary		List targets
 //	@Description	List targets
+//	@Param			showOptions	query	bool	false	"Show target config options"
 //	@Produce		json
 //	@Success		200	{array}	TargetDTO
 //	@Router			/target [get]
-//	@Param			verbose	query	bool	false	"Verbose"
 //
 //	@id				ListTargets
 func ListTargets(ctx *gin.Context) {
-	verboseQuery := ctx.Query("verbose")
-	verbose := false
-	var err error
-
-	if verboseQuery != "" {
-		verbose, err = strconv.ParseBool(verboseQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
-			return
-		}
+	server := server.GetInstance(nil)
+	showTargetConfigOptionsQuery := ctx.Query("showOptions")
+	var showTargetConfigOptions bool
+	if showTargetConfigOptionsQuery == "true" {
+		showTargetConfigOptions = true
 	}
 
-	server := server.GetInstance(nil)
-
-	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, services.TargetRetrievalParams{Verbose: verbose})
+	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, services.TargetRetrievalParams{})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return
 	}
 
-	for i, t := range targetList {
-		maskedOptions, err := util.GetMaskedOptions(server, t.TargetConfig.ProviderInfo.Name, t.TargetConfig.Options)
-		if err != nil {
-			targetList[i].TargetConfig.Options = fmt.Sprintf("Error: %s", err.Error())
-			continue
+	for i := range targetList {
+		if !showTargetConfigOptions {
+			targetList[i].TargetConfig.Options = ""
 		}
 
-		targetList[i].TargetConfig.Options = maskedOptions
+		apiKeyType, ok := ctx.Get("apiKeyType")
+		if !ok || apiKeyType == models.ApiKeyTypeClient {
+			for j := range targetList[i].Workspaces {
+				util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
+				targetList[i].Workspaces[j].ApiKey = ""
+			}
 
-		for j := range targetList[i].Workspaces {
-			util.HideDaytonaEnvVars(&targetList[i].Workspaces[j].EnvVars)
+			util.HideDaytonaEnvVars(&targetList[i].EnvVars)
+			targetList[i].ApiKey = ""
 		}
-
-		util.HideDaytonaEnvVars(&targetList[i].EnvVars)
 	}
 
 	ctx.JSON(200, targetList)

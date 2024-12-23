@@ -29,7 +29,7 @@ func NotifyEmptyTargetConfigList(tip bool) {
 func NotifyEmptyWorkspaceTemplateList(tip bool) {
 	views.RenderInfoMessageBold("No workspace templates found")
 	if tip {
-		views.RenderTip("Use 'daytona workspace-template add' to add a workspace template")
+		views.RenderTip("Use 'daytona template add' to add a workspace template")
 	}
 }
 
@@ -93,5 +93,12 @@ func NotifyEmptyServerLogList(tip bool) {
 	views.RenderInfoMessageBold("No server log files found")
 	if tip {
 		views.RenderTip("Use 'daytona serve' in order to create server log files")
+	}
+}
+
+func NotifyEmptyRunnerList(tip bool) {
+	views.RenderInfoMessageBold("No runners found")
+	if tip {
+		views.RenderTip("Use 'daytona runner register' to register a runner")
 	}
 }

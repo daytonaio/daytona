@@ -10,7 +10,6 @@ import (
 	"github.com/charmbracelet/bubbles/list"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -39,13 +38,6 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			workspaceName = "Unnamed Workspace"
 		}
 
-		// Get the time if available
-		createdTime := ""
-
-		if workspace.Info != nil {
-			createdTime = util.FormatTimestamp(workspace.Info.Created)
-		}
-
 		stateLabel := views.GetStateLabel(workspace.State.Name)
 
 		isDisabled := false
@@ -70,7 +62,6 @@ func generateWorkspaceList(workspaces []apiclient.WorkspaceDTO, isMultipleSelect
 			desc:           "",
 			targetName:     workspace.Target.Name,
 			repository:     workspace.Repository.Url,
-			createdTime:    createdTime,
 			state:          stateLabel,
 			workspace:      &workspace,
 			choiceProperty: workspace,
@@ -126,7 +117,7 @@ func getWorkspaceProgramEssentials(modelTitle string, actionVerb ActionVerb, wor
 }
 
 func selectWorkspacePrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb, choiceChan chan<- *apiclient.WorkspaceDTO) {
-	list_view.SortWorkspaces(&workspaces, true)
+	list_view.SortWorkspaces(&workspaces)
 
 	p := getWorkspaceProgramEssentials("Select a Workspace To ", actionVerb, workspaces, "", false)
 	if m, ok := p.(model[apiclient.WorkspaceDTO]); ok && m.choice != nil {
@@ -145,7 +136,7 @@ func GetWorkspaceFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb Acti
 }
 
 func selectWorkspacesFromPrompt(workspaces []apiclient.WorkspaceDTO, actionVerb ActionVerb, choiceChan chan<- []*apiclient.WorkspaceDTO) {
-	list_view.SortWorkspaces(&workspaces, true)
+	list_view.SortWorkspaces(&workspaces)
 
 	footerText := lipgloss.NewStyle().Bold(true).PaddingLeft(2).Render(fmt.Sprintf("\n\nPress 'x' to mark a workspace.\nPress 'enter' to %s the current/marked workspaces.", actionVerb))
 	p := getWorkspaceProgramEssentials("Select Workspaces To ", actionVerb, workspaces, footerText, true)

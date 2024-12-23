@@ -30,7 +30,7 @@ type BuildJobFactoryConfig struct {
 	DeleteImage          func(ctx context.Context, image string, force bool) error
 
 	TrackTelemetryEvent func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error
-	LoggerFactory       logs.LoggerFactory
+	LoggerFactory       logs.ILoggerFactory
 	BuilderFactory      build.IBuilderFactory
 
 	BasePath string

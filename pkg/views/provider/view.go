@@ -4,6 +4,7 @@
 package provider
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/charmbracelet/bubbles/list"
@@ -17,12 +18,18 @@ type item struct {
 }
 
 func (i item) Title() string {
+	title := i.provider.Name
 	if i.provider.Label != nil {
-		return *i.provider.Label
-	} else {
-		return i.provider.Name
+		title = *i.provider.Label
 	}
+
+	if i.provider.RunnerName != "" {
+		title = fmt.Sprintf("%s (Runner %s)", title, i.provider.RunnerName)
+	}
+
+	return title
 }
+
 func (i item) Description() string {
 	desc := i.provider.Version
 	if i.provider.Installed != nil {

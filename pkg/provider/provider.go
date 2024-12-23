@@ -13,23 +13,22 @@ import (
 
 type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
-	GetInfo() (ProviderInfo, error)
+	GetInfo() (models.ProviderInfo, error)
 	CheckRequirements() (*[]RequirementStatus, error)
 
-	GetTargetConfigManifest() (*TargetConfigManifest, error)
 	GetPresetTargetConfigs() (*[]TargetConfig, error)
 
 	CreateTarget(*TargetRequest) (*util.Empty, error)
 	StartTarget(*TargetRequest) (*util.Empty, error)
 	StopTarget(*TargetRequest) (*util.Empty, error)
 	DestroyTarget(*TargetRequest) (*util.Empty, error)
-	GetTargetInfo(*TargetRequest) (*models.TargetInfo, error)
+	GetTargetProviderMetadata(*TargetRequest) (string, error)
 
 	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StopWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	DestroyWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	GetWorkspaceInfo(*WorkspaceRequest) (*models.WorkspaceInfo, error)
+	GetWorkspaceProviderMetadata(*WorkspaceRequest) (string, error)
 }
 
 type ProviderPlugin struct {

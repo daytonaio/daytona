@@ -20,20 +20,19 @@ type RowData struct {
 	Repository string
 	TargetName string
 	Status     string
-	Created    string
 	Branch     string
 	Uptime     string
 }
 
-func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, verbose bool, activeProfileName string) {
+func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders bool, activeProfileName string) {
 	if len(workspaceList) == 0 {
 		views_util.NotifyEmptyWorkspaceList(true)
 		return
 	}
 
-	SortWorkspaces(&workspaceList, verbose)
+	SortWorkspaces(&workspaceList)
 
-	headers := []string{"Workspace", "Repository", "Target", "Status", "Created", "Branch"}
+	headers := []string{"Workspace", "Repository", "Target", "Status", "Branch"}
 
 	data := [][]string{}
 
@@ -46,13 +45,6 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 		data = append(data, row)
 	}
 
-	if !verbose {
-		headers = headers[:len(headers)-2]
-		for value := range data {
-			data[value] = data[value][:len(data[value])-2]
-		}
-	}
-
 	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
 
 	table := views_util.GetTableView(data, headers, &footer, func() {
@@ -62,7 +54,7 @@ func ListWorkspaces(workspaceList []apiclient.WorkspaceDTO, specifyGitProviders 
 	fmt.Println(table)
 }
 
-func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
+func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO) {
 	sort.Slice(*workspaceList, func(i, j int) bool {
 		pi, pj := views_util.GetStateSortPriorities((*workspaceList)[i].State.Name, (*workspaceList)[j].State.Name)
 		if pi != pj {
@@ -75,17 +67,13 @@ func SortWorkspaces(workspaceList *[]apiclient.WorkspaceDTO, verbose bool) {
 }
 
 func getTableRowData(workspace apiclient.WorkspaceDTO, specifyGitProviders bool) *RowData {
-	rowData := RowData{"", "", "", "", "", "", ""}
+	rowData := RowData{"", "", "", "", "", ""}
 	rowData.Name = workspace.Name + views_util.AdditionalPropertyPadding
 	rowData.Repository = util.GetRepositorySlugFromUrl(workspace.Repository.Url, specifyGitProviders)
 	rowData.Branch = workspace.Repository.Branch
 	rowData.Status = views.GetStateLabel(workspace.State.Name)
 
 	rowData.TargetName = workspace.Target.Name + views_util.AdditionalPropertyPadding
-
-	if workspace.Info != nil {
-		rowData.Created = util.FormatTimestamp(workspace.Info.Created)
-	}
 
 	if workspace.Metadata != nil {
 		views_util.CheckAndAppendTimeLabel(&rowData.Status, workspace.State, workspace.Metadata.Uptime)
@@ -115,7 +103,6 @@ func getRowFromRowData(rowData RowData, isMultiWorkspaceAccordion bool) []string
 		views.DefaultRowDataStyle.Render(rowData.Repository),
 		views.DefaultRowDataStyle.Render(rowData.TargetName),
 		rowData.Status,
-		views.DefaultRowDataStyle.Render(rowData.Created),
 		views.DefaultRowDataStyle.Render(views.GetBranchNameLabel(rowData.Branch)),
 	}
 

@@ -19,8 +19,8 @@ func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*util.Emp
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
-	var resp ProviderInfo
+func (m *ProviderRPCClient) GetInfo() (models.ProviderInfo, error) {
+	var resp models.ProviderInfo
 	err := m.client.Call("Plugin.GetInfo", new(interface{}), &resp)
 	return resp, err
 }
@@ -29,13 +29,6 @@ func (m *ProviderRPCClient) CheckRequirements() (*[]RequirementStatus, error) {
 	var result []RequirementStatus
 	err := m.client.Call("Plugin.CheckRequirements", new(interface{}), &result)
 	return &result, err
-}
-
-func (m *ProviderRPCClient) GetTargetConfigManifest() (*TargetConfigManifest, error) {
-	var resp TargetConfigManifest
-	err := m.client.Call("Plugin.GetTargetConfigManifest", new(interface{}), &resp)
-
-	return &resp, err
 }
 
 func (m *ProviderRPCClient) GetPresetTargetConfigs() (*[]TargetConfig, error) {
@@ -64,10 +57,10 @@ func (m *ProviderRPCClient) DestroyTarget(targetReq *TargetRequest) (*util.Empty
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetTargetInfo(targetReq *TargetRequest) (*models.TargetInfo, error) {
-	var response models.TargetInfo
-	err := m.client.Call("Plugin.GetTargetInfo", targetReq, &response)
-	return &response, err
+func (m *ProviderRPCClient) GetTargetProviderMetadata(targetReq *TargetRequest) (string, error) {
+	var resp string
+	err := m.client.Call("Plugin.GetTargetProviderMetadata", targetReq, &resp)
+	return resp, err
 }
 
 func (m *ProviderRPCClient) CreateWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
@@ -90,8 +83,8 @@ func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*u
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*models.WorkspaceInfo, error) {
-	var resp models.WorkspaceInfo
-	err := m.client.Call("Plugin.GetWorkspaceInfo", workspaceReq, &resp)
-	return &resp, err
+func (m *ProviderRPCClient) GetWorkspaceProviderMetadata(workspaceReq *WorkspaceRequest) (string, error) {
+	var resp string
+	err := m.client.Call("Plugin.GetWorkspaceProviderMetadata", workspaceReq, &resp)
+	return resp, err
 }

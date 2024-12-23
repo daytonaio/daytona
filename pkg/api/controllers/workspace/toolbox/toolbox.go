@@ -58,9 +58,9 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 	reqUrl := fmt.Sprintf("http://%s:%d/%s?%s", workspaceHostname, config.TOOLBOX_API_PORT, route, query)
 	client = server.TailscaleServer.HTTPClient()
 
-	if w.TargetId == "local" && w.Info != nil && w.Info.ProviderMetadata != "" {
+	if w.TargetId == "local" && w.ProviderMetadata != nil && *w.ProviderMetadata != "" {
 		var metadata map[string]interface{}
-		err := json.Unmarshal([]byte(w.Info.ProviderMetadata), &metadata)
+		err := json.Unmarshal([]byte(*w.ProviderMetadata), &metadata)
 		if err == nil {
 			if toolboxPortString, ok := metadata["daytona.toolbox.api.hostPort"]; ok {
 				toolboxPort, err := strconv.ParseUint(toolboxPortString.(string), 10, 16)

@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
@@ -51,17 +52,18 @@ var logsCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			target, _, err = apiclient_util.GetTarget(args[0], false)
+			target, _, err = apiclient_util.GetTarget(args[0])
 			if err != nil {
 				return err
 			}
 		}
 
-		apiclient_util.ReadTargetLogs(ctx, apiclient_util.ReadLogParams{
-			Id:            target.Id,
-			Label:         &target.Name,
-			ActiveProfile: activeProfile,
-			Follow:        &followFlag,
+		cmd_common.ReadTargetLogs(ctx, cmd_common.ReadLogParams{
+			Id:        target.Id,
+			Label:     &target.Name,
+			ServerUrl: activeProfile.Api.Url,
+			ApiKey:    activeProfile.Api.Key,
+			Follow:    &followFlag,
 		})
 
 		return nil

@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/provisioner"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -28,14 +27,13 @@ type WorkspaceServiceConfig struct {
 	ListGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
-	CreateJob              func(ctx context.Context, workspaceId string, action models.JobAction) error
+	CreateJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
 	TrackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	LoggerFactory         logs.LoggerFactory
+	LoggerFactory         logs.ILoggerFactory
 	ServerApiUrl          string
 	ServerUrl             string
 	ServerVersion         string
-	Provisioner           provisioner.IProvisioner
 	DefaultWorkspaceImage string
 	DefaultWorkspaceUser  string
 }
@@ -61,7 +59,6 @@ func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceServi
 		serverVersion:         config.ServerVersion,
 		defaultWorkspaceImage: config.DefaultWorkspaceImage,
 		defaultWorkspaceUser:  config.DefaultWorkspaceUser,
-		provisioner:           config.Provisioner,
 		loggerFactory:         config.LoggerFactory,
 	}
 }
@@ -78,18 +75,31 @@ type WorkspaceService struct {
 	listGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
-	createJob              func(ctx context.Context, workspaceId string, action models.JobAction) error
+	createJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
 	trackTelemetryEvent    func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
 
-	provisioner           provisioner.IProvisioner
 	serverApiUrl          string
 	serverUrl             string
 	serverVersion         string
 	defaultWorkspaceImage string
 	defaultWorkspaceUser  string
-	loggerFactory         logs.LoggerFactory
+	loggerFactory         logs.ILoggerFactory
 }
 
 func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {
-	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
+	return s.loggerFactory.CreateLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(workspaceId)
+}
+
+func (s *WorkspaceService) UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+
+	w.ProviderMetadata = &metadata
+	return s.workspaceStore.Save(ctx, w)
 }

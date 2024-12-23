@@ -9,6 +9,7 @@ const (
 	ApiKeyTypeClient    ApiKeyType = "client"
 	ApiKeyTypeWorkspace ApiKeyType = "workspace"
 	ApiKeyTypeTarget    ApiKeyType = "target"
+	ApiKeyTypeRunner    ApiKeyType = "runner"
 )
 
 type ApiKey struct {
