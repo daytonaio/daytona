@@ -358,5 +358,10 @@
     "name": "Sample React.js Ecotrack",
     "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-ecotrack"
+  },
+  {
+    "name" : "Sample Django Courier Manager",
+    "description" : " Django-based web application to manage courier services efficiently, including bookings, sorting hubs, pickups, and delivery processes. The project integrates Google Maps for enhanced location management and uses Daytona for a streamlined development environment.",
+    "gitUrl" : "https://github.com/daytonaio/sample-django-courier-manager"
   }
 ]
