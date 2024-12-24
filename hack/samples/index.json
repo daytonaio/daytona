@@ -379,7 +379,7 @@
     "description" : "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
     "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
   },
-  
+  {
     "name": "Sample React Node Adventurize",
     "description": "Adventurize is a web-app that allows users to search for different locations to visit and gather the information regarding those locations.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-adventurize"
@@ -389,7 +389,7 @@
     "description": "This project is a build of a web server in Rust on bare minimum from scratch with only native TCP. This is only a fun project to learn rust.",
     "gitUrl": "https://github.com/daytonaio/sample-rust-http-server"
   },
-{
+  {
     "name" : "Sample Python C.A.L.M App",
     "description" : "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl" : "https://github.com/daytonaio/sample-python-calm-app"
