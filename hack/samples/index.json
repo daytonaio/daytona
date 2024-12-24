@@ -378,5 +378,10 @@
     "name" : "Sample React.js The NAMESPACE Community",
     "description" : "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
     "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
+  },
+  {
+    "name":"Sample React Node Adventurize",
+    "description": "Adventurize is a web-app that allows users to search for different locations to visit and gather the information regarding those locations.",
+    "gitUrl":"https://github.com/daytonaio/sample-react-node-adventurize"
   }
 ]
