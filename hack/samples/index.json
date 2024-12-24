@@ -348,5 +348,10 @@
     "name": "Sample Next.js GitHub PR Tracker",
     "description": "An AI-powered tool (using CopilotKit) designed to track your GitHub pull requests across various open-source events like Hacktoberfest, as well as general pull requests.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
+  },
+  {
+    "name": "Sample React.js Recipe Finder",
+    "description": "Recipe Finder is a web app that helps you discover tasty recipes based on the ingredients you already have in your kitchen.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-recipe-finder"
   }
 ]
