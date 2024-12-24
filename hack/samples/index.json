@@ -380,6 +380,11 @@
     "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
   },
   {
+    "name": "Sample React Node Adventurize",
+    "description": "Adventurize is a web-app that allows users to search for different locations to visit and gather the information regarding those locations.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-node-adventurize"
+  },
+  {
     "name": "Sample Rust Http Server",
     "description": "This project is a build of a web server in Rust on bare minimum from scratch with only native TCP. This is only a fun project to learn rust.",
     "gitUrl": "https://github.com/daytonaio/sample-rust-http-server"
