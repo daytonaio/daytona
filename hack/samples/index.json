@@ -403,5 +403,10 @@
     "name": "Sample Python C.A.L.M App",
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
+  },
+  {
+    "name": "Sample Next.js with Gemini Chat",
+    "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
   }
 ]
