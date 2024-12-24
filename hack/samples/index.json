@@ -408,5 +408,10 @@
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
+  },
+  {
+    "name": "Sample JavaScript Restaurant",
+    "description": "A Restaurant-Website web application using HTML,CSS and Javascript.",
+    "gitUrl": "https://github.com/daytonaio/sample-javascript-restaurant"
   }
 ]
