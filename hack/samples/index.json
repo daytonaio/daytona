@@ -65,6 +65,11 @@
       "gitUrl": "https://github.com/daytonaio/sample-python"
   },
   {
+      "name": "Python - AI Recipe Generator",
+      "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
+  },
+  {
      "name": "Python - Lunku AI",
      "description": "Lunku AI is a Bot. Used in Discord for Image Generation using Pordia AI.",
      "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
@@ -113,6 +118,11 @@
     "name": "React.js - TerraGrow",
     "description": "TerraGrow is an AI-powered app that provides crop recommendations and yield improvement strategies by analyzing environmental factors like soil nutrients, temperature, humidity, and pH. It helps farmers optimize planting decisions for higher yields.",
     "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
+  },
+  {
+    "name": "Sample React.js - Tutor Connect",
+    "description": "Tutor Connect is a web application that simplifies the process of connecting students with tutors. It features a student dashboard for managing bookings, a tutor availability system, and an admin panel for CRUD operations. Built with React, Node.js, Express.js, and MongoDB, it includes JWT and Google OAuth for secure authentication.",
+    "gitUrl": "https://github.com/daytonaio/sample-js-tutor-connect"
   },
   {
     "name": "React.js - AI Text Summarization and Analysis",
@@ -250,6 +260,16 @@
     "gitUrl": "https://github.com/daytonaio/sample-go-nextjs-sbt-blockchain"
   },
   {
+    "name": "Next.js & FastAPI - Book Summary Generator",
+    "description": "Sample Next.js and FastAPI book summary generator. It uses the Gemini API to generate summaries of books and meilisearch to search for books.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-book-summary"
+  },
+  {
+    "name": "Next.js - Story Generator",
+    "description": "The Story Generator Platform, using Next.js and Groq API, lets children create personalized stories, fostering creativity and storytelling skills.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-story-generator"
+  },
+  {
     "name": "ShepherdJS - gotSeed",
     "description": "gotSeed is a web application which lets you to explore a diverse range of plants available at nearby nurseries and gardens 🌿.",
     "gitUrl": "https://github.com/daytonaio/sample-shepherd-js-gotseed"
@@ -270,6 +290,16 @@
     "gitUrl" : "https://github.com/daytonaio/sample-react-ai-paper-summary.git"
   },
   {
+    "name": "NextJS - Weather-bot",
+    "description": "This application provides real-time weather information, including temperature, descriptions, humidity, and wind speed, based on user input.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-weather-bot.git"
+  },
+  {
+    "name": "Astro - Restaurant app",
+    "description" : "A modern, responsive restaurant website built with Astro.js and TailwindCSS, showcasing a restaurant's menu, team, and story.",
+    "gitUrl" : "https://github.com/daytonaio/sample-astro-tailwind-restaurant"
+  },
+  {
     "name": "Sample Go Web Server",
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
@@ -278,5 +308,110 @@
     "name": "PHP/Laravel URL extractor app - URLex",
     "description" : "A simple app to understand different parts of URL in an unique way using Laravel 11.x ",
     "gitUrl" : "https://github.com/daytonaio/sample-laravel-url-extractor.git"
+  },
+  {
+    "name": "Sample React Coinbase Connect",
+    "description": "A boilerplate for React + Vite + TypeScript + shadcn/ui + CoinBase Wallet SDK project.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-coinbase-connect"
+  },
+  {
+    "name": "EJS Thoughts Web App",
+    "description": "A web app built using nodejs that allows user to share their thoughts.",
+    "gitUrl": "https://github.com/daytonaio/sample-ejs-web-app"
+  },
+  {
+    "name": "Sample JavaScript devbot",
+    "description": "An application built using React and Node which aids developer to optimize, explain code",
+    "gitUrl": "https://github.com/daytonaio/sample-javascript-devbot"
+  },
+  {
+    "name": "Sample Nuxt.js Quote Generator",
+    "description": "Quote Smith is a Nuxt.js app for creating and customizing inspirational quotes. Edit fonts, sizes, and gradients, then generate and download quotes as PNGs for sharing or personal use.",
+    "gitUrl": "https://github.com/daytonaio/sample-nuxtjs-quote-generator"
+  },
+  {
+    "name": "React.js - Progify",
+    "description": "Progrify is an AI-powered online code editor designed to revolutionize how people learn and write code.",
+    "gitUrl": "https://github.com/daytonaio/sample-ai-editor-progify"
+  },
+  {
+    "name": "Sample Next.js Nexus Framework",
+    "description": "Nexus is a modern Next.js frontend framework powered by Daytona, designed for rapid development, scalability, and performance. It delivers responsive, user-friendly interfaces for dynamic web applications.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-nexus-framework"
+  },
+  {
+    "name": "Sample Astro Pet Pilot",
+    "description": "Pet Pilot AI is an intelligent chatbot designed to assist pet owners in providing optimal care for their beloved pets.",
+    "gitUrl": "https://github.com/daytonaio/sample-astro-pet-pilot"
+  },
+  {
+    "name": "Sample Next.js Sudoku Game",
+    "description": "A Sudoku game built with Next.js and TailwindCSS. The game generates Sudoku puzzles of varying difficulties (easy, medium, hard, expert) and allows users to interactively fill in the grid.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-sudoku"
+  },
+  {
+    "name": "Sample React.js Calendar App",
+    "description": "The Calendar App is a React-based single-page application that allows event-scheduling , calendar navigation and categorization of events.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-calendar-app"
+  },
+  {
+    "name": "Sample Next.js GitHub PR Tracker",
+    "description": "An AI-powered tool (using CopilotKit) designed to track your GitHub pull requests across various open-source events like Hacktoberfest, as well as general pull requests.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
+  },
+  {
+    "name": "GraphQL API with Fine-Grained Access Control",
+    "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
+    "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
+  },
+  {
+    "name": "Sample React.js Recipe Finder",
+    "description": "Recipe Finder is a web app that helps you discover tasty recipes based on the ingredients you already have in your kitchen.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-recipe-finder"
+  },
+  {
+    "name": "Sample React.js Ecotrack",
+    "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-node-ecotrack"
+  },
+  {
+    "name": "Sample Python Rag Slim",
+    "description": "A web app which provides a solution leveraging Structured Language Instruction Models (SLIM) from LLMWare. With 10 models, Rag-Slim is your gateway to unlocking advanced AI-driven capabilities.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-rag-slim"
+  },
+  {
+    "name" : "Sample Django Courier Manager",
+    "description" : "Django-based web application to manage courier services efficiently, including bookings, sorting hubs, pickups, and delivery processes. The project integrates Google Maps for enhanced location management and uses Daytona for a streamlined development environment.",
+    "gitUrl" : "https://github.com/daytonaio/sample-django-courier-manager"
+  },
+  {
+    "name" : "Sample React.js The NAMESPACE Community",
+    "description" : "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
+    "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
+  },
+  {
+    "name": "Sample React Node Adventurize",
+    "description": "Adventurize is a web-app that allows users to search for different locations to visit and gather the information regarding those locations.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-node-adventurize"
+  },
+  {
+    "name": "Sample Rust Http Server",
+    "description": "This project is a build of a web server in Rust on bare minimum from scratch with only native TCP. This is only a fun project to learn rust.",
+    "gitUrl": "https://github.com/daytonaio/sample-rust-http-server"
+  },
+  {
+    "name": "Sample React Opinion Panel",
+    "description": "This is a Simple React project which helps to collect opinion and shows average opinon of the panel.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-opinion-panel"
+  },
+  {
+    "name": "Sample Python C.A.L.M App",
+    "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
+  },
+  {
+    "name": "Sample Next.js with Gemini Chat",
+    "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
   }
 ]
