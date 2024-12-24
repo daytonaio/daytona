@@ -400,6 +400,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-opinion-panel"
   },
   {
+    "name": "Implementation of RAG for osho chatbot",
+    "description": "This pull request introduces the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
+  },
+  {
     "name": "Sample Python C.A.L.M App",
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
