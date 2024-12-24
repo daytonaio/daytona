@@ -398,5 +398,10 @@
     "name": "Sample React Opinion Panel",
     "description": "This is a Simple React project which helps to collect opinion and shows average opinon of the panel.",
     "gitUrl": "https://github.com/daytonaio/sample-react-opinion-panel"
+  },
+  {
+    "name": "Sample Python C.A.L.M App",
+    "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
   }
 ]
