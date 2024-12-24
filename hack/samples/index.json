@@ -350,6 +350,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
   },
   {
+    "name": "GraphQL API with Fine-Grained Access Control",
+    "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
+    "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
+  },
+  {
     "name": "Sample React.js Recipe Finder",
     "description": "Recipe Finder is a web app that helps you discover tasty recipes based on the ingredients you already have in your kitchen.",
     "gitUrl": "https://github.com/daytonaio/sample-react-recipe-finder"
@@ -368,6 +373,11 @@
     "name": "Sample Django Courier Manager",
     "description": "Django-based web application to manage courier services efficiently, including bookings, sorting hubs, pickups, and delivery processes. The project integrates Google Maps for enhanced location management and uses Daytona for a streamlined development environment.",
     "gitUrl": "https://github.com/daytonaio/sample-django-courier-manager"
+  },
+  {
+    "name": "Sample React.js The NAMESPACE Community",
+    "description": "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
+    "gitUrl": "https://github.com/daytonaio/sample-react-namespace-community"
   },
   {
     "name": "Sample React Node Adventurize",
