@@ -265,6 +265,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-book-summary"
   },
   {
+    "name": "Next.js - Story Generator",
+    "description": "The Story Generator Platform, using Next.js and Groq API, lets children create personalized stories, fostering creativity and storytelling skills.",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-story-generator"
+  },
+  {
     "name": "ShepherdJS - gotSeed",
     "description": "gotSeed is a web application which lets you to explore a diverse range of plants available at nearby nurseries and gardens 🌿.",
     "gitUrl": "https://github.com/daytonaio/sample-shepherd-js-gotseed"
