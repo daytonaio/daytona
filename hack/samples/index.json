@@ -338,5 +338,10 @@
     "name": "Sample Next.js GitHub PR Tracker",
     "description": "An AI-powered tool (using CopilotKit) designed to track your GitHub pull requests across various open-source events like Hacktoberfest, as well as general pull requests.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
+  },
+  {
+    "name": "GraphQL API with Fine-Grained Access Control",
+    "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
+    "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
   }
 ]
