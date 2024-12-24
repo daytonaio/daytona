@@ -358,5 +358,10 @@
     "name": "Sample React.js Ecotrack",
     "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-ecotrack"
+  },
+  {
+    "name": "Sample Python Rag Slim",
+    "description": "A web app which provides a solution leveraging Structured Language Instruction Models (SLIM) from LLMWare. With 10 models, Rag-Slim is your gateway to unlocking advanced AI-driven capabilities.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-rag-slim"
   }
 ]
