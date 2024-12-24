@@ -330,6 +330,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-nexus-framework"
   },
   {
+    "name": "Sample Astro Pet Pilot",
+    "description": "Pet Pilot AI is an intelligent chatbot designed to assist pet owners in providing optimal care for their beloved pets.",
+    "gitUrl": "https://github.com/daytonaio/sample-astro-pet-pilot"
+  },
+  {
     "name": "Sample Next.js Sudoku Game",
     "description": "A Sudoku game built with Next.js and TailwindCSS. The game generates Sudoku puzzles of varying difficulties (easy, medium, hard, expert) and allows users to interactively fill in the grid.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-sudoku"
