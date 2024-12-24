@@ -375,13 +375,13 @@
     "gitUrl" : "https://github.com/daytonaio/sample-django-courier-manager"
   },
   {
-    "name" : "Sample React.js The NAMESPACE Community",
-    "description" : "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
-    "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
-  },
-  {
     "name": "Sample Rust Http Server",
     "description": "This project is a build of a web server in Rust on bare minimum from scratch with only native TCP. This is only a fun project to learn rust.",
     "gitUrl": "https://github.com/daytonaio/sample-rust-http-server"
+  },
+  {
+    "name" : "Sample React.js The NAMESPACE Community",
+    "description" : "The official website of The NAMESPACE Community built on React.js. This website receives 5,000+ visits per month",
+    "gitUrl" : "https://github.com/daytonaio/sample-react-namespace-community"
   }
 ]
