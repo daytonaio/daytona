@@ -401,7 +401,7 @@
   },
   {
     "name": "Implementation of RAG for osho chatbot",
-    "description": "This pull request introduces the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
+    "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
     "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
   },
   {
