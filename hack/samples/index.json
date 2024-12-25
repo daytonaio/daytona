@@ -410,6 +410,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
   },
   {
+    "name": "Simple React Calculator",
+    "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
+    "gitUrl": "https://github.com/codedpool/daytonaio"
+  },
+  {
     "name": "Sample Python C.A.L.M App",
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
