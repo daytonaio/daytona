@@ -44,7 +44,7 @@ $env:Path += ";$destination"
 
 # Confirm installation
 if (Test-Path $outputFile) {
-    Write-Host "Daytona successfully installed to $destination!" -ForegroundColor Green
+    Write-Host "Daytona successfully installed to $destination" -ForegroundColor Green
     Write-Host "You can now use 'daytona' from the command line."
 } else {
     Write-Error "Daytona installation failed."
