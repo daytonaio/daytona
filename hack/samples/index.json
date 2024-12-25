@@ -133,7 +133,7 @@
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
-  }, 
+  },
   {
     "name": "Django - CrisisMonitor",
     "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
@@ -144,10 +144,10 @@
     "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
     "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
   },
-  { 
-     "name": "Rust - Actix Web Server", 
-     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.", 
-     "gitUrl": "https://github.com/daytonaio/sample-rust-actix" 
+  {
+     "name": "Rust - Actix Web Server",
+     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.",
+     "gitUrl": "https://github.com/daytonaio/sample-rust-actix"
   },
   {
     "name": "Next.js - Festigo",
@@ -435,9 +435,16 @@
     "gitUrl": "https://github.com/daytonaio/sample-javascript-restaurant"
   },
   {
+
+    "name": "Sample PHP URL Shortener",
+    "description": "A simple URL shortener web application built using PHP and MySQL.",
+    "gitUrl": "https://github.com/daytonaio/sample-php-url-shortener"
+  },
+  {
     "name": "Chat with Llama with Daytona",
     "description": "This repository contains a sample FastAPI application that leverages the Llama 3.2-Vision multimodal language model to generate image captions. It demonstrates seamless integration with Daytona for managing reproducible and secure development environments.",
     "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
+
   }
 
 ]
