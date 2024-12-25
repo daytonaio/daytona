@@ -10,20 +10,23 @@ $destination = if ($env:DAYTONA_PATH) { $env:DAYTONA_PATH } else { "$env:APPDATA
 $downloadUrl = "$baseUrl/$version/daytona-windows-$architecture.exe"
 
 # Display installation directory
-Write-Host "Installing Daytona..."
-if ($env:DAYTONA_PATH) {
-    Write-Host "Using custom installation directory: $destination"
-}
+Write-Host "Installing Daytona..." -ForegroundColor Cyan
 
-if (!($env:DAYTONA_PATH)) {
-    Write-Host "Default installation directory: $destination"
-    Write-Host "You can override this by setting the DAYTONA_PATH environment variable."
+Write-Host ""  # Empty line
+
+if ($env:DAYTONA_PATH) {
+    Write-Host "Using custom installation directory: $destination" -ForegroundColor Yellow
+}
+else {
+    Write-Host "Default installation directory: $destination" -ForegroundColor Yellow
+    Write-Host "You can override this by setting the DAYTONA_PATH environment variable." -ForegroundColor Gray
 }
 
 # Create destination directory if it doesn't exist
 if (!(Test-Path -Path $destination)) {
-    Write-Host "Creating installation directory at $destination"
+    Write-Host "Creating installation directory at $destination" -ForegroundColor Cyan
     New-Item -ItemType Directory -Force -Path $destination | Out-Null
+    Write-Host ""  # Empty line
 }
 
 # File to download
@@ -31,10 +34,11 @@ $outputFile = "$destination\daytona.exe"
 
 # Download the file with progress using Invoke-WebRequest
 try {
-    Write-Host "Downloading Daytona binary from $downloadUrl"
+    Write-Host "Downloading Daytona binary from $downloadUrl" -ForegroundColor Cyan
 
     Invoke-WebRequest -Uri $downloadUrl -OutFile $outputFile -UseBasicParsing -ErrorAction Stop
 
+    Write-Host ""  # Empty line
     Write-Host "Download complete!" -ForegroundColor Green
 }
 catch {
@@ -44,7 +48,7 @@ catch {
 
 # Set executable permissions
 try {
-    Write-Host "Setting executable permissions for Daytona binary..."
+    Write-Host "Setting executable permissions for Daytona binary..." -ForegroundColor Cyan
     Set-ItemProperty -Path $outputFile -Name IsReadOnly -Value $false
     [System.IO.File]::SetAttributes($outputFile, 'Normal')
 }
@@ -55,18 +59,20 @@ catch {
 
 # Add to PATH if not already present
 if (-not ($env:Path -split ';' | ForEach-Object { $_.TrimEnd('\') } | Where-Object { $_ -eq $destination })) {
-    Write-Host "Adding $destination to PATH..."
+    Write-Host "Adding $destination to PATH..." -ForegroundColor Cyan
     [System.Environment]::SetEnvironmentVariable("Path", "$env:Path;$destination", [System.EnvironmentVariableTarget]::Machine)
-    Write-Host "PATH updated successfully!"
+    Write-Host "PATH updated successfully!" -ForegroundColor Green
 }
 else {
-    Write-Host "Installation directory is already in PATH."
+    Write-Host "Installation directory is already in PATH." -ForegroundColor Gray
 }
+
+Write-Host ""  # Empty line
 
 # Confirm installation
 if (Test-Path $outputFile) {
-    Write-Host "Daytona has been successfully installed to $destination"
-    Write-Host "You can now use 'daytona' from the command line."
+    Write-Host "Daytona has been successfully installed to $destination" -ForegroundColor Green
+    Write-Host "You can now use 'daytona' from the command line." -ForegroundColor Cyan
 }
 else {
     Write-Error "Daytona installation failed."
