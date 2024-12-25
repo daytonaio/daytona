@@ -428,5 +428,11 @@
     "name": "Sample JavaScript Restaurant",
     "description": "A Restaurant-Website web application using HTML,CSS and Javascript.",
     "gitUrl": "https://github.com/daytonaio/sample-javascript-restaurant"
+  },
+  {
+    "name": "Chat with Llama with Daytona",
+    "description": "This repository contains a sample FastAPI application that leverages the Llama 3.2-Vision multimodal language model to generate image captions. It demonstrates seamless integration with Daytona for managing reproducible and secure development environments.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
   }
+
 ]
