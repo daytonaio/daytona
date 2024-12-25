@@ -205,6 +205,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
   },
   {
+    "name" : "Sample Django Wellness Buddy",
+    "description" : "Django-based web application to calculate your wellness score based on the 8 dimensions of wellness. It uses Twilio to send you an SMS about the results. The project integrates Google Gemini for calculating the score based on the answers you give",
+    "gitUrl" : "https://github.com/daytonaio/sample-django-wellness-buddy"
+  },
+  {
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
