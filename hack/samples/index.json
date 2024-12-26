@@ -471,6 +471,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
   },
   {
+    "name": "Sample React guessing game",
+    "description": "A simple guessing game where users get to predict if the next number generated is in a given range.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-guessing-game"
+  },
+  {
     "name": "Smart News Flow with Daytona",
     "description": "A simple React platform Smart News Flow which utilizes Fluvio's real-time data streaming capabilities combined with Groq's fast inference large language models (LLMs) to deliver an enhance and refine historical and realtime news content from various source(currently only supports NewsAPI) with just a single prompt.",
     "gitUrl": "https://github.com/Precious-Macaulay/Smart-News-Flow-with-Daytona"
