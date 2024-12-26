@@ -451,6 +451,12 @@
     "description": "This repository contains a sample FastAPI application that leverages the Llama 3.2-Vision multimodal language model to generate image captions. It demonstrates seamless integration with Daytona for managing reproducible and secure development environments.",
     "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
 
+  },
+  {
+    "name": "Sample React guessing game",
+    "description": "A simple guessing game where users get to predict if the next number generated is in a given range.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-guessing-game"
+
   }
 
 ]
