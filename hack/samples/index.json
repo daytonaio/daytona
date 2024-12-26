@@ -45,6 +45,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
   },
   {
+    "name":"Learnpath Gen-PathGenX",
+    "description":"Personalized Learning Path Generator project uses AI to create tailored learning roadmaps based on user-selected courses, skill levels, and quiz results, visualized interactively like roadmap.sh.",
+    "gitUrl":"https://github.com/Raghunani12/Daytona-PathGenX"
+  },
+  {
     "name": "Julia",
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
