@@ -75,6 +75,11 @@
      "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
   },
   {
+     "name": "Python - FastAPI",
+     "description": "FastAPI starter based on copier-pdm and daytona",
+     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
+  },
+  {
       "name": "Ruby",
       "description": "Develop Ruby based applications. includes everything you need to get up and running.",
       "gitUrl": "https://github.com/daytonaio/sample-ruby"
