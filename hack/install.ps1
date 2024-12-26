@@ -9,11 +9,11 @@ $baseUrl = if ($env:DAYTONA_SERVER_DOWNLOAD_URL) { $env:DAYTONA_SERVER_DOWNLOAD_
 $destination = if ($env:DAYTONA_PATH) { $env:DAYTONA_PATH } else { "$env:APPDATA\bin\daytona" }
 $downloadUrl = "$baseUrl/$version/daytona-windows-$architecture.exe"
 
-# Display installation directory
 Write-Host "Installing Daytona..."
 
 Write-Host ""  # Empty line
 
+# Display installation directory
 if ($env:DAYTONA_PATH) {
     Write-Host "Using custom installation directory: $destination"
 }
