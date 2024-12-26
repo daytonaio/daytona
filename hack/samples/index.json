@@ -115,9 +115,9 @@
     "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
   },
   {
-    "name": "React.js - TerraGrow",
-    "description": "TerraGrow is an AI-powered app that provides crop recommendations and yield improvement strategies by analyzing environmental factors like soil nutrients, temperature, humidity, and pH. It helps farmers optimize planting decisions for higher yields.",
-    "gitUrl": "https://github.com/daytonaio/sample-crops-ml"
+    "name": " Javascript-Restaurant-Website",
+    "description": "Restaurant Website is web application build using HTML,CSS and javascript.It's provide online information to customers such as about restaurant menu card,online reservation , details about special offers and special dish."
+    "gitUrl": "https://github.com/Priyadav17/sample-javascript-restaurant.git"
   },
   {
     "name": "Sample React.js - Tutor Connect",
