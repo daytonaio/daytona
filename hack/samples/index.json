@@ -501,4 +501,10 @@
     "description": "A Simple Chatbot Using Mistral",
     "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
   }
+  {
+    "name": "Modern Restaurant ",
+    "description": "A Simple Modern Restaurant Website with AI recommendation",
+    "gitUrl": "https://github.com/SpandanM110/modern-restaurant"
+  }
+  
 ]
