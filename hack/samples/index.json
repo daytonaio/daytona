@@ -133,7 +133,7 @@
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
-  }, 
+  },
   {
     "name": "Django - CrisisMonitor",
     "description": "Crisis Monitor is a web application designed to track natural disasters and display information through an interactive dashboard. Built with HTML, CSS, JavaScript, and Django (Python), it features a responsive design for seamless usability.",
@@ -144,10 +144,10 @@
     "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
     "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
   },
-  { 
-     "name": "Rust - Actix Web Server", 
-     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.", 
-     "gitUrl": "https://github.com/daytonaio/sample-rust-actix" 
+  {
+     "name": "Rust - Actix Web Server",
+     "description": "This is a sample Rust project using Actix-Web, designed to demonstrate a simple and scalable backend web framework.",
+     "gitUrl": "https://github.com/daytonaio/sample-rust-actix"
   },
   {
     "name": "Next.js - Festigo",
@@ -203,6 +203,11 @@
     "name": "AstroJS + Sanity CMS Blog",
     "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
     "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
+  },
+  {
+    "name" : "Sample Django Wellness Buddy",
+    "description" : "Django-based web application to calculate your wellness score based on the 8 dimensions of wellness. It uses Twilio to send you an SMS about the results. The project integrates Google Gemini for calculating the score based on the answers you give",
+    "gitUrl" : "https://github.com/daytonaio/sample-django-wellness-buddy"
   },
   {
     "name": "NextJs/MindsDb - WordWave",
@@ -304,6 +309,11 @@
     "description" : "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl" : "https://github.com/daytonaio/sample-go-web-server"
   },
+    {
+    "name": "PHP/Laravel URL extractor app - URLex",
+    "description" : "A simple app to understand different parts of URL in an unique way using Laravel 11.x ",
+    "gitUrl" : "https://github.com/daytonaio/sample-laravel-url-extractor.git"
+  },
   {
     "name": "Sample React Coinbase Connect",
     "description": "A boilerplate for React + Vite + TypeScript + shadcn/ui + CoinBase Wallet SDK project.",
@@ -355,6 +365,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
   },
   {
+
+    "name": "Daytona-Pydantic-ai-App",
+    "description": "This repository contains a sample Flask web application that demonstrates integration with Daytona for managing development environments. The app also showcases AI-powered functionality using OpenAI API and a responsive interface built with Tailwind CSS.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-pydantic-ai"
+
     "name": "GraphQL API with Fine-Grained Access Control",
     "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
     "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
@@ -400,6 +415,16 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-opinion-panel"
   },
   {
+    "name": "Implementation of RAG for osho chatbot",
+    "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
+  },
+  {
+    "name": "Sample React Calculator",
+    "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
+    "gitUrl": "https://github.com/codedpool/daytonaio"
+  },
+  {
     "name": "Sample Python C.A.L.M App",
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
@@ -408,5 +433,24 @@
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
+  },
+  {
+    "name": "Sample JavaScript Restaurant",
+    "description": "A Restaurant-Website web application using HTML,CSS and Javascript.",
+    "gitUrl": "https://github.com/daytonaio/sample-javascript-restaurant"
+
+  },
+  {
+
+    "name": "Sample PHP URL Shortener",
+    "description": "A simple URL shortener web application built using PHP and MySQL.",
+    "gitUrl": "https://github.com/daytonaio/sample-php-url-shortener"
+  },
+  {
+    "name": "Chat with Llama with Daytona",
+    "description": "This repository contains a sample FastAPI application that leverages the Llama 3.2-Vision multimodal language model to generate image captions. It demonstrates seamless integration with Daytona for managing reproducible and secure development environments.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
+
   }
+
 ]
