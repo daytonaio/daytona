@@ -441,6 +441,11 @@
 
   },
   {
+    "name": "Nextjs - Aceternity UI sample",
+    "description": "GlobalSync is an frontend project made with aceternity UI",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-aceternity",
+  },
+  {
 
     "name": "Sample PHP URL Shortener",
     "description": "A simple URL shortener web application built using PHP and MySQL.",
