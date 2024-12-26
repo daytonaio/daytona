@@ -369,7 +369,8 @@
     "name": "Daytona-Pydantic-ai-App",
     "description": "This repository contains a sample Flask web application that demonstrates integration with Daytona for managing development environments. The app also showcases AI-powered functionality using OpenAI API and a responsive interface built with Tailwind CSS.",
     "gitUrl": "https://github.com/daytonaio/sample-python-pydantic-ai"
-
+  },
+  {
     "name": "GraphQL API with Fine-Grained Access Control",
     "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
     "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
@@ -416,7 +417,7 @@
   },
   {
     "name": "Implementation of RAG for osho chatbot",
-    "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
+    "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed by scraping content from alaalsayid.com. ",
     "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
   },
   {
