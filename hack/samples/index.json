@@ -380,6 +380,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-recipe-finder"
   },
   {
+    "name": "Text Formatter Tool",
+    "description": "Application that provides various text formatting options",
+    "gitUrl": "https://github.com/Mohiit70/text-formatter-tool-daytona"
+  },
+  {
     "name": "Sample React.js Ecotrack",
     "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-ecotrack"
