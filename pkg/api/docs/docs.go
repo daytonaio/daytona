@@ -2539,6 +2539,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}/{projectId}/toolbox/git/checkout": {
+            "post": {
+                "description": "Checkout branch or commit in git repository inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Checkout branch",
+                "operationId": "GitCheckoutBranch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "GitCheckoutRequest",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/GitCheckoutRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/{projectId}/toolbox/git/clone": {
             "post": {
                 "description": "Clone git repository inside workspace project",
@@ -3805,6 +3848,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "name": {
+                    "type": "string"
+                },
+                "path": {
+                    "type": "string"
+                }
+            }
+        },
+        "GitCheckoutRequest": {
+            "type": "object",
+            "required": [
+                "branch",
+                "path"
+            ],
+            "properties": {
+                "branch": {
                     "type": "string"
                 },
                 "path": {

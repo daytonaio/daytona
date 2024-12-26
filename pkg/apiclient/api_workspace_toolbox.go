@@ -1902,6 +1902,128 @@ func (a *WorkspaceToolboxAPIService) GitBranchListExecute(r ApiGitBranchListRequ
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGitCheckoutBranchRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceToolboxAPIService
+	workspaceId string
+	projectId   string
+	params      *GitCheckoutRequest
+}
+
+// GitCheckoutRequest
+func (r ApiGitCheckoutBranchRequest) Params(params GitCheckoutRequest) ApiGitCheckoutBranchRequest {
+	r.params = &params
+	return r
+}
+
+func (r ApiGitCheckoutBranchRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GitCheckoutBranchExecute(r)
+}
+
+/*
+GitCheckoutBranch Checkout branch
+
+Checkout branch or commit in git repository inside workspace project
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID or Name
+	@param projectId Project ID
+	@return ApiGitCheckoutBranchRequest
+*/
+func (a *WorkspaceToolboxAPIService) GitCheckoutBranch(ctx context.Context, workspaceId string, projectId string) ApiGitCheckoutBranchRequest {
+	return ApiGitCheckoutBranchRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+		projectId:   projectId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceToolboxAPIService) GitCheckoutBranchExecute(r ApiGitCheckoutBranchRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceToolboxAPIService.GitCheckoutBranch")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/git/checkout"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.params == nil {
+		return nil, reportError("params is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.params
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiGitCloneRepositoryRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService

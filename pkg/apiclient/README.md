@@ -155,6 +155,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**GetProjectDir**](docs/WorkspaceToolboxAPI.md#getprojectdir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
 *WorkspaceToolboxAPI* | [**GitAddFiles**](docs/WorkspaceToolboxAPI.md#gitaddfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 *WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
+*WorkspaceToolboxAPI* | [**GitCheckoutBranch**](docs/WorkspaceToolboxAPI.md#gitcheckoutbranch) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/checkout | Checkout branch
 *WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
 *WorkspaceToolboxAPI* | [**GitCommitChanges**](docs/WorkspaceToolboxAPI.md#gitcommitchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/commit | Commit changes
 *WorkspaceToolboxAPI* | [**GitCommitHistory**](docs/WorkspaceToolboxAPI.md#gitcommithistory) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/history | Get commit history
@@ -203,6 +204,7 @@ Class | Method | HTTP request | Description
  - [GitAddRequest](docs/GitAddRequest.md)
  - [GitBranch](docs/GitBranch.md)
  - [GitBranchRequest](docs/GitBranchRequest.md)
+ - [GitCheckoutRequest](docs/GitCheckoutRequest.md)
  - [GitCloneRequest](docs/GitCloneRequest.md)
  - [GitCommitInfo](docs/GitCommitInfo.md)
  - [GitCommitRequest](docs/GitCommitRequest.md)

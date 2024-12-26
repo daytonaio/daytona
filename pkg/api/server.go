@@ -182,6 +182,7 @@ func (a *ApiServer) Start() error {
 
 				gitController.POST("/add", toolbox.GitAddFiles)
 				gitController.POST("/branches", toolbox.GitCreateBranch)
+				gitController.POST("/checkout", toolbox.GitCheckoutBranch)
 				gitController.POST("/clone", toolbox.GitCloneRepository)
 				gitController.POST("/commit", toolbox.GitCommitChanges)
 				gitController.POST("/pull", toolbox.GitPushChanges)

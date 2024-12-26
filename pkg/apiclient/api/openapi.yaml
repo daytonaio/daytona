@@ -1845,6 +1845,38 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
+  /workspace/{workspaceId}/{projectId}/toolbox/git/checkout:
+    post:
+      description: Checkout branch or commit in git repository inside workspace project
+      operationId: GitCheckoutBranch
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/GitCheckoutRequest'
+        description: GitCheckoutRequest
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Checkout branch
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
   /workspace/{workspaceId}/{projectId}/toolbox/git/clone:
     post:
       description: Clone git repository inside workspace project
@@ -3013,6 +3045,19 @@ components:
           type: string
       required:
       - name
+      - path
+      type: object
+    GitCheckoutRequest:
+      example:
+        path: path
+        branch: branch
+      properties:
+        branch:
+          type: string
+        path:
+          type: string
+      required:
+      - branch
       - path
       type: object
     GitCloneRequest:

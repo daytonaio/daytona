@@ -157,3 +157,20 @@ func GitPushChanges(ctx *gin.Context) {
 func GitStatus(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }
+
+// GitCheckoutBranch			godoc
+//
+//	@Tags			workspace toolbox
+//	@Summary		Checkout branch
+//	@Description	Checkout branch or commit in git repository inside workspace project
+//	@Produce		json
+//	@Param			workspaceId	path	string				true	"Workspace ID or Name"
+//	@Param			projectId	path	string				true	"Project ID"
+//	@Param			params		body	GitCheckoutRequest	true	"GitCheckoutRequest"
+//	@Success		200
+//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/git/checkout [post]
+//
+//	@id				GitCheckoutBranch
+func GitCheckoutBranch(ctx *gin.Context) {
+	forwardRequestToToolbox(ctx)
+}
