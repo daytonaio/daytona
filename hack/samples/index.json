@@ -10,6 +10,12 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "name": "React node note share webapp",
+    "description": "It is a note taking webapp, where user's can share notes.",
+    "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
+  },
+  
+  {
     "name": "Ubuntu",
     "description": "A simple Ubuntu container with Git and other common utilities installed.",
     "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
