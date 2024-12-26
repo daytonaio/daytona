@@ -52,7 +52,7 @@
   {
       "name": "Rust Actix Server",
       "description": "Develop Rust based Web applications with Actix Server Framework. Includes required Cargo Pakcages.",
-      "gitUrl": ""
+      "gitUrl": "https://github.com/daytonaio/sample-rust-actix-server/"
   },
   {
     "name": "Kotlin / JetpackCompose - HopeChain",
