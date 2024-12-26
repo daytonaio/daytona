@@ -50,6 +50,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-julia"
   },
   {
+    "name": "Rust Actix Server",
+    "description": "Develop Rust based Web applications with Actix Server Framework. Includes required Cargo Pakcages.",
+    "gitUrl": "https://github.com/daytonaio/sample-rust-actix-server/"
+  },
+  {
     "name": "Kotlin / JetpackCompose - HopeChain",
     "description": "HopeChain is a decentralized donation tracking application built on the Solana blockchain. This project is dedicated to enhancing transparency and accountability in charitable donations, allowing donors to trace their contributions from the initial donation to their final use.",
     "gitUrl": "https://github.com/daytonaio/sample-android-blockchain"
@@ -72,6 +77,11 @@
   {
     "name": "Python - Lunku AI",
     "description": "Lunku AI is a Bot. Used in Discord for Image Generation using Pordia AI.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
+  },
+  {
+    "name": "Python - FastAPI",
+    "description": "FastAPI starter based on copier-pdm and daytona",
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
   },
   {
@@ -453,5 +463,10 @@
     "name": "Smart News Flow with Daytona",
     "description": "A simple React platform Smart News Flow which utilizes Fluvio's real-time data streaming capabilities combined with Groq's fast inference large language models (LLMs) to deliver an enhance and refine historical and realtime news content from various source(currently only supports NewsAPI) with just a single prompt.",
     "gitUrl": "https://github.com/Precious-Macaulay/Smart-News-Flow-with-Daytona"
+  },
+  {
+    "name": "Python / Convomate",
+    "description": "A Simple Chatbot Using Mistral",
+    "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
   }
 ]
