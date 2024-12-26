@@ -220,6 +220,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-django-wellness-buddy"
   },
   {
+    "name" : "Movies Collection",
+    "description" : "Django-based back-end web application for customising movies collection, that allows user to perform basic CRUD operations.",
+    "gitUrl" : "https://github.com/daytonaio/MoviesDB"
+  },
+  {
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
