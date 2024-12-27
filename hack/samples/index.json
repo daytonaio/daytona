@@ -81,9 +81,9 @@
     "gitUrl": "https://github.com/daytonaio/sample-python"
   },
   {
-    "name": "Python - AI Recipe Generator",
-    "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
-    "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
+    "name": "PathGenX-LearningPath Generator",
+    "description": "PathGenX is a learning path generator that helps users create personalized learning paths based on their interests and goals. It uses natural language processing to understand user input and generate a list of recommended courses and resources.",
+    "gitUrl": "https://github.com/Raghunani12/Daytona-PathGenX"
   },
   {
       "name": "Python - AI Recipe Generator",
