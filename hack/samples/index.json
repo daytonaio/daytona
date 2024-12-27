@@ -508,7 +508,7 @@
   },
    {
     "name": "Priority based Todo-List",
-    "description": "Users can add tasks with details, date & time, priority, mark them as completed, and delete tasks using a form as well as using copilot kit",
+    "description": "Users can add tasks based on their priority, mark tasks as complete, or delete them, either through a form or with AI assistance.",
     "gitUrl": "https://github.com/Vaishnavi-Raykar/Priority-Todo"
   }
 ]
