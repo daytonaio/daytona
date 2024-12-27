@@ -5,6 +5,11 @@
       "gitUrl": "https://github.com/daytonaio/sample-alpine"
   },
   {
+    "name": "Modern Restaurant",
+    "description": "A modern restaurant website built with Astro.js and TailwindCSS, showcasing a restaurant's menu, team, and Daytona.",
+    "gitUrl": "https://github.com/SpandanM110/modern-restaurant"
+  },
+  {
       "name": "Debian",
       "description": "Simple Debian container with Git installed.",
       "gitUrl": "https://github.com/daytonaio/sample-debian"
