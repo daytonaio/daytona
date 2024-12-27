@@ -81,9 +81,14 @@
     "gitUrl": "https://github.com/daytonaio/sample-python"
   },
   {
-    "name": "Python - AI Recipe Generator",
-    "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
-    "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
+    "name": "PathGenX-LearningPath Generator",
+    "description": "PathGenX is a learning path generator that helps users create personalized learning paths based on their interests and goals. It uses natural language processing to understand user input and generate a list of recommended courses and resources.",
+    "gitUrl": "https://github.com/Raghunani12/Daytona-PathGenX"
+  },
+  {
+      "name": "Python - AI Recipe Generator",
+      "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
+      "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
   },
   {
     "name": "Python - Lunku AI",
@@ -219,6 +224,11 @@
     "name": "Python/Flask - CodeChatter",
     "description": "CodeChatter v2 is an advanced Flask-based application that harnesses the power of the Groq API to provide intelligent coding assistance.",
     "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
+  },
+  {
+    "name" : "Movies Collection",
+    "description" : "Django-based back-end oriented web application, for customising multiple movies collections, which allows users to perform basic CRUD operations.",
+    "gitUrl" : "https://github.com/AbhishekSavant-005/Movies_DB"
   },
   {
     "name": "AstroJS + Sanity CMS Blog",
@@ -467,6 +477,11 @@
     "gitUrl": "https://github.com/NyuydineBill/Nyuydine-AI-chatbot-django"
   },
   {
+    "name": "Store",
+    "description": "This is a sample online store that lets you view fake products and add them to cart",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
+  },
+  {
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
@@ -506,7 +521,7 @@
     "description": "A Simple Chatbot Using Mistral",
     "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
   },
-   {
+  {
     "name": "Priority based Todo-List",
     "description": "Users can add tasks based on their priority, mark tasks as complete, or delete them, either through a form or with AI assistance.",
     "gitUrl": "https://github.com/Vaishnavi-Raykar/Priority-Todo"
