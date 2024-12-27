@@ -521,9 +521,9 @@
     "description": "A Simple Chatbot Using Mistral",
     "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
   },
-    {
-    "name": "Study Buddy AI",
-    "description": "Interactive Flashcard and Quiz Generator App",
-    "gitUrl": "https://github.com/sanketshinde3001/Study-Buddy"
+  {
+    "name": "Priority based Todo-List",
+    "description": "Users can add tasks based on their priority, mark tasks as complete, or delete them, either through a form or with AI assistance.",
+    "gitUrl": "https://github.com/Vaishnavi-Raykar/Priority-Todo"
   }
 ]
