@@ -467,6 +467,11 @@
     "gitUrl": "https://github.com/NyuydineBill/Nyuydine-AI-chatbot-django"
   },
   {
+    "name": "Store",
+    "description": "This is a sample online store that lets you view fake products and add them to cart",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
+  },
+  {
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
