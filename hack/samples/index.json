@@ -14,7 +14,11 @@
     "description": "It is a note taking webapp, where user's can share notes.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
   },
-  
+     {
+    "name": "AI Notes Taker",
+    "description": "NotesTaker is an AI-powered tool that converts speech to text, summarizes lecture content for easy understanding, generates a flowchart of topics covered, and allows direct copying of the text.",
+    "gitUrl": "https://github.com/Shiva-bajpai/The-Quest-23"
+  },
   {
     "name": "Ubuntu",
     "description": "A simple Ubuntu container with Git and other common utilities installed.",
