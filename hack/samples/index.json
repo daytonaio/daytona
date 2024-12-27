@@ -411,10 +411,15 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-recipe-finder"
   },
   {
-    "name": "Sample React.js Real Estate Website",
-    "description": "A React and Material-UI-based platform for listing and browsing properties, featuring property uploads with images, proof of ownership, and  responsive designs.",
-    "gitUrl": "https://github.com/sujal-98/realestate"
+    "name": "Text Formatter Tool",
+    "description": "Application that provides various text formatting options",
+    "gitUrl": "https://github.com/Mohit70/text-formatter-tool-daytona"
   },
+  {
+    "name": "Sample React.js Real Estate Website",
+    "description": "A React and Material-UI-based platform for listing and browsing properties, featuring property uploads with images, proof of ownership",
+    "gitUrl": "https://github.com/sujal-98/realestate"
+      },
   {
     "name": "Sample React.js Ecotrack",
     "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
