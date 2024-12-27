@@ -60,6 +60,11 @@ var ideCmd = &cobra.Command{
 			if err != nil {
 				log.Error(err)
 			}
+		case "codium":
+			_, err := ide_util.GetCodiumBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 		jetbrainsIdes := jetbrains.GetIdes()
