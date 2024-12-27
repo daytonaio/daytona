@@ -365,11 +365,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-pr-tracker"
   },
   {
-
     "name": "Daytona-Pydantic-ai-App",
     "description": "This repository contains a sample Flask web application that demonstrates integration with Daytona for managing development environments. The app also showcases AI-powered functionality using OpenAI API and a responsive interface built with Tailwind CSS.",
     "gitUrl": "https://github.com/daytonaio/sample-python-pydantic-ai"
-
+  },
+  {
     "name": "GraphQL API with Fine-Grained Access Control",
     "description": "This project demonstrates how to create a GraphQL API with fine-grained access control on your database using Node.js, Express.js, Apollo Server, and MongoDB. The project integrates Daytona for streamlined development environment management, making it easier to handle environment-specific configurations and secrets.",
     "gitUrl": "https://github.com/daytonaio/sample-nodejs-graphql-api"
@@ -430,6 +430,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
   },
   {
+    "name": "Store",
+    "description": "This is a sample online store that lets you view fake products and add them to cart",
+    "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
+  },
+  {
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
@@ -451,11 +456,5 @@
     "description": "This repository contains a sample FastAPI application that leverages the Llama 3.2-Vision multimodal language model to generate image captions. It demonstrates seamless integration with Daytona for managing reproducible and secure development environments.",
     "gitUrl": "https://github.com/daytonaio/sample-python-fastapi-authorizer"
 
-  },
-  {
-    "name": "Store",
-    "description": "This is a sample online store that lets you view fake products and add them to cart",
-    "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
   }
-
 ]
