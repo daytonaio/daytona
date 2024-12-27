@@ -14,6 +14,12 @@
     "description": "It is a note taking webapp, where user's can share notes.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
   },
+
+  {
+    "name": "The Quest 23",
+    "description": "A AI Powered Note Taking app, that gives notes while attending live lectures.",
+    "gitUrl": "https://github.com/Shiva-Bajpai/The-Quest-23"
+  },
   
   {
     "name": "Ubuntu",
