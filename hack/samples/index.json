@@ -60,7 +60,7 @@
     "description": "Predicts dengue prone area ",
     "gitUrl": "https://github.com/daytonaio/sample-flask-disease-prediction"
   },
-  },
+  
   {
     "name": "Julia",
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
