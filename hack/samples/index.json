@@ -510,5 +510,10 @@
     "name": "Python / Convomate",
     "description": "A Simple Chatbot Using Mistral",
     "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
+  },
+    {
+    "name": "Study Buddy AI",
+    "description": "Interactive Flashcard and Quiz Generator App",
+    "gitUrl": "https://github.com/sanketshinde3001/Study-Buddy"
   }
 ]
