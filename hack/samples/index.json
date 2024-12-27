@@ -226,6 +226,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
   },
   {
+    "name" : "Movies Collection",
+    "description" : "Django-based back-end oriented web application, for customising multiple movies collections, which allows users to perform basic CRUD operations.",
+    "gitUrl" : "https://github.com/AbhishekSavant-005/Movies_DB"
+  },
+  {
     "name": "AstroJS + Sanity CMS Blog",
     "description": "A minimalistic blog built using AstroJS and Sanity CMS for content management, showcasing how incredibly developer-friendly it is to create a blog. With added benefits of Daytona",
     "gitUrl": "https://github.com/daytonaio/sample-astro-blog"
