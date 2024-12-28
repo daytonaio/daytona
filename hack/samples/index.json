@@ -577,5 +577,10 @@
     "name": "Dreamify - Manifestation Journal",
     "description": "A journaling app with AI insights, habit tracking, and a vision board used react , flask and gen ai",
     "gitUrl": "https://github.com/sneha-4-22/Dreamify"
+  },
+  {
+    "name" : "Discord Bot with Image Generation",
+    "description": "A Python bot for Discord that generates images using Prodia's API.",
+    "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
   }
 ]
