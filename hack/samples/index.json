@@ -51,6 +51,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-java"
   },
   {
+    "name": "IncentiX",
+    "description": "Decentralized platform designed to reward contributors for their work on open-source projects.",
+    "gitUrl": "https://github.com/ArshTiwari2004/IncentiX"
+  },
+  {
     "name": "Julia (Genie)",
     "description": "Develop Julia based applications with Genie framework. Includes needed tools, extensions, framework and dependencies.",
     "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
