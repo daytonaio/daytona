@@ -482,6 +482,14 @@
     "description": "This is a Simple React project which helps to collect opinion and shows average opinon of the panel.",
     "gitUrl": "https://github.com/daytonaio/sample-react-opinion-panel"
   },
+  
+  {
+  "name": "Dreamify - Manifestation Journal",
+  "description": "A cozy journaling app with AI insights, habit tracking, and a vision board uses react llms and flask.",
+  "gitUrl": "ithub.com/sneha-4-22/Dreamify"
+  },
+
+
   {
     "name": "Implementation of RAG for osho chatbot",
     "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
