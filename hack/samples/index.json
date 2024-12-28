@@ -487,6 +487,11 @@
     "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
     "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
   },
+    {
+    "name": "HackHound",
+    "description": "HackHound makes web security testing visual and simple. Built with React and Python, it automatically hunts for vulnerabilities while showing real-time results. Features include directory fuzzing, subdomain discovery, and API testing - all in one modern interface.",
+    "gitUrl": "https://github.com/aayushman-singh/HackHound"
+  },
   {
     "name": "Sample React Calculator",
     "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
