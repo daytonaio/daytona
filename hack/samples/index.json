@@ -36,6 +36,7 @@
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
   {
+
     "name": "AutoGenius",
     "description": "An intelligent platform that uses advanced algorithms and AI to predict pre-owned car prices and provide personalized trading advice.",
     "gitUrl": "https://github.com/rajesh-adk-137/auto_genius_daytona"
@@ -59,6 +60,11 @@
     "name": "Java",
     "description": "Develop Java applications. Includes the JDK and Java extensions.",
     "gitUrl": "https://github.com/daytonaio/sample-java"
+  },
+  {
+    "name": "IncentiX",
+    "description": "Decentralized platform designed to reward contributors for their work on open-source projects.",
+    "gitUrl": "https://github.com/ArshTiwari2004/IncentiX"
   },
   {
     "name": "Julia (Genie)",
