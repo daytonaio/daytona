@@ -116,6 +116,12 @@
     "gitUrl": "https://github.com/daytonaio/sample-typescript-node"
   },
   {
+    "name": "React and Node.js Sample",
+    "description": "A sample project showcasing React and Node.js integration with Daytona.",
+    "repository": "https://github.com/Jitankasarkar/Sample-Template"
+  }
+
+  {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
     "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
