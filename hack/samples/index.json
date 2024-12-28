@@ -30,6 +30,8 @@
     "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
+  { "name": "AutoGenius", 
+  "description": "An intelligent platform that uses advanced algorithms and AI to predict pre-owned car prices and provide personalized trading advice.", "gitUrl": "https://github.com/rajesh-adk-137/auto_genius_daytona" },
   {
     "name": "Sample Krishi Mitra",
     "description": "It enables farmers to get real time weather forecasting and monitor crops and educates them to adopt sustainable farming practices.",
