@@ -12,9 +12,8 @@
   {
     "name": "Cricket Quira",
     "description": "I developed a comprehensive and interactive website for XYZ Organization, which focuses on conducting cricket tournaments in various formats. This project was built using Vite, Tailwind CSS, React, and Lucide React, creating an engaging user experience with a variety of features tailored to cricket enthusiasts.",
-    "url": "https://github.com/Lavavarshney/cricket-quira.git"
-},
-
+    "gitUrl": "https://github.com/Lavavarshney/cricket-quira.git"
+  },
   {
     "name": "React node note share webapp",
     "description": "It is a note taking webapp, where user's can share notes.",
