@@ -76,6 +76,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-php"
   },
   {
+    "name": "EchoBrain: Intelligent Voice-Controlled Virtual Assistant",
+    "description": "An AI virtual assistant capable of voice and gesture-based desktop automation.",
+    "gitUrl": "https://github.com/BigBang001/EchoBrain-Daytona"
+  },  
+  {
     "name": "Python",
     "description": "Develop Python applications.",
     "gitUrl": "https://github.com/daytonaio/sample-python"
