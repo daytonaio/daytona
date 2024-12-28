@@ -10,6 +10,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "name": "Cricket Quira",
+    "description": "I developed a comprehensive and interactive website for XYZ Organization, which focuses on conducting cricket tournaments in various formats. This project was built using Vite, Tailwind CSS, React, and Lucide React, creating an engaging user experience with a variety of features tailored to cricket enthusiasts.",
+    "gitUrl": "https://github.com/Lavavarshney/cricket-quira.git"
+  },
+  {
     "name": "React node note share webapp",
     "description": "It is a note taking webapp, where user's can share notes.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
