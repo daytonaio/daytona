@@ -556,5 +556,10 @@
     "name": "Priority based Todo-List",
     "description": "Users can add tasks based on their priority, mark tasks as complete, or delete them, either through a form or with AI assistance.",
     "gitUrl": "https://github.com/Vaishnavi-Raykar/Priority-Todo"
+  },
+  {
+    "name": "GitWrap",
+    "description": "GitWrap analyzes your GitHub contributions, showcasing a personalized summary of your coding journey throughout the year. Reflect, celebrate, and share your open-source achievements!.",
+    "gitUrl": "https://github.com/singodiyashubham87/GitWrap"
   }
 ]
