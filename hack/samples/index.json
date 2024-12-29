@@ -118,8 +118,13 @@
   {
     "name": "React and Node.js Sample",
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
-    "repository": "https://github.com/Jitankasarkar/Sample-Template"
-  }
+<<<<<<< HEAD
+    "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
+  },
+=======
+    "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
+},
+>>>>>>> origin/main
 
   {
     "name": "Next.js - OpenSourceSmith",
