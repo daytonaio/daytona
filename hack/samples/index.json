@@ -121,6 +121,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
   },
   {
+    "name": "Majestic Hotels - Hotel Booking Site",
+    "description": "This Next.js application provides a comprehensive hotel booking platform with secure user authentication and reservation management.",
+    "gitUrl": "https://github.com/VIBHAS3077/sample-hotel-booking"
+  },
+  {
     "name": "Python - FastAPI",
     "description": "FastAPI starter based on copier-pdm and daytona",
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
