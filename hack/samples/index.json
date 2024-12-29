@@ -157,6 +157,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
   },
   {
+    "name": "Legal101",
+    "description": "A platform for Legal workers to be up-to-date with the laws and share case studies.",
+    "gitUrl": "https://github.com/ayushmanlakshkar/Legal101"
+  },
+  {
     "name": "Next.js - MindmapCopilot",
     "description": "Mindmap Copilot, a tool that can simplify the mindmap creation with the help of a copilot. Built using NextJs, TypeCcript, CopilotKit, ShadCN, Tailwind.",
     "gitUrl": "https://github.com/daytonaio/sample-mindmap-copilot"
