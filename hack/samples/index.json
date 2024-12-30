@@ -676,5 +676,10 @@
     "name": "An Web site Builder with prompt",
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
+  },
+  {
+    "Name":"A market place for local artist",
+    "description":"A full stack Django project that helps local artist to showcase there work"
+    "giturl":"https://github.com/Omlakshkar07/artist_marketplace"
   }
 ]
