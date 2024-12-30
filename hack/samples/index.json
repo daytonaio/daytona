@@ -61,6 +61,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-go"
   },
   {
+    "name": "Beego Task Management App",
+    "description" : "A task management application demonstrating the implementation of a web application using the Beego framework, featuring REST API endpoints, Docker containerization, and seamless integration with Daytona development environments.",
+    "gitUrl":"https://github.com/SxxAq/beego-sample"
+  },
+  {
     "name": "Java",
     "description": "Develop Java applications. Includes the JDK and Java extensions.",
     "gitUrl": "https://github.com/daytonaio/sample-java"
