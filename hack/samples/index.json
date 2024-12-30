@@ -428,6 +428,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-astro-tailwind-restaurant"
   },
   {
+    "name": "SNAKE-CHAIN4",
+    "description": "snake game built on blockchain",
+    "gitUrl": "https://github.com/Aanwiie/SNAKE-CHAIN"
+  },
+  {
     "name": "Sample Go Web Server",
     "description": "A simple Go web server using Gorilla Mux and Logrus",
     "gitUrl": "https://github.com/daytonaio/sample-go-web-server"
