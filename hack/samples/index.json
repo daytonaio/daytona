@@ -517,7 +517,6 @@
     "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
     "gitUrl": "https://github.com/codedpool/daytonaio"
   },
-  {}
   {
     "name": "Sample React AI Image Generator",
     "description": "The AI Image Generator creates realistic images from descriptive prompts, ensuring high-quality outputs with efficiency using the black-forest-labs/FLUX.1-dev model.",
@@ -528,11 +527,15 @@
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
   },
-
   {
     "name": "HealthBot AI",
     "description": "HealthBot AI is an intelligent AI chatbot designed to provide timely text responses tailored for health practitioners.",
     "gitUrl": "https://github.com/NyuydineBill/AI-Chatbot"
+  },
+  {
+    "name": "Python + llmware + tkinter/AI-ChatBot",
+    "description": "A powerful chatbot that can answer all your questions built using LLMWARE integrated with the model 'phi-3-gguf'.",
+    "gitUrl": "https://github.com/rustam27332/ai-chatbot-daytona"
   },
   {
     "name": "Store",
