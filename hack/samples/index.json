@@ -15,6 +15,11 @@
     "gitUrl": "https://github.com/akshitagupta15june/FemOvaAI-daytona"
   },
   {
+    "name": "python-nvidia-nemotron",
+    "description": "A chatbot to explain everything about legal terms.",
+    "gitUrl": "https://github.com/Ayushv-01/Nvidia_nemotron_bot"
+  },
+  {
     "name": "Debian",
     "description": "Simple Debian container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-debian"
