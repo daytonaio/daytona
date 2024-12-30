@@ -1,0 +1,14 @@
+name: daytona agent
+synopsis: Start the agent process
+usage: daytona agent [flags]
+options:
+    - name: host
+      default_value: "false"
+      usage: Run the agent in host mode
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Use the Daytona CLI to manage your workspace
+    - daytona agent logs - Output Daytona Agent logs

@@ -1,0 +1,17 @@
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: Daytona Platforms Inc.
+    content: |
+      Copyright 2024 Daytona Platforms Inc.
+      SPDX-License-Identifier: Apache-2.0
+  paths:
+    - "**/*.go"
+    - "**/*.sh"
+
+  paths-ignore:
+    - "**/apiclient/**"
+    - "**/pkg/api/docs/docs.go"
+    - ".devcontainer/postcreate.sh"
+
+  comment: on-failure

@@ -1,0 +1,13 @@
+name: daytona env list
+synopsis: List profile environment variables
+usage: daytona env list [flags]
+options:
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona env - Manage profile environment variables that are added to all workspaces

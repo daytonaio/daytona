@@ -1,0 +1,13 @@
+{
+	"name": "Daytona",
+	"image": "ghcr.io/daytonaio/go-devcontainer:latest",
+	"containerEnv": {
+		"LOG_LEVEL": "debug",
+		"DAYTONA_SERVER_MODE": "development",
+		"CGO_ENABLED": "0",
+		"DAYTONA_WS_ID": ""
+	},
+	"postCreateCommand": ".devcontainer/postcreate.sh",
+	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
+	"remoteUser": "daytona"
+}

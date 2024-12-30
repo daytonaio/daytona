@@ -1,0 +1,22 @@
+name: daytona delete
+synopsis: Delete a workspace
+usage: daytona delete [WORKSPACE] [flags]
+options:
+    - name: all
+      shorthand: a
+      default_value: "false"
+      usage: Delete all workspaces
+    - name: force
+      shorthand: f
+      default_value: "false"
+      usage: Delete a workspace by force
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Confirm deletion without prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager

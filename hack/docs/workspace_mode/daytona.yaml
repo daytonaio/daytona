@@ -1,0 +1,25 @@
+name: daytona
+synopsis: Use the Daytona CLI to manage your workspace
+description: Use the Daytona CLI to manage your workspace
+usage: daytona [flags]
+options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+    - name: version
+      shorthand: v
+      default_value: "false"
+      usage: Display the version of Daytona
+see_also:
+    - daytona agent - Start the agent process
+    - daytona autocomplete - Adds a completion script for your shell environment
+    - daytona docs - Opens the Daytona documentation in your default browser.
+    - daytona expose - Expose a local port over stdout - Used by the Daytona CLI to make direct connections to the project
+    - daytona forward - Forward a port publicly via an URL
+    - daytona info - Show project info
+    - daytona list - List workspaces
+    - daytona logs - View logs for a workspace/project
+    - daytona restart - Restart the project
+    - daytona start - Start the project
+    - daytona stop - Stop the project
+    - daytona version - Print the version number

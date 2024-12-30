@@ -1,0 +1,125 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
+package workspaces
+
+import (
+	"context"
+	"errors"
+	"io"
+
+	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/provider"
+	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/server/builds"
+	"github.com/daytonaio/daytona/pkg/server/containerregistries"
+	"github.com/daytonaio/daytona/pkg/server/gitproviders"
+	"github.com/daytonaio/daytona/pkg/server/projectconfig"
+	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+	"github.com/daytonaio/daytona/pkg/workspace"
+	"github.com/daytonaio/daytona/pkg/workspace/project"
+)
+
+type IWorkspaceService interface {
+	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error)
+	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
+	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
+	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
+	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)
+	RemoveWorkspace(ctx context.Context, workspaceId string) error
+	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
+	SetProjectState(workspaceId string, projectName string, state *project.ProjectState) (*workspace.Workspace, error)
+	StartProject(ctx context.Context, workspaceId string, projectName string) error
+	StartWorkspace(ctx context.Context, workspaceId string) error
+	StopProject(ctx context.Context, workspaceId string, projectName string) error
+	StopWorkspace(ctx context.Context, workspaceId string) error
+}
+
+type targetStore interface {
+	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
+}
+
+type WorkspaceServiceConfig struct {
+	WorkspaceStore           workspace.Store
+	TargetStore              targetStore
+	ContainerRegistryService containerregistries.IContainerRegistryService
+	BuildService             builds.IBuildService
+	ProjectConfigService     projectconfig.IProjectConfigService
+	ServerApiUrl             string
+	ServerUrl                string
+	ServerVersion            string
+	Provisioner              provisioner.IProvisioner
+	DefaultProjectImage      string
+	DefaultProjectUser       string
+	BuilderImage             string
+	ApiKeyService            apikeys.IApiKeyService
+	LoggerFactory            logs.LoggerFactory
+	GitProviderService       gitproviders.IGitProviderService
+	TelemetryService         telemetry.TelemetryService
+}
+
+func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
+	return &WorkspaceService{
+		workspaceStore:           config.WorkspaceStore,
+		targetStore:              config.TargetStore,
+		containerRegistryService: config.ContainerRegistryService,
+		buildService:             config.BuildService,
+		projectConfigService:     config.ProjectConfigService,
+		serverApiUrl:             config.ServerApiUrl,
+		serverUrl:                config.ServerUrl,
+		serverVersion:            config.ServerVersion,
+		defaultProjectImage:      config.DefaultProjectImage,
+		defaultProjectUser:       config.DefaultProjectUser,
+		provisioner:              config.Provisioner,
+		loggerFactory:            config.LoggerFactory,
+		apiKeyService:            config.ApiKeyService,
+		gitProviderService:       config.GitProviderService,
+		telemetryService:         config.TelemetryService,
+		builderImage:             config.BuilderImage,
+	}
+}
+
+type WorkspaceService struct {
+	workspaceStore           workspace.Store
+	targetStore              targetStore
+	containerRegistryService containerregistries.IContainerRegistryService
+	buildService             builds.IBuildService
+	projectConfigService     projectconfig.IProjectConfigService
+	provisioner              provisioner.IProvisioner
+	apiKeyService            apikeys.IApiKeyService
+	serverApiUrl             string
+	serverUrl                string
+	serverVersion            string
+	defaultProjectImage      string
+	defaultProjectUser       string
+	builderImage             string
+	loggerFactory            logs.LoggerFactory
+	gitProviderService       gitproviders.IGitProviderService
+	telemetryService         telemetry.TelemetryService
+}
+
+func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *project.ProjectState) (*workspace.Workspace, error) {
+	ws, err := s.workspaceStore.Find(workspaceId)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, project := range ws.Projects {
+		if project.Name == projectName {
+			project.State = state
+			return ws, s.workspaceStore.Save(ws)
+		}
+	}
+
+	return nil, errors.New("project not found")
+}
+
+func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) GetProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
+	return s.loggerFactory.CreateProjectLogReader(workspaceId, projectName)
+}

@@ -1,0 +1,9 @@
+name: daytona env set
+synopsis: Set profile environment variables
+usage: daytona env set [KEY=VALUE]... [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona env - Manage profile environment variables that are added to all workspaces
