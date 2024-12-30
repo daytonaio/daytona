@@ -1,4 +1,5 @@
-#!/bin/bash
+# Copyright 2024 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
 
 RELEASE_TAG="1.7.7"
 RELEASE_ORG="tsl0922"

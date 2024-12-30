@@ -20,7 +20,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const startCommand = "$TTYD_ROOT/bin/ttyd --port 63777 --writable --cwd"
+const startCommand = "$HOME/ttyd/bin/ttyd --port 63777 --writable --cwd"
 
 func OpenBrowserTerminal(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string) error {
 	// Make sure SSH config exists
@@ -33,7 +33,7 @@ func OpenBrowserTerminal(activeProfile config.Profile, workspaceId string, proje
 	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
 	// Download and start ttyd
-	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://download.daytona.io/daytona/get-ttyd.sh | sh")
+	installServerCommand := exec.Command("ssh", projectHostname, "curl -fsSL https://raw.githubusercontent.com/hunnywar/daytona/f9ec6d34bf5c8b4b405cb4979483b066d922cf55/hack/get-ttyd.sh | sh")
 	installServerCommand.Stdout = io.Writer(&util.DebugLogWriter{})
 	installServerCommand.Stderr = io.Writer(&util.DebugLogWriter{})
 
