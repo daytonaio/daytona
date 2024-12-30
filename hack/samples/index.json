@@ -17,9 +17,7 @@
   {
     "name": "Voting Application",
     "description": "A secure and simple voting system where users can cast votes, and administrators can manage candidates and view voting results.",
-    "url": "https://github.com/avnisinngh/Voting_Application"
-  },
-  
+    "url": "https://github.com/avnisinngh/Voting_Application"  },
   {
     "name": "Ubuntu",
     "description": "A simple Ubuntu container with Git and other common utilities installed.",
