@@ -632,5 +632,11 @@
     "name" : "Discord Bot with Image Generation",
     "description": "A Python bot for Discord that generates images using Prodia's API.",
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
+  },
+  {
+    "name": "Joke Generator",
+    "description": "A website which gives out funny jokes to catch a few laughs!",
+    "gitUrl": "https://github.com/SwarnabhR/joke"
   }
+
 ]
