@@ -50,6 +50,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-c"
   },
   {
+    "name": "Spotify-Sentiment-Analysis",
+    "description": "This project is a part of Daytona Quest which showcases Spotify Review Analysis (NLP)",
+    "gitUrl": "https://github.com/abhirajadhikary06/Spotify-Sentiment-Analysis"
+  },
+  {
     "name": "C++",
     "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
