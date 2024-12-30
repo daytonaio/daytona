@@ -627,5 +627,10 @@
     "name" : "Discord Bot with Image Generation",
     "description": "A Python bot for Discord that generates images using Prodia's API.",
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
+  },
+  {
+    "name":"Web app that can create another app using prompts",
+    "description":"A web app that can create another app using prompts",
+    "gitUrl":"https://github.com/saurabh007007/Dev-Vashudev"
   }
 ]
