@@ -10,6 +10,11 @@
     "gitUrl": "https://github.com/SpandanM110/modern-restaurant"
   },
   {
+    "name": "FemOvaAI",
+    "description": "Empowering Women Through Precision: Harnessing AI to Illuminate the Path to PCOS Awareness and Care.",
+    "gitUrl": "https://github.com/akshitagupta15june/FemOvaAI-daytona"
+  },
+  {
     "name": "Debian",
     "description": "Simple Debian container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-debian"
