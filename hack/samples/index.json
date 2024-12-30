@@ -233,6 +233,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-text-AI"
   },
   {
+    "name": "React.js - Code Calendar",
+    "description": "CodeCalendar is a platform designed to help coders keep track of upcoming coding contests. It displays contest times, event dates, and locations where contests are held.",
+    "gitUrl": "https://github.com/Pawankalyan2023/CODECALENDAR"
+  },
+  {
     "name": "Next.js - Video Generation AI",
     "description": "Video Generation AI is designed as a SaaS platform, allowing users to easily create engaging video content for various purposes such as marketing, education, or social media. It uses AI to generate video content based on user inputs.",
     "gitUrl": "https://github.com/daytonaio/sample-video-generator"
