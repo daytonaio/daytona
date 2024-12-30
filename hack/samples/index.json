@@ -677,4 +677,10 @@
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
   }
+  {
+    
+    "name": "An PassWord Generator",
+    "description": "A simple and effective python project that generates a strong and random passwords which is difficult to cracks.",
+    "gitUrl": "https://github.com/Adibakhan14/CODSOFT/blob/main/PasswordGenerator.py"
+  }
 ]
