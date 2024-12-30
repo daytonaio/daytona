@@ -25,6 +25,11 @@
     "gitUrl": "https://github.com/Prince94201/target"
   },
   {
+    "name": "Artiq",
+    "description": "Artiq is a maket place for local artist and for NFts.",
+    "gitUrl":"https://github.com/Omlakshkar07/Artiq"
+  },
+  {
     "name": "Cricket Quira",
     "description": "I developed a comprehensive and interactive website for XYZ Organization, which focuses on conducting cricket tournaments in various formats. This project was built using Vite, Tailwind CSS, React, and Lucide React, creating an engaging user experience with a variety of features tailored to cricket enthusiasts.",
     "gitUrl": "https://github.com/Lavavarshney/cricket-quira.git"
