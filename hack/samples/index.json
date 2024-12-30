@@ -50,11 +50,10 @@
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
   {
-
     "name": "AutoGenius",
     "description": "An intelligent platform that uses advanced algorithms and AI to predict pre-owned car prices and provide personalized trading advice.",
     "gitUrl": "https://github.com/rajesh-adk-137/auto_genius_daytona"
-  },    
+  },
   {
     "name": "Sample Krishi Mitra",
     "description": "It enables farmers to get real time weather forecasting and monitor crops and educates them to adopt sustainable farming practices.",
@@ -72,8 +71,8 @@
   },
   {
     "name": "Beego Task Management App",
-    "description" : "A task management application demonstrating the implementation of a web application using the Beego framework, featuring REST API endpoints, Docker containerization, and seamless integration with Daytona development environments.",
-    "gitUrl":"https://github.com/SxxAq/beego-sample"
+    "description": "A task management application demonstrating the implementation of a web application using the Beego framework, featuring REST API endpoints, Docker containerization, and seamless integration with Daytona development environments.",
+    "gitUrl": "https://github.com/SxxAq/beego-sample"
   },
   {
     "name": "Java",
@@ -115,7 +114,7 @@
     "name": "EchoBrain: Intelligent Voice-Controlled Virtual Assistant",
     "description": "An AI virtual assistant capable of voice and gesture-based desktop automation.",
     "gitUrl": "https://github.com/BigBang001/EchoBrain-Daytona"
-  },  
+  },
   {
     "name": "Python",
     "description": "Develop Python applications.",
@@ -127,9 +126,9 @@
     "gitUrl": "https://github.com/Raghunani12/Daytona-PathGenX"
   },
   {
-      "name": "Python - AI Recipe Generator",
-      "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
-      "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
+    "name": "Python - AI Recipe Generator",
+    "description": "The application allows users to upload image of ingredients, analyzes the image, and provides recipe suggestion.",
+    "gitUrl": "https://github.com/daytonaio/sample-python-recipe-generator"
   },
   {
     "name": "Python - Lunku AI",
@@ -170,14 +169,14 @@
     "name": "React and Node.js Sample",
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
     "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
-},
+  },
 
   {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
     "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
   },
- 
+
   {
     "name": "Legal101",
     "description": "A platform for Legal workers to be up-to-date with the laws and share case studies.",
@@ -294,9 +293,9 @@
     "gitUrl": "https://github.com/daytonaio/sample-flask-groq-code-assistant"
   },
   {
-    "name" : "Movies Collection",
-    "description" : "Django-based back-end oriented web application, for customising multiple movies collections, which allows users to perform basic CRUD operations.",
-    "gitUrl" : "https://github.com/AbhishekSavant-005/Movies_DB"
+    "name": "Movies Collection",
+    "description": "Django-based back-end oriented web application, for customising multiple movies collections, which allows users to perform basic CRUD operations.",
+    "gitUrl": "https://github.com/AbhishekSavant-005/Movies_DB"
   },
   {
     "name": "AstroJS + Sanity CMS Blog",
@@ -352,7 +351,7 @@
     "name": "orbit-wallet4",
     "description": "ORBIT Wallet is a retro-themed Ethereum wallet application that offers a gamified user experience. Users can connect their wallet, make transactions, track achievements, and level up based on their activity.",
     "gitUrl": "https://github.com/ayaanoski/orbit-wallet"
-  }, 
+  },
   {
     "name": "Github User Profile Analyzer",
     "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
@@ -492,7 +491,7 @@
     "name": "Sample React.js Real Estate Website",
     "description": "A React and Material-UI-based platform for listing and browsing properties, featuring property uploads with images, proof of ownership",
     "gitUrl": "https://github.com/sujal-98/realestate"
-      },
+  },
   {
     "name": "Sample React.js Ecotrack",
     "description": "A LLM powered web app that calculates the carbon footprint of a family and gives advisory to reduce the carbon footprint.",
@@ -533,7 +532,7 @@
     "description": "This sample showcases the core implementation of the Osho Chatbot, leveraging Retrieval-Augmented Generation (RAG) for generating responses grounded in Osho's teachings. The knowledge base is constructed from content scraped from alaalsayid.com.",
     "gitUrl": "https://github.com/daytonaio/sample-python-rag-chatbot"
   },
-    {
+  {
     "name": "HackHound",
     "description": "HackHound makes web security testing visual and simple. Built with React and Python, it automatically hunts for vulnerabilities while showing real-time results. Features include directory fuzzing, subdomain discovery, and API testing - all in one modern interface.",
     "gitUrl": "https://github.com/aayushman-singh/HackHound"
@@ -546,7 +545,7 @@
   {
     "name": "Sample React AI Image Generator",
     "description": "The AI Image Generator creates realistic images from descriptive prompts, ensuring high-quality outputs with efficiency using the black-forest-labs/FLUX.1-dev model.",
-    "gitUrl":"https://github.com/daytonaio/sample-react-ai-image-generator"
+    "gitUrl": "https://github.com/daytonaio/sample-react-ai-image-generator"
   },
   {
     "name": "Sample Python C.A.L.M App",
@@ -608,7 +607,7 @@
     "description": "A Simple Chatbot Using Mistral",
     "gitUrl": "https://github.com/daytonaio/sample-python-mistral-chatbot"
   },
-    {
+  {
     "name": "Study Buddy AI",
     "description": "Interactive Flashcard and Quiz Generator App",
     "gitUrl": "https://github.com/sanketshinde3001/Study-Buddy"
@@ -629,8 +628,13 @@
     "gitUrl": "https://github.com/sneha-4-22/Dreamify"
   },
   {
-    "name" : "Discord Bot with Image Generation",
+    "name": "Discord Bot with Image Generation",
     "description": "A Python bot for Discord that generates images using Prodia's API.",
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
+  },
+  {
+    "name": "An Web site Builder with prompt",
+    "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
+    "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
   }
 ]
