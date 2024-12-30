@@ -181,6 +181,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
+	case "code-insiders":
+		return ide.OpenVSCodeInsiders(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "ssh":
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgKey, nil)
 	case "browser":
