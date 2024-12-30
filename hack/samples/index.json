@@ -54,6 +54,11 @@
     "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
+  { 
+    "name": "MailSender", 
+    "description": "Professional email-sending app using Python and Gradio. Features include custom emails, scheduling, status tracking, and analytics. Backend uses MongoDB and Groq's API for scalable, real-time updates.", 
+    "gitUrl": "https://github.com/Ronit-afk55/Sample_MailSender" 
+  },
   {
     "name": "AutoGenius",
     "description": "An intelligent platform that uses advanced algorithms and AI to predict pre-owned car prices and provide personalized trading advice.",
