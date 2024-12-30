@@ -608,6 +608,11 @@
     "gitUrl": "https://github.com/Bhanu-partap-13/Daytona-Sample-HTML-CSS-Javascript"
   },
   {
+    "name": "ToDo Sample Daytona",
+    "description": "A to-do website with task scheduling, progress tracking via graphs, and a dark mode feature for an enhanced user experience and efficient task management.",
+    "gitUrl": "https://github.com/SagarSharma101/To-do-Daytona"
+  },
+  {
     "name": "Sample PHP URL Shortener",
     "description": "A simple URL shortener web application built using PHP and MySQL.",
     "gitUrl": "https://github.com/daytonaio/sample-php-url-shortener"
