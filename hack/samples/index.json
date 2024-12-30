@@ -228,6 +228,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-event-planner"
   },
   {
+    "name": "GitStack",
+    "description": "A real-time GitHub repository analytics dashboard built with Go and React",
+    "gitUrl": "https://github.com/Mohiit70/GitStack"
+  },
+  {
     "name": "Next.js - Cooperword",
     "description": "The COOPER WORD is a web-based tool designed to help users create, manage, and view events in a calendar format. Built using React, Next.js, and TypeScript, this application provides a user-friendly interface with intuitive functionality for effective event management.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-ai-event-manager.git"
