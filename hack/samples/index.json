@@ -263,6 +263,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-python-ai-code-review"
   },
   {
+    "name": "Joke Generator",
+    "description": "A website which gives out funny jokes to catch a few laughs!",
+    "gitUrl": "https://github.com/SwarnabhR/joke"
+  },
+  {
     "name": "Python/Streamlit - LinearPredictor",
     "description": "LinearPredictor is an interactive web application designed to help users build and explore simple linear regression models.",
     "gitUrl": "https://github.com/daytonaio/sample-python-linear-predictor"
