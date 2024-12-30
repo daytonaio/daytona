@@ -15,6 +15,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "name": "target",
+    "description": "It is a sample institute website featuring dynamic content such as courses, achievers, and a director's column.",
+    "gitUrl": "https://github.com/Prince94201/target"
+  },
+  {
     "name": "Cricket Quira",
     "description": "I developed a comprehensive and interactive website for XYZ Organization, which focuses on conducting cricket tournaments in various formats. This project was built using Vite, Tailwind CSS, React, and Lucide React, creating an engaging user experience with a variety of features tailored to cricket enthusiasts.",
     "gitUrl": "https://github.com/Lavavarshney/cricket-quira.git"
