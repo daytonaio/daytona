@@ -105,11 +105,6 @@
     "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
   },
   {
-    "name": "Home Hacks",
-    "description": "Simplifying Home Problems",
-    "gitUrl": "https://github.com/YowaiMo-Koustav/Home_Hacks"
-  },
-  {
     "name": "Julia",
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
@@ -144,6 +139,11 @@
     "name": "PathGenX-LearningPath Generator",
     "description": "PathGenX is a learning path generator that helps users create personalized learning paths based on their interests and goals. It uses natural language processing to understand user input and generate a list of recommended courses and resources.",
     "gitUrl": "https://github.com/Raghunani12/Daytona-PathGenX"
+  },
+
+   {"name": "Home Hacks",
+    "description": "Simplifying Home Problems",
+    "gitUrl": "https://github.com/YowaiMo-Koustav/Home_Hacks"
   },
   {
     "name": "Python - AI Recipe Generator",
