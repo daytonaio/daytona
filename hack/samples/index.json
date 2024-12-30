@@ -585,11 +585,6 @@
 
   {
     "name": "HealthBot AI",
-    "description": "HealthBot AI is an intelligent AI chatbot designed to provide timely text responses tailored for health practitioners.",
-    "gitUrl": "https://github.com/NyuydineBill/AI-Chatbot"
-  },
-  {
-    "name": "HealthBot AI",
     "description": "HealthBot AI is an intelligent chatbot designed to provide timely text responses tailored for health practitioners.",
     "gitUrl": "https://github.com/NyuydineBill/Nyuydine-AI-chatbot-django"
   },
