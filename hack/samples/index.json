@@ -333,6 +333,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
   },
   {
+    "name": "gemini-chat-daytona",
+    "description": "A modern, responsive chat application powered by Google's Gemini",
+    "gitUrl": "https://github.com/Naveenkwr/gemini-chat-daytona"
+  },
+  {
     "name": "React.js - effective-scrapper",
     "description": "Effective Scrapper is a web application designed to simplify the job search process for individuals interested in roles within the technology industry.",
     "gitUrl": "https://github.com/daytonaio/sample-js-job-scaper"
