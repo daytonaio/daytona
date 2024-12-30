@@ -358,6 +358,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-book-summary"
   },
   {
+    "name": "Visually Acoustic Navigator",
+    "description": "A windows navigator for the visually impared, aided by Google's text-to-speech engine.",
+    "gitUrl": "https://github.com/sushanthk-262/Visually_Acoustic_Navigator"
+  },
+  {
     "name": "Next.js - Story Generator",
     "description": "The Story Generator Platform, using Next.js and Groq API, lets children create personalized stories, fostering creativity and storytelling skills.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-story-generator"
