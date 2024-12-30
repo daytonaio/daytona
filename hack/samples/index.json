@@ -213,6 +213,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-django-crisis-monitor"
   },
   {
+    "name": "orbit-wallet4",
+    "description": "ORBIT Wallet is a retro-themed Ethereum wallet application that offers a gamified user experience. Users can connect their wallet, make transactions, track achievements, and level up based on their activity.",
+    "gitUrl": "https://github.com/ayaanoski/orbit-wallet"
+  }, 
+  {
     "name": "Flask - AI Playlist Generator",
     "description": "A Python-based application that dynamically generates playlists based on the user's emotional state and inputs, using APIs and machine learning techniques.",
     "gitUrl": "https://github.com/daytonaio/sample-python-ai-playlist-generator"
@@ -517,7 +522,6 @@
     "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
     "gitUrl": "https://github.com/codedpool/daytonaio"
   },
-  {}
   {
     "name": "Sample React AI Image Generator",
     "description": "The AI Image Generator creates realistic images from descriptive prompts, ensuring high-quality outputs with efficiency using the black-forest-labs/FLUX.1-dev model.",
