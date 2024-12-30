@@ -75,6 +75,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-go"
   },
   {
+    "name": "Sundown Studios",
+    "description": "Develop a homepage of a popular website using html,css,js, gsap, animations,etc .",
+    "gitUrl": "https://github.com/Ashulovesmaa2003/sundown-studios"
+  },
+  {
     "name": "Beego Task Management App",
     "description": "A task management application demonstrating the implementation of a web application using the Beego framework, featuring REST API endpoints, Docker containerization, and seamless integration with Daytona development environments.",
     "gitUrl": "https://github.com/SxxAq/beego-sample"
