@@ -50,9 +50,14 @@
     "gitUrl": "https://github.com/daytonaio/sample-c"
   },
   {
-    "name": "C++",
-    "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
-    "gitUrl": "https://github.com/daytonaio/sample-cpp"
+    "name": "C",
+    "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
+    "gitUrl": "https://github.com/daytonaio/sample-c"
+  },
+  {
+    "name": "React.js - CryptoTracker",
+    "description": "Get the latest crypto currency info at your fingertips.",
+    "gitUrl": "https://github.com/Suyash878/Sample-Crypto"
   },
   { 
     "name": "MailSender", 
