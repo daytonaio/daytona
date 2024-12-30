@@ -126,6 +126,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-php"
   },
   {
+    "name": "VoxVision",
+    "description": "Discord Bot for Generating Images with Prodia API.",
+    "gitUrl": "https://github.com/xartus2004/VoxVision"
+  },
+  {
     "name": "EchoBrain: Intelligent Voice-Controlled Virtual Assistant",
     "description": "An AI virtual assistant capable of voice and gesture-based desktop automation.",
     "gitUrl": "https://github.com/BigBang001/EchoBrain-Daytona"
