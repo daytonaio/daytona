@@ -19,6 +19,12 @@
     "description": "It is a note taking webapp, where user's can share notes.",
     "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
   },
+
+  {
+    "name":"Tictactoegame",
+    "description" :"Tic Tac Toe is a simple, strategic game where two players compete to align three symbols on X or O in a 3x3 grid.based on HTML,CSS,JS",
+    "gitUrl":"https://github.com/Abhinav09-bits/TicTacToe"
+  },
   
   {
     "name": "Ubuntu",
