@@ -202,6 +202,11 @@
     "description": "Mindmap Copilot, a tool that can simplify the mindmap creation with the help of a copilot. Built using NextJs, TypeCcript, CopilotKit, ShadCN, Tailwind.",
     "gitUrl": "https://github.com/daytonaio/sample-mindmap-copilot"
   },
+    {
+    "name": "Home_Hacks",
+    "description": "Solving Big Home Problems with Small Solutions using AI",
+    "gitUrl": "https://github.com/YowaiMo-Koustav/Home_Hacks"
+  },
   {
     "name": "Next.js - RecipeGenie",
     "description": "Recipe Genie, an app for exploring delicious recipes, powered by TheMealDB. Built using NextJs, JavaScript, react-shepherd, Tailwind, DaisyUI.",
