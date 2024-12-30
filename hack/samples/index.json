@@ -45,6 +45,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-ubuntu"
   },
   {
+    "name":"python",
+    "description":"A simple patient manager that allows you to manage patients and store data locally with backup feature",
+    "gitUrl":"https://github.com/huzaifa8546/patient-manager-daytona.git"
+  },
+  {
     "name": "C",
     "description": "Develop C applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-c"
