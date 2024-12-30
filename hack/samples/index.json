@@ -15,6 +15,11 @@
     "gitUrl": "https://github.com/akshitagupta15june/FemOvaAI-daytona"
   },
   {
+    "name": "AIcontentCreator",
+    "description": "An AI-powered tool for content creators to brainstorm and transform their ideas into various moods and topics, offering a wide range of styles to choose from.",
+    "gitUrl": "https://github.com/FredDiPasqua/daytona"
+  },
+  {
     "name": "Debian",
     "description": "Simple Debian container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-debian"
