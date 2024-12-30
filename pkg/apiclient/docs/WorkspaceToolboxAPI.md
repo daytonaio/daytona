@@ -18,6 +18,7 @@ Method | HTTP request | Description
 [**GetProjectDir**](WorkspaceToolboxAPI.md#GetProjectDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
 [**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 [**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
+[**GitCheckoutBranch**](WorkspaceToolboxAPI.md#GitCheckoutBranch) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/checkout | Checkout branch
 [**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
 [**GitCommitChanges**](WorkspaceToolboxAPI.md#GitCommitChanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/commit | Commit changes
 [**GitCommitHistory**](WorkspaceToolboxAPI.md#GitCommitHistory) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/history | Get commit history
@@ -1082,6 +1083,79 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GitCheckoutBranch
+
+> GitCheckoutBranch(ctx, workspaceId, projectId).Params(params).Execute()
+
+Checkout branch
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+	params := *openapiclient.NewGitCheckoutRequest("Branch_example", "Path_example") // GitCheckoutRequest | GitCheckoutRequest
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.WorkspaceToolboxAPI.GitCheckoutBranch(context.Background(), workspaceId, projectId).Params(params).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GitCheckoutBranch``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGitCheckoutBranchRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **params** | [**GitCheckoutRequest**](GitCheckoutRequest.md) | GitCheckoutRequest | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

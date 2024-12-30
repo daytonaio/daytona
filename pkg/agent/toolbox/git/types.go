@@ -43,3 +43,8 @@ type GitRepoRequest struct {
 	Username *string `json:"username,omitempty" validate:"optional"`
 	Password *string `json:"password,omitempty" validate:"optional"`
 } // @name GitRepoRequest
+
+type GitCheckoutRequest struct {
+	Path   string `json:"path" validate:"required"`
+	Branch string `json:"branch" validate:"required"`
+} // @name GitCheckoutRequest
