@@ -105,6 +105,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-julia-genie"
   },
   {
+    "name": "Home Hacks",
+    "description": "Simplifying Home Problems",
+    "gitUrl": "https://github.com/YowaiMo-Koustav/Home_Hacks"
+  },
+  {
     "name": "Julia",
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
