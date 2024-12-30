@@ -126,6 +126,11 @@
     "gitUrl": "https://github.com/VIBHAS3077/sample-hotel-booking"
   },
   {
+    "name": "AI Companion - Voice Assistant App",
+    "description": "This real-time voice assistant app combines Speech-to-Text, Large Language Model processing, and Text-to-Speech technologies for seamless interaction. It supports both terminal and web interfaces with customizable voice parameters like pitch, speed, and type.",
+    "gitUrl": "https://github.com/Ankur2606/AI-Companion"
+  },
+  {
     "name": "Python - FastAPI",
     "description": "FastAPI starter based on copier-pdm and daytona",
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
@@ -156,6 +161,7 @@
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
     "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
   },
+ 
   {
     "name": "Legal101",
     "description": "A platform for Legal workers to be up-to-date with the laws and share case studies.",
@@ -511,6 +517,7 @@
     "description": "A simple calculator built using React.js, demonstrating the basic functionality of a calculator.",
     "gitUrl": "https://github.com/codedpool/daytonaio"
   },
+  {}
   {
     "name": "Sample React AI Image Generator",
     "description": "The AI Image Generator creates realistic images from descriptive prompts, ensuring high-quality outputs with efficiency using the black-forest-labs/FLUX.1-dev model.",
