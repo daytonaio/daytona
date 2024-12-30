@@ -588,6 +588,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-aceternity"
   },
   {
+    "name": "BMI Calculator Daytona",
+    "description": "The project serves as a sample to demonstrate how Daytona simplifies setting up and managing development environments.",
+    "gitUrl": "https://github.com/Bhanu-partap-13/Daytona-Sample-HTML-CSS-Javascript"
+  },
+  {
     "name": "Sample PHP URL Shortener",
     "description": "A simple URL shortener web application built using PHP and MySQL.",
     "gitUrl": "https://github.com/daytonaio/sample-php-url-shortener"
