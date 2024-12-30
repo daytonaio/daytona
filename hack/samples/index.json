@@ -621,5 +621,10 @@
     "name" : "Discord Bot with Image Generation",
     "description": "A Python bot for Discord that generates images using Prodia's API.",
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
+  },
+  {
+  "name": "Bank Application (Bank Chor) - Using Spring Boot & REST API with Daytona",
+  "description": "A bank application featuring account creation, deposits, and withdrawals, implemented with Spring Boot and integrated with Daytona for streamlined development.",
+  "gitUrl": "https://github.com/harshsinghcs/SpingBoot-BankProject-withDaytona"
   }
 ]
