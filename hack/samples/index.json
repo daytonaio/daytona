@@ -90,6 +90,7 @@
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
   },
+
   {
     "name": "Rust Actix Server",
     "description": "Develop Rust based Web applications with Actix Server Framework. Includes required Cargo Pakcages.",
@@ -342,6 +343,11 @@
     "description": "A tool to calculate keyword density from large text / raw html / direct URL.",
     "gitUrl": "https://github.com/daytonaio/sample-laravel-keyword-density"
   },
+  {
+    "name": "orbit-wallet4",
+    "description": "ORBIT Wallet is a retro-themed Ethereum wallet application that offers a gamified user experience. Users can connect their wallet, make transactions, track achievements, and level up based on their activity.",
+    "gitUrl": "https://github.com/ayaanoski/orbit-wallet"
+  }, 
   {
     "name": "Github User Profile Analyzer",
     "description": "A Next.js application built with TypeScript, Tailwind CSS, and ShadCN, utilizing MetaLLama 3 on AWS Bedrock for insightful GitHub user profile analysis.",
