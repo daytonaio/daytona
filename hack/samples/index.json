@@ -35,10 +35,19 @@
     "gitUrl": "https://github.com/daytonaio/sample-react-node-note-share-webapp"
   },
   {
+[
+  {
+    "name": "Voting Application",
+    "description": "A secure and simple voting system where users can cast votes, and administrators can manage candidates and view voting results.",
+    "url": "https://github.com/avnisinngh/Voting_Application"
+  },
+  {
     "name": "ReactJS - Markdown Previewer",
     "description": "Markdown Previewer is a web application that allows users to write and edit markdown in a live editor while simultaneously viewing a real-time preview.",
     "gitUrl": "https://github.com/AIR-EMPREES-GAMING/markdown-previewer.git"
-  },
+  }
+]
+
   {
     "name": "Ubuntu",
     "description": "A simple Ubuntu container with Git and other common utilities installed.",
