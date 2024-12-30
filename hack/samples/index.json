@@ -20,6 +20,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "Name":"Artiq ",
+    "description":"A market place for local artist anf NFts",
+    "giturl":"https://github.com/Omlakshkar07/Artiq"
+  } 
+  {
     "name": "target",
     "description": "It is a sample institute website featuring dynamic content such as courses, achievers, and a director's column.",
     "gitUrl": "https://github.com/Prince94201/target"
