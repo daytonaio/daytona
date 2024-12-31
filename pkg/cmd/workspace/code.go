@@ -193,6 +193,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
 	case "zed":
 		return ide.OpenZed(activeProfile, workspaceId, projectName, gpgKey)
+	case "positron":
+		return ide.OpenPositron(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {

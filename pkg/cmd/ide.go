@@ -60,6 +60,11 @@ var ideCmd = &cobra.Command{
 			if err != nil {
 				log.Error(err)
 			}
+		case "positron":
+			_, err := ide_util.GetPositronBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 		jetbrainsIdes := jetbrains.GetIdes()
