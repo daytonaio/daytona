@@ -592,6 +592,7 @@
     "description": "C.A.L.M is designed to assist students by providing mental health and emotional support through conversational AI.",
     "gitUrl": "https://github.com/daytonaio/sample-python-calm-app"
   },
+
   {
     "name": "HealthBot AI",
     "description": "HealthBot AI is an intelligent chatbot designed to provide timely text responses tailored for health practitioners.",
