@@ -398,6 +398,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-go-nextjs-sbt-blockchain"
   },
   {
+    "name": "Dietary Remix",
+    "description": "A Flask web application that leverages AI to transform recipes based on different dietary requirements",
+    "gitUrl": "https://github.com/FaycalZM/dietary-remix-with-daytona"
+  },
+  {
     "name": "Next.js & FastAPI - Book Summary Generator",
     "description": "Sample Next.js and FastAPI book summary generator. It uses the Gemini API to generate summaries of books and meilisearch to search for books.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-book-summary"
