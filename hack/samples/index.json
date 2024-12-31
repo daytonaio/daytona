@@ -59,10 +59,10 @@
     "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
-  { 
-    "name": "MailSender", 
-    "description": "Professional email-sending app using Python and Gradio. Features include custom emails, scheduling, status tracking, and analytics. Backend uses MongoDB and Groq's API for scalable, real-time updates.", 
-    "gitUrl": "https://github.com/Ronit-afk55/Sample_MailSender" 
+  {
+    "name": "MailSender",
+    "description": "Professional email-sending app using Python and Gradio. Features include custom emails, scheduling, status tracking, and analytics. Backend uses MongoDB and Groq's API for scalable, real-time updates.",
+    "gitUrl": "https://github.com/Ronit-afk55/Sample_MailSender"
   },
   {
     "name": "AutoGenius",
@@ -114,7 +114,6 @@
     "description": "Develop Julia applications. Includes PkgTemplates for package creation and JuliaFormatter for code formatting.",
     "gitUrl": "https://github.com/daytonaio/sample-julia"
   },
-
   {
     "name": "Rust Actix Server",
     "description": "Develop Rust based Web applications with Actix Server Framework. Includes required Cargo Pakcages.",
@@ -190,13 +189,16 @@
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
     "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
   },
-
   {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
     "gitUrl": "https://github.com/daytonaio/sample-open-source-smith"
   },
-
+  {
+    "name": "Dietary Remix",
+    "description": "A Flask a web application that leverages AI to transform recipes based on different dietary requirements",
+    "gitUrl": "https://github.com/FaycalZM/dietary-remix-with-daytona"
+  },
   {
     "name": "Legal101",
     "description": "A platform for Legal workers to be up-to-date with the laws and share case studies.",
