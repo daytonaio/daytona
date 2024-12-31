@@ -190,7 +190,11 @@
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
     "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
   },
-
+  {
+    "name": "React.js - CryptoTracker",
+    "description": "Get the latest crypto prices and trends with CryptoTracker, a React.js application.",
+    "gitUrl": "https://github.com/Suyash878/Sample-Crypto"
+  },
   {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
