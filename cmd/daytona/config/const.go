@@ -28,6 +28,7 @@ func GetIdeList() []Ide {
 		{"browser", "VS Code - Browser"},
 		{"cursor", "Cursor"},
 		{"ssh", "Terminal SSH"},
+		{"browser-tty", "Browser Terminal"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
 		{"zed", "Zed"},

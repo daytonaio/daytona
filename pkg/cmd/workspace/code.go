@@ -185,6 +185,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgKey, nil)
 	case "browser":
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
+	case "browser-tty":
+		return ide.OpenBrowserTerminal(activeProfile, workspaceId, projectName, gpgKey)
 	case "cursor":
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "jupyter":
