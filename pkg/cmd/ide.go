@@ -60,6 +60,11 @@ var ideCmd = &cobra.Command{
 			if err != nil {
 				log.Error(err)
 			}
+		case "windsurf":
+			_, err := ide_util.GetWindsurfBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		}
 
 		jetbrainsIdes := jetbrains.GetIdes()
