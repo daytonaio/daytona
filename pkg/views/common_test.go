@@ -70,7 +70,6 @@ func TestRenderBorderedMessage(t *testing.T) {
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
-
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()
 	stdout := os.Stdout
