@@ -683,6 +683,11 @@
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
   },
   {
+    "name": "Bank Application (Bank Chor) - Using Spring Boot & REST API with Daytona",
+    "description": "A bank application featuring account creation, deposits, and withdrawals, implemented with Spring Boot and integrated with Daytona for streamlined development.",
+    "gitUrl": "https://github.com/harshsinghcs/SpingBoot-BankProject-withDaytona"
+  },
+  {
     "name": "An Web site Builder with prompt",
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
