@@ -12,7 +12,6 @@ VERSION=${DAYTONA_SERVER_VERSION:-"latest"}
 BASE_URL=${DAYTONA_SERVER_DOWNLOAD_URL:-"https://download.daytona.io/daytona"}
 DESTINATION=${DAYTONA_PATH:-"/usr/local/bin"}
 CONFIRM_FLAG=false
-CURRENT_VERSION=$(daytona version 2>/dev/null)
 
 # Check for the -y flag
 for arg in "$@"; do
@@ -93,13 +92,20 @@ echo -e "Installing Daytona...\n"
 ARCH=$(uname -m)
 # Check operating system
 OS=$(uname -s)
+CURRENT_VERSION="undefined"
 
 case $OS in
 "Darwin")
   FILENAME="darwin"
+  if [[ -d "$HOME/Library/Application Support/daytona" ]]; then
+    CURRENT_VERSION=$(daytona version 2>/dev/null)
+  fi
   ;;
 "Linux")
   FILENAME="linux"
+  if [[ -d "$HOME/.config/daytona" ]]; then
+    CURRENT_VERSION=$(daytona version 2>/dev/null)
+  fi
   ;;
 *)
   err "Unsupported operating system: $OS"
@@ -315,7 +321,11 @@ print_breaking_changes() {
     fi
 }
 
-UPDATED_VERSION=$(daytona version 2>/dev/null)
+UPDATED_VERSION="undefined"
+if [[ "$CURRENT_VERSION" != "undefined" ]]; then
+  UPDATED_VERSION=$(daytona version 2>/dev/null)
+fi
+
 read -r current_major current_minor current_patch <<< "$(parse_version "$CURRENT_VERSION")"
 read -r updated_major updated_minor updated_patch <<< "$(parse_version "$UPDATED_VERSION")"
 
