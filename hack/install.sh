@@ -264,10 +264,10 @@ parse_version() {
 }
 
 format_breaking_changes() { 
-  sed -E 's/^#+\s*//; 
+  sed -E 's/^#+\s*//;
           s/^```.*$//;  
           s/\*\*([^*]+)\*\*/\1/g; 
-          s/`([^`]+)`/\1/g';
+          s/`([^`]+)`/\1/g'
 }
 
 is_updated_to_next_version() {
@@ -316,7 +316,7 @@ print_breaking_changes() {
 }
 
 UPDATED_VERSION=$(daytona version 2>/dev/null)
-read -r current_major current_minor current_patch <<< $(parse_version "$CURRENT_VERSION")
+read -r current_major current_minor current_patch <<< "$(parse_version "$CURRENT_VERSION")"
 read -r updated_major updated_minor updated_patch <<< "$(parse_version "$UPDATED_VERSION")"
 
 PARSED_CURRENT_VERSION="v${current_major}.${current_minor}.${current_patch}"
