@@ -5,6 +5,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-alpine"
   },
   {
+    "name": "MindAly",
+    "description": "MindAily is a transformative chat application designed to provide a judgment-free space for users to express their struggles.",
+    "gitUrl": "https://github.com/Aashish079/MindAly-daytona"
+  },
+  {
     "name": "Modern Restaurant",
     "description": "A modern restaurant website built with Astro.js and TailwindCSS, showcasing a restaurant's menu, team, and Daytona.",
     "gitUrl": "https://github.com/SpandanM110/modern-restaurant"
