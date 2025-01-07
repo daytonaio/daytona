@@ -15,6 +15,11 @@
     "gitUrl": "https://github.com/akshitagupta15june/FemOvaAI-daytona"
   },
   {
+    "name": "AIcontentCreator",
+    "description": "An AI-powered tool for content creators to brainstorm and transform their ideas into various moods and topics, offering a wide range of styles to choose from.",
+    "gitUrl": "https://github.com/FredDiPasqua/daytona"
+  },
+  {
     "name": "Debian",
     "description": "Simple Debian container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-debian"
@@ -54,10 +59,10 @@
     "description": "Develop C++ applications on Linux. Includes Debian C/C++ build tools.",
     "gitUrl": "https://github.com/daytonaio/sample-cpp"
   },
-  { 
-    "name": "MailSender", 
-    "description": "Professional email-sending app using Python and Gradio. Features include custom emails, scheduling, status tracking, and analytics. Backend uses MongoDB and Groq's API for scalable, real-time updates.", 
-    "gitUrl": "https://github.com/Ronit-afk55/Sample_MailSender" 
+  {
+    "name": "MailSender",
+    "description": "Professional email-sending app using Python and Gradio. Features include custom emails, scheduling, status tracking, and analytics. Backend uses MongoDB and Groq's API for scalable, real-time updates.",
+    "gitUrl": "https://github.com/Ronit-afk55/Sample_MailSender"
   },
   {
     "name": "AutoGenius",
@@ -185,7 +190,11 @@
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
     "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
   },
-
+  {
+    "name": "React.js - CryptoTracker",
+    "description": "Get the latest crypto prices and trends with CryptoTracker, a React.js application.",
+    "gitUrl": "https://github.com/Suyash878/Sample-Crypto"
+  },
   {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
@@ -331,6 +340,11 @@
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
+  },
+  {
+    "name": "gemini-chat-daytona",
+    "description": "A modern, responsive chat application powered by Google's Gemini",
+    "gitUrl": "https://github.com/Naveenkwr/gemini-chat-daytona"
   },
   {
     "name": "React.js - effective-scrapper",
@@ -598,16 +612,6 @@
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
   },
   {
-    "name": "Python + llmware + tkinter/AI-ChatBot",
-    "description": "A powerful chatbot that can answer all your questions built using LLMWARE integrated with the model 'phi-3-gguf'.",
-    "gitUrl": "https://github.com/rustam27332/ai-chatbot-daytona"
-  },
-  {
-    "name": "Store",
-    "description": "This is a sample online store that lets you view fake products and add them to cart",
-    "gitUrl": "https://github.com/daytonaio/sample-nextjs-store"
-  },
-  {
     "name": "Sample Next.js with Gemini Chat",
     "description": "A simple Next.js app that provides a basic chat interface powered by Gemini for easily making AI-powered chat applications.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-gemini-chat"
@@ -681,6 +685,11 @@
     "name": "Discord Bot with Image Generation",
     "description": "A Python bot for Discord that generates images using Prodia's API.",
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
+  },
+  {
+    "name": "Bank Application (Bank Chor) - Using Spring Boot & REST API with Daytona",
+    "description": "A bank application featuring account creation, deposits, and withdrawals, implemented with Spring Boot and integrated with Daytona for streamlined development.",
+    "gitUrl": "https://github.com/harshsinghcs/SpingBoot-BankProject-withDaytona"
   },
   {
     "name": "An Web site Builder with prompt",
