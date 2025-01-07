@@ -18,6 +18,7 @@ type IWorkspaceService interface {
 	ListWorkspaces(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
 	StartWorkspace(ctx context.Context, workspaceId string) error
 	StopWorkspace(ctx context.Context, workspaceId string) error
+	RestartWorkspace(ctx context.Context, workspaceId string) error
 	RemoveWorkspace(ctx context.Context, workspaceId string) error
 	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
 	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error

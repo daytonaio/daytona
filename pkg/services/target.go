@@ -19,6 +19,7 @@ type ITargetService interface {
 	ListTargets(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) ([]TargetDTO, error)
 	StartTarget(ctx context.Context, targetId string) error
 	StopTarget(ctx context.Context, targetId string) error
+	RestartTarget(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
 	UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error
 	RemoveTarget(ctx context.Context, targetId string) error

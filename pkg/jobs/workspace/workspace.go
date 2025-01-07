@@ -36,6 +36,8 @@ func (wj *WorkspaceJob) Execute(ctx context.Context) error {
 		return wj.start(ctx, &wj.Job)
 	case models.JobActionStop:
 		return wj.stop(ctx, &wj.Job)
+	case models.JobActionRestart:
+		return wj.restart(ctx, &wj.Job)
 	case models.JobActionDelete:
 		return wj.delete(ctx, &wj.Job, false)
 	case models.JobActionForceDelete:

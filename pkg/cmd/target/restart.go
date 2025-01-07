@@ -51,7 +51,7 @@ var restartCmd = &cobra.Command{
 			}
 		}
 
-		err = RestartTarget(apiClient, *target)
+		err = StartTarget(apiClient, *target, true)
 		if err != nil {
 			return err
 		}
@@ -61,12 +61,4 @@ var restartCmd = &cobra.Command{
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return getAllTargetsByState(util.Pointer(apiclient.ResourceStateNameStarted))
 	},
-}
-
-func RestartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) error {
-	err := StopTarget(apiClient, target)
-	if err != nil {
-		return err
-	}
-	return StartTarget(apiClient, target)
 }

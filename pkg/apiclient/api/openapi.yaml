@@ -1254,6 +1254,24 @@ paths:
       tags:
       - target
       x-codegen-request-body-name: metadata
+  /target/{targetId}/restart:
+    post:
+      description: Restart target
+      operationId: RestartTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Restart target
+      tags:
+      - target
   /target/{targetId}/set-default:
     patch:
       description: Set target to be used by default
@@ -1697,6 +1715,24 @@ paths:
       tags:
       - workspace
       x-codegen-request-body-name: metadata
+  /workspace/{workspaceId}/restart:
+    post:
+      description: Restart workspace
+      operationId: RestartWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Restart workspace
+      tags:
+      - workspace
   /workspace/{workspaceId}/start:
     post:
       description: Start workspace
