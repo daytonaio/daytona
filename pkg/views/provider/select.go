@@ -15,6 +15,7 @@ import (
 
 type ProviderView struct {
 	Name                 string
+	AgentlessTarget      *bool
 	Label                *string
 	Version              string
 	Installed            *bool
@@ -67,6 +68,7 @@ func ProviderListToView(providers []apiclient.ProviderInfo) []ProviderView {
 	for _, p := range providers {
 		providerViews = append(providerViews, ProviderView{
 			Name:                 p.Name,
+			AgentlessTarget:      p.AgentlessTarget,
 			Label:                p.Label,
 			Version:              p.Version,
 			Installed:            nil,

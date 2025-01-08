@@ -26,12 +26,13 @@ type TargetConfigView struct {
 }
 
 type ProviderInfo struct {
-	Name       string
-	RunnerId   string
-	RunnerName string
-	Version    string
-	Label      *string
-	Installed  *bool
+	Name            string
+	AgentlessTarget *bool
+	RunnerId        string
+	RunnerName      string
+	Version         string
+	Label           *string
+	Installed       *bool
 }
 
 func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activeProfileName string, providerViewList *[]provider.ProviderView, withNewTargetConfig bool, actionVerb string) (*TargetConfigView, error) {
@@ -70,12 +71,13 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 					Name:    fmt.Sprintf("Add a %s Target Config", label),
 					Options: "{}",
 					ProviderInfo: ProviderInfo{
-						Name:       providerView.Name,
-						RunnerId:   providerView.RunnerId,
-						RunnerName: providerView.RunnerName,
-						Version:    providerView.Version,
-						Label:      providerView.Label,
-						Installed:  providerView.Installed,
+						Name:            providerView.Name,
+						AgentlessTarget: providerView.AgentlessTarget,
+						RunnerId:        providerView.RunnerId,
+						RunnerName:      providerView.RunnerName,
+						Version:         providerView.Version,
+						Label:           providerView.Label,
+						Installed:       providerView.Installed,
 					},
 				},
 			})
@@ -106,11 +108,12 @@ func ToTargetConfigView(targetConfig apiclient.TargetConfig) TargetConfigView {
 		RunnerName: targetConfig.ProviderInfo.RunnerName,
 		Options:    targetConfig.Options,
 		ProviderInfo: ProviderInfo{
-			Name:       targetConfig.ProviderInfo.Name,
-			RunnerId:   targetConfig.ProviderInfo.RunnerId,
-			RunnerName: targetConfig.ProviderInfo.RunnerName,
-			Version:    targetConfig.ProviderInfo.Version,
-			Label:      targetConfig.ProviderInfo.Label,
+			Name:            targetConfig.ProviderInfo.Name,
+			AgentlessTarget: targetConfig.ProviderInfo.AgentlessTarget,
+			RunnerId:        targetConfig.ProviderInfo.RunnerId,
+			RunnerName:      targetConfig.ProviderInfo.RunnerName,
+			Version:         targetConfig.ProviderInfo.Version,
+			Label:           targetConfig.ProviderInfo.Label,
 		},
 	}
 }
