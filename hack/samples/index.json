@@ -4,6 +4,7 @@
     "description": "Develop Ada based applications. Includes appropriate runtime args, Ada, common tools, extensions, and dependencies.",
     "gitUrl": "https://github.com/daytonaio/sample-ada"
   },
+  {
     "name": "Alpine",
     "description": "Simple Alpine container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-alpine"
