@@ -2609,7 +2609,7 @@
             "required": [
                 "id",
                 "name",
-                "targetConfigName"
+                "targetConfigId"
             ],
             "properties": {
                 "id": {
@@ -2618,7 +2618,7 @@
                 "name": {
                     "type": "string"
                 },
-                "targetConfigName": {
+                "targetConfigId": {
                     "type": "string"
                 }
             }

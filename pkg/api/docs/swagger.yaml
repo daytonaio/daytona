@@ -153,12 +153,12 @@ definitions:
         type: string
       name:
         type: string
-      targetConfigName:
+      targetConfigId:
         type: string
     required:
     - id
     - name
-    - targetConfigName
+    - targetConfigId
     type: object
   CreateWorkspaceDTO:
     properties:

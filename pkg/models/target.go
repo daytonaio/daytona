@@ -36,7 +36,8 @@ func (t *Target) GetState() ResourceState {
 
 	// Some providers do not utilize agents in target mode
 	if t.TargetConfig.ProviderInfo.AgentlessTarget {
-		if state.Name == ResourceStateNameDeleted || state.Name == ResourceStateNamePendingCreate || state.Name == ResourceStateNameCreating {
+		if state.Name == ResourceStateNameDeleted || state.Name == ResourceStateNamePendingCreate ||
+			state.Name == ResourceStateNameCreating || state.Name == ResourceStateNameError {
 			return state
 		}
 

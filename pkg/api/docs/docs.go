@@ -2612,7 +2612,7 @@ const docTemplate = `{
             "required": [
                 "id",
                 "name",
-                "targetConfigName"
+                "targetConfigId"
             ],
             "properties": {
                 "id": {
@@ -2621,7 +2621,7 @@ const docTemplate = `{
                 "name": {
                     "type": "string"
                 },
-                "targetConfigName": {
+                "targetConfigId": {
                     "type": "string"
                 }
             }
