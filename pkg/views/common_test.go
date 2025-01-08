@@ -1,3 +1,5 @@
+// Copyright 2024 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
 package views
 
 import (
@@ -9,7 +11,10 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/term"
 )
+
+var getTerminalSize = term.GetSize
 
 func TestRenderMainTitle(t *testing.T) {
 	title := "Render Main Title"
@@ -70,6 +75,57 @@ func TestRenderBorderedMessage(t *testing.T) {
 	assert.Equal(t, expectedOutput, actualOutput)
 }
 
+func TestGetListFooter(t *testing.T) {
+	profileName := "Get List Footer"
+	padding := &Padding{1, 2, 3, 4}
+	expectedOutput := lipgloss.NewStyle().Bold(true).Padding(padding.Top, padding.Right, padding.Bottom, padding.Left).Render("\n\nActive profile: " + profileName)
+	actualOutput := GetListFooter(profileName, padding)
+	assert.Equal(t, expectedOutput, actualOutput)
+}
+
+func TestGetStyledMainTitle(t *testing.T) {
+	content := "Get Styled Main Title"
+	expectedOutput := lipgloss.NewStyle().Foreground(Dark).Background(Light).Padding(0, 1).Render(content)
+	actualOutput := GetStyledMainTitle(content)
+	assert.Equal(t, expectedOutput, actualOutput)
+}
+
+func TestGetInfoMessage(t *testing.T) {
+	message := "Get Info Message"
+	expectedOutput := lipgloss.NewStyle().Padding(1, 0, 1, 1).Render(message)
+	actualOutput := GetInfoMessage(message)
+	assert.Equal(t, expectedOutput, actualOutput)
+}
+
+func TestGetBoldedInfoMessage(t *testing.T) {
+	message := "Get Bolded Info Message"
+	expectedOutput := lipgloss.NewStyle().Bold(true).Padding(1, 0, 1, 1).Render(message)
+	actualOutput := GetBoldedInfoMessage(message)
+	assert.Equal(t, expectedOutput, actualOutput)
+}
+
+func TestRenderContainerLayout(t *testing.T) {
+	originalGetSize := getTerminalSize
+	defer func() { getTerminalSize = originalGetSize }()
+	t.Run("terminal size error", func(t *testing.T) {
+		getTerminalSize = mockGetSize(0, 0, fmt.Errorf("mock error"))
+		expectedOutput := DocStyle.Render("Error: Unable to get terminal size") + "\n"
+
+		actualOutput := captureOutput(func() { RenderContainerLayout("Test Output") })
+		assert.Equal(t, expectedOutput, actualOutput)
+	})
+
+	t.Run("successful render", func(t *testing.T) {
+		getTerminalSize = mockGetSize(100, 10, nil)
+		expectedOutput := "Test Output"
+		actualOutput := captureOutput(func() {
+			RenderContainerLayout(expectedOutput)
+		})
+
+		assert.Equal(t, expectedOutput, actualOutput)
+	})
+}
+
 func captureOutput(f func()) string {
 	r, w, _ := os.Pipe()
 	stdout := os.Stdout
@@ -82,4 +138,10 @@ func captureOutput(f func()) string {
 	os.Stdout = stdout
 
 	return buf.String()
+}
+
+func mockGetSize(width, height int, err error) func(fd int) (int, int, error) {
+	return func(fd int) (int, int, error) {
+		return width, height, err
+	}
 }
