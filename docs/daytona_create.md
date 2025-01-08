@@ -17,7 +17,7 @@ daytona create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]... [flags]
       --devcontainer-path string     Automatically assign the devcontainer builder with the path passed as the flag value
       --env stringArray              Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
       --git-provider-config string   Specify the Git provider configuration ID or alias
-  -i, --ide string                   Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -i, --ide string                   Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, browser-tty, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
       --label stringArray            Specify labels (e.g. --label 'label.key1=VALUE1' --label 'label.key2=VALUE2' ...)
       --manual                       Manually enter the Git repository
       --multi-workspace              Target with multiple workspaces/repos

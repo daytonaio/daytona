@@ -28,7 +28,7 @@ options:
     - name: ide
       shorthand: i
       usage: |
-        Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+        Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, browser-tty, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: label
       default_value: '[]'
       usage: |

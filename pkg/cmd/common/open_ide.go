@@ -25,6 +25,8 @@ func OpenIDE(ideId string, activeProfile config.Profile, workspaceId string, wor
 		err = ide.OpenTerminalSsh(activeProfile, workspaceId, gpgKey, nil)
 	case "browser":
 		err = ide.OpenBrowserIDE(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
+	case "browser-tty":
+		err = ide.OpenBrowserTerminal(activeProfile, workspaceId, gpgKey)
 	case "codium":
 		err = ide.OpenVScodium(activeProfile, workspaceId, workspaceProviderMetadata, gpgKey)
 	case "codium-insiders":
