@@ -259,7 +259,7 @@ func (a *ApiServer) Start() error {
 	{
 		targetConfigController.GET("", targetconfig.ListTargetConfigs)
 		targetConfigController.PUT("", targetconfig.AddTargetConfig)
-		targetConfigController.DELETE("/:configName", targetconfig.RemoveTargetConfig)
+		targetConfigController.DELETE("/:configId", targetconfig.RemoveTargetConfig)
 	}
 
 	logController := protected.Group("/log")
