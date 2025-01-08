@@ -128,11 +128,12 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		Name:    "",
 		Options: "{}",
 		ProviderInfo: targetconfig.ProviderInfo{
-			Name:       selectedProvider.Name,
-			RunnerId:   selectedProvider.RunnerId,
-			RunnerName: selectedProvider.RunnerName,
-			Version:    selectedProvider.Version,
-			Label:      selectedProvider.Label,
+			Name:            selectedProvider.Name,
+			AgentlessTarget: selectedProvider.AgentlessTarget,
+			RunnerId:        selectedProvider.RunnerId,
+			RunnerName:      selectedProvider.RunnerName,
+			Version:         selectedProvider.Version,
+			Label:           selectedProvider.Label,
 		},
 	}
 
@@ -184,6 +185,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
 		ProviderInfo: apiclient.ProviderInfo{
+			AgentlessTarget:      selectedProvider.AgentlessTarget,
 			Name:                 selectedProvider.Name,
 			Version:              selectedProvider.Version,
 			Label:                selectedProvider.Label,
@@ -203,11 +205,12 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		Name:    targetConfig.Name,
 		Options: targetConfig.Options,
 		ProviderInfo: targetconfig.ProviderInfo{
-			Name:       targetConfig.ProviderInfo.Name,
-			RunnerId:   targetConfig.ProviderInfo.RunnerId,
-			RunnerName: targetConfig.ProviderInfo.RunnerName,
-			Version:    targetConfig.ProviderInfo.Version,
-			Label:      targetConfig.ProviderInfo.Label,
+			Name:            targetConfig.ProviderInfo.Name,
+			AgentlessTarget: targetConfig.ProviderInfo.AgentlessTarget,
+			RunnerId:        targetConfig.ProviderInfo.RunnerId,
+			RunnerName:      targetConfig.ProviderInfo.RunnerName,
+			Version:         targetConfig.ProviderInfo.Version,
+			Label:           targetConfig.ProviderInfo.Label,
 		},
 	}, nil
 }

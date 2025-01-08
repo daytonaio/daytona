@@ -27,6 +27,7 @@ type TargetConfigView struct {
 
 type ProviderInfo struct {
 	Name                 string
+	AgentlessTarget      *bool
 	RunnerId             string
 	RunnerName           string
 	Version              string
@@ -78,6 +79,7 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 						Label:                providerView.Label,
 						Installed:            providerView.Installed,
 						TargetConfigManifest: providerView.TargetConfigManifest,
+						AgentlessTarget:      providerView.AgentlessTarget,
 					},
 				},
 			})
@@ -108,11 +110,12 @@ func ToTargetConfigView(targetConfig apiclient.TargetConfig) TargetConfigView {
 		RunnerName: targetConfig.ProviderInfo.RunnerName,
 		Options:    targetConfig.Options,
 		ProviderInfo: ProviderInfo{
-			Name:       targetConfig.ProviderInfo.Name,
-			RunnerId:   targetConfig.ProviderInfo.RunnerId,
-			RunnerName: targetConfig.ProviderInfo.RunnerName,
-			Version:    targetConfig.ProviderInfo.Version,
-			Label:      targetConfig.ProviderInfo.Label,
+			Name:            targetConfig.ProviderInfo.Name,
+			AgentlessTarget: targetConfig.ProviderInfo.AgentlessTarget,
+			RunnerId:        targetConfig.ProviderInfo.RunnerId,
+			RunnerName:      targetConfig.ProviderInfo.RunnerName,
+			Version:         targetConfig.ProviderInfo.Version,
+			Label:           targetConfig.ProviderInfo.Label,
 		},
 	}
 }

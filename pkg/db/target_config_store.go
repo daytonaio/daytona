@@ -29,7 +29,7 @@ func (s *TargetConfigStore) List(ctx context.Context, allowDeleted bool) ([]*mod
 	tx := s.GetTransaction(ctx)
 
 	targetConfigs := []*models.TargetConfig{}
-	tx = processTargetConfigFilters(tx, "", allowDeleted).Find(&targetConfigs)
+	tx = processTargetConfigFilters(tx, nil, allowDeleted).Find(&targetConfigs)
 
 	if tx.Error != nil {
 		return nil, tx.Error
@@ -42,7 +42,7 @@ func (s *TargetConfigStore) Find(ctx context.Context, idOrName string, allowDele
 	tx := s.GetTransaction(ctx)
 
 	targetConfig := &models.TargetConfig{}
-	tx = processTargetConfigFilters(tx, idOrName, allowDeleted).First(targetConfig)
+	tx = processTargetConfigFilters(tx, &idOrName, allowDeleted).First(targetConfig)
 
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
@@ -58,16 +58,12 @@ func (s *TargetConfigStore) Save(ctx context.Context, targetConfig *models.Targe
 	tx := s.GetTransaction(ctx)
 
 	tx = tx.Save(targetConfig)
-	if tx.Error != nil {
-		return tx.Error
-	}
-
-	return nil
+	return tx.Error
 }
 
-func processTargetConfigFilters(tx *gorm.DB, idOrName string, allowDeleted bool) *gorm.DB {
-	if idOrName != "" {
-		tx = tx.Where("id = ? OR name = ?", idOrName, idOrName)
+func processTargetConfigFilters(tx *gorm.DB, idOrName *string, allowDeleted bool) *gorm.DB {
+	if idOrName != nil {
+		tx = tx.Where("id = ? OR name = ?", *idOrName, *idOrName)
 	}
 
 	if !allowDeleted {
