@@ -131,20 +131,20 @@ func TestGetBorderedMessage(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestGetContainerBreakpointWidth(t*testing.T){
-	t.Run("width less than minimum", func(t *testing.T){
+func TestGetContainerBreakpointWidth(t *testing.T) {
+	t.Run("width less than minimum", func(t *testing.T) {
 		width := 50
 		expected := 38
 		actual := GetContainerBreakpointWidth(width)
 		assert.Equal(t, expected, actual)
 	})
-	t.Run("width within breakpoints", func(t *testing.T){
+	t.Run("width within breakpoints", func(t *testing.T) {
 		terminalWidth := 70
 		expected := 58
 		actual := GetContainerBreakpointWidth(terminalWidth)
 		assert.Equal(t, expected, actual)
 	})
-	t.Run("width greater than maximum", func(t *testing.T){
+	t.Run("width greater than maximum", func(t *testing.T) {
 		width := 150
 		expected := 138
 		actual := GetContainerBreakpointWidth(width)

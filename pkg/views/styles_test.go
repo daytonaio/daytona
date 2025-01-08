@@ -19,17 +19,17 @@ func TestGetInitialCommandTheme(t *testing.T) {
 	//check focused styles
 	assert.Equal(t, lipgloss.Color("fff"), theme.Focused.Base.GetBorderBottomForeground())
 	assert.Equal(t, Green, theme.Focused.Title.GetForeground())
-    assert.True(t, theme.Focused.Title.GetBold())
-    assert.True(t, theme.Focused.FocusedButton.GetBold())
-    assert.Equal(t, Green, theme.Focused.FocusedButton.GetBackground())
-    assert.Equal(t, Green, theme.Focused.TextInput.Prompt.GetForeground())
-    assert.Equal(t, Light, theme.Focused.TextInput.Cursor.GetForeground())
-    assert.Equal(t, Green, theme.Focused.SelectSelector.GetForeground())
-    assert.False(t, theme.Focused.Base.GetBorderLeft())
-    assert.Equal(t, Green, theme.Focused.SelectedOption.GetForeground())
+	assert.True(t, theme.Focused.Title.GetBold())
+	assert.True(t, theme.Focused.FocusedButton.GetBold())
+	assert.Equal(t, Green, theme.Focused.FocusedButton.GetBackground())
+	assert.Equal(t, Green, theme.Focused.TextInput.Prompt.GetForeground())
+	assert.Equal(t, Light, theme.Focused.TextInput.Cursor.GetForeground())
+	assert.Equal(t, Green, theme.Focused.SelectSelector.GetForeground())
+	assert.False(t, theme.Focused.Base.GetBorderLeft())
+	assert.Equal(t, Green, theme.Focused.SelectedOption.GetForeground())
 }
 
-func TestGetCustomTheeme(t *testing.T){
+func TestGetCustomTheeme(t *testing.T) {
 	theme := GetCustomTheme()
 
 	//check blurred styles
