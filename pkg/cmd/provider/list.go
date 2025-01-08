@@ -56,6 +56,7 @@ func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient,
 	for _, installedProvider := range installedProviders {
 		providerMap[installedProvider.Name] = provider.ProviderView{
 			Name:                 installedProvider.Name,
+			AgentlessTarget:      installedProvider.AgentlessTarget,
 			Label:                installedProvider.Label,
 			Version:              installedProvider.Version,
 			Installed:            util.Pointer(true),
