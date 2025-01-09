@@ -46,7 +46,7 @@ func (s *Server) Start() error {
 	fsController := r.Group("/files")
 	{
 		// read operations
-		fsController.GET("/", fs.ListFiles)
+		fsController.GET("", fs.ListFiles)
 		fsController.GET("/download", fs.DownloadFile)
 		fsController.GET("/find", fs.FindInFiles)
 		fsController.GET("/info", fs.GetFileInfo)
@@ -60,7 +60,7 @@ func (s *Server) Start() error {
 		fsController.POST("/upload", fs.UploadFile)
 
 		// delete operations
-		fsController.DELETE("/", fs.DeleteFile)
+		fsController.DELETE("", fs.DeleteFile)
 	}
 
 	processController := r.Group("/process")
