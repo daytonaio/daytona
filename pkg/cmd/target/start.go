@@ -6,6 +6,7 @@ package target
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -67,7 +68,7 @@ var startCmd = &cobra.Command{
 				return err
 			}
 
-			err = StartTarget(apiClient, *target)
+			err = StartTarget(apiClient, *target, false)
 			if err != nil {
 				return err
 			}
@@ -80,7 +81,7 @@ var startCmd = &cobra.Command{
 					return err
 				}
 
-				err = StartTarget(apiClient, *target)
+				err = StartTarget(apiClient, *target, false)
 				if err != nil {
 					log.Errorf("Failed to start target %s: %v\n\n", targetName, err)
 					continue
@@ -100,6 +101,60 @@ func init() {
 	startCmd.PersistentFlags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }
 
+func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO, restart bool) error {
+	ctx := context.Background()
+	timeFormat := time.Now().Format("2006-01-02 15:04:05")
+	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
+	if err != nil {
+		return err
+	}
+
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		return err
+	}
+
+	if target.TargetConfig.ProviderInfo.AgentlessTarget != nil && *target.TargetConfig.ProviderInfo.AgentlessTarget {
+		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
+	}
+
+	logsContext, stopLogs := context.WithCancel(context.Background())
+	go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
+		Id:        target.Id,
+		Label:     &target.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Follow:    util.Pointer(true),
+		From:      &from,
+	})
+
+	var res *http.Response
+
+	if restart {
+		res, err = apiClient.TargetAPI.RestartTarget(ctx, target.Id).Execute()
+	} else {
+		res, err = apiClient.TargetAPI.StartTarget(ctx, target.Id).Execute()
+	}
+
+	if err != nil {
+		stopLogs()
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	err = cmd_common.AwaitTargetState(target.Id, apiclient.ResourceStateNameStarted)
+
+	// Ensure reading remaining logs is completed
+	time.Sleep(100 * time.Millisecond)
+
+	stopLogs()
+	return err
+}
+
 func startAllTargets() error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -113,7 +168,7 @@ func startAllTargets() error {
 	}
 
 	for _, target := range targetList {
-		err := StartTarget(apiClient, target)
+		err := StartTarget(apiClient, target, false)
 		if err != nil {
 			log.Errorf("Failed to start target %s: %v\n\n", target.Name, err)
 			continue
@@ -154,53 +209,6 @@ func getAllTargetsByState(state *apiclient.ModelsResourceStateName) ([]string, c
 	}
 
 	return choices, cobra.ShellCompDirectiveNoFileComp
-}
-
-func StartTarget(apiClient *apiclient.APIClient, target apiclient.TargetDTO) error {
-	ctx := context.Background()
-	timeFormat := time.Now().Format("2006-01-02 15:04:05")
-	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
-	if err != nil {
-		return err
-	}
-
-	c, err := config.GetConfig()
-	if err != nil {
-		return err
-	}
-
-	activeProfile, err := c.GetActiveProfile()
-	if err != nil {
-		return err
-	}
-
-	if target.TargetConfig.ProviderInfo.AgentlessTarget != nil && *target.TargetConfig.ProviderInfo.AgentlessTarget {
-		return agentlessTargetError(target.TargetConfig.ProviderInfo.Name)
-	}
-
-	logsContext, stopLogs := context.WithCancel(context.Background())
-	go cmd_common.ReadTargetLogs(logsContext, cmd_common.ReadLogParams{
-		Id:        target.Id,
-		Label:     &target.Name,
-		ServerUrl: activeProfile.Api.Url,
-		ApiKey:    activeProfile.Api.Key,
-		Follow:    util.Pointer(true),
-		From:      &from,
-	})
-
-	res, err := apiClient.TargetAPI.StartTarget(ctx, target.Id).Execute()
-	if err != nil {
-		stopLogs()
-		return apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	err = cmd_common.AwaitTargetState(target.Id, apiclient.ResourceStateNameStarted)
-
-	// Ensure reading remaining logs is completed
-	time.Sleep(100 * time.Millisecond)
-
-	stopLogs()
-	return err
 }
 
 func agentlessTargetError(providerName string) error {

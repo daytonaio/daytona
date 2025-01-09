@@ -100,7 +100,7 @@ var StartCmd = &cobra.Command{
 				}
 			}
 
-			err = StartWorkspace(apiClient, *workspace)
+			err = StartWorkspace(apiClient, *workspace, false)
 			if err != nil {
 				return err
 			}
@@ -120,7 +120,7 @@ var StartCmd = &cobra.Command{
 			}
 		} else {
 			for _, ws := range selectedWorkspaces {
-				err := StartWorkspace(apiClient, *ws)
+				err := StartWorkspace(apiClient, *ws, false)
 				if err != nil {
 					log.Errorf("Failed to start workspace %s: %v\n\n", ws.Name, err)
 					continue
@@ -154,7 +154,7 @@ func startAllWorkspaces() error {
 	}
 
 	for _, workspace := range workspaceList {
-		err := StartWorkspace(apiClient, workspace)
+		err := StartWorkspace(apiClient, workspace, false)
 		if err != nil {
 			log.Errorf("Failed to start workspace %s: %v\n\n", workspace.Name, err)
 			continue
@@ -165,7 +165,7 @@ func startAllWorkspaces() error {
 	return nil
 }
 
-func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
+func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO, restart bool) error {
 	ctx := context.Background()
 	timeFormat := time.Now().Format("2006-01-02 15:04:05")
 	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
@@ -194,7 +194,14 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspac
 		From:      &from,
 	})
 
-	res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
+	var res *http.Response
+
+	if restart {
+		res, err = apiClient.WorkspaceAPI.RestartWorkspace(ctx, workspace.Id).Execute()
+	} else {
+		res, err = apiClient.WorkspaceAPI.StartWorkspace(ctx, workspace.Id).Execute()
+	}
+
 	if err != nil {
 		stopLogs()
 		return apiclient_util.HandleErrorResponse(res, err)
