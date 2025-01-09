@@ -20,6 +20,7 @@ type IWorkspaceService interface {
 	Stop(ctx context.Context, workspaceId string) error
 	Delete(ctx context.Context, workspaceId string) error
 	ForceDelete(ctx context.Context, workspaceId string) error
+	Restart(ctx context.Context, workspaceId string) error
 
 	UpdateMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 	UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error

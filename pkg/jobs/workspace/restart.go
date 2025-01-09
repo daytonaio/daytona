@@ -9,7 +9,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (wj *WorkspaceJob) Restart(ctx context.Context, j *models.Job) error {
+func (wj *WorkspaceJob) restart(ctx context.Context, j *models.Job) error {
 	err := wj.stop(ctx, j)
 	if err != nil {
 		return err

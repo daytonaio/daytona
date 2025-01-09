@@ -149,6 +149,7 @@ func (a *ApiServer) Start() error {
 		targetController.POST("", target.CreateTarget)
 		targetController.POST("/:targetId/start", target.StartTarget)
 		targetController.POST("/:targetId/stop", target.StopTarget)
+		targetController.POST("/:targetId/restart", target.RestartTarget)
 		targetController.PATCH("/:targetId/set-default", target.SetDefaultTarget)
 		targetController.POST("/:targetId/handle-successful-creation", target.HandleSuccessfulCreation)
 		targetController.POST("/:targetId/provider-metadata", target.UpdateTargetProviderMetadata)
@@ -214,6 +215,7 @@ func (a *ApiServer) Start() error {
 
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
+		workspaceController.POST("/:workspaceId/restart", workspace.RestartWorkspace)
 		workspaceController.POST("/:workspaceId/provider-metadata", workspace.UpdateWorkspaceProviderMetadata)
 	}
 

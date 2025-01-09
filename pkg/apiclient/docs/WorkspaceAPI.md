@@ -8,6 +8,7 @@ Method | HTTP request | Description
 [**DeleteWorkspace**](WorkspaceAPI.md#DeleteWorkspace) | **Delete** /workspace/{workspaceId} | Delete workspace
 [**FindWorkspace**](WorkspaceAPI.md#FindWorkspace) | **Get** /workspace/{workspaceId} | Find workspace
 [**ListWorkspaces**](WorkspaceAPI.md#ListWorkspaces) | **Get** /workspace | List workspaces
+[**RestartWorkspace**](WorkspaceAPI.md#RestartWorkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 [**StartWorkspace**](WorkspaceAPI.md#StartWorkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 [**StopWorkspace**](WorkspaceAPI.md#StopWorkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
 [**UpdateWorkspaceMetadata**](WorkspaceAPI.md#UpdateWorkspaceMetadata) | **Post** /workspace/{workspaceId}/metadata | Update workspace metadata
@@ -276,6 +277,74 @@ Other parameters are passed through a pointer to a apiListWorkspacesRequest stru
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## RestartWorkspace
+
+> RestartWorkspace(ctx, workspaceId).Execute()
+
+Restart workspace
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.WorkspaceAPI.RestartWorkspace(context.Background(), workspaceId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.RestartWorkspace``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiRestartWorkspaceRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

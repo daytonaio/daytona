@@ -1734,6 +1734,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/target/{targetId}/restart": {
+            "post": {
+                "description": "Restart target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Restart target",
+                "operationId": "RestartTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
         "/target/{targetId}/set-default": {
             "patch": {
                 "description": "Set target to be used by default",
@@ -2333,6 +2357,30 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/UpdateWorkspaceProviderMetadataDTO"
                         }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/restart": {
+            "post": {
+                "description": "Restart workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Restart workspace",
+                "operationId": "RestartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {

@@ -2715,6 +2715,22 @@ paths:
       summary: Update target provider metadata
       tags:
       - target
+  /target/{targetId}/restart:
+    post:
+      description: Restart target
+      operationId: RestartTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Restart target
+      tags:
+      - target
   /target/{targetId}/set-default:
     patch:
       description: Set target to be used by default
@@ -3120,6 +3136,22 @@ paths:
         "200":
           description: OK
       summary: Update workspace provider metadata
+      tags:
+      - workspace
+  /workspace/{workspaceId}/restart:
+    post:
+      description: Restart workspace
+      operationId: RestartWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Restart workspace
       tags:
       - workspace
   /workspace/{workspaceId}/start:
