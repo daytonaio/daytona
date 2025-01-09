@@ -10,13 +10,13 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/agent/toolbox/fs"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/workspace/project"
@@ -95,7 +95,11 @@ func (a *Agent) startProjectMode() error {
 				log.Info("Repository already exists. Skipping clone...")
 			} else {
 				if stat, err := os.Stat(a.Config.ProjectDir); err == nil {
-					ownerUid := stat.Sys().(*syscall.Stat_t).Uid
+					ownerUid, err := fs.GetFileUid(stat)
+					if err != nil {
+						log.Error(err)
+					}
+
 					if ownerUid != uint32(os.Getuid()) {
 						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", project.User, project.User), a.Config.ProjectDir)
 						err = chownCmd.Run()
