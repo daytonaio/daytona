@@ -19,6 +19,7 @@ type ITargetService interface {
 	Save(ctx context.Context, target *models.Target) error
 	Start(ctx context.Context, targetId string) error
 	Stop(ctx context.Context, targetId string) error
+	Restart(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
 	Delete(ctx context.Context, targetId string) error
 	ForceDelete(ctx context.Context, targetId string) error
