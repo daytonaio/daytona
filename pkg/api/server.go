@@ -213,8 +213,8 @@ func (a *ApiServer) Start() error {
 
 		projectConfigNameGroup := projectConfigController.Group(":configName")
 		{
-			projectConfigNameGroup.PUT(prebuildRoutePath+"/", prebuild.SetPrebuild)
-			projectConfigNameGroup.GET(prebuildRoutePath+"/", prebuild.ListPrebuildsForProjectConfig)
+			projectConfigNameGroup.PUT(prebuildRoutePath, prebuild.SetPrebuild)
+			projectConfigNameGroup.GET(prebuildRoutePath, prebuild.ListPrebuildsForProjectConfig)
 			projectConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
 			projectConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
 
