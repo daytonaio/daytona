@@ -11,6 +11,7 @@ import (
 	"unsafe"
 
 	"github.com/gliderlabs/ssh"
+	"golang.org/x/sys/unix"
 )
 
 func SetPtySize(f *os.File, win ssh.Window) {
