@@ -133,6 +133,7 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**HandleSuccessfulCreation**](docs/TargetAPI.md#handlesuccessfulcreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
+*TargetAPI* | [**RestartTarget**](docs/TargetAPI.md#restarttarget) | **Post** /target/{targetId}/restart | Restart target
 *TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 *TargetAPI* | [**SetTargetMetadata**](docs/TargetAPI.md#settargetmetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
@@ -145,6 +146,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
+*WorkspaceAPI* | [**RestartWorkspace**](docs/WorkspaceAPI.md#restartworkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 *WorkspaceAPI* | [**SetWorkspaceMetadata**](docs/WorkspaceAPI.md#setworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace

@@ -9,6 +9,7 @@ Method | HTTP request | Description
 [**HandleSuccessfulCreation**](TargetAPI.md#HandleSuccessfulCreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RemoveTarget**](TargetAPI.md#RemoveTarget) | **Delete** /target/{targetId} | Remove target
+[**RestartTarget**](TargetAPI.md#RestartTarget) | **Post** /target/{targetId}/restart | Restart target
 [**SetDefaultTarget**](TargetAPI.md#SetDefaultTarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
 [**SetTargetMetadata**](TargetAPI.md#SetTargetMetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 [**StartTarget**](TargetAPI.md#StartTarget) | **Post** /target/{targetId}/start | Start target
@@ -340,6 +341,74 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **force** | **bool** | Force | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## RestartTarget
+
+> RestartTarget(ctx, targetId).Execute()
+
+Restart target
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID or Name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.TargetAPI.RestartTarget(context.Background(), targetId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.RestartTarget``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID or Name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiRestartTargetRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
 
 ### Return type
 

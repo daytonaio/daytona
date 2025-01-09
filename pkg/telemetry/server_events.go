@@ -26,20 +26,24 @@ const (
 	ServerEventTargetDestroyed    ServerEvent = "server_target_destroyed"
 	ServerEventTargetStarted      ServerEvent = "server_target_started"
 	ServerEventTargetStopped      ServerEvent = "server_target_stopped"
+	ServerEventTargetRestarted    ServerEvent = "server_target_restarted"
 	ServerEventTargetCreateError  ServerEvent = "server_target_created_error"
 	ServerEventTargetDestroyError ServerEvent = "server_target_destroyed_error"
 	ServerEventTargetStartError   ServerEvent = "server_target_started_error"
 	ServerEventTargetStopError    ServerEvent = "server_target_stopped_error"
+	ServerEventTargetRestartError ServerEvent = "server_target_restarted_error"
 
 	// Workspace events
 	ServerEventWorkspaceCreated      ServerEvent = "server_workspace_created"
 	ServerEventWorkspaceDestroyed    ServerEvent = "server_workspace_destroyed"
 	ServerEventWorkspaceStarted      ServerEvent = "server_workspace_started"
 	ServerEventWorkspaceStopped      ServerEvent = "server_workspace_stopped"
+	ServerEventWorkspaceRestarted    ServerEvent = "server_workspace_restarted"
 	ServerEventWorkspaceCreateError  ServerEvent = "server_workspace_created_error"
 	ServerEventWorkspaceDestroyError ServerEvent = "server_workspace_destroyed_error"
 	ServerEventWorkspaceStartError   ServerEvent = "server_workspace_started_error"
 	ServerEventWorkspaceStopError    ServerEvent = "server_workspace_stopped_error"
+	ServerEventWorkspaceRestartError ServerEvent = "server_workspace_restarted_error"
 )
 
 func NewTargetEventProps(ctx context.Context, target *models.Target) map[string]interface{} {

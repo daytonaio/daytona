@@ -107,7 +107,7 @@ func autoStartTarget(target apiclient.TargetDTO) (bool, error) {
 		return false, err
 	}
 
-	err = StartTarget(apiClient, target)
+	err = StartTarget(apiClient, target, false)
 	if err != nil {
 		return false, err
 	}

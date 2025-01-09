@@ -62,7 +62,7 @@ var RestartCmd = &cobra.Command{
 		if len(selectedWorkspaces) == 1 {
 			workspace := selectedWorkspaces[0]
 
-			err = RestartWorkspace(apiClient, *workspace)
+			err = StartWorkspace(apiClient, *workspace, true)
 			if err != nil {
 				return err
 			}
@@ -70,7 +70,7 @@ var RestartCmd = &cobra.Command{
 			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' restarted successfully", workspace.Name))
 		} else {
 			for _, ws := range selectedWorkspaces {
-				err := RestartWorkspace(apiClient, *ws)
+				err := StartWorkspace(apiClient, *ws, true)
 				if err != nil {
 					log.Errorf("Failed to restart workspace %s: %v\n\n", ws.Name, err)
 					continue
@@ -84,12 +84,4 @@ var RestartCmd = &cobra.Command{
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.GetAllWorkspacesByState(apiclient.ResourceStateNameStarted)
 	},
-}
-
-func RestartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
-	err := StopWorkspace(apiClient, workspace)
-	if err != nil {
-		return err
-	}
-	return StartWorkspace(apiClient, workspace)
 }
