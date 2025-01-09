@@ -134,7 +134,7 @@ func AutoStartWorkspace(workspace apiclient.WorkspaceDTO) (bool, error) {
 		return false, err
 	}
 
-	err = StartWorkspace(apiClient, workspace)
+	err = StartWorkspace(apiClient, workspace, false)
 	if err != nil {
 		return false, err
 	}
