@@ -130,21 +130,33 @@ var ServeCmd = &cobra.Command{
 
 		go func() {
 			if c.LocalRunnerDisabled != nil && *c.LocalRunnerDisabled {
-				err = handleDisabledLocalRunner()
+				err = HandleDisabledLocalRunner()
 				if err != nil {
 					localRunnerErrChan <- err
 				}
 				return
 			}
 
-			localRunnerConfig := getLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
+			localRunnerConfig := GetLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
 
-			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
+			err = EnsureRunnerRegistered()
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+
+			params := bootstrap.LocalRunnerParams{
 				ServerConfig:     c,
 				RunnerConfig:     localRunnerConfig,
 				ConfigDir:        configDir,
 				TelemetryService: telemetryService,
-			})
+			}
+
+			runner, err := bootstrap.GetLocalRunner(params)
+			if err != nil {
+				localRunnerErrChan <- err
+			}
+
+			localRunnerErrChan <- runner.Start(context.Background())
 		}()
 
 		err = waitForApiServerToStart(apiServer)
@@ -158,7 +170,7 @@ var ServeCmd = &cobra.Command{
 		}
 
 		if c.LocalRunnerDisabled != nil && !*c.LocalRunnerDisabled {
-			err = awaitLocalRunnerStarted()
+			err = AwaitLocalRunnerStarted()
 			if err != nil {
 				localRunnerErrChan <- err
 			}
@@ -239,7 +251,7 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 	})
 }
 
-func startLocalRunner(params bootstrap.LocalRunnerParams) error {
+func EnsureRunnerRegistered() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
 	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
@@ -257,15 +269,10 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 		}
 	}
 
-	runner, err := bootstrap.GetLocalRunner(params)
-	if err != nil {
-		return err
-	}
-
-	return runner.Start(context.Background())
+	return err
 }
 
-func getLocalRunnerConfig(configDir string) *runner.Config {
+func GetLocalRunnerConfig(configDir string) *runner.Config {
 	providersDir := filepath.Join(configDir, "providers")
 	logFilePath := filepath.Join(configDir, "runner.log")
 
@@ -277,7 +284,7 @@ func getLocalRunnerConfig(configDir string) *runner.Config {
 	}
 }
 
-func awaitLocalRunnerStarted() error {
+func AwaitLocalRunnerStarted() error {
 	server := server.GetInstance(nil)
 	startTime := time.Now()
 
@@ -302,7 +309,7 @@ func awaitLocalRunnerStarted() error {
 	return nil
 }
 
-func handleDisabledLocalRunner() error {
+func HandleDisabledLocalRunner() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
 	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
