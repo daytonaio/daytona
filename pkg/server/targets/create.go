@@ -30,7 +30,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 		return nil, services.ErrTargetAlreadyExists
 	}
 
-	tc, err := s.findTargetConfig(ctx, req.TargetConfigName)
+	tc, err := s.findTargetConfig(ctx, req.TargetConfigId)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}

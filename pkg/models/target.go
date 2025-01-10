@@ -31,12 +31,19 @@ type TargetMetadata struct {
 	Uptime    uint64    `json:"uptime" validate:"required" gorm:"not null"`
 } // @name TargetMetadata
 
+var allowedAgentlessTargetStates = map[ResourceStateName]bool{
+	ResourceStateNamePendingCreate: true,
+	ResourceStateNameCreating:      true,
+	ResourceStateNameError:         true,
+	ResourceStateNameDeleted:       true,
+}
+
 func (t *Target) GetState() ResourceState {
 	state := getResourceStateFromJob(t.LastJob)
 
 	// Some providers do not utilize agents in target mode
 	if t.TargetConfig.ProviderInfo.AgentlessTarget {
-		if state.Name == ResourceStateNameDeleted || state.Name == ResourceStateNamePendingCreate || state.Name == ResourceStateNameCreating {
+		if allowedAgentlessTargetStates[state.Name] {
 			return state
 		}
 
