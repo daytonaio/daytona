@@ -120,7 +120,7 @@ func (a *ApiServer) Start() error {
 
 	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
 	{
-		healthController.GET("/", health.HealthCheck)
+		healthController.GET("", health.HealthCheck)
 	}
 
 	protected := a.router.Group("/")
@@ -143,8 +143,8 @@ func (a *ApiServer) Start() error {
 	workspaceController := protected.Group("/workspace")
 	{
 		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
-		workspaceController.GET("/", workspace.ListWorkspaces)
-		workspaceController.POST("/", workspace.CreateWorkspace)
+		workspaceController.GET("", workspace.ListWorkspaces)
+		workspaceController.POST("", workspace.CreateWorkspace)
 		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
 		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
@@ -159,9 +159,9 @@ func (a *ApiServer) Start() error {
 
 			fsController := toolboxController.Group("/files")
 			{
-				fsController.DELETE("/", toolbox.FsDeleteFile)
+				fsController.DELETE("", toolbox.FsDeleteFile)
 
-				fsController.GET("/", toolbox.FsListFiles)
+				fsController.GET("", toolbox.FsListFiles)
 				fsController.GET("/download", toolbox.FsDownloadFile)
 				fsController.GET("/find", toolbox.FsFindInFiles)
 				fsController.GET("/info", toolbox.FsGetFileDetails)
@@ -208,23 +208,23 @@ func (a *ApiServer) Start() error {
 		prebuildRoutePath := "/prebuild"
 		projectConfigPrebuildsGroup := projectConfigController.Group(prebuildRoutePath)
 		{
-			projectConfigPrebuildsGroup.GET("/", prebuild.ListPrebuilds)
+			projectConfigPrebuildsGroup.GET("", prebuild.ListPrebuilds)
 		}
 
 		projectConfigNameGroup := projectConfigController.Group(":configName")
 		{
-			projectConfigNameGroup.PUT(prebuildRoutePath+"/", prebuild.SetPrebuild)
-			projectConfigNameGroup.GET(prebuildRoutePath+"/", prebuild.ListPrebuildsForProjectConfig)
+			projectConfigNameGroup.PUT(prebuildRoutePath, prebuild.SetPrebuild)
+			projectConfigNameGroup.GET(prebuildRoutePath, prebuild.ListPrebuildsForProjectConfig)
 			projectConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
 			projectConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
 
-			projectConfigNameGroup.GET("/", projectconfig.GetProjectConfig)
+			projectConfigNameGroup.GET("", projectconfig.GetProjectConfig)
 			projectConfigNameGroup.PATCH("/set-default", projectconfig.SetDefaultProjectConfig)
-			projectConfigNameGroup.DELETE("/", projectconfig.DeleteProjectConfig)
+			projectConfigNameGroup.DELETE("", projectconfig.DeleteProjectConfig)
 		}
 
-		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
-		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
+		projectConfigController.GET("", projectconfig.ListProjectConfigs)
+		projectConfigController.PUT("", projectconfig.SetProjectConfig)
 		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
 	}
 
@@ -233,14 +233,14 @@ func (a *ApiServer) Start() error {
 	providerController := protected.Group("/provider")
 	{
 		providerController.POST("/install", provider.InstallProvider)
-		providerController.GET("/", provider.ListProviders)
+		providerController.GET("", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
 		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
 	}
 
 	containerRegistryController := protected.Group("/container-registry")
 	{
-		containerRegistryController.GET("/", containerregistry.ListContainerRegistries)
+		containerRegistryController.GET("", containerregistry.ListContainerRegistries)
 		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
 		containerRegistryController.PUT("/:server", containerregistry.SetContainerRegistry)
 		containerRegistryController.DELETE("/:server", containerregistry.RemoveContainerRegistry)
@@ -248,18 +248,18 @@ func (a *ApiServer) Start() error {
 
 	buildController := protected.Group("/build")
 	{
-		buildController.POST("/", build.CreateBuild)
+		buildController.POST("", build.CreateBuild)
 		buildController.GET("/:buildId", build.GetBuild)
-		buildController.GET("/", build.ListBuilds)
-		buildController.DELETE("/", build.DeleteAllBuilds)
+		buildController.GET("", build.ListBuilds)
+		buildController.DELETE("", build.DeleteAllBuilds)
 		buildController.DELETE("/:buildId", build.DeleteBuild)
 		buildController.DELETE("/prebuild/:prebuildId", build.DeleteBuildsFromPrebuild)
 	}
 
 	targetController := protected.Group("/target")
 	{
-		targetController.GET("/", target.ListTargets)
-		targetController.PUT("/", target.SetTarget)
+		targetController.GET("", target.ListTargets)
+		targetController.PUT("", target.SetTarget)
 		targetController.PATCH("/:target/set-default", target.SetDefaultTarget)
 		targetController.DELETE("/:target", target.RemoveTarget)
 	}
@@ -274,8 +274,8 @@ func (a *ApiServer) Start() error {
 
 	gitProviderController := protected.Group("/gitprovider")
 	{
-		gitProviderController.GET("/", gitprovider.ListGitProviders)
-		gitProviderController.PUT("/", gitprovider.SetGitProvider)
+		gitProviderController.GET("", gitprovider.ListGitProviders)
+		gitProviderController.PUT("", gitprovider.SetGitProvider)
 		gitProviderController.DELETE("/:gitProviderId", gitprovider.RemoveGitProvider)
 		gitProviderController.GET("/:gitProviderId/user", gitprovider.GetGitUser)
 		gitProviderController.GET("/:gitProviderId/namespaces", gitprovider.GetNamespaces)
@@ -291,21 +291,21 @@ func (a *ApiServer) Start() error {
 
 	apiKeyController := protected.Group("/apikey")
 	{
-		apiKeyController.GET("/", apikey.ListClientApiKeys)
+		apiKeyController.GET("", apikey.ListClientApiKeys)
 		apiKeyController.POST("/:apiKeyName", apikey.GenerateApiKey)
 		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
 	}
 
 	profileDataController := protected.Group("/profile")
 	{
-		profileDataController.GET("/", profiledata.GetProfileData)
-		profileDataController.PUT("/", profiledata.SetProfileData)
-		profileDataController.DELETE("/", profiledata.DeleteProfileData)
+		profileDataController.GET("", profiledata.GetProfileData)
+		profileDataController.PUT("", profiledata.SetProfileData)
+		profileDataController.DELETE("", profiledata.DeleteProfileData)
 	}
 
 	samplesController := protected.Group("/sample")
 	{
-		samplesController.GET("/", sample.ListSamples)
+		samplesController.GET("", sample.ListSamples)
 	}
 
 	projectGroup := protected.Group("/")
