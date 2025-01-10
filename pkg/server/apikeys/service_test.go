@@ -7,7 +7,9 @@ import (
 	"context"
 	"testing"
 
+	apikeys_util "github.com/daytonaio/daytona/internal/apikeys"
 	t_apikeys "github.com/daytonaio/daytona/internal/testing/server/apikeys"
+
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/services"
@@ -32,6 +34,12 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 	s.apiKeyStore = t_apikeys.NewInMemoryApiKeyStore()
 	s.apiKeyService = apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 		ApiKeyStore: s.apiKeyStore,
+		GenerateRandomKey: func(name string) string {
+			return apikeys_util.GenerateRandomKey()
+		},
+		GetKeyHash: func(key string) string {
+			return apikeys_util.HashKey(key)
+		},
 	})
 
 	for _, keyName := range clientKeyNames {

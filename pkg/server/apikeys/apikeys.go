@@ -6,7 +6,6 @@ package apikeys
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
@@ -37,10 +36,10 @@ func (s *ApiKeyService) Revoke(ctx context.Context, name string) error {
 }
 
 func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error) {
-	key := apikeys.GenerateRandomKey()
+	key := s.generateRandomKey(name)
 
 	apiKey := &models.ApiKey{
-		KeyHash: apikeys.HashKey(key),
+		KeyHash: s.getKeyHash(key),
 		Type:    keyType,
 		Name:    name,
 	}
