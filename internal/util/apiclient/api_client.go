@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -60,7 +61,7 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
 		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
-		if internal.AgentMode() {
+		if common.AgentMode() {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_WORKSPACE_SOURCE))
 		} else {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
