@@ -1,6 +1,6 @@
 ## daytona info
 
-Show workspace info
+Show resource info
 
 ```
 daytona info [flags]
