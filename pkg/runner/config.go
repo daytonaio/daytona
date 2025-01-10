@@ -19,7 +19,7 @@ import (
 type Config struct {
 	Id               string              `json:"id"`
 	Name             string              `json:"name"`
-	ApiPort          uint16              `json:"apiPort"`
+	ApiPort          int32               `json:"apiPort"`
 	ServerApiKey     string              `json:"serverApiKey"`
 	ServerApiUrl     string              `json:"serverApiUrl"`
 	ProvidersDir     string              `json:"providersDir"`

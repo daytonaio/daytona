@@ -32,13 +32,13 @@ var purgeCmd = &cobra.Command{
 	},
 }
 
-func healthCheck(apiPort uint16) error {
+func healthCheck(apiPort int32) error {
 	_, err := net.Dial("tcp", fmt.Sprintf(":%d", apiPort))
 
 	return err
 }
 
-func runStopRunnerForm(apiPort uint16) error {
+func runStopRunnerForm(apiPort int32) error {
 	var runnerStoppedCheck bool
 
 	form := huh.NewForm(

@@ -15,6 +15,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type Model struct {
@@ -45,6 +46,7 @@ func (m *Model) createForm() *huh.Form {
 	logFileMaxSize := strconv.Itoa(int(m.config.LogFile.MaxSize))
 	logFileMaxBackups := strconv.Itoa(int(m.config.LogFile.MaxBackups))
 	logFileMaxAge := strconv.Itoa(int(m.config.LogFile.MaxAge))
+	apiPort := strconv.Itoa(int(m.config.ApiPort))
 
 	return huh.NewForm(
 		huh.NewGroup(
@@ -56,6 +58,11 @@ func (m *Model) createForm() *huh.Form {
 				Title("Name").
 				Description("Unique name set on the Daytona Server").
 				Value(&m.config.Name),
+			huh.NewInput().
+				Title("Runner API Port").
+				Description("Port used for exposing runner health-check endpoint").
+				Value(&apiPort).
+				Validate(util.CreatePortValidator(&apiPort, &m.config.ApiPort)),
 			huh.NewInput().
 				Title("Server API URL").
 				Value(&m.config.ServerApiUrl),
@@ -88,16 +95,16 @@ func (m *Model) createForm() *huh.Form {
 				Title("Log File Max Size").
 				Description("In megabytes").
 				Value(&logFileMaxSize).
-				Validate(createIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
+				Validate(util.CreateIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
 			huh.NewInput().
 				Title("Log File Max Backups").
 				Value(&logFileMaxBackups).
-				Validate(createIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
+				Validate(util.CreateIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
 			huh.NewInput().
 				Title("Log File Max Age").
 				Description("In days").
 				Value(&logFileMaxAge).
-				Validate(createIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
+				Validate(util.CreateIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
 			huh.NewConfirm().
 				Title("Log File Local Time").
 				Description("Used for timestamping files. Default is UTC time.").
@@ -180,21 +187,4 @@ func ConfigurationForm(config *runner.Config) (*runner.Config, error) {
 	}
 
 	return nil, errors.New("no changes were made")
-}
-
-func createIntValidator(viewValue *string, value *int) func(string) error {
-	return func(string) error {
-		validateInt, err := strconv.Atoi(*viewValue)
-		if err != nil {
-			return errors.New("failed to parse int")
-		}
-
-		if validateInt <= 0 {
-			return errors.New("int out of range")
-		}
-
-		*value = int(validateInt)
-
-		return nil
-	}
 }
