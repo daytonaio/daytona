@@ -169,11 +169,7 @@ var CreateCmd = &cobra.Command{
 				SkipPrefixLengthSetup: true,
 			})
 
-			t, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(apiclient.CreateTargetDTO{
-				Id:               createTargetDto.Id,
-				Name:             createTargetDto.Name,
-				TargetConfigName: createTargetDto.TargetConfigName,
-			}).Execute()
+			t, res, err := apiClient.TargetAPI.CreateTarget(ctx).Target(*createTargetDto).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
