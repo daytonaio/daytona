@@ -37,9 +37,9 @@ type TargetDTO struct {
 } //	@name	TargetDTO
 
 type CreateTargetDTO struct {
-	Id               string `json:"id" validate:"required"`
-	Name             string `json:"name" validate:"required"`
-	TargetConfigName string `json:"targetConfigName" validate:"required"`
+	Id             string `json:"id" validate:"required"`
+	Name           string `json:"name" validate:"required"`
+	TargetConfigId string `json:"targetConfigId" validate:"required"`
 } //	@name	CreateTargetDTO
 
 type UpdateTargetProviderMetadataDTO struct {

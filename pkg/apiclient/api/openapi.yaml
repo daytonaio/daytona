@@ -2021,20 +2021,20 @@ components:
       type: object
     CreateTargetDTO:
       example:
-        targetConfigName: targetConfigName
         name: name
+        targetConfigId: targetConfigId
         id: id
       properties:
         id:
           type: string
         name:
           type: string
-        targetConfigName:
+        targetConfigId:
           type: string
       required:
       - id
       - name
-      - targetConfigName
+      - targetConfigId
       type: object
     CreateWorkspaceDTO:
       example:
