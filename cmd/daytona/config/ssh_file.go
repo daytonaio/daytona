@@ -60,9 +60,15 @@ func ensureSshFilesLinked() error {
 			return err
 		}
 
-		newContent := strings.ReplaceAll(string(content), "Include daytona_config\n\n", "")
-		newContent = strings.ReplaceAll(string(newContent), "Include daytona_config\n", "")
-		newContent = strings.ReplaceAll(string(newContent), "Include daytona_config", "")
+		contentStr := string(content)
+
+		if strings.HasPrefix(contentStr, "Include daytona_config") {
+			return nil
+		}
+
+		newContent := strings.ReplaceAll(contentStr, "Include daytona_config\n\n", "")
+		newContent = strings.ReplaceAll(newContent, "Include daytona_config\n", "")
+		newContent = strings.ReplaceAll(newContent, "Include daytona_config", "")
 		newContent = "Include daytona_config\n\n" + newContent
 		err = os.WriteFile(configFile, []byte(newContent), 0600)
 		if err != nil {
