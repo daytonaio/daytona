@@ -9,17 +9,17 @@ import (
 
 	golog "log"
 
-	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/cmd"
 	"github.com/daytonaio/daytona/pkg/cmd/agentmode"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/rs/zerolog"
 	zlog "github.com/rs/zerolog/log"
 	log "github.com/sirupsen/logrus"
 )
 
 func main() {
-	if internal.AgentMode() {
+	if common.AgentMode() {
 		err := agentmode.Execute()
 		if err != nil {
 			log.Fatal(err)
