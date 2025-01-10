@@ -46,6 +46,17 @@ func Start(logFilePath string) error {
 		}
 	}
 
+	if runtime.GOOS == "darwin" {
+		status, err := s.Status()
+		if err != nil {
+			return err
+		}
+
+		if status == service.StatusRunning {
+			return errors.New("daemon already running. Run 'daytona server restart' to reload the daemon")
+		}
+	}
+
 	logFile, err := os.OpenFile(logFilePath, os.O_TRUNC|os.O_CREATE|os.O_RDONLY, 0644)
 	if err != nil {
 		return err
