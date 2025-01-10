@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	apikey_util "github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/db"
@@ -278,6 +279,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 	apiKeyService := apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 		ApiKeyStore: apiKeyStore,
+		GenerateRandomKey: func(name string) string {
+			return apikey_util.GenerateRandomKey()
+		},
+		GetKeyHash: func(key string) string {
+			return apikey_util.HashKey(key)
+		},
 	})
 
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)

@@ -6,19 +6,18 @@ package apikeys
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/internal/apikeys"
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
 func (s *ApiKeyService) IsValidApiKey(ctx context.Context, apiKey string) bool {
-	keyHash := apikeys.HashKey(apiKey)
+	keyHash := s.getKeyHash(apiKey)
 
 	_, err := s.apiKeyStore.Find(ctx, keyHash)
 	return err == nil
 }
 
 func (s *ApiKeyService) GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error) {
-	keyHash := apikeys.HashKey(apiKey)
+	keyHash := s.getKeyHash(apiKey)
 
 	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
@@ -29,7 +28,7 @@ func (s *ApiKeyService) GetApiKeyType(ctx context.Context, apiKey string) (model
 }
 
 func (s *ApiKeyService) IsTargetApiKey(ctx context.Context, apiKey string) bool {
-	keyHash := apikeys.HashKey(apiKey)
+	keyHash := s.getKeyHash(apiKey)
 
 	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
