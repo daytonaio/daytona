@@ -43,9 +43,9 @@ var tg = &models.Target{
 }
 
 var createTargetDTO = services.CreateTargetDTO{
-	Name:             "test",
-	Id:               "test",
-	TargetConfigName: "test",
+	Name:           "test",
+	Id:             "test",
+	TargetConfigId: "test",
 }
 
 func TestTargetService(t *testing.T) {
