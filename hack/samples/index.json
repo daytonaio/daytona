@@ -1,8 +1,18 @@
 [
   {
+    "name": "Ada",
+    "description": "Develop Ada based applications. Includes appropriate runtime args, Ada, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-ada"
+  },
+  {
     "name": "Alpine",
     "description": "Simple Alpine container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-alpine"
+  },
+  {
+    "name": "MindAly",
+    "description": "MindAily is a transformative chat application designed to provide a judgment-free space for users to express their struggles.",
+    "gitUrl": "https://github.com/Aashish079/MindAly-daytona"
   },
   {
     "name": "Modern Restaurant",
@@ -15,6 +25,11 @@
     "gitUrl": "https://github.com/akshitagupta15june/FemOvaAI-daytona"
   },
   {
+    "name": "AIcontentCreator",
+    "description": "An AI-powered tool for content creators to brainstorm and transform their ideas into various moods and topics, offering a wide range of styles to choose from.",
+    "gitUrl": "https://github.com/FredDiPasqua/daytona"
+  },
+  {
     "name": "Debian",
     "description": "Simple Debian container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-debian"
@@ -23,6 +38,16 @@
     "name": "target",
     "description": "It is a sample institute website featuring dynamic content such as courses, achievers, and a director's column.",
     "gitUrl": "https://github.com/Prince94201/target"
+  },
+  {
+    "name": "COBOL",
+    "description": "Develop COBOL based applications. Includes appropriate runtime args, COBOL, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-cobol"
+  },
+  {
+    "name": "Fortran",
+    "description": "Develop Fortran based applications. Includes appropriate runtime args, Fortran, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-fortran"
   },
   {
     "name": "Cricket Quira",
@@ -185,7 +210,11 @@
     "description": "A sample project showcasing React and Node.js integration with Daytona.",
     "gitUrl": "https://github.com/Jitankasarkar/Sample-Template"
   },
-
+  {
+    "name": "React.js - CryptoTracker",
+    "description": "Get the latest crypto prices and trends with CryptoTracker, a React.js application.",
+    "gitUrl": "https://github.com/Suyash878/Sample-Crypto"
+  },
   {
     "name": "Next.js - OpenSourceSmith",
     "description": "A platform designed to empower developers by providing curated open-source templates for frontend, backend, and full-stack applications. Built using NextJs, Prisma, Postgres, CopilotKit, ShadCN.",
@@ -216,6 +245,11 @@
     "name": "Next.js - Cal Buddy",
     "description": "Cal Buddy, is a smart calendar assistant that helps you schedule, manage, and chat with your calendar. It helps you boost your productivity with AI-powered task management.",
     "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
+  },
+  {
+      "name": "R",
+      "description": "Develop R based applications. Includes appropriate runtime args, R, common tools, extensions, and dependencies.",
+      "gitUrl": "https://github.com/daytonaio/sample-r"
   },
   {
     "name": "React.js - TerraGrow",
@@ -331,6 +365,11 @@
     "name": "NextJs/MindsDb - WordWave",
     "description": "A blogging platform that uses AI to help generate content for posts and categorize them into their respective topics.",
     "gitUrl": "https://github.com/daytonaio/sample-nextjs-blogging-app"
+  },
+  {
+    "name": "gemini-chat-daytona",
+    "description": "A modern, responsive chat application powered by Google's Gemini",
+    "gitUrl": "https://github.com/Naveenkwr/gemini-chat-daytona"
   },
   {
     "name": "React.js - effective-scrapper",
@@ -673,10 +712,15 @@
     "gitUrl": "https://github.com/TheCoderAdi/discord-bot"
   },
   {
+    "name": "Bank Application (Bank Chor) - Using Spring Boot & REST API with Daytona",
+    "description": "A bank application featuring account creation, deposits, and withdrawals, implemented with Spring Boot and integrated with Daytona for streamlined development.",
+    "gitUrl": "https://github.com/harshsinghcs/SpingBoot-BankProject-withDaytona"
+  },
+  {
     "name": "An Web site Builder with prompt",
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
-  }
+  },
   {
     
     "name": "An PassWord Generator",
@@ -684,3 +728,4 @@
     "gitUrl": "https://github.com/Adibakhan14/CODSOFT/blob/main/PasswordGenerator.py"
   }
 ]
+

@@ -181,10 +181,14 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	switch ideId {
 	case "vscode":
 		return ide.OpenVSCode(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
+	case "code-insiders":
+		return ide.OpenVSCodeInsiders(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "ssh":
 		return ide.OpenTerminalSsh(activeProfile, workspaceId, projectName, gpgKey, nil)
 	case "browser":
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
+	case "codium":
+		return ide.OpenVScodium(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "cursor":
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "jupyter":
@@ -193,6 +197,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenFleet(activeProfile, workspaceId, projectName, gpgKey)
 	case "zed":
 		return ide.OpenZed(activeProfile, workspaceId, projectName, gpgKey)
+	case "windsurf":
+		return ide.OpenWindsurf(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	default:
 		_, ok := jetbrains.GetIdes()[jetbrains.Id(ideId)]
 		if ok {

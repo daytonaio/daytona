@@ -25,12 +25,15 @@ func GetBinaryUrls() map[os.OperatingSystem]string {
 func GetIdeList() []Ide {
 	ides := []Ide{
 		{"vscode", "VS Code"},
+		{"code-insiders", "VS Code Insiders"},
 		{"browser", "VS Code - Browser"},
 		{"cursor", "Cursor"},
+		{"codium", "VSCodium"},
 		{"ssh", "Terminal SSH"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
 		{"zed", "Zed"},
+		{"windsurf", "Windsurf"},
 	}
 
 	sortedJbIdes := []Ide{}

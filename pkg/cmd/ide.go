@@ -46,6 +46,16 @@ var ideCmd = &cobra.Command{
 		switch chosenIde.Id {
 		case "vscode":
 			ide_util.CheckAndAlertVSCodeInstalled()
+		case "codium":
+			_, err := ide_util.GetCodiumBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
+		case "code-insiders":
+			_, err := ide_util.GetVSCodeInsidersBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		case "cursor":
 			_, err := ide_util.GetCursorBinaryPath()
 			if err != nil {
@@ -57,6 +67,11 @@ var ideCmd = &cobra.Command{
 			}
 		case "zed":
 			_, err := ide_util.GetZedBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
+		case "windsurf":
+			_, err := ide_util.GetWindsurfBinaryPath()
 			if err != nil {
 				log.Error(err)
 			}
