@@ -214,7 +214,7 @@ func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interfac
 	}
 
 	source := telemetry.CLI_SOURCE
-	if internal.AgentMode() {
+	if common.AgentMode() {
 		source = telemetry.CLI_WORKSPACE_SOURCE
 	}
 
