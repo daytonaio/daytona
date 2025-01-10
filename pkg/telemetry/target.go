@@ -44,15 +44,17 @@ func NewTargetEvent(name TargetEventName, t *models.Target, err error, extras ma
 func (e targetEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.target != nil {
-		props["target_id"] = e.target.Id
-		props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.target.TargetConfig.ProviderInfo.Name, e.target.TargetConfig.Options, e.target.TargetConfig.ProviderInfo.RunnerId)
-		props["provider_name"] = e.target.TargetConfig.ProviderInfo.Name
-		props["provider_version"] = e.target.TargetConfig.ProviderInfo.Version
-		props["target_config_deleted"] = e.target.TargetConfig.Deleted
-		props["agentless_target"] = e.target.TargetConfig.ProviderInfo.AgentlessTarget
-		props["is_local_runner"] = e.target.TargetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
+	if e.target == nil {
+		return props
 	}
+
+	props["target_id"] = e.target.Id
+	props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.target.TargetConfig.ProviderInfo.Name, e.target.TargetConfig.Options, e.target.TargetConfig.ProviderInfo.RunnerId)
+	props["provider_name"] = e.target.TargetConfig.ProviderInfo.Name
+	props["provider_version"] = e.target.TargetConfig.ProviderInfo.Version
+	props["target_config_deleted"] = e.target.TargetConfig.Deleted
+	props["agentless_target"] = e.target.TargetConfig.ProviderInfo.AgentlessTarget
+	props["is_local_runner"] = e.target.TargetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
 
 	return props
 }

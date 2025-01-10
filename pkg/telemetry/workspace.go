@@ -44,20 +44,22 @@ func NewWorkspaceEvent(name WorkspaceEventName, w *models.Workspace, err error, 
 func (e workspaceEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.workspace != nil {
-		props["workspace_id"] = e.workspace.Id
-		props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.workspace.Target.TargetConfig.ProviderInfo.Name, e.workspace.Target.TargetConfig.Options, e.workspace.Target.TargetConfig.ProviderInfo.RunnerId)
-		props["provider_name"] = e.workspace.Target.TargetConfig.ProviderInfo.Name
-		props["provider_version"] = e.workspace.Target.TargetConfig.ProviderInfo.Version
-		if isImagePublic(e.workspace.Image) {
-			props["image"] = e.workspace.Image
-		}
-		if e.workspace.Repository != nil && isPublic(e.workspace.Repository.Url) {
-			props["repository_url"] = e.workspace.Repository.Url
-		}
-		props["builder"] = getBuilder(e.workspace.BuildConfig)
-		props["is_local_runner"] = e.workspace.Target.TargetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
+	if e.workspace == nil {
+		return props
 	}
+
+	props["workspace_id"] = e.workspace.Id
+	props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.workspace.Target.TargetConfig.ProviderInfo.Name, e.workspace.Target.TargetConfig.Options, e.workspace.Target.TargetConfig.ProviderInfo.RunnerId)
+	props["provider_name"] = e.workspace.Target.TargetConfig.ProviderInfo.Name
+	props["provider_version"] = e.workspace.Target.TargetConfig.ProviderInfo.Version
+	if isImagePublic(e.workspace.Image) {
+		props["image"] = e.workspace.Image
+	}
+	if e.workspace.Repository != nil && isPublic(e.workspace.Repository.Url) {
+		props["repository_url"] = e.workspace.Repository.Url
+	}
+	props["builder"] = getBuilder(e.workspace.BuildConfig)
+	props["is_local_runner"] = e.workspace.Target.TargetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
 
 	return props
 }

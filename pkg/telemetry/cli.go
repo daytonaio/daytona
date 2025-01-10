@@ -45,21 +45,23 @@ func NewCliEvent(name CliEventName, cmd *cobra.Command, flags []string, err erro
 func (e cliEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.cmd != nil {
-		path := e.cmd.CommandPath()
-
-		// Trim daytona from the path if a non-root command was invoked
-		// This prevents a `daytona` pileup in the telemetry data
-		if path != "daytona" {
-			path = strings.TrimPrefix(path, "daytona ")
-		}
-
-		calledAs := e.cmd.CalledAs()
-
-		props["command"] = path
-		props["called_as"] = calledAs
-		props["flags"] = e.flags
+	if e.cmd == nil {
+		return props
 	}
+
+	path := e.cmd.CommandPath()
+
+	// Trim daytona from the path if a non-root command was invoked
+	// This prevents a `daytona` pileup in the telemetry data
+	if path != "daytona" {
+		path = strings.TrimPrefix(path, "daytona ")
+	}
+
+	calledAs := e.cmd.CalledAs()
+
+	props["command"] = path
+	props["called_as"] = calledAs
+	props["flags"] = e.flags
 
 	return props
 }

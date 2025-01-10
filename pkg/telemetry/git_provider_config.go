@@ -17,13 +17,13 @@ const (
 )
 
 type GitProviderConfigEvent struct {
-	GitProviderConfig *models.GitProviderConfig
+	gitProviderConfig *models.GitProviderConfig
 	AbstractEvent
 }
 
 func NewGitProviderConfigEvent(name GitProviderConfigEventName, b *models.GitProviderConfig, err error, extras map[string]interface{}) Event {
 	return GitProviderConfigEvent{
-		GitProviderConfig: b,
+		gitProviderConfig: b,
 		AbstractEvent: AbstractEvent{
 			name:   string(name),
 			extras: extras,
@@ -35,12 +35,14 @@ func NewGitProviderConfigEvent(name GitProviderConfigEventName, b *models.GitPro
 func (e GitProviderConfigEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.GitProviderConfig != nil {
-		props["provider_id"] = e.GitProviderConfig.ProviderId
-		props["is_self_hosted"] = e.GitProviderConfig.BaseApiUrl != nil && *e.GitProviderConfig.BaseApiUrl != ""
-		if e.GitProviderConfig.SigningMethod != nil {
-			props["signing_method"] = *e.GitProviderConfig.SigningMethod
-		}
+	if e.gitProviderConfig == nil {
+		return props
+	}
+
+	props["provider_id"] = e.gitProviderConfig.ProviderId
+	props["is_self_hosted"] = e.gitProviderConfig.BaseApiUrl != nil && *e.gitProviderConfig.BaseApiUrl != ""
+	if e.gitProviderConfig.SigningMethod != nil {
+		props["signing_method"] = *e.gitProviderConfig.SigningMethod
 	}
 
 	return props

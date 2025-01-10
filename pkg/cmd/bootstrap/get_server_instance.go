@@ -300,6 +300,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		GetKeyHash: func(key string) string {
 			return apikey_util.HashKey(key)
 		},
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return telemetryService.Track(event, clientId)
+		},
 	})
 
 	headscaleUrl := util.GetFrpcHeadscaleUrl(c.Frps.Protocol, c.Id, c.Frps.Domain)

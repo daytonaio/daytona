@@ -37,15 +37,17 @@ func NewJobEvent(name JobEventName, j *models.Job, err error, extras map[string]
 func (e jobEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.job != nil {
-		props["job_id"] = e.job.Id
-		props["is_local_runner"] = e.job.RunnerId != nil && *e.job.RunnerId == common.LOCAL_RUNNER_ID
-		props["resource_type"] = e.job.ResourceType
-		props["job_action"] = e.job.Action
+	if e.job == nil {
+		return props
+	}
 
-		if e.job.Error != nil {
-			props["job_error"] = *e.job.Error
-		}
+	props["job_id"] = e.job.Id
+	props["is_local_runner"] = e.job.RunnerId != nil && *e.job.RunnerId == common.LOCAL_RUNNER_ID
+	props["resource_type"] = e.job.ResourceType
+	props["job_action"] = e.job.Action
+
+	if e.job.Error != nil {
+		props["job_error"] = *e.job.Error
 	}
 
 	return props

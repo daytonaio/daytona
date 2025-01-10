@@ -7,6 +7,8 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *ApiKeyService) ListClientKeys(ctx context.Context) ([]*models.ApiKey, error) {
@@ -46,8 +48,32 @@ func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType,
 
 	err := s.apiKeyStore.Save(ctx, apiKey)
 	if err != nil {
-		return "", err
+		return "", s.handleGenerateApiKeyError(ctx, apiKey, err)
 	}
 
-	return key, nil
+	return key, s.handleGenerateApiKeyError(ctx, apiKey, nil)
+}
+
+func (s *ApiKeyService) handleGenerateApiKeyError(ctx context.Context, key *models.ApiKey, err error) error {
+	if key.Type != models.ApiKeyTypeClient {
+		return err
+	}
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	eventName := telemetry.ApiKeyEventLifecycleCreated
+	if err != nil {
+		eventName = telemetry.ApiKeyEventLifecycleCreationFailed
+	}
+
+	event := telemetry.NewApiKeyEvent(eventName, key, err, nil)
+
+	telemetryErr := s.trackTelemetryEvent(event, telemetry.ClientId(ctx))
+	if telemetryErr != nil {
+		log.Trace(telemetryErr)
+	}
+
+	return err
 }

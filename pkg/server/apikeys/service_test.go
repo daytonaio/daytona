@@ -14,6 +14,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -39,6 +40,9 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 		},
 		GetKeyHash: func(key string) string {
 			return apikeys_util.HashKey(key)
+		},
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return nil
 		},
 	})
 

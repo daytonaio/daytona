@@ -36,14 +36,16 @@ func NewTargetConfigEvent(name TargetConfigEventName, tc *models.TargetConfig, e
 func (e targetConfigEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.targetConfig != nil {
-		props["target_config_id"] = e.targetConfig.Id
-		props["provider_name"] = e.targetConfig.ProviderInfo.Name
-		props["provider_version"] = e.targetConfig.ProviderInfo.Version
-		props["deleted"] = e.targetConfig.Deleted
-		props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.targetConfig.ProviderInfo.Name, e.targetConfig.Options, e.targetConfig.ProviderInfo.RunnerId)
-		props["is_local_runner"] = e.targetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
+	if e.targetConfig == nil {
+		return props
 	}
+
+	props["target_config_id"] = e.targetConfig.Id
+	props["provider_name"] = e.targetConfig.ProviderInfo.Name
+	props["provider_version"] = e.targetConfig.ProviderInfo.Version
+	props["deleted"] = e.targetConfig.Deleted
+	props["is_local_docker_target_config"] = common.IsLocalDockerTarget(e.targetConfig.ProviderInfo.Name, e.targetConfig.Options, e.targetConfig.ProviderInfo.RunnerId)
+	props["is_local_runner"] = e.targetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
 
 	return props
 }

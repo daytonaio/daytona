@@ -35,19 +35,21 @@ func NewBuildEvent(name BuildEventName, b *models.Build, err error, extras map[s
 func (e buildEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.build != nil {
-		props["build_id"] = e.build.Id
-		props["from_prebuild"] = e.build.PrebuildId != ""
-		if isImagePublic(e.build.ContainerConfig.Image) {
-			props["image"] = e.build.Image
-		}
-
-		if e.build.Repository != nil && isPublic(e.build.Repository.Url) {
-			props["repository_url"] = e.build.Repository.Url
-		}
-
-		props["builder"] = getBuilder(e.build.BuildConfig)
+	if e.build == nil {
+		return props
 	}
+
+	props["build_id"] = e.build.Id
+	props["from_prebuild"] = e.build.PrebuildId != ""
+	if isImagePublic(e.build.ContainerConfig.Image) {
+		props["image"] = e.build.Image
+	}
+
+	if e.build.Repository != nil && isPublic(e.build.Repository.Url) {
+		props["repository_url"] = e.build.Repository.Url
+	}
+
+	props["builder"] = getBuilder(e.build.BuildConfig)
 
 	return props
 }

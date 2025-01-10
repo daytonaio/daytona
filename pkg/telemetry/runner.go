@@ -42,10 +42,12 @@ func NewRunnerEvent(name RunnerEventName, r *models.Runner, err error, extras ma
 func (e runnerEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.runner != nil {
-		props["runner_id"] = e.runner.Id
-		props["is_local_runner"] = e.runner.Id == common.LOCAL_RUNNER_ID
+	if e.runner == nil {
+		return props
 	}
+
+	props["runner_id"] = e.runner.Id
+	props["is_local_runner"] = e.runner.Id == common.LOCAL_RUNNER_ID
 
 	return props
 }

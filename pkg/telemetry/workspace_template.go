@@ -39,22 +39,24 @@ func NewWorkspaceTemplateEvent(name WorkspaceTemplateEventName, wt *models.Works
 func (e workspaceTemplateEvent) Props() map[string]interface{} {
 	props := e.AbstractEvent.Props()
 
-	if e.workspaceTemplate != nil {
-		props["workspace_template_name"] = e.workspaceTemplate.Name
-		// prebuilds, err := json.Marshal(e.workspaceTemplate.Prebuilds)
-		props["prebuilds"] = e.workspaceTemplate.Prebuilds
-		// if err == nil {
-		// }
-		if isImagePublic(e.workspaceTemplate.Image) {
-			props["image"] = e.workspaceTemplate.Image
-		}
-
-		if isPublic(e.workspaceTemplate.RepositoryUrl) {
-			props["repository_url"] = e.workspaceTemplate.RepositoryUrl
-		}
-
-		props["builder"] = getBuilder(e.workspaceTemplate.BuildConfig)
+	if e.workspaceTemplate == nil {
+		return props
 	}
+
+	props["workspace_template_name"] = e.workspaceTemplate.Name
+	// prebuilds, err := json.Marshal(e.workspaceTemplate.Prebuilds)
+	props["prebuilds"] = e.workspaceTemplate.Prebuilds
+	// if err == nil {
+	// }
+	if isImagePublic(e.workspaceTemplate.Image) {
+		props["image"] = e.workspaceTemplate.Image
+	}
+
+	if isPublic(e.workspaceTemplate.RepositoryUrl) {
+		props["repository_url"] = e.workspaceTemplate.RepositoryUrl
+	}
+
+	props["builder"] = getBuilder(e.workspaceTemplate.BuildConfig)
 
 	return props
 }
