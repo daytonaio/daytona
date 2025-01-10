@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
@@ -16,7 +17,6 @@ import (
 	server_cmd "github.com/daytonaio/daytona/pkg/cmd/server"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
-	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/services"
@@ -143,7 +143,7 @@ var purgeCmd = &cobra.Command{
 
 		if len(targets) != 0 || len(workspaces) != 0 || len(builds) != 0 {
 			var continuePurge bool
-			view.PurgeResourcesPrompt(&continuePurge, len(targets), len(workspaces), len(builds))
+			commands := view.PurgeResourcesPrompt(&continuePurge, len(targets), len(workspaces), len(builds))
 			if err != nil {
 				if !forceFlag {
 					return err
@@ -152,7 +152,7 @@ var purgeCmd = &cobra.Command{
 				}
 			}
 			if !continuePurge {
-				fmt.Println("Operation cancelled. Manually delete leftover workspaces, targets and builds for a complete purge.")
+				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by running following commands:\n%s\n", strings.Join(commands, "\n"))
 				return nil
 			}
 		}
@@ -251,12 +251,6 @@ var purgeCmd = &cobra.Command{
 			fmt.Printf("Error deleting autocompletion data: %s\n", err)
 		}
 
-		fmt.Println("Deleting the runners config directory")
-		err = runner.DeleteConfigDir()
-		if err != nil {
-			return err
-		}
-
 		fmt.Println("Deleting the Daytona config directory")
 		err = config.DeleteConfigDir()
 		if err != nil {
@@ -281,11 +275,6 @@ func init() {
 
 func purgeLocalRunnerProviders(ctx context.Context, serverConfig *server.Config, serverConfigDir string, telemetryService telemetry.TelemetryService) error {
 	localRunnerConfig := server_cmd.GetLocalRunnerConfig(filepath.Join(serverConfigDir, "local-runner"))
-
-	err := server_cmd.EnsureRunnerRegistered()
-	if err != nil {
-		return err
-	}
 
 	params := bootstrap.LocalRunnerParams{
 		ServerConfig:     serverConfig,

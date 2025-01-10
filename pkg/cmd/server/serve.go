@@ -130,7 +130,7 @@ var ServeCmd = &cobra.Command{
 
 		go func() {
 			if c.LocalRunnerDisabled != nil && *c.LocalRunnerDisabled {
-				err = HandleDisabledLocalRunner()
+				err = handleDisabledLocalRunner()
 				if err != nil {
 					localRunnerErrChan <- err
 				}
@@ -139,7 +139,7 @@ var ServeCmd = &cobra.Command{
 
 			localRunnerConfig := GetLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
 
-			err = EnsureRunnerRegistered()
+			err = ensureRunnerRegistered()
 			if err != nil {
 				localRunnerErrChan <- err
 			}
@@ -170,7 +170,7 @@ var ServeCmd = &cobra.Command{
 		}
 
 		if c.LocalRunnerDisabled != nil && !*c.LocalRunnerDisabled {
-			err = AwaitLocalRunnerStarted()
+			err = awaitLocalRunnerStarted()
 			if err != nil {
 				localRunnerErrChan <- err
 			}
@@ -251,7 +251,7 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 	})
 }
 
-func EnsureRunnerRegistered() error {
+func ensureRunnerRegistered() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
 	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
@@ -284,7 +284,7 @@ func GetLocalRunnerConfig(configDir string) *runner.Config {
 	}
 }
 
-func AwaitLocalRunnerStarted() error {
+func awaitLocalRunnerStarted() error {
 	server := server.GetInstance(nil)
 	startTime := time.Now()
 
@@ -309,7 +309,7 @@ func AwaitLocalRunnerStarted() error {
 	return nil
 }
 
-func HandleDisabledLocalRunner() error {
+func handleDisabledLocalRunner() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
 	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
