@@ -15,7 +15,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/build"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/db"
 	"github.com/daytonaio/daytona/pkg/docker"
 	jobs_build "github.com/daytonaio/daytona/pkg/jobs/build"
 	jobs_runner "github.com/daytonaio/daytona/pkg/jobs/runner"
@@ -27,11 +26,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/server/headscale"
-	"github.com/daytonaio/daytona/pkg/server/targetconfigs"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stringid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -325,23 +324,8 @@ func getProviderManager(params LocalRunnerParams, logger *log.Logger) (providerm
 	headscaleUrl := util.GetFrpcHeadscaleUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain)
 	binaryUrl, _ := url.JoinPath(util.GetFrpcApiUrl(params.ServerConfig.Frps.Protocol, params.ServerConfig.Id, params.ServerConfig.Frps.Domain), "binary", "script")
 
-	dbPath, err := getDbPath()
-	if err != nil {
-		return nil, err
-	}
-
-	dbConnection := db.GetSQLiteConnection(dbPath)
-
-	store := db.NewStore(dbConnection)
-
-	targetConfigStore, err := db.NewTargetConfigStore(store)
-	if err != nil {
-		return nil, err
-	}
-
-	targetConfigService := targetconfigs.NewTargetConfigService(targetconfigs.TargetConfigServiceConfig{
-		TargetConfigStore: targetConfigStore,
-	})
+	targetConfigService := server.GetInstance(nil).TargetConfigService
+	targetService := server.GetInstance(nil).TargetService
 
 	return providermanager.GetProviderManager(&providermanager.ProviderManagerConfig{
 		TargetLogsDir:      server.GetTargetLogsDir(params.ConfigDir),
@@ -362,12 +346,31 @@ func getProviderManager(params LocalRunnerParams, logger *log.Logger) (providerm
 			return targetConfigService.Map(ctx)
 		},
 		CreateTargetConfig: func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error {
-			_, err := targetConfigService.Add(ctx, services.AddTargetConfigDTO{
+			tc, err := targetConfigService.Add(ctx, services.AddTargetConfigDTO{
 				Name:         name,
 				Options:      options,
 				ProviderInfo: providerInfo,
 			})
-			return err
+
+			if err != nil {
+				return err
+			}
+
+			if providerInfo.Name == "docker-provider" {
+				id := stringid.GenerateRandomID()
+				id = stringid.TruncateID(id)
+
+				_, err := targetService.CreateTarget(ctx, services.CreateTargetDTO{
+					TargetConfigId: tc.Id,
+					Name:           name,
+					Id:             id,
+				})
+				if err != nil {
+					log.Error(err)
+				}
+			}
+
+			return nil
 		},
 	}), nil
 }
