@@ -31,6 +31,7 @@ func GetIdeList() []Ide {
 		{"codium", "VSCodium"},
 		{"codium-insiders", "VSCodium Insiders"},
 		{"ssh", "Terminal SSH"},
+		{"vim", "Vim"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
 		{"positron", "Positron"},
