@@ -127,7 +127,7 @@ func (r *Runner) Start(ctx context.Context) error {
 
 	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
 	{
-		healthController.GET("/", health.HealthCheck)
+		healthController.GET("", health.HealthCheck)
 	}
 
 	routerErrChan := make(chan error)

@@ -152,7 +152,7 @@ var purgeCmd = &cobra.Command{
 				}
 			}
 			if !continuePurge {
-				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by running following commands:\n%s\n", strings.Join(commands, "\n"))
+				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by running the following commands:\n\n%s\n", strings.Join(commands, "\n"))
 				return nil
 			}
 		}
