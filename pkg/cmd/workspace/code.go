@@ -189,6 +189,8 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "codium":
 		return ide.OpenVScodium(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
+	case "codium-insiders":
+		return ide.OpenVScodiumInsiders(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "cursor":
 		return ide.OpenCursor(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "jupyter":
