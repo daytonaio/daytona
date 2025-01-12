@@ -1,88 +1,88 @@
-# ApiKey
+# ApiKeyViewDTO
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**KeyHash** | **string** |  | 
-**Name** | **string** | Workspace or client name | 
+**Current** | **bool** |  | 
+**Name** | **string** |  | 
 **Type** | [**ModelsApiKeyType**](ModelsApiKeyType.md) |  | 
 
 ## Methods
 
-### NewApiKey
+### NewApiKeyViewDTO
 
-`func NewApiKey(keyHash string, name string, type_ ModelsApiKeyType, ) *ApiKey`
+`func NewApiKeyViewDTO(current bool, name string, type_ ModelsApiKeyType, ) *ApiKeyViewDTO`
 
-NewApiKey instantiates a new ApiKey object
+NewApiKeyViewDTO instantiates a new ApiKeyViewDTO object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewApiKeyWithDefaults
+### NewApiKeyViewDTOWithDefaults
 
-`func NewApiKeyWithDefaults() *ApiKey`
+`func NewApiKeyViewDTOWithDefaults() *ApiKeyViewDTO`
 
-NewApiKeyWithDefaults instantiates a new ApiKey object
+NewApiKeyViewDTOWithDefaults instantiates a new ApiKeyViewDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
-### GetKeyHash
+### GetCurrent
 
-`func (o *ApiKey) GetKeyHash() string`
+`func (o *ApiKeyViewDTO) GetCurrent() bool`
 
-GetKeyHash returns the KeyHash field if non-nil, zero value otherwise.
+GetCurrent returns the Current field if non-nil, zero value otherwise.
 
-### GetKeyHashOk
+### GetCurrentOk
 
-`func (o *ApiKey) GetKeyHashOk() (*string, bool)`
+`func (o *ApiKeyViewDTO) GetCurrentOk() (*bool, bool)`
 
-GetKeyHashOk returns a tuple with the KeyHash field if it's non-nil, zero value otherwise
+GetCurrentOk returns a tuple with the Current field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetKeyHash
+### SetCurrent
 
-`func (o *ApiKey) SetKeyHash(v string)`
+`func (o *ApiKeyViewDTO) SetCurrent(v bool)`
 
-SetKeyHash sets KeyHash field to given value.
+SetCurrent sets Current field to given value.
 
 
 ### GetName
 
-`func (o *ApiKey) GetName() string`
+`func (o *ApiKeyViewDTO) GetName() string`
 
 GetName returns the Name field if non-nil, zero value otherwise.
 
 ### GetNameOk
 
-`func (o *ApiKey) GetNameOk() (*string, bool)`
+`func (o *ApiKeyViewDTO) GetNameOk() (*string, bool)`
 
 GetNameOk returns a tuple with the Name field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetName
 
-`func (o *ApiKey) SetName(v string)`
+`func (o *ApiKeyViewDTO) SetName(v string)`
 
 SetName sets Name field to given value.
 
 
 ### GetType
 
-`func (o *ApiKey) GetType() ModelsApiKeyType`
+`func (o *ApiKeyViewDTO) GetType() ModelsApiKeyType`
 
 GetType returns the Type field if non-nil, zero value otherwise.
 
 ### GetTypeOk
 
-`func (o *ApiKey) GetTypeOk() (*ModelsApiKeyType, bool)`
+`func (o *ApiKeyViewDTO) GetTypeOk() (*ModelsApiKeyType, bool)`
 
 GetTypeOk returns a tuple with the Type field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetType
 
-`func (o *ApiKey) SetType(v ModelsApiKeyType)`
+`func (o *ApiKeyViewDTO) SetType(v ModelsApiKeyType)`
 
 SetType sets Type field to given value.
 

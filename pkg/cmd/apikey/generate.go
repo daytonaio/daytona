@@ -12,11 +12,10 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/views/apikey"
 	view "github.com/daytonaio/daytona/pkg/views/apikey"
 )
 
-var GenerateCmd = &cobra.Command{
+var generateCmd = &cobra.Command{
 	Use:     "generate [NAME]",
 	Short:   "Generate a new API key",
 	Aliases: []string{"g", "new"},
@@ -38,7 +37,7 @@ var GenerateCmd = &cobra.Command{
 		if len(args) == 1 {
 			keyName = args[0]
 		} else {
-			apikey.ApiKeyCreationView(&keyName, apiKeyList)
+			view.ApiKeyCreationView(&keyName, apiKeyList)
 		}
 
 		for _, key := range apiKeyList {

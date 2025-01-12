@@ -5,8 +5,8 @@ package middlewares
 
 import (
 	"errors"
-	"strings"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +19,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token := ExtractToken(bearerToken)
+		token := util.ExtractToken(bearerToken)
 		if token == "" {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return
@@ -41,12 +41,4 @@ func AuthMiddleware() gin.HandlerFunc {
 		ctx.Set("apiKeyType", apiKeyType)
 		ctx.Next()
 	}
-}
-
-func ExtractToken(bearerToken string) string {
-	if !strings.HasPrefix(bearerToken, "Bearer ") {
-		return ""
-	}
-
-	return strings.TrimPrefix(bearerToken, "Bearer ")
 }

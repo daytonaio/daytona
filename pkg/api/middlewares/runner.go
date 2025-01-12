@@ -6,6 +6,7 @@ package middlewares
 import (
 	"errors"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,7 @@ func RunnerAuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		token := ExtractToken(bearerToken)
+		token := util.ExtractToken(bearerToken)
 		if token == "" {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return
