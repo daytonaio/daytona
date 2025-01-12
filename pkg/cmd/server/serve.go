@@ -137,26 +137,12 @@ var ServeCmd = &cobra.Command{
 				return
 			}
 
-			localRunnerConfig := GetLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
-
-			err = ensureRunnerRegistered()
-			if err != nil {
-				localRunnerErrChan <- err
-			}
-
-			params := bootstrap.LocalRunnerParams{
+			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
 				ServerConfig:     c,
-				RunnerConfig:     localRunnerConfig,
+				RunnerConfig:     GetLocalRunnerConfig(filepath.Join(configDir, "local-runner")),
 				ConfigDir:        configDir,
 				TelemetryService: telemetryService,
-			}
-
-			runner, err := bootstrap.GetLocalRunner(params)
-			if err != nil {
-				localRunnerErrChan <- err
-			}
-
-			localRunnerErrChan <- runner.Start(context.Background())
+			})
 		}()
 
 		err = waitForApiServerToStart(apiServer)
@@ -251,7 +237,7 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 	})
 }
 
-func ensureRunnerRegistered() error {
+func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	runnerService := server.GetInstance(nil).RunnerService
 
 	_, err := runnerService.GetRunner(context.Background(), bootstrap.LOCAL_RUNNER_ID)
@@ -269,7 +255,12 @@ func ensureRunnerRegistered() error {
 		}
 	}
 
-	return err
+	runner, err := bootstrap.GetLocalRunner(params)
+	if err != nil {
+		return err
+	}
+
+	return runner.Start(context.Background())
 }
 
 func GetLocalRunnerConfig(configDir string) *runner.Config {
