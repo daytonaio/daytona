@@ -7,16 +7,20 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
 )
 
 func (s *ApiKeyServiceTestSuite) TestListClientKeys() {
-	expectedKeys := []*models.ApiKey{}
+	expectedKeys := []*services.ApiKeyDTO{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
 	for _, keyName := range keyNames {
 		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
-		expectedKeys = append(expectedKeys, apiKey)
+		expectedKeys = append(expectedKeys, &services.ApiKeyDTO{
+			Type: apiKey.Type,
+			Name: apiKey.Name,
+		})
 	}
 
 	require := s.Require()
