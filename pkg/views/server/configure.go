@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type Model struct {
@@ -89,7 +90,7 @@ func (m *Model) createForm() *huh.Form {
 			huh.NewInput().
 				Title("Local Builder Registry Port").
 				Value(&localBuilderRegistryPort).
-				Validate(createPortValidator(m.config, &localBuilderRegistryPort, &m.config.LocalBuilderRegistryPort)),
+				Validate(util.CreateServerPortValidator(m.config, &localBuilderRegistryPort, &m.config.LocalBuilderRegistryPort)),
 			huh.NewInput().
 				Title("Local Builder Registry Image").
 				Value(&m.config.LocalBuilderRegistryImage),
@@ -104,11 +105,11 @@ func (m *Model) createForm() *huh.Form {
 			huh.NewInput().
 				Title("API Port").
 				Value(&apiPortView).
-				Validate(createPortValidator(m.config, &apiPortView, &m.config.ApiPort)),
+				Validate(util.CreateServerPortValidator(m.config, &apiPortView, &m.config.ApiPort)),
 			huh.NewInput().
 				Title("Headscale Port").
 				Value(&headscalePortView).
-				Validate(createPortValidator(m.config, &headscalePortView, &m.config.HeadscalePort)),
+				Validate(util.CreateServerPortValidator(m.config, &headscalePortView, &m.config.HeadscalePort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
@@ -131,16 +132,16 @@ func (m *Model) createForm() *huh.Form {
 				Title("Log File Max Size").
 				Description("In megabytes").
 				Value(&logFileMaxSize).
-				Validate(createIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
+				Validate(util.CreateIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
 			huh.NewInput().
 				Title("Log File Max Backups").
 				Value(&logFileMaxBackups).
-				Validate(createIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
+				Validate(util.CreateIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
 			huh.NewInput().
 				Title("Log File Max Age").
 				Description("In days").
 				Value(&logFileMaxAge).
-				Validate(createIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
+				Validate(util.CreateIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
 			huh.NewConfirm().
 				Title("Log File Local Time").
 				Description("Used for timestamping files. Default is UTC time.").
@@ -156,7 +157,7 @@ func (m *Model) createForm() *huh.Form {
 			huh.NewInput().
 				Title("Frps Port").
 				Value(&frpsPortView).
-				Validate(createPortValidator(m.config, &frpsPortView, &m.config.Frps.Port)),
+				Validate(util.CreateServerPortValidator(m.config, &frpsPortView, &m.config.Frps.Port)),
 			huh.NewInput().
 				Title("Frps Protocol").
 				Value(&m.config.Frps.Protocol),
@@ -235,40 +236,4 @@ func ConfigurationForm(config *apiclient.ServerConfig) (*apiclient.ServerConfig,
 	}
 
 	return nil, errors.New("no changes were made")
-}
-
-func createPortValidator(config *apiclient.ServerConfig, portView *string, port *int32) func(string) error {
-	return func(string) error {
-		validatePort, err := strconv.Atoi(*portView)
-		if err != nil {
-			return errors.New("failed to parse port")
-		}
-		if validatePort < 0 || validatePort > 65535 {
-			return errors.New("port out of range")
-		}
-		*port = int32(validatePort)
-
-		if config.ApiPort == config.HeadscalePort {
-			return errors.New("port conflict")
-		}
-
-		return nil
-	}
-}
-
-func createIntValidator(viewValue *string, value *int32) func(string) error {
-	return func(string) error {
-		validateInt, err := strconv.Atoi(*viewValue)
-		if err != nil {
-			return errors.New("failed to parse int")
-		}
-
-		if validateInt <= 0 {
-			return errors.New("int out of range")
-		}
-
-		*value = int32(validateInt)
-
-		return nil
-	}
 }

@@ -18,10 +18,12 @@ func RenderConfig(config *runner.Config, showKey bool) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Runner Name: "), config.Name) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("API URL: "), config.ServerApiUrl) + "\n\n"
+	output += fmt.Sprintf("%s %d", views.GetPropertyKey("Runner API Port: "), config.ApiPort) + "\n\n"
+
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server API URL: "), config.ServerApiUrl) + "\n\n"
 
 	if showKey {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("API Key: "), config.ServerApiKey) + "\n\n"
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Server API Key: "), config.ServerApiKey) + "\n\n"
 	}
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Providers Dir: "), config.ProvidersDir) + "\n\n"

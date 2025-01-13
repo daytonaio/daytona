@@ -21,9 +21,9 @@ var defaultLogFileConfig = LogFileConfig{
 
 type LogFileConfig struct {
 	Path       string `json:"path" validate:"required"`
-	MaxSize    int    `json:"maxSize" validate:"required"`
-	MaxBackups int    `json:"maxBackups" validate:"required"`
-	MaxAge     int    `json:"maxAge" validate:"required"`
+	MaxSize    int32  `json:"maxSize" validate:"required"`
+	MaxBackups int32  `json:"maxBackups" validate:"required"`
+	MaxAge     int32  `json:"maxAge" validate:"required"`
 	LocalTime  bool   `json:"localTime" validate:"optional"`
 	Compress   bool   `json:"compress" validate:"optional"`
 } // @name LogFileConfig
@@ -44,7 +44,7 @@ func GetDefaultLogFileConfig(logFilePath string) *LogFileConfig {
 		if err != nil {
 			log.Error(fmt.Printf("%s. Using default log file max size.", err))
 		} else {
-			logFileConfig.MaxSize = value
+			logFileConfig.MaxSize = int32(value)
 		}
 	}
 
@@ -54,7 +54,7 @@ func GetDefaultLogFileConfig(logFilePath string) *LogFileConfig {
 		if err != nil {
 			log.Error(fmt.Printf("%s. Using default log file max backups.", err))
 		} else {
-			logFileConfig.MaxBackups = value
+			logFileConfig.MaxBackups = int32(value)
 		}
 	}
 
@@ -64,7 +64,7 @@ func GetDefaultLogFileConfig(logFilePath string) *LogFileConfig {
 		if err != nil {
 			log.Error(fmt.Printf("%s. Using default log file max age.", err))
 		} else {
-			logFileConfig.MaxAge = value
+			logFileConfig.MaxAge = int32(value)
 		}
 	}
 
