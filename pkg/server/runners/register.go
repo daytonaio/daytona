@@ -9,25 +9,28 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func (s *RunnerService) RegisterRunner(ctx context.Context, req services.RegisterRunnerDTO) (*services.RunnerDTO, error) {
 	var err error
 	ctx, err = s.runnerStore.BeginTransaction(ctx)
 	if err != nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, err)
+		return nil, s.handleRegisterError(ctx, nil, err)
 	}
 
 	defer stores.RecoverAndRollback(ctx, s.runnerStore)
 
 	_, err = s.runnerStore.Find(ctx, req.Name)
 	if err == nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, services.ErrRunnerAlreadyExists)
+		return nil, s.handleRegisterError(ctx, nil, services.ErrRunnerAlreadyExists)
 	}
 
 	apiKey, err := s.generateApiKey(ctx, req.Id)
 	if err != nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, err)
+		return nil, s.handleRegisterError(ctx, nil, err)
 	}
 
 	runner := &models.Runner{
@@ -42,21 +45,46 @@ func (s *RunnerService) RegisterRunner(ctx context.Context, req services.Registe
 
 	err = s.runnerStore.Save(ctx, runner)
 	if err != nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, err)
+		return nil, s.handleRegisterError(ctx, runner, err)
 	}
 
 	err = s.runnerMetadataStore.Save(ctx, runner.Metadata)
 	if err != nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, err)
+		return nil, s.handleRegisterError(ctx, runner, err)
 	}
 
 	err = s.runnerStore.CommitTransaction(ctx)
 	if err != nil {
-		return nil, s.runnerStore.RollbackTransaction(ctx, err)
+		return nil, s.handleRegisterError(ctx, runner, err)
 	}
 
 	return &services.RunnerDTO{
 		Runner: *runner,
 		State:  runner.GetState(),
-	}, nil
+	}, s.handleRegisterError(ctx, runner, nil)
+}
+
+func (s *RunnerService) handleRegisterError(ctx context.Context, r *models.Runner, err error) error {
+	if err != nil {
+		err = s.runnerStore.RollbackTransaction(ctx, err)
+	}
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.RunnerEventLifecycleRegistered
+	if err != nil {
+		eventName = telemetry.RunnerEventLifecycleRegistrationFailed
+	}
+	event := telemetry.NewRunnerEvent(eventName, r, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }

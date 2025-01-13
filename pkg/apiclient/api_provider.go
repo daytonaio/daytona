@@ -375,16 +375,16 @@ func (a *ProviderAPIService) UninstallProviderExecute(r ApiUninstallProviderRequ
 }
 
 type ApiUpdateProviderRequest struct {
-	ctx          context.Context
-	ApiService   *ProviderAPIService
-	runnerId     string
-	providerName string
-	downloadUrls *map[string]string
+	ctx               context.Context
+	ApiService        *ProviderAPIService
+	runnerId          string
+	providerName      string
+	updateProviderDto *UpdateProviderDTO
 }
 
-// Provider download URLs
-func (r ApiUpdateProviderRequest) DownloadUrls(downloadUrls map[string]string) ApiUpdateProviderRequest {
-	r.downloadUrls = &downloadUrls
+// Update provider
+func (r ApiUpdateProviderRequest) UpdateProviderDto(updateProviderDto UpdateProviderDTO) ApiUpdateProviderRequest {
+	r.updateProviderDto = &updateProviderDto
 	return r
 }
 
@@ -431,8 +431,8 @@ func (a *ProviderAPIService) UpdateProviderExecute(r ApiUpdateProviderRequest) (
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.downloadUrls == nil {
-		return nil, reportError("downloadUrls is required and must be specified")
+	if r.updateProviderDto == nil {
+		return nil, reportError("updateProviderDto is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -453,7 +453,7 @@ func (a *ProviderAPIService) UpdateProviderExecute(r ApiUpdateProviderRequest) (
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.downloadUrls
+	localVarPostBody = r.updateProviderDto
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

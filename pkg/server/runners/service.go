@@ -27,7 +27,7 @@ type RunnerServiceConfig struct {
 	RevokeApiKey       func(ctx context.Context, name string) error
 	UnsetDefaultTarget func(ctx context.Context, runnerId string) error
 
-	TrackTelemetryEvent func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 func NewRunnerService(config RunnerServiceConfig) services.IRunnerService {
@@ -59,7 +59,7 @@ type RunnerService struct {
 	revokeApiKey       func(ctx context.Context, name string) error
 	unsetDefaultTarget func(ctx context.Context, runnerId string) error
 
-	trackTelemetryEvent func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 func (s *RunnerService) GetRunner(ctx context.Context, runnerId string) (*services.RunnerDTO, error) {

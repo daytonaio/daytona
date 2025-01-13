@@ -12,6 +12,7 @@ import (
 	jobs "github.com/daytonaio/daytona/pkg/server/jobs"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -63,6 +64,9 @@ func (s *JobServiceTestSuite) SetupTest() {
 	s.jobStore = job_internal.NewInMemoryJobStore()
 	s.jobService = jobs.NewJobService(jobs.JobServiceConfig{
 		JobStore: s.jobStore,
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return nil
+		},
 	})
 
 	for _, j := range expectedJobs {
