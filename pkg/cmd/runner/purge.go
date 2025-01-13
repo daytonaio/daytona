@@ -5,6 +5,7 @@ package runner
 
 import (
 	"fmt"
+	"log"
 	"net"
 
 	"github.com/charmbracelet/huh"
@@ -13,11 +14,36 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var yesFlag bool
+
 var purgeCmd = &cobra.Command{
 	Use:   "purge",
-	Short: "Purges the runner",
+	Short: "Purges the Daytona Runner",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if !yesFlag {
+			var confirmCheck bool
+
+			form := huh.NewForm(
+				huh.NewGroup(
+					huh.NewConfirm().
+						Title("Purging will remove the entire Daytona Runner configuration from the system, are you sure you want to continue?").
+						Description("This action is irreversible.").
+						Value(&confirmCheck),
+				),
+			).WithTheme(views.GetCustomTheme())
+
+			err := form.Run()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			if !confirmCheck {
+				fmt.Println("Operation cancelled.")
+				return nil
+			}
+		}
+
 		cfg, err := runner.GetConfig()
 		if err != nil {
 			return err
@@ -80,4 +106,8 @@ func purgeRunner() error {
 	views.RenderInfoMessageBold("The Daytona Runner has been purged from this device.")
 
 	return nil
+}
+
+func init() {
+	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute Daytona Runner purge without prompt")
 }
