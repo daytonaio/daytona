@@ -14,7 +14,7 @@ daytona purge [flags]
 
 ```
   -f, --force   Delete all targets by force
-  -y, --yes     Execute purge without prompt
+  -y, --yes     Execute purge without a prompt
 ```
 
 ### Options inherited from parent commands

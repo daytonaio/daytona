@@ -6,6 +6,7 @@ package middlewares
 import (
 	"errors"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
@@ -13,13 +14,7 @@ import (
 
 func WorkspaceAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		bearerToken := ctx.GetHeader("Authorization")
-		if bearerToken == "" {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
-			return
-		}
-
-		token := ExtractToken(bearerToken)
+		token := util.ExtractToken(ctx)
 		if token == "" {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return

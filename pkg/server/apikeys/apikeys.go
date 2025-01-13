@@ -7,21 +7,25 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *ApiKeyService) ListClientKeys(ctx context.Context) ([]*models.ApiKey, error) {
+func (s *ApiKeyService) ListClientKeys(ctx context.Context) ([]*services.ApiKeyDTO, error) {
 	keys, err := s.apiKeyStore.List(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	clientKeys := []*models.ApiKey{}
+	clientKeys := []*services.ApiKeyDTO{}
 
 	for _, key := range keys {
 		if key.Type == models.ApiKeyTypeClient {
-			clientKeys = append(clientKeys, key)
+			clientKeys = append(clientKeys, &services.ApiKeyDTO{
+				Type: key.Type,
+				Name: key.Name,
+			})
 		}
 	}
 
@@ -52,6 +56,15 @@ func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType,
 	}
 
 	return key, s.handleGenerateApiKeyError(ctx, apiKey, nil)
+}
+
+func (s *ApiKeyService) GetApiKeyName(ctx context.Context, apiKey string) (string, error) {
+	key, err := s.apiKeyStore.Find(ctx, s.getKeyHash(apiKey))
+	if err != nil {
+		return "", err
+	}
+
+	return key.Name, nil
 }
 
 func (s *ApiKeyService) handleGenerateApiKeyError(ctx context.Context, key *models.ApiKey, err error) error {
