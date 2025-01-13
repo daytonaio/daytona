@@ -45,7 +45,7 @@ func (s *BuildService) Create(ctx context.Context, b services.CreateBuildDTO) (s
 	}
 
 	if b.PrebuildId != nil {
-		newBuild.PrebuildId = *b.PrebuildId
+		newBuild.PrebuildId = b.PrebuildId
 	}
 
 	err = s.buildStore.Save(ctx, &newBuild)

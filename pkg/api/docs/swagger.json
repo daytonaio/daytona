@@ -3589,7 +3589,6 @@
                 "createdAt",
                 "envVars",
                 "id",
-                "prebuildId",
                 "repository",
                 "state",
                 "updatedAt"
