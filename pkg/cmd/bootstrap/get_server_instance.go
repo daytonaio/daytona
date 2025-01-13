@@ -166,9 +166,9 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 
 			return repo, err
 		},
-		CreateJob: func(ctx context.Context, workspaceId string, action models.JobAction) error {
+		CreateJob: func(ctx context.Context, buildId string, action models.JobAction) error {
 			return jobService.Create(ctx, &models.Job{
-				ResourceId:   workspaceId,
+				ResourceId:   buildId,
 				ResourceType: models.ResourceTypeBuild,
 				Action:       action,
 				State:        models.JobStatePending,

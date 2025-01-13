@@ -21,7 +21,7 @@ type BuildServiceConfig struct {
 	BuildStore            stores.BuildStore
 	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
-	CreateJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
+	CreateJob             func(ctx context.Context, buildId string, action models.JobAction) error
 	TrackTelemetryEvent   func(event telemetry.Event, clientId string) error
 	LoggerFactory         logs.ILoggerFactory
 }
@@ -30,7 +30,7 @@ type BuildService struct {
 	buildStore            stores.BuildStore
 	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
-	createJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
+	createJob             func(ctx context.Context, buildId string, action models.JobAction) error
 	trackTelemetryEvent   func(event telemetry.Event, clientId string) error
 	loggerFactory         logs.ILoggerFactory
 }
