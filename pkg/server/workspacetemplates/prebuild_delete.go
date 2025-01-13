@@ -57,7 +57,7 @@ func (s *WorkspaceTemplateService) DeletePrebuild(ctx context.Context, workspace
 		}
 	}
 
-	errs := s.deleteBuilds(ctx, &id, nil, force)
+	errs := s.deleteBuilds(ctx, nil, &id, force)
 	if len(errs) > 0 {
 		for _, err := range errs {
 			err = s.handleDeletePrebuildError(ctx, workspaceTemplate, err)

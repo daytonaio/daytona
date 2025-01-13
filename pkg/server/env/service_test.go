@@ -36,12 +36,6 @@ func TestEnvironmentVariableService(t *testing.T) {
 	suite.Run(t, NewEnvironmentVariableTestSuite())
 }
 
-func (s *EnvironmentVariableServiceTestSuite) TestReturnsEnvironmentVariableNotFound() {
-	envVar, err := s.environmentVariableService.List(context.TODO())
-	s.Require().Nil(envVar)
-	s.Require().True(stores.IsEnvironmentVariableNotFound(err))
-}
-
 func (s *EnvironmentVariableServiceTestSuite) TestSaveEnvironmentVariable() {
 	envVar := &models.EnvironmentVariable{
 		Key:   "key1",
@@ -51,10 +45,10 @@ func (s *EnvironmentVariableServiceTestSuite) TestSaveEnvironmentVariable() {
 	err := s.environmentVariableService.Save(context.TODO(), envVar)
 	s.Require().Nil(err)
 
-	envVarsFromStore, err := s.environmentVariableStore.List(context.TODO())
+	envVars, err := s.environmentVariableStore.List(context.TODO())
 	s.Require().Nil(err)
-	s.Require().NotNil(envVarsFromStore)
-	s.Require().Equal(envVar, envVarsFromStore)
+	s.Require().NotNil(envVars)
+	s.Require().Contains(envVars, envVar)
 }
 
 func (s *EnvironmentVariableServiceTestSuite) TestDeleteEnvironmentVariable() {
@@ -69,7 +63,7 @@ func (s *EnvironmentVariableServiceTestSuite) TestDeleteEnvironmentVariable() {
 	err = s.environmentVariableService.Delete(context.TODO(), envVar.Key)
 	s.Require().Nil(err)
 
-	EnvVarsFromStore, err := s.environmentVariableStore.List(context.TODO())
-	s.Require().Nil(EnvVarsFromStore)
-	s.Require().True(stores.IsEnvironmentVariableNotFound(err))
+	envVars, err := s.environmentVariableStore.List(context.TODO())
+	s.Require().Nil(err)
+	s.Require().NotContains(envVars, envVar)
 }

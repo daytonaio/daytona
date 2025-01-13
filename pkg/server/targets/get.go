@@ -20,7 +20,7 @@ func (s *TargetService) GetTarget(ctx context.Context, filter *stores.TargetFilt
 	state := tg.GetState()
 
 	if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
-		return nil, stores.ErrTargetNotFound
+		return nil, services.ErrTargetDeleted
 	}
 
 	var updatedWorkspaces []models.Workspace
