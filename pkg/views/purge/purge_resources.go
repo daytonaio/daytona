@@ -19,17 +19,17 @@ func PurgeResourcesPrompt(continuePurge *bool, numOfTargets, numOfWorkspaces, nu
 
 	if numOfBuilds > 0 {
 		resources = append(resources, fmt.Sprintf("builds: %d", numOfBuilds))
-		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("\"daytona build remove -af\""))
+		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("daytona build remove -af"))
 	}
 
 	if numOfWorkspaces > 0 {
 		resources = append(resources, fmt.Sprintf("workspaces: %d", numOfWorkspaces))
-		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("\"daytona remove -afy\""))
+		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("daytona remove -afy"))
 	}
 
 	if numOfTargets > 0 {
 		resources = append(resources, fmt.Sprintf("targets: %d", numOfTargets))
-		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("\"daytona target remove -afy\""))
+		commands = append(commands, lipgloss.NewStyle().Foreground(views.DimmedGreen).Render("daytona target remove -afy"))
 	}
 
 	form := huh.NewForm(

@@ -18,12 +18,10 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/server/headscale"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/purge"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -152,59 +150,12 @@ var purgeCmd = &cobra.Command{
 				}
 			}
 			if !continuePurge {
-				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by running the following commands:\n\n%s\n", strings.Join(commands, "\n"))
+				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by starting the server and running the following commands:\n\n%s\n", strings.Join(commands, "\n"))
 				return nil
 			}
 		}
 
 		fmt.Println("Purging the server")
-
-		errCh := make(chan error)
-
-		go func() {
-			err := <-errCh
-			if err != nil {
-				if !forceFlag {
-					log.Fatal(err)
-				}
-			}
-		}()
-
-		headscaleServerStartedChan := make(chan struct{})
-		headscaleServerErrChan := make(chan error)
-
-		go func() {
-			err := server.TailscaleServer.Start(headscaleServerErrChan)
-			if err != nil {
-				headscaleServerErrChan <- err
-				return
-			}
-			headscaleServerStartedChan <- struct{}{}
-		}()
-
-		localContainerRegistryErrChan := make(chan error)
-
-		go func() {
-			if server.LocalContainerRegistry != nil {
-				localContainerRegistryErrChan <- server.LocalContainerRegistry.Start()
-			} else {
-				localContainerRegistryErrChan <- nil
-			}
-		}()
-
-		select {
-		case <-headscaleServerStartedChan:
-			go func() {
-				headscaleServerErrChan <- server.TailscaleServer.Connect(headscale.HEADSCALE_USERNAME)
-			}()
-		case err := <-headscaleServerErrChan:
-			return err
-		}
-
-		err = <-localContainerRegistryErrChan
-		if err != nil {
-			return err
-		}
 
 		if server.LocalContainerRegistry != nil {
 			fmt.Println("Purging local container registry...")
