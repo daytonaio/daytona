@@ -220,7 +220,7 @@ var purgeCmd = &cobra.Command{
 }
 
 func init() {
-	purgeCmd.Flags().BoolVarP(&create.YesFlag, "yes", "y", false, "Execute purge without prompt")
+	purgeCmd.Flags().BoolVarP(&create.YesFlag, "yes", "y", false, "Execute purge without a prompt")
 	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }
 

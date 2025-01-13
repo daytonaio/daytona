@@ -5,7 +5,6 @@ package runner
 
 import (
 	"fmt"
-	"log"
 	"net"
 
 	"github.com/charmbracelet/huh"
@@ -35,7 +34,7 @@ var purgeCmd = &cobra.Command{
 
 			err := form.Run()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 
 			if !confirmCheck {
@@ -109,5 +108,5 @@ func purgeRunner() error {
 }
 
 func init() {
-	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute Daytona Runner purge without prompt")
+	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute Daytona Runner purge without a prompt")
 }
