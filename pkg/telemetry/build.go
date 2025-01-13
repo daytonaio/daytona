@@ -40,7 +40,7 @@ func (e buildEvent) Props() map[string]interface{} {
 	}
 
 	props["build_id"] = e.build.Id
-	props["from_prebuild"] = e.build.PrebuildId != ""
+	props["from_prebuild"] = e.build.PrebuildId != nil && *e.build.PrebuildId != ""
 	if isImagePublic(e.build.ContainerConfig.Image) {
 		props["image"] = e.build.Image
 	}
