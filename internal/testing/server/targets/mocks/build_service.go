@@ -7,7 +7,6 @@ package mocks
 
 import (
 	"io"
-	"time"
 
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/stretchr/testify/mock"
@@ -44,11 +43,6 @@ func (m *MockBuildService) Delete(filter *services.BuildFilter, force bool) []er
 func (m *MockBuildService) HandleSuccessfulRemoval(id string) error {
 	args := m.Called(id)
 	return args.Get(0).(error)
-}
-
-func (m *MockBuildService) AwaitEmptyList(waitTime time.Duration) error {
-	args := m.Called(waitTime)
-	return args.Error(0)
 }
 
 func (m *MockBuildService) GetBuildLogReader(buildId string) (io.Reader, error) {

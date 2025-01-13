@@ -7,7 +7,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"time"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
@@ -19,7 +18,6 @@ type IBuildService interface {
 	List(ctx context.Context, filter *BuildFilter) ([]*BuildDTO, error)
 	Delete(ctx context.Context, filter *BuildFilter, force bool) []error
 	HandleSuccessfulRemoval(ctx context.Context, id string) error
-	AwaitEmptyList(ctx context.Context, waitTime time.Duration) error
 
 	GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error)
 	GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error)

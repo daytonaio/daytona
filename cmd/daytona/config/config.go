@@ -215,12 +215,7 @@ func DeleteConfigDir() error {
 		return err
 	}
 
-	err = os.RemoveAll(configDir)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return os.RemoveAll(configDir)
 }
 
 func TelemetryEnabled() bool {
