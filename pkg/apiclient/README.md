@@ -162,7 +162,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [AddTargetConfigDTO](docs/AddTargetConfigDTO.md)
- - [ApiKey](docs/ApiKey.md)
+ - [ApiKeyViewDTO](docs/ApiKeyViewDTO.md)
  - [BuildConfig](docs/BuildConfig.md)
  - [BuildDTO](docs/BuildDTO.md)
  - [CachedBuild](docs/CachedBuild.md)

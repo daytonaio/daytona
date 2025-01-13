@@ -29,7 +29,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ApiKey"
+                                "$ref": "#/definitions/ApiKeyViewDTO"
                             }
                         }
                     }
@@ -2456,19 +2456,18 @@
                 }
             }
         },
-        "ApiKey": {
+        "ApiKeyViewDTO": {
             "type": "object",
             "required": [
-                "keyHash",
+                "current",
                 "name",
                 "type"
             ],
             "properties": {
-                "keyHash": {
-                    "type": "string"
+                "current": {
+                    "type": "boolean"
                 },
                 "name": {
-                    "description": "Workspace or client name",
                     "type": "string"
                 },
                 "type": {
