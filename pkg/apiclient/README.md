@@ -280,6 +280,7 @@ Class | Method | HTTP request | Description
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetMetadata](docs/TargetMetadata.md)
  - [UpdateJobState](docs/UpdateJobState.md)
+ - [UpdateProviderDTO](docs/UpdateProviderDTO.md)
  - [UpdateRunnerMetadataDTO](docs/UpdateRunnerMetadataDTO.md)
  - [UpdateTargetMetadataDTO](docs/UpdateTargetMetadataDTO.md)
  - [UpdateTargetProviderMetadataDTO](docs/UpdateTargetProviderMetadataDTO.md)

@@ -17,7 +17,7 @@ import (
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
-	Args:    cobra.ExactArgs(0),
+	Args:    cobra.NoArgs,
 	Aliases: []string{"ls"},
 	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {

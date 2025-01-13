@@ -18,16 +18,16 @@ type TargetServiceConfig struct {
 	TargetStore         stores.TargetStore
 	TargetMetadataStore stores.TargetMetadataStore
 
-	FindTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
-	GenerateApiKey   func(ctx context.Context, name string) (string, error)
-	RevokeApiKey     func(ctx context.Context, name string) error
-	CreateJob        func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
+	FindTargetConfig    func(ctx context.Context, name string) (*models.TargetConfig, error)
+	GenerateApiKey      func(ctx context.Context, name string) (string, error)
+	RevokeApiKey        func(ctx context.Context, name string) error
+	CreateJob           func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 
-	ServerApiUrl     string
-	ServerUrl        string
-	ServerVersion    string
-	LoggerFactory    logs.ILoggerFactory
-	TelemetryService telemetry.TelemetryService
+	ServerApiUrl  string
+	ServerUrl     string
+	ServerVersion string
+	LoggerFactory logs.ILoggerFactory
 }
 
 func NewTargetService(config TargetServiceConfig) services.ITargetService {
@@ -40,11 +40,11 @@ func NewTargetService(config TargetServiceConfig) services.ITargetService {
 		revokeApiKey:     config.RevokeApiKey,
 		createJob:        config.CreateJob,
 
-		serverApiUrl:     config.ServerApiUrl,
-		serverUrl:        config.ServerUrl,
-		serverVersion:    config.ServerVersion,
-		loggerFactory:    config.LoggerFactory,
-		telemetryService: config.TelemetryService,
+		serverApiUrl:        config.ServerApiUrl,
+		serverUrl:           config.ServerUrl,
+		serverVersion:       config.ServerVersion,
+		loggerFactory:       config.LoggerFactory,
+		trackTelemetryEvent: config.TrackTelemetryEvent,
 	}
 }
 
@@ -52,16 +52,16 @@ type TargetService struct {
 	targetStore         stores.TargetStore
 	targetMetadataStore stores.TargetMetadataStore
 
-	findTargetConfig func(ctx context.Context, name string) (*models.TargetConfig, error)
-	generateApiKey   func(ctx context.Context, name string) (string, error)
-	revokeApiKey     func(ctx context.Context, name string) error
-	createJob        func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
+	findTargetConfig    func(ctx context.Context, name string) (*models.TargetConfig, error)
+	generateApiKey      func(ctx context.Context, name string) (string, error)
+	revokeApiKey        func(ctx context.Context, name string) error
+	createJob           func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 
-	serverApiUrl     string
-	serverUrl        string
-	serverVersion    string
-	loggerFactory    logs.ILoggerFactory
-	telemetryService telemetry.TelemetryService
+	serverApiUrl  string
+	serverUrl     string
+	serverVersion string
+	loggerFactory logs.ILoggerFactory
 }
 
 func (s *TargetService) GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error) {

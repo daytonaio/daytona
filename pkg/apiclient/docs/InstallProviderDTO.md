@@ -6,12 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **DownloadUrls** | **map[string]string** |  | 
 **Name** | **string** |  | 
+**Version** | **string** |  | 
 
 ## Methods
 
 ### NewInstallProviderDTO
 
-`func NewInstallProviderDTO(downloadUrls map[string]string, name string, ) *InstallProviderDTO`
+`func NewInstallProviderDTO(downloadUrls map[string]string, name string, version string, ) *InstallProviderDTO`
 
 NewInstallProviderDTO instantiates a new InstallProviderDTO object
 This constructor will assign default values to properties that have it defined,
@@ -64,6 +65,26 @@ and a boolean to check if the value has been set.
 `func (o *InstallProviderDTO) SetName(v string)`
 
 SetName sets Name field to given value.
+
+
+### GetVersion
+
+`func (o *InstallProviderDTO) GetVersion() string`
+
+GetVersion returns the Version field if non-nil, zero value otherwise.
+
+### GetVersionOk
+
+`func (o *InstallProviderDTO) GetVersionOk() (*string, bool)`
+
+GetVersionOk returns a tuple with the Version field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetVersion
+
+`func (o *InstallProviderDTO) SetVersion(v string)`
+
+SetVersion sets Version field to given value.
 
 
 

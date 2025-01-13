@@ -117,14 +117,19 @@ func updateProvider(runnerId string, providerName string, providersManifest *uti
 	}
 
 	version, ok := providerManifest.Versions["latest"]
+	versionName := "latest"
 	if !ok {
-		_, latest := providerManifest.FindLatestVersion()
+		name, latest := providerManifest.FindLatestVersion()
+		versionName = name
 		version = *latest
 	}
 
 	downloadUrls := convertOSToStringMap(version.DownloadUrls)
 
-	res, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).DownloadUrls(downloadUrls).Execute()
+	res, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(apiclient.UpdateProviderDTO{
+		DownloadUrls: downloadUrls,
+		Version:      versionName,
+	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}

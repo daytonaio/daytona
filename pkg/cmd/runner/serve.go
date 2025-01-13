@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/runner"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
@@ -50,6 +51,7 @@ var serveCmd = &cobra.Command{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
 			Version:  internal.Version,
+			Source:   telemetry.RUNNER_SOURCE,
 		})
 
 		apiClient, err := apiclient_util.GetRunnerApiClient(runnerConfig.ServerApiUrl, runnerConfig.ServerApiKey, runnerConfig.ClientId, runnerConfig.TelemetryEnabled)

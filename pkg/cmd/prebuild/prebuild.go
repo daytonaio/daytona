@@ -12,6 +12,7 @@ var PrebuildCmd = &cobra.Command{
 	Use:     "prebuild",
 	Aliases: []string{"pb", "prebuilds"},
 	Short:   "Manage prebuilds",
+	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
 }
 

@@ -15,7 +15,7 @@ import (
 type RunnerJob struct {
 	models.Job
 
-	trackTelemetryEvent func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 	providerManager     providermanager.IProviderManager
 }
 

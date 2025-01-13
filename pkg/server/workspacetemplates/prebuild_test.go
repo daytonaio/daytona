@@ -68,7 +68,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestSetPrebuild() {
 	}).Return(repository1, nil)
 	s.gitProviderService.On("GetPrebuildWebhook", "github", repository1, "").Return(util.Pointer("webhook-id"), nil)
 
-	newPrebuildDto, err := s.workspaceTemplateService.SetPrebuild(context.TODO(), workspaceTemplate1.Name, services.CreatePrebuildDTO{
+	newPrebuildDto, err := s.workspaceTemplateService.SavePrebuild(context.TODO(), workspaceTemplate1.Name, services.CreatePrebuildDTO{
 		Id:             &prebuild3.Id,
 		Branch:         prebuild3.Branch,
 		CommitInterval: prebuild3.CommitInterval,

@@ -11,6 +11,7 @@ import (
 var WorkspaceTemplateCmd = &cobra.Command{
 	Use:     "template",
 	Short:   "Manage workspace templates",
+	Args:    cobra.NoArgs,
 	Aliases: []string{"templates", "workspace-template", "workspace-templates", "wt"},
 	GroupID: util.TARGET_GROUP,
 }

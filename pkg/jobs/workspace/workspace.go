@@ -21,7 +21,7 @@ type WorkspaceJob struct {
 	findGitProviderConfig            func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	updateWorkspaceProviderMetadata  func(ctx context.Context, workspaceId, metadata string) error
 	getWorkspaceEnvironmentVariables func(ctx context.Context, w *models.Workspace) (map[string]string, error)
-	trackTelemetryEvent              func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent              func(event telemetry.Event, clientId string) error
 
 	loggerFactory   logs.ILoggerFactory
 	providerManager providermanager.IProviderManager

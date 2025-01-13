@@ -23,7 +23,7 @@ type BuildJob struct {
 	checkImageExists     func(ctx context.Context, image string) bool
 	deleteImage          func(ctx context.Context, image string, force bool) error
 
-	trackTelemetryEvent func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 	loggerFactory       logs.ILoggerFactory
 	builderFactory      build.IBuilderFactory
 

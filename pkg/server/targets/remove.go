@@ -61,21 +61,21 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 	var err error
 	ctx, err = s.targetStore.BeginTransaction(ctx)
 	if err != nil {
-		return s.handleRemoveError(ctx, nil, err)
+		return s.handleForceRemoveError(ctx, nil, err)
 	}
 
 	defer stores.RecoverAndRollback(ctx, s.targetStore)
 
 	t, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
-		return s.handleRemoveError(ctx, nil, stores.ErrTargetNotFound)
+		return s.handleForceRemoveError(ctx, nil, stores.ErrTargetNotFound)
 	}
 
 	t.Name = util.AddDeletedToName(t.Name)
 
 	err = s.targetStore.Save(ctx, t)
 	if err != nil {
-		return s.handleRemoveError(ctx, t, err)
+		return s.handleForceRemoveError(ctx, t, err)
 	}
 
 	err = s.revokeApiKey(ctx, targetId)
@@ -93,11 +93,11 @@ func (s *TargetService) ForceRemoveTarget(ctx context.Context, targetId string) 
 
 	err = s.createJob(ctx, t.Id, t.TargetConfig.ProviderInfo.RunnerId, models.JobActionForceDelete)
 	if err != nil {
-		return s.handleRemoveError(ctx, t, err)
+		return s.handleForceRemoveError(ctx, t, err)
 	}
 
 	err = s.targetStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, t, err)
+	return s.handleForceRemoveError(ctx, t, err)
 }
 
 func (s *TargetService) handleRemoveError(ctx context.Context, target *models.Target, err error) error {
@@ -111,15 +111,39 @@ func (s *TargetService) handleRemoveError(ctx context.Context, target *models.Ta
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
-	event := telemetry.ServerEventTargetDestroyed
+	eventName := telemetry.TargetEventLifecycleDeleted
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventTargetDestroyError
+		eventName = telemetry.TargetEventLifecycleDeletionFailed
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	event := telemetry.NewTargetEvent(eventName, target, err, nil)
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
-		log.Trace(err)
+		log.Trace(telemetryError)
+	}
+
+	return err
+}
+
+func (s *TargetService) handleForceRemoveError(ctx context.Context, target *models.Target, err error) error {
+	if err != nil {
+		err = s.targetStore.RollbackTransaction(ctx, err)
+	}
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.TargetEventLifecycleForceDeleted
+	if err != nil {
+		eventName = telemetry.TargetEventLifecycleForceDeletionFailed
+	}
+	event := telemetry.NewTargetEvent(eventName, target, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
 	}
 
 	return err
