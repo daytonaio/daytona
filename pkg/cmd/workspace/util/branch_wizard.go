@@ -179,16 +179,17 @@ func SetBranchFromWizard(config BranchWizardConfig) (*apiclient.GitRepository, e
 		curPageItemsNum := 0
 		selectionListCursorIdx := 0
 		var selectionListOptions views.SelectionListOptions
+		prList = []apiclient.GitPullRequest{}
 
 		for {
 			err = views_util.WithSpinner("Loading Pull Requests", func() error {
-				branches, _, err := config.ApiClient.GitProviderAPI.GetRepoBranches(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
+				prs, _, err := config.ApiClient.GitProviderAPI.GetRepoPRs(ctx, config.GitProviderConfigId, url.QueryEscape(config.NamespaceId), url.QueryEscape(config.ChosenRepo.Id)).Page(page).PerPage(perPage).Execute()
 				if err != nil {
 					return err
 				}
 
-				curPageItemsNum = len(branches)
-				branchList = append(branchList, branches...)
+				curPageItemsNum = len(prs)
+				prList = append(prList, prs...)
 				return nil
 			})
 
