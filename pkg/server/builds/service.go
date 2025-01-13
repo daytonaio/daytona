@@ -5,9 +5,7 @@ package builds
 
 import (
 	"context"
-	"errors"
 	"io"
-	"time"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -166,31 +164,6 @@ func (s *BuildService) Delete(ctx context.Context, filter *services.BuildFilter,
 	}
 
 	return errors
-}
-
-func (s *BuildService) AwaitEmptyList(ctx context.Context, waitTime time.Duration) error {
-	timeout := time.NewTimer(waitTime)
-	defer timeout.Stop()
-
-	for {
-		select {
-		case <-timeout.C:
-			return errors.New("awaiting empty build list timed out")
-		default:
-			builds, err := s.List(ctx, &services.BuildFilter{
-				ShowDeleted: true,
-			})
-			if err != nil {
-				return err
-			}
-
-			if len(builds) == 0 {
-				return nil
-			}
-
-			time.Sleep(time.Second)
-		}
-	}
 }
 
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {

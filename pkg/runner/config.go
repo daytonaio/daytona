@@ -19,6 +19,7 @@ import (
 type Config struct {
 	Id               string              `json:"id"`
 	Name             string              `json:"name"`
+	ApiPort          int32               `json:"apiPort"`
 	ServerApiKey     string              `json:"serverApiKey"`
 	ServerApiUrl     string              `json:"serverApiUrl"`
 	ProvidersDir     string              `json:"providersDir"`
@@ -99,6 +100,15 @@ func GetConfigDir() (string, error) {
 	return filepath.Join(userConfigDir, "daytona-runner"), nil
 }
 
+func DeleteConfigDir() error {
+	configDir, err := GetConfigDir()
+	if err != nil {
+		return err
+	}
+
+	return os.RemoveAll(configDir)
+}
+
 func Save(c Config) error {
 	if err := util.DirectoryValidator(&c.ProvidersDir); err != nil {
 		return err
@@ -171,6 +181,7 @@ func GetDefaultConfig() (*Config, error) {
 	c := Config{
 		ProvidersDir: providersDir,
 		LogFile:      logs.GetDefaultLogFileConfig(logFilePath),
+		ApiPort:      3983,
 	}
 
 	if os.Getenv("DEFAULT_PROVIDERS_DIR") != "" {

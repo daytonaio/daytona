@@ -1,9 +1,15 @@
 ## daytona runner purge
 
-Purges the runner
+Purges the Daytona Runner
 
 ```
 daytona runner purge [flags]
+```
+
+### Options
+
+```
+  -y, --yes   Execute Daytona Runner purge without prompt
 ```
 
 ### Options inherited from parent commands

@@ -4,7 +4,7 @@ Purges all Daytona data from the current device
 
 ### Synopsis
 
-Purges all Daytona data from the current device - including all targets, configuration files, and SSH files. This command is irreversible.
+Purges all Daytona data from the current device - including all local runner providers, configuration files and SSH files. This command is irreversible.
 
 ```
 daytona purge [flags]
