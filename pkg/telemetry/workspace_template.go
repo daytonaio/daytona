@@ -44,10 +44,8 @@ func (e workspaceTemplateEvent) Props() map[string]interface{} {
 	}
 
 	props["workspace_template_name"] = e.workspaceTemplate.Name
-	// prebuilds, err := json.Marshal(e.workspaceTemplate.Prebuilds)
 	props["prebuilds"] = e.workspaceTemplate.Prebuilds
-	// if err == nil {
-	// }
+
 	if isImagePublic(e.workspaceTemplate.Image) {
 		props["image"] = e.workspaceTemplate.Image
 	}
