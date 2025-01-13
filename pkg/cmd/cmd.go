@@ -206,7 +206,7 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (*cobra.Command, []string, bool, error) {
 	cmd, flags, isCompletion, err := validateCommands(rootCmd, os.Args[1:])
 	if err != nil && !isCompletion {
-		if !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
+		if !shouldIgnoreCommand(cmd.CommandPath()) {
 			event := telemetry.NewCliEvent(telemetry.CliEventCommandInvalid, cmd, flags, err, nil)
 			err := cmd_common.TrackTelemetryEvent(event, clientId)
 			if err != nil {
@@ -221,7 +221,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 		return cmd, flags, isCompletion, err
 	}
 
-	if !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") && !isCompletion {
+	if !shouldIgnoreCommand(cmd.CommandPath()) && !isCompletion {
 		event := telemetry.NewCliEvent(telemetry.CliEventCommandStarted, cmd, flags, nil, nil)
 		err := cmd_common.TrackTelemetryEvent(event, clientId)
 		if err != nil {
@@ -255,7 +255,7 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 }
 
 func PostRun(cmd *cobra.Command, cmdErr error, clientId string, startTime time.Time, endTime time.Time, flags []string) {
-	if !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
+	if !shouldIgnoreCommand(cmd.CommandPath()) {
 		execTime := endTime.Sub(startTime)
 		extras := map[string]interface{}{"exec_time_µs": execTime.Microseconds()}
 		eventName := telemetry.CliEventCommandCompleted
@@ -274,4 +274,16 @@ func PostRun(cmd *cobra.Command, cmdErr error, clientId string, startTime time.T
 			log.Trace(err)
 		}
 	}
+}
+
+func shouldIgnoreCommand(commandPath string) bool {
+	ignoredPaths := []string{"daemon-serve", "ssh-proxy"}
+
+	for _, ignoredPath := range ignoredPaths {
+		if strings.HasSuffix(commandPath, ignoredPath) {
+			return true
+		}
+	}
+
+	return false
 }
