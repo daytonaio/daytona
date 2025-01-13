@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -19,7 +20,7 @@ import (
 var workspaceTemplateInfoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show workspace template info",
-	Aliases: []string{"view", "inspect"},
+	Aliases: cmd_common.GetAliases("info"),
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -58,7 +59,7 @@ var workspaceTemplateInfoCmd = &cobra.Command{
 
 		} else {
 			var res *http.Response
-			workspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, args[0]).Execute()
+			workspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.FindWorkspaceTemplate(ctx, args[0]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

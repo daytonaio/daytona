@@ -119,7 +119,7 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 
 	var verifiedGitProvider bool
 	if config.GitProviderConfigId != nil {
-		_, _, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *config.GitProviderConfigId).Execute()
+		_, _, err := apiClient.GitProviderAPI.FindGitProvider(ctx, *config.GitProviderConfigId).Execute()
 		if err == nil {
 			verifiedGitProvider = true
 		}
@@ -135,7 +135,7 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 		}
 
 		if len(gitProviders) == 0 {
-			gitProviderConfigId, _, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
+			gitProviderConfigId, _, err := apiClient.GitProviderAPI.FindGitProviderIdForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
 			if err != nil {
 				return fmt.Errorf("error fetching Git provider: %v", err)
 			}
@@ -228,7 +228,7 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 	}
 
 	if submissionFormConfig.ImportConfirmation != nil && *submissionFormConfig.ImportConfirmation {
-		res, err = apiClient.WorkspaceTemplateAPI.SetWorkspaceTemplate(ctx).WorkspaceTemplate(newWorkspaceTemplate).Execute()
+		res, err = apiClient.WorkspaceTemplateAPI.SaveWorkspaceTemplate(ctx).WorkspaceTemplate(newWorkspaceTemplate).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

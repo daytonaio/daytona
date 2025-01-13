@@ -313,11 +313,11 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
 			return targetConfigService.Find(ctx, name)
 		},
-		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(ctx, models.ApiKeyTypeTarget, name)
+		CreateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Create(ctx, models.ApiKeyTypeTarget, name)
 		},
-		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(ctx, name)
+		DeleteApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Delete(ctx, name)
 		},
 		CreateJob: func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error {
 			return jobService.Create(ctx, &models.Job{
@@ -341,7 +341,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		WorkspaceStore:         workspaceStore,
 		WorkspaceMetadataStore: workspaceMetadataStore,
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			t, err := targetService.GetTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+			t, err := targetService.FindTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}
@@ -378,17 +378,17 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 				Image: *build.Image,
 			}, nil
 		},
-		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(ctx, models.ApiKeyTypeWorkspace, name)
+		CreateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Create(ctx, models.ApiKeyTypeWorkspace, name)
 		},
-		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(ctx, name)
+		DeleteApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Delete(ctx, name)
 		},
 		ListGitProviderConfigs: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
 			return gitProviderService.ListConfigsForUrl(ctx, repoUrl)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			return gitProviderService.GetConfig(ctx, id)
+			return gitProviderService.FindConfig(ctx, id)
 		},
 		GetLastCommitSha: func(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
 			return gitProviderService.GetLastCommitSha(ctx, repo)
@@ -438,12 +438,12 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			})
 		},
 		UpdateJobState: func(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
-			return jobService.SetState(ctx, jobId, updateJobStateDto)
+			return jobService.UpdateState(ctx, jobId, updateJobStateDto)
 		},
-		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(ctx, models.ApiKeyTypeRunner, name)
+		CreateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Create(ctx, models.ApiKeyTypeRunner, name)
 		},
-		RevokeApiKey: apiKeyService.Revoke,
+		DeleteApiKey: apiKeyService.Delete,
 		UnsetDefaultTarget: func(ctx context.Context, runnerId string) error {
 			targets, err := targetService.ListTargets(ctx, nil, services.TargetRetrievalParams{})
 			if err != nil {

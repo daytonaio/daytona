@@ -38,18 +38,18 @@ func ListEnvironmentVariables(ctx *gin.Context) {
 	ctx.JSON(200, envVars)
 }
 
-// SetEnvironmentVariable godoc
+// SaveEnvironmentVariable godoc
 //
 //	@Tags			envVar
-//	@Summary		Set environment variable
-//	@Description	Set environment variable
+//	@Summary		Save environment variable
+//	@Description	Save environment variable
 //	@Accept			json
 //	@Param			environmentVariable	body	models.EnvironmentVariable	true	"Environment Variable"
 //	@Success		201
 //	@Router			/env [put]
 //
-//	@id				SetEnvironmentVariable
-func SetEnvironmentVariable(ctx *gin.Context) {
+//	@id				SaveEnvironmentVariable
+func SaveEnvironmentVariable(ctx *gin.Context) {
 	var req models.EnvironmentVariable
 	err := ctx.BindJSON(&req)
 	if err != nil {
@@ -88,7 +88,7 @@ func DeleteEnvironmentVariable(ctx *gin.Context) {
 			ctx.Status(204)
 			return
 		}
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove environment variable: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete environment variable: %w", err))
 		return
 	}
 

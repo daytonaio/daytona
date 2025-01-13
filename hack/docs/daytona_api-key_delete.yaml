@@ -1,0 +1,14 @@
+name: daytona api-key delete
+synopsis: Delete an API key
+usage: daytona api-key delete [NAME] [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Skip confirmation prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona api-key - Api Key commands

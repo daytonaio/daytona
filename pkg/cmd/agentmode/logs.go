@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/spf13/cobra"
 )
@@ -18,7 +19,7 @@ var logsCmd = &cobra.Command{
 	Short:   "View resource logs",
 	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
-	Aliases: []string{"lg", "log"},
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

@@ -8,6 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/target/info"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
@@ -18,8 +19,8 @@ import (
 var infoCmd = &cobra.Command{
 	Use:     "info [TARGET]",
 	Short:   "Show target info",
-	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

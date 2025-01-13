@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
@@ -18,7 +19,7 @@ var providerListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List installed providers",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

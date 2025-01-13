@@ -13,6 +13,7 @@ var RunnerCmd = &cobra.Command{
 	Short:   "Manage the runner",
 	Args:    cobra.NoArgs,
 	GroupID: util.RUNNER_GROUP,
+	Aliases: []string{"runners"},
 }
 
 func init() {

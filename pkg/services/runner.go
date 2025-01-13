@@ -13,13 +13,13 @@ import (
 )
 
 type IRunnerService interface {
-	RegisterRunner(ctx context.Context, req RegisterRunnerDTO) (*RunnerDTO, error)
-	GetRunner(ctx context.Context, runnerId string) (*RunnerDTO, error)
 	ListRunners(ctx context.Context) ([]*RunnerDTO, error)
 	ListRunnerJobs(ctx context.Context, runnerId string) ([]*models.Job, error)
+	FindRunner(ctx context.Context, runnerId string) (*RunnerDTO, error)
+	CreateRunner(ctx context.Context, req CreateRunnerDTO) (*RunnerDTO, error)
 	UpdateJobState(ctx context.Context, jobId string, req UpdateJobStateDTO) error
-	SetRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error
-	RemoveRunner(ctx context.Context, runnerId string) error
+	UpdateRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error
+	DeleteRunner(ctx context.Context, runnerId string) error
 
 	ListProviders(ctx context.Context, runnerId *string) ([]models.ProviderInfo, error)
 	InstallProvider(ctx context.Context, runnerId string, providerDto InstallProviderDTO) error
@@ -35,15 +35,15 @@ type RunnerDTO struct {
 	State models.ResourceState `json:"state" validate:"required"`
 } //	@name	RunnerDTO
 
-type RegisterRunnerDTO struct {
+type CreateRunnerDTO struct {
 	Id   string `json:"id" validate:"required"`
 	Name string `json:"name" validate:"required"`
-} // @name RegisterRunnerDTO
+} // @name CreateRunnerDTO
 
-type RegisterRunnerResultDTO struct {
+type CreateRunnerResultDTO struct {
 	models.Runner
 	ApiKey string `json:"apiKey" validate:"required"`
-} // @name RegisterRunnerResultDTO
+} // @name CreateRunnerResultDTO
 
 type UpdateJobStateDTO struct {
 	State        models.JobState `json:"state" validate:"required"`

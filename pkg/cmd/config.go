@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	config_view "github.com/daytonaio/daytona/pkg/views/config"
 	"github.com/spf13/cobra"
@@ -15,8 +16,8 @@ var showApiKeysFlag bool
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Short:   "Output Daytona configuration",
-	Aliases: []string{"cfg"},
 	Args:    cobra.NoArgs,
+	Aliases: common.GetAliases("config"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {

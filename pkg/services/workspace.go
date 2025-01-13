@@ -13,18 +13,18 @@ import (
 )
 
 type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*WorkspaceDTO, error)
-	GetWorkspace(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
 	ListWorkspaces(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
+	FindWorkspace(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
+	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*WorkspaceDTO, error)
+	UpdateWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
+	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
 	StartWorkspace(ctx context.Context, workspaceId string) error
 	StopWorkspace(ctx context.Context, workspaceId string) error
-	RemoveWorkspace(ctx context.Context, workspaceId string) error
-	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
-	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
+	DeleteWorkspace(ctx context.Context, workspaceId string) error
+	ForceDeleteWorkspace(ctx context.Context, workspaceId string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)
-	SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 }
 
 type WorkspaceDTO struct {
