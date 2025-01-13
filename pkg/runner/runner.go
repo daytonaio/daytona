@@ -7,12 +7,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
+	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/api/controllers/health"
 	"github.com/daytonaio/daytona/pkg/jobs"
 	"github.com/daytonaio/daytona/pkg/jobs/build"
 	"github.com/daytonaio/daytona/pkg/jobs/runner"
@@ -21,6 +24,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/scheduler"
+	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 )
@@ -34,6 +38,7 @@ const RUNNER_METADATA_UPDATE_INTERVAL = 2 * time.Second
 type IRunner interface {
 	Start(ctx context.Context) error
 	CheckAndRunJobs(ctx context.Context) error
+	Purge(ctx context.Context) error
 }
 
 type RunnerConfig struct {
@@ -98,6 +103,12 @@ func (r *Runner) Start(ctx context.Context) error {
 
 	r.startTime = time.Now()
 
+	// Check if the API port is already in use for the runner API server
+	_, err := net.Dial("tcp", fmt.Sprintf(":%d", r.Config.ApiPort))
+	if err == nil {
+		return fmt.Errorf("cannot start runner API server, port %d is already in use", r.Config.ApiPort)
+	}
+
 	go func() {
 		interruptChannel := make(chan os.Signal, 1)
 		signal.Notify(interruptChannel, os.Interrupt)
@@ -107,8 +118,25 @@ func (r *Runner) Start(ctx context.Context) error {
 		}
 	}()
 
+	router := gin.New()
+	router.Use(gin.Recovery())
+
+	gin.SetMode(gin.ReleaseMode)
+
+	public := router.Group("/")
+
+	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
+	{
+		healthController.GET("", health.HealthCheck)
+	}
+
+	routerErrChan := make(chan error)
+	go func() {
+		routerErrChan <- router.Run(fmt.Sprintf(":%d", r.Config.ApiPort))
+	}()
+
 	// Terminate orphaned provider processes
-	err := r.providerManager.TerminateProviderProcesses(r.Config.ProvidersDir)
+	err = r.providerManager.TerminateProviderProcesses(r.Config.ProvidersDir)
 	if err != nil {
 		r.logger.Errorf("Failed to terminate orphaned provider processes: %s", err)
 	}
@@ -146,11 +174,16 @@ func (r *Runner) Start(ctx context.Context) error {
 		}
 	}()
 
-	<-ctx.Done()
+	select {
+	case err = <-routerErrChan:
+	case <-ctx.Done():
+		err = nil
+	}
 
 	r.logger.Info("Shutting down runner")
 	scheduler.Stop()
-	return nil
+
+	return err
 }
 
 func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
@@ -171,6 +204,10 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 	}
 
 	return nil
+}
+
+func (r *Runner) Purge(ctx context.Context) error {
+	return r.providerManager.Purge()
 }
 
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {

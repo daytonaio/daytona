@@ -174,11 +174,6 @@ func (s *LocalContainerRegistry) Stop() error {
 }
 
 func (s *LocalContainerRegistry) Purge() error {
-	err := s.Stop()
-	if err != nil {
-		return err
-	}
-
 	return os.RemoveAll(s.dataPath)
 }
 
