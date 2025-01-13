@@ -16,7 +16,7 @@ type RowData struct {
 	Type string
 }
 
-func ListApiKeys(apiKeyList []apiclient.ApiKey) {
+func ListApiKeys(apiKeyList []apiclient.ApiKeyViewDTO) {
 	data := [][]string{}
 
 	for _, apiKey := range apiKeyList {
@@ -32,7 +32,7 @@ func ListApiKeys(apiKeyList []apiclient.ApiKey) {
 	fmt.Println(table)
 }
 
-func getRowFromRowData(apiKey apiclient.ApiKey) []string {
+func getRowFromRowData(apiKey apiclient.ApiKeyViewDTO) []string {
 	rowData := RowData{"", ""}
 
 	rowData.Name = apiKey.Name
@@ -46,7 +46,7 @@ func getRowFromRowData(apiKey apiclient.ApiKey) []string {
 	return row
 }
 
-func renderUnstyledList(apiKeyList []apiclient.ApiKey) {
+func renderUnstyledList(apiKeyList []apiclient.ApiKeyViewDTO) {
 	output := "\n"
 
 	for _, apiKey := range apiKeyList {

@@ -16,65 +16,64 @@ import (
 	"fmt"
 )
 
-// checks if the ApiKey type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &ApiKey{}
+// checks if the ApiKeyViewDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &ApiKeyViewDTO{}
 
-// ApiKey struct for ApiKey
-type ApiKey struct {
-	KeyHash string `json:"keyHash"`
-	// Workspace or client name
-	Name string           `json:"name"`
-	Type ModelsApiKeyType `json:"type"`
+// ApiKeyViewDTO struct for ApiKeyViewDTO
+type ApiKeyViewDTO struct {
+	Current bool             `json:"current"`
+	Name    string           `json:"name"`
+	Type    ModelsApiKeyType `json:"type"`
 }
 
-type _ApiKey ApiKey
+type _ApiKeyViewDTO ApiKeyViewDTO
 
-// NewApiKey instantiates a new ApiKey object
+// NewApiKeyViewDTO instantiates a new ApiKeyViewDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKey(keyHash string, name string, type_ ModelsApiKeyType) *ApiKey {
-	this := ApiKey{}
-	this.KeyHash = keyHash
+func NewApiKeyViewDTO(current bool, name string, type_ ModelsApiKeyType) *ApiKeyViewDTO {
+	this := ApiKeyViewDTO{}
+	this.Current = current
 	this.Name = name
 	this.Type = type_
 	return &this
 }
 
-// NewApiKeyWithDefaults instantiates a new ApiKey object
+// NewApiKeyViewDTOWithDefaults instantiates a new ApiKeyViewDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewApiKeyWithDefaults() *ApiKey {
-	this := ApiKey{}
+func NewApiKeyViewDTOWithDefaults() *ApiKeyViewDTO {
+	this := ApiKeyViewDTO{}
 	return &this
 }
 
-// GetKeyHash returns the KeyHash field value
-func (o *ApiKey) GetKeyHash() string {
+// GetCurrent returns the Current field value
+func (o *ApiKeyViewDTO) GetCurrent() bool {
 	if o == nil {
-		var ret string
+		var ret bool
 		return ret
 	}
 
-	return o.KeyHash
+	return o.Current
 }
 
-// GetKeyHashOk returns a tuple with the KeyHash field value
+// GetCurrentOk returns a tuple with the Current field value
 // and a boolean to check if the value has been set.
-func (o *ApiKey) GetKeyHashOk() (*string, bool) {
+func (o *ApiKeyViewDTO) GetCurrentOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.KeyHash, true
+	return &o.Current, true
 }
 
-// SetKeyHash sets field value
-func (o *ApiKey) SetKeyHash(v string) {
-	o.KeyHash = v
+// SetCurrent sets field value
+func (o *ApiKeyViewDTO) SetCurrent(v bool) {
+	o.Current = v
 }
 
 // GetName returns the Name field value
-func (o *ApiKey) GetName() string {
+func (o *ApiKeyViewDTO) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -85,7 +84,7 @@ func (o *ApiKey) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *ApiKey) GetNameOk() (*string, bool) {
+func (o *ApiKeyViewDTO) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -93,12 +92,12 @@ func (o *ApiKey) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *ApiKey) SetName(v string) {
+func (o *ApiKeyViewDTO) SetName(v string) {
 	o.Name = v
 }
 
 // GetType returns the Type field value
-func (o *ApiKey) GetType() ModelsApiKeyType {
+func (o *ApiKeyViewDTO) GetType() ModelsApiKeyType {
 	if o == nil {
 		var ret ModelsApiKeyType
 		return ret
@@ -109,7 +108,7 @@ func (o *ApiKey) GetType() ModelsApiKeyType {
 
 // GetTypeOk returns a tuple with the Type field value
 // and a boolean to check if the value has been set.
-func (o *ApiKey) GetTypeOk() (*ModelsApiKeyType, bool) {
+func (o *ApiKeyViewDTO) GetTypeOk() (*ModelsApiKeyType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -117,11 +116,11 @@ func (o *ApiKey) GetTypeOk() (*ModelsApiKeyType, bool) {
 }
 
 // SetType sets field value
-func (o *ApiKey) SetType(v ModelsApiKeyType) {
+func (o *ApiKeyViewDTO) SetType(v ModelsApiKeyType) {
 	o.Type = v
 }
 
-func (o ApiKey) MarshalJSON() ([]byte, error) {
+func (o ApiKeyViewDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -129,20 +128,20 @@ func (o ApiKey) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o ApiKey) ToMap() (map[string]interface{}, error) {
+func (o ApiKeyViewDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["keyHash"] = o.KeyHash
+	toSerialize["current"] = o.Current
 	toSerialize["name"] = o.Name
 	toSerialize["type"] = o.Type
 	return toSerialize, nil
 }
 
-func (o *ApiKey) UnmarshalJSON(data []byte) (err error) {
+func (o *ApiKeyViewDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"keyHash",
+		"current",
 		"name",
 		"type",
 	}
@@ -161,53 +160,53 @@ func (o *ApiKey) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varApiKey := _ApiKey{}
+	varApiKeyViewDTO := _ApiKeyViewDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varApiKey)
+	err = decoder.Decode(&varApiKeyViewDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = ApiKey(varApiKey)
+	*o = ApiKeyViewDTO(varApiKeyViewDTO)
 
 	return err
 }
 
-type NullableApiKey struct {
-	value *ApiKey
+type NullableApiKeyViewDTO struct {
+	value *ApiKeyViewDTO
 	isSet bool
 }
 
-func (v NullableApiKey) Get() *ApiKey {
+func (v NullableApiKeyViewDTO) Get() *ApiKeyViewDTO {
 	return v.value
 }
 
-func (v *NullableApiKey) Set(val *ApiKey) {
+func (v *NullableApiKeyViewDTO) Set(val *ApiKeyViewDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableApiKey) IsSet() bool {
+func (v NullableApiKeyViewDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableApiKey) Unset() {
+func (v *NullableApiKeyViewDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableApiKey(val *ApiKey) *NullableApiKey {
-	return &NullableApiKey{value: val, isSet: true}
+func NewNullableApiKeyViewDTO(val *ApiKeyViewDTO) *NullableApiKeyViewDTO {
+	return &NullableApiKeyViewDTO{value: val, isSet: true}
 }
 
-func (v NullableApiKey) MarshalJSON() ([]byte, error) {
+func (v NullableApiKeyViewDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableApiKey) UnmarshalJSON(src []byte) error {
+func (v *NullableApiKeyViewDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
