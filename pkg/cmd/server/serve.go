@@ -137,11 +137,9 @@ var ServeCmd = &cobra.Command{
 				return
 			}
 
-			localRunnerConfig := getLocalRunnerConfig(filepath.Join(configDir, "local-runner"))
-
 			localRunnerErrChan <- startLocalRunner(bootstrap.LocalRunnerParams{
 				ServerConfig:     c,
-				RunnerConfig:     localRunnerConfig,
+				RunnerConfig:     GetLocalRunnerConfig(filepath.Join(configDir, "local-runner")),
 				ConfigDir:        configDir,
 				TelemetryService: telemetryService,
 			})
@@ -265,7 +263,7 @@ func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	return runner.Start(context.Background())
 }
 
-func getLocalRunnerConfig(configDir string) *runner.Config {
+func GetLocalRunnerConfig(configDir string) *runner.Config {
 	providersDir := filepath.Join(configDir, "providers")
 	logFilePath := filepath.Join(configDir, "runner.log")
 
