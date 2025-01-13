@@ -162,7 +162,7 @@ func getWorkspace(c *config.Config, telemetryEnabled bool) (*models.Workspace, e
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, c.WorkspaceId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.FindWorkspace(ctx, c.WorkspaceId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}

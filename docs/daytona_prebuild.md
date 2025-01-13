@@ -11,7 +11,7 @@ Manage prebuilds
 ### SEE ALSO
 
 * [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
-* [daytona prebuild add](daytona_prebuild_add.md)	 - Add a prebuild configuration
+* [daytona prebuild create](daytona_prebuild_create.md)	 - Create a prebuild configuration
 * [daytona prebuild delete](daytona_prebuild_delete.md)	 - Delete a prebuild configuration
 * [daytona prebuild info](daytona_prebuild_info.md)	 - Show prebuild configuration info
 * [daytona prebuild list](daytona_prebuild_list.md)	 - List prebuild configurations

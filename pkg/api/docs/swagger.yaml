@@ -1,18 +1,5 @@
 basePath: /
 definitions:
-  AddTargetConfigDTO:
-    properties:
-      name:
-        type: string
-      options:
-        type: string
-      providerInfo:
-        $ref: '#/definitions/ProviderInfo'
-    required:
-    - name
-    - options
-    - providerInfo
-    type: object
   ApiKeyViewDTO:
     properties:
       current:
@@ -183,6 +170,44 @@ definitions:
         type: array
     required:
     - retention
+    type: object
+  CreateRunnerDTO:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+    required:
+    - id
+    - name
+    type: object
+  CreateRunnerResultDTO:
+    properties:
+      apiKey:
+        type: string
+      id:
+        type: string
+      metadata:
+        $ref: '#/definitions/RunnerMetadata'
+      name:
+        type: string
+    required:
+    - apiKey
+    - id
+    - name
+    type: object
+  CreateTargetConfigDTO:
+    properties:
+      name:
+        type: string
+      options:
+        type: string
+      providerInfo:
+        $ref: '#/definitions/ProviderInfo'
+    required:
+    - name
+    - options
+    - providerInfo
     type: object
   CreateTargetDTO:
     properties:
@@ -871,31 +896,6 @@ definitions:
     - targetConfigManifest
     - version
     type: object
-  RegisterRunnerDTO:
-    properties:
-      id:
-        type: string
-      name:
-        type: string
-    required:
-    - id
-    - name
-    type: object
-  RegisterRunnerResultDTO:
-    properties:
-      apiKey:
-        type: string
-      id:
-        type: string
-      metadata:
-        $ref: '#/definitions/RunnerMetadata'
-      name:
-        type: string
-    required:
-    - apiKey
-    - id
-    - name
-    type: object
   ReplaceRequest:
     properties:
       files:
@@ -1574,8 +1574,8 @@ paths:
       - apiKey
   /apikey/{apiKeyName}:
     delete:
-      description: Revoke API key
-      operationId: RevokeApiKey
+      description: Delete API key
+      operationId: DeleteApiKey
       parameters:
       - description: API key name
         in: path
@@ -1585,12 +1585,12 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Revoke API key
+      summary: Delete API key
       tags:
       - apiKey
     post:
-      description: Generate an API key
-      operationId: GenerateApiKey
+      description: Create an API key
+      operationId: CreateApiKey
       parameters:
       - description: API key name
         in: path
@@ -1604,7 +1604,7 @@ paths:
           description: OK
           schema:
             type: string
-      summary: Generate an API key
+      summary: Create an API key
       tags:
       - apiKey
   /build:
@@ -1680,8 +1680,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get build data
-      operationId: GetBuild
+      description: Find build
+      operationId: FindBuild
       parameters:
       - description: Build ID
         in: path
@@ -1693,7 +1693,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/BuildDTO'
-      summary: Get build data
+      summary: Find build
       tags:
       - build
   /build/prebuild/{prebuildId}:
@@ -1740,8 +1740,8 @@ paths:
       - build
   /container-registry/{server}:
     get:
-      description: Get container registry
-      operationId: GetContainerRegistry
+      description: Find container registry
+      operationId: FindContainerRegistry
       parameters:
       - description: Container registry server
         in: path
@@ -1759,7 +1759,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ContainerRegistry'
-      summary: Get container registry
+      summary: Find container registry
       tags:
       - container registry
   /env:
@@ -1781,8 +1781,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: Set environment variable
-      operationId: SetEnvironmentVariable
+      description: Save environment variable
+      operationId: SaveEnvironmentVariable
       parameters:
       - description: Environment Variable
         in: body
@@ -1793,7 +1793,7 @@ paths:
       responses:
         "201":
           description: Created
-      summary: Set environment variable
+      summary: Save environment variable
       tags:
       - envVar
   /env/{key}:
@@ -1829,8 +1829,8 @@ paths:
       tags:
       - gitProvider
     put:
-      description: Set Git provider
-      operationId: SetGitProvider
+      description: Save Git provider
+      operationId: SaveGitProvider
       parameters:
       - description: Git provider
         in: body
@@ -1843,13 +1843,13 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Set Git provider
+      summary: Save Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}:
     delete:
-      description: Remove Git provider
-      operationId: RemoveGitProvider
+      description: Delete Git provider
+      operationId: DeleteGitProvider
       parameters:
       - description: Git provider
         in: path
@@ -1861,12 +1861,12 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Remove Git provider
+      summary: Delete Git provider
       tags:
       - gitProvider
     get:
-      description: Get Git provider
-      operationId: GetGitProvider
+      description: Find Git provider
+      operationId: FindGitProvider
       parameters:
       - description: ID
         in: path
@@ -1880,7 +1880,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/GitProvider'
-      summary: Get Git provider
+      summary: Find Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches:
@@ -2114,8 +2114,8 @@ paths:
       - gitProvider
   /gitprovider/id-for-url/{url}:
     get:
-      description: Get Git provider ID
-      operationId: GetGitProviderIdForUrl
+      description: Find Git provider ID
+      operationId: FindGitProviderIdForUrl
       parameters:
       - description: Url
         in: path
@@ -2129,7 +2129,7 @@ paths:
           description: OK
           schema:
             type: string
-      summary: Get Git provider ID
+      summary: Find Git provider ID
       tags:
       - gitProvider
   /health:
@@ -2202,29 +2202,29 @@ paths:
       tags:
       - runner
     post:
-      description: Register a runner
-      operationId: RegisterRunner
+      description: Create a runner
+      operationId: CreateRunner
       parameters:
-      - description: Register runner
+      - description: Runner
         in: body
         name: runner
         required: true
         schema:
-          $ref: '#/definitions/RegisterRunnerDTO'
+          $ref: '#/definitions/CreateRunnerDTO'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/RegisterRunnerResultDTO'
-      summary: Register a runner
+            $ref: '#/definitions/CreateRunnerResultDTO'
+      summary: Create a runner
       tags:
       - runner
   /runner/{runnerId}:
     delete:
-      description: Remove runner
-      operationId: RemoveRunner
+      description: Delete runner
+      operationId: DeleteRunner
       parameters:
       - description: Runner ID
         in: path
@@ -2234,12 +2234,12 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Remove runner
+      summary: Delete runner
       tags:
       - runner
     get:
-      description: Get a runner
-      operationId: GetRunner
+      description: Find a runner
+      operationId: FindRunner
       parameters:
       - description: Runner ID
         in: path
@@ -2253,7 +2253,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/RunnerDTO'
-      summary: Get a runner
+      summary: Find a runner
       tags:
       - runner
   /runner/{runnerId}/jobs:
@@ -2309,8 +2309,8 @@ paths:
       - runner
   /runner/{runnerId}/metadata:
     post:
-      description: Set runner metadata
-      operationId: SetRunnerMetadata
+      description: Update runner metadata
+      operationId: UpdateRunnerMetadata
       parameters:
       - description: Runner ID
         in: path
@@ -2326,7 +2326,7 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Set runner metadata
+      summary: Update runner metadata
       tags:
       - runner
   /runner/{runnerId}/provider/{providerName}/uninstall:
@@ -2450,11 +2450,11 @@ paths:
       summary: Get the server configuration
       tags:
       - server
-    post:
+    put:
       consumes:
       - application/json
-      description: Set the server configuration
-      operationId: SetConfig
+      description: Save the server configuration
+      operationId: SaveConfig
       parameters:
       - description: Server configuration
         in: body
@@ -2469,12 +2469,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/ServerConfig'
-      summary: Set the server configuration
+      summary: Save the server configuration
       tags:
       - server
   /server/logs:
     get:
-      description: List server log files
+      description: Get server log files
       operationId: GetServerLogFiles
       produces:
       - application/json
@@ -2485,13 +2485,13 @@ paths:
             items:
               type: string
             type: array
-      summary: List server log files
+      summary: Get server log files
       tags:
       - server
   /server/network-key:
     post:
-      description: Generate a new authentication key
-      operationId: GenerateNetworkKey
+      description: Create a new authentication key
+      operationId: CreateNetworkKey
       produces:
       - application/json
       responses:
@@ -2499,7 +2499,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/NetworkKey'
-      summary: Generate a new authentication key
+      summary: Create a new authentication key
       tags:
       - server
   /target:
@@ -2564,16 +2564,16 @@ paths:
       summary: List target configs
       tags:
       - target-config
-    put:
-      description: Add a target config
-      operationId: AddTargetConfig
+    post:
+      description: Create a target config
+      operationId: CreateTargetConfig
       parameters:
-      - description: Target config to add
+      - description: Target config to create
         in: body
         name: targetConfig
         required: true
         schema:
-          $ref: '#/definitions/AddTargetConfigDTO'
+          $ref: '#/definitions/CreateTargetConfigDTO'
       - description: Show target config options
         in: query
         name: showOptions
@@ -2583,13 +2583,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/TargetConfig'
-      summary: Add a target config
+      summary: Create a target config
       tags:
       - target-config
   /target-config/{configId}:
     delete:
-      description: Remove a target config
-      operationId: RemoveTargetConfig
+      description: Delete a target config
+      operationId: DeleteTargetConfig
       parameters:
       - description: Target Config Id
         in: path
@@ -2599,13 +2599,13 @@ paths:
       responses:
         "204":
           description: No Content
-      summary: Remove a target config
+      summary: Delete a target config
       tags:
       - target-config
   /target/{targetId}:
     delete:
-      description: Remove target
-      operationId: RemoveTarget
+      description: Delete target
+      operationId: DeleteTarget
       parameters:
       - description: Target ID
         in: path
@@ -2619,12 +2619,12 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Remove target
+      summary: Delete target
       tags:
       - target
     get:
-      description: Get target info
-      operationId: GetTarget
+      description: Find target
+      operationId: FindTarget
       parameters:
       - description: Target ID or Name
         in: path
@@ -2642,7 +2642,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/TargetDTO'
-      summary: Get target info
+      summary: Find target
       tags:
       - target
   /target/{targetId}/handle-successful-creation:
@@ -2663,8 +2663,8 @@ paths:
       - target
   /target/{targetId}/metadata:
     post:
-      description: Set target metadata
-      operationId: SetTargetMetadata
+      description: Update target metadata
+      operationId: UpdateTargetMetadata
       parameters:
       - description: Target ID
         in: path
@@ -2680,7 +2680,7 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Set target metadata
+      summary: Update target metadata
       tags:
       - target
   /target/{targetId}/provider-metadata:
@@ -2809,7 +2809,7 @@ paths:
       consumes:
       - application/json
       description: Set workspace template data
-      operationId: SetWorkspaceTemplate
+      operationId: SaveWorkspaceTemplate
       parameters:
       - description: Workspace template
         in: body
@@ -2846,8 +2846,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get workspace template data
-      operationId: GetWorkspaceTemplate
+      description: Find a workspace template
+      operationId: FindWorkspaceTemplate
       parameters:
       - description: Template name
         in: path
@@ -2859,7 +2859,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/WorkspaceTemplate'
-      summary: Get workspace template data
+      summary: Find a workspace template
       tags:
       - workspace-template
   /workspace-template/{templateName}/prebuild:
@@ -2887,8 +2887,8 @@ paths:
     put:
       consumes:
       - application/json
-      description: Set prebuild
-      operationId: SetPrebuild
+      description: Save prebuild
+      operationId: SavePrebuild
       parameters:
       - description: Template name
         in: path
@@ -2906,7 +2906,7 @@ paths:
           description: Created
           schema:
             type: string
-      summary: Set prebuild
+      summary: Save prebuild
       tags:
       - prebuild
   /workspace-template/{templateName}/prebuild/{prebuildId}:
@@ -2939,8 +2939,8 @@ paths:
     get:
       consumes:
       - application/json
-      description: Get prebuild
-      operationId: GetPrebuild
+      description: Find prebuild
+      operationId: FindPrebuild
       parameters:
       - description: Workspace template name
         in: path
@@ -2957,7 +2957,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/PrebuildDTO'
-      summary: Get prebuild
+      summary: Find prebuild
       tags:
       - prebuild
   /workspace-template/{templateName}/set-default:
@@ -2978,7 +2978,7 @@ paths:
       - workspace-template
   /workspace-template/default/{gitUrl}:
     get:
-      description: Get workspace templates by git url
+      description: Get default workspace templates by git url
       operationId: GetDefaultWorkspaceTemplate
       parameters:
       - description: Git URL
@@ -2993,7 +2993,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/WorkspaceTemplate'
-      summary: Get workspace templates by git url
+      summary: Get default workspace templates by git url
       tags:
       - workspace-template
   /workspace-template/prebuild:
@@ -3031,8 +3031,8 @@ paths:
       - prebuild
   /workspace/{workspaceId}:
     delete:
-      description: Remove workspace
-      operationId: RemoveWorkspace
+      description: Delete workspace
+      operationId: DeleteWorkspace
       parameters:
       - description: Workspace ID
         in: path
@@ -3046,12 +3046,12 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Remove workspace
+      summary: Delete workspace
       tags:
       - workspace
     get:
-      description: Get workspace info
-      operationId: GetWorkspace
+      description: Find workspace
+      operationId: FindWorkspace
       parameters:
       - description: Workspace ID or Name
         in: path
@@ -3065,13 +3065,13 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/WorkspaceDTO'
-      summary: Get workspace info
+      summary: Find workspace
       tags:
       - workspace
   /workspace/{workspaceId}/metadata:
     post:
-      description: Set workspace metadata
-      operationId: SetWorkspaceMetadata
+      description: Update workspace metadata
+      operationId: UpdateWorkspaceMetadata
       parameters:
       - description: Workspace ID
         in: path
@@ -3087,7 +3087,7 @@ paths:
       responses:
         "200":
           description: OK
-      summary: Set workspace metadata
+      summary: Update workspace metadata
       tags:
       - workspace
   /workspace/{workspaceId}/provider-metadata:

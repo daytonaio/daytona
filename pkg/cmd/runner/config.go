@@ -7,14 +7,15 @@ import (
 	view "github.com/daytonaio/daytona/pkg/views/runner"
 	"github.com/spf13/cobra"
 
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/runner"
 )
 
 var configCmd = &cobra.Command{
 	Use:     "config",
-	Aliases: []string{"info"},
 	Short:   "Outputs Daytona Runner config",
+	Aliases: common.GetAliases("config"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		config, err := runner.GetConfig()
 		if err != nil {

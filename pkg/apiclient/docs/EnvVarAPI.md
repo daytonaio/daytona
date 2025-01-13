@@ -6,7 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeleteEnvironmentVariable**](EnvVarAPI.md#DeleteEnvironmentVariable) | **Delete** /env/{key} | Delete environment variable
 [**ListEnvironmentVariables**](EnvVarAPI.md#ListEnvironmentVariables) | **Get** /env | List environment variables
-[**SetEnvironmentVariable**](EnvVarAPI.md#SetEnvironmentVariable) | **Put** /env | Set environment variable
+[**SaveEnvironmentVariable**](EnvVarAPI.md#SaveEnvironmentVariable) | **Put** /env | Save environment variable
 
 
 
@@ -139,11 +139,11 @@ Other parameters are passed through a pointer to a apiListEnvironmentVariablesRe
 [[Back to README]](../README.md)
 
 
-## SetEnvironmentVariable
+## SaveEnvironmentVariable
 
-> SetEnvironmentVariable(ctx).EnvironmentVariable(environmentVariable).Execute()
+> SaveEnvironmentVariable(ctx).EnvironmentVariable(environmentVariable).Execute()
 
-Set environment variable
+Save environment variable
 
 
 
@@ -164,9 +164,9 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.EnvVarAPI.SetEnvironmentVariable(context.Background()).EnvironmentVariable(environmentVariable).Execute()
+	r, err := apiClient.EnvVarAPI.SaveEnvironmentVariable(context.Background()).EnvironmentVariable(environmentVariable).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `EnvVarAPI.SetEnvironmentVariable``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `EnvVarAPI.SaveEnvironmentVariable``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
 }
@@ -178,7 +178,7 @@ func main() {
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiSetEnvironmentVariableRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSaveEnvironmentVariableRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

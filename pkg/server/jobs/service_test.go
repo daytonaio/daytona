@@ -122,7 +122,7 @@ func (s *JobServiceTestSuite) TestSetState() {
 	job4Update := *job4
 	job4Update.State = models.JobStateSuccess
 
-	err = s.jobService.SetState(context.TODO(), job4Update.Id, services.UpdateJobStateDTO{
+	err = s.jobService.UpdateState(context.TODO(), job4Update.Id, services.UpdateJobStateDTO{
 		State:        models.JobStateSuccess,
 		ErrorMessage: nil,
 	})

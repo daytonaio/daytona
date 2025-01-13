@@ -8,7 +8,7 @@ Method | HTTP request | Description
 [**DeleteAllBuilds**](BuildAPI.md#DeleteAllBuilds) | **Delete** /build | Delete ALL builds
 [**DeleteBuild**](BuildAPI.md#DeleteBuild) | **Delete** /build/{buildId} | Delete build
 [**DeleteBuildsFromPrebuild**](BuildAPI.md#DeleteBuildsFromPrebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
-[**GetBuild**](BuildAPI.md#GetBuild) | **Get** /build/{buildId} | Get build data
+[**FindBuild**](BuildAPI.md#FindBuild) | **Get** /build/{buildId} | Find build
 [**ListBuilds**](BuildAPI.md#ListBuilds) | **Get** /build | List builds
 [**ListSuccessfulBuilds**](BuildAPI.md#ListSuccessfulBuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
 
@@ -284,11 +284,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetBuild
+## FindBuild
 
-> BuildDTO GetBuild(ctx, buildId).Execute()
+> BuildDTO FindBuild(ctx, buildId).Execute()
 
-Get build data
+Find build
 
 
 
@@ -309,13 +309,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.BuildAPI.GetBuild(context.Background(), buildId).Execute()
+	resp, r, err := apiClient.BuildAPI.FindBuild(context.Background(), buildId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.GetBuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.FindBuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetBuild`: BuildDTO
-	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.GetBuild`: %v\n", resp)
+	// response from `FindBuild`: BuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.FindBuild`: %v\n", resp)
 }
 ```
 
@@ -329,7 +329,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetBuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFindBuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

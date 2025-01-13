@@ -18,7 +18,7 @@ func NewMockApiKeyService() *mockApiKeyService {
 	return &mockApiKeyService{}
 }
 
-func (s *mockApiKeyService) Generate(keyType models.ApiKeyType, name string) (string, error) {
+func (s *mockApiKeyService) Create(keyType models.ApiKeyType, name string) (string, error) {
 	args := s.Called(keyType, name)
 	return args.String(0), args.Error(1)
 }
@@ -43,7 +43,7 @@ func (s *mockApiKeyService) ListClientKeys() ([]*models.ApiKey, error) {
 	return args.Get(0).([]*models.ApiKey), args.Error(1)
 }
 
-func (s *mockApiKeyService) Revoke(name string) error {
+func (s *mockApiKeyService) Delete(name string) error {
 	args := s.Called(name)
 	return args.Error(0)
 }

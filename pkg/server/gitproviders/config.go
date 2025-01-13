@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *GitProviderService) GetConfig(ctx context.Context, id string) (*models.GitProviderConfig, error) {
+func (s *GitProviderService) FindConfig(ctx context.Context, id string) (*models.GitProviderConfig, error) {
 	return s.configStore.Find(ctx, id)
 }
 
@@ -55,7 +55,7 @@ func (s *GitProviderService) ListConfigsForUrl(ctx context.Context, repoUrl stri
 	return gpcs, nil
 }
 
-func (s *GitProviderService) SetGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error {
+func (s *GitProviderService) SaveGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error {
 	gitProvider, err := s.newGitProvider(providerConfig)
 	if err != nil {
 		return s.handleSetGitProviderConfigError(ctx, providerConfig, err)

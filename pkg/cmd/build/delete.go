@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -17,8 +18,8 @@ import (
 var buildDeleteCmd = &cobra.Command{
 	Use:     "delete [BUILD]",
 	Short:   "Delete a build",
-	Aliases: []string{"remove", "rm"},
 	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var buildId string

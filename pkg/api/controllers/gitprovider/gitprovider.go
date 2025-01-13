@@ -86,23 +86,23 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 	ctx.JSON(200, gitProviders)
 }
 
-// GetGitProvider 			godoc
+// FindGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git provider
-//	@Description	Get Git provider
+//	@Summary		Find Git provider
+//	@Description	Find Git provider
 //	@Produce		plain
 //	@Param			gitProviderId	path		string	true	"ID"
 //	@Success		200				{object}	models.GitProviderConfig
 //	@Router			/gitprovider/{gitProviderId} [get]
 //
-//	@id				GetGitProvider
-func GetGitProvider(ctx *gin.Context) {
+//	@id				FindGitProvider
+func FindGitProvider(ctx *gin.Context) {
 	id := ctx.Param("gitProviderId")
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetConfig(ctx.Request.Context(), id)
+	gitProvider, err := server.GitProviderService.FindConfig(ctx.Request.Context(), id)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -120,18 +120,18 @@ func GetGitProvider(ctx *gin.Context) {
 	ctx.JSON(200, gitProvider)
 }
 
-// GetGitProviderIdForUrl 			godoc
+// FindGitProviderIdForUrl 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git provider ID
-//	@Description	Get Git provider ID
+//	@Summary		Find Git provider ID
+//	@Description	Find Git provider ID
 //	@Produce		plain
 //	@Param			url	path		string	true	"Url"
 //	@Success		200	{string}	providerId
 //	@Router			/gitprovider/id-for-url/{url} [get]
 //
-//	@id				GetGitProviderIdForUrl
-func GetGitProviderIdForUrl(ctx *gin.Context) {
+//	@id				FindGitProviderIdForUrl
+func FindGitProviderIdForUrl(ctx *gin.Context) {
 	urlParam := ctx.Param("url")
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
@@ -155,18 +155,18 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 	ctx.String(200, providerId)
 }
 
-// SetGitProvider 			godoc
+// SaveGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Set Git provider
-//	@Description	Set Git provider
+//	@Summary		Save Git provider
+//	@Description	Save Git provider
 //	@Param			gitProviderConfig	body	SetGitProviderConfig	true	"Git provider"
 //	@Produce		json
 //	@Success		200
 //	@Router			/gitprovider [put]
 //
-//	@id				SetGitProvider
-func SetGitProvider(ctx *gin.Context) {
+//	@id				SaveGitProvider
+func SaveGitProvider(ctx *gin.Context) {
 	var setConfigDto dto.SetGitProviderConfig
 
 	err := ctx.BindJSON(&setConfigDto)
@@ -194,7 +194,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.GitProviderService.SetGitProviderConfig(ctx.Request.Context(), &gitProviderConfig)
+	err = server.GitProviderService.SaveGitProviderConfig(ctx.Request.Context(), &gitProviderConfig)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -207,23 +207,23 @@ func SetGitProvider(ctx *gin.Context) {
 	ctx.JSON(200, nil)
 }
 
-// RemoveGitProvider 			godoc
+// DeleteGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Remove Git provider
-//	@Description	Remove Git provider
+//	@Summary		Delete Git provider
+//	@Description	Delete Git provider
 //	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Produce		json
 //	@Success		200
 //	@Router			/gitprovider/{gitProviderId} [delete]
 //
-//	@id				RemoveGitProvider
-func RemoveGitProvider(ctx *gin.Context) {
+//	@id				DeleteGitProvider
+func DeleteGitProvider(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
 	server := server.GetInstance(nil)
 
-	err := server.GitProviderService.RemoveGitProvider(ctx.Request.Context(), gitProviderId)
+	err := server.GitProviderService.DeleteGitProviderConfig(ctx.Request.Context(), gitProviderId)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

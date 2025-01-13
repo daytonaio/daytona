@@ -69,7 +69,7 @@ func (wt *WorkspaceTemplate) ListPrebuilds(filter *MatchParams) ([]*PrebuildConf
 	return prebuilds, nil
 }
 
-func (wt *WorkspaceTemplate) RemovePrebuild(id string) error {
+func (wt *WorkspaceTemplate) DeletePrebuild(id string) error {
 	newPrebuilds := []*PrebuildConfig{}
 
 	for _, pb := range wt.Prebuilds {

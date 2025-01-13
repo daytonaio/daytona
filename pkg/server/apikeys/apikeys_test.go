@@ -44,7 +44,7 @@ func (s *ApiKeyServiceTestSuite) TestRevoke() {
 
 	require := s.Require()
 
-	err := s.apiKeyService.Revoke(context.TODO(), clientKeyNames[0])
+	err := s.apiKeyService.Delete(context.TODO(), clientKeyNames[0])
 	require.Nil(err)
 
 	keys, err := s.apiKeyStore.List(context.TODO())
@@ -67,7 +67,7 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 
 	require := s.Require()
 
-	_, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
+	_, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
 	apiKey, err := s.apiKeyStore.FindByName(context.TODO(), keyName)

@@ -54,7 +54,7 @@ func (s *TargetConfigService) Find(ctx context.Context, idOrName string) (*model
 	return s.targetConfigStore.Find(ctx, idOrName, false)
 }
 
-func (s *TargetConfigService) Add(ctx context.Context, addTargetConfig services.AddTargetConfigDTO) (*models.TargetConfig, error) {
+func (s *TargetConfigService) Create(ctx context.Context, addTargetConfig services.CreateTargetConfigDTO) (*models.TargetConfig, error) {
 	persistedTargetConfig, err := s.targetConfigStore.Find(ctx, addTargetConfig.Name, false)
 	if err != nil && !stores.IsTargetConfigNotFound(err) {
 		return nil, s.handleCreateError(ctx, nil, err)

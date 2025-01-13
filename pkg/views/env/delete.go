@@ -11,13 +11,13 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/env/selection"
 )
 
-func RemoveEnvVarsView(ctx context.Context, apiClient apiclient.APIClient) ([]*apiclient.EnvironmentVariable, error) {
+func DeleteEnvVarsView(ctx context.Context, apiClient apiclient.APIClient) ([]*apiclient.EnvironmentVariable, error) {
 	envVars, res, err := apiClient.EnvVarAPI.ListEnvironmentVariables(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	selectedEnvVars := selection.GetEnvironmentVariablesFromPrompt(envVars, "Remove")
+	selectedEnvVars := selection.GetEnvironmentVariablesFromPrompt(envVars, "Delete")
 
 	return selectedEnvVars, nil
 }

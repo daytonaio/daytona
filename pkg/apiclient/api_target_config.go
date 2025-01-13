@@ -22,39 +22,39 @@ import (
 // TargetConfigAPIService TargetConfigAPI service
 type TargetConfigAPIService service
 
-type ApiAddTargetConfigRequest struct {
+type ApiCreateTargetConfigRequest struct {
 	ctx          context.Context
 	ApiService   *TargetConfigAPIService
-	targetConfig *AddTargetConfigDTO
+	targetConfig *CreateTargetConfigDTO
 	showOptions  *bool
 }
 
-// Target config to add
-func (r ApiAddTargetConfigRequest) TargetConfig(targetConfig AddTargetConfigDTO) ApiAddTargetConfigRequest {
+// Target config to create
+func (r ApiCreateTargetConfigRequest) TargetConfig(targetConfig CreateTargetConfigDTO) ApiCreateTargetConfigRequest {
 	r.targetConfig = &targetConfig
 	return r
 }
 
 // Show target config options
-func (r ApiAddTargetConfigRequest) ShowOptions(showOptions bool) ApiAddTargetConfigRequest {
+func (r ApiCreateTargetConfigRequest) ShowOptions(showOptions bool) ApiCreateTargetConfigRequest {
 	r.showOptions = &showOptions
 	return r
 }
 
-func (r ApiAddTargetConfigRequest) Execute() (*TargetConfig, *http.Response, error) {
-	return r.ApiService.AddTargetConfigExecute(r)
+func (r ApiCreateTargetConfigRequest) Execute() (*TargetConfig, *http.Response, error) {
+	return r.ApiService.CreateTargetConfigExecute(r)
 }
 
 /*
-AddTargetConfig Add a target config
+CreateTargetConfig Create a target config
 
-Add a target config
+Create a target config
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiAddTargetConfigRequest
+	@return ApiCreateTargetConfigRequest
 */
-func (a *TargetConfigAPIService) AddTargetConfig(ctx context.Context) ApiAddTargetConfigRequest {
-	return ApiAddTargetConfigRequest{
+func (a *TargetConfigAPIService) CreateTargetConfig(ctx context.Context) ApiCreateTargetConfigRequest {
+	return ApiCreateTargetConfigRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -63,15 +63,15 @@ func (a *TargetConfigAPIService) AddTargetConfig(ctx context.Context) ApiAddTarg
 // Execute executes the request
 //
 //	@return TargetConfig
-func (a *TargetConfigAPIService) AddTargetConfigExecute(r ApiAddTargetConfigRequest) (*TargetConfig, *http.Response, error) {
+func (a *TargetConfigAPIService) CreateTargetConfigExecute(r ApiCreateTargetConfigRequest) (*TargetConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
+		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
 		localVarReturnValue *TargetConfig
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetConfigAPIService.AddTargetConfig")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetConfigAPIService.CreateTargetConfig")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -156,6 +156,112 @@ func (a *TargetConfigAPIService) AddTargetConfigExecute(r ApiAddTargetConfigRequ
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteTargetConfigRequest struct {
+	ctx        context.Context
+	ApiService *TargetConfigAPIService
+	configId   string
+}
+
+func (r ApiDeleteTargetConfigRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteTargetConfigExecute(r)
+}
+
+/*
+DeleteTargetConfig Delete a target config
+
+Delete a target config
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param configId Target Config Id
+	@return ApiDeleteTargetConfigRequest
+*/
+func (a *TargetConfigAPIService) DeleteTargetConfig(ctx context.Context, configId string) ApiDeleteTargetConfigRequest {
+	return ApiDeleteTargetConfigRequest{
+		ApiService: a,
+		ctx:        ctx,
+		configId:   configId,
+	}
+}
+
+// Execute executes the request
+func (a *TargetConfigAPIService) DeleteTargetConfigExecute(r ApiDeleteTargetConfigRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetConfigAPIService.DeleteTargetConfig")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/target-config/{configId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"configId"+"}", url.PathEscape(parameterValueToString(r.configId, "configId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type ApiListTargetConfigsRequest struct {
@@ -280,110 +386,4 @@ func (a *TargetConfigAPIService) ListTargetConfigsExecute(r ApiListTargetConfigs
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type ApiRemoveTargetConfigRequest struct {
-	ctx        context.Context
-	ApiService *TargetConfigAPIService
-	configId   string
-}
-
-func (r ApiRemoveTargetConfigRequest) Execute() (*http.Response, error) {
-	return r.ApiService.RemoveTargetConfigExecute(r)
-}
-
-/*
-RemoveTargetConfig Remove a target config
-
-Remove a target config
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configId Target Config Id
-	@return ApiRemoveTargetConfigRequest
-*/
-func (a *TargetConfigAPIService) RemoveTargetConfig(ctx context.Context, configId string) ApiRemoveTargetConfigRequest {
-	return ApiRemoveTargetConfigRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configId:   configId,
-	}
-}
-
-// Execute executes the request
-func (a *TargetConfigAPIService) RemoveTargetConfigExecute(r ApiRemoveTargetConfigRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "TargetConfigAPIService.RemoveTargetConfig")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/target-config/{configId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"configId"+"}", url.PathEscape(parameterValueToString(r.configId, "configId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
 }

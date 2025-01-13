@@ -13,18 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetTargetMetadata 			godoc
+// UpdateTargetMetadata 			godoc
 //
 //	@Tags			target
-//	@Summary		Set target metadata
-//	@Description	Set target metadata
+//	@Summary		Update target metadata
+//	@Description	Update target metadata
 //	@Param			targetId		path	string					true	"Target ID"
 //	@Param			targetMetadata	body	UpdateTargetMetadataDTO	true	"Target Metadata"
 //	@Success		200
 //	@Router			/target/{targetId}/metadata [post]
 //
-//	@id				SetTargetMetadata
-func SetTargetMetadata(ctx *gin.Context) {
+//	@id				UpdateTargetMetadata
+func UpdateTargetMetadata(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
 
 	var updateDTO dto.UpdateTargetMetadataDTO
@@ -36,7 +36,7 @@ func SetTargetMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.TargetService.SetTargetMetadata(ctx.Request.Context(), targetId, &models.TargetMetadata{
+	_, err = server.TargetService.UpdateTargetMetadata(ctx.Request.Context(), targetId, &models.TargetMetadata{
 		Uptime: updateDTO.Uptime,
 	})
 	if err != nil {

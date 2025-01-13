@@ -10,6 +10,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -18,9 +19,10 @@ import (
 )
 
 var workspaceTemplateUpdateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update a workspace template",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "update",
+	Short:   "Update a workspace template",
+	Args:    cobra.MaximumNArgs(1),
+	Aliases: cmd_common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspaceTemplate *apiclient.WorkspaceTemplate
 		var res *http.Response
@@ -47,7 +49,7 @@ var workspaceTemplateUpdateCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			workspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, args[0]).Execute()
+			workspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.FindWorkspaceTemplate(ctx, args[0]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -120,7 +122,7 @@ var workspaceTemplateUpdateCmd = &cobra.Command{
 			GitProviderConfigId: createDto[0].GitProviderConfigId,
 		}
 
-		res, err = apiClient.WorkspaceTemplateAPI.SetWorkspaceTemplate(ctx).WorkspaceTemplate(newWorkspaceTemplate).Execute()
+		res, err = apiClient.WorkspaceTemplateAPI.SaveWorkspaceTemplate(ctx).WorkspaceTemplate(newWorkspaceTemplate).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

@@ -27,8 +27,8 @@ paths:
       - apiKey
   /apikey/{apiKeyName}:
     delete:
-      description: Revoke API key
-      operationId: RevokeApiKey
+      description: Delete API key
+      operationId: DeleteApiKey
       parameters:
       - description: API key name
         in: path
@@ -40,12 +40,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Revoke API key
+      summary: Delete API key
       tags:
       - apiKey
     post:
-      description: Generate an API key
-      operationId: GenerateApiKey
+      description: Create an API key
+      operationId: CreateApiKey
       parameters:
       - description: API key name
         in: path
@@ -60,7 +60,7 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Generate an API key
+      summary: Create an API key
       tags:
       - apiKey
   /build:
@@ -186,8 +186,8 @@ paths:
       tags:
       - build
     get:
-      description: Get build data
-      operationId: GetBuild
+      description: Find build
+      operationId: FindBuild
       parameters:
       - description: Build ID
         in: path
@@ -202,13 +202,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/BuildDTO'
           description: OK
-      summary: Get build data
+      summary: Find build
       tags:
       - build
   /container-registry/{server}:
     get:
-      description: Get container registry
-      operationId: GetContainerRegistry
+      description: Find container registry
+      operationId: FindContainerRegistry
       parameters:
       - description: Container registry server
         in: path
@@ -228,7 +228,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContainerRegistry'
           description: OK
-      summary: Get container registry
+      summary: Find container registry
       tags:
       - container registry
   /env:
@@ -248,8 +248,8 @@ paths:
       tags:
       - envVar
     put:
-      description: Set environment variable
-      operationId: SetEnvironmentVariable
+      description: Save environment variable
+      operationId: SaveEnvironmentVariable
       requestBody:
         content:
           application/json:
@@ -261,7 +261,7 @@ paths:
         "201":
           content: {}
           description: Created
-      summary: Set environment variable
+      summary: Save environment variable
       tags:
       - envVar
       x-codegen-request-body-name: environmentVariable
@@ -300,8 +300,8 @@ paths:
       tags:
       - gitProvider
     put:
-      description: Set Git provider
-      operationId: SetGitProvider
+      description: Save Git provider
+      operationId: SaveGitProvider
       requestBody:
         content:
           '*/*':
@@ -313,7 +313,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set Git provider
+      summary: Save Git provider
       tags:
       - gitProvider
       x-codegen-request-body-name: gitProviderConfig
@@ -386,8 +386,8 @@ paths:
       - gitProvider
   /gitprovider/id-for-url/{url}:
     get:
-      description: Get Git provider ID
-      operationId: GetGitProviderIdForUrl
+      description: Find Git provider ID
+      operationId: FindGitProviderIdForUrl
       parameters:
       - description: Url
         in: path
@@ -402,13 +402,13 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Get Git provider ID
+      summary: Find Git provider ID
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}:
     delete:
-      description: Remove Git provider
-      operationId: RemoveGitProvider
+      description: Delete Git provider
+      operationId: DeleteGitProvider
       parameters:
       - description: Git provider
         in: path
@@ -420,12 +420,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove Git provider
+      summary: Delete Git provider
       tags:
       - gitProvider
     get:
-      description: Get Git provider
-      operationId: GetGitProvider
+      description: Find Git provider
+      operationId: FindGitProvider
       parameters:
       - description: ID
         in: path
@@ -440,7 +440,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GitProvider'
           description: OK
-      summary: Get Git provider
+      summary: Find Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}/namespaces:
@@ -702,23 +702,23 @@ paths:
       tags:
       - runner
     post:
-      description: Register a runner
-      operationId: RegisterRunner
+      description: Create a runner
+      operationId: CreateRunner
       requestBody:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/RegisterRunnerDTO'
-        description: Register runner
+              $ref: '#/components/schemas/CreateRunnerDTO'
+        description: Runner
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RegisterRunnerResultDTO'
+                $ref: '#/components/schemas/CreateRunnerResultDTO'
           description: OK
-      summary: Register a runner
+      summary: Create a runner
       tags:
       - runner
       x-codegen-request-body-name: runner
@@ -746,8 +746,8 @@ paths:
       - provider
   /runner/{runnerId}:
     delete:
-      description: Remove runner
-      operationId: RemoveRunner
+      description: Delete runner
+      operationId: DeleteRunner
       parameters:
       - description: Runner ID
         in: path
@@ -759,12 +759,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove runner
+      summary: Delete runner
       tags:
       - runner
     get:
-      description: Get a runner
-      operationId: GetRunner
+      description: Find a runner
+      operationId: FindRunner
       parameters:
       - description: Runner ID
         in: path
@@ -779,7 +779,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/RunnerDTO'
           description: OK
-      summary: Get a runner
+      summary: Find a runner
       tags:
       - runner
   /runner/{runnerId}/jobs:
@@ -839,8 +839,8 @@ paths:
       x-codegen-request-body-name: updateJobState
   /runner/{runnerId}/metadata:
     post:
-      description: Set runner metadata
-      operationId: SetRunnerMetadata
+      description: Update runner metadata
+      operationId: UpdateRunnerMetadata
       parameters:
       - description: Runner ID
         in: path
@@ -859,7 +859,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set runner metadata
+      summary: Update runner metadata
       tags:
       - runner
       x-codegen-request-body-name: runnerMetadata
@@ -975,9 +975,9 @@ paths:
       summary: Get the server configuration
       tags:
       - server
-    post:
-      description: Set the server configuration
-      operationId: SetConfig
+    put:
+      description: Save the server configuration
+      operationId: SaveConfig
       requestBody:
         content:
           application/json:
@@ -992,13 +992,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ServerConfig'
           description: OK
-      summary: Set the server configuration
+      summary: Save the server configuration
       tags:
       - server
       x-codegen-request-body-name: config
   /server/logs:
     get:
-      description: List server log files
+      description: Get server log files
       operationId: GetServerLogFiles
       responses:
         "200":
@@ -1009,13 +1009,13 @@ paths:
                   type: string
                 type: array
           description: OK
-      summary: List server log files
+      summary: Get server log files
       tags:
       - server
   /server/network-key:
     post:
-      description: Generate a new authentication key
-      operationId: GenerateNetworkKey
+      description: Create a new authentication key
+      operationId: CreateNetworkKey
       responses:
         "200":
           content:
@@ -1023,7 +1023,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/NetworkKey'
           description: OK
-      summary: Generate a new authentication key
+      summary: Create a new authentication key
       tags:
       - server
   /target:
@@ -1091,9 +1091,9 @@ paths:
       summary: List target configs
       tags:
       - target-config
-    put:
-      description: Add a target config
-      operationId: AddTargetConfig
+    post:
+      description: Create a target config
+      operationId: CreateTargetConfig
       parameters:
       - description: Show target config options
         in: query
@@ -1104,8 +1104,8 @@ paths:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/AddTargetConfigDTO'
-        description: Target config to add
+              $ref: '#/components/schemas/CreateTargetConfigDTO'
+        description: Target config to create
         required: true
       responses:
         "200":
@@ -1114,14 +1114,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TargetConfig'
           description: OK
-      summary: Add a target config
+      summary: Create a target config
       tags:
       - target-config
       x-codegen-request-body-name: targetConfig
   /target-config/{configId}:
     delete:
-      description: Remove a target config
-      operationId: RemoveTargetConfig
+      description: Delete a target config
+      operationId: DeleteTargetConfig
       parameters:
       - description: Target Config Id
         in: path
@@ -1133,13 +1133,13 @@ paths:
         "204":
           content: {}
           description: No Content
-      summary: Remove a target config
+      summary: Delete a target config
       tags:
       - target-config
   /target/{targetId}:
     delete:
-      description: Remove target
-      operationId: RemoveTarget
+      description: Delete target
+      operationId: DeleteTarget
       parameters:
       - description: Target ID
         in: path
@@ -1156,12 +1156,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove target
+      summary: Delete target
       tags:
       - target
     get:
-      description: Get target info
-      operationId: GetTarget
+      description: Find target
+      operationId: FindTarget
       parameters:
       - description: Target ID or Name
         in: path
@@ -1181,7 +1181,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/TargetDTO'
           description: OK
-      summary: Get target info
+      summary: Find target
       tags:
       - target
   /target/{targetId}/handle-successful-creation:
@@ -1204,8 +1204,8 @@ paths:
       - target
   /target/{targetId}/metadata:
     post:
-      description: Set target metadata
-      operationId: SetTargetMetadata
+      description: Update target metadata
+      operationId: UpdateTargetMetadata
       parameters:
       - description: Target ID
         in: path
@@ -1224,7 +1224,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set target metadata
+      summary: Update target metadata
       tags:
       - target
       x-codegen-request-body-name: targetMetadata
@@ -1363,7 +1363,7 @@ paths:
       - workspace-template
     put:
       description: Set workspace template data
-      operationId: SetWorkspaceTemplate
+      operationId: SaveWorkspaceTemplate
       requestBody:
         content:
           application/json:
@@ -1381,7 +1381,7 @@ paths:
       x-codegen-request-body-name: workspaceTemplate
   /workspace-template/default/{gitUrl}:
     get:
-      description: Get workspace templates by git url
+      description: Get default workspace templates by git url
       operationId: GetDefaultWorkspaceTemplate
       parameters:
       - description: Git URL
@@ -1397,7 +1397,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceTemplate'
           description: OK
-      summary: Get workspace templates by git url
+      summary: Get default workspace templates by git url
       tags:
       - workspace-template
   /workspace-template/prebuild:
@@ -1459,8 +1459,8 @@ paths:
       tags:
       - workspace-template
     get:
-      description: Get workspace template data
-      operationId: GetWorkspaceTemplate
+      description: Find a workspace template
+      operationId: FindWorkspaceTemplate
       parameters:
       - description: Template name
         in: path
@@ -1475,7 +1475,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceTemplate'
           description: OK
-      summary: Get workspace template data
+      summary: Find a workspace template
       tags:
       - workspace-template
   /workspace-template/{templateName}/prebuild:
@@ -1502,8 +1502,8 @@ paths:
       tags:
       - prebuild
     put:
-      description: Set prebuild
-      operationId: SetPrebuild
+      description: Save prebuild
+      operationId: SavePrebuild
       parameters:
       - description: Template name
         in: path
@@ -1525,7 +1525,7 @@ paths:
               schema:
                 type: string
           description: Created
-      summary: Set prebuild
+      summary: Save prebuild
       tags:
       - prebuild
       x-codegen-request-body-name: prebuild
@@ -1559,8 +1559,8 @@ paths:
       tags:
       - prebuild
     get:
-      description: Get prebuild
-      operationId: GetPrebuild
+      description: Find prebuild
+      operationId: FindPrebuild
       parameters:
       - description: Workspace template name
         in: path
@@ -1581,7 +1581,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PrebuildDTO'
           description: OK
-      summary: Get prebuild
+      summary: Find prebuild
       tags:
       - prebuild
   /workspace-template/{templateName}/set-default:
@@ -1604,8 +1604,8 @@ paths:
       - workspace-template
   /workspace/{workspaceId}:
     delete:
-      description: Remove workspace
-      operationId: RemoveWorkspace
+      description: Delete workspace
+      operationId: DeleteWorkspace
       parameters:
       - description: Workspace ID
         in: path
@@ -1622,12 +1622,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove workspace
+      summary: Delete workspace
       tags:
       - workspace
     get:
-      description: Get workspace info
-      operationId: GetWorkspace
+      description: Find workspace
+      operationId: FindWorkspace
       parameters:
       - description: Workspace ID or Name
         in: path
@@ -1642,13 +1642,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceDTO'
           description: OK
-      summary: Get workspace info
+      summary: Find workspace
       tags:
       - workspace
   /workspace/{workspaceId}/metadata:
     post:
-      description: Set workspace metadata
-      operationId: SetWorkspaceMetadata
+      description: Update workspace metadata
+      operationId: UpdateWorkspaceMetadata
       parameters:
       - description: Workspace ID
         in: path
@@ -1667,7 +1667,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set workspace metadata
+      summary: Update workspace metadata
       tags:
       - workspace
       x-codegen-request-body-name: workspaceMetadata
@@ -2579,42 +2579,6 @@ paths:
       - workspace toolbox
 components:
   schemas:
-    AddTargetConfigDTO:
-      example:
-        name: name
-        options: options
-        providerInfo:
-          runnerName: runnerName
-          targetConfigManifest:
-            key:
-              defaultValue: defaultValue
-              options:
-              - options
-              - options
-              description: description
-              suggestions:
-              - suggestions
-              - suggestions
-              type: null
-              disabledPredicate: disabledPredicate
-              inputMasked: true
-          agentlessTarget: true
-          name: name
-          runnerId: runnerId
-          label: label
-          version: version
-      properties:
-        name:
-          type: string
-        options:
-          type: string
-        providerInfo:
-          $ref: '#/components/schemas/ProviderInfo'
-      required:
-      - name
-      - options
-      - providerInfo
-      type: object
     ApiKeyViewDTO:
       example:
         current: true
@@ -2892,6 +2856,118 @@ components:
           type: array
       required:
       - retention
+      type: object
+    CreateRunnerDTO:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    CreateRunnerResultDTO:
+      example:
+        metadata:
+          runningJobs: 0
+          runnerId: runnerId
+          providers:
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          updatedAt: updatedAt
+          uptime: 6
+        apiKey: apiKey
+        name: name
+        id: id
+      properties:
+        apiKey:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/RunnerMetadata'
+        name:
+          type: string
+      required:
+      - apiKey
+      - id
+      - name
+      type: object
+    CreateTargetConfigDTO:
+      example:
+        name: name
+        options: options
+        providerInfo:
+          runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+      properties:
+        name:
+          type: string
+        options:
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
       type: object
     CreateTargetDTO:
       example:
@@ -3885,82 +3961,6 @@ components:
       - runnerName
       - targetConfigManifest
       - version
-      type: object
-    RegisterRunnerDTO:
-      example:
-        name: name
-        id: id
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-      required:
-      - id
-      - name
-      type: object
-    RegisterRunnerResultDTO:
-      example:
-        metadata:
-          runningJobs: 0
-          runnerId: runnerId
-          providers:
-          - runnerName: runnerName
-            targetConfigManifest:
-              key:
-                defaultValue: defaultValue
-                options:
-                - options
-                - options
-                description: description
-                suggestions:
-                - suggestions
-                - suggestions
-                type: null
-                disabledPredicate: disabledPredicate
-                inputMasked: true
-            agentlessTarget: true
-            name: name
-            runnerId: runnerId
-            label: label
-            version: version
-          - runnerName: runnerName
-            targetConfigManifest:
-              key:
-                defaultValue: defaultValue
-                options:
-                - options
-                - options
-                description: description
-                suggestions:
-                - suggestions
-                - suggestions
-                type: null
-                disabledPredicate: disabledPredicate
-                inputMasked: true
-            agentlessTarget: true
-            name: name
-            runnerId: runnerId
-            label: label
-            version: version
-          updatedAt: updatedAt
-          uptime: 6
-        apiKey: apiKey
-        name: name
-        id: id
-      properties:
-        apiKey:
-          type: string
-        id:
-          type: string
-        metadata:
-          $ref: '#/components/schemas/RunnerMetadata'
-        name:
-          type: string
-      required:
-      - apiKey
-      - id
-      - name
       type: object
     ReplaceRequest:
       example:

@@ -32,19 +32,19 @@ func GetConfig(ctx *gin.Context) {
 	ctx.JSON(200, config)
 }
 
-// SetConfig 			godoc
+// SaveConfig 			godoc
 //
 //	@Tags			server
-//	@Summary		Set the server configuration
-//	@Description	Set the server configuration
+//	@Summary		Save the server configuration
+//	@Description	Save the server configuration
 //	@Accept			json
 //	@Produce		json
 //	@Param			config	body		ServerConfig	true	"Server configuration"
 //	@Success		200		{object}	ServerConfig
-//	@Router			/server/config [post]
+//	@Router			/server/config [put]
 //
-//	@id				SetConfig
-func SetConfig(ctx *gin.Context) {
+//	@id				SaveConfig
+func SaveConfig(ctx *gin.Context) {
 	var c server.Config
 	err := ctx.BindJSON(&c)
 	if err != nil {
@@ -61,17 +61,17 @@ func SetConfig(ctx *gin.Context) {
 	ctx.JSON(200, c)
 }
 
-// GenerateNetworkKey 		godoc
+// CreateNetworkKey 		godoc
 //
 //	@Tags			server
-//	@Summary		Generate a new authentication key
-//	@Description	Generate a new authentication key
+//	@Summary		Create a new authentication key
+//	@Description	Create a new authentication key
 //	@Produce		json
 //	@Success		200	{object}	NetworkKey
 //	@Router			/server/network-key [post]
 //
-//	@id				GenerateNetworkKey
-func GenerateNetworkKey(ctx *gin.Context) {
+//	@id				CreateNetworkKey
+func CreateNetworkKey(ctx *gin.Context) {
 	s := server.GetInstance(nil)
 
 	authKey, err := s.TailscaleServer.CreateAuthKey(headscale.HEADSCALE_USERNAME)
@@ -86,8 +86,8 @@ func GenerateNetworkKey(ctx *gin.Context) {
 // GetServerLogFiles 		godoc
 //
 //	@Tags			server
-//	@Summary		List server log files
-//	@Description	List server log files
+//	@Summary		Get server log files
+//	@Description	Get server log files
 //	@Produce		json
 //	@Success		200	{array}	string
 //	@Router			/server/logs [get]

@@ -36,7 +36,7 @@ func GetConnection(profile *config.Profile) (*tsnet.Server, error) {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	networkKey, res, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(apiclient.ApiGenerateNetworkKeyRequest{})
+	networkKey, res, err := apiClient.ServerAPI.CreateNetworkKeyExecute(apiclient.ApiCreateNetworkKeyRequest{})
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}

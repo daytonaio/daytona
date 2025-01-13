@@ -72,7 +72,7 @@ var workspaceTemplateExportCmd = &cobra.Command{
 			}
 		} else {
 			var res *http.Response
-			selectedWorkspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, args[0]).Execute()
+			selectedWorkspaceTemplate, res, err = apiClient.WorkspaceTemplateAPI.FindWorkspaceTemplate(ctx, args[0]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

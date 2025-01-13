@@ -24,7 +24,7 @@ var providerUpdateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"up"},
+	Aliases: cmd_common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedRunnerId string
 

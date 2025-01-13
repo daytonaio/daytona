@@ -85,7 +85,7 @@ func (s *LocalContainerRegistry) Start() error {
 
 	//	we want to always create a new container
 	//	to avoid conflicts with configuration changes
-	if err := RemoveRegistryContainer(); err != nil {
+	if err := DeleteRegistryContainer(); err != nil {
 		return err
 	}
 
@@ -170,14 +170,14 @@ func (s *LocalContainerRegistry) Start() error {
 }
 
 func (s *LocalContainerRegistry) Stop() error {
-	return RemoveRegistryContainer()
+	return DeleteRegistryContainer()
 }
 
 func (s *LocalContainerRegistry) Purge() error {
 	return os.RemoveAll(s.dataPath)
 }
 
-func RemoveRegistryContainer() error {
+func DeleteRegistryContainer() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err

@@ -32,7 +32,7 @@ func (s *ApiKeyService) ListClientKeys(ctx context.Context) ([]*services.ApiKeyD
 	return clientKeys, nil
 }
 
-func (s *ApiKeyService) Revoke(ctx context.Context, name string) error {
+func (s *ApiKeyService) Delete(ctx context.Context, name string) error {
 	apiKey, err := s.apiKeyStore.FindByName(ctx, name)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (s *ApiKeyService) Revoke(ctx context.Context, name string) error {
 	return s.apiKeyStore.Delete(ctx, apiKey)
 }
 
-func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error) {
+func (s *ApiKeyService) Create(ctx context.Context, keyType models.ApiKeyType, name string) (string, error) {
 	key := s.generateRandomKey(name)
 
 	apiKey := &models.ApiKey{
@@ -52,10 +52,10 @@ func (s *ApiKeyService) Generate(ctx context.Context, keyType models.ApiKeyType,
 
 	err := s.apiKeyStore.Save(ctx, apiKey)
 	if err != nil {
-		return "", s.handleGenerateApiKeyError(ctx, apiKey, err)
+		return "", s.handleCreateApiKeyError(ctx, apiKey, err)
 	}
 
-	return key, s.handleGenerateApiKeyError(ctx, apiKey, nil)
+	return key, s.handleCreateApiKeyError(ctx, apiKey, nil)
 }
 
 func (s *ApiKeyService) GetApiKeyName(ctx context.Context, apiKey string) (string, error) {
@@ -67,7 +67,7 @@ func (s *ApiKeyService) GetApiKeyName(ctx context.Context, apiKey string) (strin
 	return key.Name, nil
 }
 
-func (s *ApiKeyService) handleGenerateApiKeyError(ctx context.Context, key *models.ApiKey, err error) error {
+func (s *ApiKeyService) handleCreateApiKeyError(ctx context.Context, key *models.ApiKey, err error) error {
 	if key.Type != models.ApiKeyTypeClient {
 		return err
 	}

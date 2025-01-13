@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
 	"github.com/daytonaio/daytona/pkg/views/gitprovider/list"
@@ -16,8 +17,8 @@ import (
 
 var gitProviderListCmd = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"ls"},
-	Short:   "Lists your registered Git providers",
+	Short:   "Lists your registered Git provider configs",
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {

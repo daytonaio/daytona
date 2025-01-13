@@ -142,29 +142,29 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 	return localVarHTTPResponse, nil
 }
 
-type ApiGetPrebuildRequest struct {
+type ApiFindPrebuildRequest struct {
 	ctx          context.Context
 	ApiService   *PrebuildAPIService
 	templateName string
 	prebuildId   string
 }
 
-func (r ApiGetPrebuildRequest) Execute() (*PrebuildDTO, *http.Response, error) {
-	return r.ApiService.GetPrebuildExecute(r)
+func (r ApiFindPrebuildRequest) Execute() (*PrebuildDTO, *http.Response, error) {
+	return r.ApiService.FindPrebuildExecute(r)
 }
 
 /*
-GetPrebuild Get prebuild
+FindPrebuild Find prebuild
 
-Get prebuild
+Find prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param templateName Workspace template name
 	@param prebuildId Prebuild ID
-	@return ApiGetPrebuildRequest
+	@return ApiFindPrebuildRequest
 */
-func (a *PrebuildAPIService) GetPrebuild(ctx context.Context, templateName string, prebuildId string) ApiGetPrebuildRequest {
-	return ApiGetPrebuildRequest{
+func (a *PrebuildAPIService) FindPrebuild(ctx context.Context, templateName string, prebuildId string) ApiFindPrebuildRequest {
+	return ApiFindPrebuildRequest{
 		ApiService:   a,
 		ctx:          ctx,
 		templateName: templateName,
@@ -175,7 +175,7 @@ func (a *PrebuildAPIService) GetPrebuild(ctx context.Context, templateName strin
 // Execute executes the request
 //
 //	@return PrebuildDTO
-func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*PrebuildDTO, *http.Response, error) {
+func (a *PrebuildAPIService) FindPrebuildExecute(r ApiFindPrebuildRequest) (*PrebuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -183,7 +183,7 @@ func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*Prebu
 		localVarReturnValue *PrebuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.GetPrebuild")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.FindPrebuild")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -610,7 +610,7 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetPrebuildRequest struct {
+type ApiSavePrebuildRequest struct {
 	ctx          context.Context
 	ApiService   *PrebuildAPIService
 	templateName string
@@ -618,26 +618,26 @@ type ApiSetPrebuildRequest struct {
 }
 
 // Prebuild
-func (r ApiSetPrebuildRequest) Prebuild(prebuild CreatePrebuildDTO) ApiSetPrebuildRequest {
+func (r ApiSavePrebuildRequest) Prebuild(prebuild CreatePrebuildDTO) ApiSavePrebuildRequest {
 	r.prebuild = &prebuild
 	return r
 }
 
-func (r ApiSetPrebuildRequest) Execute() (string, *http.Response, error) {
-	return r.ApiService.SetPrebuildExecute(r)
+func (r ApiSavePrebuildRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.SavePrebuildExecute(r)
 }
 
 /*
-SetPrebuild Set prebuild
+SavePrebuild Save prebuild
 
-Set prebuild
+Save prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param templateName Template name
-	@return ApiSetPrebuildRequest
+	@return ApiSavePrebuildRequest
 */
-func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, templateName string) ApiSetPrebuildRequest {
-	return ApiSetPrebuildRequest{
+func (a *PrebuildAPIService) SavePrebuild(ctx context.Context, templateName string) ApiSavePrebuildRequest {
+	return ApiSavePrebuildRequest{
 		ApiService:   a,
 		ctx:          ctx,
 		templateName: templateName,
@@ -647,7 +647,7 @@ func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, templateName strin
 // Execute executes the request
 //
 //	@return string
-func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string, *http.Response, error) {
+func (a *PrebuildAPIService) SavePrebuildExecute(r ApiSavePrebuildRequest) (string, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPut
 		localVarPostBody    interface{}
@@ -655,7 +655,7 @@ func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string
 		localVarReturnValue string
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.SetPrebuild")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.SavePrebuild")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

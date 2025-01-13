@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -20,8 +21,8 @@ var forceFlag bool
 var prebuildDeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE_CONFIG] [PREBUILD]",
 	Short:   "Delete a prebuild configuration",
-	Aliases: []string{"remove", "rm"},
 	Args:    cobra.MaximumNArgs(2),
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedPrebuild *apiclient.PrebuildDTO
 		var selectedPrebuildId string

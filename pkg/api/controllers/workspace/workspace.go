@@ -15,22 +15,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetWorkspace 			godoc
+// FindWorkspace 			godoc
 //
 //	@Tags			workspace
-//	@Summary		Get workspace info
-//	@Description	Get workspace info
+//	@Summary		Find workspace
+//	@Description	Find workspace
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
 //	@Success		200			{object}	WorkspaceDTO
 //	@Router			/workspace/{workspaceId} [get]
 //
-//	@id				GetWorkspace
-func GetWorkspace(ctx *gin.Context) {
+//	@id				FindWorkspace
+func FindWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+	w, err := server.WorkspaceService.FindWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {

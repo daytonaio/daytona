@@ -242,46 +242,46 @@ func (a *EnvVarAPIService) ListEnvironmentVariablesExecute(r ApiListEnvironmentV
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetEnvironmentVariableRequest struct {
+type ApiSaveEnvironmentVariableRequest struct {
 	ctx                 context.Context
 	ApiService          *EnvVarAPIService
 	environmentVariable *EnvironmentVariable
 }
 
 // Environment Variable
-func (r ApiSetEnvironmentVariableRequest) EnvironmentVariable(environmentVariable EnvironmentVariable) ApiSetEnvironmentVariableRequest {
+func (r ApiSaveEnvironmentVariableRequest) EnvironmentVariable(environmentVariable EnvironmentVariable) ApiSaveEnvironmentVariableRequest {
 	r.environmentVariable = &environmentVariable
 	return r
 }
 
-func (r ApiSetEnvironmentVariableRequest) Execute() (*http.Response, error) {
-	return r.ApiService.SetEnvironmentVariableExecute(r)
+func (r ApiSaveEnvironmentVariableRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SaveEnvironmentVariableExecute(r)
 }
 
 /*
-SetEnvironmentVariable Set environment variable
+SaveEnvironmentVariable Save environment variable
 
-Set environment variable
+Save environment variable
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiSetEnvironmentVariableRequest
+	@return ApiSaveEnvironmentVariableRequest
 */
-func (a *EnvVarAPIService) SetEnvironmentVariable(ctx context.Context) ApiSetEnvironmentVariableRequest {
-	return ApiSetEnvironmentVariableRequest{
+func (a *EnvVarAPIService) SaveEnvironmentVariable(ctx context.Context) ApiSaveEnvironmentVariableRequest {
+	return ApiSaveEnvironmentVariableRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-func (a *EnvVarAPIService) SetEnvironmentVariableExecute(r ApiSetEnvironmentVariableRequest) (*http.Response, error) {
+func (a *EnvVarAPIService) SaveEnvironmentVariableExecute(r ApiSaveEnvironmentVariableRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPut
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EnvVarAPIService.SetEnvironmentVariable")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "EnvVarAPIService.SaveEnvironmentVariable")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
