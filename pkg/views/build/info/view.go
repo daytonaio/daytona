@@ -61,7 +61,9 @@ func Render(b *apiclient.BuildDTO, apiServerConfig *apiclient.ServerConfig, forc
 		output += getInfoLine("Devcontainer path", b.BuildConfig.Devcontainer.FilePath) + "\n"
 	}
 
-	output += getInfoLine("Prebuild ID", b.PrebuildId) + "\n"
+	if b.PrebuildId != nil {
+		output += getInfoLine("Prebuild ID", *b.PrebuildId) + "\n"
+	}
 
 	output += getInfoLine("Created", util.FormatTimestamp(b.CreatedAt)) + "\n"
 

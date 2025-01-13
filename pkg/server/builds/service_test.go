@@ -150,7 +150,7 @@ func (s *BuildServiceTestSuite) TestSave() {
 	createBuildDto := services.CreateBuildDTO{
 		WorkspaceTemplateName: "workspaceTemplateName",
 		Branch:                "branch",
-		PrebuildId:            &build4.PrebuildId,
+		PrebuildId:            build4.PrebuildId,
 		EnvVars:               build4.EnvVars,
 	}
 

@@ -72,10 +72,13 @@ func getRowFromRowData(build apiclient.BuildDTO) []string {
 
 	data.Id = build.Id + views_util.AdditionalPropertyPadding
 	data.Status = views.GetStateLabel(build.State.Name)
-	data.PrebuildId = build.PrebuildId
-	if data.PrebuildId == "" {
+
+	if build.PrebuildId != nil && *build.PrebuildId != "" {
+		data.PrebuildId = *build.PrebuildId
+	} else {
 		data.PrebuildId = "/"
 	}
+
 	data.CreatedAt = util.FormatTimestamp(build.CreatedAt)
 	data.UpdatedAt = util.FormatTimestamp(build.UpdatedAt)
 
