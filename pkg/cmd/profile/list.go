@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
@@ -16,7 +17,7 @@ import (
 var profileListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profiles",
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -18,8 +19,8 @@ import (
 
 var gitProviderDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: []string{"remove", "rm"},
-	Short:   "Unregister a Git provider",
+	Short:   "Delete a Git provider config",
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -40,7 +41,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 
 		if allFlag {
 			if yesFlag {
-				err = removeAllGitProviders(gitProviders, apiClient)
+				err = deleteAllGitProviders(gitProviders, apiClient)
 				if err != nil {
 					return err
 				}
@@ -48,8 +49,8 @@ var gitProviderDeleteCmd = &cobra.Command{
 				form := huh.NewForm(
 					huh.NewGroup(
 						huh.NewConfirm().
-							Title("Remove all git providers?").
-							Description("Are you sure you want to remove all git providers?").
+							Title("Delete all git providers?").
+							Description("Are you sure you want to delete all git providers?").
 							Value(&yesFlag),
 					),
 				).WithTheme(views.GetCustomTheme())
@@ -59,7 +60,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 				}
 
 				if yesFlag {
-					err = removeAllGitProviders(gitProviders, apiClient)
+					err = deleteAllGitProviders(gitProviders, apiClient)
 					if err != nil {
 						return err
 					}
@@ -73,7 +74,7 @@ var gitProviderDeleteCmd = &cobra.Command{
 
 		selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
 			GitProviderConfigs: gitProviders,
-			ActionVerb:         "Remove",
+			ActionVerb:         "Delete",
 		})
 
 		if selectedGitProvider == nil {
@@ -85,8 +86,8 @@ var gitProviderDeleteCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title(fmt.Sprintf("Remove git provider: %s?", selectedGitProviderText)).
-						Description(fmt.Sprintf("Are you sure you want to remove the git provider: %s?", selectedGitProviderText)).
+						Title(fmt.Sprintf("Delete git provider: %s?", selectedGitProviderText)).
+						Description(fmt.Sprintf("Are you sure you want to delete the Git provider: %s?", selectedGitProviderText)).
 						Value(&yesFlag),
 				),
 			).WithTheme(views.GetCustomTheme())
@@ -100,12 +101,12 @@ var gitProviderDeleteCmd = &cobra.Command{
 		if !yesFlag {
 			fmt.Println("Operation canceled.")
 		} else {
-			_, err = apiClient.GitProviderAPI.RemoveGitProvider(ctx, selectedGitProvider.Id).Execute()
+			_, err = apiClient.GitProviderAPI.DeleteGitProvider(ctx, selectedGitProvider.Id).Execute()
 			if err != nil {
 				return err
 			}
 
-			views.RenderInfoMessage("Git provider has been removed")
+			views.RenderInfoMessage("Git provider has been deleted")
 		}
 
 		return nil
@@ -116,14 +117,14 @@ var allFlag bool
 var yesFlag bool
 
 func init() {
-	gitProviderDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Remove all Git providers")
+	gitProviderDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all Git providers")
 	gitProviderDeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
 
-func removeAllGitProviders(gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) error {
+func deleteAllGitProviders(gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) error {
 	ctx := context.Background()
 	for _, gitProvider := range gitProviders {
-		_, err := apiClient.GitProviderAPI.RemoveGitProvider(ctx, gitProvider.Id).Execute()
+		_, err := apiClient.GitProviderAPI.DeleteGitProvider(ctx, gitProvider.Id).Execute()
 		if err != nil {
 			return err
 		}

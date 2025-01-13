@@ -12,14 +12,14 @@ var WorkspaceTemplateCmd = &cobra.Command{
 	Use:     "template",
 	Short:   "Manage workspace templates",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"templates", "workspace-template", "workspace-templates", "wt"},
 	GroupID: util.TARGET_GROUP,
+	Aliases: []string{"templates", "workspace-template", "workspace-templates", "wt"},
 }
 
 func init() {
 	WorkspaceTemplateCmd.AddCommand(workspaceTemplateListCmd)
 	WorkspaceTemplateCmd.AddCommand(workspaceTemplateInfoCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateAddCmd)
+	WorkspaceTemplateCmd.AddCommand(createCmd)
 	WorkspaceTemplateCmd.AddCommand(workspaceTemplateUpdateCmd)
 	WorkspaceTemplateCmd.AddCommand(workspaceTemplateSetDefaultCmd)
 	WorkspaceTemplateCmd.AddCommand(workspaceTemplateDeleteCmd)

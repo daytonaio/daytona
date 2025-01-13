@@ -11,7 +11,7 @@ Manage workspace templates
 ### SEE ALSO
 
 * [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
-* [daytona template add](daytona_template_add.md)	 - Add a workspace template
+* [daytona template create](daytona_template_create.md)	 - Create a workspace template
 * [daytona template delete](daytona_template_delete.md)	 - Delete a workspace template
 * [daytona template info](daytona_template_info.md)	 - Show workspace template info
 * [daytona template list](daytona_template_list.md)	 - Lists workspace templates

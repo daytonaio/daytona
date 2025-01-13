@@ -1,0 +1,13 @@
+name: daytona server runner create
+synopsis: Create a runner
+usage: daytona server runner create [flags]
+options:
+    - name: name
+      shorthand: "n"
+      usage: Runner name
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona server runner - Manage runners

@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/huh"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -23,9 +24,9 @@ var forceFlag bool
 
 var workspaceTemplateDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Aliases: []string{"remove", "rm"},
 	Short:   "Delete a workspace template",
 	Args:    cobra.MaximumNArgs(1),
+	Aliases: cmd_common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedWorkspaceTemplate *apiclient.WorkspaceTemplate
 		var selectedWorkspaceTemplateName string

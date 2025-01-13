@@ -20,9 +20,9 @@ import (
 var InfoCmd = &cobra.Command{
 	Use:     "info [WORKSPACE]",
 	Short:   "Show workspace info",
-	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
 	GroupID: util.TARGET_GROUP,
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

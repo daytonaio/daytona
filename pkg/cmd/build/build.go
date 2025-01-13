@@ -10,10 +10,10 @@ import (
 
 var BuildCmd = &cobra.Command{
 	Use:     "build",
-	Aliases: []string{"builds"},
 	Short:   "Manage builds",
 	Args:    cobra.NoArgs,
 	GroupID: util.TARGET_GROUP,
+	Aliases: []string{"builds"},
 }
 
 func init() {

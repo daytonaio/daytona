@@ -8,6 +8,7 @@ import (
 	"errors"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/runner"
 	logs_view "github.com/daytonaio/daytona/pkg/views/logs"
@@ -17,9 +18,10 @@ import (
 var followFlag bool
 
 var logsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "View runner logs",
-	Args:  cobra.NoArgs,
+	Use:     "logs",
+	Short:   "View runner logs",
+	Args:    cobra.NoArgs,
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := runner.GetConfig()
 		if err != nil {

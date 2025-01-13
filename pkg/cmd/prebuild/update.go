@@ -12,19 +12,21 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/build"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/prebuild/add"
+	"github.com/daytonaio/daytona/pkg/views/prebuild/create"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
 var prebuildUpdateCmd = &cobra.Command{
-	Use:   "update [WORKSPACE_CONFIG] [PREBUILD_ID]",
-	Short: "Update a prebuild configuration",
-	Args:  cobra.MaximumNArgs(2),
+	Use:     "update [WORKSPACE_CONFIG] [PREBUILD_ID]",
+	Short:   "Update a prebuild configuration",
+	Args:    cobra.MaximumNArgs(2),
+	Aliases: common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var prebuildAddView add.PrebuildAddView
+		var prebuildAddView create.PrebuildAddView
 		var prebuild *apiclient.PrebuildDTO
 		var workspaceTemplateRecieved string
 		var retention int
@@ -56,7 +58,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			workspaceTemplateRecieved = args[0]
 			prebuildID := args[1]
 
-			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, workspaceTemplateRecieved, prebuildID).Execute()
+			prebuild, res, err = apiClient.PrebuildAPI.FindPrebuild(ctx, workspaceTemplateRecieved, prebuildID).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -112,7 +114,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			}
 
 			workspaceTemplateRecieved = prebuild.WorkspaceTemplateName
-			prebuildAddView = add.PrebuildAddView{
+			prebuildAddView = create.PrebuildAddView{
 				Branch:                prebuild.Branch,
 				Retention:             strconv.Itoa(int(prebuild.Retention)),
 				WorkspaceTemplateName: workspaceTemplateRecieved,
@@ -128,7 +130,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			if len(prebuild.TriggerFiles) > 0 {
 				prebuildAddView.TriggerFiles = prebuild.TriggerFiles
 			}
-			add.PrebuildCreationView(&prebuildAddView, false)
+			create.PrebuildCreationView(&prebuildAddView, false)
 		}
 
 		prebuildAddView.RunBuildOnAdd = runFlag
@@ -155,7 +157,7 @@ var prebuildUpdateCmd = &cobra.Command{
 			newPrebuild.TriggerFiles = prebuildAddView.TriggerFiles
 		}
 
-		prebuildId, res, err := apiClient.PrebuildAPI.SetPrebuild(ctx, prebuildAddView.WorkspaceTemplateName).Prebuild(newPrebuild).Execute()
+		prebuildId, res, err := apiClient.PrebuildAPI.SavePrebuild(ctx, prebuildAddView.WorkspaceTemplateName).Prebuild(newPrebuild).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -163,7 +165,7 @@ var prebuildUpdateCmd = &cobra.Command{
 		views.RenderInfoMessage("Prebuild updated successfully")
 
 		if prebuildAddView.RunBuildOnAdd {
-			workspaceTemplate, res, err := apiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, prebuildAddView.WorkspaceTemplateName).Execute()
+			workspaceTemplate, res, err := apiClient.WorkspaceTemplateAPI.FindWorkspaceTemplate(ctx, prebuildAddView.WorkspaceTemplateName).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

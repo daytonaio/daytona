@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
@@ -18,8 +19,8 @@ var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"ls"},
 	GroupID: util.TARGET_GROUP,
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var specifyGitProviders bool

@@ -15,19 +15,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetPrebuild godoc
+// FindPrebuild godoc
 //
 //	@Tags			prebuild
-//	@Summary		Get prebuild
-//	@Description	Get prebuild
+//	@Summary		Find prebuild
+//	@Description	Find prebuild
 //	@Accept			json
 //	@Param			templateName	path		string	true	"Workspace template name"
 //	@Param			prebuildId		path		string	true	"Prebuild ID"
 //	@Success		200				{object}	PrebuildDTO
 //	@Router			/workspace-template/{templateName}/prebuild/{prebuildId} [get]
 //
-//	@id				GetPrebuild
-func GetPrebuild(ctx *gin.Context) {
+//	@id				FindPrebuild
+func FindPrebuild(ctx *gin.Context) {
 	templateName := ctx.Param("templateName")
 	prebuildId := ctx.Param("prebuildId")
 
@@ -49,19 +49,19 @@ func GetPrebuild(ctx *gin.Context) {
 	ctx.JSON(200, res)
 }
 
-// SetPrebuild godoc
+// SavePrebuild godoc
 
 // @Tags			prebuild
-// @Summary		Set prebuild
-// @Description	Set prebuild
+// @Summary		Save prebuild
+// @Description	Save prebuild
 // @Accept			json
 // @Param			templateName	path		string				true	"Template name"
 // @Param			prebuild		body		CreatePrebuildDTO	true	"Prebuild"
 // @Success		201				{string}	prebuildId
 // @Router			/workspace-template/{templateName}/prebuild [put]
 //
-// @id				SetPrebuild
-func SetPrebuild(ctx *gin.Context) {
+// @id				SavePrebuild
+func SavePrebuild(ctx *gin.Context) {
 	templateName := ctx.Param("templateName")
 
 	var dto services.CreatePrebuildDTO

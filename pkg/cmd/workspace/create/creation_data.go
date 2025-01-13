@@ -114,7 +114,7 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 				}
 
 				if workspaceTemplate.GitProviderConfigId == nil || *workspaceTemplate.GitProviderConfigId == "" {
-					gitProviderConfigId, res, err := params.ApiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, url.QueryEscape(workspaceTemplate.RepositoryUrl)).Execute()
+					gitProviderConfigId, res, err := params.ApiClient.GitProviderAPI.FindGitProviderIdForUrl(ctx, url.QueryEscape(workspaceTemplate.RepositoryUrl)).Execute()
 					if err != nil {
 						return nil, apiclient_util.HandleErrorResponse(res, err)
 					}
@@ -222,9 +222,14 @@ func GetBranchFromWorkspaceTemplate(ctx context.Context, workspaceTemplate *apic
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	gitProviderConfigId, res, err := apiClient.GitProviderAPI.GetGitProviderIdForUrl(ctx, encodedURLParam).Execute()
+	gitProviderConfigId, res, err := apiClient.GitProviderAPI.FindGitProviderIdForUrl(ctx, encodedURLParam).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	gitProvider, _, err := apiClient.GitProviderAPI.FindGitProvider(ctx, gitProviderConfigId).Execute()
+	if err == nil && gitProvider != nil {
+		gitProviderConfigId = gitProvider.ProviderId
 	}
 
 	branchWizardConfig := BranchWizardParams{

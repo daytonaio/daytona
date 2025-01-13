@@ -25,7 +25,7 @@ var logsCmd = &cobra.Command{
 	Use:     "logs [RUNNER_ID]",
 	Short:   "View runner logs",
 	Args:    cobra.MaximumNArgs(1),
-	Aliases: []string{"log"},
+	Aliases: cmd_common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedRunnerId string
 		ctx := context.Background()
@@ -75,7 +75,7 @@ var logsCmd = &cobra.Command{
 			selectedRunnerId = args[0]
 		}
 
-		runner, res, err := apiClient.RunnerAPI.GetRunner(ctx, selectedRunnerId).Execute()
+		runner, res, err := apiClient.RunnerAPI.FindRunner(ctx, selectedRunnerId).Execute()
 		if err != nil {
 			if res.StatusCode == http.StatusNotFound {
 				return fmt.Errorf("runner %s not found", selectedRunnerId)

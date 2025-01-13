@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -15,9 +16,10 @@ import (
 )
 
 var workspaceTemplateSetDefaultCmd = &cobra.Command{
-	Use:   "set-default",
-	Short: "Set workspace template info",
-	Args:  cobra.MaximumNArgs(1),
+	Use:     "set-default",
+	Short:   "Set workspace template info",
+	Args:    cobra.MaximumNArgs(1),
+	Aliases: cmd_common.GetAliases("set-default"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspaceTemplateName string
 		ctx := context.Background()

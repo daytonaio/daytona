@@ -13,18 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetRunnerMetadata 			godoc
+// UpdateRunnerMetadata 			godoc
 //
 //	@Tags			runner
-//	@Summary		Set runner metadata
-//	@Description	Set runner metadata
+//	@Summary		Update runner metadata
+//	@Description	Update runner metadata
 //	@Param			runnerId		path	string					true	"Runner ID"
 //	@Param			runnerMetadata	body	UpdateRunnerMetadataDTO	true	"Runner Metadata"
 //	@Success		200
 //	@Router			/runner/{runnerId}/metadata [post]
 //
-//	@id				SetRunnerMetadata
-func SetRunnerMetadata(ctx *gin.Context) {
+//	@id				UpdateRunnerMetadata
+func UpdateRunnerMetadata(ctx *gin.Context) {
 	runnerId := ctx.Param("runnerId")
 
 	var runnerMetadata dto.UpdateRunnerMetadataDTO
@@ -36,7 +36,7 @@ func SetRunnerMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.SetRunnerMetadata(ctx.Request.Context(), runnerId, &models.RunnerMetadata{
+	err = server.RunnerService.UpdateRunnerMetadata(ctx.Request.Context(), runnerId, &models.RunnerMetadata{
 		RunnerId:    runnerId,
 		Uptime:      runnerMetadata.Uptime,
 		Providers:   runnerMetadata.Providers,

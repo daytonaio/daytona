@@ -12,15 +12,15 @@ import (
 )
 
 type IWorkspaceTemplateService interface {
-	Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error
-	Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
 	List(ctx context.Context, filter *stores.WorkspaceTemplateFilter) ([]*models.WorkspaceTemplate, error)
+	Find(ctx context.Context, filter *stores.WorkspaceTemplateFilter) (*models.WorkspaceTemplate, error)
+	Save(ctx context.Context, workspaceTemplate *models.WorkspaceTemplate) error
 	SetDefault(ctx context.Context, workspaceTemplateName string) error
 	Delete(ctx context.Context, workspaceTemplateName string, force bool) []error
 
-	SavePrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
-	FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*PrebuildDTO, error)
 	ListPrebuilds(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*PrebuildDTO, error)
+	FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*PrebuildDTO, error)
+	SavePrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
 	DeletePrebuild(ctx context.Context, workspaceTemplateName string, id string, force bool) []error
 
 	StartRetentionPoller(ctx context.Context) error

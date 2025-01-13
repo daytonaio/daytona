@@ -22,27 +22,259 @@ import (
 // RunnerAPIService RunnerAPI service
 type RunnerAPIService service
 
-type ApiGetRunnerRequest struct {
+type ApiCreateRunnerRequest struct {
+	ctx        context.Context
+	ApiService *RunnerAPIService
+	runner     *CreateRunnerDTO
+}
+
+// Runner
+func (r ApiCreateRunnerRequest) Runner(runner CreateRunnerDTO) ApiCreateRunnerRequest {
+	r.runner = &runner
+	return r
+}
+
+func (r ApiCreateRunnerRequest) Execute() (*CreateRunnerResultDTO, *http.Response, error) {
+	return r.ApiService.CreateRunnerExecute(r)
+}
+
+/*
+CreateRunner Create a runner
+
+Create a runner
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiCreateRunnerRequest
+*/
+func (a *RunnerAPIService) CreateRunner(ctx context.Context) ApiCreateRunnerRequest {
+	return ApiCreateRunnerRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return CreateRunnerResultDTO
+func (a *RunnerAPIService) CreateRunnerExecute(r ApiCreateRunnerRequest) (*CreateRunnerResultDTO, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *CreateRunnerResultDTO
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.CreateRunner")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runner"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.runner == nil {
+		return localVarReturnValue, nil, reportError("runner is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.runner
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiDeleteRunnerRequest struct {
 	ctx        context.Context
 	ApiService *RunnerAPIService
 	runnerId   string
 }
 
-func (r ApiGetRunnerRequest) Execute() (*RunnerDTO, *http.Response, error) {
-	return r.ApiService.GetRunnerExecute(r)
+func (r ApiDeleteRunnerRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteRunnerExecute(r)
 }
 
 /*
-GetRunner Get a runner
+DeleteRunner Delete runner
 
-Get a runner
+Delete runner
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param runnerId Runner ID
-	@return ApiGetRunnerRequest
+	@return ApiDeleteRunnerRequest
 */
-func (a *RunnerAPIService) GetRunner(ctx context.Context, runnerId string) ApiGetRunnerRequest {
-	return ApiGetRunnerRequest{
+func (a *RunnerAPIService) DeleteRunner(ctx context.Context, runnerId string) ApiDeleteRunnerRequest {
+	return ApiDeleteRunnerRequest{
+		ApiService: a,
+		ctx:        ctx,
+		runnerId:   runnerId,
+	}
+}
+
+// Execute executes the request
+func (a *RunnerAPIService) DeleteRunnerExecute(r ApiDeleteRunnerRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.DeleteRunner")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runner/{runnerId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"runnerId"+"}", url.PathEscape(parameterValueToString(r.runnerId, "runnerId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiFindRunnerRequest struct {
+	ctx        context.Context
+	ApiService *RunnerAPIService
+	runnerId   string
+}
+
+func (r ApiFindRunnerRequest) Execute() (*RunnerDTO, *http.Response, error) {
+	return r.ApiService.FindRunnerExecute(r)
+}
+
+/*
+FindRunner Find a runner
+
+Find a runner
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param runnerId Runner ID
+	@return ApiFindRunnerRequest
+*/
+func (a *RunnerAPIService) FindRunner(ctx context.Context, runnerId string) ApiFindRunnerRequest {
+	return ApiFindRunnerRequest{
 		ApiService: a,
 		ctx:        ctx,
 		runnerId:   runnerId,
@@ -52,7 +284,7 @@ func (a *RunnerAPIService) GetRunner(ctx context.Context, runnerId string) ApiGe
 // Execute executes the request
 //
 //	@return RunnerDTO
-func (a *RunnerAPIService) GetRunnerExecute(r ApiGetRunnerRequest) (*RunnerDTO, *http.Response, error) {
+func (a *RunnerAPIService) FindRunnerExecute(r ApiFindRunnerRequest) (*RunnerDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -60,7 +292,7 @@ func (a *RunnerAPIService) GetRunnerExecute(r ApiGetRunnerRequest) (*RunnerDTO, 
 		localVarReturnValue *RunnerDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.GetRunner")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.FindRunner")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -372,356 +604,6 @@ func (a *RunnerAPIService) ListRunnersExecute(r ApiListRunnersRequest) ([]Runner
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiRegisterRunnerRequest struct {
-	ctx        context.Context
-	ApiService *RunnerAPIService
-	runner     *RegisterRunnerDTO
-}
-
-// Register runner
-func (r ApiRegisterRunnerRequest) Runner(runner RegisterRunnerDTO) ApiRegisterRunnerRequest {
-	r.runner = &runner
-	return r
-}
-
-func (r ApiRegisterRunnerRequest) Execute() (*RegisterRunnerResultDTO, *http.Response, error) {
-	return r.ApiService.RegisterRunnerExecute(r)
-}
-
-/*
-RegisterRunner Register a runner
-
-Register a runner
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiRegisterRunnerRequest
-*/
-func (a *RunnerAPIService) RegisterRunner(ctx context.Context) ApiRegisterRunnerRequest {
-	return ApiRegisterRunnerRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return RegisterRunnerResultDTO
-func (a *RunnerAPIService) RegisterRunnerExecute(r ApiRegisterRunnerRequest) (*RegisterRunnerResultDTO, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *RegisterRunnerResultDTO
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.RegisterRunner")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/runner"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.runner == nil {
-		return localVarReturnValue, nil, reportError("runner is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.runner
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type ApiRemoveRunnerRequest struct {
-	ctx        context.Context
-	ApiService *RunnerAPIService
-	runnerId   string
-}
-
-func (r ApiRemoveRunnerRequest) Execute() (*http.Response, error) {
-	return r.ApiService.RemoveRunnerExecute(r)
-}
-
-/*
-RemoveRunner Remove runner
-
-Remove runner
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param runnerId Runner ID
-	@return ApiRemoveRunnerRequest
-*/
-func (a *RunnerAPIService) RemoveRunner(ctx context.Context, runnerId string) ApiRemoveRunnerRequest {
-	return ApiRemoveRunnerRequest{
-		ApiService: a,
-		ctx:        ctx,
-		runnerId:   runnerId,
-	}
-}
-
-// Execute executes the request
-func (a *RunnerAPIService) RemoveRunnerExecute(r ApiRemoveRunnerRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.RemoveRunner")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/runner/{runnerId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"runnerId"+"}", url.PathEscape(parameterValueToString(r.runnerId, "runnerId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
-type ApiSetRunnerMetadataRequest struct {
-	ctx            context.Context
-	ApiService     *RunnerAPIService
-	runnerId       string
-	runnerMetadata *UpdateRunnerMetadataDTO
-}
-
-// Runner Metadata
-func (r ApiSetRunnerMetadataRequest) RunnerMetadata(runnerMetadata UpdateRunnerMetadataDTO) ApiSetRunnerMetadataRequest {
-	r.runnerMetadata = &runnerMetadata
-	return r
-}
-
-func (r ApiSetRunnerMetadataRequest) Execute() (*http.Response, error) {
-	return r.ApiService.SetRunnerMetadataExecute(r)
-}
-
-/*
-SetRunnerMetadata Set runner metadata
-
-Set runner metadata
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param runnerId Runner ID
-	@return ApiSetRunnerMetadataRequest
-*/
-func (a *RunnerAPIService) SetRunnerMetadata(ctx context.Context, runnerId string) ApiSetRunnerMetadataRequest {
-	return ApiSetRunnerMetadataRequest{
-		ApiService: a,
-		ctx:        ctx,
-		runnerId:   runnerId,
-	}
-}
-
-// Execute executes the request
-func (a *RunnerAPIService) SetRunnerMetadataExecute(r ApiSetRunnerMetadataRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.SetRunnerMetadata")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/runner/{runnerId}/metadata"
-	localVarPath = strings.Replace(localVarPath, "{"+"runnerId"+"}", url.PathEscape(parameterValueToString(r.runnerId, "runnerId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.runnerMetadata == nil {
-		return nil, reportError("runnerMetadata is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.runnerMetadata
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
 type ApiUpdateJobStateRequest struct {
 	ctx            context.Context
 	ApiService     *RunnerAPIService
@@ -802,6 +684,124 @@ func (a *RunnerAPIService) UpdateJobStateExecute(r ApiUpdateJobStateRequest) (*h
 	}
 	// body params
 	localVarPostBody = r.updateJobState
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiUpdateRunnerMetadataRequest struct {
+	ctx            context.Context
+	ApiService     *RunnerAPIService
+	runnerId       string
+	runnerMetadata *UpdateRunnerMetadataDTO
+}
+
+// Runner Metadata
+func (r ApiUpdateRunnerMetadataRequest) RunnerMetadata(runnerMetadata UpdateRunnerMetadataDTO) ApiUpdateRunnerMetadataRequest {
+	r.runnerMetadata = &runnerMetadata
+	return r
+}
+
+func (r ApiUpdateRunnerMetadataRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateRunnerMetadataExecute(r)
+}
+
+/*
+UpdateRunnerMetadata Update runner metadata
+
+Update runner metadata
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param runnerId Runner ID
+	@return ApiUpdateRunnerMetadataRequest
+*/
+func (a *RunnerAPIService) UpdateRunnerMetadata(ctx context.Context, runnerId string) ApiUpdateRunnerMetadataRequest {
+	return ApiUpdateRunnerMetadataRequest{
+		ApiService: a,
+		ctx:        ctx,
+		runnerId:   runnerId,
+	}
+}
+
+// Execute executes the request
+func (a *RunnerAPIService) UpdateRunnerMetadataExecute(r ApiUpdateRunnerMetadataRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnerAPIService.UpdateRunnerMetadata")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/runner/{runnerId}/metadata"
+	localVarPath = strings.Replace(localVarPath, "{"+"runnerId"+"}", url.PathEscape(parameterValueToString(r.runnerId, "runnerId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.runnerMetadata == nil {
+		return nil, reportError("runnerMetadata is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.runnerMetadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

@@ -6,7 +6,7 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona template add - Add a workspace template
+    - daytona template create - Create a workspace template
     - daytona template delete - Delete a workspace template
     - daytona template info - Show workspace template info
     - daytona template list - Lists workspace templates

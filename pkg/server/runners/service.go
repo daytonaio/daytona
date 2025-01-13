@@ -23,8 +23,8 @@ type RunnerServiceConfig struct {
 	CreateJob          func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error
 	ListJobsForRunner  func(ctx context.Context, runnerId string) ([]*models.Job, error)
 	UpdateJobState     func(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error
-	GenerateApiKey     func(ctx context.Context, name string) (string, error)
-	RevokeApiKey       func(ctx context.Context, name string) error
+	CreateApiKey       func(ctx context.Context, name string) (string, error)
+	DeleteApiKey       func(ctx context.Context, name string) error
 	UnsetDefaultTarget func(ctx context.Context, runnerId string) error
 
 	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
@@ -39,8 +39,8 @@ func NewRunnerService(config RunnerServiceConfig) services.IRunnerService {
 		createJob:          config.CreateJob,
 		listJobsForRunner:  config.ListJobsForRunner,
 		updateJobState:     config.UpdateJobState,
-		generateApiKey:     config.GenerateApiKey,
-		revokeApiKey:       config.RevokeApiKey,
+		createApiKey:       config.CreateApiKey,
+		deleteApiKey:       config.DeleteApiKey,
 		unsetDefaultTarget: config.UnsetDefaultTarget,
 
 		trackTelemetryEvent: config.TrackTelemetryEvent,
@@ -55,14 +55,14 @@ type RunnerService struct {
 	createJob          func(ctx context.Context, runnerId string, action models.JobAction, metadata string) error
 	listJobsForRunner  func(ctx context.Context, runnerId string) ([]*models.Job, error)
 	updateJobState     func(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error
-	generateApiKey     func(ctx context.Context, name string) (string, error)
-	revokeApiKey       func(ctx context.Context, name string) error
+	createApiKey       func(ctx context.Context, name string) (string, error)
+	deleteApiKey       func(ctx context.Context, name string) error
 	unsetDefaultTarget func(ctx context.Context, runnerId string) error
 
 	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
-func (s *RunnerService) GetRunner(ctx context.Context, runnerId string) (*services.RunnerDTO, error) {
+func (s *RunnerService) FindRunner(ctx context.Context, runnerId string) (*services.RunnerDTO, error) {
 	runner, err := s.runnerStore.Find(ctx, runnerId)
 	if err != nil {
 		return nil, stores.ErrRunnerNotFound
@@ -88,7 +88,7 @@ func (s *RunnerService) ListRunners(ctx context.Context) ([]*services.RunnerDTO,
 	}), nil
 }
 
-func (s *RunnerService) SetRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error {
+func (s *RunnerService) UpdateRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error {
 	m, err := s.runnerMetadataStore.Find(ctx, runnerId)
 	if err != nil {
 		return stores.ErrRunnerMetadataNotFound

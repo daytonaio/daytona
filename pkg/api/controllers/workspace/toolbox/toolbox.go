@@ -48,7 +48,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+	w, err := server.WorkspaceService.FindWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
 		if stores.IsWorkspaceNotFound(err) {
 			ctx.AbortWithError(http.StatusNotFound, err)

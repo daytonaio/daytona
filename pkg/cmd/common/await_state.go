@@ -64,7 +64,7 @@ func AwaitProviderInstalled(runnerId, providerName, version string) error {
 			return err
 		}
 
-		runner, res, err := apiClient.RunnerAPI.GetRunner(ctx, runnerId).Execute()
+		runner, res, err := apiClient.RunnerAPI.FindRunner(ctx, runnerId).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

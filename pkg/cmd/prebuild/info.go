@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/info"
 	"github.com/daytonaio/daytona/pkg/views/selection"
@@ -17,9 +18,10 @@ import (
 )
 
 var prebuildInfoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "Show prebuild configuration info",
-	Args:  cobra.MaximumNArgs(2),
+	Use:     "info",
+	Short:   "Show prebuild configuration info",
+	Args:    cobra.MaximumNArgs(2),
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuild *apiclient.PrebuildDTO
 		var res *http.Response
@@ -66,7 +68,7 @@ var prebuildInfoCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, args[0], args[1]).Execute()
+			prebuild, res, err = apiClient.PrebuildAPI.FindPrebuild(ctx, args[0], args[1]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}

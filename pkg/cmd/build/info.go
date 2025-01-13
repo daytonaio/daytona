@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
 	"github.com/daytonaio/daytona/pkg/views/selection"
@@ -19,8 +20,8 @@ import (
 var buildInfoCmd = &cobra.Command{
 	Use:     "info [BUILD]",
 	Short:   "Show build info",
-	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var build *apiclient.BuildDTO
@@ -60,7 +61,7 @@ var buildInfoCmd = &cobra.Command{
 			}
 		} else {
 			var res *http.Response
-			build, res, err = apiClient.BuildAPI.GetBuild(ctx, args[0]).Execute()
+			build, res, err = apiClient.BuildAPI.FindBuild(ctx, args[0]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
