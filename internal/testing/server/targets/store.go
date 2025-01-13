@@ -10,18 +10,21 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/testing/common"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryTargetStore struct {
 	common.InMemoryStore
-	targets map[string]*models.Target
+	targets  map[string]*models.Target
+	jobStore stores.JobStore
 }
 
-func NewInMemoryTargetStore() stores.TargetStore {
+func NewInMemoryTargetStore(jobStore stores.JobStore) stores.TargetStore {
 	return &InMemoryTargetStore{
-		targets: make(map[string]*models.Target),
+		targets:  make(map[string]*models.Target),
+		jobStore: jobStore,
 	}
 }
 
@@ -63,27 +66,50 @@ func (s *InMemoryTargetStore) processFilters(filter *stores.TargetFilter) ([]*mo
 		filteredTargets[k] = v
 	}
 
+	jobs, err := s.jobMap(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	if filter != nil {
 		if filter.IdOrName != nil {
 			t, ok := s.targets[*filter.IdOrName]
 			if ok {
+				t.LastJob = jobs[t.Id]
 				return []*models.Target{t}, nil
 			} else {
 				return []*models.Target{}, fmt.Errorf("target with id or name %s not found", *filter.IdOrName)
 			}
 		}
 		if filter.Default != nil {
-			for _, targetConfig := range filteredTargets {
-				if targetConfig.IsDefault != *filter.Default {
-					delete(filteredTargets, targetConfig.Name)
+			for _, t := range filteredTargets {
+				if t.IsDefault != *filter.Default {
+					delete(filteredTargets, t.Name)
 				}
 			}
 		}
 	}
 
-	for _, targetConfig := range filteredTargets {
-		result = append(result, targetConfig)
+	for _, t := range filteredTargets {
+		t.LastJob = jobs[t.Id]
+		result = append(result, t)
 	}
 
 	return result, nil
+}
+
+func (s *InMemoryTargetStore) jobMap(ctx context.Context) (map[string]*models.Job, error) {
+	jobs, err := s.jobStore.List(ctx, &stores.JobFilter{
+		ResourceType: util.Pointer(models.ResourceTypeTarget),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	jobMap := make(map[string]*models.Job)
+	for _, j := range jobs {
+		jobMap[j.ResourceId] = j
+	}
+
+	return jobMap, nil
 }

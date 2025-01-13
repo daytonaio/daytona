@@ -243,8 +243,3 @@ func init() {
 	purgeCmd.Flags().BoolVarP(&create.YesFlag, "yes", "y", false, "Execute purge without a prompt")
 	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }
-
-func purgeLocalRunnerProviders(ctx context.Context, serverConfig *server.Config, serverConfigDir string, cliConfig *config.Config, telemetryService telemetry.TelemetryService) error {
-
-	return nil
-}

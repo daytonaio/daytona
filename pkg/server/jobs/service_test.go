@@ -19,31 +19,35 @@ import (
 var expectedJobs []*models.Job
 
 var job1 = &models.Job{
-	Id:         "1",
-	ResourceId: "1",
-	Action:     models.JobActionStart,
-	State:      models.JobStatePending,
+	Id:           "1",
+	ResourceId:   "1",
+	ResourceType: models.ResourceTypeWorkspace,
+	Action:       models.JobActionStart,
+	State:        models.JobStatePending,
 }
 
 var job2 = &models.Job{
-	Id:         "2",
-	ResourceId: "2",
-	Action:     models.JobActionStart,
-	State:      models.JobStatePending,
+	Id:           "2",
+	ResourceId:   "2",
+	ResourceType: models.ResourceTypeWorkspace,
+	Action:       models.JobActionStart,
+	State:        models.JobStatePending,
 }
 
 var job3 = &models.Job{
-	Id:         "3",
-	ResourceId: "3",
-	Action:     models.JobActionStart,
-	State:      models.JobStatePending,
+	Id:           "3",
+	ResourceId:   "3",
+	ResourceType: models.ResourceTypeWorkspace,
+	Action:       models.JobActionStart,
+	State:        models.JobStatePending,
 }
 
 var job4 = &models.Job{
-	Id:         "4",
-	ResourceId: "4",
-	Action:     models.JobActionStart,
-	State:      models.JobStatePending,
+	Id:           "4",
+	ResourceId:   "4",
+	ResourceType: models.ResourceTypeWorkspace,
+	Action:       models.JobActionStart,
+	State:        models.JobStatePending,
 }
 
 type JobServiceTestSuite struct {
@@ -138,10 +142,11 @@ func (s *JobServiceTestSuite) TestCreateWithAnotherJobInProgress() {
 	require.Nil(err)
 
 	var job5 = &models.Job{
-		Id:         "5",
-		ResourceId: "4",
-		Action:     models.JobActionStart,
-		State:      models.JobStatePending,
+		Id:           "5",
+		ResourceId:   "4",
+		ResourceType: models.ResourceTypeWorkspace,
+		Action:       models.JobActionStart,
+		State:        models.JobStatePending,
 	}
 
 	err = s.jobService.Create(context.TODO(), job5)
