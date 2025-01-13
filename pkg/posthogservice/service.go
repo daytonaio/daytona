@@ -4,7 +4,6 @@
 package posthogservice
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -16,6 +15,7 @@ type PosthogServiceConfig struct {
 	ApiKey   string
 	Endpoint string
 	Version  string
+	Source   telemetry.TelemetrySource
 }
 
 func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService {
@@ -25,48 +25,31 @@ func NewTelemetryService(config PosthogServiceConfig) telemetry.TelemetryService
 		Verbose:  true,
 	})
 	posthogService := &posthogService{
-		client:                   client,
-		AbstractTelemetryService: telemetry.NewAbstractTelemetryService(config.Version),
+		client:  client,
+		version: config.Version,
+		source:  config.Source,
 	}
-
-	posthogService.AbstractTelemetryService.TelemetryService = posthogService
 
 	return posthogService
 }
 
 type posthogService struct {
-	*telemetry.AbstractTelemetryService
-
-	client posthog.Client
+	client  posthog.Client
+	version string
+	source  telemetry.TelemetrySource
 }
 
 func (p *posthogService) Close() error {
 	return p.client.Close()
 }
 
-func (p *posthogService) TrackCliEvent(event telemetry.CliEvent, clientId string, properties map[string]interface{}) error {
-	p.AbstractTelemetryService.SetCommonProps(properties)
+func (p *posthogService) Track(event telemetry.Event, clientId string) error {
+	props := event.Props()
+
+	telemetry.SetCommonProps(p.version, p.source, props)
 	return p.client.Enqueue(posthog.Capture{
 		DistinctId: clientId,
-		Event:      string(event),
-		Properties: properties,
-	})
-}
-
-func (p *posthogService) TrackServerEvent(event telemetry.ServerEvent, clientId string, properties map[string]interface{}) error {
-	p.AbstractTelemetryService.SetCommonProps(properties)
-	return p.client.Enqueue(posthog.Capture{
-		DistinctId: clientId,
-		Event:      string(event),
-		Properties: properties,
-	})
-}
-
-func (p *posthogService) TrackBuildRunnerEvent(event telemetry.BuildRunnerEvent, buildRunnerId string, properties map[string]interface{}) error {
-	p.AbstractTelemetryService.SetCommonProps(properties)
-	return p.client.Enqueue(posthog.Capture{
-		DistinctId: fmt.Sprintf("build-runner-%s", buildRunnerId),
-		Event:      string(event),
-		Properties: properties,
+		Event:      event.Name(),
+		Properties: props,
 	})
 }

@@ -23,6 +23,7 @@ var _ MappedNullable = &InstallProviderDTO{}
 type InstallProviderDTO struct {
 	DownloadUrls map[string]string `json:"downloadUrls"`
 	Name         string            `json:"name"`
+	Version      string            `json:"version"`
 }
 
 type _InstallProviderDTO InstallProviderDTO
@@ -31,10 +32,11 @@ type _InstallProviderDTO InstallProviderDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInstallProviderDTO(downloadUrls map[string]string, name string) *InstallProviderDTO {
+func NewInstallProviderDTO(downloadUrls map[string]string, name string, version string) *InstallProviderDTO {
 	this := InstallProviderDTO{}
 	this.DownloadUrls = downloadUrls
 	this.Name = name
+	this.Version = version
 	return &this
 }
 
@@ -94,6 +96,30 @@ func (o *InstallProviderDTO) SetName(v string) {
 	o.Name = v
 }
 
+// GetVersion returns the Version field value
+func (o *InstallProviderDTO) GetVersion() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Version
+}
+
+// GetVersionOk returns a tuple with the Version field value
+// and a boolean to check if the value has been set.
+func (o *InstallProviderDTO) GetVersionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Version, true
+}
+
+// SetVersion sets field value
+func (o *InstallProviderDTO) SetVersion(v string) {
+	o.Version = v
+}
+
 func (o InstallProviderDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -106,6 +132,7 @@ func (o InstallProviderDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["downloadUrls"] = o.DownloadUrls
 	toSerialize["name"] = o.Name
+	toSerialize["version"] = o.Version
 	return toSerialize, nil
 }
 
@@ -116,6 +143,7 @@ func (o *InstallProviderDTO) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"downloadUrls",
 		"name",
+		"version",
 	}
 
 	allProperties := make(map[string]interface{})

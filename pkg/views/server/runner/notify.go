@@ -12,14 +12,17 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func Notify(runner *apiclient.RegisterRunnerResultDTO, apiUrl string) {
+func Notify(runner *apiclient.RegisterRunnerResultDTO, apiUrl, clientId string, telemetryDisabled bool) {
 	var output string
 
 	output += fmt.Sprintf("You can connect the Runner %s to the Daytona Server by running this command on the Runner's machine:", runner.Name)
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 
-	command := fmt.Sprintf("daytona runner configure --api-url %s --api-key %s --id %s --name %s", apiUrl, runner.ApiKey, runner.Id, runner.Name)
+	command := fmt.Sprintf("daytona runner configure --api-url %s --api-key %s --id %s --name %s --client-id %s", apiUrl, runner.ApiKey, runner.Id, runner.Name, clientId)
+	if telemetryDisabled {
+		command += " --disable-telemetry"
+	}
 	fmt.Println(lipgloss.NewStyle().Padding(0).Foreground(views.Green).Render(command))
 
 	if err := clipboard.WriteAll(command); err == nil {

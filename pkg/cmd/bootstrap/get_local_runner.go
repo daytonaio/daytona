@@ -34,8 +34,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const LOCAL_RUNNER_ID = "local"
-
 type LocalRunnerParams struct {
 	ServerConfig     *server.Config
 	RunnerConfig     *runner.Config
@@ -53,7 +51,7 @@ type LocalJobFactoryParams struct {
 func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 	loggerFactory := logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: server.GetRunnerLogsDir(params.ConfigDir)})
 
-	runnerLogger, err := loggerFactory.CreateLogger(LOCAL_RUNNER_ID, LOCAL_RUNNER_ID, logs.LogSourceRunner)
+	runnerLogger, err := loggerFactory.CreateLogger(common.LOCAL_RUNNER_ID, common.LOCAL_RUNNER_ID, logs.LogSourceRunner)
 	if err != nil {
 		return nil, err
 	}
@@ -99,8 +97,8 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 	}
 
 	runnerJobFactory := jobs_runner.NewRunnerJobFactory(jobs_runner.RunnerJobFactoryConfig{
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		ProviderManager: providerManager,
 	})
@@ -112,20 +110,23 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 		RegistryUrl:     params.ServerConfig.RegistryUrl,
 		ListPendingJobs: func(ctx context.Context) ([]*models.Job, int, error) {
 			jobs, err := jobService.List(ctx, &stores.JobFilter{
-				RunnerIdOrIsNil: util.Pointer(LOCAL_RUNNER_ID),
+				RunnerIdOrIsNil: util.Pointer(common.LOCAL_RUNNER_ID),
 				States:          &[]models.JobState{models.JobStatePending},
 			})
 			return jobs, 0, err
 		},
-		UpdateJobState: func(ctx context.Context, jobId string, state models.JobState, err *error) error {
+		UpdateJobState: func(ctx context.Context, jobId string, state models.JobState, err error) error {
 			var jobErr *string
 			if err != nil {
-				jobErr = util.Pointer((*err).Error())
+				jobErr = util.Pointer(err.Error())
 			}
 			return jobService.SetState(ctx, jobId, services.UpdateJobStateDTO{
 				State:        state,
 				ErrorMessage: jobErr,
 			})
+		},
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		SetRunnerMetadata: func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error {
 			return runnerService.SetRunnerMetadata(context.Background(), runnerId, &models.RunnerMetadata{
@@ -179,8 +180,8 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 
 			return util.MergeEnvVars(serverEnvVars, w.EnvVars), nil
 		},
-		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackServerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory:   workspaceLogsFactory,
 		ProviderManager: params.ProviderManager,
@@ -205,8 +206,8 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 			return targetService.HandleSuccessfulCreation(ctx, targetId)
 		},
 		UpdateTargetProviderMetadata: targetService.UpdateTargetProviderMetadata,
-		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackServerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory:   loggerFactory,
 		ProviderManager: params.ProviderManager,
@@ -289,8 +290,8 @@ func getLocalBuildJobFactory(params LocalJobFactoryParams) (jobs_build.IBuildJob
 		DeleteImage: func(ctx context.Context, image string, force bool) error {
 			return dockerClient.DeleteImage(image, force, nil)
 		},
-		TrackTelemetryEvent: func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error {
-			return params.TelemetryService.TrackBuildRunnerEvent(event, clientId, props)
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return params.TelemetryService.Track(event, clientId)
 		},
 		LoggerFactory: buildLogsFactory,
 		BuilderFactory: build.NewBuilderFactory(build.BuilderFactoryConfig{

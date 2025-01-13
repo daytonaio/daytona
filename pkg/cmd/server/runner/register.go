@@ -6,11 +6,11 @@ package runner
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views/server/runner"
-	runner_view "github.com/daytonaio/daytona/pkg/views/server/runner"
 	"github.com/docker/docker/pkg/stringid"
 
 	"github.com/spf13/cobra"
@@ -22,6 +22,11 @@ var registerCmd = &cobra.Command{
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
+
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -49,7 +54,7 @@ var registerCmd = &cobra.Command{
 		id := stringid.GenerateRandomID()
 		id = stringid.TruncateID(id)
 
-		runner, res, err := apiClient.RunnerAPI.RegisterRunner(ctx).Runner(apiclient.RegisterRunnerDTO{
+		runnerDto, res, err := apiClient.RunnerAPI.RegisterRunner(ctx).Runner(apiclient.RegisterRunnerDTO{
 			Id:   id,
 			Name: name,
 		}).Execute()
@@ -63,7 +68,7 @@ var registerCmd = &cobra.Command{
 		}
 
 		apiUrl := util.GetFrpcApiUrl(apiServerConfig.Frps.Protocol, apiServerConfig.Id, apiServerConfig.Frps.Domain)
-		runner_view.Notify(runner, apiUrl)
+		runner.Notify(runnerDto, apiUrl, c.Id, !c.TelemetryEnabled)
 
 		return nil
 	},

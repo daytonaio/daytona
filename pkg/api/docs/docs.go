@@ -1276,12 +1276,12 @@ const docTemplate = `{
                 "operationId": "UpdateProvider",
                 "parameters": [
                     {
-                        "description": "Provider download URLs",
-                        "name": "downloadUrls",
+                        "description": "Update provider",
+                        "name": "updateProviderDto",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/DownloadUrls"
+                            "$ref": "#/definitions/UpdateProviderDTO"
                         }
                     },
                     {
@@ -4649,13 +4649,17 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "downloadUrls",
-                "name"
+                "name",
+                "version"
             ],
             "properties": {
                 "downloadUrls": {
                     "$ref": "#/definitions/DownloadUrls"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -5616,6 +5620,21 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/JobState"
+                }
+            }
+        },
+        "UpdateProviderDTO": {
+            "type": "object",
+            "required": [
+                "downloadUrls",
+                "version"
+            ],
+            "properties": {
+                "downloadUrls": {
+                    "$ref": "#/definitions/DownloadUrls"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },

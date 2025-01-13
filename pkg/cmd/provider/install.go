@@ -126,6 +126,7 @@ func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerTo
 		res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId).InstallProviderDto(apiclient.InstallProviderDTO{
 			Name:         providerToInstall.Name,
 			DownloadUrls: downloadUrls,
+			Version:      providerToInstall.Version,
 		}).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)

@@ -72,7 +72,7 @@ func SetPrebuild(ctx *gin.Context) {
 	}
 
 	server := server.GetInstance(nil)
-	prebuild, err := server.WorkspaceTemplateService.SetPrebuild(ctx.Request.Context(), templateName, dto)
+	prebuild, err := server.WorkspaceTemplateService.SavePrebuild(ctx.Request.Context(), templateName, dto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to set prebuild: %s", err.Error()))
 		return

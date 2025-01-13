@@ -24,6 +24,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 	"github.com/daytonaio/daytona/pkg/scheduler"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
@@ -49,9 +50,10 @@ type RunnerConfig struct {
 	ProviderManager providermanager.IProviderManager
 	RegistryUrl     string
 
-	ListPendingJobs   func(ctx context.Context) ([]*models.Job, int, error)
-	UpdateJobState    func(ctx context.Context, jobId string, state models.JobState, err *error) error
-	SetRunnerMetadata func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error
+	ListPendingJobs     func(ctx context.Context) ([]*models.Job, int, error)
+	UpdateJobState      func(ctx context.Context, jobId string, state models.JobState, err error) error
+	SetRunnerMetadata   func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 
 	WorkspaceJobFactory workspace.IWorkspaceJobFactory
 	TargetJobFactory    target.ITargetJobFactory
@@ -68,9 +70,10 @@ func NewRunner(config RunnerConfig) IRunner {
 		providerManager: config.ProviderManager,
 		registryUrl:     config.RegistryUrl,
 
-		listPendingJobs:   config.ListPendingJobs,
-		updateJobState:    config.UpdateJobState,
-		setRunnerMetadata: config.SetRunnerMetadata,
+		listPendingJobs:     config.ListPendingJobs,
+		updateJobState:      config.UpdateJobState,
+		setRunnerMetadata:   config.SetRunnerMetadata,
+		trackTelemetryEvent: config.TrackTelemetryEvent,
 
 		workspaceJobFactory: config.WorkspaceJobFactory,
 		targetJobFactory:    config.TargetJobFactory,
@@ -88,9 +91,10 @@ type Runner struct {
 	providerManager providermanager.IProviderManager
 	registryUrl     string
 
-	listPendingJobs   func(ctx context.Context) ([]*models.Job, int, error)
-	updateJobState    func(ctx context.Context, jobId string, state models.JobState, err *error) error
-	setRunnerMetadata func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error
+	listPendingJobs     func(ctx context.Context) ([]*models.Job, int, error)
+	updateJobState      func(ctx context.Context, jobId string, state models.JobState, err error) error
+	setRunnerMetadata   func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 
 	workspaceJobFactory workspace.IWorkspaceJobFactory
 	targetJobFactory    target.ITargetJobFactory
@@ -211,15 +215,24 @@ func (r *Runner) Purge(ctx context.Context) error {
 }
 
 func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
+	startTime := time.Now()
+	if r.Config.TelemetryEnabled {
+		event := telemetry.NewJobEvent(telemetry.JobEventRunStarted, j, nil, nil)
+		err := r.trackTelemetryEvent(event, r.Config.ClientId)
+		if err != nil {
+			r.logger.Trace(err)
+		}
+	}
+
 	var job jobs.IJob
 
 	j.State = models.JobStateRunning
 	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
 	if err != nil {
-		return err
+		return r.handleRunFailed(j, err, startTime)
 	}
 
-	r.logJobStateUpdate(j)
+	r.logJobStateUpdate(j, nil)
 
 	switch j.ResourceType {
 	case models.ResourceTypeWorkspace:
@@ -236,14 +249,26 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	err = job.Execute(ctx)
 	if err != nil {
-		j.State = models.JobStateError
-		r.logJobStateUpdate(j)
-		return r.updateJobState(ctx, j.Id, models.JobStateError, &err)
+		return r.handleRunFailed(j, err, startTime)
 	}
 
 	j.State = models.JobStateSuccess
-	r.logJobStateUpdate(j)
-	return r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
+	r.logJobStateUpdate(j, nil)
+	err = r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
+	if err != nil {
+		return r.handleRunFailed(j, err, startTime)
+	}
+
+	if r.Config.TelemetryEnabled {
+		execTime := time.Since(startTime)
+		event := telemetry.NewJobEvent(telemetry.JobEventRunCompleted, j, nil, map[string]interface{}{"exec_time_ms": execTime.Milliseconds()})
+		err = r.trackTelemetryEvent(event, r.Config.ClientId)
+		if err != nil {
+			r.logger.Trace(err)
+		}
+	}
+
+	return nil
 }
 
 // Runner uptime in seconds
@@ -275,7 +300,7 @@ func (r *Runner) UpdateRunnerMetadata(config *Config) error {
 	})
 }
 
-func (r *Runner) logJobStateUpdate(j *models.Job) {
+func (r *Runner) logJobStateUpdate(j *models.Job, err error) {
 	if j == nil {
 		return
 	}
@@ -292,5 +317,26 @@ func (r *Runner) logJobStateUpdate(j *models.Job) {
 		message = "Running job"
 	}
 
-	r.logger.Info(fmt.Sprintf("%-16s %-16s %-12s %-12s\n", message, j.Id, j.ResourceType, j.Action))
+	message = fmt.Sprintf("%-16s %-16s %-12s %-12s\n", message, j.Id, j.ResourceType, j.Action)
+	if err != nil {
+		message += fmt.Sprintf(" Error: %s\n", err)
+	}
+
+	r.logger.Info(message)
+}
+
+func (r *Runner) handleRunFailed(j *models.Job, err error, startTime time.Time) error {
+	j.State = models.JobStateError
+	r.logJobStateUpdate(j, err)
+
+	if r.Config.TelemetryEnabled {
+		execTime := time.Since(startTime)
+		event := telemetry.NewJobEvent(telemetry.JobEventRunFailed, j, err, map[string]interface{}{"exec_time_ms": execTime.Milliseconds()})
+		err = r.trackTelemetryEvent(event, r.Config.ClientId)
+		if err != nil {
+			r.logger.Trace(err)
+		}
+	}
+
+	return r.updateJobState(context.Background(), j.Id, models.JobStateError, err)
 }

@@ -12,7 +12,9 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
-	"github.com/docker/docker/pkg/stringid"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type BuildServiceConfig struct {
@@ -20,6 +22,7 @@ type BuildServiceConfig struct {
 	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	CreateJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
+	TrackTelemetryEvent   func(event telemetry.Event, clientId string) error
 	LoggerFactory         logs.ILoggerFactory
 }
 
@@ -28,6 +31,7 @@ type BuildService struct {
 	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
 	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
 	createJob             func(ctx context.Context, workspaceId string, action models.JobAction) error
+	trackTelemetryEvent   func(event telemetry.Event, clientId string) error
 	loggerFactory         logs.ILoggerFactory
 }
 
@@ -38,49 +42,8 @@ func NewBuildService(config BuildServiceConfig) services.IBuildService {
 		getRepositoryContext:  config.GetRepositoryContext,
 		loggerFactory:         config.LoggerFactory,
 		createJob:             config.CreateJob,
+		trackTelemetryEvent:   config.TrackTelemetryEvent,
 	}
-}
-
-func (s *BuildService) Create(ctx context.Context, b services.CreateBuildDTO) (string, error) {
-	id := stringid.GenerateRandomID()
-	id = stringid.TruncateID(id)
-
-	workspaceTemplate, err := s.findWorkspaceTemplate(ctx, b.WorkspaceTemplateName)
-	if err != nil {
-		return "", err
-	}
-
-	repo, err := s.getRepositoryContext(ctx, workspaceTemplate.RepositoryUrl, b.Branch)
-	if err != nil {
-		return "", err
-	}
-
-	newBuild := models.Build{
-		Id: id,
-		ContainerConfig: models.ContainerConfig{
-			Image: workspaceTemplate.Image,
-			User:  workspaceTemplate.User,
-		},
-		BuildConfig: workspaceTemplate.BuildConfig,
-		Repository:  repo,
-		EnvVars:     b.EnvVars,
-	}
-
-	if b.PrebuildId != nil {
-		newBuild.PrebuildId = *b.PrebuildId
-	}
-
-	err = s.buildStore.Save(ctx, &newBuild)
-	if err != nil {
-		return "", err
-	}
-
-	err = s.createJob(ctx, id, models.JobActionRun)
-	if err != nil {
-		return "", err
-	}
-
-	return id, nil
 }
 
 func (s *BuildService) Find(ctx context.Context, filter *services.BuildFilter) (*services.BuildDTO, error) {
@@ -146,17 +109,19 @@ func (s *BuildService) Delete(ctx context.Context, filter *services.BuildFilter,
 
 	builds, err := s.List(ctx, filter)
 	if err != nil {
-		return []error{err}
+		return []error{s.handleDeleteError(ctx, nil, err, force)}
 	}
 
 	for _, b := range builds {
 		if force {
 			err = s.createJob(ctx, b.Id, models.JobActionForceDelete)
+			err = s.handleDeleteError(ctx, &b.Build, err, force)
 			if err != nil {
 				errors = append(errors, err)
 			}
 		} else {
 			err = s.createJob(ctx, b.Id, models.JobActionDelete)
+			err = s.handleDeleteError(ctx, &b.Build, err, force)
 			if err != nil {
 				errors = append(errors, err)
 			}
@@ -164,6 +129,34 @@ func (s *BuildService) Delete(ctx context.Context, filter *services.BuildFilter,
 	}
 
 	return errors
+}
+
+func (s *BuildService) handleDeleteError(ctx context.Context, b *models.Build, err error, force bool) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.BuildEventLifecycleDeleted
+	if force {
+		eventName = telemetry.BuildEventLifecycleForceDeleted
+	}
+	if err != nil {
+		eventName = telemetry.BuildEventLifecycleDeletionFailed
+		if force {
+			eventName = telemetry.BuildEventLifecycleForceDeletionFailed
+		}
+	}
+
+	event := telemetry.NewBuildEvent(eventName, b, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }
 
 func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {

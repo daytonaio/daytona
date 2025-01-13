@@ -18,9 +18,9 @@ import (
 //	@Tags			provider
 //	@Summary		Update provider
 //	@Description	Update provider
-//	@Param			downloadUrls	body	DownloadUrls	true	"Provider download URLs"
-//	@Param			runnerId		path	string			true	"Runner ID"
-//	@Param			providerName	path	string			true	"Provider name"
+//	@Param			updateProviderDto	body	UpdateProviderDTO	true	"Update provider"
+//	@Param			runnerId			path	string				true	"Runner ID"
+//	@Param			providerName		path	string				true	"Provider name"
 //	@Success		200
 //	@Router			/runner/{runnerId}/provider/{providerName}/update [post]
 //
@@ -29,8 +29,8 @@ func UpdateProvider(ctx *gin.Context) {
 	runnerId := ctx.Param("runnerId")
 	providerName := ctx.Param("providerName")
 
-	var downloadUrls services.DownloadUrls
-	err := ctx.BindJSON(&downloadUrls)
+	var updateProviderMetadataDto services.UpdateProviderDTO
+	err := ctx.BindJSON(&updateProviderMetadataDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
 		return
@@ -38,7 +38,7 @@ func UpdateProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.UpdateProvider(ctx.Request.Context(), runnerId, providerName, downloadUrls)
+	err = server.RunnerService.UpdateProvider(ctx.Request.Context(), runnerId, providerName, updateProviderMetadataDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update provider: %w", err))
 		return
