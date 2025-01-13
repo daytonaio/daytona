@@ -29,6 +29,7 @@ func GetIdeList() []Ide {
 		{"browser", "VS Code - Browser"},
 		{"cursor", "Cursor"},
 		{"codium", "VSCodium"},
+		{"codium-insiders", "VSCodium Insiders"},
 		{"ssh", "Terminal SSH"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
