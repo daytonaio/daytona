@@ -78,9 +78,9 @@ func RenderConfig(config *server.Config) {
 	output += "If you want to connect to the server remotely:\n\n"
 
 	output += "1. Create an API key on this machine: "
-	output += lipgloss.NewStyle().Foreground(views.Green).Render("daytona api-key new") + "\n"
+	output += lipgloss.NewStyle().Foreground(views.Green).Render("daytona api-key create") + "\n"
 	output += "2. Add a profile on the client machine: \n\t"
-	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k API_KEY", apiUrl))
+	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile create -a %s -k API_KEY", apiUrl))
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 }

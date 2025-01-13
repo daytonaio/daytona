@@ -138,37 +138,37 @@ func (a *WorkspaceTemplateAPIService) DeleteWorkspaceTemplateExecute(r ApiDelete
 	return localVarHTTPResponse, nil
 }
 
-type ApiGetDefaultWorkspaceTemplateRequest struct {
-	ctx        context.Context
-	ApiService *WorkspaceTemplateAPIService
-	gitUrl     string
+type ApiFindWorkspaceTemplateRequest struct {
+	ctx          context.Context
+	ApiService   *WorkspaceTemplateAPIService
+	templateName string
 }
 
-func (r ApiGetDefaultWorkspaceTemplateRequest) Execute() (*WorkspaceTemplate, *http.Response, error) {
-	return r.ApiService.GetDefaultWorkspaceTemplateExecute(r)
+func (r ApiFindWorkspaceTemplateRequest) Execute() (*WorkspaceTemplate, *http.Response, error) {
+	return r.ApiService.FindWorkspaceTemplateExecute(r)
 }
 
 /*
-GetDefaultWorkspaceTemplate Get workspace templates by git url
+FindWorkspaceTemplate Find a workspace template
 
-Get workspace templates by git url
+Find a workspace template
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param gitUrl Git URL
-	@return ApiGetDefaultWorkspaceTemplateRequest
+	@param templateName Template name
+	@return ApiFindWorkspaceTemplateRequest
 */
-func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplate(ctx context.Context, gitUrl string) ApiGetDefaultWorkspaceTemplateRequest {
-	return ApiGetDefaultWorkspaceTemplateRequest{
-		ApiService: a,
-		ctx:        ctx,
-		gitUrl:     gitUrl,
+func (a *WorkspaceTemplateAPIService) FindWorkspaceTemplate(ctx context.Context, templateName string) ApiFindWorkspaceTemplateRequest {
+	return ApiFindWorkspaceTemplateRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
 	}
 }
 
 // Execute executes the request
 //
 //	@return WorkspaceTemplate
-func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplateExecute(r ApiGetDefaultWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
+func (a *WorkspaceTemplateAPIService) FindWorkspaceTemplateExecute(r ApiFindWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -176,13 +176,13 @@ func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplateExecute(r ApiGe
 		localVarReturnValue *WorkspaceTemplate
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.GetDefaultWorkspaceTemplate")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.FindWorkspaceTemplate")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-template/default/{gitUrl}"
-	localVarPath = strings.Replace(localVarPath, "{"+"gitUrl"+"}", url.PathEscape(parameterValueToString(r.gitUrl, "gitUrl")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -198,7 +198,7 @@ func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplateExecute(r ApiGe
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
+	localVarHTTPHeaderAccepts := []string{"*/*"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -256,37 +256,37 @@ func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplateExecute(r ApiGe
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetWorkspaceTemplateRequest struct {
-	ctx          context.Context
-	ApiService   *WorkspaceTemplateAPIService
-	templateName string
+type ApiGetDefaultWorkspaceTemplateRequest struct {
+	ctx        context.Context
+	ApiService *WorkspaceTemplateAPIService
+	gitUrl     string
 }
 
-func (r ApiGetWorkspaceTemplateRequest) Execute() (*WorkspaceTemplate, *http.Response, error) {
-	return r.ApiService.GetWorkspaceTemplateExecute(r)
+func (r ApiGetDefaultWorkspaceTemplateRequest) Execute() (*WorkspaceTemplate, *http.Response, error) {
+	return r.ApiService.GetDefaultWorkspaceTemplateExecute(r)
 }
 
 /*
-GetWorkspaceTemplate Get workspace template data
+GetDefaultWorkspaceTemplate Get default workspace templates by git url
 
-Get workspace template data
+Get default workspace templates by git url
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param templateName Template name
-	@return ApiGetWorkspaceTemplateRequest
+	@param gitUrl Git URL
+	@return ApiGetDefaultWorkspaceTemplateRequest
 */
-func (a *WorkspaceTemplateAPIService) GetWorkspaceTemplate(ctx context.Context, templateName string) ApiGetWorkspaceTemplateRequest {
-	return ApiGetWorkspaceTemplateRequest{
-		ApiService:   a,
-		ctx:          ctx,
-		templateName: templateName,
+func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplate(ctx context.Context, gitUrl string) ApiGetDefaultWorkspaceTemplateRequest {
+	return ApiGetDefaultWorkspaceTemplateRequest{
+		ApiService: a,
+		ctx:        ctx,
+		gitUrl:     gitUrl,
 	}
 }
 
 // Execute executes the request
 //
 //	@return WorkspaceTemplate
-func (a *WorkspaceTemplateAPIService) GetWorkspaceTemplateExecute(r ApiGetWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
+func (a *WorkspaceTemplateAPIService) GetDefaultWorkspaceTemplateExecute(r ApiGetDefaultWorkspaceTemplateRequest) (*WorkspaceTemplate, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -294,13 +294,13 @@ func (a *WorkspaceTemplateAPIService) GetWorkspaceTemplateExecute(r ApiGetWorksp
 		localVarReturnValue *WorkspaceTemplate
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.GetWorkspaceTemplate")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.GetDefaultWorkspaceTemplate")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace-template/{templateName}"
-	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
+	localVarPath := localBasePath + "/workspace-template/default/{gitUrl}"
+	localVarPath = strings.Replace(localVarPath, "{"+"gitUrl"+"}", url.PathEscape(parameterValueToString(r.gitUrl, "gitUrl")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -316,7 +316,7 @@ func (a *WorkspaceTemplateAPIService) GetWorkspaceTemplateExecute(r ApiGetWorksp
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"*/*"}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
@@ -488,6 +488,120 @@ func (a *WorkspaceTemplateAPIService) ListWorkspaceTemplatesExecute(r ApiListWor
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiSaveWorkspaceTemplateRequest struct {
+	ctx               context.Context
+	ApiService        *WorkspaceTemplateAPIService
+	workspaceTemplate *CreateWorkspaceTemplateDTO
+}
+
+// Workspace template
+func (r ApiSaveWorkspaceTemplateRequest) WorkspaceTemplate(workspaceTemplate CreateWorkspaceTemplateDTO) ApiSaveWorkspaceTemplateRequest {
+	r.workspaceTemplate = &workspaceTemplate
+	return r
+}
+
+func (r ApiSaveWorkspaceTemplateRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SaveWorkspaceTemplateExecute(r)
+}
+
+/*
+SaveWorkspaceTemplate Set workspace template data
+
+Set workspace template data
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiSaveWorkspaceTemplateRequest
+*/
+func (a *WorkspaceTemplateAPIService) SaveWorkspaceTemplate(ctx context.Context) ApiSaveWorkspaceTemplateRequest {
+	return ApiSaveWorkspaceTemplateRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceTemplateAPIService) SaveWorkspaceTemplateExecute(r ApiSaveWorkspaceTemplateRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPut
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.SaveWorkspaceTemplate")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace-template"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.workspaceTemplate == nil {
+		return nil, reportError("workspaceTemplate is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.workspaceTemplate
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
 type ApiSetDefaultWorkspaceTemplateRequest struct {
 	ctx          context.Context
 	ApiService   *WorkspaceTemplateAPIService
@@ -552,120 +666,6 @@ func (a *WorkspaceTemplateAPIService) SetDefaultWorkspaceTemplateExecute(r ApiSe
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
-type ApiSetWorkspaceTemplateRequest struct {
-	ctx               context.Context
-	ApiService        *WorkspaceTemplateAPIService
-	workspaceTemplate *CreateWorkspaceTemplateDTO
-}
-
-// Workspace template
-func (r ApiSetWorkspaceTemplateRequest) WorkspaceTemplate(workspaceTemplate CreateWorkspaceTemplateDTO) ApiSetWorkspaceTemplateRequest {
-	r.workspaceTemplate = &workspaceTemplate
-	return r
-}
-
-func (r ApiSetWorkspaceTemplateRequest) Execute() (*http.Response, error) {
-	return r.ApiService.SetWorkspaceTemplateExecute(r)
-}
-
-/*
-SetWorkspaceTemplate Set workspace template data
-
-Set workspace template data
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiSetWorkspaceTemplateRequest
-*/
-func (a *WorkspaceTemplateAPIService) SetWorkspaceTemplate(ctx context.Context) ApiSetWorkspaceTemplateRequest {
-	return ApiSetWorkspaceTemplateRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-func (a *WorkspaceTemplateAPIService) SetWorkspaceTemplateExecute(r ApiSetWorkspaceTemplateRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodPut
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceTemplateAPIService.SetWorkspaceTemplate")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/workspace-template"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.workspaceTemplate == nil {
-		return nil, reportError("workspaceTemplate is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	// body params
-	localVarPostBody = r.workspaceTemplate
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

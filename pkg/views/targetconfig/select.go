@@ -68,7 +68,7 @@ func GetTargetConfigFromPrompt(targetConfigs []apiclient.TargetConfig, activePro
 
 			items = append(items, item{
 				targetConfig: TargetConfigView{
-					Name:    fmt.Sprintf("Add a %s Target Config", label),
+					Name:    fmt.Sprintf("Create a %s Target Config", label),
 					Options: "{}",
 					ProviderInfo: ProviderInfo{
 						Name:            providerView.Name,

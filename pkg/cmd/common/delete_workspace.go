@@ -16,7 +16,7 @@ import (
 func DeleteWorkspace(ctx context.Context, apiClient *apiclient.APIClient, workspaceId, workspaceName string, force bool) error {
 	message := fmt.Sprintf("Deleting workspace %s", workspaceName)
 	err := views_util.WithInlineSpinner(message, func() error {
-		res, err := apiClient.WorkspaceAPI.RemoveWorkspace(ctx, workspaceId).Force(force).Execute()
+		res, err := apiClient.WorkspaceAPI.DeleteWorkspace(ctx, workspaceId).Force(force).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

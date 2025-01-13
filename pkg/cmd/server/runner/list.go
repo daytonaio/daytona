@@ -6,6 +6,7 @@ package runner
 import (
 	"context"
 
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/server/runner/list"
 
@@ -16,7 +17,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List runners",
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

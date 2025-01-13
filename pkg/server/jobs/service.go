@@ -75,12 +75,12 @@ func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 	return s.handleCreateError(ctx, j, err)
 }
 
-func (s *JobService) SetState(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
-	job, findErr := s.Find(ctx, &stores.JobFilter{
+func (s *JobService) UpdateState(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
+	job, err := s.Find(ctx, &stores.JobFilter{
 		Id: &jobId,
 	})
-	if findErr != nil {
-		return findErr
+	if err != nil {
+		return err
 	}
 
 	if job.State == updateJobStateDto.State {

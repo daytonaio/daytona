@@ -15,21 +15,21 @@ func NotifyEmptyProviderList(tip bool) {
 func NotifyEmptyGitProviderList(tip bool) {
 	views.RenderInfoMessageBold("No Git providers found")
 	if tip {
-		views.RenderTip("Use 'daytona git-provider add' to add a Git provider")
+		views.RenderTip("Use 'daytona git-provider create' to add a Git provider")
 	}
 }
 
 func NotifyEmptyTargetConfigList(tip bool) {
 	views.RenderInfoMessageBold("No target configs found")
 	if tip {
-		views.RenderTip("Use 'daytona target-config set' to add a target config")
+		views.RenderTip("Use 'daytona target-config create' to create a target config")
 	}
 }
 
 func NotifyEmptyWorkspaceTemplateList(tip bool) {
 	views.RenderInfoMessageBold("No workspace templates found")
 	if tip {
-		views.RenderTip("Use 'daytona template add' to add a workspace template")
+		views.RenderTip("Use 'daytona template create' to add a workspace template")
 	}
 }
 
@@ -47,38 +47,31 @@ func NotifyEmptyWorkspaceList(tip bool) {
 	}
 }
 
-func NotifyEmptyContainerRegistryList(tip bool) {
-	views.RenderInfoMessageBold("No container registries found")
-	if tip {
-		views.RenderTip("Use 'daytona container-registry add' to add a container registry")
-	}
-}
-
 func NotifyEmptyProfileList(tip bool) {
 	views.RenderInfoMessageBold("No profiles found")
 	if tip {
-		views.RenderTip("Use 'daytona profile add' to add a profile")
+		views.RenderTip("Use 'daytona profile create' to add a profile")
 	}
 }
 
 func NotifyEmptyPrebuildList(tip bool) {
 	views.RenderInfoMessageBold("No prebuilds found")
 	if tip {
-		views.RenderTip("Use 'daytona prebuild add' to add a prebuild")
+		views.RenderTip("Use 'daytona prebuild create' to add a prebuild")
 	}
 }
 
 func NotifyEmptyApiKeyList(tip bool) {
 	views.RenderInfoMessageBold("No API keys found")
 	if tip {
-		views.RenderTip("Use 'daytona api-key new' to create an API key")
+		views.RenderTip("Use 'daytona api-key create' to create an API key")
 	}
 }
 
 func NotifyEmptyBuildList(tip bool) {
 	views.RenderInfoMessageBold("No builds found")
 	if tip {
-		views.RenderTip("Use 'daytona build run' to run a build or 'daytona prebuild add' to configure a prebuild rule")
+		views.RenderTip("Use 'daytona build run' to run a build or 'daytona prebuild create' to configure a prebuild rule")
 	}
 }
 
@@ -99,6 +92,6 @@ func NotifyEmptyServerLogList(tip bool) {
 func NotifyEmptyRunnerList(tip bool) {
 	views.RenderInfoMessageBold("No runners found")
 	if tip {
-		views.RenderTip("Use 'daytona runner register' to register a runner")
+		views.RenderTip("Use 'daytona runner create' to register a runner")
 	}
 }

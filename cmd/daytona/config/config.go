@@ -89,7 +89,7 @@ func GetConfig() (*Config, error) {
 	return &c, nil
 }
 
-var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile add` to connect to a remote server")
+var ErrNoProfilesFound = errors.New("no profiles found. Run `daytona serve` to create a default profile or `daytona profile create` to connect to a remote server")
 
 func (c *Config) GetActiveProfile() (Profile, error) {
 	if len(c.Profiles) == 0 {

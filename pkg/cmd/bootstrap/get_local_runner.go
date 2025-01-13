@@ -120,7 +120,7 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 			if err != nil {
 				jobErr = util.Pointer(err.Error())
 			}
-			return jobService.SetState(ctx, jobId, services.UpdateJobStateDTO{
+			return jobService.UpdateState(ctx, jobId, services.UpdateJobStateDTO{
 				State:        state,
 				ErrorMessage: jobErr,
 			})
@@ -129,7 +129,7 @@ func GetLocalRunner(params LocalRunnerParams) (runner.IRunner, error) {
 			return params.TelemetryService.Track(event, clientId)
 		},
 		SetRunnerMetadata: func(ctx context.Context, runnerId string, metadata models.RunnerMetadata) error {
-			return runnerService.SetRunnerMetadata(context.Background(), runnerId, &models.RunnerMetadata{
+			return runnerService.UpdateRunnerMetadata(context.Background(), runnerId, &models.RunnerMetadata{
 				Uptime:      uint64(metadata.Uptime),
 				Providers:   metadata.Providers,
 				RunningJobs: metadata.RunningJobs,
@@ -155,14 +155,14 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 
 	return workspace.NewWorkspaceJobFactory(workspace.WorkspaceJobFactoryConfig{
 		FindWorkspace: func(ctx context.Context, workspaceId string) (*models.Workspace, error) {
-			workspaceDto, err := workspaceService.GetWorkspace(ctx, workspaceId, services.WorkspaceRetrievalParams{})
+			workspaceDto, err := workspaceService.FindWorkspace(ctx, workspaceId, services.WorkspaceRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}
 			return &workspaceDto.Workspace, nil
 		},
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, err := targetService.GetTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+			targetDto, err := targetService.FindTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}
@@ -170,7 +170,7 @@ func getLocalWorkspaceJobFactory(params LocalJobFactoryParams) (workspace.IWorks
 		},
 		UpdateWorkspaceProviderMetadata: workspaceService.UpdateWorkspaceProviderMetadata,
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			return gitProviderService.GetConfig(ctx, id)
+			return gitProviderService.FindConfig(ctx, id)
 		},
 		GetWorkspaceEnvironmentVariables: func(ctx context.Context, w *models.Workspace) (map[string]string, error) {
 			serverEnvVars, err := envVarService.Map(ctx)
@@ -196,7 +196,7 @@ func getLocalTargetJobFactory(params LocalJobFactoryParams) (target.ITargetJobFa
 
 	return target.NewTargetJobFactory(target.TargetJobFactoryConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, err := targetService.GetTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+			targetDto, err := targetService.FindTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}
@@ -347,7 +347,7 @@ func getProviderManager(params LocalRunnerParams, logger *log.Logger) (providerm
 			return targetConfigService.Map(ctx)
 		},
 		CreateTargetConfig: func(ctx context.Context, name, options string, providerInfo models.ProviderInfo) error {
-			tc, err := targetConfigService.Add(ctx, services.AddTargetConfigDTO{
+			tc, err := targetConfigService.Create(ctx, services.CreateTargetConfigDTO{
 				Name:         name,
 				Options:      options,
 				ProviderInfo: providerInfo,

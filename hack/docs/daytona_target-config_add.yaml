@@ -1,9 +1,0 @@
-name: daytona target-config add
-synopsis: Add target config
-usage: daytona target-config add [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona target-config - Manage target configs

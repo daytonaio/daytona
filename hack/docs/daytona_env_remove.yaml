@@ -1,9 +1,0 @@
-name: daytona env remove
-synopsis: Remove server environment variables
-usage: daytona env remove [KEY]... [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona env - Manage server environment variables that are added to all targets and workspaces

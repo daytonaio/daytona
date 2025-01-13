@@ -27,7 +27,7 @@ var providerInstallCmd = &cobra.Command{
 	Use:     "install",
 	Short:   "Install provider",
 	Args:    cobra.MaximumNArgs(1),
-	Aliases: []string{"i"},
+	Aliases: cmd_common.GetAliases("install"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedRunnerId string
 

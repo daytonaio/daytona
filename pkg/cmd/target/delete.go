@@ -26,7 +26,7 @@ var forceFlag bool
 var deleteCmd = &cobra.Command{
 	Use:     "delete [TARGET]...",
 	Short:   "Delete a target",
-	Aliases: []string{"remove", "rm"},
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -188,7 +188,7 @@ func deleteTarget(ctx context.Context, activeProfileId string, apiClient *apicli
 
 	message := fmt.Sprintf("Deleting target %s", target.Name)
 	err := views_util.WithInlineSpinner(message, func() error {
-		res, err := apiClient.TargetAPI.RemoveTarget(ctx, target.Id).Force(forceFlag).Execute()
+		res, err := apiClient.TargetAPI.DeleteTarget(ctx, target.Id).Force(forceFlag).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

@@ -26,9 +26,10 @@ import (
 )
 
 var targetCreateCmd = &cobra.Command{
-	Use:   "create",
-	Short: "Create a target",
-	Args:  cobra.NoArgs,
+	Use:     "create",
+	Short:   "Create a target",
+	Args:    cobra.NoArgs,
+	Aliases: cmd_common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

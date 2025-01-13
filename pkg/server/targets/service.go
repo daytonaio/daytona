@@ -19,8 +19,8 @@ type TargetServiceConfig struct {
 	TargetMetadataStore stores.TargetMetadataStore
 
 	FindTargetConfig    func(ctx context.Context, name string) (*models.TargetConfig, error)
-	GenerateApiKey      func(ctx context.Context, name string) (string, error)
-	RevokeApiKey        func(ctx context.Context, name string) error
+	CreateApiKey        func(ctx context.Context, name string) (string, error)
+	DeleteApiKey        func(ctx context.Context, name string) error
 	CreateJob           func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
 	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 
@@ -36,8 +36,8 @@ func NewTargetService(config TargetServiceConfig) services.ITargetService {
 		targetMetadataStore: config.TargetMetadataStore,
 
 		findTargetConfig: config.FindTargetConfig,
-		generateApiKey:   config.GenerateApiKey,
-		revokeApiKey:     config.RevokeApiKey,
+		createApiKey:     config.CreateApiKey,
+		deleteApiKey:     config.DeleteApiKey,
 		createJob:        config.CreateJob,
 
 		serverApiUrl:        config.ServerApiUrl,
@@ -53,8 +53,8 @@ type TargetService struct {
 	targetMetadataStore stores.TargetMetadataStore
 
 	findTargetConfig    func(ctx context.Context, name string) (*models.TargetConfig, error)
-	generateApiKey      func(ctx context.Context, name string) (string, error)
-	revokeApiKey        func(ctx context.Context, name string) error
+	createApiKey        func(ctx context.Context, name string) (string, error)
+	deleteApiKey        func(ctx context.Context, name string) error
 	createJob           func(ctx context.Context, targetId string, runnerId string, action models.JobAction) error
 	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 

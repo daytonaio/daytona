@@ -41,15 +41,15 @@ const docTemplate = `{
         },
         "/apikey/{apiKeyName}": {
             "post": {
-                "description": "Generate an API key",
+                "description": "Create an API key",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "apiKey"
                 ],
-                "summary": "Generate an API key",
-                "operationId": "GenerateApiKey",
+                "summary": "Create an API key",
+                "operationId": "CreateApiKey",
                 "parameters": [
                     {
                         "type": "string",
@@ -69,12 +69,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Revoke API key",
+                "description": "Delete API key",
                 "tags": [
                     "apiKey"
                 ],
-                "summary": "Revoke API key",
-                "operationId": "RevokeApiKey",
+                "summary": "Delete API key",
+                "operationId": "DeleteApiKey",
                 "parameters": [
                     {
                         "type": "string",
@@ -231,15 +231,15 @@ const docTemplate = `{
         },
         "/build/{buildId}": {
             "get": {
-                "description": "Get build data",
+                "description": "Find build",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "build"
                 ],
-                "summary": "Get build data",
-                "operationId": "GetBuild",
+                "summary": "Find build",
+                "operationId": "FindBuild",
                 "parameters": [
                     {
                         "type": "string",
@@ -289,15 +289,15 @@ const docTemplate = `{
         },
         "/container-registry/{server}": {
             "get": {
-                "description": "Get container registry",
+                "description": "Find container registry",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "container registry"
                 ],
-                "summary": "Get container registry",
-                "operationId": "GetContainerRegistry",
+                "summary": "Find container registry",
+                "operationId": "FindContainerRegistry",
                 "parameters": [
                     {
                         "type": "string",
@@ -347,15 +347,15 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Set environment variable",
+                "description": "Save environment variable",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "envVar"
                 ],
-                "summary": "Set environment variable",
-                "operationId": "SetEnvironmentVariable",
+                "summary": "Save environment variable",
+                "operationId": "SaveEnvironmentVariable",
                 "parameters": [
                     {
                         "description": "Environment Variable",
@@ -422,15 +422,15 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Set Git provider",
+                "description": "Save Git provider",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Set Git provider",
-                "operationId": "SetGitProvider",
+                "summary": "Save Git provider",
+                "operationId": "SaveGitProvider",
                 "parameters": [
                     {
                         "description": "Git provider",
@@ -548,15 +548,15 @@ const docTemplate = `{
         },
         "/gitprovider/id-for-url/{url}": {
             "get": {
-                "description": "Get Git provider ID",
+                "description": "Find Git provider ID",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider ID",
-                "operationId": "GetGitProviderIdForUrl",
+                "summary": "Find Git provider ID",
+                "operationId": "FindGitProviderIdForUrl",
                 "parameters": [
                     {
                         "type": "string",
@@ -578,15 +578,15 @@ const docTemplate = `{
         },
         "/gitprovider/{gitProviderId}": {
             "get": {
-                "description": "Get Git provider",
+                "description": "Find Git provider",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider",
-                "operationId": "GetGitProvider",
+                "summary": "Find Git provider",
+                "operationId": "FindGitProvider",
                 "parameters": [
                     {
                         "type": "string",
@@ -606,15 +606,15 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove Git provider",
+                "description": "Delete Git provider",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Remove Git provider",
-                "operationId": "RemoveGitProvider",
+                "summary": "Delete Git provider",
+                "operationId": "DeleteGitProvider",
                 "parameters": [
                     {
                         "type": "string",
@@ -979,23 +979,23 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Register a runner",
+                "description": "Create a runner",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "runner"
                 ],
-                "summary": "Register a runner",
-                "operationId": "RegisterRunner",
+                "summary": "Create a runner",
+                "operationId": "CreateRunner",
                 "parameters": [
                     {
-                        "description": "Register runner",
+                        "description": "Runner",
                         "name": "runner",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/RegisterRunnerDTO"
+                            "$ref": "#/definitions/CreateRunnerDTO"
                         }
                     }
                 ],
@@ -1003,7 +1003,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/RegisterRunnerResultDTO"
+                            "$ref": "#/definitions/CreateRunnerResultDTO"
                         }
                     }
                 }
@@ -1043,15 +1043,15 @@ const docTemplate = `{
         },
         "/runner/{runnerId}": {
             "get": {
-                "description": "Get a runner",
+                "description": "Find a runner",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "runner"
                 ],
-                "summary": "Get a runner",
-                "operationId": "GetRunner",
+                "summary": "Find a runner",
+                "operationId": "FindRunner",
                 "parameters": [
                     {
                         "type": "string",
@@ -1071,12 +1071,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove runner",
+                "description": "Delete runner",
                 "tags": [
                     "runner"
                 ],
-                "summary": "Remove runner",
-                "operationId": "RemoveRunner",
+                "summary": "Delete runner",
+                "operationId": "DeleteRunner",
                 "parameters": [
                     {
                         "type": "string",
@@ -1171,12 +1171,12 @@ const docTemplate = `{
         },
         "/runner/{runnerId}/metadata": {
             "post": {
-                "description": "Set runner metadata",
+                "description": "Update runner metadata",
                 "tags": [
                     "runner"
                 ],
-                "summary": "Set runner metadata",
-                "operationId": "SetRunnerMetadata",
+                "summary": "Update runner metadata",
+                "operationId": "UpdateRunnerMetadata",
                 "parameters": [
                     {
                         "type": "string",
@@ -1350,8 +1350,8 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
-                "description": "Set the server configuration",
+            "put": {
+                "description": "Save the server configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -1361,8 +1361,8 @@ const docTemplate = `{
                 "tags": [
                     "server"
                 ],
-                "summary": "Set the server configuration",
-                "operationId": "SetConfig",
+                "summary": "Save the server configuration",
+                "operationId": "SaveConfig",
                 "parameters": [
                     {
                         "description": "Server configuration",
@@ -1386,14 +1386,14 @@ const docTemplate = `{
         },
         "/server/logs": {
             "get": {
-                "description": "List server log files",
+                "description": "Get server log files",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "server"
                 ],
-                "summary": "List server log files",
+                "summary": "Get server log files",
                 "operationId": "GetServerLogFiles",
                 "responses": {
                     "200": {
@@ -1410,15 +1410,15 @@ const docTemplate = `{
         },
         "/server/network-key": {
             "post": {
-                "description": "Generate a new authentication key",
+                "description": "Create a new authentication key",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "server"
                 ],
-                "summary": "Generate a new authentication key",
-                "operationId": "GenerateNetworkKey",
+                "summary": "Create a new authentication key",
+                "operationId": "CreateNetworkKey",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1522,21 +1522,21 @@ const docTemplate = `{
                     }
                 }
             },
-            "put": {
-                "description": "Add a target config",
+            "post": {
+                "description": "Create a target config",
                 "tags": [
                     "target-config"
                 ],
-                "summary": "Add a target config",
-                "operationId": "AddTargetConfig",
+                "summary": "Create a target config",
+                "operationId": "CreateTargetConfig",
                 "parameters": [
                     {
-                        "description": "Target config to add",
+                        "description": "Target config to create",
                         "name": "targetConfig",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/AddTargetConfigDTO"
+                            "$ref": "#/definitions/CreateTargetConfigDTO"
                         }
                     },
                     {
@@ -1558,12 +1558,12 @@ const docTemplate = `{
         },
         "/target-config/{configId}": {
             "delete": {
-                "description": "Remove a target config",
+                "description": "Delete a target config",
                 "tags": [
                     "target-config"
                 ],
-                "summary": "Remove a target config",
-                "operationId": "RemoveTargetConfig",
+                "summary": "Delete a target config",
+                "operationId": "DeleteTargetConfig",
                 "parameters": [
                     {
                         "type": "string",
@@ -1582,15 +1582,15 @@ const docTemplate = `{
         },
         "/target/{targetId}": {
             "get": {
-                "description": "Get target info",
+                "description": "Find target",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "target"
                 ],
-                "summary": "Get target info",
-                "operationId": "GetTarget",
+                "summary": "Find target",
+                "operationId": "FindTarget",
                 "parameters": [
                     {
                         "type": "string",
@@ -1616,12 +1616,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove target",
+                "description": "Delete target",
                 "tags": [
                     "target"
                 ],
-                "summary": "Remove target",
-                "operationId": "RemoveTarget",
+                "summary": "Delete target",
+                "operationId": "DeleteTarget",
                 "parameters": [
                     {
                         "type": "string",
@@ -1670,12 +1670,12 @@ const docTemplate = `{
         },
         "/target/{targetId}/metadata": {
             "post": {
-                "description": "Set target metadata",
+                "description": "Update target metadata",
                 "tags": [
                     "target"
                 ],
-                "summary": "Set target metadata",
-                "operationId": "SetTargetMetadata",
+                "summary": "Update target metadata",
+                "operationId": "UpdateTargetMetadata",
                 "parameters": [
                     {
                         "type": "string",
@@ -1916,7 +1916,7 @@ const docTemplate = `{
                     "workspace-template"
                 ],
                 "summary": "Set workspace template data",
-                "operationId": "SetWorkspaceTemplate",
+                "operationId": "SaveWorkspaceTemplate",
                 "parameters": [
                     {
                         "description": "Workspace template",
@@ -1937,14 +1937,14 @@ const docTemplate = `{
         },
         "/workspace-template/default/{gitUrl}": {
             "get": {
-                "description": "Get workspace templates by git url",
+                "description": "Get default workspace templates by git url",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace-template"
                 ],
-                "summary": "Get workspace templates by git url",
+                "summary": "Get default workspace templates by git url",
                 "operationId": "GetDefaultWorkspaceTemplate",
                 "parameters": [
                     {
@@ -2017,15 +2017,15 @@ const docTemplate = `{
         },
         "/workspace-template/{templateName}": {
             "get": {
-                "description": "Get workspace template data",
+                "description": "Find a workspace template",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace-template"
                 ],
-                "summary": "Get workspace template data",
-                "operationId": "GetWorkspaceTemplate",
+                "summary": "Find a workspace template",
+                "operationId": "FindWorkspaceTemplate",
                 "parameters": [
                     {
                         "type": "string",
@@ -2106,15 +2106,15 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Set prebuild",
+                "description": "Save prebuild",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "prebuild"
                 ],
-                "summary": "Set prebuild",
-                "operationId": "SetPrebuild",
+                "summary": "Save prebuild",
+                "operationId": "SavePrebuild",
                 "parameters": [
                     {
                         "type": "string",
@@ -2145,15 +2145,15 @@ const docTemplate = `{
         },
         "/workspace-template/{templateName}/prebuild/{prebuildId}": {
             "get": {
-                "description": "Get prebuild",
+                "description": "Find prebuild",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "prebuild"
                 ],
-                "summary": "Get prebuild",
-                "operationId": "GetPrebuild",
+                "summary": "Find prebuild",
+                "operationId": "FindPrebuild",
                 "parameters": [
                     {
                         "type": "string",
@@ -2244,15 +2244,15 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}": {
             "get": {
-                "description": "Get workspace info",
+                "description": "Find workspace",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace"
                 ],
-                "summary": "Get workspace info",
-                "operationId": "GetWorkspace",
+                "summary": "Find workspace",
+                "operationId": "FindWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -2272,12 +2272,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove workspace",
+                "description": "Delete workspace",
                 "tags": [
                     "workspace"
                 ],
-                "summary": "Remove workspace",
-                "operationId": "RemoveWorkspace",
+                "summary": "Delete workspace",
+                "operationId": "DeleteWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -2302,12 +2302,12 @@ const docTemplate = `{
         },
         "/workspace/{workspaceId}/metadata": {
             "post": {
-                "description": "Set workspace metadata",
+                "description": "Update workspace metadata",
                 "tags": [
                     "workspace"
                 ],
-                "summary": "Set workspace metadata",
-                "operationId": "SetWorkspaceMetadata",
+                "summary": "Update workspace metadata",
+                "operationId": "UpdateWorkspaceMetadata",
                 "parameters": [
                     {
                         "type": "string",
@@ -2440,25 +2440,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "AddTargetConfigDTO": {
-            "type": "object",
-            "required": [
-                "name",
-                "options",
-                "providerInfo"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/ProviderInfo"
-                }
-            }
-        },
         "ApiKeyViewDTO": {
             "type": "object",
             "required": [
@@ -2650,6 +2631,62 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "CreateRunnerDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateRunnerResultDTO": {
+            "type": "object",
+            "required": [
+                "apiKey",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateTargetConfigDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/ProviderInfo"
                 }
             }
         },
@@ -3272,43 +3309,6 @@ const docTemplate = `{
                     "$ref": "#/definitions/TargetConfigManifest"
                 },
                 "version": {
-                    "type": "string"
-                }
-            }
-        },
-        "RegisterRunnerDTO": {
-            "type": "object",
-            "required": [
-                "id",
-                "name"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "RegisterRunnerResultDTO": {
-            "type": "object",
-            "required": [
-                "apiKey",
-                "id",
-                "name"
-            ],
-            "properties": {
-                "apiKey": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "string"
-                },
-                "metadata": {
-                    "$ref": "#/definitions/RunnerMetadata"
-                },
-                "name": {
                     "type": "string"
                 }
             }

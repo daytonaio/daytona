@@ -15,19 +15,19 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetTarget 			godoc
+// FindTarget 			godoc
 //
 //	@Tags			target
-//	@Summary		Get target info
-//	@Description	Get target info
+//	@Summary		Find target
+//	@Description	Find target
 //	@Produce		json
 //	@Param			targetId	path		string	true	"Target ID or Name"
 //	@Param			showOptions	query		bool	false	"Show target config options"
 //	@Success		200			{object}	TargetDTO
 //	@Router			/target/{targetId} [get]
 //
-//	@id				GetTarget
-func GetTarget(ctx *gin.Context) {
+//	@id				FindTarget
+func FindTarget(ctx *gin.Context) {
 	targetId := ctx.Param("targetId")
 	showTargetConfigOptionsQuery := ctx.Query("showOptions")
 	var showTargetConfigOptions bool
@@ -37,7 +37,7 @@ func GetTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.GetTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+	t, err := server.TargetService.FindTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsTargetNotFound(err) || services.IsTargetDeleted(err) {

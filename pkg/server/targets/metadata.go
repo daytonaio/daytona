@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *TargetService) SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error) {
+func (s *TargetService) UpdateTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error) {
 	m, err := s.targetMetadataStore.Find(ctx, targetId)
 	if err != nil {
 		return nil, stores.ErrTargetMetadataNotFound

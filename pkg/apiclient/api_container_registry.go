@@ -22,7 +22,7 @@ import (
 // ContainerRegistryAPIService ContainerRegistryAPI service
 type ContainerRegistryAPIService service
 
-type ApiGetContainerRegistryRequest struct {
+type ApiFindContainerRegistryRequest struct {
 	ctx         context.Context
 	ApiService  *ContainerRegistryAPIService
 	server      string
@@ -30,26 +30,26 @@ type ApiGetContainerRegistryRequest struct {
 }
 
 // Workspace ID or Name
-func (r ApiGetContainerRegistryRequest) WorkspaceId(workspaceId string) ApiGetContainerRegistryRequest {
+func (r ApiFindContainerRegistryRequest) WorkspaceId(workspaceId string) ApiFindContainerRegistryRequest {
 	r.workspaceId = &workspaceId
 	return r
 }
 
-func (r ApiGetContainerRegistryRequest) Execute() (*ContainerRegistry, *http.Response, error) {
-	return r.ApiService.GetContainerRegistryExecute(r)
+func (r ApiFindContainerRegistryRequest) Execute() (*ContainerRegistry, *http.Response, error) {
+	return r.ApiService.FindContainerRegistryExecute(r)
 }
 
 /*
-GetContainerRegistry Get container registry
+FindContainerRegistry Find container registry
 
-Get container registry
+Find container registry
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param server Container registry server
-	@return ApiGetContainerRegistryRequest
+	@return ApiFindContainerRegistryRequest
 */
-func (a *ContainerRegistryAPIService) GetContainerRegistry(ctx context.Context, server string) ApiGetContainerRegistryRequest {
-	return ApiGetContainerRegistryRequest{
+func (a *ContainerRegistryAPIService) FindContainerRegistry(ctx context.Context, server string) ApiFindContainerRegistryRequest {
+	return ApiFindContainerRegistryRequest{
 		ApiService: a,
 		ctx:        ctx,
 		server:     server,
@@ -59,7 +59,7 @@ func (a *ContainerRegistryAPIService) GetContainerRegistry(ctx context.Context, 
 // Execute executes the request
 //
 //	@return ContainerRegistry
-func (a *ContainerRegistryAPIService) GetContainerRegistryExecute(r ApiGetContainerRegistryRequest) (*ContainerRegistry, *http.Response, error) {
+func (a *ContainerRegistryAPIService) FindContainerRegistryExecute(r ApiFindContainerRegistryRequest) (*ContainerRegistry, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -67,7 +67,7 @@ func (a *ContainerRegistryAPIService) GetContainerRegistryExecute(r ApiGetContai
 		localVarReturnValue *ContainerRegistry
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.GetContainerRegistry")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ContainerRegistryAPIService.FindContainerRegistry")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

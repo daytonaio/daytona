@@ -14,7 +14,7 @@ func (s *ApiKeyServiceTestSuite) TestIsValidKey_True() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
+	apiKey, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
 	res := s.apiKeyService.IsValidApiKey(context.TODO(), apiKey)
@@ -35,7 +35,7 @@ func (s *ApiKeyServiceTestSuite) TestGetApiKeyType() {
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
+	apiKey, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
 	apiKeyType, err := s.apiKeyService.GetApiKeyType(context.TODO(), apiKey)

@@ -87,7 +87,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.Cre
 		w.User = s.defaultWorkspaceUser
 	}
 
-	apiKey, err := s.generateApiKey(ctx, w.Id)
+	apiKey, err := s.createApiKey(ctx, w.Id)
 	if err != nil {
 		return s.handleCreateError(ctx, w, err)
 	}

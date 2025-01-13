@@ -29,12 +29,12 @@ var ProfileUseCmd = &cobra.Command{
 			profilesList := c.Profiles
 
 			if len(profilesList) == 0 {
-				views.RenderInfoMessage("Add a profile by running `daytona profile add`")
+				views.RenderInfoMessage("Create a profile by running `daytona profile create`")
 				return nil
 			}
 
 			if len(profilesList) == 1 {
-				views.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile add`", profilesList[0].Name))
+				views.RenderInfoMessage(fmt.Sprintf("You are using profile %s. Add a new profile by running `daytona profile create`", profilesList[0].Name))
 				return nil
 			}
 

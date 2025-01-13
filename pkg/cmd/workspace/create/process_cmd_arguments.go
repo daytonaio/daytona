@@ -83,7 +83,7 @@ func ProcessCmdArguments(ctx context.Context, params ProcessCmdArgumentsParams) 
 		}
 
 		// The argument is not a Git URL - try getting the workspace template
-		workspaceTemplate, _, err = params.ApiClient.WorkspaceTemplateAPI.GetWorkspaceTemplate(ctx, repoUrl).Execute()
+		workspaceTemplate, _, err = params.ApiClient.WorkspaceTemplateAPI.FindWorkspaceTemplate(ctx, repoUrl).Execute()
 		if err != nil {
 			return nil, fmt.Errorf("failed to parse the URL or fetch the workspace template for '%s'", repoUrl)
 		}

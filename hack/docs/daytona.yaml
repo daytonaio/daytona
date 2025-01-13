@@ -21,7 +21,7 @@ see_also:
     - daytona docs - Opens the Daytona documentation in your default browser.
     - daytona env - Manage server environment variables that are added to all targets and workspaces
     - daytona forward - Forward a port from a workspace to your local machine
-    - daytona git-providers - Manage Git providers
+    - daytona git-provider - Manage Git provider configs
     - daytona ide - Choose the default IDE
     - daytona info - Show workspace info
     - daytona list - List workspaces

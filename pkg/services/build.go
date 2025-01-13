@@ -13,12 +13,12 @@ import (
 )
 
 type IBuildService interface {
-	Create(ctx context.Context, createBuildDTO CreateBuildDTO) (string, error)
-	Find(ctx context.Context, filter *BuildFilter) (*BuildDTO, error)
 	List(ctx context.Context, filter *BuildFilter) ([]*BuildDTO, error)
+	Find(ctx context.Context, filter *BuildFilter) (*BuildDTO, error)
+	Create(ctx context.Context, createBuildDTO CreateBuildDTO) (string, error)
 	Delete(ctx context.Context, filter *BuildFilter, force bool) []error
-	HandleSuccessfulRemoval(ctx context.Context, id string) error
 
+	HandleSuccessfulRemoval(ctx context.Context, id string) error
 	GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error)
 	GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error)
 }

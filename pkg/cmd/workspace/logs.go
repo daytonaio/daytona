@@ -25,7 +25,7 @@ var LogsCmd = &cobra.Command{
 	Short:   "View the logs of a workspace",
 	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.TARGET_GROUP,
-	Aliases: []string{"lg", "log"},
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

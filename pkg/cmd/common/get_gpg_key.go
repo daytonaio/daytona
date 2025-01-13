@@ -17,7 +17,7 @@ func GetGitProviderGpgKey(apiClient *apiclient.APIClient, ctx context.Context, p
 
 	var gpgKey *string
 
-	gitProvider, res, err := apiClient.GitProviderAPI.GetGitProvider(ctx, *providerConfigId).Execute()
+	gitProvider, res, err := apiClient.GitProviderAPI.FindGitProvider(ctx, *providerConfigId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}

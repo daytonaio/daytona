@@ -19,18 +19,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// GetWorkspaceTemplate godoc
+// FindWorkspaceTemplate godoc
 //
 //	@Tags			workspace-template
-//	@Summary		Get workspace template data
-//	@Description	Get workspace template data
+//	@Summary		Find a workspace template
+//	@Description	Find a workspace template
 //	@Accept			json
 //	@Param			templateName	path		string	true	"Template name"
 //	@Success		200				{object}	WorkspaceTemplate
 //	@Router			/workspace-template/{templateName} [get]
 //
-//	@id				GetWorkspaceTemplate
-func GetWorkspaceTemplate(ctx *gin.Context) {
+//	@id				FindWorkspaceTemplate
+func FindWorkspaceTemplate(ctx *gin.Context) {
 	templateName := ctx.Param("templateName")
 
 	server := server.GetInstance(nil)
@@ -49,8 +49,8 @@ func GetWorkspaceTemplate(ctx *gin.Context) {
 // GetDefaultWorkspaceTemplate godoc
 //
 //	@Tags			workspace-template
-//	@Summary		Get workspace templates by git url
-//	@Description	Get workspace templates by git url
+//	@Summary		Get default workspace templates by git url
+//	@Description	Get default workspace templates by git url
 //	@Produce		json
 //	@Param			gitUrl	path		string	true	"Git URL"
 //	@Success		200		{object}	WorkspaceTemplate
@@ -68,7 +68,7 @@ func GetDefaultWorkspaceTemplate(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	workspaceTemplates, err := server.WorkspaceTemplateService.Find(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
+	workspaceTemplate, err := server.WorkspaceTemplateService.Find(ctx.Request.Context(), &stores.WorkspaceTemplateFilter{
 		Url:     &decodedURLParam,
 		Default: util.Pointer(true),
 	})
@@ -84,7 +84,7 @@ func GetDefaultWorkspaceTemplate(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, workspaceTemplates)
+	ctx.JSON(200, workspaceTemplate)
 }
 
 // ListWorkspaceTemplates godoc
@@ -109,7 +109,7 @@ func ListWorkspaceTemplates(ctx *gin.Context) {
 	ctx.JSON(200, workspaceTemplates)
 }
 
-// SetWorkspaceTemplate godoc
+// SaveWorkspaceTemplate godoc
 //
 //	@Tags			workspace-template
 //	@Summary		Set workspace template data
@@ -119,8 +119,8 @@ func ListWorkspaceTemplates(ctx *gin.Context) {
 //	@Success		201
 //	@Router			/workspace-template [put]
 //
-//	@id				SetWorkspaceTemplate
-func SetWorkspaceTemplate(ctx *gin.Context) {
+//	@id				SaveWorkspaceTemplate
+func SaveWorkspaceTemplate(ctx *gin.Context) {
 	var req services.CreateWorkspaceTemplateDTO
 	err := ctx.BindJSON(&req)
 	if err != nil {
