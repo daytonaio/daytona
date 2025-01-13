@@ -9,7 +9,7 @@ daytona code [WORKSPACE] [PROJECT] [flags]
 ### Options
 
 ```
-  -i, --ide string   Specify the IDE (vscode, code-insiders, browser, cursor, codium, ssh, jupyter, fleet, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -i, --ide string   Specify the IDE (vscode, code-insiders, browser, cursor, codium, ssh, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
   -y, --yes          Automatically confirm any prompts
 ```
 
