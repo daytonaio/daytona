@@ -218,9 +218,6 @@ var CreateCmd = &cobra.Command{
 			}
 		}
 
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
 		gpgKey, err := cmd_common.GetGitProviderGpgKey(apiClient, ctx, createWorkspaceDtos[0].GitProviderConfigId)
 		if err != nil {
 			log.Warn(err)
