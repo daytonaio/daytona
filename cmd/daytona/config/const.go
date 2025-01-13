@@ -32,6 +32,7 @@ func GetIdeList() []Ide {
 		{"ssh", "Terminal SSH"},
 		{"jupyter", "Jupyter"},
 		{"fleet", "Fleet"},
+		{"positron", "Positron"},
 		{"zed", "Zed"},
 		{"windsurf", "Windsurf"},
 	}
