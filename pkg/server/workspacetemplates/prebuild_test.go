@@ -111,8 +111,10 @@ func (s *WorkspaceTemplateServiceTestSuite) TestDeletePrebuild() {
 
 	require := s.Require()
 
-	s.buildService.On("MarkForDeletion", &stores.BuildFilter{
-		PrebuildIds: &[]string{prebuild2.Id},
+	s.buildService.On("Delete", &services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			PrebuildIds: &[]string{prebuild2.Id},
+		},
 	}, false).Return([]error{})
 
 	err := s.workspaceTemplateService.DeletePrebuild(context.TODO(), workspaceTemplate1.Name, prebuild2.Id, false)
@@ -142,13 +144,17 @@ func (s *WorkspaceTemplateServiceTestSuite) TestProcessGitEventCommitInterval() 
 		EnvVars:               workspaceTemplate1.EnvVars,
 	}).Return("", nil)
 
-	s.buildService.On("Find", &stores.BuildFilter{
-		PrebuildIds: &[]string{prebuild1.Id},
-		GetNewest:   util.Pointer(true),
-	}).Return(&models.Build{
-		Id:         "1",
-		PrebuildId: &prebuild1.Id,
-		Repository: repository1,
+	s.buildService.On("Find", &services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			PrebuildIds: &[]string{prebuild1.Id},
+			GetNewest:   util.Pointer(true),
+		},
+	}).Return(&services.BuildDTO{
+		Build: models.Build{
+			Id:         "1",
+			PrebuildId: &prebuild1.Id,
+			Repository: repository1,
+		},
 	}, nil)
 
 	data := gitprovider.GitEventData{
@@ -199,31 +205,41 @@ func (s *WorkspaceTemplateServiceTestSuite) TestEnforceRetentionPolicy() {
 
 	s.buildService.On("List", &services.BuildFilter{
 		StateNames: &[]models.ResourceStateName{models.ResourceStateNameRunSuccessful},
-	}).Return([]*models.Build{
+	}).Return([]*services.BuildDTO{
 		{
-			Id:         "1",
-			PrebuildId: util.Pointer("1"),
-			CreatedAt:  time.Now().Add(time.Hour * -4),
+			Build: models.Build{
+				Id:         "1",
+				PrebuildId: util.Pointer("1"),
+				CreatedAt:  time.Now().Add(time.Hour * -4),
+			},
 		},
 		{
-			Id:         "2",
-			PrebuildId: util.Pointer("1"),
-			CreatedAt:  time.Now().Add(time.Hour * -3),
+			Build: models.Build{
+				Id:         "2",
+				PrebuildId: util.Pointer("1"),
+				CreatedAt:  time.Now().Add(time.Hour * -3),
+			},
 		},
 		{
-			Id:         "3",
-			PrebuildId: util.Pointer("1"),
-			CreatedAt:  time.Now().Add(time.Hour * -2),
+			Build: models.Build{
+				Id:         "3",
+				PrebuildId: util.Pointer("1"),
+				CreatedAt:  time.Now().Add(time.Hour * -2),
+			},
 		},
 		{
-			Id:         "4",
-			PrebuildId: util.Pointer("1"),
-			CreatedAt:  time.Now().Add(time.Hour * -1),
+			Build: models.Build{
+				Id:         "4",
+				PrebuildId: util.Pointer("1"),
+				CreatedAt:  time.Now().Add(time.Hour * -1),
+			},
 		},
 	}, nil)
 
-	s.buildService.On("MarkForDeletion", &stores.BuildFilter{
-		Id: util.Pointer("1"),
+	s.buildService.On("Delete", &services.BuildFilter{
+		StoreFilter: stores.BuildFilter{
+			Id: util.Pointer("1"),
+		},
 	}, false).Return([]error{})
 
 	err := s.workspaceTemplateService.EnforceRetentionPolicy(context.TODO())
