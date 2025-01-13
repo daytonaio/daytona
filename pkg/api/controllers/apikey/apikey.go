@@ -58,18 +58,14 @@ func RevokeApiKey(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
-	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to get current api key name: %w", err))
-		return
-	}
+	currentApiKeyName, _ := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
 
 	if currentApiKeyName == apiKeyName {
 		ctx.AbortWithError(http.StatusForbidden, fmt.Errorf("cannot revoke current api key"))
 		return
 	}
 
-	err = server.ApiKeyService.Revoke(ctx.Request.Context(), apiKeyName)
+	err := server.ApiKeyService.Revoke(ctx.Request.Context(), apiKeyName)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to revoke api key: %w", err))
 		return
