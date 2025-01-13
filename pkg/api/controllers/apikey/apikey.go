@@ -28,11 +28,7 @@ import (
 func ListClientApiKeys(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
-	if err != nil {
-		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to get current api key name: %w", err))
-		return
-	}
+	currentApiKeyName, _ := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
 
 	response, err := server.ApiKeyService.ListClientKeys(ctx.Request.Context())
 	if err != nil {
