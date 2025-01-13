@@ -147,7 +147,7 @@ func (s *WorkspaceTemplateServiceTestSuite) TestProcessGitEventCommitInterval() 
 		GetNewest:   util.Pointer(true),
 	}).Return(&models.Build{
 		Id:         "1",
-		PrebuildId: prebuild1.Id,
+		PrebuildId: &prebuild1.Id,
 		Repository: repository1,
 	}, nil)
 
@@ -202,22 +202,22 @@ func (s *WorkspaceTemplateServiceTestSuite) TestEnforceRetentionPolicy() {
 	}).Return([]*models.Build{
 		{
 			Id:         "1",
-			PrebuildId: "1",
+			PrebuildId: util.Pointer("1"),
 			CreatedAt:  time.Now().Add(time.Hour * -4),
 		},
 		{
 			Id:         "2",
-			PrebuildId: "1",
+			PrebuildId: util.Pointer("1"),
 			CreatedAt:  time.Now().Add(time.Hour * -3),
 		},
 		{
 			Id:         "3",
-			PrebuildId: "1",
+			PrebuildId: util.Pointer("1"),
 			CreatedAt:  time.Now().Add(time.Hour * -2),
 		},
 		{
 			Id:         "4",
-			PrebuildId: "1",
+			PrebuildId: util.Pointer("1"),
 			CreatedAt:  time.Now().Add(time.Hour * -1),
 		},
 	}, nil)
