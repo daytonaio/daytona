@@ -32,7 +32,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ApiKey"
+                                "$ref": "#/definitions/ApiKeyViewDTO"
                             }
                         }
                     }
@@ -3555,19 +3555,18 @@ const docTemplate = `{
                 }
             }
         },
-        "ApiKey": {
+        "ApiKeyViewDTO": {
             "type": "object",
             "required": [
-                "keyHash",
+                "current",
                 "name",
                 "type"
             ],
             "properties": {
-                "keyHash": {
-                    "type": "string"
+                "current": {
+                    "type": "boolean"
                 },
                 "name": {
-                    "description": "Workspace or client name",
                     "type": "string"
                 },
                 "type": {

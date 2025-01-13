@@ -13,17 +13,16 @@ definitions:
     - options
     - providerInfo
     type: object
-  ApiKey:
+  ApiKeyViewDTO:
     properties:
-      keyHash:
-        type: string
+      current:
+        type: boolean
       name:
-        description: Workspace or client name
         type: string
       type:
         $ref: '#/definitions/models.ApiKeyType'
     required:
-    - keyHash
+    - current
     - name
     - type
     type: object
@@ -1569,7 +1568,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/ApiKey'
+              $ref: '#/definitions/ApiKeyViewDTO'
             type: array
       summary: List API keys
       tags:

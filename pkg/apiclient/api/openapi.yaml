@@ -19,7 +19,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ApiKey'
+                  $ref: '#/components/schemas/ApiKeyViewDTO'
                 type: array
           description: OK
       summary: List API keys
@@ -2615,21 +2615,20 @@ components:
       - options
       - providerInfo
       type: object
-    ApiKey:
+    ApiKeyViewDTO:
       example:
-        keyHash: keyHash
+        current: true
         name: name
         type: null
       properties:
-        keyHash:
-          type: string
+        current:
+          type: boolean
         name:
-          description: Workspace or client name
           type: string
         type:
           $ref: '#/components/schemas/models.ApiKeyType'
       required:
-      - keyHash
+      - current
       - name
       - type
       type: object
