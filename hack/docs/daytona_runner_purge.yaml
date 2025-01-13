@@ -5,7 +5,7 @@ options:
     - name: "yes"
       shorthand: "y"
       default_value: "false"
-      usage: Execute Daytona Runner purge without prompt
+      usage: Execute Daytona Runner purge without a prompt
 inherited_options:
     - name: help
       default_value: "false"

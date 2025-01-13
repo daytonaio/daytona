@@ -14,13 +14,7 @@ import (
 
 func RunnerAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		bearerToken := ctx.GetHeader("Authorization")
-		if bearerToken == "" {
-			ctx.AbortWithError(401, errors.New("unauthorized"))
-			return
-		}
-
-		token := util.ExtractToken(bearerToken)
+		token := util.ExtractToken(ctx)
 		if token == "" {
 			ctx.AbortWithError(401, errors.New("unauthorized"))
 			return

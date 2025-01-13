@@ -4,13 +4,14 @@
 package apikey
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
+	internal_util "github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api/controllers/apikey/dto"
 	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,22 +26,9 @@ import (
 //
 //	@id				ListClientApiKeys
 func ListClientApiKeys(ctx *gin.Context) {
-
-	bearerToken := ctx.GetHeader("Authorization")
-	if bearerToken == "" {
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
-	token := util.ExtractToken(bearerToken)
-	if token == "" {
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
 	server := server.GetInstance(nil)
 
-	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), token)
+	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to get current api key name: %w", err))
 		return
@@ -52,19 +40,9 @@ func ListClientApiKeys(ctx *gin.Context) {
 		return
 	}
 
-	var result []dto.ApiKeyViewDTO
-	for _, key := range response {
-		viewKey := dto.ApiKeyViewDTO{
-			Type: key.Type,
-			Name: key.Name,
-		}
-
-		if viewKey.Name == currentApiKeyName {
-			viewKey.Current = true
-		}
-
-		result = append(result, viewKey)
-	}
+	result := internal_util.ArrayMap(response, func(key *services.ApiKeyDTO) dto.ApiKeyViewDTO {
+		return dto.ApiKeyViewDTO{Name: key.Name, Type: key.Type, Current: key.Name == currentApiKeyName}
+	})
 
 	ctx.JSON(200, result)
 }
@@ -82,21 +60,9 @@ func ListClientApiKeys(ctx *gin.Context) {
 func RevokeApiKey(ctx *gin.Context) {
 	apiKeyName := ctx.Param("apiKeyName")
 
-	bearerToken := ctx.GetHeader("Authorization")
-	if bearerToken == "" {
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
-	token := util.ExtractToken(bearerToken)
-	if token == "" {
-		ctx.AbortWithError(http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
 	server := server.GetInstance(nil)
 
-	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), token)
+	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
 	if err != nil {
 		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to get current api key name: %w", err))
 		return

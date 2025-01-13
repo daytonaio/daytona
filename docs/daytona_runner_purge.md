@@ -9,7 +9,7 @@ daytona runner purge [flags]
 ### Options
 
 ```
-  -y, --yes   Execute Daytona Runner purge without prompt
+  -y, --yes   Execute Daytona Runner purge without a prompt
 ```
 
 ### Options inherited from parent commands

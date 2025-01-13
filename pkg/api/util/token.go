@@ -3,9 +3,18 @@
 
 package util
 
-import "strings"
+import (
+	"strings"
 
-func ExtractToken(bearerToken string) string {
+	"github.com/gin-gonic/gin"
+)
+
+func ExtractToken(ctx *gin.Context) string {
+	bearerToken := ctx.GetHeader("Authorization")
+	if bearerToken == "" {
+		return ""
+	}
+
 	if !strings.HasPrefix(bearerToken, "Bearer ") {
 		return ""
 	}
