@@ -12,6 +12,7 @@ var TargetConfigCmd = &cobra.Command{
 	Use:     "target-config",
 	Aliases: []string{"tc"},
 	Short:   "Manage target configs",
+	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
 }
 

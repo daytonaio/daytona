@@ -16,7 +16,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
@@ -189,7 +188,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		var tsConn *tsnet.Server
-		if !IsLocalDockerTarget(target) || activeProfile.Id != "default" {
+		if !common.IsLocalDockerTarget(target.TargetConfig.ProviderInfo.Name, target.TargetConfig.Options, target.TargetConfig.ProviderInfo.RunnerId) || activeProfile.Id != "default" {
 			tsConn, err = tailscale.GetConnection(&activeProfile)
 			if err != nil {
 				return err
@@ -219,9 +218,6 @@ var CreateCmd = &cobra.Command{
 			}
 		}
 
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
 		gpgKey, err := cmd_common.GetGitProviderGpgKey(apiClient, ctx, createWorkspaceDtos[0].GitProviderConfigId)
 		if err != nil {
 			log.Warn(err)
@@ -317,7 +313,7 @@ func init() {
 }
 
 func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile *config.Profile, tsConn *tsnet.Server, gpgKey *string) error {
-	if IsLocalDockerTarget(target) && (activeProfile != nil && activeProfile.Id == "default") {
+	if common.IsLocalDockerTarget(target.TargetConfig.ProviderInfo.Name, target.TargetConfig.Options, target.TargetConfig.ProviderInfo.RunnerId) && (activeProfile != nil && activeProfile.Id == "default") {
 		err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 		if err != nil {
 			return err
@@ -369,12 +365,4 @@ func waitForDial(target *apiclient.TargetDTO, workspaceId string, activeProfile 
 		})
 		return err
 	}
-}
-
-func IsLocalDockerTarget(target *apiclient.TargetDTO) bool {
-	if target.TargetConfig.ProviderInfo.Name != "docker-provider" {
-		return false
-	}
-
-	return !strings.Contains(target.TargetConfig.Options, "Remote Hostname") && target.TargetConfig.ProviderInfo.RunnerId == bootstrap.LOCAL_RUNNER_ID
 }

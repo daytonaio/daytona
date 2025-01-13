@@ -13,23 +13,27 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
 type GitProviderServiceConfig struct {
 	ConfigStore stores.GitProviderConfigStore
 
 	DetachWorkspaceTemplates func(ctx context.Context, gitProviderConfigId string) error
+	TrackTelemetryEvent      func(event telemetry.Event, clientId string) error
 }
 
 type GitProviderService struct {
 	configStore              stores.GitProviderConfigStore
 	detachWorkspaceTemplates func(ctx context.Context, gitProviderConfigId string) error
+	trackTelemetryEvent      func(event telemetry.Event, clientId string) error
 }
 
 func NewGitProviderService(config GitProviderServiceConfig) services.IGitProviderService {
 	return &GitProviderService{
 		configStore:              config.ConfigStore,
 		detachWorkspaceTemplates: config.DetachWorkspaceTemplates,
+		trackTelemetryEvent:      config.TrackTelemetryEvent,
 	}
 }
 

@@ -99,15 +99,14 @@ func (s *TargetService) handleCreateError(ctx context.Context, target *models.Ta
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
-	event := telemetry.ServerEventTargetCreated
+	eventName := telemetry.TargetEventLifecycleCreated
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventTargetCreateError
+		eventName = telemetry.TargetEventLifecycleCreationFailed
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	event := telemetry.NewTargetEvent(eventName, target, err, nil)
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
-		log.Trace(err)
+		log.Trace(telemetryError)
 	}
 
 	return target, err

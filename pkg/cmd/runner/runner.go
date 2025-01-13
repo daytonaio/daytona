@@ -11,6 +11,7 @@ import (
 var RunnerCmd = &cobra.Command{
 	Use:     "runner",
 	Short:   "Manage the runner",
+	Args:    cobra.NoArgs,
 	GroupID: util.RUNNER_GROUP,
 }
 

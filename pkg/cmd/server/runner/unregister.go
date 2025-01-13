@@ -11,7 +11,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	runner "github.com/daytonaio/daytona/pkg/views/server/runner/selection"
@@ -69,7 +68,7 @@ var unregisterCmd = &cobra.Command{
 			selectedRunnerId = args[0]
 		}
 
-		if selectedRunnerId == bootstrap.LOCAL_RUNNER_ID {
+		if selectedRunnerId == common.LOCAL_RUNNER_ID {
 			return errors.New("to disable the local runner, use the 'daytona server configure' form")
 		}
 

@@ -6,6 +6,11 @@ options:
       usage: Runner API Key
     - name: api-url
       usage: Daytona Server API URL
+    - name: client-id
+      usage: Client ID
+    - name: disable-telemetry
+      default_value: "false"
+      usage: Disable telemetry
     - name: id
       usage: Runner ID
     - name: name

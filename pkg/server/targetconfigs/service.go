@@ -9,20 +9,26 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/pkg/stringid"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type TargetConfigServiceConfig struct {
-	TargetConfigStore stores.TargetConfigStore
+	TargetConfigStore   stores.TargetConfigStore
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 type TargetConfigService struct {
-	targetConfigStore stores.TargetConfigStore
+	targetConfigStore   stores.TargetConfigStore
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 func NewTargetConfigService(config TargetConfigServiceConfig) services.ITargetConfigService {
 	return &TargetConfigService{
-		targetConfigStore: config.TargetConfigStore,
+		targetConfigStore:   config.TargetConfigStore,
+		trackTelemetryEvent: config.TrackTelemetryEvent,
 	}
 }
 
@@ -51,10 +57,10 @@ func (s *TargetConfigService) Find(ctx context.Context, idOrName string) (*model
 func (s *TargetConfigService) Add(ctx context.Context, addTargetConfig services.AddTargetConfigDTO) (*models.TargetConfig, error) {
 	persistedTargetConfig, err := s.targetConfigStore.Find(ctx, addTargetConfig.Name, false)
 	if err != nil && !stores.IsTargetConfigNotFound(err) {
-		return nil, err
+		return nil, s.handleCreateError(ctx, nil, err)
 	}
 	if persistedTargetConfig != nil && !persistedTargetConfig.Deleted {
-		return nil, stores.ErrTargetConfigAlreadyExists
+		return nil, s.handleCreateError(ctx, nil, stores.ErrTargetConfigAlreadyExists)
 	}
 
 	targetConfig := &models.TargetConfig{
@@ -65,15 +71,59 @@ func (s *TargetConfigService) Add(ctx context.Context, addTargetConfig services.
 		Deleted:      false,
 	}
 
-	return targetConfig, s.targetConfigStore.Save(ctx, targetConfig)
+	err = s.targetConfigStore.Save(ctx, targetConfig)
+	return targetConfig, s.handleCreateError(ctx, targetConfig, err)
 }
 
 func (s *TargetConfigService) Delete(ctx context.Context, targetConfigId string) error {
 	targetConfig, err := s.targetConfigStore.Find(ctx, targetConfigId, false)
 	if err != nil {
-		return err
+		return s.handleDeleteError(ctx, nil, err)
 	}
 	targetConfig.Deleted = true
 
-	return s.targetConfigStore.Save(ctx, targetConfig)
+	err = s.targetConfigStore.Save(ctx, targetConfig)
+	return s.handleDeleteError(ctx, targetConfig, err)
+}
+
+func (s *TargetConfigService) handleCreateError(ctx context.Context, tc *models.TargetConfig, err error) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.TargetConfigEventLifecycleCreated
+	if err != nil {
+		eventName = telemetry.TargetConfigEventLifecycleCreationFailed
+	}
+	event := telemetry.NewTargetConfigEvent(eventName, tc, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
+}
+
+func (s *TargetConfigService) handleDeleteError(ctx context.Context, tc *models.TargetConfig, err error) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.TargetConfigEventLifecycleDeleted
+	if err != nil {
+		eventName = telemetry.TargetConfigEventLifecycleDeletionFailed
+	}
+	event := telemetry.NewTargetConfigEvent(eventName, tc, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }

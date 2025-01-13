@@ -17,7 +17,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	ssh_config "github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -66,7 +65,7 @@ var SshProxyCmd = &cobra.Command{
 			}
 		}
 
-		if ws != nil && create.IsLocalDockerTarget(target) && profile.Id == "default" {
+		if ws != nil && common.IsLocalDockerTarget(target.TargetConfig.ProviderInfo.Name, target.TargetConfig.Options, target.TargetConfig.ProviderInfo.RunnerId) && profile.Id == "default" {
 			// If the target is local, we directly access the ssh port through the container
 
 			cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())

@@ -63,21 +63,21 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 	var err error
 	ctx, err = s.workspaceStore.BeginTransaction(ctx)
 	if err != nil {
-		return s.handleRemoveError(ctx, nil, err)
+		return s.handleForceRemoveError(ctx, nil, err)
 	}
 
 	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
 
 	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
-		return s.handleRemoveError(ctx, w, stores.ErrWorkspaceNotFound)
+		return s.handleForceRemoveError(ctx, w, stores.ErrWorkspaceNotFound)
 	}
 
 	w.Name = util.AddDeletedToName(w.Name)
 
 	err = s.workspaceStore.Save(ctx, w)
 	if err != nil {
-		return s.handleRemoveError(ctx, w, err)
+		return s.handleForceRemoveError(ctx, w, err)
 	}
 
 	err = s.revokeApiKey(ctx, workspaceId)
@@ -100,11 +100,11 @@ func (s *WorkspaceService) ForceRemoveWorkspace(ctx context.Context, workspaceId
 
 	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionForceDelete)
 	if err != nil {
-		return s.handleRemoveError(ctx, w, err)
+		return s.handleForceRemoveError(ctx, w, err)
 	}
 
 	err = s.workspaceStore.CommitTransaction(ctx)
-	return s.handleRemoveError(ctx, w, err)
+	return s.handleForceRemoveError(ctx, w, err)
 }
 
 func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Workspace, err error) error {
@@ -118,15 +118,40 @@ func (s *WorkspaceService) handleRemoveError(ctx context.Context, w *models.Work
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w)
-	event := telemetry.ServerEventWorkspaceDestroyed
+	eventName := telemetry.WorkspaceEventLifecycleDeleted
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventWorkspaceDestroyError
+		eventName = telemetry.WorkspaceEventLifecycleDeletionFailed
 	}
-	telemetryError := s.trackTelemetryEvent(event, clientId, telemetryProps)
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
-		log.Trace(err)
+		log.Trace(telemetryError)
+	}
+
+	return err
+}
+
+func (s *WorkspaceService) handleForceRemoveError(ctx context.Context, w *models.Workspace, err error) error {
+	if err != nil {
+		err = s.workspaceStore.RollbackTransaction(ctx, err)
+	}
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.WorkspaceEventLifecycleForceDeleted
+	if err != nil {
+		eventName = telemetry.WorkspaceEventLifecycleForceDeletionFailed
+	}
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
 	}
 
 	return err

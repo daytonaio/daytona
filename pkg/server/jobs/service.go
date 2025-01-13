@@ -11,20 +11,26 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/docker/docker/pkg/stringid"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type JobServiceConfig struct {
-	JobStore stores.JobStore
+	JobStore            stores.JobStore
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 type JobService struct {
-	jobStore stores.JobStore
+	jobStore            stores.JobStore
+	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
 func NewJobService(config JobServiceConfig) services.IJobService {
 	return &JobService{
-		jobStore: config.JobStore,
+		jobStore:            config.JobStore,
+		trackTelemetryEvent: config.TrackTelemetryEvent,
 	}
 }
 
@@ -39,11 +45,11 @@ func (s *JobService) Find(ctx context.Context, filter *stores.JobFilter) (*model
 func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 	validAction, ok := validResourceActions[j.ResourceType]
 	if !ok {
-		return services.ErrInvalidResourceJobAction
+		return s.handleCreateError(ctx, j, services.ErrInvalidResourceJobAction)
 	}
 
 	if !slices.Contains(validAction, j.Action) {
-		return services.ErrInvalidResourceJobAction
+		return s.handleCreateError(ctx, j, services.ErrInvalidResourceJobAction)
 	}
 
 	pendingJobs, err := s.List(ctx, &stores.JobFilter{
@@ -52,11 +58,11 @@ func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 		States:       &[]models.JobState{models.JobStatePending, models.JobStateRunning},
 	})
 	if err != nil {
-		return err
+		return s.handleCreateError(ctx, j, err)
 	}
 
 	if len(pendingJobs) > 0 {
-		return stores.ErrJobInProgress
+		return s.handleCreateError(ctx, j, stores.ErrJobInProgress)
 	}
 
 	if j.Id == "" {
@@ -64,7 +70,9 @@ func (s *JobService) Create(ctx context.Context, j *models.Job) error {
 		id = stringid.TruncateID(id)
 		j.Id = id
 	}
-	return s.jobStore.Save(ctx, j)
+
+	err = s.jobStore.Save(ctx, j)
+	return s.handleCreateError(ctx, j, err)
 }
 
 func (s *JobService) SetState(ctx context.Context, jobId string, updateJobStateDto services.UpdateJobStateDTO) error {
@@ -87,6 +95,27 @@ func (s *JobService) SetState(ctx context.Context, jobId string, updateJobStateD
 
 func (s *JobService) Delete(ctx context.Context, j *models.Job) error {
 	return s.jobStore.Delete(ctx, j)
+}
+
+func (s *JobService) handleCreateError(ctx context.Context, j *models.Job, err error) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.JobEventLifecycleCreated
+	if err != nil {
+		eventName = telemetry.JobEventLifecycleCreationFailed
+	}
+	event := telemetry.NewJobEvent(eventName, j, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }
 
 var validResourceActions = map[models.ResourceType][]models.JobAction{

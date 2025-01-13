@@ -34,13 +34,13 @@ func (s *TargetService) handleStopError(ctx context.Context, target *models.Targ
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewTargetEventProps(ctx, target)
-	event := telemetry.ServerEventTargetStopped
+	eventName := telemetry.TargetEventLifecycleStopped
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventTargetStopError
+		eventName = telemetry.TargetEventLifecycleStopFailed
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	event := telemetry.NewTargetEvent(eventName, target, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}

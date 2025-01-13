@@ -11,6 +11,7 @@ import (
 var ProfileCmd = &cobra.Command{
 	Use:     "profile",
 	Short:   "Manage profiles",
+	Args:    cobra.NoArgs,
 	GroupID: util.PROFILE_GROUP,
 }
 
