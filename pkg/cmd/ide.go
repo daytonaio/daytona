@@ -56,6 +56,11 @@ var ideCmd = &cobra.Command{
 			if err != nil {
 				log.Error(err)
 			}
+		case "codium-insiders":
+			_, err := ide_util.GetCodiumInsidersBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		case "cursor":
 			_, err := ide_util.GetCursorBinaryPath()
 			if err != nil {
