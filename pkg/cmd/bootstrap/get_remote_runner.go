@@ -179,7 +179,7 @@ func GetRemoteRunner(params RemoteRunnerParams) (runner.IRunner, error) {
 				runnerMetadata.RunningJobs = util.Pointer(int32(*metadata.RunningJobs))
 			}
 
-			_, err := params.ApiClient.RunnerAPI.SetRunnerMetadata(ctx, runnerId).RunnerMetadata(runnerMetadata).Execute()
+			_, err := params.ApiClient.RunnerAPI.UpdateRunnerMetadata(ctx, runnerId).RunnerMetadata(runnerMetadata).Execute()
 			return err
 		},
 		WorkspaceJobFactory: workspaceJobFactory,
@@ -205,7 +205,7 @@ func getRemoteProviderManager(params RemoteRunnerParams, logger *log.Logger) pro
 		ServerUrl:          headscaleUrl,
 		BaseDir:            params.RunnerConfig.ProvidersDir,
 		CreateProviderNetworkKey: func(ctx context.Context, providerName string) (string, error) {
-			key, _, err := params.ApiClient.ServerAPI.GenerateNetworkKey(ctx).Execute()
+			key, _, err := params.ApiClient.ServerAPI.CreateNetworkKey(ctx).Execute()
 			if err != nil {
 				return "", err
 			}
@@ -248,7 +248,7 @@ func getRemoteProviderManager(params RemoteRunnerParams, logger *log.Logger) pro
 				return errors.New("invalid provider info")
 			}
 
-			_, _, err = params.ApiClient.TargetConfigAPI.AddTargetConfig(ctx).TargetConfig(apiclient.AddTargetConfigDTO{
+			_, _, err = params.ApiClient.TargetConfigAPI.CreateTargetConfig(ctx).TargetConfig(apiclient.CreateTargetConfigDTO{
 				Name:         fmt.Sprintf("%s-runner-%s", name, params.RunnerConfig.Id),
 				Options:      options,
 				ProviderInfo: *providerInfoDto,
@@ -269,14 +269,14 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 
 	return workspace.NewWorkspaceJobFactory(workspace.WorkspaceJobFactoryConfig{
 		FindWorkspace: func(ctx context.Context, workspaceId string) (*models.Workspace, error) {
-			workspaceDto, _, err := params.ApiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+			workspaceDto, _, err := params.ApiClient.WorkspaceAPI.FindWorkspace(ctx, workspaceId).Execute()
 			if err != nil {
 				return nil, err
 			}
 			return conversion.Convert[apiclient.WorkspaceDTO, models.Workspace](workspaceDto)
 		},
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).ShowOptions(true).Execute()
+			targetDto, _, err := params.ApiClient.TargetAPI.FindTarget(ctx, targetId).ShowOptions(true).Execute()
 			if err != nil {
 				return nil, err
 			}
@@ -289,7 +289,7 @@ func getRemoteWorkspaceJobFactory(params RemoteJobFactoryParams) (workspace.IWor
 			return err
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			gp, _, err := params.ApiClient.GitProviderAPI.GetGitProvider(ctx, id).Execute()
+			gp, _, err := params.ApiClient.GitProviderAPI.FindGitProvider(ctx, id).Execute()
 			if err != nil {
 				return nil, err
 			}
@@ -328,7 +328,7 @@ func getRemoteTargetJobFactory(params RemoteJobFactoryParams) (target.ITargetJob
 
 	return target.NewTargetJobFactory(target.TargetJobFactoryConfig{
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			targetDto, _, err := params.ApiClient.TargetAPI.GetTarget(ctx, targetId).ShowOptions(true).Execute()
+			targetDto, _, err := params.ApiClient.TargetAPI.FindTarget(ctx, targetId).ShowOptions(true).Execute()
 			if err != nil {
 				return nil, err
 			}
@@ -408,7 +408,7 @@ func getRemoteBuildJobFactory(params RemoteJobFactoryParams) (jobs_build.IBuildJ
 
 	return jobs_build.NewBuildJobFactory(jobs_build.BuildJobFactoryConfig{
 		FindBuild: func(ctx context.Context, buildId string) (*services.BuildDTO, error) {
-			build, _, err := params.ApiClient.BuildAPI.GetBuild(ctx, buildId).Execute()
+			build, _, err := params.ApiClient.BuildAPI.FindBuild(ctx, buildId).Execute()
 			if err != nil {
 				return nil, err
 			}

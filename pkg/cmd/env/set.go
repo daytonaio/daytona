@@ -17,9 +17,8 @@ import (
 )
 
 var setCmd = &cobra.Command{
-	Use:     "set [KEY=VALUE]...",
-	Short:   "Set server environment variables",
-	Aliases: []string{"s", "add", "new"},
+	Use:   "set [KEY=VALUE]...",
+	Short: "Set server environment variables",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		envVarsMap := make(map[string]string)
 
@@ -46,7 +45,7 @@ var setCmd = &cobra.Command{
 		}
 
 		for key, value := range envVarsMap {
-			res, err := apiClient.EnvVarAPI.SetEnvironmentVariable(ctx).EnvironmentVariable(apiclient.EnvironmentVariable{
+			res, err := apiClient.EnvVarAPI.SaveEnvironmentVariable(ctx).EnvironmentVariable(apiclient.EnvironmentVariable{
 				Key:   key,
 				Value: value,
 			}).Execute()

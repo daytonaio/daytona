@@ -79,11 +79,11 @@ func TestTargetService(t *testing.T) {
 		FindTargetConfig: func(ctx context.Context, name string) (*models.TargetConfig, error) {
 			return targetConfigStore.Find(ctx, name, false)
 		},
-		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(models.ApiKeyTypeTarget, name)
+		CreateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Create(models.ApiKeyTypeTarget, name)
 		},
-		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(name)
+		DeleteApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Delete(name)
 		},
 		ServerApiUrl:  serverApiUrl,
 		ServerUrl:     serverUrl,
@@ -104,7 +104,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {
-		apiKeyService.On("Generate", models.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
+		apiKeyService.On("Create", models.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
 
 		target, err := service.CreateTarget(ctx, createTargetDTO)
 
@@ -123,8 +123,8 @@ func TestTargetService(t *testing.T) {
 		require.Equal(t, services.ErrTargetAlreadyExists, err)
 	})
 
-	t.Run("GetTarget", func(t *testing.T) {
-		target, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+	t.Run("FindTarget", func(t *testing.T) {
+		target, err := service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -132,8 +132,8 @@ func TestTargetService(t *testing.T) {
 		targetDtoEquals(t, createTargetDTO, *target)
 	})
 
-	t.Run("GetTarget fails when target not found", func(t *testing.T) {
-		_, err := service.GetTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{})
+	t.Run("FindTarget fails when target not found", func(t *testing.T) {
+		_, err := service.FindTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{})
 		require.NotNil(t, err)
 		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
@@ -169,38 +169,38 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("SetTargetMetadata", func(t *testing.T) {
+	t.Run("UpdateTargetMetadata", func(t *testing.T) {
 		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
-		_, err = service.SetTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
+		_, err = service.UpdateTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
 			Uptime: 10,
 		})
 		require.Nil(t, err)
 	})
 
-	t.Run("RemoveTarget", func(t *testing.T) {
-		apiKeyService.On("Revoke", mock.Anything).Return(nil)
+	t.Run("DeleteTarget", func(t *testing.T) {
+		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err := service.RemoveTarget(ctx, createTargetDTO.Id)
+		err := service.DeleteTarget(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+		_, err = service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 
-	t.Run("ForceRemoveTarget", func(t *testing.T) {
+	t.Run("ForceDeleteTarget", func(t *testing.T) {
 		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
-		apiKeyService.On("Revoke", mock.Anything).Return(nil)
+		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err = service.ForceRemoveTarget(ctx, createTargetDTO.Id)
+		err = service.ForceDeleteTarget(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+		_, err = service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 

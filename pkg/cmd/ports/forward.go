@@ -18,6 +18,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/frpc"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -35,6 +36,7 @@ var PortForwardCmd = &cobra.Command{
 	Short:   "Forward a port from a workspace to your local machine",
 	GroupID: util.TARGET_GROUP,
 	Args:    cobra.RangeArgs(1, 2),
+	Aliases: common.GetAliases("forward"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -60,7 +62,7 @@ var PortForwardCmd = &cobra.Command{
 		var resp *http.Response
 
 		if len(args) == 2 {
-			workspace, resp, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, args[1]).Execute()
+			workspace, resp, err = apiClient.WorkspaceAPI.FindWorkspace(ctx, args[1]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(resp, err)
 			}

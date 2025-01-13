@@ -91,7 +91,7 @@ var StartCmd = &cobra.Command{
 				ideList = config.GetIdeList()
 				ideId = c.DefaultIdeId
 
-				ws, res, err = apiClient.WorkspaceAPI.GetWorkspace(ctx, workspace.Id).Execute()
+				ws, res, err = apiClient.WorkspaceAPI.FindWorkspace(ctx, workspace.Id).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}

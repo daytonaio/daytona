@@ -23,7 +23,7 @@ func Render(key, apiUrl string) {
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 
-	command := fmt.Sprintf("daytona profile add -a %s -k %s", apiUrl, key)
+	command := fmt.Sprintf("daytona profile create -a %s -k %s", apiUrl, key)
 	fmt.Println(lipgloss.NewStyle().Padding(0).Foreground(views.Green).Render(command))
 
 	if err := clipboard.WriteAll(command); err == nil {

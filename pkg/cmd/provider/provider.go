@@ -13,6 +13,7 @@ var ProviderCmd = &cobra.Command{
 	Short:   "Manage providers",
 	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
+	Aliases: []string{"providers"},
 }
 
 func init() {

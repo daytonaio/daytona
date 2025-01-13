@@ -47,11 +47,11 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 	})
 
 	for _, keyName := range clientKeyNames {
-		_, _ = s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeClient, keyName)
+		_, _ = s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeClient, keyName)
 	}
 
 	for _, keyName := range workspaceKeyNames {
-		_, _ = s.apiKeyService.Generate(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
+		_, _ = s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	}
 }
 

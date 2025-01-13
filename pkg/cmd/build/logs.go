@@ -9,6 +9,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -19,7 +20,7 @@ var buildLogsCmd = &cobra.Command{
 	Use:     "logs",
 	Short:   "View logs for build",
 	Args:    cobra.RangeArgs(0, 1),
-	Aliases: []string{"log"},
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -59,7 +60,7 @@ var buildLogsCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
-		_, _, err = apiClient.BuildAPI.GetBuild(ctx, buildId).Execute()
+		_, _, err = apiClient.BuildAPI.FindBuild(ctx, buildId).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(nil, err)
 		}

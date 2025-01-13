@@ -10,12 +10,13 @@ import (
 )
 
 type IApiKeyService interface {
-	Generate(ctx context.Context, keyType models.ApiKeyType, name string) (string, error)
-	GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error)
-	IsValidApiKey(ctx context.Context, apiKey string) bool
 	ListClientKeys(ctx context.Context) ([]*ApiKeyDTO, error)
-	Revoke(ctx context.Context, name string) error
+	Create(ctx context.Context, keyType models.ApiKeyType, name string) (string, error)
+	Delete(ctx context.Context, name string) error
+
+	GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error)
 	GetApiKeyName(ctx context.Context, apiKey string) (string, error)
+	IsValidApiKey(ctx context.Context, apiKey string) bool
 }
 
 type ApiKeyDTO struct {

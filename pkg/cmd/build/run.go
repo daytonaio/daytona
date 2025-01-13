@@ -10,6 +10,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/selection"
@@ -20,8 +21,8 @@ import (
 var buildRunCmd = &cobra.Command{
 	Use:     "run",
 	Short:   "Run a build from a workspace template",
-	Aliases: []string{"create"},
 	Args:    cobra.NoArgs,
+	Aliases: common.GetAliases("run"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var workspaceTemplate *apiclient.WorkspaceTemplate
 		ctx := context.Background()

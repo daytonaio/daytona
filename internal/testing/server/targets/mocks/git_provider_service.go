@@ -21,7 +21,7 @@ func NewMockGitProviderService() *MockGitProviderService {
 	return &MockGitProviderService{}
 }
 
-func (m *MockGitProviderService) GetConfig(id string) (*models.GitProviderConfig, error) {
+func (m *MockGitProviderService) FindConfig(id string) (*models.GitProviderConfig, error) {
 	args := m.Called(id)
 	return args.Get(0).(*models.GitProviderConfig), args.Error(1)
 }
@@ -76,12 +76,12 @@ func (m *MockGitProviderService) ListConfigs() ([]*models.GitProviderConfig, err
 	return args.Get(0).([]*models.GitProviderConfig), args.Error(1)
 }
 
-func (m *MockGitProviderService) RemoveGitProvider(gitProviderId string) error {
+func (m *MockGitProviderService) DeleteGitProvider(gitProviderId string) error {
 	args := m.Called(gitProviderId)
 	return args.Error(0)
 }
 
-func (m *MockGitProviderService) SetGitProviderConfig(providerConfig *models.GitProviderConfig) error {
+func (m *MockGitProviderService) SaveGitProviderConfig(providerConfig *models.GitProviderConfig) error {
 	args := m.Called(providerConfig)
 	return args.Error(0)
 }

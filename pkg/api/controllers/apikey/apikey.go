@@ -43,17 +43,17 @@ func ListClientApiKeys(ctx *gin.Context) {
 	ctx.JSON(200, result)
 }
 
-// RevokeApiKey		godoc
+// DeleteApiKey		godoc
 //
 //	@Tags			apiKey
-//	@Summary		Revoke API key
-//	@Description	Revoke API key
+//	@Summary		Delete API key
+//	@Description	Delete API key
 //	@Param			apiKeyName	path	string	true	"API key name"
 //	@Success		200
 //	@Router			/apikey/{apiKeyName} [delete]
 //
-//	@id				RevokeApiKey
-func RevokeApiKey(ctx *gin.Context) {
+//	@id				DeleteApiKey
+func DeleteApiKey(ctx *gin.Context) {
 	apiKeyName := ctx.Param("apiKeyName")
 
 	server := server.GetInstance(nil)
@@ -65,13 +65,13 @@ func RevokeApiKey(ctx *gin.Context) {
 	}
 
 	if currentApiKeyName == apiKeyName {
-		ctx.AbortWithError(http.StatusForbidden, fmt.Errorf("cannot revoke current api key"))
+		ctx.AbortWithError(http.StatusForbidden, fmt.Errorf("cannot delete current api key"))
 		return
 	}
 
-	err = server.ApiKeyService.Revoke(ctx.Request.Context(), apiKeyName)
+	err = server.ApiKeyService.Delete(ctx.Request.Context(), apiKeyName)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to revoke api key: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete api key: %w", err))
 		return
 	}
 

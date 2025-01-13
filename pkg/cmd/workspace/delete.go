@@ -27,7 +27,7 @@ var DeleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE]...",
 	Short:   "Delete a workspace",
 	GroupID: util.TARGET_GROUP,
-	Aliases: []string{"remove", "rm"},
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if allFlag {
 			if yesFlag {

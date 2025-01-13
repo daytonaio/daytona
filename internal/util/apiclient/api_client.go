@@ -151,7 +151,7 @@ func GetTarget(targetNameOrId string) (*apiclient.TargetDTO, int, error) {
 		return nil, -1, err
 	}
 
-	target, res, err := apiClient.TargetAPI.GetTarget(ctx, targetNameOrId).Execute()
+	target, res, err := apiClient.TargetAPI.FindTarget(ctx, targetNameOrId).Execute()
 	if err != nil {
 		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
@@ -167,7 +167,7 @@ func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, int, error
 		return nil, -1, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.FindWorkspace(ctx, workspaceNameOrId).Execute()
 	if err != nil {
 		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}

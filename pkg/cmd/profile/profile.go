@@ -13,6 +13,7 @@ var ProfileCmd = &cobra.Command{
 	Short:   "Manage profiles",
 	Args:    cobra.NoArgs,
 	GroupID: util.PROFILE_GROUP,
+	Aliases: []string{"profiles"},
 }
 
 func init() {
@@ -20,6 +21,6 @@ func init() {
 	ProfileCmd.AddCommand(profileListCmd)
 	ProfileCmd.AddCommand(ProfileUseCmd)
 	ProfileCmd.AddCommand(ProfileAddCmd)
-	ProfileCmd.AddCommand(profileEditCmd)
+	ProfileCmd.AddCommand(profileUpdateCmd)
 	ProfileCmd.AddCommand(profileDeleteCmd)
 }

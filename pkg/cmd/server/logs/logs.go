@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -38,8 +39,9 @@ func init() {
 }
 
 var LogsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Output Daytona Server logs",
+	Use:     "logs",
+	Short:   "Output Daytona Server logs",
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

@@ -1,9 +1,9 @@
 ## daytona profile delete
 
-Delete profile [PROFILE_NAME]
+Delete a profile
 
 ```
-daytona profile delete [flags]
+daytona profile delete [PROFILE_NAME] [flags]
 ```
 
 ### Options inherited from parent commands

@@ -81,7 +81,7 @@ func (s *TargetConfigServiceTestSuite) SetupTest() {
 	})
 
 	for _, targetConfig := range expectedConfigs {
-		tc, err := s.targetConfigService.Add(context.TODO(), services.AddTargetConfigDTO{
+		tc, err := s.targetConfigService.Create(context.TODO(), services.CreateTargetConfigDTO{
 			Name:         targetConfig.Name,
 			ProviderInfo: targetConfig.ProviderInfo,
 			Options:      targetConfig.Options,
@@ -124,7 +124,7 @@ func (s *TargetConfigServiceTestSuite) TestFind() {
 func (s *TargetConfigServiceTestSuite) TestSave() {
 	require := s.Require()
 
-	tc, err := s.targetConfigService.Add(context.TODO(), services.AddTargetConfigDTO{
+	tc, err := s.targetConfigService.Create(context.TODO(), services.CreateTargetConfigDTO{
 		Name:         targetConfig4.Name,
 		ProviderInfo: targetConfig4.ProviderInfo,
 		Options:      targetConfig4.Options,

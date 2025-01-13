@@ -20,14 +20,14 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 
 	defer stores.RecoverAndRollback(ctx, s.targetStore)
 
-	currentTarget, err := s.GetTarget(ctx, &stores.TargetFilter{
+	currentTarget, err := s.FindTarget(ctx, &stores.TargetFilter{
 		IdOrName: &id,
 	}, services.TargetRetrievalParams{})
 	if err != nil || currentTarget == nil {
 		return s.targetStore.RollbackTransaction(ctx, err)
 	}
 
-	defaultTarget, err := s.GetTarget(ctx, &stores.TargetFilter{
+	defaultTarget, err := s.FindTarget(ctx, &stores.TargetFilter{
 		Default: util.Pointer(true),
 	}, services.TargetRetrievalParams{})
 	if err != nil && !stores.IsTargetNotFound(err) {

@@ -12,8 +12,12 @@ import (
 )
 
 type IGitProviderService interface {
-	GetConfig(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	ListConfigs(ctx context.Context) ([]*models.GitProviderConfig, error)
 	ListConfigsForUrl(ctx context.Context, url string) ([]*models.GitProviderConfig, error)
+	FindConfig(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	SaveGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error
+	DeleteGitProviderConfig(ctx context.Context, id string) error
+
 	GetGitProvider(ctx context.Context, id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(ctx context.Context, url string) (gitprovider.GitProvider, string, error)
 	GetGitProviderForHttpRequest(ctx context.Context, req *http.Request) (gitprovider.GitProvider, error)
@@ -22,10 +26,8 @@ type IGitProviderService interface {
 	GetRepoBranches(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitBranch, error)
 	GetRepoPRs(ctx context.Context, gitProviderId string, namespaceId string, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error)
 	GetRepositories(ctx context.Context, gitProviderId string, namespaceId string, options gitprovider.ListOptions) ([]*gitprovider.GitRepository, error)
-	ListConfigs(ctx context.Context) ([]*models.GitProviderConfig, error)
-	RemoveGitProvider(ctx context.Context, gitProviderId string) error
-	SetGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error
 	GetLastCommitSha(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+
 	RegisterPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error)
 	GetPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error)
 	UnregisterPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error

@@ -8,6 +8,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/env"
 	"github.com/spf13/cobra"
@@ -18,7 +19,7 @@ var showValuesFlag bool
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List server environment variables",
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {

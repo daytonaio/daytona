@@ -169,7 +169,7 @@ func getWorkspace(c *agent_config.Config, telemetryEnabled bool) (*models.Worksp
 		return nil, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, c.WorkspaceId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.FindWorkspace(ctx, c.WorkspaceId).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}

@@ -13,18 +13,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetWorkspaceMetadata 			godoc
+// UpdateWorkspaceMetadata 			godoc
 //
 //	@Tags			workspace
-//	@Summary		Set workspace metadata
-//	@Description	Set workspace metadata
+//	@Summary		Update workspace metadata
+//	@Description	Update workspace metadata
 //	@Param			workspaceId			path	string						true	"Workspace ID"
 //	@Param			workspaceMetadata	body	UpdateWorkspaceMetadataDTO	true	"Workspace Metadata"
 //	@Success		200
 //	@Router			/workspace/{workspaceId}/metadata [post]
 //
-//	@id				SetWorkspaceMetadata
-func SetWorkspaceMetadata(ctx *gin.Context) {
+//	@id				UpdateWorkspaceMetadata
+func UpdateWorkspaceMetadata(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 
 	var updateDTO dto.UpdateWorkspaceMetadataDTO
@@ -36,7 +36,7 @@ func SetWorkspaceMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.WorkspaceService.SetWorkspaceMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
+	_, err = server.WorkspaceService.UpdateWorkspaceMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
 		Uptime:    updateDTO.Uptime,
 		GitStatus: updateDTO.GitStatus,
 	})
