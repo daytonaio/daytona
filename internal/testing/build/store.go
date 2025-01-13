@@ -76,7 +76,7 @@ func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*mode
 			for _, b := range filteredBuilds {
 				check := false
 				for _, prebuildId := range *filter.PrebuildIds {
-					if b.PrebuildId == prebuildId {
+					if b.PrebuildId != nil && *b.PrebuildId == prebuildId {
 						check = true
 						break
 					}

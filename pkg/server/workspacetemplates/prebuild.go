@@ -143,7 +143,9 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy(ctx context.Context) e
 
 	// Group builds by their prebuildId
 	for _, b := range existingBuilds {
-		buildMap[b.PrebuildId] = append(buildMap[b.PrebuildId], b.Build)
+		if b.PrebuildId != nil && *b.PrebuildId != "" {
+			buildMap[*b.PrebuildId] = append(buildMap[*b.PrebuildId], b.Build)
+		}
 	}
 
 	for _, prebuild := range prebuilds {

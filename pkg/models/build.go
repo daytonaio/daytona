@@ -20,7 +20,7 @@ type Build struct {
 	Repository      *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
 	EnvVars         map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
 	LastJob         *Job                       `json:"lastJob" validate:"optional" gorm:"foreignKey:ResourceId;references:Id"`
-	PrebuildId      string                     `json:"prebuildId" validate:"required" gorm:"not null"`
+	PrebuildId      *string                    `json:"prebuildId" validate:"optional"`
 	CreatedAt       time.Time                  `json:"createdAt" validate:"required" gorm:"not null"`
 	UpdatedAt       time.Time                  `json:"updatedAt" validate:"required" gorm:"not null"`
 } // @name Build

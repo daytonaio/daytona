@@ -28,7 +28,7 @@ type BuildDTO struct {
 	Id              string            `json:"id"`
 	Image           *string           `json:"image,omitempty"`
 	LastJob         *Job              `json:"lastJob,omitempty"`
-	PrebuildId      string            `json:"prebuildId"`
+	PrebuildId      *string           `json:"prebuildId,omitempty"`
 	Repository      GitRepository     `json:"repository"`
 	State           ResourceState     `json:"state"`
 	UpdatedAt       string            `json:"updatedAt"`
@@ -41,13 +41,12 @@ type _BuildDTO BuildDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuildDTO(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ResourceState, updatedAt string) *BuildDTO {
+func NewBuildDTO(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, repository GitRepository, state ResourceState, updatedAt string) *BuildDTO {
 	this := BuildDTO{}
 	this.ContainerConfig = containerConfig
 	this.CreatedAt = createdAt
 	this.EnvVars = envVars
 	this.Id = id
-	this.PrebuildId = prebuildId
 	this.Repository = repository
 	this.State = state
 	this.UpdatedAt = updatedAt
@@ -254,28 +253,36 @@ func (o *BuildDTO) SetLastJob(v Job) {
 	o.LastJob = &v
 }
 
-// GetPrebuildId returns the PrebuildId field value
+// GetPrebuildId returns the PrebuildId field value if set, zero value otherwise.
 func (o *BuildDTO) GetPrebuildId() string {
-	if o == nil {
+	if o == nil || IsNil(o.PrebuildId) {
 		var ret string
 		return ret
 	}
-
-	return o.PrebuildId
+	return *o.PrebuildId
 }
 
-// GetPrebuildIdOk returns a tuple with the PrebuildId field value
+// GetPrebuildIdOk returns a tuple with the PrebuildId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *BuildDTO) GetPrebuildIdOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.PrebuildId) {
 		return nil, false
 	}
-	return &o.PrebuildId, true
+	return o.PrebuildId, true
 }
 
-// SetPrebuildId sets field value
+// HasPrebuildId returns a boolean if a field has been set.
+func (o *BuildDTO) HasPrebuildId() bool {
+	if o != nil && !IsNil(o.PrebuildId) {
+		return true
+	}
+
+	return false
+}
+
+// SetPrebuildId gets a reference to the given string and assigns it to the PrebuildId field.
 func (o *BuildDTO) SetPrebuildId(v string) {
-	o.PrebuildId = v
+	o.PrebuildId = &v
 }
 
 // GetRepository returns the Repository field value
@@ -405,7 +412,9 @@ func (o BuildDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
 	}
-	toSerialize["prebuildId"] = o.PrebuildId
+	if !IsNil(o.PrebuildId) {
+		toSerialize["prebuildId"] = o.PrebuildId
+	}
 	toSerialize["repository"] = o.Repository
 	toSerialize["state"] = o.State
 	toSerialize["updatedAt"] = o.UpdatedAt
@@ -424,7 +433,6 @@ func (o *BuildDTO) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"envVars",
 		"id",
-		"prebuildId",
 		"repository",
 		"state",
 		"updatedAt",
