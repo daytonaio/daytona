@@ -145,7 +145,7 @@ type ApiListClientApiKeysRequest struct {
 	ApiService *ApiKeyAPIService
 }
 
-func (r ApiListClientApiKeysRequest) Execute() ([]ApiKey, *http.Response, error) {
+func (r ApiListClientApiKeysRequest) Execute() ([]ApiKeyViewDTO, *http.Response, error) {
 	return r.ApiService.ListClientApiKeysExecute(r)
 }
 
@@ -166,13 +166,13 @@ func (a *ApiKeyAPIService) ListClientApiKeys(ctx context.Context) ApiListClientA
 
 // Execute executes the request
 //
-//	@return []ApiKey
-func (a *ApiKeyAPIService) ListClientApiKeysExecute(r ApiListClientApiKeysRequest) ([]ApiKey, *http.Response, error) {
+//	@return []ApiKeyViewDTO
+func (a *ApiKeyAPIService) ListClientApiKeysExecute(r ApiListClientApiKeysRequest) ([]ApiKeyViewDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []ApiKey
+		localVarReturnValue []ApiKeyViewDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeyAPIService.ListClientApiKeys")

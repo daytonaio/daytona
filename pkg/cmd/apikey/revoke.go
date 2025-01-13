@@ -11,8 +11,6 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/spf13/cobra"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/apikeys"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -30,22 +28,12 @@ var revokeCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		c, err := config.GetConfig()
-		if err != nil {
-			return err
-		}
-
-		activeProfile, err := c.GetActiveProfile()
-		if err != nil {
-			return err
-		}
-
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
 		}
 
-		var selectedApiKey *apiclient.ApiKey
+		var selectedApiKey *apiclient.ApiKeyViewDTO
 
 		apiKeyList, _, err := apiClient.ApiKeyAPI.ListClientApiKeys(ctx).Execute()
 		if err != nil {
@@ -71,22 +59,15 @@ var revokeCmd = &cobra.Command{
 		}
 
 		if selectedApiKey == nil {
-			return errors.New("No API key selected")
+			return errors.New("no API key selected")
 		}
 
 		if !yesFlag {
-			title := fmt.Sprintf("Revoke API Key '%s'?", selectedApiKey.Name)
-			description := fmt.Sprintf("Are you sure you want to revoke '%s'?", selectedApiKey.Name)
-			if apikeys.EqualsKeyHashFromApi(activeProfile.Api.Key, selectedApiKey.KeyHash) {
-				title = fmt.Sprintf("Warning! API Key '%s' is attached to your active profile", selectedApiKey.Name)
-				description = fmt.Sprintf("Revoking '%s' will lock out your active profile from accessing the server.", selectedApiKey.Name)
-			}
-
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title(title).
-						Description(description).
+						Title(fmt.Sprintf("Revoke API Key '%s'?", selectedApiKey.Name)).
+						Description(fmt.Sprintf("Are you sure you want to revoke '%s'?", selectedApiKey.Name)).
 						Value(&yesFlag),
 				),
 			).WithTheme(views.GetCustomTheme())
@@ -95,6 +76,10 @@ var revokeCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+		}
+
+		if selectedApiKey.Current {
+			return errors.New("cannot revoke current API key")
 		}
 
 		if yesFlag {

@@ -82,7 +82,7 @@ Name | Type | Description  | Notes
 
 ## ListClientApiKeys
 
-> []ApiKey ListClientApiKeys(ctx).Execute()
+> []ApiKeyViewDTO ListClientApiKeys(ctx).Execute()
 
 List API keys
 
@@ -109,7 +109,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `ApiKeyAPI.ListClientApiKeys``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListClientApiKeys`: []ApiKey
+	// response from `ListClientApiKeys`: []ApiKeyViewDTO
 	fmt.Fprintf(os.Stdout, "Response from `ApiKeyAPI.ListClientApiKeys`: %v\n", resp)
 }
 ```
@@ -125,7 +125,7 @@ Other parameters are passed through a pointer to a apiListClientApiKeysRequest s
 
 ### Return type
 
-[**[]ApiKey**](ApiKey.md)
+[**[]ApiKeyViewDTO**](ApiKeyViewDTO.md)
 
 ### Authorization
 
