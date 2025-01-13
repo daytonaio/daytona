@@ -20,7 +20,7 @@ var providerUninstallCmd = &cobra.Command{
 	Use:     "uninstall",
 	Short:   "Uninstall provider",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"u"},
+	Aliases: cmd_common.GetAliases("uninstall"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedRunnerId string
 

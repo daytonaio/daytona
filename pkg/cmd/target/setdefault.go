@@ -9,6 +9,7 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -16,9 +17,10 @@ import (
 )
 
 var setDefaultCmd = &cobra.Command{
-	Use:   "set-default [TARGET]",
-	Short: "Set default target",
-	Args:  cobra.RangeArgs(0, 1),
+	Use:     "set-default [TARGET]",
+	Short:   "Set default target",
+	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("set-default"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

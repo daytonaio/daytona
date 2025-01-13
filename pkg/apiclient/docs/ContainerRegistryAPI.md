@@ -4,15 +4,15 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GetContainerRegistry**](ContainerRegistryAPI.md#GetContainerRegistry) | **Get** /container-registry/{server} | Get container registry
+[**FindContainerRegistry**](ContainerRegistryAPI.md#FindContainerRegistry) | **Get** /container-registry/{server} | Find container registry
 
 
 
-## GetContainerRegistry
+## FindContainerRegistry
 
-> ContainerRegistry GetContainerRegistry(ctx, server).WorkspaceId(workspaceId).Execute()
+> ContainerRegistry FindContainerRegistry(ctx, server).WorkspaceId(workspaceId).Execute()
 
-Get container registry
+Find container registry
 
 
 
@@ -34,13 +34,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ContainerRegistryAPI.GetContainerRegistry(context.Background(), server).WorkspaceId(workspaceId).Execute()
+	resp, r, err := apiClient.ContainerRegistryAPI.FindContainerRegistry(context.Background(), server).WorkspaceId(workspaceId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ContainerRegistryAPI.GetContainerRegistry``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ContainerRegistryAPI.FindContainerRegistry``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetContainerRegistry`: ContainerRegistry
-	fmt.Fprintf(os.Stdout, "Response from `ContainerRegistryAPI.GetContainerRegistry`: %v\n", resp)
+	// response from `FindContainerRegistry`: ContainerRegistry
+	fmt.Fprintf(os.Stdout, "Response from `ContainerRegistryAPI.FindContainerRegistry`: %v\n", resp)
 }
 ```
 
@@ -54,7 +54,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetContainerRegistryRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFindContainerRegistryRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

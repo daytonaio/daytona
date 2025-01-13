@@ -492,27 +492,27 @@ func (a *BuildAPIService) DeleteBuildsFromPrebuildExecute(r ApiDeleteBuildsFromP
 	return localVarHTTPResponse, nil
 }
 
-type ApiGetBuildRequest struct {
+type ApiFindBuildRequest struct {
 	ctx        context.Context
 	ApiService *BuildAPIService
 	buildId    string
 }
 
-func (r ApiGetBuildRequest) Execute() (*BuildDTO, *http.Response, error) {
-	return r.ApiService.GetBuildExecute(r)
+func (r ApiFindBuildRequest) Execute() (*BuildDTO, *http.Response, error) {
+	return r.ApiService.FindBuildExecute(r)
 }
 
 /*
-GetBuild Get build data
+FindBuild Find build
 
-Get build data
+Find build
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param buildId Build ID
-	@return ApiGetBuildRequest
+	@return ApiFindBuildRequest
 */
-func (a *BuildAPIService) GetBuild(ctx context.Context, buildId string) ApiGetBuildRequest {
-	return ApiGetBuildRequest{
+func (a *BuildAPIService) FindBuild(ctx context.Context, buildId string) ApiFindBuildRequest {
+	return ApiFindBuildRequest{
 		ApiService: a,
 		ctx:        ctx,
 		buildId:    buildId,
@@ -522,7 +522,7 @@ func (a *BuildAPIService) GetBuild(ctx context.Context, buildId string) ApiGetBu
 // Execute executes the request
 //
 //	@return BuildDTO
-func (a *BuildAPIService) GetBuildExecute(r ApiGetBuildRequest) (*BuildDTO, *http.Response, error) {
+func (a *BuildAPIService) FindBuildExecute(r ApiFindBuildRequest) (*BuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -530,7 +530,7 @@ func (a *BuildAPIService) GetBuildExecute(r ApiGetBuildRequest) (*BuildDTO, *htt
 		localVarReturnValue *BuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BuildAPIService.GetBuild")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "BuildAPIService.FindBuild")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

@@ -35,7 +35,7 @@ var dockerCredCmd = &cobra.Command{
 			return err
 		}
 
-		cr, _, err := apiClient.ContainerRegistryAPI.GetContainerRegistry(ctx, string(input)).WorkspaceId(workspaceId).Execute()
+		cr, _, err := apiClient.ContainerRegistryAPI.FindContainerRegistry(ctx, string(input)).WorkspaceId(workspaceId).Execute()
 		if err != nil {
 			os.Exit(1)
 		}

@@ -7,6 +7,7 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	workspacetemplate_view "github.com/daytonaio/daytona/pkg/views/workspacetemplate/list"
 	"github.com/spf13/cobra"
@@ -15,8 +16,8 @@ import (
 var workspaceTemplateListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Lists workspace templates",
-	Aliases: []string{"ls"},
 	Args:    cobra.NoArgs,
+	Aliases: cmd_common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var specifyGitProviders bool

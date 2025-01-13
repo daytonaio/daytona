@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *WorkspaceService) SetWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error) {
+func (s *WorkspaceService) UpdateWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error) {
 	m, err := s.workspaceMetadataStore.Find(ctx, workspaceId)
 	if err != nil {
 		return nil, stores.ErrWorkspaceMetadataNotFound

@@ -133,17 +133,17 @@ func TestWorkspaceService(t *testing.T) {
 		FindCachedBuild: func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error) {
 			return nil, nil
 		},
-		GenerateApiKey: func(ctx context.Context, name string) (string, error) {
-			return apiKeyService.Generate(models.ApiKeyTypeWorkspace, name)
+		CreateApiKey: func(ctx context.Context, name string) (string, error) {
+			return apiKeyService.Create(models.ApiKeyTypeWorkspace, name)
 		},
-		RevokeApiKey: func(ctx context.Context, name string) error {
-			return apiKeyService.Revoke(name)
+		DeleteApiKey: func(ctx context.Context, name string) error {
+			return apiKeyService.Delete(name)
 		},
 		ListGitProviderConfigs: func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error) {
 			return gitProviderService.ListConfigsForUrl(repoUrl)
 		},
 		FindGitProviderConfig: func(ctx context.Context, id string) (*models.GitProviderConfig, error) {
-			return gitProviderService.GetConfig(id)
+			return gitProviderService.FindConfig(id)
 		},
 		GetLastCommitSha: func(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
 			return gitProviderService.GetLastCommitSha(repo)
@@ -172,7 +172,7 @@ func TestWorkspaceService(t *testing.T) {
 	t.Run("CreateWorkspace", func(t *testing.T) {
 		gitProviderService.On("GetLastCommitSha", createWorkspaceDTO.Source.Repository).Return("123", nil)
 
-		apiKeyService.On("Generate", models.ApiKeyTypeWorkspace, createWorkspaceDTO.Id).Return(createWorkspaceDTO.Name, nil)
+		apiKeyService.On("Create", models.ApiKeyTypeWorkspace, createWorkspaceDTO.Id).Return(createWorkspaceDTO.Name, nil)
 
 		ws := &models.Workspace{
 			Id:                  createWorkspaceDTO.Id,
@@ -193,7 +193,7 @@ func TestWorkspaceService(t *testing.T) {
 			ClientId:      "test",
 		})
 
-		gitProviderService.On("GetConfig", "github").Return(&gitProviderConfig, nil)
+		gitProviderService.On("FindConfig", "github").Return(&gitProviderConfig, nil)
 
 		workspace, err := service.CreateWorkspace(ctx, createWorkspaceDTO)
 
@@ -224,8 +224,8 @@ func TestWorkspaceService(t *testing.T) {
 		require.Equal(t, services.ErrInvalidWorkspaceName, err)
 	})
 
-	t.Run("GetWorkspace", func(t *testing.T) {
-		w, err := service.GetWorkspace(ctx, ws.Id, services.WorkspaceRetrievalParams{})
+	t.Run("FindWorkspace", func(t *testing.T) {
+		w, err := service.FindWorkspace(ctx, ws.Id, services.WorkspaceRetrievalParams{})
 
 		require.Nil(t, err)
 		require.NotNil(t, w)
@@ -233,8 +233,8 @@ func TestWorkspaceService(t *testing.T) {
 		workspaceDtoEquals(t, createWorkspaceDTO, *w, defaultWorkspaceImage)
 	})
 
-	t.Run("GetWorkspace fails when workspace not found", func(t *testing.T) {
-		_, err := service.GetWorkspace(ctx, "invalid-id", services.WorkspaceRetrievalParams{})
+	t.Run("FindWorkspace fails when workspace not found", func(t *testing.T) {
+		_, err := service.FindWorkspace(ctx, "invalid-id", services.WorkspaceRetrievalParams{})
 		require.NotNil(t, err)
 		require.Equal(t, stores.ErrWorkspaceNotFound, err)
 	})
@@ -260,8 +260,8 @@ func TestWorkspaceService(t *testing.T) {
 		require.Nil(t, err)
 	})
 
-	t.Run("SetWorkspaceMetadata", func(t *testing.T) {
-		res, err := service.SetWorkspaceMetadata(ctx, createWorkspaceDTO.Id, &models.WorkspaceMetadata{
+	t.Run("UpdateWorkspaceMetadata", func(t *testing.T) {
+		res, err := service.UpdateWorkspaceMetadata(ctx, createWorkspaceDTO.Id, &models.WorkspaceMetadata{
 			Uptime: 10,
 			GitStatus: &models.GitStatus{
 				CurrentBranch: "main",
@@ -273,28 +273,28 @@ func TestWorkspaceService(t *testing.T) {
 		require.Equal(t, "main", res.GitStatus.CurrentBranch)
 	})
 
-	t.Run("RemoveWorkspace", func(t *testing.T) {
-		apiKeyService.On("Revoke", mock.Anything).Return(nil)
+	t.Run("DeleteWorkspace", func(t *testing.T) {
+		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err := service.RemoveWorkspace(ctx, createWorkspaceDTO.Id)
+		err := service.DeleteWorkspace(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
+		_, err = service.FindWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
 		require.Equal(t, services.ErrWorkspaceDeleted, err)
 	})
 
-	t.Run("ForceRemoveWorkspace", func(t *testing.T) {
+	t.Run("ForceDeleteWorkspace", func(t *testing.T) {
 		err := workspaceStore.Save(ctx, ws)
 		require.Nil(t, err)
 
-		apiKeyService.On("Revoke", mock.Anything).Return(nil)
+		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err = service.ForceRemoveWorkspace(ctx, createWorkspaceDTO.Id)
+		err = service.ForceDeleteWorkspace(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.GetWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
+		_, err = service.FindWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
 		require.Equal(t, services.ErrWorkspaceDeleted, err)
 	})
 

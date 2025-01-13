@@ -13,22 +13,22 @@ import (
 )
 
 type ITargetService interface {
-	CreateTarget(ctx context.Context, req CreateTargetDTO) (*models.Target, error)
-	GetTarget(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) (*TargetDTO, error)
-	SaveTarget(ctx context.Context, target *models.Target) error
 	ListTargets(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) ([]TargetDTO, error)
+	FindTarget(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) (*TargetDTO, error)
+	CreateTarget(ctx context.Context, req CreateTargetDTO) (*models.Target, error)
+	SaveTarget(ctx context.Context, target *models.Target) error
 	StartTarget(ctx context.Context, targetId string) error
 	StopTarget(ctx context.Context, targetId string) error
 	RestartTarget(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
+	UpdateTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 	UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error
-	RemoveTarget(ctx context.Context, targetId string) error
-	ForceRemoveTarget(ctx context.Context, targetId string) error
-	HandleSuccessfulCreation(ctx context.Context, targetId string) error
+	DeleteTarget(ctx context.Context, targetId string) error
+	ForceDeleteTarget(ctx context.Context, targetId string) error
 
+	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)
 	GetTargetLogWriter(ctx context.Context, targetId string) (io.WriteCloser, error)
-	SetTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
 }
 
 type TargetDTO struct {

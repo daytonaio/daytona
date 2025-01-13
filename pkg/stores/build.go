@@ -12,8 +12,8 @@ import (
 
 type BuildStore interface {
 	IStore
-	Find(ctx context.Context, filter *BuildFilter) (*models.Build, error)
 	List(ctx context.Context, filter *BuildFilter) ([]*models.Build, error)
+	Find(ctx context.Context, filter *BuildFilter) (*models.Build, error)
 	Save(ctx context.Context, build *models.Build) error
 	Delete(ctx context.Context, id string) error
 }

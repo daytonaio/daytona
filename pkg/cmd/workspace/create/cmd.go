@@ -35,6 +35,7 @@ var CreateCmd = &cobra.Command{
 	Use:     "create [REPOSITORY_URL | WORKSPACE_CONFIG_NAME]...",
 	Short:   "Create a workspace",
 	GroupID: util.TARGET_GROUP,
+	Aliases: cmd_common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var createWorkspaceDtos []apiclient.CreateWorkspaceDTO

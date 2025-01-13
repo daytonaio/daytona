@@ -7,6 +7,7 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/env"
 	log "github.com/sirupsen/logrus"
@@ -14,9 +15,9 @@ import (
 )
 
 var deleteCmd = &cobra.Command{
-	Use:     "remove [KEY]...",
-	Short:   "Remove server environment variables",
-	Aliases: []string{"r", "rm", "d", "delete"},
+	Use:     "delete [KEY]...",
+	Short:   "Delete server environment variables",
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		keys := []string{}
 
@@ -30,7 +31,7 @@ var deleteCmd = &cobra.Command{
 		if len(args) > 0 {
 			keys = args
 		} else {
-			selectedEnvVars, err := env.RemoveEnvVarsView(ctx, *apiClient)
+			selectedEnvVars, err := env.DeleteEnvVarsView(ctx, *apiClient)
 			if err != nil {
 				return err
 			}

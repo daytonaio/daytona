@@ -22,8 +22,8 @@ type WorkspaceServiceConfig struct {
 	FindTarget             func(ctx context.Context, targetId string) (*models.Target, error)
 	FindContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	FindCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
-	GenerateApiKey         func(ctx context.Context, name string) (string, error)
-	RevokeApiKey           func(ctx context.Context, name string) error
+	CreateApiKey           func(ctx context.Context, name string) (string, error)
+	DeleteApiKey           func(ctx context.Context, name string) error
 	ListGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
@@ -46,8 +46,8 @@ func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceServi
 		findTarget:             config.FindTarget,
 		findContainerRegistry:  config.FindContainerRegistry,
 		findCachedBuild:        config.FindCachedBuild,
-		generateApiKey:         config.GenerateApiKey,
-		revokeApiKey:           config.RevokeApiKey,
+		createApiKey:           config.CreateApiKey,
+		deleteApiKey:           config.DeleteApiKey,
 		listGitProviderConfigs: config.ListGitProviderConfigs,
 		findGitProviderConfig:  config.FindGitProviderConfig,
 		getLastCommitSha:       config.GetLastCommitSha,
@@ -70,8 +70,8 @@ type WorkspaceService struct {
 	findTarget             func(ctx context.Context, targetId string) (*models.Target, error)
 	findContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
 	findCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
-	generateApiKey         func(ctx context.Context, name string) (string, error)
-	revokeApiKey           func(ctx context.Context, name string) error
+	createApiKey           func(ctx context.Context, name string) (string, error)
+	deleteApiKey           func(ctx context.Context, name string) error
 	listGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
 	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
 	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)

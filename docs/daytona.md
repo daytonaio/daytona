@@ -29,7 +29,7 @@ daytona [flags]
 * [daytona docs](daytona_docs.md)	 - Opens the Daytona documentation in your default browser.
 * [daytona env](daytona_env.md)	 - Manage server environment variables that are added to all targets and workspaces
 * [daytona forward](daytona_forward.md)	 - Forward a port from a workspace to your local machine
-* [daytona git-providers](daytona_git-providers.md)	 - Manage Git providers
+* [daytona git-provider](daytona_git-provider.md)	 - Manage Git provider configs
 * [daytona ide](daytona_ide.md)	 - Choose the default IDE
 * [daytona info](daytona_info.md)	 - Show workspace info
 * [daytona list](daytona_list.md)	 - List workspaces

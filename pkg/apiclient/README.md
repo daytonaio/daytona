@@ -77,24 +77,25 @@ All URIs are relative to *http://localhost:3986*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*ApiKeyAPI* | [**GenerateApiKey**](docs/ApiKeyAPI.md#generateapikey) | **Post** /apikey/{apiKeyName} | Generate an API key
+*ApiKeyAPI* | [**CreateApiKey**](docs/ApiKeyAPI.md#createapikey) | **Post** /apikey/{apiKeyName} | Create an API key
+*ApiKeyAPI* | [**DeleteApiKey**](docs/ApiKeyAPI.md#deleteapikey) | **Delete** /apikey/{apiKeyName} | Delete API key
 *ApiKeyAPI* | [**ListClientApiKeys**](docs/ApiKeyAPI.md#listclientapikeys) | **Get** /apikey | List API keys
-*ApiKeyAPI* | [**RevokeApiKey**](docs/ApiKeyAPI.md#revokeapikey) | **Delete** /apikey/{apiKeyName} | Revoke API key
 *BuildAPI* | [**CreateBuild**](docs/BuildAPI.md#createbuild) | **Post** /build | Create a build
 *BuildAPI* | [**DeleteAllBuilds**](docs/BuildAPI.md#deleteallbuilds) | **Delete** /build | Delete ALL builds
 *BuildAPI* | [**DeleteBuild**](docs/BuildAPI.md#deletebuild) | **Delete** /build/{buildId} | Delete build
 *BuildAPI* | [**DeleteBuildsFromPrebuild**](docs/BuildAPI.md#deletebuildsfromprebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
-*BuildAPI* | [**GetBuild**](docs/BuildAPI.md#getbuild) | **Get** /build/{buildId} | Get build data
+*BuildAPI* | [**FindBuild**](docs/BuildAPI.md#findbuild) | **Get** /build/{buildId} | Find build
 *BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
 *BuildAPI* | [**ListSuccessfulBuilds**](docs/BuildAPI.md#listsuccessfulbuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
-*ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry
+*ContainerRegistryAPI* | [**FindContainerRegistry**](docs/ContainerRegistryAPI.md#findcontainerregistry) | **Get** /container-registry/{server} | Find container registry
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
 *EnvVarAPI* | [**DeleteEnvironmentVariable**](docs/EnvVarAPI.md#deleteenvironmentvariable) | **Delete** /env/{key} | Delete environment variable
 *EnvVarAPI* | [**ListEnvironmentVariables**](docs/EnvVarAPI.md#listenvironmentvariables) | **Get** /env | List environment variables
-*EnvVarAPI* | [**SetEnvironmentVariable**](docs/EnvVarAPI.md#setenvironmentvariable) | **Put** /env | Set environment variable
+*EnvVarAPI* | [**SaveEnvironmentVariable**](docs/EnvVarAPI.md#saveenvironmentvariable) | **Put** /env | Save environment variable
+*GitProviderAPI* | [**DeleteGitProvider**](docs/GitProviderAPI.md#deletegitprovider) | **Delete** /gitprovider/{gitProviderId} | Delete Git provider
+*GitProviderAPI* | [**FindGitProvider**](docs/GitProviderAPI.md#findgitprovider) | **Get** /gitprovider/{gitProviderId} | Find Git provider
+*GitProviderAPI* | [**FindGitProviderIdForUrl**](docs/GitProviderAPI.md#findgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Find Git provider ID
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
-*GitProviderAPI* | [**GetGitProvider**](docs/GitProviderAPI.md#getgitprovider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
-*GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 *GitProviderAPI* | [**GetNamespaces**](docs/GitProviderAPI.md#getnamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
 *GitProviderAPI* | [**GetRepoBranches**](docs/GitProviderAPI.md#getrepobranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
@@ -103,65 +104,63 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**GetUrlFromRepository**](docs/GitProviderAPI.md#geturlfromrepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
-*GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
-*GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
+*GitProviderAPI* | [**SaveGitProvider**](docs/GitProviderAPI.md#savegitprovider) | **Put** /gitprovider | Save Git provider
 *JobAPI* | [**ListJobs**](docs/JobAPI.md#listjobs) | **Get** /job | List jobs
 *PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
-*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Get prebuild
+*PrebuildAPI* | [**FindPrebuild**](docs/PrebuildAPI.md#findprebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Find prebuild
 *PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-template/prebuild | List prebuilds
 *PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
-*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
+*PrebuildAPI* | [**SavePrebuild**](docs/PrebuildAPI.md#saveprebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/install | Install provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
 *ProviderAPI* | [**UpdateProvider**](docs/ProviderAPI.md#updateprovider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
-*RunnerAPI* | [**GetRunner**](docs/RunnerAPI.md#getrunner) | **Get** /runner/{runnerId} | Get a runner
+*RunnerAPI* | [**CreateRunner**](docs/RunnerAPI.md#createrunner) | **Post** /runner | Create a runner
+*RunnerAPI* | [**DeleteRunner**](docs/RunnerAPI.md#deleterunner) | **Delete** /runner/{runnerId} | Delete runner
+*RunnerAPI* | [**FindRunner**](docs/RunnerAPI.md#findrunner) | **Get** /runner/{runnerId} | Find a runner
 *RunnerAPI* | [**ListRunnerJobs**](docs/RunnerAPI.md#listrunnerjobs) | **Get** /runner/{runnerId}/jobs | List runner jobs
 *RunnerAPI* | [**ListRunners**](docs/RunnerAPI.md#listrunners) | **Get** /runner | List runners
-*RunnerAPI* | [**RegisterRunner**](docs/RunnerAPI.md#registerrunner) | **Post** /runner | Register a runner
-*RunnerAPI* | [**RemoveRunner**](docs/RunnerAPI.md#removerunner) | **Delete** /runner/{runnerId} | Remove runner
-*RunnerAPI* | [**SetRunnerMetadata**](docs/RunnerAPI.md#setrunnermetadata) | **Post** /runner/{runnerId}/metadata | Set runner metadata
 *RunnerAPI* | [**UpdateJobState**](docs/RunnerAPI.md#updatejobstate) | **Post** /runner/{runnerId}/jobs/{jobId}/state | Update job state
+*RunnerAPI* | [**UpdateRunnerMetadata**](docs/RunnerAPI.md#updaterunnermetadata) | **Post** /runner/{runnerId}/metadata | Update runner metadata
 *SampleAPI* | [**ListSamples**](docs/SampleAPI.md#listsamples) | **Get** /sample | List samples
-*ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
+*ServerAPI* | [**CreateNetworkKey**](docs/ServerAPI.md#createnetworkkey) | **Post** /server/network-key | Create a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
-*ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | List server log files
-*ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
+*ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | Get server log files
+*ServerAPI* | [**SaveConfig**](docs/ServerAPI.md#saveconfig) | **Put** /server/config | Save the server configuration
 *TargetAPI* | [**CreateTarget**](docs/TargetAPI.md#createtarget) | **Post** /target | Create a target
-*TargetAPI* | [**GetTarget**](docs/TargetAPI.md#gettarget) | **Get** /target/{targetId} | Get target info
+*TargetAPI* | [**DeleteTarget**](docs/TargetAPI.md#deletetarget) | **Delete** /target/{targetId} | Delete target
+*TargetAPI* | [**FindTarget**](docs/TargetAPI.md#findtarget) | **Get** /target/{targetId} | Find target
 *TargetAPI* | [**HandleSuccessfulCreation**](docs/TargetAPI.md#handlesuccessfulcreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
-*TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{targetId} | Remove target
 *TargetAPI* | [**RestartTarget**](docs/TargetAPI.md#restarttarget) | **Post** /target/{targetId}/restart | Restart target
 *TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
-*TargetAPI* | [**SetTargetMetadata**](docs/TargetAPI.md#settargetmetadata) | **Post** /target/{targetId}/metadata | Set target metadata
 *TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
 *TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
+*TargetAPI* | [**UpdateTargetMetadata**](docs/TargetAPI.md#updatetargetmetadata) | **Post** /target/{targetId}/metadata | Update target metadata
 *TargetAPI* | [**UpdateTargetProviderMetadata**](docs/TargetAPI.md#updatetargetprovidermetadata) | **Post** /target/{targetId}/provider-metadata | Update target provider metadata
-*TargetConfigAPI* | [**AddTargetConfig**](docs/TargetConfigAPI.md#addtargetconfig) | **Put** /target-config | Add a target config
+*TargetConfigAPI* | [**CreateTargetConfig**](docs/TargetConfigAPI.md#createtargetconfig) | **Post** /target-config | Create a target config
+*TargetConfigAPI* | [**DeleteTargetConfig**](docs/TargetConfigAPI.md#deletetargetconfig) | **Delete** /target-config/{configId} | Delete a target config
 *TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
-*TargetConfigAPI* | [**RemoveTargetConfig**](docs/TargetConfigAPI.md#removetargetconfig) | **Delete** /target-config/{configId} | Remove a target config
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
-*WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
+*WorkspaceAPI* | [**DeleteWorkspace**](docs/WorkspaceAPI.md#deleteworkspace) | **Delete** /workspace/{workspaceId} | Delete workspace
+*WorkspaceAPI* | [**FindWorkspace**](docs/WorkspaceAPI.md#findworkspace) | **Get** /workspace/{workspaceId} | Find workspace
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
-*WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
 *WorkspaceAPI* | [**RestartWorkspace**](docs/WorkspaceAPI.md#restartworkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
-*WorkspaceAPI* | [**SetWorkspaceMetadata**](docs/WorkspaceAPI.md#setworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Set workspace metadata
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+*WorkspaceAPI* | [**UpdateWorkspaceMetadata**](docs/WorkspaceAPI.md#updateworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Update workspace metadata
 *WorkspaceAPI* | [**UpdateWorkspaceProviderMetadata**](docs/WorkspaceAPI.md#updateworkspaceprovidermetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
 *WorkspaceTemplateAPI* | [**DeleteWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#deleteworkspacetemplate) | **Delete** /workspace-template/{templateName} | Delete workspace template data
-*WorkspaceTemplateAPI* | [**GetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getdefaultworkspacetemplate) | **Get** /workspace-template/default/{gitUrl} | Get workspace templates by git url
-*WorkspaceTemplateAPI* | [**GetWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getworkspacetemplate) | **Get** /workspace-template/{templateName} | Get workspace template data
+*WorkspaceTemplateAPI* | [**FindWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#findworkspacetemplate) | **Get** /workspace-template/{templateName} | Find a workspace template
+*WorkspaceTemplateAPI* | [**GetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getdefaultworkspacetemplate) | **Get** /workspace-template/default/{gitUrl} | Get default workspace templates by git url
 *WorkspaceTemplateAPI* | [**ListWorkspaceTemplates**](docs/WorkspaceTemplateAPI.md#listworkspacetemplates) | **Get** /workspace-template | List workspace templates
+*WorkspaceTemplateAPI* | [**SaveWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#saveworkspacetemplate) | **Put** /workspace-template | Set workspace template data
 *WorkspaceTemplateAPI* | [**SetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#setdefaultworkspacetemplate) | **Patch** /workspace-template/{templateName}/set-default | Set workspace template to default
-*WorkspaceTemplateAPI* | [**SetWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#setworkspacetemplate) | **Put** /workspace-template | Set workspace template data
 
 
 ## Documentation For Models
 
- - [AddTargetConfigDTO](docs/AddTargetConfigDTO.md)
  - [ApiKeyViewDTO](docs/ApiKeyViewDTO.md)
  - [BuildConfig](docs/BuildConfig.md)
  - [BuildDTO](docs/BuildDTO.md)
@@ -171,6 +170,9 @@ Class | Method | HTTP request | Description
  - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
+ - [CreateRunnerDTO](docs/CreateRunnerDTO.md)
+ - [CreateRunnerResultDTO](docs/CreateRunnerResultDTO.md)
+ - [CreateTargetConfigDTO](docs/CreateTargetConfigDTO.md)
  - [CreateTargetDTO](docs/CreateTargetDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [CreateWorkspaceSourceDTO](docs/CreateWorkspaceSourceDTO.md)
@@ -199,8 +201,6 @@ Class | Method | HTTP request | Description
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
  - [ProviderInfo](docs/ProviderInfo.md)
- - [RegisterRunnerDTO](docs/RegisterRunnerDTO.md)
- - [RegisterRunnerResultDTO](docs/RegisterRunnerResultDTO.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
  - [ResourceState](docs/ResourceState.md)
  - [ResourceType](docs/ResourceType.md)

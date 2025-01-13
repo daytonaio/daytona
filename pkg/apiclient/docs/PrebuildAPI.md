@@ -5,11 +5,11 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
-[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Get prebuild
+[**FindPrebuild**](PrebuildAPI.md#FindPrebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Find prebuild
 [**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /workspace-template/prebuild | List prebuilds
 [**ListPrebuildsForWorkspaceTemplate**](PrebuildAPI.md#ListPrebuildsForWorkspaceTemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
 [**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
-[**SetPrebuild**](PrebuildAPI.md#SetPrebuild) | **Put** /workspace-template/{templateName}/prebuild | Set prebuild
+[**SavePrebuild**](PrebuildAPI.md#SavePrebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
 
 
 
@@ -86,11 +86,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetPrebuild
+## FindPrebuild
 
-> PrebuildDTO GetPrebuild(ctx, templateName, prebuildId).Execute()
+> PrebuildDTO FindPrebuild(ctx, templateName, prebuildId).Execute()
 
-Get prebuild
+Find prebuild
 
 
 
@@ -112,13 +112,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.GetPrebuild(context.Background(), templateName, prebuildId).Execute()
+	resp, r, err := apiClient.PrebuildAPI.FindPrebuild(context.Background(), templateName, prebuildId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.GetPrebuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.FindPrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetPrebuild`: PrebuildDTO
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.GetPrebuild`: %v\n", resp)
+	// response from `FindPrebuild`: PrebuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.FindPrebuild`: %v\n", resp)
 }
 ```
 
@@ -133,7 +133,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetPrebuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFindPrebuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -354,11 +354,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## SetPrebuild
+## SavePrebuild
 
-> string SetPrebuild(ctx, templateName).Prebuild(prebuild).Execute()
+> string SavePrebuild(ctx, templateName).Prebuild(prebuild).Execute()
 
-Set prebuild
+Save prebuild
 
 
 
@@ -380,13 +380,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.SetPrebuild(context.Background(), templateName).Prebuild(prebuild).Execute()
+	resp, r, err := apiClient.PrebuildAPI.SavePrebuild(context.Background(), templateName).Prebuild(prebuild).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.SetPrebuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.SavePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `SetPrebuild`: string
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.SetPrebuild`: %v\n", resp)
+	// response from `SavePrebuild`: string
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.SavePrebuild`: %v\n", resp)
 }
 ```
 
@@ -400,7 +400,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiSetPrebuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSavePrebuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

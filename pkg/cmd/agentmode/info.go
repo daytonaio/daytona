@@ -6,6 +6,7 @@ package agentmode
 import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	target_views "github.com/daytonaio/daytona/pkg/views/target/info"
 	workspaces_views "github.com/daytonaio/daytona/pkg/views/workspace/info"
@@ -15,9 +16,9 @@ import (
 var infoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show resource info",
-	Aliases: []string{"view", "inspect"},
 	Args:    cobra.ExactArgs(0),
 	GroupID: util.TARGET_GROUP,
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if isWorkspaceAgentMode() {
 			return runWorkspaceInfo()

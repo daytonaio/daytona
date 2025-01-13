@@ -70,7 +70,7 @@ func (s *WorkspaceTemplateService) DeletePrebuild(ctx context.Context, workspace
 		}
 	}
 
-	err = workspaceTemplate.RemovePrebuild(id)
+	err = workspaceTemplate.DeletePrebuild(id)
 	if err != nil {
 		return []error{s.handleDeletePrebuildError(ctx, workspaceTemplate, err)}
 	}

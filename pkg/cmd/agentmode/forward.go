@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	defaultPortForwardCmd "github.com/daytonaio/daytona/pkg/cmd/ports"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -17,6 +18,7 @@ var portForwardCmd = &cobra.Command{
 	Short:   "Forward a port publicly via an URL",
 	Args:    cobra.ExactArgs(1),
 	GroupID: util.TARGET_GROUP,
+	Aliases: common.GetAliases("forward"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		port, err := strconv.Atoi(args[0])
 		if err != nil {

@@ -11,7 +11,7 @@ Api Key commands
 ### SEE ALSO
 
 * [daytona](daytona.md)	 - Daytona is a Dev Environment Manager
-* [daytona api-key generate](daytona_api-key_generate.md)	 - Generate a new API key
+* [daytona api-key create](daytona_api-key_create.md)	 - Create a new API key
+* [daytona api-key delete](daytona_api-key_delete.md)	 - Delete an API key
 * [daytona api-key list](daytona_api-key_list.md)	 - List API keys
-* [daytona api-key revoke](daytona_api-key_revoke.md)	 - Revoke an API key
 

@@ -4,17 +4,17 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GenerateApiKey**](ApiKeyAPI.md#GenerateApiKey) | **Post** /apikey/{apiKeyName} | Generate an API key
+[**CreateApiKey**](ApiKeyAPI.md#CreateApiKey) | **Post** /apikey/{apiKeyName} | Create an API key
+[**DeleteApiKey**](ApiKeyAPI.md#DeleteApiKey) | **Delete** /apikey/{apiKeyName} | Delete API key
 [**ListClientApiKeys**](ApiKeyAPI.md#ListClientApiKeys) | **Get** /apikey | List API keys
-[**RevokeApiKey**](ApiKeyAPI.md#RevokeApiKey) | **Delete** /apikey/{apiKeyName} | Revoke API key
 
 
 
-## GenerateApiKey
+## CreateApiKey
 
-> string GenerateApiKey(ctx, apiKeyName).Execute()
+> string CreateApiKey(ctx, apiKeyName).Execute()
 
-Generate an API key
+Create an API key
 
 
 
@@ -35,13 +35,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ApiKeyAPI.GenerateApiKey(context.Background(), apiKeyName).Execute()
+	resp, r, err := apiClient.ApiKeyAPI.CreateApiKey(context.Background(), apiKeyName).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ApiKeyAPI.GenerateApiKey``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ApiKeyAPI.CreateApiKey``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GenerateApiKey`: string
-	fmt.Fprintf(os.Stdout, "Response from `ApiKeyAPI.GenerateApiKey`: %v\n", resp)
+	// response from `CreateApiKey`: string
+	fmt.Fprintf(os.Stdout, "Response from `ApiKeyAPI.CreateApiKey`: %v\n", resp)
 }
 ```
 
@@ -55,7 +55,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGenerateApiKeyRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiCreateApiKeyRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -74,6 +74,74 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: text/plain
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteApiKey
+
+> DeleteApiKey(ctx, apiKeyName).Execute()
+
+Delete API key
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	apiKeyName := "apiKeyName_example" // string | API key name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.ApiKeyAPI.DeleteApiKey(context.Background(), apiKeyName).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ApiKeyAPI.DeleteApiKey``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**apiKeyName** | **string** | API key name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteApiKeyRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
@@ -135,74 +203,6 @@ Other parameters are passed through a pointer to a apiListClientApiKeysRequest s
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## RevokeApiKey
-
-> RevokeApiKey(ctx, apiKeyName).Execute()
-
-Revoke API key
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	apiKeyName := "apiKeyName_example" // string | API key name
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ApiKeyAPI.RevokeApiKey(context.Background(), apiKeyName).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ApiKeyAPI.RevokeApiKey``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**apiKeyName** | **string** | API key name | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiRevokeApiKeyRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: Not defined
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

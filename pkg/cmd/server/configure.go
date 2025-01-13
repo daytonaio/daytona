@@ -31,7 +31,7 @@ var configureCmd = &cobra.Command{
 			return err
 		}
 
-		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
+		_, res, err = apiClient.ServerAPI.SaveConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

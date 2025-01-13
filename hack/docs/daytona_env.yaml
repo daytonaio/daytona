@@ -7,6 +7,6 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
+    - daytona env delete - Delete server environment variables
     - daytona env list - List server environment variables
-    - daytona env remove - Remove server environment variables
     - daytona env set - Set server environment variables

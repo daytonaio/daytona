@@ -8,6 +8,7 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 	"github.com/spf13/cobra"
@@ -17,7 +18,7 @@ var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List targets",
 	Args:    cobra.ExactArgs(0),
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

@@ -47,7 +47,7 @@ func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTar
 		TargetConfig:   *tc,
 	}
 
-	apiKey, err := s.generateApiKey(ctx, tg.Id)
+	apiKey, err := s.createApiKey(ctx, tg.Id)
 	if err != nil {
 		return s.handleCreateError(ctx, nil, err)
 	}
