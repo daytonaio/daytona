@@ -10,18 +10,21 @@ import (
 	"fmt"
 
 	"github.com/daytonaio/daytona/internal/testing/common"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryBuildStore struct {
 	common.InMemoryStore
-	builds map[string]*models.Build
+	builds   map[string]*models.Build
+	jobStore stores.JobStore
 }
 
-func NewInMemoryBuildStore() stores.BuildStore {
+func NewInMemoryBuildStore(jobStore stores.JobStore) stores.BuildStore {
 	return &InMemoryBuildStore{
-		builds: make(map[string]*models.Build),
+		builds:   make(map[string]*models.Build),
+		jobStore: jobStore,
 	}
 }
 
@@ -63,10 +66,16 @@ func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*mode
 		filteredBuilds[k] = v
 	}
 
+	jobs, err := s.jobMap(context.Background())
+	if err != nil {
+		return nil, err
+	}
+
 	if filter != nil {
 		if filter.Id != nil {
 			b, ok := s.builds[*filter.Id]
 			if ok {
+				b.LastJob = jobs[b.Id]
 				return []*models.Build{b}, nil
 			} else {
 				return []*models.Build{}, fmt.Errorf("build with id %s not found", *filter.Id)
@@ -98,6 +107,7 @@ func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*mode
 				}
 			}
 			if newestBuild != nil {
+				newestBuild.LastJob = jobs[newestBuild.Id]
 				return []*models.Build{newestBuild}, nil
 			}
 		}
@@ -139,8 +149,25 @@ func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*mode
 	}
 
 	for _, b := range filteredBuilds {
+		b.LastJob = jobs[b.Id]
 		result = append(result, b)
 	}
 
 	return result, nil
+}
+
+func (s *InMemoryBuildStore) jobMap(ctx context.Context) (map[string]*models.Job, error) {
+	jobs, err := s.jobStore.List(ctx, &stores.JobFilter{
+		ResourceType: util.Pointer(models.ResourceTypeWorkspace),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	jobMap := make(map[string]*models.Job)
+	for _, j := range jobs {
+		jobMap[j.ResourceId] = j
+	}
+
+	return jobMap, nil
 }

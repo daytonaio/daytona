@@ -7,6 +7,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/daytonaio/daytona/internal/testing/job"
 	t_targetconfigs "github.com/daytonaio/daytona/internal/testing/server/targetconfigs"
 	t_targets "github.com/daytonaio/daytona/internal/testing/server/targets"
 	"github.com/daytonaio/daytona/internal/testing/server/targets/mocks"
@@ -25,6 +26,7 @@ const serverApiUrl = "http://localhost:3986"
 const serverUrl = "http://localhost:3987"
 
 var tc = models.TargetConfig{
+	Id:   "test",
 	Name: "test",
 	ProviderInfo: models.ProviderInfo{
 		Name:    "test-provider",
@@ -58,7 +60,9 @@ func TestTargetService(t *testing.T) {
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, "test-client-id")
 
-	targetStore := t_targets.NewInMemoryTargetStore()
+	jobStore := job.NewInMemoryJobStore()
+
+	targetStore := t_targets.NewInMemoryTargetStore(jobStore)
 	targetMetadataStore := t_targets.NewInMemoryTargetMetadataStore()
 	targetConfigStore := t_targetconfigs.NewInMemoryTargetConfigStore()
 
@@ -84,6 +88,19 @@ func TestTargetService(t *testing.T) {
 		ServerApiUrl:  serverApiUrl,
 		ServerUrl:     serverUrl,
 		LoggerFactory: logs.NewLoggerFactory(logs.LoggerFactoryConfig{LogsDir: tgLogsDir}),
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return nil
+		},
+		CreateJob: func(ctx context.Context, targetId, runnerId string, action models.JobAction) error {
+			return jobStore.Save(ctx, &models.Job{
+				Id:           targetId,
+				ResourceId:   targetId,
+				RunnerId:     util.Pointer(runnerId),
+				ResourceType: models.ResourceTypeTarget,
+				Action:       action,
+				State:        models.JobStateSuccess,
+			})
+		},
 	})
 
 	t.Run("CreateTarget", func(t *testing.T) {
@@ -93,9 +110,6 @@ func TestTargetService(t *testing.T) {
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
-
-		// Must be true after creation
-		tg.IsDefault = true
 
 		targetEquals(t, tg, target)
 
@@ -155,6 +169,16 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 	})
 
+	t.Run("SetTargetMetadata", func(t *testing.T) {
+		err := targetStore.Save(ctx, tg)
+		require.Nil(t, err)
+
+		_, err = service.SetTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
+			Uptime: 10,
+		})
+		require.Nil(t, err)
+	})
+
 	t.Run("RemoveTarget", func(t *testing.T) {
 		apiKeyService.On("Revoke", mock.Anything).Return(nil)
 
@@ -163,7 +187,7 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 
 		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
-		require.Equal(t, stores.ErrTargetNotFound, err)
+		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 
 	t.Run("ForceRemoveTarget", func(t *testing.T) {
@@ -177,26 +201,17 @@ func TestTargetService(t *testing.T) {
 		require.Nil(t, err)
 
 		_, err = service.GetTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
-		require.Equal(t, stores.ErrTargetNotFound, err)
+		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 
 	t.Run("CreateTarget fails name validation", func(t *testing.T) {
 		invalidTargetRequest := createTargetDTO
+		invalidTargetRequest.Id = "some-id"
 		invalidTargetRequest.Name = "invalid name"
 
 		_, err := service.CreateTarget(ctx, invalidTargetRequest)
 		require.NotNil(t, err)
 		require.Equal(t, services.ErrInvalidTargetName, err)
-	})
-
-	t.Run("SetTargetMetadata", func(t *testing.T) {
-		err := targetStore.Save(ctx, tg)
-		require.Nil(t, err)
-
-		_, err = service.SetTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
-			Uptime: 10,
-		})
-		require.Nil(t, err)
 	})
 
 	t.Cleanup(func() {
