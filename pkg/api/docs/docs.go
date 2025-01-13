@@ -2496,7 +2496,6 @@ const docTemplate = `{
                 "createdAt",
                 "envVars",
                 "id",
-                "prebuildId",
                 "repository",
                 "state",
                 "updatedAt"

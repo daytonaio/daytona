@@ -11,7 +11,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Image** | Pointer to **string** |  | [optional] 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
-**PrebuildId** | **string** |  | 
+**PrebuildId** | Pointer to **string** |  | [optional] 
 **Repository** | [**GitRepository**](GitRepository.md) |  | 
 **State** | [**ResourceState**](ResourceState.md) |  | 
 **UpdatedAt** | **string** |  | 
@@ -21,7 +21,7 @@ Name | Type | Description | Notes
 
 ### NewBuildDTO
 
-`func NewBuildDTO(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, prebuildId string, repository GitRepository, state ResourceState, updatedAt string, ) *BuildDTO`
+`func NewBuildDTO(containerConfig ContainerConfig, createdAt string, envVars map[string]string, id string, repository GitRepository, state ResourceState, updatedAt string, ) *BuildDTO`
 
 NewBuildDTO instantiates a new BuildDTO object
 This constructor will assign default values to properties that have it defined,
@@ -210,6 +210,11 @@ and a boolean to check if the value has been set.
 
 SetPrebuildId sets PrebuildId field to given value.
 
+### HasPrebuildId
+
+`func (o *BuildDTO) HasPrebuildId() bool`
+
+HasPrebuildId returns a boolean if a field has been set.
 
 ### GetRepository
 
