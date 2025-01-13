@@ -19,7 +19,7 @@ type RunnerJobFactory struct {
 }
 
 type RunnerJobFactoryConfig struct {
-	TrackTelemetryEvent func(event telemetry.BuildRunnerEvent, clientId string, props map[string]interface{}) error
+	TrackTelemetryEvent func(event telemetry.Event, clientId string) error
 	ProviderManager     providermanager.IProviderManager
 }
 

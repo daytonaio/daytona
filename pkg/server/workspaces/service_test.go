@@ -144,7 +144,7 @@ func TestTargetService(t *testing.T) {
 		GetLastCommitSha: func(ctx context.Context, repo *gitprovider.GitRepository) (string, error) {
 			return gitProviderService.GetLastCommitSha(repo)
 		},
-		TrackTelemetryEvent: func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error {
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
 			return nil
 		},
 		WorkspaceStore:        workspaceStore,

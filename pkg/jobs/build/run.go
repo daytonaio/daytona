@@ -50,10 +50,6 @@ func (bj *BuildJob) run(ctx context.Context, j *models.Job) error {
 	}
 
 	exists := bj.checkImageExists(ctx, imageName)
-	if err != nil {
-		return bj.handleBuildResult(b.Build, builder, buildLogger, err)
-	}
-
 	if exists {
 		return bj.handleBuildResult(b.Build, builder, buildLogger, nil)
 	}

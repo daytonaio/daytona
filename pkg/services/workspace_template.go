@@ -18,7 +18,7 @@ type IWorkspaceTemplateService interface {
 	SetDefault(ctx context.Context, workspaceTemplateName string) error
 	Delete(ctx context.Context, workspaceTemplateName string, force bool) []error
 
-	SetPrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
+	SavePrebuild(ctx context.Context, workspaceTemplateName string, createPrebuildDto CreatePrebuildDTO) (*PrebuildDTO, error)
 	FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*PrebuildDTO, error)
 	ListPrebuilds(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) ([]*PrebuildDTO, error)
 	DeletePrebuild(ctx context.Context, workspaceTemplateName string, id string, force bool) []error

@@ -25,7 +25,7 @@ type TargetJobFactoryConfig struct {
 	FindTarget               func(ctx context.Context, targetId string) (*models.Target, error)
 	HandleSuccessfulCreation func(ctx context.Context, targetId string) error
 
-	TrackTelemetryEvent          func(event telemetry.ServerEvent, clientId string, props map[string]interface{}) error
+	TrackTelemetryEvent          func(event telemetry.Event, clientId string) error
 	UpdateTargetProviderMetadata func(ctx context.Context, targetId, metadata string) error
 
 	LoggerFactory   logs.ILoggerFactory

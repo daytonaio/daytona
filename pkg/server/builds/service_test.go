@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/server/builds"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/suite"
 )
 
@@ -106,6 +107,9 @@ func (s *BuildServiceTestSuite) SetupTest() {
 	s.buildStore = build_internal.NewInMemoryBuildStore()
 	s.buildService = builds.NewBuildService(builds.BuildServiceConfig{
 		BuildStore: s.buildStore,
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return nil
+		},
 	})
 
 	for _, b := range expectedBuilds {

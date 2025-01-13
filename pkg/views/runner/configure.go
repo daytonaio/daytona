@@ -74,6 +74,9 @@ func (m *Model) createForm() *huh.Form {
 				Title("Providers Directory").
 				Description("Directory will be created if it does not exist").
 				Value(&m.config.ProvidersDir),
+			huh.NewConfirm().
+				Title("Telemetry Enabled").
+				Value(&m.config.TelemetryEnabled),
 		),
 		huh.NewGroup(
 			huh.NewInput().

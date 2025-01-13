@@ -12,6 +12,7 @@ var GitProviderCmd = &cobra.Command{
 	Use:     "git-providers",
 	Aliases: []string{"git-provider", "gp"},
 	Short:   "Manage Git providers",
+	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
 }
 
