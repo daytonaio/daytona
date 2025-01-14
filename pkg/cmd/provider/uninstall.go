@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var providerUninstallCmd = &cobra.Command{
+var uninstallCmd = &cobra.Command{
 	Use:     "uninstall",
 	Short:   "Uninstall provider",
 	Args:    cobra.NoArgs,

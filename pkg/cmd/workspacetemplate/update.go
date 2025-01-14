@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var workspaceTemplateUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update a workspace template",
 	Args:    cobra.MaximumNArgs(1),

@@ -20,7 +20,7 @@ import (
 
 var allFlag bool
 
-var providerUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
@@ -138,5 +138,5 @@ func updateProvider(runnerId string, providerName string, providersManifest *uti
 }
 
 func init() {
-	providerUpdateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
+	updateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
 }

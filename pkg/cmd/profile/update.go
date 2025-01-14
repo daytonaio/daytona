@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var profileUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update profile [PROFILE_NAME]",
 	Args:    cobra.RangeArgs(0, 1),
@@ -113,7 +113,7 @@ func editProfile(profileToEdit *config.Profile, profileView profile.ProfileAddVi
 }
 
 func init() {
-	profileUpdateCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
-	profileUpdateCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
-	profileUpdateCmd.Flags().StringVarP(&apiKeyFlag, "api-key", "k", "", "API Key")
+	updateCmd.Flags().StringVarP(&profileNameFlag, "name", "n", "", "Profile name")
+	updateCmd.Flags().StringVarP(&apiUrlFlag, "api-url", "a", "", "API URL")
+	updateCmd.Flags().StringVarP(&apiKeyFlag, "api-key", "k", "", "API Key")
 }

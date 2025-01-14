@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gitProviderListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Lists your registered Git provider configs",
 	Aliases: common.GetAliases("list"),
@@ -69,5 +69,5 @@ var gitProviderListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(gitProviderListCmd)
+	format.RegisterFormatFlag(listCmd)
 }
