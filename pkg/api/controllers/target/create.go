@@ -33,7 +33,7 @@ func CreateTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.CreateTarget(ctx.Request.Context(), createTargetReq)
+	t, err := server.TargetService.Create(ctx.Request.Context(), createTargetReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create target: %w", err))
 		return

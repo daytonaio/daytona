@@ -36,7 +36,7 @@ func UpdateWorkspaceMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.WorkspaceService.UpdateWorkspaceMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
+	_, err = server.WorkspaceService.UpdateMetadata(ctx.Request.Context(), workspaceId, &models.WorkspaceMetadata{
 		Uptime:    updateDTO.Uptime,
 		GitStatus: updateDTO.GitStatus,
 	})
@@ -71,7 +71,7 @@ func UpdateWorkspaceProviderMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.WorkspaceService.UpdateWorkspaceProviderMetadata(ctx.Request.Context(), workspaceId, metadata.Metadata)
+	err = server.WorkspaceService.UpdateProviderMetadata(ctx.Request.Context(), workspaceId, metadata.Metadata)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update workspace provider metadata for %s: %w", workspaceId, err))
 		return

@@ -26,7 +26,7 @@ func StartTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.TargetService.StartTarget(ctx.Request.Context(), targetId)
+	err := server.TargetService.Start(ctx.Request.Context(), targetId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start target %s: %w", targetId, err))
 		return

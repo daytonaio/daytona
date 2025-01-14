@@ -13,13 +13,14 @@ import (
 )
 
 type IRunnerService interface {
-	ListRunners(ctx context.Context) ([]*RunnerDTO, error)
-	ListRunnerJobs(ctx context.Context, runnerId string) ([]*models.Job, error)
-	FindRunner(ctx context.Context, runnerId string) (*RunnerDTO, error)
-	CreateRunner(ctx context.Context, req CreateRunnerDTO) (*RunnerDTO, error)
+	List(ctx context.Context) ([]*RunnerDTO, error)
+	Find(ctx context.Context, runnerId string) (*RunnerDTO, error)
+	Create(ctx context.Context, req CreateRunnerDTO) (*RunnerDTO, error)
+	Delete(ctx context.Context, runnerId string) error
+
+	UpdateMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error
 	UpdateJobState(ctx context.Context, jobId string, req UpdateJobStateDTO) error
-	UpdateRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error
-	DeleteRunner(ctx context.Context, runnerId string) error
+	ListRunnerJobs(ctx context.Context, runnerId string) ([]*models.Job, error)
 
 	ListProviders(ctx context.Context, runnerId *string) ([]models.ProviderInfo, error)
 	InstallProvider(ctx context.Context, runnerId string, providerDto InstallProviderDTO) error

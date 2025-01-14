@@ -15,8 +15,8 @@ type IGitProviderService interface {
 	ListConfigs(ctx context.Context) ([]*models.GitProviderConfig, error)
 	ListConfigsForUrl(ctx context.Context, url string) ([]*models.GitProviderConfig, error)
 	FindConfig(ctx context.Context, id string) (*models.GitProviderConfig, error)
-	SaveGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error
-	DeleteGitProviderConfig(ctx context.Context, id string) error
+	SaveConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error
+	DeleteConfig(ctx context.Context, id string) error
 
 	GetGitProvider(ctx context.Context, id string) (gitprovider.GitProvider, error)
 	GetGitProviderForUrl(ctx context.Context, url string) (gitprovider.GitProvider, string, error)

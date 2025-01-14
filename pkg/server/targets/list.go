@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *TargetService) ListTargets(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) ([]services.TargetDTO, error) {
+func (s *TargetService) List(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) ([]services.TargetDTO, error) {
 	targets, err := s.targetStore.List(ctx, filter)
 	if err != nil {
 		return nil, err

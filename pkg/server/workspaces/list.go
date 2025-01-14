@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/services"
 )
 
-func (s *WorkspaceService) ListWorkspaces(ctx context.Context, params services.WorkspaceRetrievalParams) ([]services.WorkspaceDTO, error) {
+func (s *WorkspaceService) List(ctx context.Context, params services.WorkspaceRetrievalParams) ([]services.WorkspaceDTO, error) {
 	workspaces, err := s.workspaceStore.List(ctx)
 	if err != nil {
 		return nil, err
