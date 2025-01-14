@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *GitProviderService) DeleteGitProviderConfig(ctx context.Context, gitProviderId string) error {
+func (s *GitProviderService) DeleteConfig(ctx context.Context, gitProviderId string) error {
 	gitProvider, err := s.configStore.Find(ctx, gitProviderId)
 	if err != nil {
 		return s.handleDeleteGitProviderConfigError(ctx, nil, err)

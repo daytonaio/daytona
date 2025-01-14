@@ -26,7 +26,7 @@ func DeleteRunner(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.RunnerService.DeleteRunner(ctx.Request.Context(), runnerId)
+	err := server.RunnerService.Delete(ctx.Request.Context(), runnerId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete runner: %w", err))
 		return

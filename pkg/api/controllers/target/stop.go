@@ -26,7 +26,7 @@ func StopTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.TargetService.StopTarget(ctx.Request.Context(), targetId)
+	err := server.TargetService.Stop(ctx.Request.Context(), targetId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop target %s: %w", targetId, err))
 		return

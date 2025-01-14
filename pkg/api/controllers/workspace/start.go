@@ -26,7 +26,7 @@ func StartWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StartWorkspace(ctx.Request.Context(), workspaceId)
+	err := server.WorkspaceService.Start(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace %s: %w", workspaceId, err))
 		return

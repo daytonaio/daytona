@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) CreateTarget(ctx context.Context, req services.CreateTargetDTO) (*models.Target, error) {
+func (s *TargetService) Create(ctx context.Context, req services.CreateTargetDTO) (*models.Target, error) {
 	var err error
 	ctx, err = s.targetStore.BeginTransaction(ctx)
 	if err != nil {

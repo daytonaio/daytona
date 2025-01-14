@@ -37,7 +37,7 @@ func FindTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	t, err := server.TargetService.FindTarget(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+	t, err := server.TargetService.Find(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsTargetNotFound(err) || services.IsTargetDeleted(err) {
@@ -84,7 +84,7 @@ func ListTargets(ctx *gin.Context) {
 		showTargetConfigOptions = true
 	}
 
-	targetList, err := server.TargetService.ListTargets(ctx.Request.Context(), nil, services.TargetRetrievalParams{})
+	targetList, err := server.TargetService.List(ctx.Request.Context(), nil, services.TargetRetrievalParams{})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list targets: %w", err))
 		return

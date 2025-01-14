@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) StopTarget(ctx context.Context, targetId string) error {
+func (s *TargetService) Stop(ctx context.Context, targetId string) error {
 	target, err := s.targetStore.Find(ctx, &stores.TargetFilter{IdOrName: &targetId})
 	if err != nil {
 		return s.handleStopError(ctx, nil, stores.ErrTargetNotFound)

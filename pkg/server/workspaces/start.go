@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId string) error {
+func (s *WorkspaceService) Start(ctx context.Context, workspaceId string) error {
 	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleStartError(ctx, w, stores.ErrWorkspaceNotFound)

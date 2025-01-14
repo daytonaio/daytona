@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *TargetService) FindTarget(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) (*services.TargetDTO, error) {
+func (s *TargetService) Find(ctx context.Context, filter *stores.TargetFilter, params services.TargetRetrievalParams) (*services.TargetDTO, error) {
 	tg, err := s.targetStore.Find(ctx, filter)
 	if err != nil {
 		return nil, stores.ErrTargetNotFound
