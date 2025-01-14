@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *TargetService) DeleteTarget(ctx context.Context, targetId string) error {
+func (s *TargetService) Delete(ctx context.Context, targetId string) error {
 	var err error
 	ctx, err = s.targetStore.BeginTransaction(ctx)
 	if err != nil {
@@ -58,8 +58,8 @@ func (s *TargetService) DeleteTarget(ctx context.Context, targetId string) error
 	return s.handleDeleteError(ctx, t, err)
 }
 
-// ForceDeleteTarget ignores provider errors and makes sure the target is deleted from storage.
-func (s *TargetService) ForceDeleteTarget(ctx context.Context, targetId string) error {
+// ForceDelete ignores provider errors and makes sure the target is deleted from storage.
+func (s *TargetService) ForceDelete(ctx context.Context, targetId string) error {
 	var err error
 	ctx, err = s.targetStore.BeginTransaction(ctx)
 	if err != nil {

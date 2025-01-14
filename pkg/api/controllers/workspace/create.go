@@ -33,7 +33,7 @@ func CreateWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.CreateWorkspace(ctx.Request.Context(), createWorkspaceReq)
+	w, err := server.WorkspaceService.Create(ctx.Request.Context(), createWorkspaceReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create workspace: %w", err))
 		return

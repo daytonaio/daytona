@@ -24,7 +24,7 @@ import (
 func ListRunners(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	runners, err := server.RunnerService.ListRunners(ctx.Request.Context())
+	runners, err := server.RunnerService.List(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to register runner: %w", err))
 		return

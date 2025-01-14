@@ -195,7 +195,7 @@ func TestWorkspaceService(t *testing.T) {
 
 		gitProviderService.On("FindConfig", "github").Return(&gitProviderConfig, nil)
 
-		workspace, err := service.CreateWorkspace(ctx, createWorkspaceDTO)
+		workspace, err := service.Create(ctx, createWorkspaceDTO)
 
 		require.Nil(t, err)
 		require.NotNil(t, workspace)
@@ -210,7 +210,7 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("CreateWorkspace fails when workspace already exists", func(t *testing.T) {
-		_, err := service.CreateWorkspace(ctx, createWorkspaceDTO)
+		_, err := service.Create(ctx, createWorkspaceDTO)
 		require.NotNil(t, err)
 		require.Equal(t, services.ErrWorkspaceAlreadyExists, err)
 	})
@@ -219,13 +219,13 @@ func TestWorkspaceService(t *testing.T) {
 		invalidWorkspaceRequest := createWorkspaceDTO
 		invalidWorkspaceRequest.Name = "invalid name"
 
-		_, err := service.CreateWorkspace(ctx, invalidWorkspaceRequest)
+		_, err := service.Create(ctx, invalidWorkspaceRequest)
 		require.NotNil(t, err)
 		require.Equal(t, services.ErrInvalidWorkspaceName, err)
 	})
 
 	t.Run("FindWorkspace", func(t *testing.T) {
-		w, err := service.FindWorkspace(ctx, ws.Id, services.WorkspaceRetrievalParams{})
+		w, err := service.Find(ctx, ws.Id, services.WorkspaceRetrievalParams{})
 
 		require.Nil(t, err)
 		require.NotNil(t, w)
@@ -234,13 +234,13 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("FindWorkspace fails when workspace not found", func(t *testing.T) {
-		_, err := service.FindWorkspace(ctx, "invalid-id", services.WorkspaceRetrievalParams{})
+		_, err := service.Find(ctx, "invalid-id", services.WorkspaceRetrievalParams{})
 		require.NotNil(t, err)
 		require.Equal(t, stores.ErrWorkspaceNotFound, err)
 	})
 
 	t.Run("ListWorkspaces", func(t *testing.T) {
-		workspaces, err := service.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{})
+		workspaces, err := service.List(ctx, services.WorkspaceRetrievalParams{})
 
 		require.Nil(t, err)
 		require.Len(t, workspaces, 1)
@@ -249,19 +249,19 @@ func TestWorkspaceService(t *testing.T) {
 	})
 
 	t.Run("StartWorkspace", func(t *testing.T) {
-		err := service.StartWorkspace(ctx, createWorkspaceDTO.Id)
+		err := service.Start(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("StopWorkspace", func(t *testing.T) {
-		err := service.StopWorkspace(ctx, createWorkspaceDTO.Id)
+		err := service.Stop(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 	})
 
 	t.Run("UpdateWorkspaceMetadata", func(t *testing.T) {
-		res, err := service.UpdateWorkspaceMetadata(ctx, createWorkspaceDTO.Id, &models.WorkspaceMetadata{
+		res, err := service.UpdateMetadata(ctx, createWorkspaceDTO.Id, &models.WorkspaceMetadata{
 			Uptime: 10,
 			GitStatus: &models.GitStatus{
 				CurrentBranch: "main",
@@ -276,11 +276,11 @@ func TestWorkspaceService(t *testing.T) {
 	t.Run("DeleteWorkspace", func(t *testing.T) {
 		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err := service.DeleteWorkspace(ctx, createWorkspaceDTO.Id)
+		err := service.Delete(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.FindWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
+		_, err = service.Find(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
 		require.Equal(t, services.ErrWorkspaceDeleted, err)
 	})
 
@@ -290,11 +290,11 @@ func TestWorkspaceService(t *testing.T) {
 
 		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err = service.ForceDeleteWorkspace(ctx, createWorkspaceDTO.Id)
+		err = service.ForceDelete(ctx, createWorkspaceDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.FindWorkspace(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
+		_, err = service.Find(ctx, createWorkspaceDTO.Id, services.WorkspaceRetrievalParams{})
 		require.Equal(t, services.ErrWorkspaceDeleted, err)
 	})
 

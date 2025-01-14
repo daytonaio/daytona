@@ -44,7 +44,7 @@ func FindContainerRegistry(ctx *gin.Context) {
 	envVars = serverEnvVars
 
 	if workspaceId != "" {
-		w, err := server.WorkspaceService.FindWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+		w, err := server.WorkspaceService.Find(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 		if err != nil {
 			statusCode := http.StatusInternalServerError
 			if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {

@@ -26,7 +26,7 @@ func RestartWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.RestartWorkspace(ctx.Request.Context(), workspaceId)
+	err := server.WorkspaceService.Restart(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to restart workspace %s: %w", workspaceId, err))
 		return

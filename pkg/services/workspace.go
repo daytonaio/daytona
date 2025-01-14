@@ -13,16 +13,17 @@ import (
 )
 
 type IWorkspaceService interface {
-	ListWorkspaces(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
-	FindWorkspace(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
-	CreateWorkspace(ctx context.Context, req CreateWorkspaceDTO) (*WorkspaceDTO, error)
-	UpdateWorkspaceMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
-	UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error
-	StartWorkspace(ctx context.Context, workspaceId string) error
-	StopWorkspace(ctx context.Context, workspaceId string) error
-	RestartWorkspace(ctx context.Context, workspaceId string) error
-	DeleteWorkspace(ctx context.Context, workspaceId string) error
-	ForceDeleteWorkspace(ctx context.Context, workspaceId string) error
+	List(ctx context.Context, params WorkspaceRetrievalParams) ([]WorkspaceDTO, error)
+	Find(ctx context.Context, workspaceId string, params WorkspaceRetrievalParams) (*WorkspaceDTO, error)
+	Create(ctx context.Context, req CreateWorkspaceDTO) (*WorkspaceDTO, error)
+	Start(ctx context.Context, workspaceId string) error
+	Stop(ctx context.Context, workspaceId string) error
+	Restart(ctx context.Context, workspaceId string) error
+	Delete(ctx context.Context, workspaceId string) error
+	ForceDelete(ctx context.Context, workspaceId string) error
+
+	UpdateMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
+	UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)
