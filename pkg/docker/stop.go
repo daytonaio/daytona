@@ -23,7 +23,9 @@ func (d *DockerClient) stopWorkspaceContainer(w *models.Workspace, logWriter io.
 	containerName := d.GetWorkspaceContainerName(w)
 	ctx := context.Background()
 
-	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{})
+	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{
+		Signal: "SIGKILL",
+	})
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,9 @@ func (d *DockerClient) stopWorkspaceContainer(w *models.Workspace, logWriter io.
 	}
 
 	for _, c := range composeContainers {
-		err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{})
+		err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{
+			Signal: "SIGKILL",
+		})
 		if err != nil {
 			return err
 		}

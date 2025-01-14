@@ -18,7 +18,7 @@ func (s *WorkspaceService) Restart(ctx context.Context, workspaceId string) erro
 		return s.handleRestartError(ctx, w, stores.ErrWorkspaceNotFound)
 	}
 
-	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionStart)
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionRestart)
 	if err != nil {
 		return s.handleRestartError(ctx, w, err)
 	}
