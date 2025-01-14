@@ -8,6 +8,8 @@ see_also:
     - daytona - Daytona is a Dev Environment Manager
     - daytona template create - Create a workspace template
     - daytona template delete - Delete a workspace template
+    - daytona template export - Export a workspace template
+    - daytona template import - Import a workspace template from a JSON object
     - daytona template info - Show workspace template info
     - daytona template list - Lists workspace templates
     - daytona template set-default - Set workspace template info
