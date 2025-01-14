@@ -236,6 +236,7 @@ func (a *ApiServer) Start() error {
 		providerController.GET("/", provider.ListProviders)
 		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
 		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
+		providerController.GET("/health", provider.HealthCheck)
 	}
 
 	containerRegistryController := protected.Group("/container-registry")

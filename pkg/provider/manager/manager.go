@@ -46,6 +46,7 @@ type IProviderManager interface {
 	TerminateProviderProcesses(providersBasePath string) error
 	UninstallProvider(name string) error
 	Purge() error
+	IsInitialized(providerName string) bool
 }
 
 type ProviderManagerConfig struct {
@@ -334,4 +335,12 @@ func (m *ProviderManager) dispenseProvider(client *plugin.Client, name string) (
 	}
 
 	return &provider, nil
+}
+
+func (m *ProviderManager) IsInitialized(providerName string) bool {
+	pluginRef, exists := m.pluginRefs[providerName]
+	if !exists {
+		return false
+	}
+	return pluginRef != nil
 }
