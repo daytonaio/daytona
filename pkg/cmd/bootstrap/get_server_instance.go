@@ -341,7 +341,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		WorkspaceStore:         workspaceStore,
 		WorkspaceMetadataStore: workspaceMetadataStore,
 		FindTarget: func(ctx context.Context, targetId string) (*models.Target, error) {
-			t, err := targetService.FindTarget(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+			t, err := targetService.Find(ctx, &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
 			if err != nil {
 				return nil, err
 			}
@@ -445,7 +445,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 		},
 		DeleteApiKey: apiKeyService.Delete,
 		UnsetDefaultTarget: func(ctx context.Context, runnerId string) error {
-			targets, err := targetService.ListTargets(ctx, nil, services.TargetRetrievalParams{})
+			targets, err := targetService.List(ctx, nil, services.TargetRetrievalParams{})
 			if err != nil {
 				return err
 			}
@@ -453,7 +453,7 @@ func GetInstance(c *server.Config, configDir string, version string, telemetrySe
 			for _, t := range targets {
 				if t.TargetConfig.ProviderInfo.RunnerId == runnerId && t.IsDefault {
 					t.IsDefault = false
-					err = targetService.SaveTarget(ctx, &t.Target)
+					err = targetService.Save(ctx, &t.Target)
 					if err != nil {
 						return err
 					}

@@ -33,7 +33,7 @@ func CreateRunner(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	r, err := server.RunnerService.CreateRunner(ctx.Request.Context(), createRunnerReq)
+	r, err := server.RunnerService.Create(ctx.Request.Context(), createRunnerReq)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to create runner: %w", err))
 		return

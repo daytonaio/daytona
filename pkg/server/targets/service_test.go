@@ -106,7 +106,7 @@ func TestTargetService(t *testing.T) {
 	t.Run("CreateTarget", func(t *testing.T) {
 		apiKeyService.On("Create", models.ApiKeyTypeTarget, createTargetDTO.Id).Return(createTargetDTO.Id, nil)
 
-		target, err := service.CreateTarget(ctx, createTargetDTO)
+		target, err := service.Create(ctx, createTargetDTO)
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -118,13 +118,13 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("CreateTarget fails when target already exists", func(t *testing.T) {
-		_, err := service.CreateTarget(ctx, createTargetDTO)
+		_, err := service.Create(ctx, createTargetDTO)
 		require.NotNil(t, err)
 		require.Equal(t, services.ErrTargetAlreadyExists, err)
 	})
 
 	t.Run("FindTarget", func(t *testing.T) {
-		target, err := service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+		target, err := service.Find(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 
 		require.Nil(t, err)
 		require.NotNil(t, target)
@@ -133,13 +133,13 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("FindTarget fails when target not found", func(t *testing.T) {
-		_, err := service.FindTarget(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{})
+		_, err := service.Find(ctx, &stores.TargetFilter{IdOrName: util.Pointer("invalid-id")}, services.TargetRetrievalParams{})
 		require.NotNil(t, err)
 		require.Equal(t, stores.ErrTargetNotFound, err)
 	})
 
 	t.Run("ListTargets", func(t *testing.T) {
-		targets, err := service.ListTargets(ctx, nil, services.TargetRetrievalParams{})
+		targets, err := service.List(ctx, nil, services.TargetRetrievalParams{})
 
 		require.Nil(t, err)
 		require.Len(t, targets, 1)
@@ -156,7 +156,7 @@ func TestTargetService(t *testing.T) {
 			ClientId:  "test-client-id",
 		})
 
-		err := service.StartTarget(ctx, createTargetDTO.Id)
+		err := service.Start(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
@@ -164,7 +164,7 @@ func TestTargetService(t *testing.T) {
 	})
 
 	t.Run("StopTarget", func(t *testing.T) {
-		err := service.StopTarget(ctx, createTargetDTO.Id)
+		err := service.Stop(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 	})
@@ -173,7 +173,7 @@ func TestTargetService(t *testing.T) {
 		err := targetStore.Save(ctx, tg)
 		require.Nil(t, err)
 
-		_, err = service.UpdateTargetMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
+		_, err = service.UpdateMetadata(context.TODO(), tg.Id, &models.TargetMetadata{
 			Uptime: 10,
 		})
 		require.Nil(t, err)
@@ -182,11 +182,11 @@ func TestTargetService(t *testing.T) {
 	t.Run("DeleteTarget", func(t *testing.T) {
 		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err := service.DeleteTarget(ctx, createTargetDTO.Id)
+		err := service.Delete(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+		_, err = service.Find(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 
@@ -196,11 +196,11 @@ func TestTargetService(t *testing.T) {
 
 		apiKeyService.On("Delete", mock.Anything).Return(nil)
 
-		err = service.ForceDeleteTarget(ctx, createTargetDTO.Id)
+		err = service.ForceDelete(ctx, createTargetDTO.Id)
 
 		require.Nil(t, err)
 
-		_, err = service.FindTarget(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
+		_, err = service.Find(ctx, &stores.TargetFilter{IdOrName: &createTargetDTO.Id}, services.TargetRetrievalParams{})
 		require.Equal(t, services.ErrTargetDeleted, err)
 	})
 
@@ -209,7 +209,7 @@ func TestTargetService(t *testing.T) {
 		invalidTargetRequest.Id = "some-id"
 		invalidTargetRequest.Name = "invalid name"
 
-		_, err := service.CreateTarget(ctx, invalidTargetRequest)
+		_, err := service.Create(ctx, invalidTargetRequest)
 		require.NotNil(t, err)
 		require.Equal(t, services.ErrInvalidTargetName, err)
 	})

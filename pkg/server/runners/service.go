@@ -62,7 +62,7 @@ type RunnerService struct {
 	trackTelemetryEvent func(event telemetry.Event, clientId string) error
 }
 
-func (s *RunnerService) FindRunner(ctx context.Context, runnerId string) (*services.RunnerDTO, error) {
+func (s *RunnerService) Find(ctx context.Context, runnerId string) (*services.RunnerDTO, error) {
 	runner, err := s.runnerStore.Find(ctx, runnerId)
 	if err != nil {
 		return nil, stores.ErrRunnerNotFound
@@ -74,7 +74,7 @@ func (s *RunnerService) FindRunner(ctx context.Context, runnerId string) (*servi
 	}, nil
 }
 
-func (s *RunnerService) ListRunners(ctx context.Context) ([]*services.RunnerDTO, error) {
+func (s *RunnerService) List(ctx context.Context) ([]*services.RunnerDTO, error) {
 	runners, err := s.runnerStore.List(ctx)
 	if err != nil {
 		return nil, err
@@ -88,7 +88,7 @@ func (s *RunnerService) ListRunners(ctx context.Context) ([]*services.RunnerDTO,
 	}), nil
 }
 
-func (s *RunnerService) UpdateRunnerMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error {
+func (s *RunnerService) UpdateMetadata(ctx context.Context, runnerId string, metadata *models.RunnerMetadata) error {
 	m, err := s.runnerMetadataStore.Find(ctx, runnerId)
 	if err != nil {
 		return stores.ErrRunnerMetadataNotFound

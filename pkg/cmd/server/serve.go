@@ -248,10 +248,10 @@ func ensureDefaultProfile(server *server.Server, apiPort uint32) error {
 func startLocalRunner(params bootstrap.LocalRunnerParams) error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.FindRunner(context.Background(), common.LOCAL_RUNNER_ID)
+	_, err := runnerService.Find(context.Background(), common.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
-			_, err := runnerService.CreateRunner(context.Background(), services.CreateRunnerDTO{
+			_, err := runnerService.Create(context.Background(), services.CreateRunnerDTO{
 				Id:   common.LOCAL_RUNNER_ID,
 				Name: common.LOCAL_RUNNER_ID,
 			})
@@ -290,7 +290,7 @@ func awaitLocalRunnerStarted() error {
 	startTime := time.Now()
 
 	for {
-		r, err := server.RunnerService.FindRunner(context.Background(), common.LOCAL_RUNNER_ID)
+		r, err := server.RunnerService.Find(context.Background(), common.LOCAL_RUNNER_ID)
 		if err != nil {
 			return err
 		}
@@ -313,12 +313,12 @@ func awaitLocalRunnerStarted() error {
 func handleDisabledLocalRunner() error {
 	runnerService := server.GetInstance(nil).RunnerService
 
-	_, err := runnerService.FindRunner(context.Background(), common.LOCAL_RUNNER_ID)
+	_, err := runnerService.Find(context.Background(), common.LOCAL_RUNNER_ID)
 	if err != nil {
 		if stores.IsRunnerNotFound(err) {
 			return nil
 		}
 	}
 
-	return runnerService.DeleteRunner(context.Background(), common.LOCAL_RUNNER_ID)
+	return runnerService.Delete(context.Background(), common.LOCAL_RUNNER_ID)
 }

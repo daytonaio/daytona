@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *RunnerService) DeleteRunner(ctx context.Context, runnerId string) error {
+func (s *RunnerService) Delete(ctx context.Context, runnerId string) error {
 	var err error
 	ctx, err = s.runnerStore.BeginTransaction(ctx)
 	if err != nil {

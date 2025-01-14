@@ -30,7 +30,7 @@ func FindWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.FindWorkspace(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+	w, err := server.WorkspaceService.Find(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
@@ -64,7 +64,7 @@ func FindWorkspace(ctx *gin.Context) {
 func ListWorkspaces(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	workspaceList, err := server.WorkspaceService.ListWorkspaces(ctx.Request.Context(), services.WorkspaceRetrievalParams{})
+	workspaceList, err := server.WorkspaceService.List(ctx.Request.Context(), services.WorkspaceRetrievalParams{})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %w", err))
 		return
