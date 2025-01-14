@@ -17,8 +17,8 @@ var ProviderCmd = &cobra.Command{
 }
 
 func init() {
-	ProviderCmd.AddCommand(providerListCmd)
-	ProviderCmd.AddCommand(providerUninstallCmd)
-	ProviderCmd.AddCommand(providerInstallCmd)
-	ProviderCmd.AddCommand(providerUpdateCmd)
+	ProviderCmd.AddCommand(listCmd)
+	ProviderCmd.AddCommand(uninstallCmd)
+	ProviderCmd.AddCommand(installCmd)
+	ProviderCmd.AddCommand(updateCmd)
 }

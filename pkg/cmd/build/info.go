@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildInfoCmd = &cobra.Command{
+var infoCmd = &cobra.Command{
 	Use:     "info [BUILD]",
 	Short:   "Show build info",
 	Args:    cobra.RangeArgs(0, 1),
@@ -79,5 +79,5 @@ var buildInfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(buildInfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

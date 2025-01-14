@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var GitProviderAddCmd = &cobra.Command{
+var GitProviderCreateCmd = &cobra.Command{
 	Use:     "create [GIT_PROVIDER_ID]",
 	Short:   "Create a Git provider config",
 	Aliases: common.GetAliases("create"),
@@ -149,11 +149,11 @@ var signingMethodFlag string
 var signingKeyFlag string
 
 func init() {
-	GitProviderAddCmd.Flags().StringVarP(&aliasFlag, "alias", "a", "", "Alias")
-	GitProviderAddCmd.Flags().StringVarP(&usernameFlag, "username", "u", "", "Username")
-	GitProviderAddCmd.Flags().StringVarP(&baseApiUrlFlag, "base-api-url", "b", "", "Base API Url")
-	GitProviderAddCmd.Flags().StringVarP(&tokenFlag, "token", "t", "", "Personal Access Token")
-	GitProviderAddCmd.Flags().StringVarP(&signingMethodFlag, "signing-method", "s", "", "Signing Method (ssh, gpg)")
-	GitProviderAddCmd.Flags().StringVarP(&signingKeyFlag, "signing-key", "k", "", "Signing Key")
-	GitProviderAddCmd.MarkFlagsRequiredTogether("signing-method", "signing-key")
+	GitProviderCreateCmd.Flags().StringVarP(&aliasFlag, "alias", "a", "", "Alias")
+	GitProviderCreateCmd.Flags().StringVarP(&usernameFlag, "username", "u", "", "Username")
+	GitProviderCreateCmd.Flags().StringVarP(&baseApiUrlFlag, "base-api-url", "b", "", "Base API Url")
+	GitProviderCreateCmd.Flags().StringVarP(&tokenFlag, "token", "t", "", "Personal Access Token")
+	GitProviderCreateCmd.Flags().StringVarP(&signingMethodFlag, "signing-method", "s", "", "Signing Method (ssh, gpg)")
+	GitProviderCreateCmd.Flags().StringVarP(&signingKeyFlag, "signing-key", "k", "", "Signing Key")
+	GitProviderCreateCmd.MarkFlagsRequiredTogether("signing-method", "signing-key")
 }

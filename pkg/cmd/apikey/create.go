@@ -16,7 +16,7 @@ import (
 	view "github.com/daytonaio/daytona/pkg/views/apikey"
 )
 
-var createApiKeyCmd = &cobra.Command{
+var createCmd = &cobra.Command{
 	Use:     "create [NAME]",
 	Short:   "Create a new API key",
 	Args:    cobra.RangeArgs(0, 1),

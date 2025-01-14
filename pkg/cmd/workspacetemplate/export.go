@@ -19,7 +19,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var workspaceTemplateExportCmd = &cobra.Command{
+var exportCmd = &cobra.Command{
 	Use:     "export",
 	Aliases: []string{"exp"},
 	Short:   "Export a workspace template",
@@ -83,8 +83,8 @@ var workspaceTemplateExportCmd = &cobra.Command{
 }
 
 func init() {
-	workspaceTemplateExportCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Export all workspace templates")
-	format.RegisterFormatFlag(workspaceTemplateExportCmd)
+	exportCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Export all workspace templates")
+	format.RegisterFormatFlag(exportCmd)
 }
 
 func exportWorkspaceTemplates(workspaceConfigs []apiclient.WorkspaceTemplate) error {

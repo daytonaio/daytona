@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List all builds",
 	Args:    cobra.NoArgs,
@@ -48,5 +48,5 @@ var buildListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(buildListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

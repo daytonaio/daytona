@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var profileDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete [PROFILE_NAME]",
 	Short:   "Delete a profile",
 	Args:    cobra.RangeArgs(0, 1),

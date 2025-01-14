@@ -23,7 +23,7 @@ import (
 
 var yesFlag bool
 
-var providerInstallCmd = &cobra.Command{
+var installCmd = &cobra.Command{
 	Use:     "install",
 	Short:   "Install provider",
 	Args:    cobra.MaximumNArgs(1),
@@ -116,7 +116,7 @@ var providerInstallCmd = &cobra.Command{
 }
 
 func init() {
-	providerInstallCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
+	installCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }
 
 func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall provider.ProviderView, providersManifest *util.ProvidersManifest) error {

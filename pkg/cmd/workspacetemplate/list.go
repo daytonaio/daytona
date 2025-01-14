@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var workspaceTemplateListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "Lists workspace templates",
 	Args:    cobra.NoArgs,
@@ -58,5 +58,5 @@ var workspaceTemplateListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(workspaceTemplateListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

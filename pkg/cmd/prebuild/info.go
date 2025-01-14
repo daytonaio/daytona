@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var prebuildInfoCmd = &cobra.Command{
+var infoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show prebuild configuration info",
 	Args:    cobra.MaximumNArgs(2),
@@ -86,5 +86,5 @@ var prebuildInfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(prebuildInfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

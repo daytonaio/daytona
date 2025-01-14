@@ -17,9 +17,9 @@ var BuildCmd = &cobra.Command{
 }
 
 func init() {
-	BuildCmd.AddCommand(buildListCmd)
-	BuildCmd.AddCommand(buildInfoCmd)
-	BuildCmd.AddCommand(buildRunCmd)
-	BuildCmd.AddCommand(buildDeleteCmd)
-	BuildCmd.AddCommand(buildLogsCmd)
+	BuildCmd.AddCommand(listCmd)
+	BuildCmd.AddCommand(infoCmd)
+	BuildCmd.AddCommand(runCmd)
+	BuildCmd.AddCommand(deleteCmd)
+	BuildCmd.AddCommand(logsCmd)
 }

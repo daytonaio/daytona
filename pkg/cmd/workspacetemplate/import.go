@@ -24,7 +24,7 @@ import (
 
 var filePath string
 
-var workspaceTemplateImportCmd = &cobra.Command{
+var importCmd = &cobra.Command{
 	Use:     "import",
 	Aliases: []string{"imp"},
 	Short:   "Import workspace template from JSON",
@@ -100,7 +100,7 @@ var workspaceTemplateImportCmd = &cobra.Command{
 }
 
 func init() {
-	workspaceTemplateImportCmd.Flags().StringVarP(&filePath, "file", "f", "", "Import workspace template from a JSON file. Use '-' to read from stdin.")
+	importCmd.Flags().StringVarP(&filePath, "file", "f", "", "Import workspace template from a JSON file. Use '-' to read from stdin.")
 }
 
 func isWorkspaceTemplateAlreadyExists(configName string, workspaceConfigList *[]apiclient.WorkspaceTemplate) bool {

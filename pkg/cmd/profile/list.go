@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var profileListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List profiles",
 	Aliases: common.GetAliases("list"),
@@ -45,5 +45,5 @@ var profileListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(profileListCmd)
+	format.RegisterFormatFlag(listCmd)
 }
