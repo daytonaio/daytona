@@ -58,7 +58,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 	reqUrl := fmt.Sprintf("http://%s:%d/%s?%s", workspaceHostname, config.TOOLBOX_API_PORT, route, query)
 	client = server.TailscaleServer.HTTPClient()
 
-	if w.TargetId == "local" && w.ProviderMetadata != nil && *w.ProviderMetadata != "" {
+	if common.IsLocalDockerTarget(w.Target.TargetConfig.ProviderInfo.Name, w.Target.TargetConfig.Options, w.Target.TargetConfig.ProviderInfo.RunnerId) && w.ProviderMetadata != nil && *w.ProviderMetadata != "" {
 		var metadata map[string]interface{}
 		err := json.Unmarshal([]byte(*w.ProviderMetadata), &metadata)
 		if err == nil {
