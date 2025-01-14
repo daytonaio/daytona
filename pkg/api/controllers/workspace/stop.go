@@ -26,7 +26,7 @@ func StopWorkspace(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.WorkspaceService.StopWorkspace(ctx.Request.Context(), workspaceId)
+	err := server.WorkspaceService.Stop(ctx.Request.Context(), workspaceId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to stop workspace %s: %w", workspaceId, err))
 		return

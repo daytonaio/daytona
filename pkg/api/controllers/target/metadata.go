@@ -36,7 +36,7 @@ func UpdateTargetMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, err = server.TargetService.UpdateTargetMetadata(ctx.Request.Context(), targetId, &models.TargetMetadata{
+	_, err = server.TargetService.UpdateMetadata(ctx.Request.Context(), targetId, &models.TargetMetadata{
 		Uptime: updateDTO.Uptime,
 	})
 	if err != nil {
@@ -70,7 +70,7 @@ func UpdateTargetProviderMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.TargetService.UpdateTargetProviderMetadata(ctx.Request.Context(), targetId, metadata.Metadata)
+	err = server.TargetService.UpdateProviderMetadata(ctx.Request.Context(), targetId, metadata.Metadata)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update target provider metadata for %s: %w", targetId, err))
 		return

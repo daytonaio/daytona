@@ -94,7 +94,7 @@ func (s *WorkspaceService) GetWorkspaceLogWriter(ctx context.Context, workspaceI
 	return s.loggerFactory.CreateLogWriter(workspaceId)
 }
 
-func (s *WorkspaceService) UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId, metadata string) error {
+func (s *WorkspaceService) UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error {
 	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return err

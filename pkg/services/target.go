@@ -13,17 +13,18 @@ import (
 )
 
 type ITargetService interface {
-	ListTargets(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) ([]TargetDTO, error)
-	FindTarget(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) (*TargetDTO, error)
-	CreateTarget(ctx context.Context, req CreateTargetDTO) (*models.Target, error)
-	SaveTarget(ctx context.Context, target *models.Target) error
-	StartTarget(ctx context.Context, targetId string) error
-	StopTarget(ctx context.Context, targetId string) error
+	List(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) ([]TargetDTO, error)
+	Find(ctx context.Context, filter *stores.TargetFilter, params TargetRetrievalParams) (*TargetDTO, error)
+	Create(ctx context.Context, req CreateTargetDTO) (*models.Target, error)
+	Save(ctx context.Context, target *models.Target) error
+	Start(ctx context.Context, targetId string) error
+	Stop(ctx context.Context, targetId string) error
 	SetDefault(ctx context.Context, targetId string) error
-	UpdateTargetMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
-	UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error
-	DeleteTarget(ctx context.Context, targetId string) error
-	ForceDeleteTarget(ctx context.Context, targetId string) error
+	Delete(ctx context.Context, targetId string) error
+	ForceDelete(ctx context.Context, targetId string) error
+
+	UpdateMetadata(ctx context.Context, targetId string, metadata *models.TargetMetadata) (*models.TargetMetadata, error)
+	UpdateProviderMetadata(ctx context.Context, targetId, metadata string) error
 
 	HandleSuccessfulCreation(ctx context.Context, targetId string) error
 	GetTargetLogReader(ctx context.Context, targetId string) (io.Reader, error)

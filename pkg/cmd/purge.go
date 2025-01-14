@@ -113,7 +113,7 @@ var purgeCmd = &cobra.Command{
 		ctx = context.WithValue(ctx, telemetry.ENABLED_CONTEXT_KEY, c.TelemetryEnabled)
 
 		// Get all targets, workspaces and builds to prompt user for resource purge
-		targets, err := server.TargetService.ListTargets(ctx, nil, services.TargetRetrievalParams{})
+		targets, err := server.TargetService.List(ctx, nil, services.TargetRetrievalParams{})
 		if err != nil {
 			if !forceFlag {
 				return err
@@ -122,7 +122,7 @@ var purgeCmd = &cobra.Command{
 			}
 		}
 
-		workspaces, err := server.WorkspaceService.ListWorkspaces(ctx, services.WorkspaceRetrievalParams{})
+		workspaces, err := server.WorkspaceService.List(ctx, services.WorkspaceRetrievalParams{})
 		if err != nil {
 			if !forceFlag {
 				return err

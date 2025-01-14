@@ -73,11 +73,11 @@ func (s *TargetService) GetTargetLogWriter(ctx context.Context, targetId string)
 }
 
 // TODO: revise - "remove default" is enough for now
-func (s *TargetService) SaveTarget(ctx context.Context, target *models.Target) error {
+func (s *TargetService) Save(ctx context.Context, target *models.Target) error {
 	return s.targetStore.Save(ctx, target)
 }
 
-func (s *TargetService) UpdateTargetProviderMetadata(ctx context.Context, targetId, metadata string) error {
+func (s *TargetService) UpdateProviderMetadata(ctx context.Context, targetId, metadata string) error {
 	tg, err := s.targetStore.Find(ctx, &stores.TargetFilter{
 		IdOrName: &targetId,
 	})

@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) StopWorkspace(ctx context.Context, workspaceId string) error {
+func (s *WorkspaceService) Stop(ctx context.Context, workspaceId string) error {
 	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return s.handleStopError(ctx, w, stores.ErrWorkspaceNotFound)

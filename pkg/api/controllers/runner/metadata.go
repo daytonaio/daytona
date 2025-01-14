@@ -36,7 +36,7 @@ func UpdateRunnerMetadata(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.UpdateRunnerMetadata(ctx.Request.Context(), runnerId, &models.RunnerMetadata{
+	err = server.RunnerService.UpdateMetadata(ctx.Request.Context(), runnerId, &models.RunnerMetadata{
 		RunnerId:    runnerId,
 		Uptime:      runnerMetadata.Uptime,
 		Providers:   runnerMetadata.Providers,

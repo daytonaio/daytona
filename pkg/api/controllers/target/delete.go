@@ -41,9 +41,9 @@ func DeleteTarget(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	if force {
-		err = server.TargetService.ForceDeleteTarget(ctx.Request.Context(), targetId)
+		err = server.TargetService.ForceDelete(ctx.Request.Context(), targetId)
 	} else {
-		err = server.TargetService.DeleteTarget(ctx.Request.Context(), targetId)
+		err = server.TargetService.Delete(ctx.Request.Context(), targetId)
 	}
 
 	if err != nil {
