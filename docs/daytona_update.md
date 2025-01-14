@@ -13,7 +13,6 @@ daytona update [flags]
 ### Options
 
 ```
-  -c, --show-changelog   Show changelog (default true)
   -v, --version string   Version to update to
 ```
 
