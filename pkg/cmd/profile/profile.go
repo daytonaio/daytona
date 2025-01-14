@@ -18,9 +18,9 @@ var ProfileCmd = &cobra.Command{
 
 func init() {
 	ProfileCmd.AddGroup(&cobra.Group{ID: util.PROFILE_GROUP, Title: "Profile"})
-	ProfileCmd.AddCommand(profileListCmd)
+	ProfileCmd.AddCommand(listCmd)
 	ProfileCmd.AddCommand(ProfileUseCmd)
 	ProfileCmd.AddCommand(ProfileAddCmd)
-	ProfileCmd.AddCommand(profileUpdateCmd)
-	ProfileCmd.AddCommand(profileDeleteCmd)
+	ProfileCmd.AddCommand(updateCmd)
+	ProfileCmd.AddCommand(deleteCmd)
 }

@@ -22,7 +22,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var prebuildAddCmd = &cobra.Command{
+var addCmd = &cobra.Command{
 	Use:     "create [WORKSPACE_CONFIG]",
 	Short:   "Create a prebuild configuration",
 	Args:    cobra.MaximumNArgs(1),
@@ -179,9 +179,9 @@ var prebuildAddCmd = &cobra.Command{
 }
 
 func init() {
-	prebuildAddCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after adding it")
-	prebuildAddCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
-	prebuildAddCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
-	prebuildAddCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
-	prebuildAddCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
+	addCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after adding it")
+	addCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
+	addCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
+	addCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
+	addCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
 }

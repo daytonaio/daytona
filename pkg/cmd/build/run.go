@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildRunCmd = &cobra.Command{
+var runCmd = &cobra.Command{
 	Use:     "run",
 	Short:   "Run a build from a workspace template",
 	Args:    cobra.NoArgs,

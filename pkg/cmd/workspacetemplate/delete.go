@@ -22,7 +22,7 @@ var allFlag bool
 var yesFlag bool
 var forceFlag bool
 
-var workspaceTemplateDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete a workspace template",
 	Args:    cobra.MaximumNArgs(1),
@@ -111,7 +111,7 @@ var workspaceTemplateDeleteCmd = &cobra.Command{
 }
 
 func init() {
-	workspaceTemplateDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all workspace templates")
-	workspaceTemplateDeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
-	workspaceTemplateDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all workspace templates")
+	deleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildLogsCmd = &cobra.Command{
+var logsCmd = &cobra.Command{
 	Use:     "logs",
 	Short:   "View logs for build",
 	Args:    cobra.RangeArgs(0, 1),
@@ -82,5 +82,5 @@ var buildLogsCmd = &cobra.Command{
 var followFlag bool
 
 func init() {
-	buildLogsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
+	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 }

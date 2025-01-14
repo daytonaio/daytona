@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var workspaceTemplateInfoCmd = &cobra.Command{
+var infoCmd = &cobra.Command{
 	Use:     "info",
 	Short:   "Show workspace template info",
 	Aliases: cmd_common.GetAliases("info"),
@@ -81,5 +81,5 @@ var workspaceTemplateInfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(workspaceTemplateInfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

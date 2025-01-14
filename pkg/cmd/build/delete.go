@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var buildDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete [BUILD]",
 	Short:   "Delete a build",
 	Args:    cobra.RangeArgs(0, 1),
@@ -83,7 +83,7 @@ var forceFlag bool
 var prebuildIdFlag string
 
 func init() {
-	buildDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
-	buildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
-	buildDeleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
+	deleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var prebuildListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List prebuild configurations",
 	Args:    cobra.NoArgs,
@@ -43,5 +43,5 @@ var prebuildListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(prebuildListCmd)
+	format.RegisterFormatFlag(listCmd)
 }
