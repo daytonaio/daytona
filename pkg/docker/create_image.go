@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ports"
 	"github.com/docker/docker/api/types/container"
@@ -49,7 +50,7 @@ func (d *DockerClient) initWorkspaceContainer(opts *CreateWorkspaceOptions, moun
 	var availablePort *uint16
 	var portBindings map[nat.Port][]nat.PortBinding
 
-	if opts.Workspace.TargetId == "local" {
+	if common.IsLocalDockerTarget(opts.Workspace.Target.TargetConfig.ProviderInfo.Name, opts.Workspace.Target.TargetConfig.Options, opts.Workspace.Target.TargetConfig.ProviderInfo.RunnerId) {
 		p, err := ports.GetAvailableEphemeralPort()
 		if err != nil {
 			log.Error(err)
