@@ -41,6 +41,7 @@ see_also:
     - daytona target-config - Manage target configs
     - daytona telemetry - Manage telemetry collection
     - daytona template - Manage workspace templates
+    - daytona update - Update Daytona CLI
     - daytona use - Use profile [PROFILE_NAME]
     - daytona version - Print the version number
     - daytona whoami - Display information about the active user

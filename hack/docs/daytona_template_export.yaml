@@ -1,11 +1,11 @@
-name: daytona project-config export
-synopsis: Export a project config
-usage: daytona project-config export [flags]
+name: daytona template export
+synopsis: Export a workspace template
+usage: daytona template export [flags]
 options:
     - name: all
       shorthand: a
       default_value: "false"
-      usage: Export all project configs
+      usage: Export all workspace templates
     - name: format
       shorthand: f
       usage: Output format. Must be one of (yaml, json)
@@ -14,4 +14,4 @@ inherited_options:
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona project-config - Manage project configs
+    - daytona template - Manage workspace templates

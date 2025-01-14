@@ -1,6 +1,11 @@
 name: daytona target-config create
 synopsis: Create target config
 usage: daytona target-config create [flags]
+options:
+    - name: file
+      shorthand: f
+      usage: |
+        Path to JSON file for target configuration, use '-' to read from stdin
 inherited_options:
     - name: help
       default_value: "false"
