@@ -4,18 +4,22 @@
 package cmd
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+	"os"
+	"os/exec"
+	"regexp"
+	"runtime"
+	"strings"
+
 	"github.com/daytonaio/daytona/internal"
 	"github.com/inconshreveable/go-update"
 	"github.com/spf13/cobra"
 	"golang.org/x/mod/semver"
-	"net/http"
-	"net/url"
-	"regexp"
-	"runtime"
-	"strings"
 )
 
 const (
@@ -29,6 +33,7 @@ type GitHubRelease struct {
 }
 
 var versionFlag string
+var showChangelog bool
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
@@ -87,9 +92,11 @@ var updateCmd = &cobra.Command{
 			changelog += "\n\nThere might be more important changes since you updated. Please visit https://github.com/daytonaio/daytona/releases for the complete changelog\n"
 		}
 
-		fmt.Println("Updating to version", version, "from", currentVersion)
-		fmt.Print("\nChangelog:\n\n")
-		fmt.Println(changelog)
+		if showChangelog {
+			fmt.Println("Updating to version", version, "from", currentVersion)
+			fmt.Print("\nChangelog:\n\n")
+			fmt.Println(changelog)
+		}
 
 		return updateToVersion(version)
 	},
@@ -97,6 +104,7 @@ var updateCmd = &cobra.Command{
 
 func init() {
 	updateCmd.Flags().StringVarP(&versionFlag, "version", "v", "", "Version to update to")
+	updateCmd.Flags().BoolVarP(&showChangelog, "show-changelog", "c", true, "Show changelog")
 }
 
 func fetchLatestRelase() (*GitHubRelease, error) {
@@ -165,18 +173,42 @@ func updateToVersion(version string) error {
 	}
 
 	err = update.Apply(resp.Body, update.Options{})
-
 	if err != nil {
 		fmt.Println("Failed to update binary")
 		if rollbackErr := update.RollbackError(err); rollbackErr != nil {
 			return fmt.Errorf("failed to rollback: %w", rollbackErr)
 		}
 
-		return fmt.Errorf("failed to update binary: %w", err)
-	}
+		if strings.Contains(err.Error(), "permission") {
+			if runtime.GOOS == "windows" {
+				return fmt.Errorf("please run 'daytona update' as administrator")
+			}
 
-	fmt.Println("\nSuccessfully updated to version", version)
-	fmt.Println("If your Server is running, you need to restart it for the changes to take effect.")
+			fmt.Print("The update requires sudo privileges. Would you like to continue with sudo? [y/N]: ")
+			reader := bufio.NewReader(os.Stdin)
+			response, err := reader.ReadString('\n')
+			if err != nil {
+				return fmt.Errorf("failed to read user input: %v", err)
+			}
+
+			response = strings.TrimSpace(strings.ToLower(response))
+			if response != "y" && response != "yes" {
+				return fmt.Errorf("update cancelled by user")
+			}
+
+			cmd := exec.Command("sudo", "daytona", "update", "--show-changelog=false")
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+			cmd.Stdin = os.Stdin
+
+			if err := cmd.Run(); err != nil {
+				return fmt.Errorf("failed to update binary with sudo: %w", err)
+			}
+		}
+	} else {
+		fmt.Println("\nSuccessfully updated to version", version)
+		fmt.Println("If your Server is running, you need to restart it for the changes to take effect.")
+	}
 	return nil
 }
 

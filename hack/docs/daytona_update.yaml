@@ -3,6 +3,10 @@ synopsis: Update Daytona CLI
 description: Update Daytona CLI to the latest version
 usage: daytona update [flags]
 options:
+    - name: show-changelog
+      shorthand: c
+      default_value: "true"
+      usage: Show changelog
     - name: version
       shorthand: v
       usage: Version to update to
