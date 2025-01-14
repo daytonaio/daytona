@@ -77,7 +77,7 @@ func forwardRequestToToolbox(ctx *gin.Context) {
 		},
 	}
 
-	if w.TargetId == "local" && w.ProviderMetadata != nil && *w.ProviderMetadata != "" {
+	if common.IsLocalDockerTarget(w.Target.TargetConfig.ProviderInfo.Name, w.Target.TargetConfig.Options, w.Target.TargetConfig.ProviderInfo.RunnerId) && w.ProviderMetadata != nil && *w.ProviderMetadata != "" {
 		var metadata map[string]interface{}
 		err := json.Unmarshal([]byte(*w.ProviderMetadata), &metadata)
 		if err == nil {
