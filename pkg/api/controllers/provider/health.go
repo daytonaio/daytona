@@ -9,7 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// HealthCheck godoc
+// HealthCheck      godoc
 //
 //	@Tags			provider
 //	@Summary		Provider health check
