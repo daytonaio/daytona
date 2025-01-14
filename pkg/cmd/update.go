@@ -30,7 +30,6 @@ type GitHubRelease struct {
 }
 
 var versionFlag string
-var showChangelog bool
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
