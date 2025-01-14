@@ -25,10 +25,9 @@ import (
 var filePath string
 
 var importCmd = &cobra.Command{
-	Use:     "import",
-	Aliases: []string{"imp"},
-	Short:   "Import workspace template from JSON",
-	Args:    cobra.MaximumNArgs(1),
+	Use:   "import",
+	Short: "Import a workspace template from a JSON object",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var inputText string
 		ctx := context.Background()
@@ -38,7 +37,7 @@ var importCmd = &cobra.Command{
 			return err
 		}
 
-		workspaceConfigList, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
+		workspaceTemplateList, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -62,8 +61,8 @@ var importCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewText().
-						Title("Import Workspace-Config").
-						Description("Enter Workspace-Config as a JSON or an array of JSON objects").
+						Title("Import Workspace Template").
+						Description("Enter Workspace Template as a JSON object or an array of JSON objects").
 						CharLimit(-1).
 						Value(&inputText),
 				),
@@ -74,24 +73,24 @@ var importCmd = &cobra.Command{
 			}
 		}
 
-		var config apiclient.WorkspaceTemplate
-		err = json.Unmarshal([]byte(inputText), &config)
+		var template apiclient.WorkspaceTemplate
+		err = json.Unmarshal([]byte(inputText), &template)
 		if err == nil {
-			err = importWorkspaceTemplate(ctx, apiClient, config, &workspaceConfigList)
+			err = importWorkspaceTemplate(ctx, apiClient, template, &workspaceTemplateList)
 			if err != nil {
-				return fmt.Errorf("error importing workspace config: %v", err)
+				return fmt.Errorf("error importing workspace template: %v", err)
 			}
 		} else {
-			var configs []apiclient.WorkspaceTemplate
-			err = json.Unmarshal([]byte(inputText), &configs)
+			var templates []apiclient.WorkspaceTemplate
+			err = json.Unmarshal([]byte(inputText), &templates)
 			if err != nil {
 				return fmt.Errorf("invalid JSON input: %v", err)
 			}
 
-			for _, config := range configs {
-				err = importWorkspaceTemplate(ctx, apiClient, config, &workspaceConfigList)
+			for _, t := range templates {
+				err = importWorkspaceTemplate(ctx, apiClient, t, &workspaceTemplateList)
 				if err != nil {
-					return fmt.Errorf("error importing workspace config: %v", err)
+					return fmt.Errorf("error importing workspace template: %v", err)
 				}
 			}
 		}
@@ -103,23 +102,23 @@ func init() {
 	importCmd.Flags().StringVarP(&filePath, "file", "f", "", "Import workspace template from a JSON file. Use '-' to read from stdin.")
 }
 
-func isWorkspaceTemplateAlreadyExists(configName string, workspaceConfigList *[]apiclient.WorkspaceTemplate) bool {
-	for _, workspaceConfig := range *workspaceConfigList {
-		if workspaceConfig.Name == configName {
+func checkWorkspaceTemplateAlreadyExists(templateName string, workspaceTemplateList *[]apiclient.WorkspaceTemplate) bool {
+	for _, t := range *workspaceTemplateList {
+		if t.Name == templateName {
 			return true
 		}
 	}
 	return false
 }
 
-func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient, config apiclient.WorkspaceTemplate, workspaceConfigList *[]apiclient.WorkspaceTemplate) error {
-	if isWorkspaceTemplateAlreadyExists(config.Name, workspaceConfigList) {
-		return fmt.Errorf("workspace config already present with name \"%s\"", config.Name)
+func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient, template apiclient.WorkspaceTemplate, workspaceTemplateList *[]apiclient.WorkspaceTemplate) error {
+	if checkWorkspaceTemplateAlreadyExists(template.Name, workspaceTemplateList) {
+		return fmt.Errorf("workspace template already present with name \"%s\"", template.Name)
 	}
 
 	var verifiedGitProvider bool
-	if config.GitProviderConfigId != nil {
-		_, _, err := apiClient.GitProviderAPI.FindGitProvider(ctx, *config.GitProviderConfigId).Execute()
+	if template.GitProviderConfigId != nil {
+		_, _, err := apiClient.GitProviderAPI.FindGitProvider(ctx, *template.GitProviderConfigId).Execute()
 		if err == nil {
 			verifiedGitProvider = true
 		}
@@ -129,27 +128,27 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 
 	if !verifiedGitProvider {
 		var err error
-		gitProviders, _, err = apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
+		gitProviders, _, err = apiClient.GitProviderAPI.ListGitProvidersForUrl(ctx, url.QueryEscape(template.RepositoryUrl)).Execute()
 		if err != nil {
 			return fmt.Errorf("error fetching Git providers: %v", err)
 		}
 
 		if len(gitProviders) == 0 {
-			gitProviderConfigId, _, err := apiClient.GitProviderAPI.FindGitProviderIdForUrl(ctx, url.QueryEscape(config.RepositoryUrl)).Execute()
+			gitProviderConfigId, _, err := apiClient.GitProviderAPI.FindGitProviderIdForUrl(ctx, url.QueryEscape(template.RepositoryUrl)).Execute()
 			if err != nil {
 				return fmt.Errorf("error fetching Git provider: %v", err)
 			}
-			config.GitProviderConfigId = &gitProviderConfigId
+			template.GitProviderConfigId = &gitProviderConfigId
 		}
 
-		if len(gitProviders) == 1 && config.GitProviderConfigId == nil {
-			config.GitProviderConfigId = &gitProviders[0].Id
-		} else if len(gitProviders) > 1 && config.GitProviderConfigId == nil {
+		if len(gitProviders) == 1 && template.GitProviderConfigId == nil {
+			template.GitProviderConfigId = &gitProviders[0].Id
+		} else if len(gitProviders) > 1 && template.GitProviderConfigId == nil {
 			selectedGitProvider := selection.GetGitProviderConfigFromPrompt(selection.GetGitProviderConfigParams{
 				GitProviderConfigs: gitProviders,
 				ActionVerb:         "Use",
 			})
-			config.GitProviderConfigId = &selectedGitProvider.Id
+			template.GitProviderConfigId = &selectedGitProvider.Id
 		}
 	}
 
@@ -159,13 +158,13 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 	}
 
 	newWorkspaceTemplate := apiclient.CreateWorkspaceTemplateDTO{
-		Name:                config.Name,
-		BuildConfig:         config.BuildConfig,
-		Image:               &config.Image,
-		User:                &config.User,
-		RepositoryUrl:       config.RepositoryUrl,
-		EnvVars:             config.EnvVars,
-		GitProviderConfigId: config.GitProviderConfigId,
+		Name:                template.Name,
+		BuildConfig:         template.BuildConfig,
+		Image:               &template.Image,
+		User:                &template.User,
+		RepositoryUrl:       template.RepositoryUrl,
+		EnvVars:             template.EnvVars,
+		GitProviderConfigId: template.GitProviderConfigId,
 	}
 
 	if newWorkspaceTemplate.Image == nil {
@@ -195,15 +194,15 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 
 	createDto := []apiclient.CreateWorkspaceDTO{
 		{
-			Name: config.Name,
+			Name: template.Name,
 			Source: apiclient.CreateWorkspaceSourceDTO{
 				Repository: apiclient.GitRepository{
-					Url: config.RepositoryUrl,
+					Url: template.RepositoryUrl,
 				},
 			},
-			BuildConfig:         config.BuildConfig,
-			EnvVars:             config.EnvVars,
-			GitProviderConfigId: config.GitProviderConfigId,
+			BuildConfig:         template.BuildConfig,
+			EnvVars:             template.EnvVars,
+			GitProviderConfigId: template.GitProviderConfigId,
 		},
 	}
 
@@ -213,11 +212,11 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 	}
 
 	submissionFormConfig := create.SubmissionFormParams{
-		ChosenName:             &config.Name,
-		SuggestedName:          config.Name,
+		ChosenName:             &template.Name,
+		SuggestedName:          template.Name,
 		ExistingWorkspaceNames: existingWorkspaceTemplateNames,
 		WorkspaceList:          &createDto,
-		NameLabel:              "Workspace config",
+		NameLabel:              "Workspace template",
 		Defaults:               workspaceDefaults,
 		ImportConfirmation:     util.Pointer(true),
 	}
@@ -233,11 +232,11 @@ func importWorkspaceTemplate(ctx context.Context, apiClient *apiclient.APIClient
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		*workspaceConfigList = append(*workspaceConfigList, config)
-		views.RenderInfoMessage(fmt.Sprintf("Workspace config %s imported successfully", newWorkspaceTemplate.Name))
+		*workspaceTemplateList = append(*workspaceTemplateList, template)
+		views.RenderInfoMessage(fmt.Sprintf("Workspace template %s imported successfully", newWorkspaceTemplate.Name))
 		return nil
 	}
 
-	views.RenderInfoMessage(fmt.Sprintf("Workspace config %s import cancelled", newWorkspaceTemplate.Name))
+	views.RenderInfoMessage(fmt.Sprintf("Workspace template %s import cancelled", newWorkspaceTemplate.Name))
 	return nil
 }

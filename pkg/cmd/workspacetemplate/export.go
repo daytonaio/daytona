@@ -20,10 +20,9 @@ import (
 )
 
 var exportCmd = &cobra.Command{
-	Use:     "export",
-	Aliases: []string{"exp"},
-	Short:   "Export a workspace template",
-	Args:    cobra.MaximumNArgs(1),
+	Use:   "export",
+	Short: "Export a workspace template",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedWorkspaceTemplate *apiclient.WorkspaceTemplate
 		ctx := context.Background()
@@ -34,26 +33,26 @@ var exportCmd = &cobra.Command{
 		}
 
 		if allFlag {
-			workspaceConfigs, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
+			templates, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			if len(workspaceConfigs) == 0 {
+			if len(templates) == 0 {
 				views_util.NotifyEmptyWorkspaceTemplateList(true)
 				return nil
 			}
 
-			return exportWorkspaceTemplates(workspaceConfigs)
+			return exportWorkspaceTemplates(templates)
 		}
 
 		if len(args) == 0 {
-			workspaceConfigs, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
+			templates, res, err := apiClient.WorkspaceTemplateAPI.ListWorkspaceTemplates(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
 
-			if len(workspaceConfigs) == 0 {
+			if len(templates) == 0 {
 				views_util.NotifyEmptyWorkspaceTemplateList(true)
 				return nil
 			}
@@ -62,7 +61,7 @@ var exportCmd = &cobra.Command{
 				format.UnblockStdOut()
 			}
 
-			selectedWorkspaceTemplate = selection.GetWorkspaceTemplateFromPrompt(workspaceConfigs, 0, false, false, "Export")
+			selectedWorkspaceTemplate = selection.GetWorkspaceTemplateFromPrompt(templates, 0, false, false, "Export")
 			if selectedWorkspaceTemplate == nil {
 				return nil
 			}
@@ -87,55 +86,46 @@ func init() {
 	format.RegisterFormatFlag(exportCmd)
 }
 
-func exportWorkspaceTemplates(workspaceConfigs []apiclient.WorkspaceTemplate) error {
-	if len(workspaceConfigs) == 0 {
+func exportWorkspaceTemplates(templates []apiclient.WorkspaceTemplate) error {
+	if len(templates) == 0 {
 		return nil
 	}
 
 	var pbFlag bool
 
-	for i := range workspaceConfigs {
-		workspaceConfigs[i].GitProviderConfigId = nil
-		if workspaceConfigs[i].Prebuilds != nil {
-			workspaceConfigs[i].Prebuilds = nil
+	for i := range templates {
+		templates[i].GitProviderConfigId = nil
+		if templates[i].Prebuilds != nil {
+			templates[i].Prebuilds = nil
 			pbFlag = true
 		}
 	}
 
-	var data []byte
-	var err error
-
-	if len(workspaceConfigs) == 1 {
-		data, err = json.MarshalIndent(workspaceConfigs[0], "", "  ")
-		views.RenderContainerLayout("Prebuilds have been removed from the template.")
-	} else {
-		data, err = json.MarshalIndent(workspaceConfigs, "", "  ")
-		if pbFlag {
-			views.RenderContainerLayout("Prebuilds have been removed from your templates.")
-		}
+	data, err := json.MarshalIndent(templates, "", "  ")
+	if pbFlag {
+		views.RenderContainerLayout("Prebuilds have been removed from the export.")
+	}
+	if err != nil {
+		return err
 	}
 
 	if format.FormatFlag != "" {
-		if len(workspaceConfigs) == 1 {
-			formattedData := format.NewFormatter(workspaceConfigs[0])
+		if len(templates) == 1 {
+			formattedData := format.NewFormatter(templates[0])
 			formattedData.Print()
 		} else {
-			formattedData := format.NewFormatter(workspaceConfigs)
+			formattedData := format.NewFormatter(templates)
 			formattedData.Print()
 		}
 		return nil
 	}
 
-	if err != nil {
-		return err
-	}
-
 	fmt.Println(string(data))
 
 	if err := clipboard.WriteAll(string(data)); err == nil {
-		views.RenderContainerLayout(views.GetInfoMessage("The config(s) have been copied to your clipboard."))
+		views.RenderContainerLayout(views.GetInfoMessage("The export has been copied to your clipboard."))
 	} else {
-		views.RenderContainerLayout(views.GetInfoMessage("Could not copy the config(s) to your clipboard."))
+		views.RenderContainerLayout(views.GetInfoMessage("Could not copy the export to your clipboard."))
 	}
 
 	return nil
