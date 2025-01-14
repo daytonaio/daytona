@@ -14,7 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *RunnerService) CreateRunner(ctx context.Context, req services.CreateRunnerDTO) (*services.RunnerDTO, error) {
+func (s *RunnerService) Create(ctx context.Context, req services.CreateRunnerDTO) (*services.RunnerDTO, error) {
 	var err error
 	ctx, err = s.runnerStore.BeginTransaction(ctx)
 	if err != nil {

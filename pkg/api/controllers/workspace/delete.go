@@ -41,9 +41,9 @@ func DeleteWorkspace(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
 	if force {
-		err = server.WorkspaceService.ForceDeleteWorkspace(ctx.Request.Context(), workspaceId)
+		err = server.WorkspaceService.ForceDelete(ctx.Request.Context(), workspaceId)
 	} else {
-		err = server.WorkspaceService.DeleteWorkspace(ctx.Request.Context(), workspaceId)
+		err = server.WorkspaceService.Delete(ctx.Request.Context(), workspaceId)
 	}
 
 	if err != nil {

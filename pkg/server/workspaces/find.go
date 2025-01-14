@@ -11,7 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/stores"
 )
 
-func (s *WorkspaceService) FindWorkspace(ctx context.Context, workspaceId string, params services.WorkspaceRetrievalParams) (*services.WorkspaceDTO, error) {
+func (s *WorkspaceService) Find(ctx context.Context, workspaceId string, params services.WorkspaceRetrievalParams) (*services.WorkspaceDTO, error) {
 	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
 		return nil, stores.ErrWorkspaceNotFound

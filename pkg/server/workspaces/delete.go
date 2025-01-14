@@ -13,7 +13,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) DeleteWorkspace(ctx context.Context, workspaceId string) error {
+func (s *WorkspaceService) Delete(ctx context.Context, workspaceId string) error {
 	var err error
 	ctx, err = s.workspaceStore.BeginTransaction(ctx)
 	if err != nil {
@@ -58,8 +58,8 @@ func (s *WorkspaceService) DeleteWorkspace(ctx context.Context, workspaceId stri
 	return s.handleDeleteError(ctx, w, err)
 }
 
-// ForceDeleteWorkspace ignores provider errors and makes sure the workspace is removed from storage.
-func (s *WorkspaceService) ForceDeleteWorkspace(ctx context.Context, workspaceId string) error {
+// ForceDelete ignores provider errors and makes sure the workspace is removed from storage.
+func (s *WorkspaceService) ForceDelete(ctx context.Context, workspaceId string) error {
 	var err error
 	ctx, err = s.workspaceStore.BeginTransaction(ctx)
 	if err != nil {

@@ -55,7 +55,7 @@ func (s *GitProviderService) ListConfigsForUrl(ctx context.Context, repoUrl stri
 	return gpcs, nil
 }
 
-func (s *GitProviderService) SaveGitProviderConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error {
+func (s *GitProviderService) SaveConfig(ctx context.Context, providerConfig *models.GitProviderConfig) error {
 	gitProvider, err := s.newGitProvider(providerConfig)
 	if err != nil {
 		return s.handleSetGitProviderConfigError(ctx, providerConfig, err)

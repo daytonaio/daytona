@@ -194,7 +194,7 @@ func SaveGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.GitProviderService.SaveGitProviderConfig(ctx.Request.Context(), &gitProviderConfig)
+	err = server.GitProviderService.SaveConfig(ctx.Request.Context(), &gitProviderConfig)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -223,7 +223,7 @@ func DeleteGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.GitProviderService.DeleteGitProviderConfig(ctx.Request.Context(), gitProviderId)
+	err := server.GitProviderService.DeleteConfig(ctx.Request.Context(), gitProviderId)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

@@ -17,7 +17,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req services.CreateWorkspaceDTO) (*services.WorkspaceDTO, error) {
+func (s *WorkspaceService) Create(ctx context.Context, req services.CreateWorkspaceDTO) (*services.WorkspaceDTO, error) {
 	var err error
 	ctx, err = s.workspaceStore.BeginTransaction(ctx)
 	if err != nil {

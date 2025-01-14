@@ -28,7 +28,7 @@ func FindRunner(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	r, err := server.RunnerService.FindRunner(ctx.Request.Context(), runnerId)
+	r, err := server.RunnerService.Find(ctx.Request.Context(), runnerId)
 	if err != nil {
 		statusCode := http.StatusInternalServerError
 		if stores.IsRunnerNotFound(err) {

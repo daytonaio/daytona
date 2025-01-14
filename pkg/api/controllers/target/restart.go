@@ -26,7 +26,7 @@ func RestartTarget(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err := server.TargetService.RestartTarget(ctx.Request.Context(), targetId)
+	err := server.TargetService.Restart(ctx.Request.Context(), targetId)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to restart target %s: %w", targetId, err))
 		return
