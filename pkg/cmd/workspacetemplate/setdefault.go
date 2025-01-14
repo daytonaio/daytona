@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var workspaceTemplateSetDefaultCmd = &cobra.Command{
+var setDefaultCmd = &cobra.Command{
 	Use:     "set-default",
 	Short:   "Set workspace template info",
 	Args:    cobra.MaximumNArgs(1),

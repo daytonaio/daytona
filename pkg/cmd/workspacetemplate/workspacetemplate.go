@@ -17,12 +17,12 @@ var WorkspaceTemplateCmd = &cobra.Command{
 }
 
 func init() {
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateListCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateInfoCmd)
+	WorkspaceTemplateCmd.AddCommand(listCmd)
+	WorkspaceTemplateCmd.AddCommand(infoCmd)
 	WorkspaceTemplateCmd.AddCommand(createCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateUpdateCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateSetDefaultCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateDeleteCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateExportCmd)
-	WorkspaceTemplateCmd.AddCommand(workspaceTemplateImportCmd)
+	WorkspaceTemplateCmd.AddCommand(updateCmd)
+	WorkspaceTemplateCmd.AddCommand(setDefaultCmd)
+	WorkspaceTemplateCmd.AddCommand(deleteCmd)
+	WorkspaceTemplateCmd.AddCommand(exportCmd)
+	WorkspaceTemplateCmd.AddCommand(importCmd)
 }

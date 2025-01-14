@@ -18,7 +18,7 @@ import (
 
 var forceFlag bool
 
-var prebuildDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete [WORKSPACE_CONFIG] [PREBUILD]",
 	Short:   "Delete a prebuild configuration",
 	Args:    cobra.MaximumNArgs(2),
@@ -78,5 +78,5 @@ var prebuildDeleteCmd = &cobra.Command{
 }
 
 func init() {
-	prebuildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

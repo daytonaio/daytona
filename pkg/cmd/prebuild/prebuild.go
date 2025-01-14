@@ -17,9 +17,9 @@ var PrebuildCmd = &cobra.Command{
 }
 
 func init() {
-	PrebuildCmd.AddCommand(prebuildAddCmd)
-	PrebuildCmd.AddCommand(prebuildListCmd)
-	PrebuildCmd.AddCommand(prebuildInfoCmd)
-	PrebuildCmd.AddCommand(prebuildUpdateCmd)
-	PrebuildCmd.AddCommand(prebuildDeleteCmd)
+	PrebuildCmd.AddCommand(addCmd)
+	PrebuildCmd.AddCommand(listCmd)
+	PrebuildCmd.AddCommand(infoCmd)
+	PrebuildCmd.AddCommand(updateCmd)
+	PrebuildCmd.AddCommand(deleteCmd)
 }

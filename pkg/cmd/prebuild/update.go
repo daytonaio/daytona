@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var prebuildUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update [WORKSPACE_CONFIG] [PREBUILD_ID]",
 	Short:   "Update a prebuild configuration",
 	Args:    cobra.MaximumNArgs(2),
@@ -191,9 +191,9 @@ var (
 )
 
 func init() {
-	prebuildUpdateCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
-	prebuildUpdateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
-	prebuildUpdateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
-	prebuildUpdateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
-	prebuildUpdateCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after updating it")
+	updateCmd.Flags().StringVarP(&branchFlag, "branch", "b", "", "Git branch for the prebuild")
+	updateCmd.Flags().IntVarP(&retentionFlag, "retention", "r", 0, "Maximum number of resulting builds stored at a time")
+	updateCmd.Flags().IntVarP(&commitIntervalFlag, "commit-interval", "c", 0, "Commit interval for running a prebuild - leave blank to ignore push events")
+	updateCmd.Flags().StringSliceVarP(&triggerFilesFlag, "trigger-files", "t", nil, "Full paths of files whose changes should explicitly trigger a  prebuild")
+	updateCmd.Flags().BoolVar(&runFlag, "run", false, "Run the prebuild once after updating it")
 }

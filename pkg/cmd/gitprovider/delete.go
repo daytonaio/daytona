@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gitProviderDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete",
 	Short:   "Delete a Git provider config",
 	Aliases: common.GetAliases("delete"),
@@ -117,8 +117,8 @@ var allFlag bool
 var yesFlag bool
 
 func init() {
-	gitProviderDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all Git providers")
-	gitProviderDeleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all Git providers")
+	deleteCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Confirm deletion without prompt")
 }
 
 func deleteAllGitProviders(gitProviders []apiclient.GitProvider, apiClient *apiclient.APIClient) error {

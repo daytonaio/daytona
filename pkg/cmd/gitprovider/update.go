@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var gitProviderUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update a Git provider",
 	Aliases: common.GetAliases("update"),

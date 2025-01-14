@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var providerListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List installed providers",
 	Args:    cobra.NoArgs,
@@ -89,5 +89,5 @@ func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient,
 }
 
 func init() {
-	format.RegisterFormatFlag(providerListCmd)
+	format.RegisterFormatFlag(listCmd)
 }
