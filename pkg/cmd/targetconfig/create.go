@@ -14,7 +14,6 @@ import (
 	"sort"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal/util"
 	internal_util "github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
@@ -89,7 +88,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
+	providersManifest, err := internal_util.GetProvidersManifest(serverConfig.RegistryUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -244,8 +243,13 @@ func handleTargetConfigJSON(data []byte) error {
 		Name:    selectedTargetConfig.Name,
 		Options: selectedTargetConfig.Options,
 		ProviderInfo: apiclient.ProviderInfo{
-			Name:    selectedTargetConfig.ProviderInfo.Name,
-			Version: selectedTargetConfig.ProviderInfo.Version,
+			RunnerId:             selectedTargetConfig.ProviderInfo.RunnerId,
+			RunnerName:           selectedTargetConfig.ProviderInfo.RunnerName,
+			Name:                 selectedTargetConfig.ProviderInfo.Name,
+			Version:              selectedTargetConfig.ProviderInfo.Version,
+			AgentlessTarget:      selectedTargetConfig.ProviderInfo.AgentlessTarget,
+			Label:                selectedTargetConfig.ProviderInfo.Label,
+			TargetConfigManifest: selectedTargetConfig.ProviderInfo.TargetConfigManifest,
 		},
 	}
 	_, res, err := apiClient.TargetConfigAPI.CreateTargetConfig(ctx).TargetConfig(targetConfigData).Execute()
