@@ -188,7 +188,7 @@ func openIDE(ideId string, activeProfile config.Profile, workspaceId string, pro
 	case "browser":
 		return ide.OpenBrowserIDE(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "vim":
-		return ide.OpenVim(activeProfile, workspaceId, projectName, gpgKey)
+		return ide.OpenEditor("Vim", activeProfile, workspaceId, projectName, gpgKey)
 	case "codium":
 		return ide.OpenVScodium(activeProfile, workspaceId, projectName, projectProviderMetadata, gpgKey)
 	case "codium-insiders":

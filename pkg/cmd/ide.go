@@ -67,7 +67,7 @@ var ideCmd = &cobra.Command{
 				log.Error(err)
 			}
 		case "vim":
-			_, err := ide_util.GetVimBinaryPath()
+			_, err := ide_util.GetEditorBinaryPath("Vim")
 			if err != nil {
 				log.Error(err)
 			}
