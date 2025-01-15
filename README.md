@@ -304,7 +304,7 @@ If you're interested in contributing code to Daytona, follow these steps:
    Before creating your workspace, ensure that you have a GitHub provider registered. If not, run:
 
    ```bash
-   daytona git-provider add
+   daytona git-provider create
    ```
 
 1. **Create a Workspace with Daytona**
