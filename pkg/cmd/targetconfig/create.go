@@ -77,7 +77,7 @@ var TargetConfigCreateCmd = &cobra.Command{
 			return nil
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Target config '%s' set successfully", targetConfig.Name))
+		views.RenderInfoMessage(fmt.Sprintf("Target config '%s' created successfully", targetConfig.Name))
 		return nil
 	},
 }
