@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/common"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	ide_views "github.com/daytonaio/daytona/pkg/views/ide"
@@ -104,7 +103,7 @@ var StartCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+			gpgKey, err := cmd_common.GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
 			if err != nil {
 				log.Warn(err)
 			}
@@ -113,7 +112,7 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-				err = common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
+				err = cmd_common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}
@@ -131,7 +130,7 @@ var StartCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return common.GetAllWorkspacesByState(apiclient.ResourceStateNameStopped)
+		return cmd_common.GetAllWorkspacesByState(apiclient.ResourceStateNameStopped)
 	},
 }
 
@@ -207,7 +206,7 @@ func StartWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspac
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	err = common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStarted)
+	err = cmd_common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStarted)
 	if err != nil {
 		stopLogs()
 		return err

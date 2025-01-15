@@ -10,7 +10,6 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	"github.com/daytonaio/daytona/pkg/cmd/common"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -25,7 +24,7 @@ var LogsCmd = &cobra.Command{
 	Short:   "View the logs of a workspace",
 	Args:    cobra.RangeArgs(0, 2),
 	GroupID: util.TARGET_GROUP,
-	Aliases: common.GetAliases("logs"),
+	Aliases: cmd_common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -88,7 +87,7 @@ var LogsCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return common.GetWorkspaceNameCompletions()
+		return cmd_common.GetWorkspaceNameCompletions()
 	},
 }
 
