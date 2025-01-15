@@ -252,11 +252,11 @@ func handleTargetConfigJSON(data []byte) error {
 			TargetConfigManifest: selectedTargetConfig.ProviderInfo.TargetConfigManifest,
 		},
 	}
-	_, res, err := apiClient.TargetConfigAPI.CreateTargetConfig(ctx).TargetConfig(targetConfigData).Execute()
+	targetConfig, res, err := apiClient.TargetConfigAPI.CreateTargetConfig(ctx).TargetConfig(targetConfigData).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
-	views.RenderInfoMessage("Target set successfully and will be used by default")
+	views.RenderInfoMessage(fmt.Sprintf("Target config '%s' created successfully", targetConfig.Name))
 	return nil
 }
 
