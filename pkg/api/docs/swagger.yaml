@@ -238,6 +238,10 @@ definitions:
         type: string
       image:
         type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       name:
         type: string
       source:
@@ -249,6 +253,7 @@ definitions:
     required:
     - envVars
     - id
+    - labels
     - name
     - source
     - targetId
@@ -1336,6 +1341,10 @@ definitions:
         type: string
       image:
         type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       lastJob:
         $ref: '#/definitions/Job'
       lastJobId:
@@ -1359,6 +1368,7 @@ definitions:
     - envVars
     - id
     - image
+    - labels
     - name
     - repository
     - target
@@ -1381,6 +1391,10 @@ definitions:
         type: string
       image:
         type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       lastJob:
         $ref: '#/definitions/Job'
       lastJobId:
@@ -1406,6 +1420,7 @@ definitions:
     - envVars
     - id
     - image
+    - labels
     - name
     - repository
     - state
@@ -1447,6 +1462,10 @@ definitions:
         type: string
       image:
         type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       name:
         type: string
       prebuilds:
@@ -1461,6 +1480,7 @@ definitions:
     - default
     - envVars
     - image
+    - labels
     - name
     - repositoryUrl
     - user
@@ -2783,6 +2803,11 @@ paths:
     get:
       description: List workspaces
       operationId: ListWorkspaces
+      parameters:
+      - description: JSON encoded labels
+        in: query
+        name: labels
+        type: string
       produces:
       - application/json
       responses:
@@ -3092,6 +3117,32 @@ paths:
           schema:
             $ref: '#/definitions/WorkspaceDTO'
       summary: Find workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/labels:
+    post:
+      description: Update workspace labels
+      operationId: UpdateWorkspaceLabels
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Labels
+        in: body
+        name: labels
+        required: true
+        schema:
+          additionalProperties:
+            type: string
+          type: object
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/WorkspaceDTO'
+      summary: Update workspace labels
       tags:
       - workspace
   /workspace/{workspaceId}/metadata:

@@ -5,6 +5,7 @@ package common
 
 import (
 	"fmt"
+	"strings"
 
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
@@ -19,6 +20,7 @@ type WorkspaceConfigurationFlags struct {
 	EnvVars           *[]string
 	Manual            *bool
 	GitProviderConfig *string
+	Labels            *[]string
 }
 
 func AddWorkspaceConfigurationFlags(cmd *cobra.Command, flags WorkspaceConfigurationFlags, multiWorkspaceFlagException bool) {
@@ -29,6 +31,7 @@ func AddWorkspaceConfigurationFlags(cmd *cobra.Command, flags WorkspaceConfigura
 	cmd.Flags().StringArrayVar(flags.EnvVars, "env", []string{}, "Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')")
 	cmd.Flags().BoolVar(flags.Manual, "manual", false, "Manually enter the Git repository")
 	cmd.Flags().StringVar(flags.GitProviderConfig, "git-provider-config", "", "Specify the Git provider configuration ID or alias")
+	cmd.Flags().StringArrayVar(flags.Labels, "label", []string{}, "Specify labels (e.g. --label 'label.key1=VALUE1' --label 'label.key2=VALUE2' ...)")
 
 	cmd.MarkFlagsMutuallyExclusive("builder", "custom-image")
 	cmd.MarkFlagsMutuallyExclusive("builder", "custom-image-user")
@@ -46,5 +49,20 @@ func AddWorkspaceConfigurationFlags(cmd *cobra.Command, flags WorkspaceConfigura
 }
 
 func CheckAnyWorkspaceConfigurationFlagSet(flags WorkspaceConfigurationFlags) bool {
-	return *flags.GitProviderConfig != "" || *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0
+	return *flags.GitProviderConfig != "" || *flags.CustomImage != "" || *flags.CustomImageUser != "" || *flags.DevcontainerPath != "" || *flags.Builder != "" || len(*flags.EnvVars) > 0 || len(*flags.Labels) > 0
+}
+
+func MapKeyValue(arr []string) (map[string]string, error) {
+	result := map[string]string{}
+
+	for _, str := range arr {
+		parts := strings.SplitN(str, "=", 2)
+		if len(parts) == 2 {
+			result[parts[0]] = parts[1]
+		} else {
+			return nil, fmt.Errorf("invalid format: %s", str)
+		}
+	}
+
+	return result, nil
 }

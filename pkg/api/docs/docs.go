@@ -1841,6 +1841,14 @@ const docTemplate = `{
                 ],
                 "summary": "List workspaces",
                 "operationId": "ListWorkspaces",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "JSON encoded labels",
+                        "name": "labels",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2296,6 +2304,45 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/labels": {
+            "post": {
+                "description": "Update workspace labels",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Update workspace labels",
+                "operationId": "UpdateWorkspaceLabels",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Labels",
+                        "name": "labels",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceDTO"
+                        }
                     }
                 }
             }
@@ -3920,6 +3967,7 @@ const docTemplate = `{
             "required": [
                 "envVars",
                 "id",
+                "labels",
                 "name",
                 "source",
                 "targetId"
@@ -3942,6 +3990,12 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "name": {
                     "type": "string"
@@ -5505,6 +5559,7 @@ const docTemplate = `{
                 "envVars",
                 "id",
                 "image",
+                "labels",
                 "name",
                 "repository",
                 "target",
@@ -5532,6 +5587,12 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
@@ -5569,6 +5630,7 @@ const docTemplate = `{
                 "envVars",
                 "id",
                 "image",
+                "labels",
                 "name",
                 "repository",
                 "state",
@@ -5597,6 +5659,12 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "lastJob": {
                     "$ref": "#/definitions/Job"
@@ -5666,6 +5734,7 @@ const docTemplate = `{
                 "default",
                 "envVars",
                 "image",
+                "labels",
                 "name",
                 "repositoryUrl",
                 "user"
@@ -5688,6 +5757,12 @@ const docTemplate = `{
                 },
                 "image": {
                     "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
                 },
                 "name": {
                     "type": "string"

@@ -217,6 +217,7 @@ func (a *ApiServer) Start() error {
 		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
 		workspaceController.POST("/:workspaceId/restart", workspace.RestartWorkspace)
 		workspaceController.POST("/:workspaceId/provider-metadata", workspace.UpdateWorkspaceProviderMetadata)
+		workspaceController.POST("/:workspaceId/labels", workspace.UpdateWorkspaceLabels)
 	}
 
 	workspaceTemplateController := protected.Group("/workspace-template")

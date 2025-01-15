@@ -149,6 +149,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**RestartWorkspace**](docs/WorkspaceAPI.md#restartworkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+*WorkspaceAPI* | [**UpdateWorkspaceLabels**](docs/WorkspaceAPI.md#updateworkspacelabels) | **Post** /workspace/{workspaceId}/labels | Update workspace labels
 *WorkspaceAPI* | [**UpdateWorkspaceMetadata**](docs/WorkspaceAPI.md#updateworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Update workspace metadata
 *WorkspaceAPI* | [**UpdateWorkspaceProviderMetadata**](docs/WorkspaceAPI.md#updateworkspaceprovidermetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
 *WorkspaceTemplateAPI* | [**DeleteWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#deleteworkspacetemplate) | **Delete** /workspace-template/{templateName} | Delete workspace template data

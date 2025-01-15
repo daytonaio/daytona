@@ -25,6 +25,7 @@ type IWorkspaceService interface {
 	UpdateMetadata(ctx context.Context, workspaceId string, metadata *models.WorkspaceMetadata) (*models.WorkspaceMetadata, error)
 	UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error
 	UpdateLastJob(ctx context.Context, workspaceId, jobId string) error
+	UpdateLabels(ctx context.Context, workspaceId string, labels map[string]string) (*WorkspaceDTO, error)
 
 	GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error)
 	GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error)
@@ -43,6 +44,7 @@ type CreateWorkspaceDTO struct {
 	BuildConfig         *models.BuildConfig      `json:"buildConfig,omitempty" validate:"optional"`
 	Source              CreateWorkspaceSourceDTO `json:"source" validate:"required"`
 	EnvVars             map[string]string        `json:"envVars" validate:"required"`
+	Labels              map[string]string        `json:"labels" validate:"required"`
 	TargetId            string                   `json:"targetId" validate:"required"`
 	GitProviderConfigId *string                  `json:"gitProviderConfigId,omitempty" validate:"optional"`
 } //	@name	CreateWorkspaceDTO
@@ -56,6 +58,7 @@ func (c *CreateWorkspaceDTO) ToWorkspace() *models.Workspace {
 		EnvVars:             c.EnvVars,
 		TargetId:            c.TargetId,
 		GitProviderConfigId: c.GitProviderConfigId,
+		Labels:              c.Labels,
 	}
 
 	if c.Image != nil {
@@ -75,6 +78,7 @@ type CreateWorkspaceSourceDTO struct {
 
 type WorkspaceRetrievalParams struct {
 	ShowDeleted bool
+	Labels      map[string]string
 }
 
 var (
