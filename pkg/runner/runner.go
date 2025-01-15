@@ -332,9 +332,9 @@ func (r *Runner) handleRunFailed(j *models.Job, err error, startTime time.Time) 
 	if r.Config.TelemetryEnabled {
 		execTime := time.Since(startTime)
 		event := telemetry.NewJobEvent(telemetry.JobEventRunFailed, j, err, map[string]interface{}{"exec_time_ms": execTime.Milliseconds()})
-		err = r.trackTelemetryEvent(event, r.Config.ClientId)
-		if err != nil {
-			r.logger.Trace(err)
+		telemetryErr := r.trackTelemetryEvent(event, r.Config.ClientId)
+		if telemetryErr != nil {
+			r.logger.Trace(telemetryErr)
 		}
 	}
 
