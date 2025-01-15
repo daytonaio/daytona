@@ -19,8 +19,6 @@ const (
 	RunnerEventProviderInstallationFailed   RunnerEventName = "runner_provider_installation_failed"
 	RunnerEventProviderUninstalled          RunnerEventName = "runner_provider_uninstalled"
 	RunnerEventProviderUninstallationFailed RunnerEventName = "runer_provider_uninstallation_failed"
-	RunnerEventProviderUpdated              RunnerEventName = "runner_provider_updated"
-	RunnerEventProviderUpdateFailed         RunnerEventName = "runner_provider_update_failed"
 )
 
 type runnerEvent struct {

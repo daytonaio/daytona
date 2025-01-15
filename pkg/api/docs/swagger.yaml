@@ -290,10 +290,6 @@ definitions:
     required:
     - filePath
     type: object
-  DownloadUrls:
-    additionalProperties:
-      type: string
-    type: object
   EnvironmentVariable:
     properties:
       key:
@@ -635,16 +631,12 @@ definitions:
     type: object
   InstallProviderDTO:
     properties:
-      downloadUrls:
-        $ref: '#/definitions/DownloadUrls'
       name:
         type: string
       version:
         type: string
     required:
-    - downloadUrls
     - name
-    - version
     type: object
   Job:
     properties:
@@ -874,6 +866,21 @@ definitions:
     - id
     - retention
     - workspaceTemplateName
+    type: object
+  ProviderDTO:
+    properties:
+      label:
+        type: string
+      latest:
+        type: boolean
+      name:
+        type: string
+      version:
+        type: string
+    required:
+    - latest
+    - name
+    - version
     type: object
   ProviderInfo:
     properties:
@@ -1266,16 +1273,6 @@ definitions:
     required:
     - state
     type: object
-  UpdateProviderDTO:
-    properties:
-      downloadUrls:
-        $ref: '#/definitions/DownloadUrls'
-      version:
-        type: string
-    required:
-    - downloadUrls
-    - version
-    type: object
   UpdateRunnerMetadataDTO:
     properties:
       providers:
@@ -1488,7 +1485,6 @@ definitions:
     - run
     - install-provider
     - uninstall-provider
-    - update-provider
     type: string
     x-enum-varnames:
     - JobActionCreate
@@ -1500,7 +1496,6 @@ definitions:
     - JobActionRun
     - JobActionInstallProvider
     - JobActionUninstallProvider
-    - JobActionUpdateProvider
   models.ResourceStateName:
     enum:
     - undefined
@@ -2360,33 +2355,6 @@ paths:
       summary: Uninstall provider
       tags:
       - provider
-  /runner/{runnerId}/provider/{providerName}/update:
-    post:
-      description: Update provider
-      operationId: UpdateProvider
-      parameters:
-      - description: Update provider
-        in: body
-        name: updateProviderDto
-        required: true
-        schema:
-          $ref: '#/definitions/UpdateProviderDTO'
-      - description: Runner ID
-        in: path
-        name: runnerId
-        required: true
-        type: string
-      - description: Provider name
-        in: path
-        name: providerName
-        required: true
-        type: string
-      responses:
-        "200":
-          description: OK
-      summary: Update provider
-      tags:
-      - provider
   /runner/{runnerId}/provider/install:
     post:
       description: Install provider
@@ -2428,6 +2396,22 @@ paths:
               $ref: '#/definitions/ProviderInfo'
             type: array
       summary: List providers
+      tags:
+      - provider
+  /runner/provider/for-install:
+    get:
+      description: List providers available for installation
+      operationId: ListProvidersForInstall
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderDTO'
+            type: array
+      summary: List providers available for installation
       tags:
       - provider
   /sample:

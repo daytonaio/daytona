@@ -1041,6 +1041,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/runner/provider/for-install": {
+            "get": {
+                "description": "List providers available for installation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers available for installation",
+                "operationId": "ListProvidersForInstall",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/runner/{runnerId}": {
             "get": {
                 "description": "Find a runner",
@@ -1244,46 +1268,6 @@ const docTemplate = `{
                 "summary": "Uninstall provider",
                 "operationId": "UninstallProvider",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Runner ID",
-                        "name": "runnerId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Provider name",
-                        "name": "providerName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/runner/{runnerId}/provider/{providerName}/update": {
-            "post": {
-                "description": "Update provider",
-                "tags": [
-                    "provider"
-                ],
-                "summary": "Update provider",
-                "operationId": "UpdateProvider",
-                "parameters": [
-                    {
-                        "description": "Update provider",
-                        "name": "updateProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UpdateProviderDTO"
-                        }
-                    },
                     {
                         "type": "string",
                         "description": "Runner ID",
@@ -4013,12 +3997,6 @@ const docTemplate = `{
                 }
             }
         },
-        "DownloadUrls": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
         "EnvironmentVariable": {
             "type": "object",
             "required": [
@@ -4517,14 +4495,9 @@ const docTemplate = `{
         "InstallProviderDTO": {
             "type": "object",
             "required": [
-                "downloadUrls",
-                "name",
-                "version"
+                "name"
             ],
             "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -4862,6 +4835,28 @@ const docTemplate = `{
                     }
                 },
                 "workspaceTemplateName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderDTO": {
+            "type": "object",
+            "required": [
+                "latest",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "latest": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -5415,21 +5410,6 @@ const docTemplate = `{
                 }
             }
         },
-        "UpdateProviderDTO": {
-            "type": "object",
-            "required": [
-                "downloadUrls",
-                "version"
-            ],
-            "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "UpdateRunnerMetadataDTO": {
             "type": "object",
             "required": [
@@ -5732,8 +5712,7 @@ const docTemplate = `{
                 "force-delete",
                 "run",
                 "install-provider",
-                "uninstall-provider",
-                "update-provider"
+                "uninstall-provider"
             ],
             "x-enum-varnames": [
                 "JobActionCreate",
@@ -5744,8 +5723,7 @@ const docTemplate = `{
                 "JobActionForceDelete",
                 "JobActionRun",
                 "JobActionInstallProvider",
-                "JobActionUninstallProvider",
-                "JobActionUpdateProvider"
+                "JobActionUninstallProvider"
             ]
         },
         "models.ResourceStateName": {

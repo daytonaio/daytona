@@ -21,9 +21,8 @@ var _ MappedNullable = &InstallProviderDTO{}
 
 // InstallProviderDTO struct for InstallProviderDTO
 type InstallProviderDTO struct {
-	DownloadUrls map[string]string `json:"downloadUrls"`
-	Name         string            `json:"name"`
-	Version      string            `json:"version"`
+	Name    string  `json:"name"`
+	Version *string `json:"version,omitempty"`
 }
 
 type _InstallProviderDTO InstallProviderDTO
@@ -32,11 +31,9 @@ type _InstallProviderDTO InstallProviderDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewInstallProviderDTO(downloadUrls map[string]string, name string, version string) *InstallProviderDTO {
+func NewInstallProviderDTO(name string) *InstallProviderDTO {
 	this := InstallProviderDTO{}
-	this.DownloadUrls = downloadUrls
 	this.Name = name
-	this.Version = version
 	return &this
 }
 
@@ -46,30 +43,6 @@ func NewInstallProviderDTO(downloadUrls map[string]string, name string, version 
 func NewInstallProviderDTOWithDefaults() *InstallProviderDTO {
 	this := InstallProviderDTO{}
 	return &this
-}
-
-// GetDownloadUrls returns the DownloadUrls field value
-func (o *InstallProviderDTO) GetDownloadUrls() map[string]string {
-	if o == nil {
-		var ret map[string]string
-		return ret
-	}
-
-	return o.DownloadUrls
-}
-
-// GetDownloadUrlsOk returns a tuple with the DownloadUrls field value
-// and a boolean to check if the value has been set.
-func (o *InstallProviderDTO) GetDownloadUrlsOk() (*map[string]string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.DownloadUrls, true
-}
-
-// SetDownloadUrls sets field value
-func (o *InstallProviderDTO) SetDownloadUrls(v map[string]string) {
-	o.DownloadUrls = v
 }
 
 // GetName returns the Name field value
@@ -96,28 +69,36 @@ func (o *InstallProviderDTO) SetName(v string) {
 	o.Name = v
 }
 
-// GetVersion returns the Version field value
+// GetVersion returns the Version field value if set, zero value otherwise.
 func (o *InstallProviderDTO) GetVersion() string {
-	if o == nil {
+	if o == nil || IsNil(o.Version) {
 		var ret string
 		return ret
 	}
-
-	return o.Version
+	return *o.Version
 }
 
-// GetVersionOk returns a tuple with the Version field value
+// GetVersionOk returns a tuple with the Version field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *InstallProviderDTO) GetVersionOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.Version) {
 		return nil, false
 	}
-	return &o.Version, true
+	return o.Version, true
 }
 
-// SetVersion sets field value
+// HasVersion returns a boolean if a field has been set.
+func (o *InstallProviderDTO) HasVersion() bool {
+	if o != nil && !IsNil(o.Version) {
+		return true
+	}
+
+	return false
+}
+
+// SetVersion gets a reference to the given string and assigns it to the Version field.
 func (o *InstallProviderDTO) SetVersion(v string) {
-	o.Version = v
+	o.Version = &v
 }
 
 func (o InstallProviderDTO) MarshalJSON() ([]byte, error) {
@@ -130,9 +111,10 @@ func (o InstallProviderDTO) MarshalJSON() ([]byte, error) {
 
 func (o InstallProviderDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["downloadUrls"] = o.DownloadUrls
 	toSerialize["name"] = o.Name
-	toSerialize["version"] = o.Version
+	if !IsNil(o.Version) {
+		toSerialize["version"] = o.Version
+	}
 	return toSerialize, nil
 }
 
@@ -141,9 +123,7 @@ func (o *InstallProviderDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"downloadUrls",
 		"name",
-		"version",
 	}
 
 	allProperties := make(map[string]interface{})

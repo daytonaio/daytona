@@ -51,7 +51,6 @@ const (
 	JobActionRun               JobAction = "run"
 	JobActionInstallProvider   JobAction = "install-provider"
 	JobActionUninstallProvider JobAction = "uninstall-provider"
-	JobActionUpdateProvider    JobAction = "update-provider"
 )
 
 func getResourceStateFromJob(job *Job) ResourceState {

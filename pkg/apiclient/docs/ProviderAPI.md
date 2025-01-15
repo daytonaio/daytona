@@ -6,8 +6,8 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /runner/{runnerId}/provider/install | Install provider
 [**ListProviders**](ProviderAPI.md#ListProviders) | **Get** /runner/provider | List providers
+[**ListProvidersForInstall**](ProviderAPI.md#ListProvidersForInstall) | **Get** /runner/provider/for-install | List providers available for installation
 [**UninstallProvider**](ProviderAPI.md#UninstallProvider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
-[**UpdateProvider**](ProviderAPI.md#UpdateProvider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
 
 
 
@@ -33,7 +33,7 @@ import (
 
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
-	installProviderDto := *openapiclient.NewInstallProviderDTO(map[string]string{"key": "Inner_example"}, "Name_example", "Version_example") // InstallProviderDTO | Install provider
+	installProviderDto := *openapiclient.NewInstallProviderDTO("Name_example") // InstallProviderDTO | Install provider
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -147,6 +147,67 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## ListProvidersForInstall
+
+> []ProviderDTO ListProvidersForInstall(ctx).Execute()
+
+List providers available for installation
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.ProviderAPI.ListProvidersForInstall(context.Background()).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.ListProvidersForInstall``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListProvidersForInstall`: []ProviderDTO
+	fmt.Fprintf(os.Stdout, "Response from `ProviderAPI.ListProvidersForInstall`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+This endpoint does not need any parameter.
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListProvidersForInstallRequest struct via the builder pattern
+
+
+### Return type
+
+[**[]ProviderDTO**](ProviderDTO.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## UninstallProvider
 
 > UninstallProvider(ctx, runnerId, providerName).Execute()
@@ -199,79 +260,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
-
-### Return type
-
- (empty response body)
-
-### Authorization
-
-[Bearer](../README.md#Bearer)
-
-### HTTP request headers
-
-- **Content-Type**: Not defined
-- **Accept**: Not defined
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
-[[Back to Model list]](../README.md#documentation-for-models)
-[[Back to README]](../README.md)
-
-
-## UpdateProvider
-
-> UpdateProvider(ctx, runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
-
-Update provider
-
-
-
-### Example
-
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"os"
-	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
-)
-
-func main() {
-	runnerId := "runnerId_example" // string | Runner ID
-	providerName := "providerName_example" // string | Provider name
-	updateProviderDto := *openapiclient.NewUpdateProviderDTO(map[string]string{"key": "Inner_example"}, "Version_example") // UpdateProviderDTO | Update provider
-
-	configuration := openapiclient.NewConfiguration()
-	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.UpdateProvider``: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
-	}
-}
-```
-
-### Path Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**runnerId** | **string** | Runner ID | 
-**providerName** | **string** | Provider name | 
-
-### Other Parameters
-
-Other parameters are passed through a pointer to a apiUpdateProviderRequest struct via the builder pattern
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
-
-
- **updateProviderDto** | [**UpdateProviderDTO**](UpdateProviderDTO.md) | Update provider | 
 
 ### Return type
 

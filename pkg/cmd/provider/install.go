@@ -5,12 +5,9 @@ package provider
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -55,27 +52,24 @@ var installCmd = &cobra.Command{
 			selectedRunnerId = args[0]
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
+		availableProviderList, res, err := apiClient.ProviderAPI.ListProvidersForInstall(context.Background()).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
-		if err != nil {
-			return err
+		var providerPromptList []apiclient.ProviderDTO
+
+		for _, p := range availableProviderList {
+			if p.Latest {
+				providerPromptList = append(providerPromptList, p)
+			}
 		}
 
-		providersManifestLatest := providersManifest.GetLatestVersions()
-		if providersManifestLatest == nil {
-			return errors.New("could not get providers manifest")
-		}
-
-		providerList := conversion.GetProviderListFromManifest(providersManifestLatest)
 		specificProviderName := "Select a specific version"
 		specificProviderVersion := ""
-		providerList = append(providerList, apiclient.ProviderInfo{Name: specificProviderName, Label: &specificProviderName, Version: specificProviderVersion})
+		providerPromptList = append(availableProviderList, apiclient.ProviderDTO{Name: specificProviderName, Label: &specificProviderName, Version: specificProviderVersion})
 
-		providerToInstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a Provider to Install", false)
+		providerToInstall, err := provider.GetProviderFromPrompt(provider.ProviderListToView(providerPromptList), "Choose a Provider to Install", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
 				return nil
@@ -89,9 +83,7 @@ var installCmd = &cobra.Command{
 		}
 
 		if providerToInstall.Name == specificProviderName {
-			providerList = conversion.GetProviderListFromManifest(providersManifest)
-
-			providerToInstall, err = provider.GetProviderFromPrompt(provider.ProviderListToView(providerList), "Choose a specific provider to install", false)
+			providerToInstall, err = provider.GetProviderFromPrompt(provider.ProviderListToView(availableProviderList), "Choose a specific provider to install", false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -105,7 +97,7 @@ var installCmd = &cobra.Command{
 			}
 		}
 
-		err = InstallProvider(apiClient, selectedRunnerId, *providerToInstall, providersManifest)
+		err = InstallProvider(apiClient, selectedRunnerId, *providerToInstall)
 		if err != nil {
 			return err
 		}
@@ -119,14 +111,11 @@ func init() {
 	installCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }
 
-func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall provider.ProviderView, providersManifest *util.ProvidersManifest) error {
-	downloadUrls := convertOSToStringMap((*providersManifest)[providerToInstall.Name].Versions[providerToInstall.Version].DownloadUrls)
-
+func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall apiclient.ProviderDTO) error {
 	err := views_util.WithInlineSpinner("Installing", func() error {
 		res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId).InstallProviderDto(apiclient.InstallProviderDTO{
-			Name:         providerToInstall.Name,
-			DownloadUrls: downloadUrls,
-			Version:      providerToInstall.Version,
+			Name:    providerToInstall.Name,
+			Version: &providerToInstall.Version,
 		}).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)

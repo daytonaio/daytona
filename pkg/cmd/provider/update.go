@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
@@ -64,20 +63,10 @@ var updateCmd = &cobra.Command{
 			return nil
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
-
-		providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
-		if err != nil {
-			return err
-		}
-
 		if allFlag {
 			for _, provider := range providerList {
 				fmt.Printf("Updating provider %s\n", provider.Name)
-				err := updateProvider(selectedRunnerId, provider.Name, providersManifest, apiClient)
+				err := updateProvider(selectedRunnerId, provider.Name, apiClient)
 				if err != nil {
 					log.Error(fmt.Sprintf("Failed to update provider %s: %s", provider.Name, err))
 				} else {
@@ -100,7 +89,7 @@ var updateCmd = &cobra.Command{
 			return nil
 		}
 
-		err = updateProvider(selectedRunnerId, providerToUpdate.Name, providersManifest, apiClient)
+		err = updateProvider(selectedRunnerId, providerToUpdate.Name, apiClient)
 		if err != nil {
 			return err
 		}
@@ -110,25 +99,9 @@ var updateCmd = &cobra.Command{
 	},
 }
 
-func updateProvider(runnerId string, providerName string, providersManifest *util.ProvidersManifest, apiClient *apiclient.APIClient) error {
-	providerManifest, ok := (*providersManifest)[providerName]
-	if !ok {
-		return fmt.Errorf("provider %s not found in manifest", providerName)
-	}
-
-	version, ok := providerManifest.Versions["latest"]
-	versionName := "latest"
-	if !ok {
-		name, latest := providerManifest.FindLatestVersion()
-		versionName = name
-		version = *latest
-	}
-
-	downloadUrls := convertOSToStringMap(version.DownloadUrls)
-
-	res, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(apiclient.UpdateProviderDTO{
-		DownloadUrls: downloadUrls,
-		Version:      versionName,
+func updateProvider(runnerId string, providerName string, apiClient *apiclient.APIClient) error {
+	res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId).InstallProviderDto(apiclient.InstallProviderDTO{
+		Name: providerName,
 	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)

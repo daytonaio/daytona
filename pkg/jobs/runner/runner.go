@@ -23,8 +23,6 @@ func (pj *RunnerJob) Execute(ctx context.Context) error {
 	switch pj.Action {
 	case models.JobActionInstallProvider:
 		return pj.installProvider(ctx, &pj.Job)
-	case models.JobActionUpdateProvider:
-		return pj.updateProvider(ctx, &pj.Job)
 	case models.JobActionUninstallProvider:
 		return pj.uninstallProvider(ctx, &pj.Job)
 	}

@@ -180,6 +180,5 @@ var validResourceActions = map[models.ResourceType][]models.JobAction{
 	models.ResourceTypeRunner: {
 		models.JobActionInstallProvider,
 		models.JobActionUninstallProvider,
-		models.JobActionUpdateProvider,
 	},
 }

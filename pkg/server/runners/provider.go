@@ -38,10 +38,14 @@ func (s *RunnerService) ListProviders(ctx context.Context, runnerId *string) ([]
 	return providers, nil
 }
 
+func (s *RunnerService) ListProvidersForInstall(ctx context.Context) ([]services.ProviderDTO, error) {
+	return nil, nil
+}
+
 func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, providerDto services.InstallProviderDTO) error {
 	params := providerActionParams{
 		providerName:    providerDto.Name,
-		providerVersion: &providerDto.Version,
+		providerVersion: providerDto.Version,
 		eventName:       telemetry.RunnerEventProviderInstalled,
 		errEventName:    telemetry.RunnerEventProviderInstallationFailed,
 	}
@@ -77,30 +81,6 @@ func (s *RunnerService) UninstallProvider(ctx context.Context, runnerId string, 
 	params.runner = runner
 
 	err = s.createJob(ctx, runnerId, models.JobActionUninstallProvider, providerName)
-	return s.handleProviderActionError(ctx, params, err)
-}
-
-func (s *RunnerService) UpdateProvider(ctx context.Context, runnerId string, providerName string, providerDto services.UpdateProviderDTO) error {
-	params := providerActionParams{
-		providerName:    providerName,
-		providerVersion: &providerDto.Version,
-		eventName:       telemetry.RunnerEventProviderUpdated,
-		errEventName:    telemetry.RunnerEventProviderUpdateFailed,
-	}
-
-	runner, err := s.runnerStore.Find(ctx, runnerId)
-	if err != nil {
-		return s.handleProviderActionError(ctx, params, err)
-	}
-
-	params.runner = runner
-
-	metadata, err := json.Marshal(providerDto)
-	if err != nil {
-		return s.handleProviderActionError(ctx, params, err)
-	}
-
-	err = s.createJob(ctx, runnerId, models.JobActionUpdateProvider, string(metadata))
 	return s.handleProviderActionError(ctx, params, err)
 }
 

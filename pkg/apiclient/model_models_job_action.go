@@ -29,7 +29,6 @@ const (
 	JobActionRun               ModelsJobAction = "run"
 	JobActionInstallProvider   ModelsJobAction = "install-provider"
 	JobActionUninstallProvider ModelsJobAction = "uninstall-provider"
-	JobActionUpdateProvider    ModelsJobAction = "update-provider"
 )
 
 // All allowed values of ModelsJobAction enum
@@ -43,7 +42,6 @@ var AllowedModelsJobActionEnumValues = []ModelsJobAction{
 	"run",
 	"install-provider",
 	"uninstall-provider",
-	"update-provider",
 }
 
 func (v *ModelsJobAction) UnmarshalJSON(src []byte) error {

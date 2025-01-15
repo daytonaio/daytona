@@ -40,3 +40,25 @@ func ListProviders(ctx *gin.Context) {
 
 	ctx.JSON(200, providers)
 }
+
+// ListProvidersForInstall godoc
+//
+//	@Tags			provider
+//	@Summary		List providers available for installation
+//	@Description	List providers available for installation
+//	@Produce		json
+//	@Success		200	{array}	ProviderDTO
+//	@Router			/runner/provider/for-install [get]
+//
+//	@id				ListProvidersForInstall
+func ListProvidersForInstall(ctx *gin.Context) {
+	server := server.GetInstance(nil)
+
+	providers, err := server.RunnerService.ListProvidersForInstall(ctx.Request.Context())
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list providers for install: %w", err))
+		return
+	}
+
+	ctx.JSON(200, providers)
+}
