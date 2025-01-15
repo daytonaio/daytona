@@ -44,7 +44,7 @@ var updateCmd = &cobra.Command{
 		}
 
 		if len(userGitProviders) == 0 {
-			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider add' in order to start using prebuilds.")
+			views.RenderInfoMessage("No registered Git providers have been found - please register a Git provider using 'daytona git-provider create' in order to start using prebuilds.")
 			return nil
 		}
 
