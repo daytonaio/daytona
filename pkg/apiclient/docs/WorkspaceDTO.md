@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
 **Image** | **string** |  | 
+**Labels** | **map[string]string** |  | 
 **LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
 **LastJobId** | Pointer to **string** |  | [optional] 
 **Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
@@ -25,7 +26,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -168,6 +169,26 @@ and a boolean to check if the value has been set.
 `func (o *WorkspaceDTO) SetImage(v string)`
 
 SetImage sets Image field to given value.
+
+
+### GetLabels
+
+`func (o *WorkspaceDTO) GetLabels() map[string]string`
+
+GetLabels returns the Labels field if non-nil, zero value otherwise.
+
+### GetLabelsOk
+
+`func (o *WorkspaceDTO) GetLabelsOk() (*map[string]string, bool)`
+
+GetLabelsOk returns a tuple with the Labels field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabels
+
+`func (o *WorkspaceDTO) SetLabels(v map[string]string)`
+
+SetLabels sets Labels field to given value.
 
 
 ### GetLastJob

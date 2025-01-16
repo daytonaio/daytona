@@ -15,7 +15,9 @@ func (s *DockerClientTestSuite) TestStopWorkspace() {
 
 	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 
-	s.mockClient.On("ContainerStop", mock.Anything, containerName, container.StopOptions{}).Return(nil)
+	s.mockClient.On("ContainerStop", mock.Anything, containerName, container.StopOptions{
+		Signal: "SIGKILL",
+	}).Return(nil)
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{
 		ContainerJSONBase: &types.ContainerJSONBase{
 			State: &types.ContainerState{

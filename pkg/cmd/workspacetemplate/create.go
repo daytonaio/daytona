@@ -286,6 +286,7 @@ var workspaceConfigurationFlags = cmd_common.WorkspaceConfigurationFlags{
 	EnvVars:           new([]string),
 	Manual:            new(bool),
 	GitProviderConfig: new(string),
+	Labels:            new([]string),
 }
 
 func init() {

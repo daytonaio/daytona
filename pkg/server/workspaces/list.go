@@ -21,7 +21,7 @@ func (s *WorkspaceService) List(ctx context.Context, params services.WorkspaceRe
 	for _, ws := range workspaces {
 		state := ws.GetState()
 
-		if state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted {
+		if !matchesLabels(ws, params.Labels) || (state.Name == models.ResourceStateNameDeleted && !params.ShowDeleted) {
 			continue
 		}
 
@@ -32,4 +32,18 @@ func (s *WorkspaceService) List(ctx context.Context, params services.WorkspaceRe
 	}
 
 	return response, nil
+}
+
+func matchesLabels(w *models.Workspace, labels map[string]string) bool {
+	if labels == nil {
+		return true
+	}
+
+	for k, v := range labels {
+		if w.Labels[k] != v {
+			return false
+		}
+	}
+
+	return true
 }

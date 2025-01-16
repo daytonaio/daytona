@@ -26,6 +26,7 @@ type CreateWorkspaceDTO struct {
 	GitProviderConfigId *string                  `json:"gitProviderConfigId,omitempty"`
 	Id                  string                   `json:"id"`
 	Image               *string                  `json:"image,omitempty"`
+	Labels              map[string]string        `json:"labels"`
 	Name                string                   `json:"name"`
 	Source              CreateWorkspaceSourceDTO `json:"source"`
 	TargetId            string                   `json:"targetId"`
@@ -38,10 +39,11 @@ type _CreateWorkspaceDTO CreateWorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateWorkspaceDTO(envVars map[string]string, id string, name string, source CreateWorkspaceSourceDTO, targetId string) *CreateWorkspaceDTO {
+func NewCreateWorkspaceDTO(envVars map[string]string, id string, labels map[string]string, name string, source CreateWorkspaceSourceDTO, targetId string) *CreateWorkspaceDTO {
 	this := CreateWorkspaceDTO{}
 	this.EnvVars = envVars
 	this.Id = id
+	this.Labels = labels
 	this.Name = name
 	this.Source = source
 	this.TargetId = targetId
@@ -200,6 +202,30 @@ func (o *CreateWorkspaceDTO) SetImage(v string) {
 	o.Image = &v
 }
 
+// GetLabels returns the Labels field value
+func (o *CreateWorkspaceDTO) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *CreateWorkspaceDTO) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *CreateWorkspaceDTO) SetLabels(v map[string]string) {
+	o.Labels = v
+}
+
 // GetName returns the Name field value
 func (o *CreateWorkspaceDTO) GetName() string {
 	if o == nil {
@@ -325,6 +351,7 @@ func (o CreateWorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image
 	}
+	toSerialize["labels"] = o.Labels
 	toSerialize["name"] = o.Name
 	toSerialize["source"] = o.Source
 	toSerialize["targetId"] = o.TargetId
@@ -341,6 +368,7 @@ func (o *CreateWorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 	requiredProperties := []string{
 		"envVars",
 		"id",
+		"labels",
 		"name",
 		"source",
 		"targetId",

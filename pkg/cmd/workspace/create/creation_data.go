@@ -282,16 +282,26 @@ func GetCreateWorkspaceDtoFromFlags(workspaceConfigurationFlags cmd_common.Works
 
 	envVars := make(map[string]string)
 
-	for _, envVar := range *workspaceConfigurationFlags.EnvVars {
-		parts := strings.SplitN(envVar, "=", 2)
-		if len(parts) == 2 {
-			envVars[parts[0]] = parts[1]
-		} else {
-			return nil, fmt.Errorf("Invalid environment variable format: %s\n", envVar)
+	if workspaceConfigurationFlags.EnvVars != nil {
+		var err error
+		envVars, err = cmd_common.MapKeyValue(*workspaceConfigurationFlags.EnvVars)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	labels := make(map[string]string)
+
+	if workspaceConfigurationFlags.Labels != nil {
+		var err error
+		labels, err = cmd_common.MapKeyValue(*workspaceConfigurationFlags.Labels)
+		if err != nil {
+			return nil, err
 		}
 	}
 
 	workspace.EnvVars = envVars
+	workspace.Labels = labels
 
 	return workspace, nil
 }
