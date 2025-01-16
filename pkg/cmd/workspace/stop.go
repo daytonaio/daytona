@@ -12,7 +12,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -84,7 +84,7 @@ var StopCmd = &cobra.Command{
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return cmd_common.GetAllWorkspacesByState(apiclient.ResourceStateNameStarted)
+		return common.GetAllWorkspacesByState(apiclient.ResourceStateNameStarted)
 	},
 }
 
@@ -136,7 +136,7 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspace
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
+	go common.ReadWorkspaceLogs(logsContext, common.ReadLogParams{
 		Id:        workspace.Id,
 		Label:     &workspace.Name,
 		ServerUrl: activeProfile.Api.Url,
@@ -152,7 +152,7 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspace
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	err = cmd_common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStopped)
+	err = common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStopped)
 	if err != nil {
 		stopLogs()
 		return err
