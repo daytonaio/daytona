@@ -5,6 +5,7 @@ package workspace
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
@@ -14,6 +15,8 @@ import (
 	"github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
 )
+
+var labelFilters []string
 
 var ListCmd = &cobra.Command{
 	Use:     "list",
@@ -30,7 +33,17 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		labels, err := common.MapKeyValue(labelFilters)
+		if err != nil {
+			return err
+		}
+
+		encoded, err := json.Marshal(labels)
+		if err != nil {
+			return err
+		}
+
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Labels(string(encoded)).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -66,5 +79,6 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
+	ListCmd.Flags().StringSliceVarP(&labelFilters, "label", "l", nil, "Filter by label")
 	format.RegisterFormatFlag(ListCmd)
 }

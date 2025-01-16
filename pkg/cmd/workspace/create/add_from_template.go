@@ -54,6 +54,7 @@ func AddWorkspaceFromTemplate(ctx context.Context, params AddWorkspaceFromTempla
 		Image:       &params.WorkspaceTemplate.Image,
 		User:        &params.WorkspaceTemplate.User,
 		EnvVars:     params.WorkspaceTemplate.EnvVars,
+		Labels:      params.WorkspaceTemplate.Labels,
 	}
 	*params.Workspaces = append(*params.Workspaces, *workspace)
 
