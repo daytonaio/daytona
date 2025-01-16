@@ -4,6 +4,7 @@
 package workspace
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -56,15 +57,30 @@ func FindWorkspace(ctx *gin.Context) {
 //	@Tags			workspace
 //	@Summary		List workspaces
 //	@Description	List workspaces
+//	@Param			labels	query	string	false	"JSON encoded labels"
 //	@Produce		json
 //	@Success		200	{array}	WorkspaceDTO
 //	@Router			/workspace [get]
 //
 //	@id				ListWorkspaces
 func ListWorkspaces(ctx *gin.Context) {
+	labelsQuery := ctx.Query("labels")
+
+	var labels map[string]string
+
+	if labelsQuery != "" {
+		err := json.Unmarshal([]byte(labelsQuery), &labels)
+		if err != nil {
+			ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid filters: %w", err))
+			return
+		}
+	}
+
 	server := server.GetInstance(nil)
 
-	workspaceList, err := server.WorkspaceService.List(ctx.Request.Context(), services.WorkspaceRetrievalParams{})
+	workspaceList, err := server.WorkspaceService.List(ctx.Request.Context(), services.WorkspaceRetrievalParams{
+		Labels: labels,
+	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %w", err))
 		return
@@ -72,7 +88,7 @@ func ListWorkspaces(ctx *gin.Context) {
 
 	apiKeyType, ok := ctx.Get("apiKeyType")
 	if !ok || apiKeyType == models.ApiKeyTypeClient {
-		for i, _ := range workspaceList {
+		for i := range workspaceList {
 			util.HideDaytonaEnvVars(&workspaceList[i].EnvVars)
 			util.HideDaytonaEnvVars(&workspaceList[i].Target.EnvVars)
 			workspaceList[i].ApiKey = ""

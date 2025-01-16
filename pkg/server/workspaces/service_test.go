@@ -209,6 +209,19 @@ func TestWorkspaceService(t *testing.T) {
 		ws.EnvVars = nil
 	})
 
+	t.Run("UpdateLabels", func(t *testing.T) {
+		labels := map[string]string{
+			"test": "label",
+		}
+
+		workspace, err := service.UpdateLabels(ctx, createWorkspaceDTO.Id, labels)
+
+		require.Nil(t, err)
+		require.NotNil(t, workspace)
+
+		require.Equal(t, labels, workspace.Labels)
+	})
+
 	t.Run("CreateWorkspace fails when workspace already exists", func(t *testing.T) {
 		_, err := service.Create(ctx, createWorkspaceDTO)
 		require.NotNil(t, err)

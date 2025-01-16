@@ -23,6 +23,8 @@ const (
 	WorkspaceEventLifecycleDeletionFailed      WorkspaceEventName = "workspace_lifecycle_deletion_failed"
 	WorkspaceEventLifecycleForceDeleted        WorkspaceEventName = "workspace_lifecycle_force_deleted"
 	WorkspaceEventLifecycleForceDeletionFailed WorkspaceEventName = "workspace_lifecycle_force_deletion_failed"
+	WorkspaceEventLabelsUpdated                WorkspaceEventName = "workspace_labels_updated"
+	WorkspaceEventLabelsUpdateFailed           WorkspaceEventName = "workspace_label_update_failed"
 )
 
 type workspaceEvent struct {
@@ -60,6 +62,7 @@ func (e workspaceEvent) Props() map[string]interface{} {
 	}
 	props["builder"] = getBuilder(e.workspace.BuildConfig)
 	props["is_local_runner"] = e.workspace.Target.TargetConfig.ProviderInfo.RunnerId == common.LOCAL_RUNNER_ID
+	props["n_labels"] = len(e.workspace.Labels)
 
 	return props
 }

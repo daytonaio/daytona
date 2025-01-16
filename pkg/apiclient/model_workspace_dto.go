@@ -27,6 +27,7 @@ type WorkspaceDTO struct {
 	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
 	Id                  string             `json:"id"`
 	Image               string             `json:"image"`
+	Labels              map[string]string  `json:"labels"`
 	LastJob             *Job               `json:"lastJob,omitempty"`
 	LastJobId           *string            `json:"lastJobId,omitempty"`
 	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
@@ -45,12 +46,13 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
+func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	this.ApiKey = apiKey
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
+	this.Labels = labels
 	this.Name = name
 	this.Repository = repository
 	this.State = state
@@ -226,6 +228,30 @@ func (o *WorkspaceDTO) GetImageOk() (*string, bool) {
 // SetImage sets field value
 func (o *WorkspaceDTO) SetImage(v string) {
 	o.Image = v
+}
+
+// GetLabels returns the Labels field value
+func (o *WorkspaceDTO) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *WorkspaceDTO) SetLabels(v map[string]string) {
+	o.Labels = v
 }
 
 // GetLastJob returns the LastJob field value if set, zero value otherwise.
@@ -520,6 +546,7 @@ func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["image"] = o.Image
+	toSerialize["labels"] = o.Labels
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
 	}
@@ -550,6 +577,7 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 		"envVars",
 		"id",
 		"image",
+		"labels",
 		"name",
 		"repository",
 		"state",

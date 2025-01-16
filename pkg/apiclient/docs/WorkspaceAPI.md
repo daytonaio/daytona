@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**RestartWorkspace**](WorkspaceAPI.md#RestartWorkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 [**StartWorkspace**](WorkspaceAPI.md#StartWorkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 [**StopWorkspace**](WorkspaceAPI.md#StopWorkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+[**UpdateWorkspaceLabels**](WorkspaceAPI.md#UpdateWorkspaceLabels) | **Post** /workspace/{workspaceId}/labels | Update workspace labels
 [**UpdateWorkspaceMetadata**](WorkspaceAPI.md#UpdateWorkspaceMetadata) | **Post** /workspace/{workspaceId}/metadata | Update workspace metadata
 [**UpdateWorkspaceProviderMetadata**](WorkspaceAPI.md#UpdateWorkspaceProviderMetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
 
@@ -37,7 +38,7 @@ import (
 )
 
 func main() {
-	workspace := *openapiclient.NewCreateWorkspaceDTO(map[string]string{"key": "Inner_example"}, "Id_example", "Name_example", *openapiclient.NewCreateWorkspaceSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")), "TargetId_example") // CreateWorkspaceDTO | Create workspace
+	workspace := *openapiclient.NewCreateWorkspaceDTO(map[string]string{"key": "Inner_example"}, "Id_example", map[string]string{"key": "Inner_example"}, "Name_example", *openapiclient.NewCreateWorkspaceSourceDTO(*openapiclient.NewGitRepository("Branch_example", "Id_example", "Name_example", "Owner_example", "Sha_example", "Source_example", "Url_example")), "TargetId_example") // CreateWorkspaceDTO | Create workspace
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -224,7 +225,7 @@ Name | Type | Description  | Notes
 
 ## ListWorkspaces
 
-> []WorkspaceDTO ListWorkspaces(ctx).Execute()
+> []WorkspaceDTO ListWorkspaces(ctx).Labels(labels).Execute()
 
 List workspaces
 
@@ -243,10 +244,11 @@ import (
 )
 
 func main() {
+	labels := "labels_example" // string | JSON encoded labels (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Execute()
+	resp, r, err := apiClient.WorkspaceAPI.ListWorkspaces(context.Background()).Labels(labels).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.ListWorkspaces``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -258,12 +260,16 @@ func main() {
 
 ### Path Parameters
 
-This endpoint does not need any parameter.
+
 
 ### Other Parameters
 
 Other parameters are passed through a pointer to a apiListWorkspacesRequest struct via the builder pattern
 
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **labels** | **string** | JSON encoded labels | 
 
 ### Return type
 
@@ -481,6 +487,78 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## UpdateWorkspaceLabels
+
+> WorkspaceDTO UpdateWorkspaceLabels(ctx, workspaceId).Labels(labels).Execute()
+
+Update workspace labels
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	labels := map[string]string{"key": "Inner_example"} // map[string]string | Labels
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkspaceAPI.UpdateWorkspaceLabels(context.Background(), workspaceId).Labels(labels).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceAPI.UpdateWorkspaceLabels``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `UpdateWorkspaceLabels`: WorkspaceDTO
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceAPI.UpdateWorkspaceLabels`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiUpdateWorkspaceLabelsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **labels** | **map[string]string** | Labels | 
+
+### Return type
+
+[**WorkspaceDTO**](WorkspaceDTO.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)
