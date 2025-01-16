@@ -7,11 +7,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
@@ -69,7 +69,7 @@ var updateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
+		providersManifest, err := runner.GetProvidersManifest(serverConfig.RegistryUrl)
 		if err != nil {
 			return err
 		}
@@ -110,14 +110,14 @@ var updateCmd = &cobra.Command{
 	},
 }
 
-func updateProvider(runnerId string, providerName string, providersManifest *util.ProvidersManifest, apiClient *apiclient.APIClient) error {
+func updateProvider(runnerId string, providerName string, providersManifest *runner.ProvidersManifest, apiClient *apiclient.APIClient) error {
 	providerManifest, ok := (*providersManifest)[providerName]
 	if !ok {
 		return fmt.Errorf("provider %s not found in manifest", providerName)
 	}
 
-	version, ok := providerManifest.Versions["latest"]
 	versionName := "latest"
+	version, ok := providerManifest.Versions[versionName]
 	if !ok {
 		name, latest := providerManifest.FindLatestVersion()
 		versionName = name

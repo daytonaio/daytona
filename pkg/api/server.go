@@ -339,6 +339,7 @@ func (a *ApiServer) Start() error {
 		providersGroup := runnerController.Group(providerRoutePath)
 		{
 			providersGroup.GET("", provider.ListProviders)
+			providersGroup.GET("/for-install", provider.ListProvidersForInstall)
 		}
 
 		runnerIdGroup := runnerController.Group(":runnerId")

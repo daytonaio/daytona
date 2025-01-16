@@ -12,14 +12,14 @@ import (
 )
 
 func (rj *RunnerJob) installProvider(ctx context.Context, j *models.Job) error {
-	var installProviderDto services.InstallProviderDTO
+	var providerJobMetadata services.ProviderJobMetadata
 
-	err := json.Unmarshal([]byte(*j.Metadata), &installProviderDto)
+	err := json.Unmarshal([]byte(*j.Metadata), &providerJobMetadata)
 	if err != nil {
 		return err
 	}
 
-	downloadPath, err := rj.providerManager.DownloadProvider(ctx, installProviderDto.DownloadUrls, installProviderDto.Name)
+	downloadPath, err := rj.providerManager.DownloadProvider(ctx, providerJobMetadata.DownloadUrls, providerJobMetadata.Name)
 	if err != nil {
 		return err
 	}

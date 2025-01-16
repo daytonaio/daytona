@@ -744,6 +744,22 @@ paths:
       summary: List providers
       tags:
       - provider
+  /runner/provider/for-install:
+    get:
+      description: List providers available for installation
+      operationId: ListProvidersForInstall
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderDTO'
+                type: array
+          description: OK
+      summary: List providers available for installation
+      tags:
+      - provider
   /runner/{runnerId}:
     delete:
       description: Delete runner
@@ -3722,21 +3738,14 @@ components:
       type: object
     InstallProviderDTO:
       example:
-        downloadUrls:
-          key: downloadUrls
         name: name
         version: version
       properties:
-        downloadUrls:
-          additionalProperties:
-            type: string
-          type: object
         name:
           type: string
         version:
           type: string
       required:
-      - downloadUrls
       - name
       - version
       type: object
@@ -4064,6 +4073,26 @@ components:
       - id
       - retention
       - workspaceTemplateName
+      type: object
+    ProviderDTO:
+      example:
+        name: name
+        label: label
+        version: version
+        latest: true
+      properties:
+        label:
+          type: string
+        latest:
+          type: boolean
+        name:
+          type: string
+        version:
+          type: string
+      required:
+      - latest
+      - name
+      - version
       type: object
     ProviderInfo:
       example:

@@ -1041,6 +1041,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/runner/provider/for-install": {
+            "get": {
+                "description": "List providers available for installation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers available for installation",
+                "operationId": "ListProvidersForInstall",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/runner/{runnerId}": {
             "get": {
                 "description": "Find a runner",
@@ -4664,14 +4688,10 @@ const docTemplate = `{
         "InstallProviderDTO": {
             "type": "object",
             "required": [
-                "downloadUrls",
                 "name",
                 "version"
             ],
             "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
                 "name": {
                     "type": "string"
                 },
@@ -5009,6 +5029,28 @@ const docTemplate = `{
                     }
                 },
                 "workspaceTemplateName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderDTO": {
+            "type": "object",
+            "required": [
+                "latest",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "latest": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }

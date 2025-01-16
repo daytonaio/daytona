@@ -14,15 +14,15 @@ import (
 	"sort"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	internal_util "github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/provider"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
+	provider_install "github.com/daytonaio/daytona/pkg/views/provider/install"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	"github.com/spf13/cobra"
 )
@@ -83,29 +83,44 @@ var TargetConfigCreateCmd = &cobra.Command{
 }
 
 func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClient, activeProfileName string) (*targetconfig.TargetConfigView, error) {
-	serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	providersManifest, err := internal_util.GetProvidersManifest(serverConfig.RegistryUrl)
+	installedProviderList, _, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 	if err != nil {
 		return nil, err
 	}
 
-	var latestProviders []apiclient.ProviderInfo
-	if providersManifest != nil {
-		providersManifestLatest := providersManifest.GetLatestVersions()
-		if providersManifestLatest == nil {
-			return nil, errors.New("could not get latest provider versions")
-		}
-
-		latestProviders = conversion.GetProviderListFromManifest(providersManifestLatest)
-	} else {
-		fmt.Println("Could not get provider manifest. Can't check for new providers to install")
+	availableProviderList, _, err := apiClient.ProviderAPI.ListProvidersForInstall(ctx).Execute()
+	if err != nil {
+		return nil, err
 	}
 
-	providerViewList, err := provider.GetProviderViewOptions(ctx, apiClient, latestProviders)
+	var latestProviderList []apiclient.ProviderDTO
+	for _, provider := range availableProviderList {
+		if provider.Latest {
+			latestProviderList = append(latestProviderList, provider)
+		}
+	}
+
+	providerList := installedProviderList
+	for _, latestProvider := range latestProviderList {
+		installed := false
+		for _, installedProvider := range installedProviderList {
+			if latestProvider.Name != installedProvider.Name {
+				continue
+			}
+			installed = true
+			break
+		}
+
+		if !installed {
+			providerList = append(providerList, apiclient.ProviderInfo{
+				Name:    latestProvider.Name,
+				Version: latestProvider.Version,
+				Label:   latestProvider.Label,
+			})
+		}
+	}
+
+	providerViewList, err := getProviderViewOptions(ctx, apiClient, providerList)
 	if err != nil {
 		return nil, err
 	}
@@ -137,10 +152,6 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 	}
 
 	if selectedProvider.Installed != nil && !*selectedProvider.Installed {
-		if providersManifest == nil {
-			return nil, errors.New("could not get providers manifest")
-		}
-
 		selectedRunner, err := cmd_common.GetRunnerFlow(apiClient, "Manage Providers")
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
@@ -154,7 +165,11 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 			return nil, nil
 		}
 
-		err = provider.InstallProvider(apiClient, selectedRunner.Id, *selectedProvider, providersManifest)
+		err = provider.InstallProvider(apiClient, selectedRunner.Id, provider_install.ProviderInstallView{
+			Name:    selectedProvider.Name,
+			Version: selectedProvider.Version,
+			Label:   selectedProvider.Label,
+		})
 		if err != nil {
 			return nil, err
 		}
@@ -168,7 +183,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 	selectedTargetConfig.Name = ""
-	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, internal_util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
+	err = targetconfig.NewTargetConfigNameInput(&selectedTargetConfig.Name, util.ArrayMap(targetConfigs, func(t apiclient.TargetConfig) string {
 		return t.Name
 	}))
 	if err != nil {
@@ -358,4 +373,48 @@ func contains(slice []string, item interface{}) bool {
 
 func init() {
 	TargetConfigCreateCmd.Flags().StringVarP(&pipeFile, "file", "f", "", "Path to JSON file for target configuration, use '-' to read from stdin")
+}
+
+func getProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient, latestProviders []apiclient.ProviderInfo) ([]provider_view.ProviderView, error) {
+	var result []provider_view.ProviderView
+
+	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
+	if err != nil {
+		return nil, apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	providerMap := make(map[string]provider_view.ProviderView)
+
+	for _, installedProvider := range installedProviders {
+		providerMap[installedProvider.Name] = provider_view.ProviderView{
+			Name:                 installedProvider.Name,
+			AgentlessTarget:      installedProvider.AgentlessTarget,
+			Label:                installedProvider.Label,
+			Version:              installedProvider.Version,
+			Installed:            util.Pointer(true),
+			RunnerId:             installedProvider.RunnerId,
+			RunnerName:           installedProvider.RunnerName,
+			TargetConfigManifest: installedProvider.TargetConfigManifest,
+		}
+	}
+
+	for _, latestProvider := range latestProviders {
+		if _, exists := providerMap[latestProvider.Name]; !exists {
+			providerMap[latestProvider.Name] = provider_view.ProviderView{
+				Name:                 latestProvider.Name,
+				Label:                latestProvider.Label,
+				Version:              latestProvider.Version,
+				Installed:            util.Pointer(false),
+				RunnerId:             latestProvider.RunnerId,
+				RunnerName:           latestProvider.RunnerName,
+				TargetConfigManifest: latestProvider.TargetConfigManifest,
+			}
+		}
+	}
+
+	for _, provider := range providerMap {
+		result = append(result, provider)
+	}
+
+	return result, nil
 }

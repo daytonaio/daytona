@@ -9,12 +9,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
 )
 
 func (r *Runner) downloadDefaultProviders(registryUrl string) error {
-	manifest, err := util.GetProvidersManifest(registryUrl)
+	manifest, err := GetProvidersManifest(registryUrl)
 	if err != nil {
 		return err
 	}
@@ -47,7 +46,7 @@ func (r *Runner) downloadDefaultProviders(registryUrl string) error {
 func (r *Runner) registerProviders(registryUrl string) error {
 	r.logger.Info("Registering providers")
 
-	manifest, err := util.GetProvidersManifest(registryUrl)
+	manifest, err := GetProvidersManifest(registryUrl)
 	if err != nil {
 		return err
 	}

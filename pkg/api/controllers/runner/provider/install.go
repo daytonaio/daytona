@@ -33,9 +33,28 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
+	config, err := server.GetConfig()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %w", err))
+		return
+	}
+
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, installProviderMetadataDto)
+	installedProviders, err := server.RunnerService.ListProviders(ctx, &runnerId)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to fetch installed providers: %w", err))
+		return
+	}
+
+	for _, provider := range installedProviders {
+		if provider.Name == installProviderMetadataDto.Name {
+			ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("provider %s is already installed", installProviderMetadataDto.Name))
+			return
+		}
+	}
+
+	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, config.RegistryUrl, installProviderMetadataDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to install provider: %w", err))
 		return

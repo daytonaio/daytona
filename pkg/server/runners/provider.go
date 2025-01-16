@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	log "github.com/sirupsen/logrus"
@@ -38,12 +39,26 @@ func (s *RunnerService) ListProviders(ctx context.Context, runnerId *string) ([]
 	return providers, nil
 }
 
-func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, providerDto services.InstallProviderDTO) error {
+func (s *RunnerService) ListProvidersForInstall(ctx context.Context, serverRegistryUrl string) ([]services.ProviderDTO, error) {
+	providersManifest, err := runner.GetProvidersManifest(serverRegistryUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return providersManifest.GetProviderListFromManifest(), nil
+}
+
+func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, serverRegistryUrl string, providerDto services.InstallProviderDTO) error {
 	params := providerActionParams{
 		providerName:    providerDto.Name,
 		providerVersion: &providerDto.Version,
 		eventName:       telemetry.RunnerEventProviderInstalled,
 		errEventName:    telemetry.RunnerEventProviderInstallationFailed,
+	}
+
+	downloadUrls, err := runner.GetProviderDownloadUrls(serverRegistryUrl, providerDto.Name, providerDto.Version)
+	if err != nil {
+		return s.handleProviderActionError(ctx, params, err)
 	}
 
 	runner, err := s.runnerStore.Find(ctx, runnerId)
@@ -53,7 +68,11 @@ func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, pr
 
 	params.runner = runner
 
-	metadata, err := json.Marshal(providerDto)
+	metadata, err := json.Marshal(services.ProviderJobMetadata{
+		Name:         providerDto.Name,
+		Version:      providerDto.Version,
+		DownloadUrls: downloadUrls,
+	})
 	if err != nil {
 		return s.handleProviderActionError(ctx, params, err)
 	}
@@ -100,7 +119,7 @@ func (s *RunnerService) UpdateProvider(ctx context.Context, runnerId string, pro
 		return s.handleProviderActionError(ctx, params, err)
 	}
 
-	err = s.createJob(ctx, runnerId, models.JobActionUpdateProvider, string(metadata))
+	err = s.createJob(ctx, runner.Id, models.JobActionUpdateProvider, string(metadata))
 	return s.handleProviderActionError(ctx, params, err)
 }
 
