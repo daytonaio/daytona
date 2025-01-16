@@ -21,14 +21,19 @@ else {
     Write-Host "Default installation directory: $destination"
     Write-Host "You can override this by setting the DAYTONA_PATH environment variable."
 }
-
+Write-Host ""  # Empty line
 # Create destination directory if it doesn't exist
-if (!(Test-Path -Path $destination)) {
-    Write-Host "Creating installation directory at $destination"
-    New-Item -ItemType Directory -Force -Path $destination | Out-Null
-    Write-Host ""  # Empty line
+try {
+    if (!(Test-Path -Path $destination)) {
+        Write-Host "Creating installation directory at $destination"
+        New-Item -ItemType Directory -Force -Path $destination -ErrorAction Stop | Out-Null
+        Write-Host ""  # Empty line
+    }
 }
-
+catch {
+    Write-Error "Failed to create installation directory: $_"
+    exit 1
+}
 # File to download
 $outputFile = "$destination\daytona.exe"
 
@@ -45,7 +50,7 @@ catch {
     Write-Error "Failed to download Daytona binary: $_"
     exit 1
 }
-
+Write-Host ""  # Empty line
 # Set executable permissions
 try {
     Write-Host "Setting executable permissions for Daytona binary..."
@@ -56,13 +61,20 @@ catch {
     Write-Error "Failed to set executable permissions: $_"
     exit 1
 }
-
+Write-Host ""  # Empty line
 # Add to PATH if not already present
-if (-not ($env:Path -split ';' | ForEach-Object { $_.TrimEnd('\') } | Where-Object { $_ -eq $destination })) {
-    Write-Host "Adding $destination to PATH..."
-    [System.Environment]::SetEnvironmentVariable("Path", "$env:Path;$destination", [System.EnvironmentVariableTarget]::User)
-    Write-Host "PATH updated successfully!"
+try {
+    if (-not ($env:Path -split ';' | ForEach-Object { $_.TrimEnd('\') } | Where-Object { $_ -eq $destination })) {
+        Write-Host "Adding $destination to PATH..."
+        [System.Environment]::SetEnvironmentVariable("Path", "$env:Path;$destination", [System.EnvironmentVariableTarget]::User)
+        Write-Host "PATH updated successfully!"
+    }
 }
+catch {
+    Write-Error "Failed to update PATH: $_"
+    exit 1
+}
+
 Write-Host ""  # Empty line
 
 # Confirm installation
