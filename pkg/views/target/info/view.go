@@ -52,9 +52,11 @@ func Render(target *apiclient.TargetDTO, forceUnstyled bool) {
 
 	output += getInfoLine("# Workspaces", fmt.Sprint(len(target.Workspaces))) + "\n"
 
-	output += getInfoLine("Options", target.TargetConfig.Options) + "\n"
+	if target.TargetConfig.Options != "" {
+		output += getInfoLine("Options", target.TargetConfig.Options) + "\n"
+	}
 
-	if target.ProviderMetadata != nil {
+	if target.ProviderMetadata != nil && *target.ProviderMetadata != "" {
 		output += getInfoLine("Metadata", *target.ProviderMetadata) + "\n"
 	}
 
