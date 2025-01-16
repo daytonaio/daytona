@@ -38,7 +38,7 @@ func UpdateWorkspaceLabels(ctx *gin.Context) {
 
 	w, err := server.WorkspaceService.UpdateLabels(ctx.Request.Context(), workspaceId, req)
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to start workspace %s: %w", workspaceId, err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update labels for workspace %s: %w", workspaceId, err))
 		return
 	}
 
