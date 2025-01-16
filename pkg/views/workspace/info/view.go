@@ -62,6 +62,22 @@ func Render(workspace *apiclient.WorkspaceDTO, ide string, forceUnstyled bool) {
 		output = views.GetStyledMainTitle("Workspace Info") + "\n" + output
 	}
 
+	if len(workspace.Labels) > 0 {
+		labels := ""
+		i := 0
+		for k, v := range workspace.Labels {
+			label := fmt.Sprintf("%s=%s\n", k, v)
+			if i == 0 {
+				labels += label + "\n"
+			} else {
+				labels += getInfoLine("", fmt.Sprintf("%s=%s\n", k, v))
+			}
+			i++
+		}
+		labels = strings.TrimSuffix(labels, "\n")
+		output += "\n" + strings.TrimSuffix(getInfoLine("Labels", labels), "\n")
+	}
+
 	renderTUIView(output, views.GetContainerBreakpointWidth(terminalWidth), isCreationView)
 }
 
