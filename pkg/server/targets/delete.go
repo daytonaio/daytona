@@ -28,6 +28,7 @@ func (s *TargetService) Delete(ctx context.Context, targetId string) error {
 	}
 
 	t.Name = util.AddDeletedToName(t.Name)
+	t.IsDefault = false
 
 	err = s.targetStore.Save(ctx, t)
 	if err != nil {
