@@ -75,7 +75,6 @@ daytona create
 - **Configuration File Support**: Support for [dev container](https://containers.dev/) and an upcoming expansion to DevFile, Nix & Flox.
 - **Prebuilds System**: Drastically improve environment build times by prebuilding them based on Git Providers' hook events.
 - **Reverse Proxy Integration**: Enable collaboration and streamline feedback loops by leveraging our reverse proxy. Access preview ports and the Web IDE seamlessly, even behind firewalls. 
-- **Extensibility**: Coming soon: extend functionality by developing plugins - linked to all major workspace lifecycle events. 
 - **Security**: Automatically creates a VPN connection between the client machine and the development environment, ensuring a fully secure connection.
 - **Works on my Machine**: Never experience it again.
 
@@ -146,21 +145,13 @@ daytona server [start|stop|restart]
 
 ---
 
-## How to Extend Daytona
-
-Daytona offers flexibility for extension through the creation of plugins and providers.
-
-### Providers
+## Extend Daytona Through Providers
 
 Daytona is designed to be infrastructure-agnostic, capable of creating and managing development environments across various platforms. Providers are the components that encapsulate the logic for provisioning compute resources on a specific platform. They allow for the configuration of different target configurations thus enabling, for instance, multiple AWS profiles within an AWS provider.
 
 How does it work? When executing the `daytona create` command, Daytona communicates the environment details to the selected provider, which then provisions the necessary compute resources. Once provisioned, Daytona sets up the environment on these resources, allowing the user to interact with the environment seamlessly.
 
 Providers are independent projects that adhere to the Daytona Provider interface. View all currently supported providers [here](https://github.com/orgs/daytonaio/repositories?q=daytona-provider).
-
-### Plugins
-
-Plugins enhance Daytona's core functionalities by adding new CLI commands, API methods, or services within the development environments. They offer configurable settings to tailor the plugin's behavior to the user's needs. Similarly to providers, plugins are independent projects that conform to the Daytona Plugin interface and can be developed in a wide range of programming languages. More details coming soon.
 
 ## Contributing
 
