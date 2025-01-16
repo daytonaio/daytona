@@ -13,7 +13,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
-	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -137,7 +136,7 @@ func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.Workspace
 	}
 
 	logsContext, stopLogs := context.WithCancel(context.Background())
-	go cmd_common.ReadWorkspaceLogs(logsContext, cmd_common.ReadLogParams{
+	go common.ReadWorkspaceLogs(logsContext, common.ReadLogParams{
 		Id:        workspace.Id,
 		Label:     &workspace.Name,
 		ServerUrl: activeProfile.Api.Url,

@@ -11,7 +11,6 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
-	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
@@ -77,7 +76,7 @@ var LogsCmd = &cobra.Command{
 			return nil
 		}
 
-		cmd_common.ReadWorkspaceLogs(ctx, cmd_common.ReadLogParams{
+		common.ReadWorkspaceLogs(ctx, common.ReadLogParams{
 			Id:        ws.Id,
 			Label:     &ws.Name,
 			ServerUrl: activeProfile.Api.Url,
