@@ -74,6 +74,10 @@ func RunWorkspaceConfiguration(workspaceList *[]apiclient.CreateWorkspaceDTO, de
 		return false, nil
 	}
 
+	if currentWorkspace.Labels == nil {
+		currentWorkspace.Labels = make(map[string]string)
+	}
+
 	devContainerFilePath := defaults.DevcontainerFilePath
 	builderChoice := views_util.AUTOMATIC
 
