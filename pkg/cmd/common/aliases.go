@@ -13,7 +13,6 @@ var commandAliases = map[string][]string{
 	"code":        {"open"},
 	"logs":        {"log"},
 	"forward":     {"fwd"},
-	"config":      {"info"},
 	"list":        {"ls"},
 	"set-default": {"sd"},
 	"run":         {"create"},
