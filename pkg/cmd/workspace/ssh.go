@@ -81,6 +81,7 @@ var SshCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+			return nil
 		}
 
 		if ws.State.Name == apiclient.ResourceStateNameStopped {
