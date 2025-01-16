@@ -62,7 +62,7 @@ func (d *DockerCredHelper) SetDockerConfig() error {
 		return err
 	}
 
-	return os.WriteFile(d.DockerConfigFileName, updatedConfigContent, 0644)
+	return os.WriteFile(d.DockerConfigFileName, updatedConfigContent, 0755)
 }
 
 func (d *DockerCredHelper) createDockerCredHelperExecutable() error {
@@ -76,7 +76,7 @@ func (d *DockerCredHelper) createDockerCredHelperExecutable() error {
 
 		_, ok := os.Stat(filePath)
 		if os.IsNotExist(ok) {
-			err := os.MkdirAll(filePath, 0757)
+			err := os.MkdirAll(filePath, 0755)
 			if err != nil {
 				return err
 			}
@@ -88,10 +88,10 @@ func (d *DockerCredHelper) createDockerCredHelperExecutable() error {
 		}
 	}
 
-	err = os.WriteFile(filepath.Join(filePath, fileName), []byte(content), 0555)
+	err = os.WriteFile(filepath.Join(filePath, fileName), []byte(content), 0755)
 	if err != nil {
 		return err
 	}
 
-	return os.Chmod(filepath.Join(filePath, fileName), 0555)
+	return os.Chmod(filepath.Join(filePath, fileName), 0755)
 }
