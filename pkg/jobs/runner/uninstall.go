@@ -10,7 +10,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (rj *RunnerJob) uninstallProvider(ctx context.Context, j *models.Job) error {
+func (rj *RunnerJob) uninstallProvider(_ context.Context, j *models.Job) error {
 	if j.Metadata == nil {
 		return errors.New("metadata is required")
 	}

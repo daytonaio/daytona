@@ -7,6 +7,8 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
@@ -38,12 +40,26 @@ func (s *RunnerService) ListProviders(ctx context.Context, runnerId *string) ([]
 	return providers, nil
 }
 
-func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, providerDto services.InstallProviderDTO) error {
+func (s *RunnerService) ListProvidersForInstall(ctx context.Context, serverRegistryUrl string) ([]services.ProviderDTO, error) {
+	providersManifest, err := util.GetProvidersManifest(serverRegistryUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return conversion.GetProviderListFromManifest(providersManifest), nil
+}
+
+func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, serverRegistryUrl string, providerDto services.InstallProviderDTO) error {
 	params := providerActionParams{
 		providerName:    providerDto.Name,
 		providerVersion: &providerDto.Version,
 		eventName:       telemetry.RunnerEventProviderInstalled,
 		errEventName:    telemetry.RunnerEventProviderInstallationFailed,
+	}
+
+	downloadUrls, err := util.GetProviderDownloadUrls(serverRegistryUrl, providerDto.Name, providerDto.Version)
+	if err != nil {
+		return s.handleProviderActionError(ctx, params, err)
 	}
 
 	runner, err := s.runnerStore.Find(ctx, runnerId)
@@ -53,7 +69,11 @@ func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, pr
 
 	params.runner = runner
 
-	metadata, err := json.Marshal(providerDto)
+	metadata, err := json.Marshal(services.ProviderJobMetadata{
+		Name:         providerDto.Name,
+		Version:      providerDto.Version,
+		DownloadUrls: downloadUrls,
+	})
 	if err != nil {
 		return s.handleProviderActionError(ctx, params, err)
 	}

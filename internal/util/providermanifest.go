@@ -49,6 +49,15 @@ func GetProvidersManifest(registryUrl string) (*ProvidersManifest, error) {
 	return &manifest, nil
 }
 
+func GetProviderDownloadUrls(registryUrl string, providerName, providerVersion string) (map[os.OperatingSystem]string, error) {
+	manifests, err := GetProvidersManifest(registryUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*manifests)[providerName].Versions[providerVersion].DownloadUrls, nil
+}
+
 func (p *ProviderManifest) FindLatestVersion() (string, *Version) {
 	var latestVersion string = "v0.0.0"
 

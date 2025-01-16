@@ -6,9 +6,7 @@ package provider
 import (
 	"context"
 
-	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
@@ -42,50 +40,6 @@ var listCmd = &cobra.Command{
 		provider.List(providerList)
 		return nil
 	},
-}
-
-func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient, latestProviders []apiclient.ProviderInfo) ([]provider.ProviderView, error) {
-	var result []provider.ProviderView
-
-	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	providerMap := make(map[string]provider.ProviderView)
-
-	for _, installedProvider := range installedProviders {
-		providerMap[installedProvider.Name] = provider.ProviderView{
-			Name:                 installedProvider.Name,
-			AgentlessTarget:      installedProvider.AgentlessTarget,
-			Label:                installedProvider.Label,
-			Version:              installedProvider.Version,
-			Installed:            util.Pointer(true),
-			RunnerId:             installedProvider.RunnerId,
-			RunnerName:           installedProvider.RunnerName,
-			TargetConfigManifest: installedProvider.TargetConfigManifest,
-		}
-	}
-
-	for _, latestProvider := range latestProviders {
-		if _, exists := providerMap[latestProvider.Name]; !exists {
-			providerMap[latestProvider.Name] = provider.ProviderView{
-				Name:                 latestProvider.Name,
-				Label:                latestProvider.Label,
-				Version:              latestProvider.Version,
-				Installed:            util.Pointer(false),
-				RunnerId:             latestProvider.RunnerId,
-				RunnerName:           latestProvider.RunnerName,
-				TargetConfigManifest: latestProvider.TargetConfigManifest,
-			}
-		}
-	}
-
-	for _, provider := range providerMap {
-		result = append(result, provider)
-	}
-
-	return result, nil
 }
 
 func init() {
