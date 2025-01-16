@@ -53,6 +53,8 @@ var AgentCmd = &cobra.Command{
 
 		var ws *models.Workspace
 
+		c.WorkspaceDir = os.Getenv("HOME")
+
 		if agentMode == config.ModeWorkspace {
 			ws, err = getWorkspace(c, telemetryEnabled)
 			if err != nil {
