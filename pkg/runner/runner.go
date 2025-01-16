@@ -23,16 +23,11 @@ import (
 	"github.com/daytonaio/daytona/pkg/jobs/workspace"
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/runner/providermanager"
-	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/gin-gonic/gin"
 	"github.com/hashicorp/go-plugin"
 	log "github.com/sirupsen/logrus"
 )
-
-// TODO: add lock when running interval func
-// 1 second interval
-const DEFAULT_JOB_POLL_INTERVAL = "*/1 * * * * *"
 
 const RUNNER_METADATA_UPDATE_INTERVAL = 2 * time.Second
 
@@ -155,21 +150,14 @@ func (r *Runner) Start(ctx context.Context) error {
 		return err
 	}
 
-	scheduler := scheduler.NewCronScheduler()
-
-	err = scheduler.AddFunc(DEFAULT_JOB_POLL_INTERVAL, func() {
-		err := r.CheckAndRunJobs(ctx)
-		if err != nil {
-			r.logger.Error(err)
+	go func() {
+		for {
+			err := r.CheckAndRunJobs(ctx)
+			if err != nil {
+				r.logger.Error(err)
+			}
 		}
-	})
-	if err != nil {
-		return err
-	}
-
-	scheduler.Start()
-
-	r.logger.Info("Runner started")
+	}()
 
 	go func() {
 		for {
@@ -178,6 +166,8 @@ func (r *Runner) Start(ctx context.Context) error {
 		}
 	}()
 
+	r.logger.Info("Runner started")
+
 	select {
 	case err = <-routerErrChan:
 	case <-ctx.Done():
@@ -185,8 +175,6 @@ func (r *Runner) Start(ctx context.Context) error {
 	}
 
 	r.logger.Info("Shutting down runner")
-	scheduler.Stop()
-
 	return err
 }
 
@@ -199,12 +187,20 @@ func (r *Runner) CheckAndRunJobs(ctx context.Context) error {
 		return err
 	}
 
-	// goroutines, sync group
-	for _, job := range jobs {
-		err = r.runJob(ctx, job)
-		if err != nil {
-			return err
+	for _, j := range jobs {
+		if j.State != models.JobStatePending {
+			continue
 		}
+
+		j.State = models.JobStateRunning
+		err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
+		if err != nil {
+			r.logger.Trace(err)
+			continue
+		}
+
+		r.logJobStateUpdate(j, nil)
+		go r.runJob(ctx, j)
 	}
 
 	return nil
@@ -214,7 +210,7 @@ func (r *Runner) Purge(ctx context.Context) error {
 	return r.providerManager.Purge()
 }
 
-func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
+func (r *Runner) runJob(ctx context.Context, j *models.Job) {
 	startTime := time.Now()
 	if r.Config.TelemetryEnabled {
 		event := telemetry.NewJobEvent(telemetry.JobEventRunStarted, j, nil, nil)
@@ -226,14 +222,6 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 
 	var job jobs.IJob
 
-	j.State = models.JobStateRunning
-	err := r.updateJobState(ctx, j.Id, models.JobStateRunning, nil)
-	if err != nil {
-		return r.handleRunFailed(j, err, startTime)
-	}
-
-	r.logJobStateUpdate(j, nil)
-
 	switch j.ResourceType {
 	case models.ResourceTypeWorkspace:
 		job = r.workspaceJobFactory.Create(*j)
@@ -244,19 +232,19 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 	case models.ResourceTypeRunner:
 		job = r.runnerJobFactory.Create(*j)
 	default:
-		return errors.New("invalid resource type for job")
+		r.handleRunFailed(j, errors.New("invalid resource type for job"), startTime)
 	}
 
-	err = job.Execute(ctx)
+	err := job.Execute(ctx)
 	if err != nil {
-		return r.handleRunFailed(j, err, startTime)
+		r.handleRunFailed(j, err, startTime)
 	}
 
 	j.State = models.JobStateSuccess
 	r.logJobStateUpdate(j, nil)
 	err = r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 	if err != nil {
-		return r.handleRunFailed(j, err, startTime)
+		r.handleRunFailed(j, err, startTime)
 	}
 
 	if r.Config.TelemetryEnabled {
@@ -267,8 +255,6 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) error {
 			r.logger.Trace(err)
 		}
 	}
-
-	return nil
 }
 
 // Runner uptime in seconds
@@ -325,7 +311,7 @@ func (r *Runner) logJobStateUpdate(j *models.Job, err error) {
 	r.logger.Info(message)
 }
 
-func (r *Runner) handleRunFailed(j *models.Job, err error, startTime time.Time) error {
+func (r *Runner) handleRunFailed(j *models.Job, err error, startTime time.Time) {
 	j.State = models.JobStateError
 	r.logJobStateUpdate(j, err)
 
@@ -338,5 +324,8 @@ func (r *Runner) handleRunFailed(j *models.Job, err error, startTime time.Time) 
 		}
 	}
 
-	return r.updateJobState(context.Background(), j.Id, models.JobStateError, err)
+	updateJobErr := r.updateJobState(context.Background(), j.Id, models.JobStateError, err)
+	if updateJobErr != nil {
+		r.logger.Error(updateJobErr)
+	}
 }

@@ -10,12 +10,15 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
-	"github.com/daytonaio/daytona/pkg/runner"
 	"github.com/daytonaio/daytona/pkg/scheduler"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	log "github.com/sirupsen/logrus"
 )
+
+// TODO: add lock when running interval func
+// 1 second interval
+const DEFAULT_RETENTION_POLL_INTERVAL = "*/1 * * * * *"
 
 func (s *WorkspaceTemplateService) FindPrebuild(ctx context.Context, workspaceTemplateFilter *stores.WorkspaceTemplateFilter, prebuildFilter *stores.PrebuildFilter) (*services.PrebuildDTO, error) {
 	wt, err := s.templateStore.Find(ctx, workspaceTemplateFilter)
@@ -179,7 +182,7 @@ func (s *WorkspaceTemplateService) EnforceRetentionPolicy(ctx context.Context) e
 func (s *WorkspaceTemplateService) StartRetentionPoller(ctx context.Context) error {
 	scheduler := scheduler.NewCronScheduler()
 
-	err := scheduler.AddFunc(runner.DEFAULT_JOB_POLL_INTERVAL, func() {
+	err := scheduler.AddFunc(DEFAULT_RETENTION_POLL_INTERVAL, func() {
 		err := s.EnforceRetentionPolicy(ctx)
 		if err != nil {
 			log.Error(err)

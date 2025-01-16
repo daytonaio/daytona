@@ -6,12 +6,16 @@ package runner
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
+
+const LONG_POLL_TIMEOUT = 1 * time.Minute
+const LONG_POLL_INTERVAL = 50 * time.Millisecond
 
 // ListRunnerJobs 			godoc
 //
@@ -29,13 +33,33 @@ func ListRunnerJobs(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	jobs, err := server.RunnerService.ListRunnerJobs(ctx.Request.Context(), runnerId)
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get runner: %w", err))
-		return
-	}
+	timeout := time.After(LONG_POLL_TIMEOUT)
+	ticker := time.NewTicker(LONG_POLL_INTERVAL)
+	defer ticker.Stop()
 
-	ctx.JSON(200, jobs)
+	for {
+		select {
+		case <-ctx.Request.Context().Done():
+			// Handle client cancelling the request
+			ctx.AbortWithStatus(http.StatusRequestTimeout)
+			return
+		case <-timeout:
+			// Handle request timing out
+			ctx.JSON(http.StatusNoContent, nil)
+			return
+		case <-ticker.C:
+			// Check for new jobs
+			jobs, err := server.RunnerService.ListRunnerJobs(ctx.Request.Context(), runnerId)
+			if err != nil {
+				ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get runner jobs: %w", err))
+				return
+			}
+			if len(jobs) > 0 {
+				ctx.JSON(http.StatusOK, jobs)
+				return
+			}
+		}
+	}
 }
 
 // UpdateJobState 			godoc
