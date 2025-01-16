@@ -11,8 +11,9 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/pkg/agent"
-	"github.com/daytonaio/daytona/pkg/agent/config"
+	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/agent/ssh"
 	"github.com/daytonaio/daytona/pkg/agent/tailscale"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox"
@@ -31,17 +32,22 @@ var AgentCmd = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 		setLogLevel()
 
-		agentMode := config.ModeProject
+		agentMode := agent_config.ModeProject
 
 		if hostModeFlag {
-			agentMode = config.ModeHost
+			agentMode = agent_config.ModeHost
 		}
 
-		c, err := config.GetConfig(agentMode)
+		c, err := agent_config.GetConfig(agentMode)
 		if err != nil {
 			return err
 		}
 		c.ProjectDir = filepath.Join(os.Getenv("HOME"), c.ProjectName)
+
+		configDir, err := config.GetConfigDir()
+		if err != nil {
+			return err
+		}
 
 		if projectDir := os.Getenv("DAYTONA_PROJECT_DIR"); projectDir != "" {
 			c.ProjectDir = projectDir
@@ -83,6 +89,7 @@ var AgentCmd = &cobra.Command{
 
 		toolBoxServer := &toolbox.Server{
 			ProjectDir: c.ProjectDir,
+			ConfigDir:  configDir,
 		}
 
 		telemetryEnabled := os.Getenv("DAYTONA_TELEMETRY_ENABLED") == "true"

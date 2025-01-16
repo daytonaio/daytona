@@ -155,7 +155,13 @@ func (a *ApiServer) Start() error {
 		{
 			toolboxController.GET("/project-dir", toolbox.GetProjectDir)
 
-			toolboxController.POST("/process/execute", toolbox.ProcessExecuteCommand)
+			processController := toolboxController.Group("/process")
+			{
+				processController.POST("/execute", toolbox.ProcessExecuteCommand)
+				processController.POST("/session", toolbox.CreateSession)
+				processController.POST("/session/:sessionId/exec", toolbox.SessionExecuteCommand)
+				processController.DELETE("/session/:sessionId", toolbox.DeleteSession)
+			}
 
 			fsController := toolboxController.Group("/files")
 			{

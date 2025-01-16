@@ -237,6 +237,13 @@ definitions:
     - options
     - providerInfo
     type: object
+  CreateSessionRequest:
+    properties:
+      sessionId:
+        type: string
+    required:
+    - sessionId
+    type: object
   CreateWorkspaceDTO:
     properties:
       id:
@@ -1035,6 +1042,22 @@ definitions:
     - providersDir
     - registryUrl
     - serverDownloadUrl
+    type: object
+  SessionExecuteRequest:
+    properties:
+      async:
+        type: boolean
+      command:
+        type: string
+    required:
+    - command
+    type: object
+  SessionExecuteResponse:
+    properties:
+      cmdId:
+        type: string
+      output:
+        type: string
     type: object
   SetGitProviderConfig:
     properties:
@@ -3354,6 +3377,99 @@ paths:
           schema:
             $ref: '#/definitions/ExecuteResponse'
       summary: Execute command
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    post:
+      description: Create exec session inside workspace project
+      operationId: CreateSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Create session request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create exec session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a session inside workspace project
+      operationId: DeleteSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute command inside a session inside workspace project
+      operationId: SessionExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Execute command request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/SessionExecuteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SessionExecuteResponse'
+      summary: Execute command in session
       tags:
       - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/project-dir:

@@ -2340,6 +2340,109 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    post:
+      description: Create exec session inside workspace project
+      operationId: CreateSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+        description: Create session request
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Create exec session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a session inside workspace project
+      operationId: DeleteSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute command inside a session inside workspace project
+      operationId: SessionExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SessionExecuteRequest'
+        description: Execute command request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionExecuteResponse'
+          description: OK
+      summary: Execute command in session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
   /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
     get:
       description: Get project directory
@@ -2756,6 +2859,15 @@ components:
       - name
       - options
       - providerInfo
+      type: object
+    CreateSessionRequest:
+      example:
+        sessionId: sessionId
+      properties:
+        sessionId:
+          type: string
+      required:
+      - sessionId
       type: object
     CreateWorkspaceDTO:
       example:
@@ -3978,6 +4090,28 @@ components:
       - providersDir
       - registryUrl
       - serverDownloadUrl
+      type: object
+    SessionExecuteRequest:
+      example:
+        async: true
+        command: command
+      properties:
+        async:
+          type: boolean
+        command:
+          type: string
+      required:
+      - command
+      type: object
+    SessionExecuteResponse:
+      example:
+        output: output
+        cmdId: cmdId
+      properties:
+        cmdId:
+          type: string
+        output:
+          type: string
       type: object
     SetGitProviderConfig:
       example:
