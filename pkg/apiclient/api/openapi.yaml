@@ -1330,6 +1330,12 @@ paths:
     get:
       description: List workspaces
       operationId: ListWorkspaces
+      parameters:
+      - description: JSON encoded labels
+        in: query
+        name: labels
+        schema:
+          type: string
       responses:
         "200":
           content:
@@ -1663,6 +1669,37 @@ paths:
       summary: Find workspace
       tags:
       - workspace
+  /workspace/{workspaceId}/labels:
+    post:
+      description: Update workspace labels
+      operationId: UpdateWorkspaceLabels
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+        description: Labels
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WorkspaceDTO'
+          description: OK
+      summary: Update workspace labels
+      tags:
+      - workspace
+      x-codegen-request-body-name: labels
   /workspace/{workspaceId}/metadata:
     post:
       description: Update workspace metadata
@@ -3053,6 +3090,8 @@ components:
             sha: sha
             url: url
         user: user
+        labels:
+          key: labels
       properties:
         buildConfig:
           $ref: '#/components/schemas/BuildConfig'
@@ -3066,6 +3105,10 @@ components:
           type: string
         image:
           type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
         name:
           type: string
         source:
@@ -3077,6 +3120,7 @@ components:
       required:
       - envVars
       - id
+      - labels
       - name
       - source
       - targetId
@@ -4642,6 +4686,8 @@ components:
             cloneTarget: null
             sha: sha
             url: url
+          labels:
+            key: labels
           target:
             default: true
             metadata:
@@ -4751,6 +4797,8 @@ components:
             cloneTarget: null
             sha: sha
             url: url
+          labels:
+            key: labels
           target:
             default: true
             metadata:
@@ -5054,6 +5102,8 @@ components:
           cloneTarget: null
           sha: sha
           url: url
+        labels:
+          key: labels
         target:
           default: true
           metadata:
@@ -5142,6 +5192,10 @@ components:
           type: string
         image:
           type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
         lastJob:
           $ref: '#/components/schemas/Job'
         lastJobId:
@@ -5165,6 +5219,7 @@ components:
       - envVars
       - id
       - image
+      - labels
       - name
       - repository
       - target
@@ -5209,6 +5264,8 @@ components:
           cloneTarget: null
           sha: sha
           url: url
+        labels:
+          key: labels
         target:
           default: true
           metadata:
@@ -5301,6 +5358,10 @@ components:
           type: string
         image:
           type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
         lastJob:
           $ref: '#/components/schemas/Job'
         lastJobId:
@@ -5326,6 +5387,7 @@ components:
       - envVars
       - id
       - image
+      - labels
       - name
       - repository
       - state
@@ -5403,6 +5465,8 @@ components:
           key: envVars
         name: name
         user: user
+        labels:
+          key: labels
         repositoryUrl: repositoryUrl
       properties:
         buildConfig:
@@ -5417,6 +5481,10 @@ components:
           type: string
         image:
           type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
         name:
           type: string
         prebuilds:
@@ -5431,6 +5499,7 @@ components:
       - default
       - envVars
       - image
+      - labels
       - name
       - repositoryUrl
       - user

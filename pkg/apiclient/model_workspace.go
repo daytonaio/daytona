@@ -27,6 +27,7 @@ type Workspace struct {
 	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
 	Id                  string             `json:"id"`
 	Image               string             `json:"image"`
+	Labels              map[string]string  `json:"labels"`
 	LastJob             *Job               `json:"lastJob,omitempty"`
 	LastJobId           *string            `json:"lastJobId,omitempty"`
 	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
@@ -44,12 +45,13 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, name string, repository GitRepository, target Target, targetId string, user string) *Workspace {
+func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, target Target, targetId string, user string) *Workspace {
 	this := Workspace{}
 	this.ApiKey = apiKey
 	this.EnvVars = envVars
 	this.Id = id
 	this.Image = image
+	this.Labels = labels
 	this.Name = name
 	this.Repository = repository
 	this.Target = target
@@ -224,6 +226,30 @@ func (o *Workspace) GetImageOk() (*string, bool) {
 // SetImage sets field value
 func (o *Workspace) SetImage(v string) {
 	o.Image = v
+}
+
+// GetLabels returns the Labels field value
+func (o *Workspace) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *Workspace) SetLabels(v map[string]string) {
+	o.Labels = v
 }
 
 // GetLastJob returns the LastJob field value if set, zero value otherwise.
@@ -494,6 +520,7 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["id"] = o.Id
 	toSerialize["image"] = o.Image
+	toSerialize["labels"] = o.Labels
 	if !IsNil(o.LastJob) {
 		toSerialize["lastJob"] = o.LastJob
 	}
@@ -523,6 +550,7 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 		"envVars",
 		"id",
 		"image",
+		"labels",
 		"name",
 		"repository",
 		"target",

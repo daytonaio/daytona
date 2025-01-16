@@ -26,6 +26,7 @@ type WorkspaceTemplate struct {
 	EnvVars             map[string]string `json:"envVars"`
 	GitProviderConfigId *string           `json:"gitProviderConfigId,omitempty"`
 	Image               string            `json:"image"`
+	Labels              map[string]string `json:"labels"`
 	Name                string            `json:"name"`
 	Prebuilds           []PrebuildConfig  `json:"prebuilds,omitempty"`
 	RepositoryUrl       string            `json:"repositoryUrl"`
@@ -38,11 +39,12 @@ type _WorkspaceTemplate WorkspaceTemplate
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceTemplate(default_ bool, envVars map[string]string, image string, name string, repositoryUrl string, user string) *WorkspaceTemplate {
+func NewWorkspaceTemplate(default_ bool, envVars map[string]string, image string, labels map[string]string, name string, repositoryUrl string, user string) *WorkspaceTemplate {
 	this := WorkspaceTemplate{}
 	this.Default = default_
 	this.EnvVars = envVars
 	this.Image = image
+	this.Labels = labels
 	this.Name = name
 	this.RepositoryUrl = repositoryUrl
 	this.User = user
@@ -193,6 +195,30 @@ func (o *WorkspaceTemplate) SetImage(v string) {
 	o.Image = v
 }
 
+// GetLabels returns the Labels field value
+func (o *WorkspaceTemplate) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceTemplate) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *WorkspaceTemplate) SetLabels(v map[string]string) {
+	o.Labels = v
+}
+
 // GetName returns the Name field value
 func (o *WorkspaceTemplate) GetName() string {
 	if o == nil {
@@ -316,6 +342,7 @@ func (o WorkspaceTemplate) ToMap() (map[string]interface{}, error) {
 		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
 	}
 	toSerialize["image"] = o.Image
+	toSerialize["labels"] = o.Labels
 	toSerialize["name"] = o.Name
 	if !IsNil(o.Prebuilds) {
 		toSerialize["prebuilds"] = o.Prebuilds
@@ -333,6 +360,7 @@ func (o *WorkspaceTemplate) UnmarshalJSON(data []byte) (err error) {
 		"default",
 		"envVars",
 		"image",
+		"labels",
 		"name",
 		"repositoryUrl",
 		"user",

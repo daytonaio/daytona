@@ -18,6 +18,7 @@ type WorkspaceTemplate struct {
 	BuildConfig         *BuildConfig      `json:"buildConfig,omitempty" validate:"optional" gorm:"serializer:json"`
 	RepositoryUrl       string            `json:"repositoryUrl" validate:"required" gorm:"not null"`
 	EnvVars             map[string]string `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	Labels              map[string]string `json:"labels" validate:"required" gorm:"serializer:json;not null"`
 	IsDefault           bool              `json:"default" validate:"required" gorm:"not null"`
 	Prebuilds           []*PrebuildConfig `json:"prebuilds" validate:"optional" gorm:"serializer:json"`
 	GitProviderConfigId *string           `json:"gitProviderConfigId" validate:"optional"`

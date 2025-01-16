@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **EnvVars** | **map[string]string** |  | 
 **GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Image** | **string** |  | 
+**Labels** | **map[string]string** |  | 
 **Name** | **string** |  | 
 **Prebuilds** | Pointer to [**[]PrebuildConfig**](PrebuildConfig.md) |  | [optional] 
 **RepositoryUrl** | **string** |  | 
@@ -18,7 +19,7 @@ Name | Type | Description | Notes
 
 ### NewWorkspaceTemplate
 
-`func NewWorkspaceTemplate(default_ bool, envVars map[string]string, image string, name string, repositoryUrl string, user string, ) *WorkspaceTemplate`
+`func NewWorkspaceTemplate(default_ bool, envVars map[string]string, image string, labels map[string]string, name string, repositoryUrl string, user string, ) *WorkspaceTemplate`
 
 NewWorkspaceTemplate instantiates a new WorkspaceTemplate object
 This constructor will assign default values to properties that have it defined,
@@ -141,6 +142,26 @@ and a boolean to check if the value has been set.
 `func (o *WorkspaceTemplate) SetImage(v string)`
 
 SetImage sets Image field to given value.
+
+
+### GetLabels
+
+`func (o *WorkspaceTemplate) GetLabels() map[string]string`
+
+GetLabels returns the Labels field if non-nil, zero value otherwise.
+
+### GetLabelsOk
+
+`func (o *WorkspaceTemplate) GetLabelsOk() (*map[string]string, bool)`
+
+GetLabelsOk returns a tuple with the Labels field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabels
+
+`func (o *WorkspaceTemplate) SetLabels(v map[string]string)`
+
+SetLabels sets Labels field to given value.
 
 
 ### GetName

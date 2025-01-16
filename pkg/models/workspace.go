@@ -18,6 +18,7 @@ type Workspace struct {
 	BuildConfig         *BuildConfig               `json:"buildConfig,omitempty" validate:"optional" gorm:"serializer:json"`
 	Repository          *gitprovider.GitRepository `json:"repository" validate:"required" gorm:"serializer:json;not null"`
 	EnvVars             map[string]string          `json:"envVars" validate:"required" gorm:"serializer:json;not null"`
+	Labels              map[string]string          `json:"labels" validate:"required" gorm:"serializer:json;not null"`
 	TargetId            string                     `json:"targetId" validate:"required" gorm:"not null"`
 	Target              Target                     `json:"target" validate:"required" gorm:"foreignKey:TargetId"`
 	ApiKey              string                     `json:"apiKey" validate:"required" gorm:"not null"`
