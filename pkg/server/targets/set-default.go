@@ -29,7 +29,7 @@ func (s *TargetService) SetDefault(ctx context.Context, id string) error {
 
 	defaultTarget, err := s.Find(ctx, &stores.TargetFilter{
 		Default: util.Pointer(true),
-	}, services.TargetRetrievalParams{})
+	}, services.TargetRetrievalParams{ShowDeleted: true})
 	if err != nil && !stores.IsTargetNotFound(err) {
 		return s.targetStore.RollbackTransaction(ctx, err)
 	}
