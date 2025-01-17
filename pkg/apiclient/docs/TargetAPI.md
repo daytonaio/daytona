@@ -7,6 +7,7 @@ Method | HTTP request | Description
 [**CreateTarget**](TargetAPI.md#CreateTarget) | **Post** /target | Create a target
 [**DeleteTarget**](TargetAPI.md#DeleteTarget) | **Delete** /target/{targetId} | Delete target
 [**FindTarget**](TargetAPI.md#FindTarget) | **Get** /target/{targetId} | Find target
+[**GetTargetState**](TargetAPI.md#GetTargetState) | **Get** /target/{targetId}/state | Get target state
 [**HandleSuccessfulCreation**](TargetAPI.md#HandleSuccessfulCreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 [**ListTargets**](TargetAPI.md#ListTargets) | **Get** /target | List targets
 [**RestartTarget**](TargetAPI.md#RestartTarget) | **Post** /target/{targetId}/restart | Restart target
@@ -211,6 +212,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**TargetDTO**](TargetDTO.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetTargetState
+
+> ResourceState GetTargetState(ctx, targetId).Execute()
+
+Get target state
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	targetId := "targetId_example" // string | Target ID or Name
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.TargetAPI.GetTargetState(context.Background(), targetId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `TargetAPI.GetTargetState``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetTargetState`: ResourceState
+	fmt.Fprintf(os.Stdout, "Response from `TargetAPI.GetTargetState`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**targetId** | **string** | Target ID or Name | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetTargetStateRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**ResourceState**](ResourceState.md)
 
 ### Authorization
 
