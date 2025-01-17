@@ -19,6 +19,10 @@ options:
         Specify environment variables (e.g. --env 'KEY1=VALUE1' --env 'KEY2=VALUE2' ...')
     - name: git-provider-config
       usage: Specify the Git provider configuration ID or alias
+    - name: label
+      default_value: '[]'
+      usage: |
+        Specify labels (e.g. --label 'label.key1=VALUE1' --label 'label.key2=VALUE2' ...)
     - name: manual
       default_value: "false"
       usage: Manually enter the Git repository

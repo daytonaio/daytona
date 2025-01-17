@@ -5,6 +5,10 @@ options:
     - name: format
       shorthand: f
       usage: Output format. Must be one of (yaml, json)
+    - name: label
+      shorthand: l
+      default_value: '[]'
+      usage: Filter by label
 inherited_options:
     - name: help
       default_value: "false"
