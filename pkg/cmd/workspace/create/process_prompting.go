@@ -51,6 +51,7 @@ func ProcessPrompting(ctx context.Context, params ProcessPromptingParams) error 
 		Image:                &apiServerConfig.DefaultWorkspaceImage,
 		ImageUser:            &apiServerConfig.DefaultWorkspaceUser,
 		DevcontainerFilePath: create.DEVCONTAINER_FILEPATH,
+		Labels:               make(map[string]string),
 	}
 
 	*params.CreateWorkspaceDtos, err = GetWorkspacesCreationDataFromPrompt(ctx, WorkspacesDataPromptParams{
