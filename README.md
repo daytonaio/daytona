@@ -52,7 +52,7 @@ curl -sfL get.daytona.io | sudo bash && daytona server -y && daytona
 ### Windows
 
 ```pwsh
-powershell -Command "irm get.daytona.io/windows | iex"
+powershell -Command "irm https://get.daytona.io/windows | iex; daytona serve"
 ```
 
 ### Create your first dev environment by opening a new terminal, and running:
