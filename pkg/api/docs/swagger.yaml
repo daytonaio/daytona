@@ -395,6 +395,16 @@ definitions:
     - name
     - path
     type: object
+  GitCheckoutRequest:
+    properties:
+      branch:
+        type: string
+      path:
+        type: string
+    required:
+    - branch
+    - path
+    type: object
   GitCloneRequest:
     properties:
       branch:
@@ -2908,6 +2918,35 @@ paths:
         "201":
           description: Created
       summary: Create branch
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/git/checkout:
+    post:
+      description: Checkout branch or commit in git repository inside workspace project
+      operationId: GitCheckoutBranch
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: GitCheckoutRequest
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/GitCheckoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+      summary: Checkout branch
       tags:
       - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/git/clone:
