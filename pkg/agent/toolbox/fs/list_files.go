@@ -32,7 +32,7 @@ func ListFiles(c *gin.Context) {
 		if err != nil {
 			continue
 		}
-		fileInfos = append(fileInfos, info)
+		fileInfos = append(fileInfos, *info)
 	}
 
 	c.JSON(200, fileInfos)

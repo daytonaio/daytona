@@ -5,10 +5,7 @@ package fs
 
 import (
 	"errors"
-	"fmt"
 	"os"
-	"strconv"
-	"syscall"
 
 	"github.com/gin-gonic/gin"
 )
@@ -31,23 +28,4 @@ func GetFileInfo(c *gin.Context) {
 	}
 
 	c.JSON(200, info)
-}
-
-func getFileInfo(path string) (FileInfo, error) {
-	info, err := os.Stat(path)
-	if err != nil {
-		return FileInfo{}, err
-	}
-
-	stat := info.Sys().(*syscall.Stat_t)
-	return FileInfo{
-		Name:        info.Name(),
-		Size:        info.Size(),
-		Mode:        info.Mode().String(),
-		ModTime:     info.ModTime().String(),
-		IsDir:       info.IsDir(),
-		Owner:       strconv.FormatUint(uint64(stat.Uid), 10),
-		Group:       strconv.FormatUint(uint64(stat.Gid), 10),
-		Permissions: fmt.Sprintf("%04o", info.Mode().Perm()),
-	}, nil
 }
