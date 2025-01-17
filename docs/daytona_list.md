@@ -10,6 +10,7 @@ daytona list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
+  -l, --label strings   Filter by label
 ```
 
 ### Options inherited from parent commands
