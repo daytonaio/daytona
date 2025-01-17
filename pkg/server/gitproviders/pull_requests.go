@@ -4,13 +4,14 @@
 package gitproviders
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetRepoPRs(gitProviderId, namespaceId, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error) {
-	gitProvider, err := s.GetGitProvider(gitProviderId)
+func (s *GitProviderService) GetRepoPRs(ctx context.Context, gitProviderId, namespaceId, repositoryId string, options gitprovider.ListOptions) ([]*gitprovider.GitPullRequest, error) {
+	gitProvider, err := s.GetGitProvider(ctx, gitProviderId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get git provider: %w", err)
 	}

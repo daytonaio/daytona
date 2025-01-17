@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/api/types/mount"
 )
 
-func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (RemoteUser, error) {
+func (d *DockerClient) startDevcontainerWorkspace(opts *CreateWorkspaceOptions) (RemoteUser, error) {
 	go func() {
 		err := d.runDevcontainerUserCommands(opts)
 		if err != nil {
@@ -23,31 +23,32 @@ func (d *DockerClient) startDevcontainerProject(opts *CreateProjectOptions) (Rem
 	return remoteUser, err
 }
 
-func (d *DockerClient) runDevcontainerUserCommands(opts *CreateProjectOptions) error {
-	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+func (d *DockerClient) runDevcontainerUserCommands(opts *CreateWorkspaceOptions) error {
+	cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuilderImage)
+	socketForwardId, err := d.ensureDockerSockForward(opts.BuilderImage, cr, opts.LogWriter)
 	if err != nil {
 		return err
 	}
 
 	opts.LogWriter.Write([]byte("Running devcontainer user commands...\n"))
 
-	paths := d.getDevcontainerPaths(opts.ProjectDir, opts.Project.BuildConfig.Devcontainer.FilePath)
+	paths := d.getDevcontainerPaths(opts.WorkspaceDir, opts.Workspace.BuildConfig.Devcontainer.FilePath)
 
 	devcontainerCmd := []string{
 		"devcontainer",
 		"run-user-commands",
-		"--workspace-folder=" + paths.ProjectTarget,
+		"--workspace-folder=" + paths.WorkspaceDirTarget,
 		"--config=" + paths.TargetConfigFilePath,
 		"--override-config=" + path.Join(paths.OverridesTarget, "devcontainer.json"),
-		"--id-label=daytona.workspace.id=" + opts.Project.WorkspaceId,
-		"--id-label=daytona.project.name=" + opts.Project.Name,
+		"--id-label=daytona.target.id=" + opts.Workspace.TargetId,
+		"--id-label=daytona.workspace.id=" + opts.Workspace.Id,
 	}
 
 	cmd := strings.Join(devcontainerCmd, " ")
 
 	createDevcontainerOptions := d.toCreateDevcontainerOptions(opts, true)
 
-	_, err = d.execDevcontainerCommand(cmd, &createDevcontainerOptions, paths, paths.ProjectTarget, socketForwardId, true, []mount.Mount{
+	_, err = d.execDevcontainerCommand(cmd, &createDevcontainerOptions, paths, paths.WorkspaceDirTarget, socketForwardId, true, []mount.Mount{
 		{
 			Type:   mount.TypeBind,
 			Source: paths.OverridesDir,

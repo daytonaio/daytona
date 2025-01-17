@@ -3,14 +3,14 @@
 Stop a workspace
 
 ```
-daytona stop [WORKSPACE] [flags]
+daytona stop [WORKSPACE]... [flags]
 ```
 
 ### Options
 
 ```
-  -a, --all              Stop all workspaces
-  -p, --project string   Stop a single project in the workspace (project name)
+  -a, --all   Stop all targets
+  -y, --yes   Automatically confirm any prompts
 ```
 
 ### Options inherited from parent commands

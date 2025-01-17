@@ -38,7 +38,7 @@ func GetRepositories(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetRepositories(gitProviderId, namespaceId, options)
+	response, err := server.GitProviderService.GetRepositories(ctx.Request.Context(), gitProviderId, namespaceId, options)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

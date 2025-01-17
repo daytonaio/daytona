@@ -1,12 +1,18 @@
 name: daytona target
-synopsis: Manage provider targets
+synopsis: Manage targets
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
+    - daytona target create - Create a target
+    - daytona target delete - Delete a target
+    - daytona target info - Show target info
     - daytona target list - List targets
-    - daytona target remove - Remove target
-    - daytona target set - Set provider target
-    - daytona target set-default - Set target to be used by default
+    - daytona target logs - View the logs of a target
+    - daytona target restart - Restart a target
+    - daytona target set-default - Set default target
+    - daytona target ssh - SSH into a target using the terminal
+    - daytona target start - Start a target
+    - daytona target stop - Stop a target

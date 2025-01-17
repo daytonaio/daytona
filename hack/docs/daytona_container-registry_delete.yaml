@@ -1,9 +1,0 @@
-name: daytona container-registry delete
-synopsis: Delete a container registry
-usage: daytona container-registry delete [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona container-registry - Manage container registries

@@ -9,21 +9,22 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/build/info"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var buildInfoCmd = &cobra.Command{
+var infoCmd = &cobra.Command{
 	Use:     "info [BUILD]",
 	Short:   "Show build info",
-	Aliases: []string{"view", "inspect"},
 	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		var build *apiclient.Build
+		var build *apiclient.BuildDTO
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -60,7 +61,7 @@ var buildInfoCmd = &cobra.Command{
 			}
 		} else {
 			var res *http.Response
-			build, res, err = apiClient.BuildAPI.GetBuild(ctx, args[0]).Execute()
+			build, res, err = apiClient.BuildAPI.FindBuild(ctx, args[0]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -78,5 +79,5 @@ var buildInfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(buildInfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

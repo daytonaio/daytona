@@ -8,47 +8,44 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
-type CreateProjectOptions struct {
-	Project                  *project.Project
-	ProjectDir               string
-	ContainerRegistry        *containerregistry.ContainerRegistry
-	LogWriter                io.Writer
-	Gpc                      *gitprovider.GitProviderConfig
-	SshClient                *ssh.Client
-	BuilderImage             string
-	BuilderContainerRegistry *containerregistry.ContainerRegistry
+type CreateWorkspaceOptions struct {
+	Workspace           *models.Workspace
+	WorkspaceDir        string
+	ContainerRegistries common.ContainerRegistries
+	LogWriter           io.Writer
+	Gpc                 *models.GitProviderConfig
+	SshClient           *ssh.Client
+	BuilderImage        string
 }
 
 type IDockerClient interface {
-	CreateProject(opts *CreateProjectOptions) error
-	CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error
+	CreateWorkspace(opts *CreateWorkspaceOptions) error
+	CreateTarget(target *models.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error
 
-	DestroyProject(project *project.Project, projectDir string, sshClient *ssh.Client) error
-	DestroyWorkspace(workspace *workspace.Workspace, workspaceDir string, sshClient *ssh.Client) error
+	DestroyWorkspace(workspace *models.Workspace, workspaceDir string, sshClient *ssh.Client) error
+	DestroyTarget(target *models.Target, targetDir string, sshClient *ssh.Client) error
 
-	StartProject(opts *CreateProjectOptions, daytonaDownloadUrl string) error
-	StopProject(project *project.Project, logWriter io.Writer) error
+	StartWorkspace(opts *CreateWorkspaceOptions, daytonaDownloadUrl string) error
+	StopWorkspace(workspace *models.Workspace, logWriter io.Writer) error
 
-	GetProjectInfo(project *project.Project) (*project.ProjectInfo, error)
-	GetWorkspaceInfo(ws *workspace.Workspace) (*workspace.WorkspaceInfo, error)
+	GetWorkspaceProviderMetadata(workspace *models.Workspace) (string, error)
+	GetTargetProviderMetadata(t *models.Target) (string, error)
 
-	GetProjectContainerName(project *project.Project) string
-	GetProjectVolumeName(project *project.Project) string
+	GetWorkspaceContainerName(workspace *models.Workspace) string
+	GetWorkspaceVolumeName(workspace *models.Workspace) string
 	ExecSync(containerID string, config container.ExecOptions, outputWriter io.Writer) (*ExecResult, error)
 	GetContainerLogs(containerName string, logWriter io.Writer) error
-	PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
-	PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error
+	PullImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error
+	PushImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error
 	DeleteImage(imageName string, force bool, logWriter io.Writer) error
 
 	CreateFromDevcontainer(opts CreateDevcontainerOptions) (string, RemoteUser, error)
@@ -69,29 +66,29 @@ type DockerClient struct {
 	apiClient client.APIClient
 }
 
-func (d *DockerClient) GetProjectContainerName(project *project.Project) string {
+func (d *DockerClient) GetWorkspaceContainerName(workspace *models.Workspace) string {
 	containers, err := d.apiClient.ContainerList(context.Background(), container.ListOptions{
-		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.workspace.id=%s", project.WorkspaceId)), filters.Arg("label", fmt.Sprintf("daytona.project.name=%s", project.Name))),
+		Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("daytona.target.id=%s", workspace.TargetId)), filters.Arg("label", fmt.Sprintf("daytona.workspace.id=%s", workspace.Id))),
 		All:     true,
 	})
 	if err != nil || len(containers) == 0 {
-		return project.WorkspaceId + "-" + project.Name
+		return workspace.TargetId + "-" + workspace.Id
 	}
 
 	return containers[0].ID
 }
 
-func (d *DockerClient) GetProjectVolumeName(project *project.Project) string {
-	return project.WorkspaceId + "-" + project.Name
+func (d *DockerClient) GetWorkspaceVolumeName(workspace *models.Workspace) string {
+	return workspace.TargetId + "-" + workspace.Id
 }
 
 func (d *DockerClient) getComposeContainers(c types.ContainerJSON) (string, []types.Container, error) {
 	ctx := context.Background()
 
 	for k, v := range c.Config.Labels {
-		if k == "com.docker.compose.project" {
+		if k == "com.docker.compose.workspace" {
 			containers, err := d.apiClient.ContainerList(ctx, container.ListOptions{
-				Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("com.docker.compose.project=%s", v))),
+				Filters: filters.NewArgs(filters.Arg("label", fmt.Sprintf("com.docker.compose.workspace=%s", v))),
 			})
 			return v, containers, err
 		}

@@ -5,6 +5,7 @@ The team at Daytona welcomes contributions from the community. There are many wa
 Thanks for taking the time to contribute! ❤️
 
 > And if you like the project but don't have time to contribute, that's perfectly okay. There are other simple ways to support the project and show your appreciation, which we would greatly appreciate:
+>
 > - Star the project
 > - Tweet about it
 > - Contribute to our [Docs](https://github.com/daytonaio/docs/)
@@ -22,29 +23,31 @@ to [info@daytona.io](mailto:info@daytona.io).
 
 You might find things that can be improved while you are using Daytona. You can help by [submitting an issue](https://github.com/daytonaio/daytona/issues/new) when:
 
-* A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
-* Daytona crashes, or you encounter a bug that can only be resolved by restarting Daytona.
-* An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
+- A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
+- Daytona crashes, or you encounter a bug that can only be resolved by restarting Daytona.
+- An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
 
 Before creating a new issue, please confirm that an existing issue doesn't already exist.
 
 We will then take care of the issue as soon as possible.
 
 ## Participate in the Community
+
 You can engage with our community by:
 
-* Helping other users on [Daytona Community Slack](https://go.daytona.io/slack).
-* Improving [documentation](https://github.com/daytonaio/docs/)
-* Participating in general discussions about development and DevOps
-* Authoring new Daytona Plugins and sharing those Plugins
-* Authoring new dev containers and sharing examples
+- Helping other users on [Daytona Community Slack](https://go.daytona.io/slack).
+- Improving [documentation](https://github.com/daytonaio/docs/)
+- Participating in general discussions about development and DevOps
+- Authoring new Daytona Plugins and sharing those Plugins
+- Authoring new dev containers and sharing examples
 
 ## Contributing Code
+
 You can contribute to Daytona by:
 
-* Enhancing current functionality
-* Fixing bugs
-* Adding new features and capabilities
+- Enhancing current functionality
+- Fixing bugs
+- Adding new features and capabilities
 
 Before starting your contribution, especially for core features, we encourage you to reach out to us on [Slack](https://go.daytona.io/slack). This allows us to ensure that your proposed feature aligns with the project's roadmap and goals. Developers are the key to making Daytona the best tool it can be, and we value input from the community.
 
@@ -72,11 +75,35 @@ Follow the following steps to ensure your contribution goes smoothly.
 
 Note: In some cases, we might decide that a PR should be closed without merging. We'll make sure to provide clear reasoning when this happens.
 
+### Coding Style and Conventions
+
+To make the code base consistent, we follow a few guidelines and conventions listed below.
+
+It is possible that the code base does not currently comply with all these guidelines.
+While working on a PR, if you see something that can be refactored to comply, go ahead, but keep in mind that we are not looking for massive PRs that only address that.
+
+API and service method conventions:
+
+1. Avoid using model names in service methods
+   - e.g. `Create` instead of `CreateTarget`, `Find` instead of `FindWorkspace`
+1. Use model names in service methods for "sub-models"
+   - e.g. `ListPrebuilds` in `WorkspaceTemplateService`
+1. Use appropriate verbs in the UI
+   - e.g. `Create API Key` instead of `Generate API Key` since the method is called `Create`
+1. Refer to the table below for a connection between API and service methods
+
+| HTTP Method | Controller / Service / Store |
+| ----------- | ---------------------------- |
+| POST        | Create or Update             |
+| DELETE      | Delete                       |
+| PUT         | Save                         |
+| GET         | Find or List                 |
+
 #### What Does Contributing Mean for You?
 
 Here is what being a contributor means for you:
 
-* License all our contributions to the project under the Apache License, Version 2.0
-* Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
+- License all our contributions to the project under the Apache License, Version 2.0
+- Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
 
 For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://go.daytona.io/slack).

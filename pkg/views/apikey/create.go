@@ -13,7 +13,7 @@ import (
 	"github.com/charmbracelet/huh"
 )
 
-func ApiKeyCreationView(name *string, clientKeys []apiclient.ApiKey) {
+func ApiKeyCreationView(name *string, clientKeys []apiclient.ApiKeyViewDTO) {
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewInput().

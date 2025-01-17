@@ -9,33 +9,38 @@ import (
 	"github.com/daytonaio/daytona/internal/testing/docker/mocks"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/suite"
 )
 
-var project1 = &project.Project{
+var workspace1 = &models.Workspace{
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	BuildConfig: &buildconfig.BuildConfig{},
 	Image:       "test-image:tag",
 	User:        "test-user",
-	WorkspaceId: "123",
-	Target:      "test",
+	TargetId:    "123",
+	BuildConfig: &models.BuildConfig{},
 }
 
-var workspace1 = &workspace.Workspace{
-	Id:     "123",
-	Name:   "test",
-	Target: "test",
-	Projects: []*project.Project{
-		project1,
+var targetConfig1 = &models.TargetConfig{
+	Name: "test",
+	ProviderInfo: models.ProviderInfo{
+		Name:    "test-provider",
+		Version: "test",
 	},
+	Options: "test-options",
+	Deleted: false,
+}
+
+var target1 = &models.Target{
+	Id:             "123",
+	Name:           "test",
+	TargetConfigId: targetConfig1.Id,
+	TargetConfig:   *targetConfig1,
 }
 
 type DockerClientTestSuiteConfig struct {

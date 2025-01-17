@@ -10,16 +10,18 @@ import (
 	"io"
 	"os"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/spf13/cobra"
 )
 
 var followFlag bool
 
 var logsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Output Daytona Agent logs",
+	Use:     "logs",
+	Short:   "Output Daytona Agent logs",
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		logFilePath := config.GetLogFilePath()
 
@@ -36,7 +38,7 @@ var logsCmd = &cobra.Command{
 		msgChan := make(chan []byte)
 		errChan := make(chan error)
 
-		go util.ReadLog(context.Background(), file, followFlag, msgChan, errChan)
+		go logs.ReadLog(context.Background(), file, followFlag, msgChan, errChan)
 
 		for {
 			select {

@@ -6,8 +6,8 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona profile add - Add profile
-    - daytona profile delete - Delete profile [PROFILE_NAME]
-    - daytona profile edit - Edit profile [PROFILE_NAME]
+    - daytona profile create - Create a profile
+    - daytona profile delete - Delete a profile
     - daytona profile list - List profiles
+    - daytona profile update - Update profile [PROFILE_NAME]
     - daytona use - Use profile [PROFILE_NAME]

@@ -10,4 +10,4 @@ see_also:
     - daytona build info - Show build info
     - daytona build list - List all builds
     - daytona build logs - View logs for build
-    - daytona build run - Run a build from a project config
+    - daytona build run - Run a build from a workspace template

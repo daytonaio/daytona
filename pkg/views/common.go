@@ -10,6 +10,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/pkg/apiclient"
 	"golang.org/x/term"
 )
 
@@ -38,8 +39,6 @@ var DefaultHorizontalMargin = 1
 
 var TUITableMinimumWidth = 80
 
-var CheckmarkSymbol = lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓")
-
 var SeparatorString = lipgloss.NewStyle().Foreground(LightGray).Render("===")
 
 var (
@@ -47,6 +46,29 @@ var (
 	maximumWidth     = 160
 	widthBreakpoints = []int{60, 80, 100, 120, 140, 160}
 )
+
+// Resources that have actions being performed on them have a higher priority when listing
+var ResourceListStatePriorities = map[apiclient.ModelsResourceStateName]int{
+	apiclient.ResourceStateNamePendingRun:          1,
+	apiclient.ResourceStateNamePendingCreate:       1,
+	apiclient.ResourceStateNamePendingStart:        1,
+	apiclient.ResourceStateNamePendingStop:         1,
+	apiclient.ResourceStateNamePendingRestart:      1,
+	apiclient.ResourceStateNamePendingDelete:       1,
+	apiclient.ResourceStateNamePendingForcedDelete: 1,
+	apiclient.ResourceStateNameRunning:             1,
+	apiclient.ResourceStateNameCreating:            1,
+	apiclient.ResourceStateNameStarting:            1,
+	apiclient.ResourceStateNameStopping:            1,
+	apiclient.ResourceStateNameDeleting:            1,
+	apiclient.ResourceStateNameStarted:             2,
+	apiclient.ResourceStateNameRunSuccessful:       2,
+	apiclient.ResourceStateNameUndefined:           2,
+	apiclient.ResourceStateNameError:               3,
+	apiclient.ResourceStateNameUnresponsive:        4,
+	apiclient.ResourceStateNameStopped:             5,
+	apiclient.ResourceStateNameDeleted:             6,
+}
 
 func RenderMainTitle(title string) {
 	fmt.Println(lipgloss.NewStyle().Foreground(Green).Bold(true).Padding(1, 0, 1, 0).Render(title))
@@ -180,4 +202,54 @@ func GetEnvVarsInput(envVars *map[string]string) *huh.Text {
 
 			return nil
 		})
+}
+
+// Bolds the message and prepends a checkmark
+func GetPrettyLogLine(message string) string {
+	return fmt.Sprintf("%s \033[1m%s\033[0m\n", lipgloss.NewStyle().Foreground(lipgloss.Color("42")).SetString("✓").String(), message)
+}
+
+func GetStateLabel(state apiclient.ModelsResourceStateName) string {
+	switch state {
+	case apiclient.ResourceStateNameUndefined:
+		return UndefinedStyle.Render("/")
+	case apiclient.ResourceStateNamePendingRun:
+		return PendingStyle.Render("PENDING")
+	case apiclient.ResourceStateNameRunning:
+		return RunningStyle.Render("RUNNING")
+	case apiclient.ResourceStateNameRunSuccessful:
+		return RunSuccessfulStyle.Render("SUCCESS")
+	case apiclient.ResourceStateNamePendingCreate:
+		return PendingStyle.Render("PENDING")
+	case apiclient.ResourceStateNameCreating:
+		return CreatingStyle.Render("CREATING")
+	case apiclient.ResourceStateNamePendingStart:
+		return PendingStyle.Render("STARTING")
+	case apiclient.ResourceStateNameStarting:
+		return StartingStyle.Render("STARTING")
+	case apiclient.ResourceStateNameStarted:
+		return StartedStyle.Render("STARTED")
+	case apiclient.ResourceStateNamePendingStop:
+		return PendingStyle.Render("STOPPING")
+	case apiclient.ResourceStateNameStopping:
+		return StoppingStyle.Render("STOPPING")
+	case apiclient.ResourceStateNameStopped:
+		return StoppedStyle.Render("STOPPED")
+	case apiclient.ResourceStateNamePendingRestart:
+		return DeletingStyle.Render("RESTARTING")
+	case apiclient.ResourceStateNamePendingDelete:
+		return DeletingStyle.Render("DELETING")
+	case apiclient.ResourceStateNamePendingForcedDelete:
+		return DeletingStyle.Render("DELETING")
+	case apiclient.ResourceStateNameDeleting:
+		return DeletingStyle.Render("DELETING")
+	case apiclient.ResourceStateNameDeleted:
+		return DeletedStyle.Render("DELETED")
+	case apiclient.ResourceStateNameError:
+		return ErrorStyle.Render("ERROR")
+	case apiclient.ResourceStateNameUnresponsive:
+		return UnresponsiveStyle.Render("UNRESPONSIVE")
+	}
+
+	return "/"
 }

@@ -4,18 +4,18 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild
-[**GetPrebuild**](PrebuildAPI.md#GetPrebuild) | **Get** /project-config/{configName}/prebuild/{prebuildId} | Get prebuild
-[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /project-config/prebuild | List prebuilds
-[**ListPrebuildsForProjectConfig**](PrebuildAPI.md#ListPrebuildsForProjectConfig) | **Get** /project-config/{configName}/prebuild | List prebuilds for project config
-[**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
-[**SetPrebuild**](PrebuildAPI.md#SetPrebuild) | **Put** /project-config/{configName}/prebuild | Set prebuild
+[**DeletePrebuild**](PrebuildAPI.md#DeletePrebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
+[**FindPrebuild**](PrebuildAPI.md#FindPrebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Find prebuild
+[**ListPrebuilds**](PrebuildAPI.md#ListPrebuilds) | **Get** /workspace-template/prebuild | List prebuilds
+[**ListPrebuildsForWorkspaceTemplate**](PrebuildAPI.md#ListPrebuildsForWorkspaceTemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
+[**ProcessGitEvent**](PrebuildAPI.md#ProcessGitEvent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
+[**SavePrebuild**](PrebuildAPI.md#SavePrebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
 
 
 
 ## DeletePrebuild
 
-> DeletePrebuild(ctx, configName, prebuildId).Force(force).Execute()
+> DeletePrebuild(ctx, templateName, prebuildId).Force(force).Execute()
 
 Delete prebuild
 
@@ -34,13 +34,13 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Project config name
+	templateName := "templateName_example" // string | Workspace template name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
 	force := true // bool | Force (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), configName, prebuildId).Force(force).Execute()
+	r, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), templateName, prebuildId).Force(force).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.DeletePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -54,7 +54,7 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Project config name | 
+**templateName** | **string** | Workspace template name | 
 **prebuildId** | **string** | Prebuild ID | 
 
 ### Other Parameters
@@ -86,11 +86,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetPrebuild
+## FindPrebuild
 
-> PrebuildDTO GetPrebuild(ctx, configName, prebuildId).Execute()
+> PrebuildDTO FindPrebuild(ctx, templateName, prebuildId).Execute()
 
-Get prebuild
+Find prebuild
 
 
 
@@ -107,18 +107,18 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Project config name
+	templateName := "templateName_example" // string | Workspace template name
 	prebuildId := "prebuildId_example" // string | Prebuild ID
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.GetPrebuild(context.Background(), configName, prebuildId).Execute()
+	resp, r, err := apiClient.PrebuildAPI.FindPrebuild(context.Background(), templateName, prebuildId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.GetPrebuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.FindPrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetPrebuild`: PrebuildDTO
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.GetPrebuild`: %v\n", resp)
+	// response from `FindPrebuild`: PrebuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.FindPrebuild`: %v\n", resp)
 }
 ```
 
@@ -128,12 +128,12 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Project config name | 
+**templateName** | **string** | Workspace template name | 
 **prebuildId** | **string** | Prebuild ID | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetPrebuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFindPrebuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -220,11 +220,11 @@ Other parameters are passed through a pointer to a apiListPrebuildsRequest struc
 [[Back to README]](../README.md)
 
 
-## ListPrebuildsForProjectConfig
+## ListPrebuildsForWorkspaceTemplate
 
-> []PrebuildDTO ListPrebuildsForProjectConfig(ctx, configName).Execute()
+> []PrebuildDTO ListPrebuildsForWorkspaceTemplate(ctx, templateName).Execute()
 
-List prebuilds for project config
+List prebuilds for workspace template
 
 
 
@@ -241,17 +241,17 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Config name
+	templateName := "templateName_example" // string | Template name
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), configName).Execute()
+	resp, r, err := apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), templateName).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ListPrebuildsForProjectConfig``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ListPrebuildsForWorkspaceTemplate``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListPrebuildsForProjectConfig`: []PrebuildDTO
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.ListPrebuildsForProjectConfig`: %v\n", resp)
+	// response from `ListPrebuildsForWorkspaceTemplate`: []PrebuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.ListPrebuildsForWorkspaceTemplate`: %v\n", resp)
 }
 ```
 
@@ -261,11 +261,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Config name | 
+**templateName** | **string** | Template name | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiListPrebuildsForProjectConfigRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiListPrebuildsForWorkspaceTemplateRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -292,7 +292,7 @@ Name | Type | Description  | Notes
 
 ## ProcessGitEvent
 
-> ProcessGitEvent(ctx).Workspace(workspace).Execute()
+> ProcessGitEvent(ctx).Body(body).Execute()
 
 ProcessGitEvent
 
@@ -311,11 +311,11 @@ import (
 )
 
 func main() {
-	workspace := map[string]interface{}{ ... } // map[string]interface{} | Webhook event
+	body := map[string]interface{}{ ... } // map[string]interface{} | Webhook event
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.PrebuildAPI.ProcessGitEvent(context.Background()).Workspace(workspace).Execute()
+	r, err := apiClient.PrebuildAPI.ProcessGitEvent(context.Background()).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.ProcessGitEvent``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -334,7 +334,7 @@ Other parameters are passed through a pointer to a apiProcessGitEventRequest str
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **workspace** | **map[string]interface{}** | Webhook event | 
+ **body** | **map[string]interface{}** | Webhook event | 
 
 ### Return type
 
@@ -354,11 +354,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## SetPrebuild
+## SavePrebuild
 
-> string SetPrebuild(ctx, configName).Prebuild(prebuild).Execute()
+> string SavePrebuild(ctx, templateName).Prebuild(prebuild).Execute()
 
-Set prebuild
+Save prebuild
 
 
 
@@ -375,18 +375,18 @@ import (
 )
 
 func main() {
-	configName := "configName_example" // string | Config name
+	templateName := "templateName_example" // string | Template name
 	prebuild := *openapiclient.NewCreatePrebuildDTO(int32(123)) // CreatePrebuildDTO | Prebuild
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.PrebuildAPI.SetPrebuild(context.Background(), configName).Prebuild(prebuild).Execute()
+	resp, r, err := apiClient.PrebuildAPI.SavePrebuild(context.Background(), templateName).Prebuild(prebuild).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.SetPrebuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `PrebuildAPI.SavePrebuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `SetPrebuild`: string
-	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.SetPrebuild`: %v\n", resp)
+	// response from `SavePrebuild`: string
+	fmt.Fprintf(os.Stdout, "Response from `PrebuildAPI.SavePrebuild`: %v\n", resp)
 }
 ```
 
@@ -396,11 +396,11 @@ func main() {
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
-**configName** | **string** | Config name | 
+**templateName** | **string** | Template name | 
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiSetPrebuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSavePrebuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

@@ -13,12 +13,12 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (s *HeadscaleServer) CreateAuthKey() (string, error) {
+func (s *HeadscaleServer) CreateAuthKey(username string) (string, error) {
 	log.Debug("Creating headscale auth key")
 
 	request := &v1.CreatePreAuthKeyRequest{
 		Reusable:   false,
-		User:       "daytona",
+		User:       username,
 		Ephemeral:  true,
 		Expiration: timestamppb.New(time.Now().Add(100000 * time.Hour)),
 	}

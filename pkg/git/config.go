@@ -10,10 +10,11 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"gopkg.in/ini.v1"
 )
 
-func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gitprovider.GitProviderConfig) error {
+func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *models.GitProviderConfig) error {
 	gitConfigFileName := s.GitConfigFileName
 
 	var gitConfigContent []byte
@@ -45,7 +46,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 			return err
 		}
 	}
-	_, err = cfg.Section("safe").NewKey("directory", s.ProjectDir)
+	_, err = cfg.Section("safe").NewKey("directory", s.WorkspaceDir)
 	if err != nil {
 		return err
 	}
@@ -82,7 +83,7 @@ func (s *Service) SetGitConfig(userData *gitprovider.GitUser, providerConfig *gi
 	return os.WriteFile(gitConfigFileName, buf.Bytes(), 0644)
 }
 
-func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.GitProviderConfig, userData *gitprovider.GitUser) error {
+func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *models.GitProviderConfig, userData *gitprovider.GitUser) error {
 	if providerConfig == nil || providerConfig.SigningMethod == nil || providerConfig.SigningKey == nil {
 		return nil
 	}
@@ -107,12 +108,12 @@ func (s *Service) setSigningConfig(cfg *ini.File, providerConfig *gitprovider.Gi
 	}
 
 	switch *providerConfig.SigningMethod {
-	case gitprovider.SigningMethodGPG:
+	case models.SigningMethodGPG:
 		_, err := cfg.Section("commit").NewKey("gpgSign", "true")
 		if err != nil {
 			return err
 		}
-	case gitprovider.SigningMethodSSH:
+	case models.SigningMethodSSH:
 		err := s.configureAllowedSigners(userData.Email, *providerConfig.SigningKey)
 		if err != nil {
 			return err

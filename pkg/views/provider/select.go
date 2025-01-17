@@ -14,10 +14,14 @@ import (
 )
 
 type ProviderView struct {
-	Name      string
-	Label     *string
-	Version   string
-	Installed *bool
+	Name                 string
+	AgentlessTarget      *bool
+	Label                *string
+	Version              string
+	Installed            *bool
+	RunnerName           string
+	RunnerId             string
+	TargetConfigManifest map[string]apiclient.TargetConfigProperty
 }
 
 var NewProviderId = "+ New Provider"
@@ -58,15 +62,19 @@ func GetProviderFromPrompt(providers []ProviderView, title string, withNewProvid
 	return nil, common.ErrCtrlCAbort
 }
 
-func ProviderListToView(providers []apiclient.Provider) []ProviderView {
+func ProviderListToView(providers []apiclient.ProviderInfo) []ProviderView {
 	var providerViews []ProviderView
 
 	for _, p := range providers {
 		providerViews = append(providerViews, ProviderView{
-			Name:      p.Name,
-			Label:     p.Label,
-			Version:   p.Version,
-			Installed: nil,
+			Name:                 p.Name,
+			AgentlessTarget:      p.AgentlessTarget,
+			Label:                p.Label,
+			Version:              p.Version,
+			Installed:            nil,
+			RunnerId:             p.RunnerId,
+			RunnerName:           p.RunnerName,
+			TargetConfigManifest: p.TargetConfigManifest,
 		})
 	}
 

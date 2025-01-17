@@ -5,7 +5,6 @@ package create
 
 import (
 	"errors"
-	"log"
 	"path/filepath"
 
 	"github.com/charmbracelet/bubbles/key"
@@ -15,17 +14,18 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 )
 
 const (
 	DEVCONTAINER_FILEPATH = ".devcontainer/devcontainer.json"
 )
 
-var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: advanced configuration")
+var configurationHelpLine = lipgloss.NewStyle().Foreground(views.Gray).Render("enter: next  f10: configuration screen")
 
-type ProjectConfigurationData struct {
+type WorkspaceConfigurationData struct {
+	Name                 string
 	BuildChoice          string
 	DevcontainerFilePath string
 	Image                string
@@ -33,8 +33,9 @@ type ProjectConfigurationData struct {
 	EnvVars              map[string]string
 }
 
-func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentProject *apiclient.CreateProjectDTO, defaults *views_util.ProjectConfigDefaults) *ProjectConfigurationData {
-	projectConfigurationData := &ProjectConfigurationData{
+func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePath string, currentWorkspace *apiclient.CreateWorkspaceDTO, defaults *views_util.WorkspaceTemplateDefaults) *WorkspaceConfigurationData {
+	workspaceConfigurationData := &WorkspaceConfigurationData{
+		Name:                 currentWorkspace.Name,
 		BuildChoice:          string(buildChoice),
 		DevcontainerFilePath: defaults.DevcontainerFilePath,
 		Image:                *defaults.Image,
@@ -42,103 +43,106 @@ func NewConfigurationData(buildChoice views_util.BuildChoice, devContainerFilePa
 		EnvVars:              map[string]string{},
 	}
 
-	if currentProject.Image != nil {
-		projectConfigurationData.Image = *currentProject.Image
+	if currentWorkspace.Image != nil {
+		workspaceConfigurationData.Image = *currentWorkspace.Image
 	}
 
-	if currentProject.User != nil {
-		projectConfigurationData.User = *currentProject.User
+	if currentWorkspace.User != nil {
+		workspaceConfigurationData.User = *currentWorkspace.User
 	}
 
-	if currentProject.EnvVars != nil {
-		projectConfigurationData.EnvVars = currentProject.EnvVars
+	if currentWorkspace.EnvVars != nil {
+		workspaceConfigurationData.EnvVars = currentWorkspace.EnvVars
 	}
 
-	return projectConfigurationData
+	return workspaceConfigurationData
 }
 
-func RunProjectConfiguration(projectList *[]apiclient.CreateProjectDTO, defaults views_util.ProjectConfigDefaults, isConfigImport bool) (bool, error) {
-	var currentProject *apiclient.CreateProjectDTO
+func RunWorkspaceConfiguration(workspaceList *[]apiclient.CreateWorkspaceDTO, defaults views_util.WorkspaceTemplateDefaults, isTemplateImport bool) (bool, error) {
+	var currentWorkspace *apiclient.CreateWorkspaceDTO
 
-	if len(*projectList) > 1 {
-		currentProject = selection.GetProjectRequestFromPrompt(projectList)
-		if currentProject == nil {
+	if len(*workspaceList) > 1 {
+		currentWorkspace = selection.GetWorkspaceRequestFromPrompt(workspaceList)
+		if currentWorkspace == nil {
 			return false, common.ErrCtrlCAbort
 		}
 	} else {
-		currentProject = &((*projectList)[0])
+		currentWorkspace = &((*workspaceList)[0])
 	}
 
-	if currentProject.Name == selection.DoneConfiguring.Name {
+	if currentWorkspace.Name == selection.DoneConfiguring.Name {
 		return false, nil
 	}
 
 	devContainerFilePath := defaults.DevcontainerFilePath
 	builderChoice := views_util.AUTOMATIC
 
-	if currentProject.BuildConfig != nil {
-		if currentProject.BuildConfig.Devcontainer != nil {
+	if currentWorkspace.BuildConfig != nil {
+		if currentWorkspace.BuildConfig.Devcontainer != nil {
 			builderChoice = views_util.DEVCONTAINER
-			devContainerFilePath = currentProject.BuildConfig.Devcontainer.FilePath
+			devContainerFilePath = currentWorkspace.BuildConfig.Devcontainer.FilePath
 		}
 	} else {
-		if currentProject.Image == nil && currentProject.User == nil ||
-			*currentProject.Image == *defaults.Image && *currentProject.User == *defaults.ImageUser {
+		if currentWorkspace.Image == nil && currentWorkspace.User == nil ||
+			*currentWorkspace.Image == *defaults.Image && *currentWorkspace.User == *defaults.ImageUser {
 			builderChoice = views_util.NONE
 		} else {
 			builderChoice = views_util.CUSTOMIMAGE
 		}
 	}
 
-	projectConfigurationData := NewConfigurationData(builderChoice, devContainerFilePath, currentProject, &defaults)
+	workspaceConfigurationData := NewConfigurationData(builderChoice, devContainerFilePath, currentWorkspace, &defaults)
 
-	if !isConfigImport {
-		form := GetProjectConfigurationForm(projectConfigurationData)
+	if !isTemplateImport {
+		form := GetWorkspaceConfigurationForm(workspaceConfigurationData)
 		err := form.WithProgramOptions(tea.WithAltScreen()).Run()
 		if err != nil {
-			log.Fatal(err)
+			return false, err
 		}
 	}
 
-	for i := range *projectList {
-		if (*projectList)[i].Name == currentProject.Name {
-			if projectConfigurationData.BuildChoice == string(views_util.NONE) {
-				(*projectList)[i].BuildConfig = nil
-				(*projectList)[i].Image = defaults.Image
-				(*projectList)[i].User = defaults.ImageUser
-			}
-
-			if projectConfigurationData.BuildChoice == string(views_util.CUSTOMIMAGE) {
-				(*projectList)[i].BuildConfig = nil
-				(*projectList)[i].Image = &projectConfigurationData.Image
-				(*projectList)[i].User = &projectConfigurationData.User
-			}
-
-			if projectConfigurationData.BuildChoice == string(views_util.AUTOMATIC) {
-				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{}
-				(*projectList)[i].Image = defaults.Image
-				(*projectList)[i].User = defaults.ImageUser
-			}
-
-			if projectConfigurationData.BuildChoice == string(views_util.DEVCONTAINER) {
-				(*projectList)[i].BuildConfig = &apiclient.BuildConfig{
-					Devcontainer: &apiclient.DevcontainerConfig{
-						FilePath: projectConfigurationData.DevcontainerFilePath,
-					},
-				}
-				(*projectList)[i].Image = nil
-				(*projectList)[i].User = nil
-			}
-
-			(*projectList)[i].EnvVars = projectConfigurationData.EnvVars
+	for i := range *workspaceList {
+		if (*workspaceList)[i].Id != currentWorkspace.Id {
+			continue
 		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.NONE) {
+			(*workspaceList)[i].BuildConfig = nil
+			(*workspaceList)[i].Image = defaults.Image
+			(*workspaceList)[i].User = defaults.ImageUser
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.CUSTOMIMAGE) {
+			(*workspaceList)[i].BuildConfig = nil
+			(*workspaceList)[i].Image = &workspaceConfigurationData.Image
+			(*workspaceList)[i].User = &workspaceConfigurationData.User
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.AUTOMATIC) {
+			(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{}
+			(*workspaceList)[i].Image = defaults.Image
+			(*workspaceList)[i].User = defaults.ImageUser
+		}
+
+		if workspaceConfigurationData.BuildChoice == string(views_util.DEVCONTAINER) {
+			(*workspaceList)[i].BuildConfig = &apiclient.BuildConfig{
+				Devcontainer: &apiclient.DevcontainerConfig{
+					FilePath: workspaceConfigurationData.DevcontainerFilePath,
+				},
+			}
+			(*workspaceList)[i].Image = nil
+			(*workspaceList)[i].User = nil
+		}
+
+		(*workspaceList)[i].Name = workspaceConfigurationData.Name
+		(*workspaceList)[i].EnvVars = workspaceConfigurationData.EnvVars
 	}
 
-	if len(*projectList) == 1 {
+	if len(*workspaceList) == 1 {
 		return true, nil
 	}
 
-	return RunProjectConfiguration(projectList, defaults, isConfigImport)
+	return RunWorkspaceConfiguration(workspaceList, defaults, isTemplateImport)
 }
 
 func validateDevcontainerFilename(filename string) error {
@@ -149,7 +153,7 @@ func validateDevcontainerFilename(filename string) error {
 	return nil
 }
 
-func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData) *huh.Form {
+func GetWorkspaceConfigurationForm(workspaceConfiguration *WorkspaceConfigurationData) *huh.Form {
 	buildOptions := []huh.Option[string]{
 		{Key: "Automatic", Value: string(views_util.AUTOMATIC)},
 		{Key: "Devcontainer", Value: string(views_util.DEVCONTAINER)},
@@ -159,32 +163,37 @@ func GetProjectConfigurationForm(projectConfiguration *ProjectConfigurationData)
 
 	form := huh.NewForm(
 		huh.NewGroup(
+			huh.NewInput().
+				Title("Name").
+				Value(&workspaceConfiguration.Name),
+		),
+		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("Choose a build configuration").
 				Options(
 					buildOptions...,
 				).
-				Value(&projectConfiguration.BuildChoice),
+				Value(&workspaceConfiguration.BuildChoice),
 		).WithHeight(8),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Custom container image").
-				Value(&projectConfiguration.Image),
+				Value(&workspaceConfiguration.Image),
 			huh.NewInput().
 				Title("Container user").
-				Value(&projectConfiguration.User),
+				Value(&workspaceConfiguration.User),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return projectConfiguration.BuildChoice != string(views_util.CUSTOMIMAGE)
+			return workspaceConfiguration.BuildChoice != string(views_util.CUSTOMIMAGE)
 		}),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Devcontainer file path").
-				Value(&projectConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
+				Value(&workspaceConfiguration.DevcontainerFilePath).Validate(validateDevcontainerFilename),
 		).WithHeight(5).WithHideFunc(func() bool {
-			return projectConfiguration.BuildChoice != string(views_util.DEVCONTAINER)
+			return workspaceConfiguration.BuildChoice != string(views_util.DEVCONTAINER)
 		}),
 		huh.NewGroup(
-			views.GetEnvVarsInput(&projectConfiguration.EnvVars),
+			views.GetEnvVarsInput(&workspaceConfiguration.EnvVars),
 		).WithHeight(12),
 	).WithTheme(views.GetCustomTheme())
 

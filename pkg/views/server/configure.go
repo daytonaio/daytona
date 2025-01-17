@@ -14,6 +14,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/util"
 )
 
 type Model struct {
@@ -28,7 +29,7 @@ type keymap struct {
 	submit key.Binding
 }
 
-func NewModel(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) Model {
+func NewModel(config *apiclient.ServerConfig) Model {
 	m := Model{
 		config: config,
 		help:   help.New(),
@@ -37,22 +38,14 @@ func NewModel(config *apiclient.ServerConfig, containerRegistries []apiclient.Co
 		},
 	}
 
-	m.form = m.createForm(containerRegistries)
+	m.form = m.createForm()
 	return m
 }
-func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *huh.Form {
+func (m *Model) createForm() *huh.Form {
 	apiPortView := strconv.Itoa(int(m.config.GetApiPort()))
 	headscalePortView := strconv.Itoa(int(m.config.GetHeadscalePort()))
 	frpsPortView := strconv.Itoa(int(m.config.Frps.GetPort()))
 	localBuilderRegistryPort := strconv.Itoa(int(m.config.GetLocalBuilderRegistryPort()))
-
-	builderContainerRegistryOptions := []huh.Option[string]{{
-		Key:   "Local registry managed by Daytona",
-		Value: "local",
-	}}
-	for _, cr := range containerRegistries {
-		builderContainerRegistryOptions = append(builderContainerRegistryOptions, huh.Option[string]{Key: cr.Server, Value: cr.Server})
-	}
 
 	logFileMaxSize := strconv.Itoa(int(m.config.LogFile.MaxSize))
 	logFileMaxBackups := strconv.Itoa(int(m.config.LogFile.MaxBackups))
@@ -60,10 +53,6 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 
 	return huh.NewForm(
 		huh.NewGroup(
-			huh.NewInput().
-				Title("Providers Directory").
-				Description("Directory will be created if it does not exist").
-				Value(&m.config.ProvidersDir),
 			huh.NewInput().
 				Title("Registry URL").
 				Value(&m.config.RegistryUrl),
@@ -77,23 +66,20 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 		),
 		huh.NewGroup(
 			huh.NewInput().
-				Title("Default Project Image").
-				Value(&m.config.DefaultProjectImage),
+				Title("Default Workspace Image").
+				Value(&m.config.DefaultWorkspaceImage),
 			huh.NewInput().
-				Title("Default Project User").
-				Value(&m.config.DefaultProjectUser),
+				Title("Default Workspace User").
+				Value(&m.config.DefaultWorkspaceUser),
 		),
 		huh.NewGroup(
 			huh.NewInput().
 				Title("Builder Image").
 				Description("Image dependencies: docker, socat, git, @devcontainers/cli (node package)").
 				Value(&m.config.BuilderImage),
-			huh.NewSelect[string]().
-				Title("Builder Registry").
-				Description("To add options, add a container registry with 'daytona cr set'").
-				Options(
-					builderContainerRegistryOptions...,
-				).
+			huh.NewInput().
+				Title("Builder Registry Server").
+				Description("Add container registry credentials to the server by adding them as environment variables using `daytona env set`").
 				Value(&m.config.BuilderRegistryServer),
 			huh.NewInput().
 				Title("Build Image Namespace").
@@ -104,10 +90,14 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Local Builder Registry Port").
 				Value(&localBuilderRegistryPort).
-				Validate(createPortValidator(m.config, &localBuilderRegistryPort, &m.config.LocalBuilderRegistryPort)),
+				Validate(util.CreateServerPortValidator(m.config, &localBuilderRegistryPort, &m.config.LocalBuilderRegistryPort)),
 			huh.NewInput().
 				Title("Local Builder Registry Image").
 				Value(&m.config.LocalBuilderRegistryImage),
+			huh.NewConfirm().
+				Title("Local Runner Disabled").
+				Description("Disables the local runner").
+				Value(m.config.LocalRunnerDisabled),
 		).WithHideFunc(func() bool {
 			return m.config.BuilderRegistryServer != "local"
 		}),
@@ -115,11 +105,11 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("API Port").
 				Value(&apiPortView).
-				Validate(createPortValidator(m.config, &apiPortView, &m.config.ApiPort)),
+				Validate(util.CreateServerPortValidator(m.config, &apiPortView, &m.config.ApiPort)),
 			huh.NewInput().
 				Title("Headscale Port").
 				Value(&headscalePortView).
-				Validate(createPortValidator(m.config, &headscalePortView, &m.config.HeadscalePort)),
+				Validate(util.CreateServerPortValidator(m.config, &headscalePortView, &m.config.HeadscalePort)),
 			huh.NewInput().
 				Title("Binaries Path").
 				Description("Directory will be created if it does not exist").
@@ -142,16 +132,16 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 				Title("Log File Max Size").
 				Description("In megabytes").
 				Value(&logFileMaxSize).
-				Validate(createIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
+				Validate(util.CreateIntValidator(&logFileMaxSize, &m.config.LogFile.MaxSize)),
 			huh.NewInput().
 				Title("Log File Max Backups").
 				Value(&logFileMaxBackups).
-				Validate(createIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
+				Validate(util.CreateIntValidator(&logFileMaxBackups, &m.config.LogFile.MaxBackups)),
 			huh.NewInput().
 				Title("Log File Max Age").
 				Description("In days").
 				Value(&logFileMaxAge).
-				Validate(createIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
+				Validate(util.CreateIntValidator(&logFileMaxAge, &m.config.LogFile.MaxAge)),
 			huh.NewConfirm().
 				Title("Log File Local Time").
 				Description("Used for timestamping files. Default is UTC time.").
@@ -167,7 +157,7 @@ func (m *Model) createForm(containerRegistries []apiclient.ContainerRegistry) *h
 			huh.NewInput().
 				Title("Frps Port").
 				Value(&frpsPortView).
-				Validate(createPortValidator(m.config, &frpsPortView, &m.config.Frps.Port)),
+				Validate(util.CreateServerPortValidator(m.config, &frpsPortView, &m.config.Frps.Port)),
 			huh.NewInput().
 				Title("Frps Protocol").
 				Value(&m.config.Frps.Protocol),
@@ -232,8 +222,8 @@ func (m Model) View() string {
 	return m.form.View() + helpView
 }
 
-func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []apiclient.ContainerRegistry) (*apiclient.ServerConfig, error) {
-	m := NewModel(config, containerRegistries)
+func ConfigurationForm(config *apiclient.ServerConfig) (*apiclient.ServerConfig, error) {
+	m := NewModel(config)
 
 	p, err := tea.NewProgram(m, tea.WithAltScreen()).Run()
 
@@ -246,40 +236,4 @@ func ConfigurationForm(config *apiclient.ServerConfig, containerRegistries []api
 	}
 
 	return nil, errors.New("no changes were made")
-}
-
-func createPortValidator(config *apiclient.ServerConfig, portView *string, port *int32) func(string) error {
-	return func(string) error {
-		validatePort, err := strconv.Atoi(*portView)
-		if err != nil {
-			return errors.New("failed to parse port")
-		}
-		if validatePort < 0 || validatePort > 65535 {
-			return errors.New("port out of range")
-		}
-		*port = int32(validatePort)
-
-		if config.ApiPort == config.HeadscalePort {
-			return errors.New("port conflict")
-		}
-
-		return nil
-	}
-}
-
-func createIntValidator(viewValue *string, value *int32) func(string) error {
-	return func(string) error {
-		validateInt, err := strconv.Atoi(*viewValue)
-		if err != nil {
-			return errors.New("failed to parse int")
-		}
-
-		if validateInt <= 0 {
-			return errors.New("int out of range")
-		}
-
-		*value = int32(validateInt)
-
-		return nil
-	}
 }

@@ -4,17 +4,29 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ApiKey** | **string** |  | 
+**BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
+**EnvVars** | **map[string]string** |  | 
+**GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
-**Info** | Pointer to [**WorkspaceInfo**](WorkspaceInfo.md) |  | [optional] 
+**Image** | **string** |  | 
+**Labels** | **map[string]string** |  | 
+**LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**LastJobId** | Pointer to **string** |  | [optional] 
+**Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
-**Projects** | [**[]Project**](Project.md) |  | 
-**Target** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
+**State** | [**ResourceState**](ResourceState.md) |  | 
+**Target** | [**Target**](Target.md) |  | 
+**TargetId** | **string** |  | 
+**User** | **string** |  | 
 
 ## Methods
 
 ### NewWorkspaceDTO
 
-`func NewWorkspaceDTO(id string, name string, projects []Project, target string, ) *WorkspaceDTO`
+`func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string, ) *WorkspaceDTO`
 
 NewWorkspaceDTO instantiates a new WorkspaceDTO object
 This constructor will assign default values to properties that have it defined,
@@ -28,6 +40,96 @@ will change when the set of required properties is changed
 NewWorkspaceDTOWithDefaults instantiates a new WorkspaceDTO object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetApiKey
+
+`func (o *WorkspaceDTO) GetApiKey() string`
+
+GetApiKey returns the ApiKey field if non-nil, zero value otherwise.
+
+### GetApiKeyOk
+
+`func (o *WorkspaceDTO) GetApiKeyOk() (*string, bool)`
+
+GetApiKeyOk returns a tuple with the ApiKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetApiKey
+
+`func (o *WorkspaceDTO) SetApiKey(v string)`
+
+SetApiKey sets ApiKey field to given value.
+
+
+### GetBuildConfig
+
+`func (o *WorkspaceDTO) GetBuildConfig() BuildConfig`
+
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
+
+### GetBuildConfigOk
+
+`func (o *WorkspaceDTO) GetBuildConfigOk() (*BuildConfig, bool)`
+
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuildConfig
+
+`func (o *WorkspaceDTO) SetBuildConfig(v BuildConfig)`
+
+SetBuildConfig sets BuildConfig field to given value.
+
+### HasBuildConfig
+
+`func (o *WorkspaceDTO) HasBuildConfig() bool`
+
+HasBuildConfig returns a boolean if a field has been set.
+
+### GetEnvVars
+
+`func (o *WorkspaceDTO) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *WorkspaceDTO) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *WorkspaceDTO) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
+
+### GetGitProviderConfigId
+
+`func (o *WorkspaceDTO) GetGitProviderConfigId() string`
+
+GetGitProviderConfigId returns the GitProviderConfigId field if non-nil, zero value otherwise.
+
+### GetGitProviderConfigIdOk
+
+`func (o *WorkspaceDTO) GetGitProviderConfigIdOk() (*string, bool)`
+
+GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviderConfigId
+
+`func (o *WorkspaceDTO) SetGitProviderConfigId(v string)`
+
+SetGitProviderConfigId sets GitProviderConfigId field to given value.
+
+### HasGitProviderConfigId
+
+`func (o *WorkspaceDTO) HasGitProviderConfigId() bool`
+
+HasGitProviderConfigId returns a boolean if a field has been set.
 
 ### GetId
 
@@ -49,30 +151,120 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
-### GetInfo
+### GetImage
 
-`func (o *WorkspaceDTO) GetInfo() WorkspaceInfo`
+`func (o *WorkspaceDTO) GetImage() string`
 
-GetInfo returns the Info field if non-nil, zero value otherwise.
+GetImage returns the Image field if non-nil, zero value otherwise.
 
-### GetInfoOk
+### GetImageOk
 
-`func (o *WorkspaceDTO) GetInfoOk() (*WorkspaceInfo, bool)`
+`func (o *WorkspaceDTO) GetImageOk() (*string, bool)`
 
-GetInfoOk returns a tuple with the Info field if it's non-nil, zero value otherwise
+GetImageOk returns a tuple with the Image field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetInfo
+### SetImage
 
-`func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo)`
+`func (o *WorkspaceDTO) SetImage(v string)`
 
-SetInfo sets Info field to given value.
+SetImage sets Image field to given value.
 
-### HasInfo
 
-`func (o *WorkspaceDTO) HasInfo() bool`
+### GetLabels
 
-HasInfo returns a boolean if a field has been set.
+`func (o *WorkspaceDTO) GetLabels() map[string]string`
+
+GetLabels returns the Labels field if non-nil, zero value otherwise.
+
+### GetLabelsOk
+
+`func (o *WorkspaceDTO) GetLabelsOk() (*map[string]string, bool)`
+
+GetLabelsOk returns a tuple with the Labels field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabels
+
+`func (o *WorkspaceDTO) SetLabels(v map[string]string)`
+
+SetLabels sets Labels field to given value.
+
+
+### GetLastJob
+
+`func (o *WorkspaceDTO) GetLastJob() Job`
+
+GetLastJob returns the LastJob field if non-nil, zero value otherwise.
+
+### GetLastJobOk
+
+`func (o *WorkspaceDTO) GetLastJobOk() (*Job, bool)`
+
+GetLastJobOk returns a tuple with the LastJob field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJob
+
+`func (o *WorkspaceDTO) SetLastJob(v Job)`
+
+SetLastJob sets LastJob field to given value.
+
+### HasLastJob
+
+`func (o *WorkspaceDTO) HasLastJob() bool`
+
+HasLastJob returns a boolean if a field has been set.
+
+### GetLastJobId
+
+`func (o *WorkspaceDTO) GetLastJobId() string`
+
+GetLastJobId returns the LastJobId field if non-nil, zero value otherwise.
+
+### GetLastJobIdOk
+
+`func (o *WorkspaceDTO) GetLastJobIdOk() (*string, bool)`
+
+GetLastJobIdOk returns a tuple with the LastJobId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJobId
+
+`func (o *WorkspaceDTO) SetLastJobId(v string)`
+
+SetLastJobId sets LastJobId field to given value.
+
+### HasLastJobId
+
+`func (o *WorkspaceDTO) HasLastJobId() bool`
+
+HasLastJobId returns a boolean if a field has been set.
+
+### GetMetadata
+
+`func (o *WorkspaceDTO) GetMetadata() WorkspaceMetadata`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *WorkspaceDTO) GetMetadataOk() (*WorkspaceMetadata, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *WorkspaceDTO) SetMetadata(v WorkspaceMetadata)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *WorkspaceDTO) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
 
 ### GetName
 
@@ -94,44 +286,129 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetProjects
+### GetProviderMetadata
 
-`func (o *WorkspaceDTO) GetProjects() []Project`
+`func (o *WorkspaceDTO) GetProviderMetadata() string`
 
-GetProjects returns the Projects field if non-nil, zero value otherwise.
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
 
-### GetProjectsOk
+### GetProviderMetadataOk
 
-`func (o *WorkspaceDTO) GetProjectsOk() (*[]Project, bool)`
+`func (o *WorkspaceDTO) GetProviderMetadataOk() (*string, bool)`
 
-GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProjects
+### SetProviderMetadata
 
-`func (o *WorkspaceDTO) SetProjects(v []Project)`
+`func (o *WorkspaceDTO) SetProviderMetadata(v string)`
 
-SetProjects sets Projects field to given value.
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *WorkspaceDTO) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
+
+### GetRepository
+
+`func (o *WorkspaceDTO) GetRepository() GitRepository`
+
+GetRepository returns the Repository field if non-nil, zero value otherwise.
+
+### GetRepositoryOk
+
+`func (o *WorkspaceDTO) GetRepositoryOk() (*GitRepository, bool)`
+
+GetRepositoryOk returns a tuple with the Repository field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRepository
+
+`func (o *WorkspaceDTO) SetRepository(v GitRepository)`
+
+SetRepository sets Repository field to given value.
+
+
+### GetState
+
+`func (o *WorkspaceDTO) GetState() ResourceState`
+
+GetState returns the State field if non-nil, zero value otherwise.
+
+### GetStateOk
+
+`func (o *WorkspaceDTO) GetStateOk() (*ResourceState, bool)`
+
+GetStateOk returns a tuple with the State field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetState
+
+`func (o *WorkspaceDTO) SetState(v ResourceState)`
+
+SetState sets State field to given value.
 
 
 ### GetTarget
 
-`func (o *WorkspaceDTO) GetTarget() string`
+`func (o *WorkspaceDTO) GetTarget() Target`
 
 GetTarget returns the Target field if non-nil, zero value otherwise.
 
 ### GetTargetOk
 
-`func (o *WorkspaceDTO) GetTargetOk() (*string, bool)`
+`func (o *WorkspaceDTO) GetTargetOk() (*Target, bool)`
 
 GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetTarget
 
-`func (o *WorkspaceDTO) SetTarget(v string)`
+`func (o *WorkspaceDTO) SetTarget(v Target)`
 
 SetTarget sets Target field to given value.
+
+
+### GetTargetId
+
+`func (o *WorkspaceDTO) GetTargetId() string`
+
+GetTargetId returns the TargetId field if non-nil, zero value otherwise.
+
+### GetTargetIdOk
+
+`func (o *WorkspaceDTO) GetTargetIdOk() (*string, bool)`
+
+GetTargetIdOk returns a tuple with the TargetId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetId
+
+`func (o *WorkspaceDTO) SetTargetId(v string)`
+
+SetTargetId sets TargetId field to given value.
+
+
+### GetUser
+
+`func (o *WorkspaceDTO) GetUser() string`
+
+GetUser returns the User field if non-nil, zero value otherwise.
+
+### GetUserOk
+
+`func (o *WorkspaceDTO) GetUserOk() (*string, bool)`
+
+GetUserOk returns a tuple with the User field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUser
+
+`func (o *WorkspaceDTO) SetUser(v string)`
+
+SetUser sets User field to given value.
 
 
 

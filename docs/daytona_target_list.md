@@ -10,6 +10,7 @@ daytona target list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
+  -v, --show-options    Show target options
 ```
 
 ### Options inherited from parent commands
@@ -20,5 +21,5 @@ daytona target list [flags]
 
 ### SEE ALSO
 
-* [daytona target](daytona_target.md)	 - Manage provider targets
+* [daytona target](daytona_target.md)	 - Manage targets
 

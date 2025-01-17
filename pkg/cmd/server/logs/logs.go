@@ -17,6 +17,8 @@ import (
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/daytonaio/daytona/pkg/views/server/selection"
@@ -37,8 +39,9 @@ func init() {
 }
 
 var LogsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Output Daytona Server logs",
+	Use:     "logs",
+	Short:   "Output Daytona Server logs",
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -101,7 +104,7 @@ func readRemoteServerLogFile(ctx context.Context, activeProfile config.Profile, 
 		query += fmt.Sprintf("file=%s", filepath.Base(fileFlag))
 	}
 
-	ws, res, err := apiclient_util.GetWebsocketConn(context.Background(), "/log/server", &activeProfile, &query)
+	ws, res, err := util.GetWebsocketConn(context.Background(), "/log/server", activeProfile.Api.Url, activeProfile.Api.Key, &query)
 	if res.StatusCode == http.StatusNotFound {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -177,7 +180,7 @@ func readLocalServerLogFile() error {
 
 	var reader io.Reader
 	if regexp.MustCompile(constants.ZIP_LOG_FILE_NAME_SUFFIX_PATTERN).MatchString(logFile) {
-		reader, err = util.ReadCompressedFile(logFile)
+		reader, err = logs.ReadCompressedFile(logFile)
 	} else {
 		reader, err = os.Open(logFile)
 	}
@@ -188,7 +191,7 @@ func readLocalServerLogFile() error {
 	msgChan := make(chan []byte)
 	errChan := make(chan error)
 
-	go util.ReadLog(context.Background(), reader, followFlag, msgChan, errChan)
+	go logs.ReadLog(context.Background(), reader, followFlag, msgChan, errChan)
 
 	for {
 		select {

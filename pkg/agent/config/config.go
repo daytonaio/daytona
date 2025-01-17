@@ -21,13 +21,13 @@ type DaytonaServerConfig struct {
 }
 
 type Config struct {
-	ProjectDir  string
-	ClientId    string  `envconfig:"DAYTONA_CLIENT_ID" validate:"required"`
-	ProjectName string  `envconfig:"DAYTONA_WS_PROJECT_NAME"`
-	WorkspaceId string  `envconfig:"DAYTONA_WS_ID" validate:"required"`
-	LogFilePath *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
-	Server      DaytonaServerConfig
-	Mode        Mode
+	WorkspaceDir string
+	ClientId     string  `envconfig:"DAYTONA_CLIENT_ID" validate:"required"`
+	WorkspaceId  string  `envconfig:"DAYTONA_WORKSPACE_ID"`
+	TargetId     string  `envconfig:"DAYTONA_TARGET_ID" validate:"required"`
+	LogFilePath  *string `envconfig:"DAYTONA_AGENT_LOG_FILE_PATH"`
+	Server       DaytonaServerConfig
+	Mode         Mode
 
 	SkipClone string `envconfig:"DAYTONA_SKIP_CLONE"`
 }
@@ -35,8 +35,8 @@ type Config struct {
 type Mode string
 
 const (
-	ModeHost    Mode = "host"
-	ModeProject Mode = "project"
+	ModeTarget    Mode = "target"
+	ModeWorkspace Mode = "workspace"
 )
 
 var config *Config
@@ -65,9 +65,9 @@ func GetConfig(mode Mode) (*Config, error) {
 		return nil, err
 	}
 
-	if config.Mode == ModeProject {
-		if config.ProjectName == "" {
-			return nil, errors.New("DAYTONA_WS_PROJECT_NAME is required in project mode")
+	if config.Mode == ModeWorkspace {
+		if config.WorkspaceId == "" {
+			return nil, errors.New("DAYTONA_WORKSPACE_ID is required in workspace mode")
 		}
 	}
 

@@ -6,6 +6,6 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona api-key generate - Generate a new API key
+    - daytona api-key create - Create a new API key
+    - daytona api-key delete - Delete an API key
     - daytona api-key list - List API keys
-    - daytona api-key revoke - Revoke an API key

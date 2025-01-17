@@ -15,20 +15,20 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func OpenPositron(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenPositron(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey *string) error {
 	path, err := GetPositronBinaryPath()
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 	if runtime.GOARCH == "arm64" {
 		printPositronDisclaimer()
 	}
@@ -39,11 +39,11 @@ func OpenPositron(activeProfile config.Profile, workspaceId string, projectName 
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.positron-server/*/bin/positron-server", "$HOME/.positron-server/data/Machine/settings.json", ".daytona-customizations-lock-positron")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.positron-server/*/bin/positron-server", "$HOME/.positron-server/data/Machine/settings.json", ".daytona-customizations-lock-positron")
 }
 
 func GetPositronBinaryPath() (string, error) {

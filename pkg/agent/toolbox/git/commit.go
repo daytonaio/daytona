@@ -20,7 +20,7 @@ func CommitChanges(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkspaceDir: req.Path,
 	}
 
 	commitSha, err := gitService.Commit(req.Message, &go_git.CommitOptions{

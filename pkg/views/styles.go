@@ -32,6 +32,18 @@ var (
 )
 
 var (
+	ColorPending      = lipgloss.AdaptiveColor{Light: "#cce046", Dark: "#cce046"}
+	ColorSuccess      = lipgloss.AdaptiveColor{Light: "#2ecc71", Dark: "#2ecc71"}
+	ColorStarting     = ColorSuccess
+	ColorStopped      = lipgloss.AdaptiveColor{Light: "#a2a2a2", Dark: "#a2a2a2"}
+	ColorStopping     = ColorStopped
+	ColorError        = lipgloss.AdaptiveColor{Light: "#e74c3c", Dark: "#e74c3c"}
+	ColorDeleting     = ColorStopped
+	ColorDeleted      = ColorStopped
+	ColorUnresponsive = ColorError
+)
+
+var (
 	BaseTableStyleHorizontalPadding = 4
 	BaseTableStyle                  = lipgloss.NewStyle().
 					PaddingLeft(BaseTableStyleHorizontalPadding).
@@ -45,6 +57,22 @@ var (
 	DefaultRowDataStyle = lipgloss.NewStyle().Foreground(Gray)
 	BaseCellStyle       = lipgloss.NewRenderer(os.Stdout).NewStyle().Padding(0, 4, 1, 0)
 	TableHeaderStyle    = BaseCellStyle.Foreground(LightGray).Bold(false).Padding(0).MarginRight(4)
+)
+
+var (
+	UndefinedStyle     = lipgloss.NewStyle().Foreground(ColorPending)
+	PendingStyle       = lipgloss.NewStyle().Foreground(ColorPending)
+	RunningStyle       = lipgloss.NewStyle().Foreground(ColorPending)
+	RunSuccessfulStyle = lipgloss.NewStyle().Foreground(ColorSuccess)
+	CreatingStyle      = lipgloss.NewStyle().Foreground(ColorPending)
+	StartedStyle       = lipgloss.NewStyle().Foreground(ColorSuccess)
+	StartingStyle      = lipgloss.NewStyle().Foreground(ColorStarting)
+	StoppedStyle       = lipgloss.NewStyle().Foreground(ColorStopped)
+	StoppingStyle      = lipgloss.NewStyle().Foreground(ColorStopping)
+	ErrorStyle         = lipgloss.NewStyle().Foreground(ColorError)
+	DeletingStyle      = lipgloss.NewStyle().Foreground(ColorDeleting)
+	DeletedStyle       = lipgloss.NewStyle().Foreground(ColorDeleted)
+	UnresponsiveStyle  = lipgloss.NewStyle().Foreground(ColorUnresponsive)
 )
 
 var LogPrefixColors = []lipgloss.AdaptiveColor{

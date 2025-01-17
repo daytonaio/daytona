@@ -16,7 +16,7 @@ func CreateBranch(c *gin.Context) {
 	}
 
 	gitService := git.Service{
-		ProjectDir: req.Path,
+		WorkspaceDir: req.Path,
 	}
 
 	if err := gitService.CreateBranch(req.Name); err != nil {

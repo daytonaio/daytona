@@ -1,98 +1,125 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package target
+package list
 
 import (
 	"fmt"
 	"sort"
 
+	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	"github.com/daytonaio/daytona/pkg/views/util"
+	info_view "github.com/daytonaio/daytona/pkg/views/target/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 )
 
-type rowData struct {
-	Target    string
-	Provider  string
-	IsDefault string
-	Options   string
+type RowData struct {
+	Name                 string
+	Provider             string
+	WorkspaceCount       string
+	Default              bool
+	Status               string
+	TargetConfigProperty string
+	Uptime               string
 }
 
-func ListTargets(targetList []apiclient.ProviderTarget) {
+func ListTargets(targetList []apiclient.TargetDTO, activeProfileName string, showOptions bool) {
 	if len(targetList) == 0 {
 		views_util.NotifyEmptyTargetList(true)
 		return
 	}
 
-	sortTargets(&targetList)
+	SortTargets(&targetList)
 
-	data := [][]string{}
+	targetConfigPropertyHeader := "Config Name"
 
-	for _, target := range targetList {
-		data = append(data, getRowFromRowData(&target))
+	if showOptions {
+		targetConfigPropertyHeader = "Options"
 	}
 
-	table := util.GetTableView(data, []string{
-		"Target", "Provider", "Default", "Options",
-	}, nil, func() {
+	headers := []string{"Target", targetConfigPropertyHeader, "# Workspaces", "Default", "Status"}
+
+	data := util.ArrayMap(targetList, func(target apiclient.TargetDTO) []string {
+		provider := target.TargetConfig.ProviderInfo.Name
+		if target.TargetConfig.ProviderInfo.Label != nil {
+			provider = *target.TargetConfig.ProviderInfo.Label
+		}
+
+		rowData := RowData{
+			Name:                 target.Name,
+			Provider:             provider,
+			TargetConfigProperty: target.TargetConfig.Name,
+			WorkspaceCount:       fmt.Sprint(len(target.Workspaces)),
+			Default:              target.Default,
+			Status:               views.GetStateLabel(target.State.Name),
+		}
+
+		if showOptions {
+			rowData.TargetConfigProperty = target.TargetConfig.Options
+		}
+
+		if target.Metadata != nil {
+			views_util.CheckAndAppendTimeLabel(&rowData.Status, target.State, target.Metadata.Uptime)
+		}
+
+		return getRowFromRowData(rowData)
+	})
+
+	footer := lipgloss.NewStyle().Foreground(views.LightGray).Render(views.GetListFooter(activeProfileName, &views.Padding{}))
+
+	table := views_util.GetTableView(data, headers, &footer, func() {
 		renderUnstyledList(targetList)
 	})
 
 	fmt.Println(table)
 }
 
-func getRowFromRowData(target *apiclient.ProviderTarget) []string {
-	var isDefault string
-	var data rowData
+func SortTargets(targetList *[]apiclient.TargetDTO) {
+	sort.Slice(*targetList, func(i, j int) bool {
+		// Sort the default target on top
+		if (*targetList)[i].Default && !(*targetList)[j].Default {
+			return true
+		}
+		if !(*targetList)[i].Default && (*targetList)[j].Default {
+			return false
+		}
 
-	data.Target = target.Name
-	data.Provider = target.ProviderInfo.Name
-	data.Options = target.Options
+		pi, pj := views_util.GetStateSortPriorities((*targetList)[i].State.Name, (*targetList)[j].State.Name)
+		if pi != pj {
+			return pi < pj
+		}
 
-	if target.IsDefault {
-		isDefault = views.ActiveStyle.Render("Yes")
-	} else {
-		isDefault = views.InactiveStyle.Render("/")
-	}
-
-	row := []string{
-		views.NameStyle.Render(data.Target),
-		views.DefaultRowDataStyle.Render(data.Provider),
-		isDefault,
-		views.DefaultRowDataStyle.Render(data.Options),
-	}
-
-	return row
-}
-
-func sortTargets(targets *[]apiclient.ProviderTarget) {
-	sort.Slice(*targets, func(i, j int) bool {
-		t1 := (*targets)[i]
-		t2 := (*targets)[j]
-		return t1.ProviderInfo.Name < t2.ProviderInfo.Name
+		// If two targets have the same state priority, compare the UpdatedAt property
+		return (*targetList)[i].State.UpdatedAt > (*targetList)[j].State.UpdatedAt
 	})
 }
 
-func renderUnstyledList(targetList []apiclient.ProviderTarget) {
-	output := "\n"
-
+func renderUnstyledList(targetList []apiclient.TargetDTO) {
 	for _, target := range targetList {
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Name: "), target.Name) + "\n\n"
+		info_view.Render(&target, true)
 
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Provider: "), target.ProviderInfo.Name) + "\n\n"
-
-		if target.IsDefault {
-			output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default: "), "Yes") + "\n\n"
-		}
-
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Target Options: "), target.Options) + "\n\n"
-
-		if target.Name != targetList[len(targetList)-1].Name {
-			output += views.SeparatorString + "\n\n"
+		if target.Id != targetList[len(targetList)-1].Id {
+			fmt.Printf("\n%s\n\n", views.SeparatorString)
 		}
 	}
+}
 
-	fmt.Println(output)
+func getRowFromRowData(rowData RowData) []string {
+	var isDefault string
+
+	if rowData.Default {
+		isDefault = "Yes"
+	} else {
+		isDefault = "/"
+	}
+
+	return []string{
+		fmt.Sprintf("%s %s", views.NameStyle.Render(rowData.Name), views.DefaultRowDataStyle.Render(fmt.Sprintf("(%s)", rowData.Provider))),
+		views.DefaultRowDataStyle.Render(rowData.TargetConfigProperty),
+		views.DefaultRowDataStyle.Render(rowData.WorkspaceCount),
+		isDefault,
+		rowData.Status,
+	}
 }

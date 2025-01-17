@@ -16,43 +16,44 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/git"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/ssh"
-	"github.com/daytonaio/daytona/pkg/workspace"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) CreateWorkspace(workspace *workspace.Workspace, workspaceDir string, logWriter io.Writer, sshClient *ssh.Client) error {
+func (d *DockerClient) CreateTarget(target *models.Target, targetDir string, logWriter io.Writer, sshClient *ssh.Client) error {
 	var err error
 	if sshClient == nil {
-		err = os.MkdirAll(workspaceDir, 0755)
+		err = os.MkdirAll(targetDir, 0755)
 	} else {
-		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", workspaceDir), nil)
+		err = sshClient.Exec(fmt.Sprintf("mkdir -p %s", targetDir), nil)
 	}
 
 	return err
 }
 
-func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
-	// pulledImages map keeps track of pulled images for project creation in order to avoid pulling the same image multiple times
+func (d *DockerClient) CreateWorkspace(opts *CreateWorkspaceOptions) error {
+	// pulledImages map keeps track of pulled images for workspace creation in order to avoid pulling the same image multiple times
 	// This is only an optimisation for images with tag 'latest'
 	pulledImages := map[string]bool{}
 
-	if opts.Project.BuildConfig != nil {
-		err := d.PullImage(opts.BuilderImage, opts.BuilderContainerRegistry, opts.LogWriter)
+	if opts.Workspace.BuildConfig != nil {
+		cr := opts.ContainerRegistries.FindContainerRegistryByImageName(opts.BuilderImage)
+		err := d.PullImage(opts.BuilderImage, cr, opts.LogWriter)
 		if err != nil {
 			return err
 		}
 		pulledImages[opts.BuilderImage] = true
 
-		err = d.cloneProjectRepository(opts)
+		err = d.cloneWorkspaceRepository(opts)
 		if err != nil {
 			return err
 		}
 
-		builderType, err := detect.DetectProjectBuilderType(opts.Project.BuildConfig, opts.ProjectDir, opts.SshClient)
+		builderType, err := detect.DetectWorkspaceBuilderType(opts.Workspace.BuildConfig, opts.WorkspaceDir, opts.SshClient)
 		if err != nil {
 			return err
 		}
@@ -62,25 +63,25 @@ func (d *DockerClient) CreateProject(opts *CreateProjectOptions) error {
 			_, _, err := d.CreateFromDevcontainer(d.toCreateDevcontainerOptions(opts, true))
 			return err
 		case detect.BuilderTypeImage:
-			return d.createProjectFromImage(opts, pulledImages, true)
+			return d.createWorkspaceFromImage(opts, pulledImages, true)
 		default:
 			return fmt.Errorf("unknown builder type: %s", builderType)
 		}
 	}
 
-	return d.createProjectFromImage(opts, pulledImages, false)
+	return d.createWorkspaceFromImage(opts, pulledImages, false)
 }
 
-func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error {
+func (d *DockerClient) cloneWorkspaceRepository(opts *CreateWorkspaceOptions) error {
 	ctx := context.Background()
 
 	if opts.SshClient != nil {
-		err := opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", opts.ProjectDir), nil)
+		err := opts.SshClient.Exec(fmt.Sprintf("mkdir -p %s", opts.WorkspaceDir), nil)
 		if err != nil {
 			return err
 		}
 	} else {
-		err := os.MkdirAll(opts.ProjectDir, 0755)
+		err := os.MkdirAll(opts.WorkspaceDir, 0755)
 		if err != nil {
 			return err
 		}
@@ -95,10 +96,10 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 	}
 
 	gitService := git.Service{
-		ProjectDir: fmt.Sprintf("/workdir/%s-%s", opts.Project.WorkspaceId, opts.Project.Name),
+		WorkspaceDir: fmt.Sprintf("/workdir/%s", opts.Workspace.WorkspaceFolderName()),
 	}
 
-	cloneCmd := gitService.CloneRepositoryCmd(opts.Project.Repository, auth)
+	cloneCmd := gitService.CloneRepositoryCmd(opts.Workspace.Repository, auth)
 
 	c, err := d.apiClient.ContainerCreate(ctx, &container.Config{
 		Image:      opts.BuilderImage,
@@ -111,11 +112,11 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 		Mounts: []mount.Mount{
 			{
 				Type:   mount.TypeBind,
-				Source: filepath.Dir(opts.ProjectDir),
+				Source: filepath.Dir(opts.WorkspaceDir),
 				Target: "/workdir",
 			},
 		},
-	}, nil, nil, fmt.Sprintf("git-clone-%s-%s", opts.Project.WorkspaceId, opts.Project.Name))
+	}, nil, nil, fmt.Sprintf("git-clone-%s-%s", opts.Workspace.TargetId, opts.Workspace.Name))
 	if err != nil {
 		return err
 	}
@@ -158,7 +159,7 @@ func (d *DockerClient) cloneProjectRepository(opts *CreateProjectOptions) error 
 	return nil
 }
 
-func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *CreateProjectOptions) (string, error) {
+func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *CreateWorkspaceOptions) (string, error) {
 	currentUser, err := user.Current()
 	if err != nil {
 		return "", err
@@ -200,20 +201,19 @@ func (d *DockerClient) updateContainerUserUidGid(containerId string, opts *Creat
 	return containerUser, nil
 }
 
-func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateProjectOptions, prebuild bool) CreateDevcontainerOptions {
+func (d *DockerClient) toCreateDevcontainerOptions(opts *CreateWorkspaceOptions, prebuild bool) CreateDevcontainerOptions {
 	return CreateDevcontainerOptions{
-		ProjectDir:               opts.ProjectDir,
-		ProjectName:              opts.Project.Name,
-		BuildConfig:              opts.Project.BuildConfig,
-		LogWriter:                opts.LogWriter,
-		SshClient:                opts.SshClient,
-		ContainerRegistry:        opts.ContainerRegistry,
-		BuilderImage:             opts.BuilderImage,
-		BuilderContainerRegistry: opts.BuilderContainerRegistry,
-		EnvVars:                  opts.Project.EnvVars,
+		WorkspaceDir:        opts.WorkspaceDir,
+		WorkspaceFolderName: opts.Workspace.WorkspaceFolderName(),
+		BuildConfig:         opts.Workspace.BuildConfig,
+		LogWriter:           opts.LogWriter,
+		SshClient:           opts.SshClient,
+		ContainerRegistries: opts.ContainerRegistries,
+		BuilderImage:        opts.BuilderImage,
+		EnvVars:             opts.Workspace.EnvVars,
 		IdLabels: map[string]string{
-			"daytona.workspace.id": opts.Project.WorkspaceId,
-			"daytona.project.name": opts.Project.Name,
+			"daytona.target.id":    opts.Workspace.TargetId,
+			"daytona.workspace.id": opts.Workspace.Id,
 		},
 		Prebuild: prebuild,
 	}

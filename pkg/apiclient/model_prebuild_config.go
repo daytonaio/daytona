@@ -22,7 +22,7 @@ var _ MappedNullable = &PrebuildConfig{}
 // PrebuildConfig struct for PrebuildConfig
 type PrebuildConfig struct {
 	Branch         string   `json:"branch"`
-	CommitInterval int32    `json:"commitInterval"`
+	CommitInterval *int32   `json:"commitInterval,omitempty"`
 	Id             string   `json:"id"`
 	Retention      int32    `json:"retention"`
 	TriggerFiles   []string `json:"triggerFiles"`
@@ -34,10 +34,9 @@ type _PrebuildConfig PrebuildConfig
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewPrebuildConfig(branch string, commitInterval int32, id string, retention int32, triggerFiles []string) *PrebuildConfig {
+func NewPrebuildConfig(branch string, id string, retention int32, triggerFiles []string) *PrebuildConfig {
 	this := PrebuildConfig{}
 	this.Branch = branch
-	this.CommitInterval = commitInterval
 	this.Id = id
 	this.Retention = retention
 	this.TriggerFiles = triggerFiles
@@ -76,28 +75,36 @@ func (o *PrebuildConfig) SetBranch(v string) {
 	o.Branch = v
 }
 
-// GetCommitInterval returns the CommitInterval field value
+// GetCommitInterval returns the CommitInterval field value if set, zero value otherwise.
 func (o *PrebuildConfig) GetCommitInterval() int32 {
-	if o == nil {
+	if o == nil || IsNil(o.CommitInterval) {
 		var ret int32
 		return ret
 	}
-
-	return o.CommitInterval
+	return *o.CommitInterval
 }
 
-// GetCommitIntervalOk returns a tuple with the CommitInterval field value
+// GetCommitIntervalOk returns a tuple with the CommitInterval field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *PrebuildConfig) GetCommitIntervalOk() (*int32, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.CommitInterval) {
 		return nil, false
 	}
-	return &o.CommitInterval, true
+	return o.CommitInterval, true
 }
 
-// SetCommitInterval sets field value
+// HasCommitInterval returns a boolean if a field has been set.
+func (o *PrebuildConfig) HasCommitInterval() bool {
+	if o != nil && !IsNil(o.CommitInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetCommitInterval gets a reference to the given int32 and assigns it to the CommitInterval field.
 func (o *PrebuildConfig) SetCommitInterval(v int32) {
-	o.CommitInterval = v
+	o.CommitInterval = &v
 }
 
 // GetId returns the Id field value
@@ -183,7 +190,9 @@ func (o PrebuildConfig) MarshalJSON() ([]byte, error) {
 func (o PrebuildConfig) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["branch"] = o.Branch
-	toSerialize["commitInterval"] = o.CommitInterval
+	if !IsNil(o.CommitInterval) {
+		toSerialize["commitInterval"] = o.CommitInterval
+	}
 	toSerialize["id"] = o.Id
 	toSerialize["retention"] = o.Retention
 	toSerialize["triggerFiles"] = o.TriggerFiles
@@ -196,7 +205,6 @@ func (o *PrebuildConfig) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"branch",
-		"commitInterval",
 		"id",
 		"retention",
 		"triggerFiles",

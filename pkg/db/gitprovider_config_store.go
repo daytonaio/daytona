@@ -4,59 +4,56 @@
 package db
 
 import (
-	"gorm.io/gorm"
+	"context"
 
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type GitProviderConfigStore struct {
-	db *gorm.DB
+	IStore
 }
 
-func NewGitProviderConfigStore(db *gorm.DB) (*GitProviderConfigStore, error) {
-	err := db.AutoMigrate(&GitProviderConfigDTO{})
+func NewGitProviderConfigStore(store IStore) (stores.GitProviderConfigStore, error) {
+	err := store.AutoMigrate(&models.GitProviderConfig{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &GitProviderConfigStore{db: db}, nil
+	return &GitProviderConfigStore{store}, nil
 }
 
-func (p *GitProviderConfigStore) List() ([]*gitprovider.GitProviderConfig, error) {
-	gitProviderDTOs := []GitProviderConfigDTO{}
-	tx := p.db.Find(&gitProviderDTOs)
+func (p *GitProviderConfigStore) List(ctx context.Context) ([]*models.GitProviderConfig, error) {
+	tx := p.GetTransaction(ctx)
+
+	gitProviders := []*models.GitProviderConfig{}
+	tx = tx.Find(&gitProviders)
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	gitProviders := []*gitprovider.GitProviderConfig{}
-	for _, gitProviderDTO := range gitProviderDTOs {
-		gitProvider := ToGitProviderConfig(gitProviderDTO)
-		gitProviders = append(gitProviders, &gitProvider)
 	}
 
 	return gitProviders, nil
 }
 
-func (p *GitProviderConfigStore) Find(id string) (*gitprovider.GitProviderConfig, error) {
-	gitProviderDTO := GitProviderConfigDTO{}
-	tx := p.db.Where("id = ?", id).First(&gitProviderDTO)
+func (p *GitProviderConfigStore) Find(ctx context.Context, id string) (*models.GitProviderConfig, error) {
+	tx := p.GetTransaction(ctx)
+
+	gitProvider := &models.GitProviderConfig{}
+	tx = tx.Where("id = ?", id).First(gitProvider)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, gitprovider.ErrGitProviderConfigNotFound
+			return nil, stores.ErrGitProviderConfigNotFound
 		}
 		return nil, tx.Error
 	}
 
-	gitProvider := ToGitProviderConfig(gitProviderDTO)
-
-	return &gitProvider, nil
+	return gitProvider, nil
 }
 
-func (p *GitProviderConfigStore) Save(gitProvider *gitprovider.GitProviderConfig) error {
-	gitProviderDTO := ToGitProviderConfigDTO(*gitProvider)
-	tx := p.db.Save(&gitProviderDTO)
+func (p *GitProviderConfigStore) Save(ctx context.Context, gitProvider *models.GitProviderConfig) error {
+	tx := p.GetTransaction(ctx)
+
+	tx = tx.Save(gitProvider)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -64,14 +61,15 @@ func (p *GitProviderConfigStore) Save(gitProvider *gitprovider.GitProviderConfig
 	return nil
 }
 
-func (p *GitProviderConfigStore) Delete(gitProvider *gitprovider.GitProviderConfig) error {
-	gitProviderDTO := ToGitProviderConfigDTO(*gitProvider)
-	tx := p.db.Delete(&gitProviderDTO)
+func (p *GitProviderConfigStore) Delete(ctx context.Context, gitProvider *models.GitProviderConfig) error {
+	tx := p.GetTransaction(ctx)
+
+	tx = tx.Delete(gitProvider)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return gitprovider.ErrGitProviderConfigNotFound
+		return stores.ErrGitProviderConfigNotFound
 	}
 
 	return nil

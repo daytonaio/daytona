@@ -10,13 +10,21 @@ import (
 
 var TargetCmd = &cobra.Command{
 	Use:     "target",
-	Short:   "Manage provider targets",
-	GroupID: util.SERVER_GROUP,
+	Args:    cobra.NoArgs,
+	Short:   "Manage targets",
+	GroupID: util.TARGET_GROUP,
+	Aliases: []string{"targets", "tg"},
 }
 
 func init() {
-	TargetCmd.AddCommand(targetListCmd)
-	TargetCmd.AddCommand(TargetSetCmd)
-	TargetCmd.AddCommand(targetRemoveCmd)
-	TargetCmd.AddCommand(targetSetDefaultCmd)
+	TargetCmd.AddCommand(targetCreateCmd)
+	TargetCmd.AddCommand(deleteCmd)
+	TargetCmd.AddCommand(infoCmd)
+	TargetCmd.AddCommand(restartCmd)
+	TargetCmd.AddCommand(startCmd)
+	TargetCmd.AddCommand(stopCmd)
+	TargetCmd.AddCommand(logsCmd)
+	TargetCmd.AddCommand(listCmd)
+	TargetCmd.AddCommand(setDefaultCmd)
+	TargetCmd.AddCommand(sshCmd)
 }

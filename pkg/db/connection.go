@@ -44,6 +44,12 @@ func GetSQLiteConnection(dbPath string) *gorm.DB {
 	if err != nil {
 		panic("failed to connect database")
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("failed to connect database")
+	}
+
+	sqlDB.SetMaxOpenConns(1)
 
 	_db = db
 

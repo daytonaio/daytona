@@ -6,9 +6,8 @@ package provider
 import (
 	"net/rpc"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type ProviderRPCClient struct {
@@ -20,8 +19,8 @@ func (m *ProviderRPCClient) Initialize(req InitializeProviderRequest) (*util.Emp
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetInfo() (ProviderInfo, error) {
-	var resp ProviderInfo
+func (m *ProviderRPCClient) GetInfo() (models.ProviderInfo, error) {
+	var resp models.ProviderInfo
 	err := m.client.Call("Plugin.GetInfo", new(interface{}), &resp)
 	return resp, err
 }
@@ -32,17 +31,36 @@ func (m *ProviderRPCClient) CheckRequirements() (*[]RequirementStatus, error) {
 	return &result, err
 }
 
-func (m *ProviderRPCClient) GetTargetManifest() (*ProviderTargetManifest, error) {
-	var resp ProviderTargetManifest
-	err := m.client.Call("Plugin.GetTargetManifest", new(interface{}), &resp)
-
+func (m *ProviderRPCClient) GetPresetTargetConfigs() (*[]TargetConfig, error) {
+	var resp []TargetConfig
+	err := m.client.Call("Plugin.GetPresetTargetConfigs", new(interface{}), &resp)
 	return &resp, err
 }
 
-func (m *ProviderRPCClient) GetPresetTargets() (*[]ProviderTarget, error) {
-	var resp []ProviderTarget
-	err := m.client.Call("Plugin.GetPresetTargets", new(interface{}), &resp)
-	return &resp, err
+func (m *ProviderRPCClient) CreateTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.CreateTarget", targetReq, new(util.Empty))
+	return new(util.Empty), err
+}
+
+func (m *ProviderRPCClient) StartTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StartTarget", targetReq, new(util.Empty))
+	return new(util.Empty), err
+}
+
+func (m *ProviderRPCClient) StopTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.StopTarget", targetReq, new(util.Empty))
+	return new(util.Empty), err
+}
+
+func (m *ProviderRPCClient) DestroyTarget(targetReq *TargetRequest) (*util.Empty, error) {
+	err := m.client.Call("Plugin.DestroyTarget", targetReq, new(util.Empty))
+	return new(util.Empty), err
+}
+
+func (m *ProviderRPCClient) GetTargetProviderMetadata(targetReq *TargetRequest) (string, error) {
+	var resp string
+	err := m.client.Call("Plugin.GetTargetProviderMetadata", targetReq, &resp)
+	return resp, err
 }
 
 func (m *ProviderRPCClient) CreateWorkspace(workspaceReq *WorkspaceRequest) (*util.Empty, error) {
@@ -65,34 +83,8 @@ func (m *ProviderRPCClient) DestroyWorkspace(workspaceReq *WorkspaceRequest) (*u
 	return new(util.Empty), err
 }
 
-func (m *ProviderRPCClient) GetWorkspaceInfo(workspaceReq *WorkspaceRequest) (*workspace.WorkspaceInfo, error) {
-	var response workspace.WorkspaceInfo
-	err := m.client.Call("Plugin.GetWorkspaceInfo", workspaceReq, &response)
-	return &response, err
-}
-
-func (m *ProviderRPCClient) CreateProject(projectReq *ProjectRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.CreateProject", projectReq, new(util.Empty))
-	return new(util.Empty), err
-}
-
-func (m *ProviderRPCClient) StartProject(projectReq *ProjectRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.StartProject", projectReq, new(util.Empty))
-	return new(util.Empty), err
-}
-
-func (m *ProviderRPCClient) StopProject(projectReq *ProjectRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.StopProject", projectReq, new(util.Empty))
-	return new(util.Empty), err
-}
-
-func (m *ProviderRPCClient) DestroyProject(projectReq *ProjectRequest) (*util.Empty, error) {
-	err := m.client.Call("Plugin.DestroyProject", projectReq, new(util.Empty))
-	return new(util.Empty), err
-}
-
-func (m *ProviderRPCClient) GetProjectInfo(projectReq *ProjectRequest) (*project.ProjectInfo, error) {
-	var resp project.ProjectInfo
-	err := m.client.Call("Plugin.GetProjectInfo", projectReq, &resp)
-	return &resp, err
+func (m *ProviderRPCClient) GetWorkspaceProviderMetadata(workspaceReq *WorkspaceRequest) (string, error) {
+	var resp string
+	err := m.client.Call("Plugin.GetWorkspaceProviderMetadata", workspaceReq, &resp)
+	return resp, err
 }

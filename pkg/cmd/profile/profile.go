@@ -11,14 +11,16 @@ import (
 var ProfileCmd = &cobra.Command{
 	Use:     "profile",
 	Short:   "Manage profiles",
+	Args:    cobra.NoArgs,
 	GroupID: util.PROFILE_GROUP,
+	Aliases: []string{"profiles"},
 }
 
 func init() {
 	ProfileCmd.AddGroup(&cobra.Group{ID: util.PROFILE_GROUP, Title: "Profile"})
-	ProfileCmd.AddCommand(profileListCmd)
+	ProfileCmd.AddCommand(listCmd)
 	ProfileCmd.AddCommand(ProfileUseCmd)
 	ProfileCmd.AddCommand(ProfileAddCmd)
-	ProfileCmd.AddCommand(profileEditCmd)
-	ProfileCmd.AddCommand(profileDeleteCmd)
+	ProfileCmd.AddCommand(updateCmd)
+	ProfileCmd.AddCommand(deleteCmd)
 }

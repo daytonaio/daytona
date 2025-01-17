@@ -61,7 +61,7 @@ func NewGitServiceTestSuite() *GitServiceTestSuite {
 
 func (s *GitServiceTestSuite) SetupTest() {
 	s.gitService = &git.Service{
-		ProjectDir: "/workdir",
+		WorkspaceDir: "/workdir",
 	}
 }
 

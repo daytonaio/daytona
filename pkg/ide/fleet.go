@@ -13,18 +13,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenFleet(activeProfile config.Profile, workspaceId string, projectName string, gpgKey string) error {
+func OpenFleet(activeProfile config.Profile, workspaceId string, gpgKey *string) error {
 	if err := CheckFleetInstallation(); err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgKey)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	ideURL := fmt.Sprintf("fleet://fleet.ssh/%s?pwd=%s", projectHostname, projectDir)
+	ideURL := fmt.Sprintf("fleet://fleet.ssh/%s?pwd=%s", workspaceHostname, workspaceDir)
 
 	err = browser.OpenURL(ideURL)
 	if err != nil {

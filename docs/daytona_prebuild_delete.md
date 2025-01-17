@@ -3,7 +3,7 @@
 Delete a prebuild configuration
 
 ```
-daytona prebuild delete [PROJECT_CONFIG] [PREBUILD] [flags]
+daytona prebuild delete [WORKSPACE_CONFIG] [PREBUILD] [flags]
 ```
 
 ### Options

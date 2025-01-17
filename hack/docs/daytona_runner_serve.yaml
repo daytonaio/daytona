@@ -1,0 +1,9 @@
+name: daytona runner serve
+synopsis: Starts the runner in the foreground
+usage: daytona runner serve [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona runner - Manage the runner

@@ -4,21 +4,27 @@
 package apikeys_test
 
 import (
+	"context"
 	"testing"
 
+	apikeys_util "github.com/daytonaio/daytona/internal/apikeys"
 	t_apikeys "github.com/daytonaio/daytona/internal/testing/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/apikey"
+
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server/apikeys"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/stretchr/testify/suite"
 )
 
 var clientKeyNames []string = []string{"client1", "client2", "client3"}
-var projectKeyNames []string = []string{"project1", "project2"}
+var workspaceKeyNames []string = []string{"workspace1", "workspace2"}
 
 type ApiKeyServiceTestSuite struct {
 	suite.Suite
-	apiKeyService apikeys.IApiKeyService
-	apiKeyStore   apikey.Store
+	apiKeyService services.IApiKeyService
+	apiKeyStore   stores.ApiKeyStore
 }
 
 func NewApiKeyServiceTestSuite() *ApiKeyServiceTestSuite {
@@ -29,14 +35,23 @@ func (s *ApiKeyServiceTestSuite) SetupTest() {
 	s.apiKeyStore = t_apikeys.NewInMemoryApiKeyStore()
 	s.apiKeyService = apikeys.NewApiKeyService(apikeys.ApiKeyServiceConfig{
 		ApiKeyStore: s.apiKeyStore,
+		GenerateRandomKey: func(name string) string {
+			return apikeys_util.GenerateRandomKey()
+		},
+		GetKeyHash: func(key string) string {
+			return apikeys_util.HashKey(key)
+		},
+		TrackTelemetryEvent: func(event telemetry.Event, clientId string) error {
+			return nil
+		},
 	})
 
 	for _, keyName := range clientKeyNames {
-		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+		_, _ = s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeClient, keyName)
 	}
 
-	for _, keyName := range projectKeyNames {
-		_, _ = s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
+	for _, keyName := range workspaceKeyNames {
+		_, _ = s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	}
 }
 

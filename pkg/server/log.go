@@ -11,7 +11,7 @@ import (
 	"regexp"
 
 	"github.com/daytonaio/daytona/internal/constants"
-	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	frp_log "github.com/fatedier/frp/pkg/util/log"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/natefinch/lumberjack.v2"
@@ -42,9 +42,9 @@ func (f *logFormatter) Format(entry *log.Entry) ([]byte, error) {
 func (s *Server) initLogs() error {
 	rotatedLogFile := &lumberjack.Logger{
 		Filename:   s.config.LogFile.Path,
-		MaxSize:    s.config.LogFile.MaxSize, // megabytes
-		MaxBackups: s.config.LogFile.MaxBackups,
-		MaxAge:     s.config.LogFile.MaxAge, // days
+		MaxSize:    int(s.config.LogFile.MaxSize), // megabytes
+		MaxBackups: int(s.config.LogFile.MaxBackups),
+		MaxAge:     int(s.config.LogFile.MaxAge), // days
 		LocalTime:  s.config.LogFile.LocalTime,
 		Compress:   s.config.LogFile.Compress,
 	}
@@ -86,7 +86,7 @@ func (s *Server) GetLogReader(logFileQuery string) (io.Reader, error) {
 
 	var reader io.Reader
 	if regexp.MustCompile(constants.ZIP_LOG_FILE_NAME_SUFFIX_PATTERN).MatchString(logFileQuery) {
-		reader, err = util.ReadCompressedFile(logFilePath)
+		reader, err = logs.ReadCompressedFile(logFilePath)
 	} else {
 		reader, err = os.Open(logFilePath)
 	}

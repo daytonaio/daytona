@@ -18,25 +18,26 @@ const (
 	NONE         BuildChoice = "none"
 )
 
-type ProjectConfigDefaults struct {
+type WorkspaceTemplateDefaults struct {
 	BuildChoice          BuildChoice
 	Image                *string
 	ImageUser            *string
 	DevcontainerFilePath string
+	Labels               map[string]string
 }
 
-func GetProjectBuildChoice(project apiclient.CreateProjectDTO, defaults *ProjectConfigDefaults) (BuildChoice, string) {
-	if project.BuildConfig == nil {
-		if project.Image != nil && project.User != nil &&
+func GetWorkspaceBuildChoice(workspace apiclient.CreateWorkspaceDTO, defaults *WorkspaceTemplateDefaults) (BuildChoice, string) {
+	if workspace.BuildConfig == nil {
+		if workspace.Image != nil && workspace.User != nil &&
 			defaults.Image != nil && defaults.ImageUser != nil &&
-			*project.Image == *defaults.Image &&
-			*project.User == *defaults.ImageUser {
+			*workspace.Image == *defaults.Image &&
+			*workspace.User == *defaults.ImageUser {
 			return NONE, "None"
 		} else {
 			return CUSTOMIMAGE, "Custom Image"
 		}
 	} else {
-		if project.BuildConfig.Devcontainer != nil {
+		if workspace.BuildConfig.Devcontainer != nil {
 			return DEVCONTAINER, "Devcontainer"
 		} else {
 			return AUTOMATIC, "Automatic"

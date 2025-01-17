@@ -7,10 +7,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	log "github.com/sirupsen/logrus"
@@ -19,17 +20,38 @@ import (
 
 var allFlag bool
 
-var providerUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"up"},
+	Aliases: cmd_common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var selectedRunnerId string
+
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
+		}
+
+		if len(args) == 0 {
+			selectedRunner, err := cmd_common.GetRunnerFlow(apiClient, "Manage Providers")
+			if err != nil {
+				if common.IsCtrlCAbort(err) {
+					return nil
+				} else {
+					return err
+				}
+			}
+
+			if selectedRunner == nil {
+				return nil
+			}
+
+			selectedRunnerId = selectedRunner.Id
+		} else {
+			selectedRunnerId = args[0]
 		}
 
 		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
@@ -47,9 +69,7 @@ var providerUpdateCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
-
-		providersManifest, err := providerManager.GetProvidersManifest()
+		providersManifest, err := util.GetProvidersManifest(serverConfig.RegistryUrl)
 		if err != nil {
 			return err
 		}
@@ -57,7 +77,7 @@ var providerUpdateCmd = &cobra.Command{
 		if allFlag {
 			for _, provider := range providerList {
 				fmt.Printf("Updating provider %s\n", provider.Name)
-				err := updateProvider(provider.Name, providersManifest, apiClient)
+				err := updateProvider(selectedRunnerId, provider.Name, providersManifest, apiClient)
 				if err != nil {
 					log.Error(fmt.Sprintf("Failed to update provider %s: %s", provider.Name, err))
 				} else {
@@ -80,7 +100,7 @@ var providerUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		err = updateProvider(providerToUpdate.Name, providersManifest, apiClient)
+		err = updateProvider(selectedRunnerId, providerToUpdate.Name, providersManifest, apiClient)
 		if err != nil {
 			return err
 		}
@@ -90,24 +110,26 @@ var providerUpdateCmd = &cobra.Command{
 	},
 }
 
-func updateProvider(providerName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
+func updateProvider(runnerId string, providerName string, providersManifest *util.ProvidersManifest, apiClient *apiclient.APIClient) error {
 	providerManifest, ok := (*providersManifest)[providerName]
 	if !ok {
 		return fmt.Errorf("provider %s not found in manifest", providerName)
 	}
 
 	version, ok := providerManifest.Versions["latest"]
+	versionName := "latest"
 	if !ok {
-		_, latest := providerManifest.FindLatestVersion()
+		name, latest := providerManifest.FindLatestVersion()
+		versionName = name
 		version = *latest
 	}
 
-	downloadUrls := ConvertOSToStringMap(version.DownloadUrls)
+	downloadUrls := convertOSToStringMap(version.DownloadUrls)
 
-	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
-		Name:         providerName,
+	res, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(apiclient.UpdateProviderDTO{
 		DownloadUrls: downloadUrls,
-	}))
+		Version:      versionName,
+	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
@@ -116,5 +138,5 @@ func updateProvider(providerName string, providersManifest *manager.ProvidersMan
 }
 
 func init() {
-	providerUpdateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
+	updateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
 }

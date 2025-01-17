@@ -9,23 +9,24 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
 var forceFlag bool
 
-var prebuildDeleteCmd = &cobra.Command{
-	Use:     "delete [PROJECT_CONFIG] [PREBUILD]",
+var deleteCmd = &cobra.Command{
+	Use:     "delete [WORKSPACE_CONFIG] [PREBUILD]",
 	Short:   "Delete a prebuild configuration",
-	Aliases: []string{"remove", "rm"},
 	Args:    cobra.MaximumNArgs(2),
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var selectedPrebuild *apiclient.PrebuildDTO
 		var selectedPrebuildId string
-		var selectedProjectConfigName string
+		var selectedWorkspaceTemplateName string
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
@@ -37,8 +38,8 @@ var prebuildDeleteCmd = &cobra.Command{
 			var res *http.Response
 
 			if len(args) == 1 {
-				selectedProjectConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+				selectedWorkspaceTemplateName = args[0]
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), selectedWorkspaceTemplateName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -59,13 +60,13 @@ var prebuildDeleteCmd = &cobra.Command{
 				return nil
 			}
 			selectedPrebuildId = selectedPrebuild.Id
-			selectedProjectConfigName = selectedPrebuild.ProjectConfigName
+			selectedWorkspaceTemplateName = selectedPrebuild.WorkspaceTemplateName
 		} else {
-			selectedProjectConfigName = args[0]
+			selectedWorkspaceTemplateName = args[0]
 			selectedPrebuildId = args[1]
 		}
 
-		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedProjectConfigName, selectedPrebuildId).Force(forceFlag).Execute()
+		res, err := apiClient.PrebuildAPI.DeletePrebuild(context.Background(), selectedWorkspaceTemplateName, selectedPrebuildId).Force(forceFlag).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -77,5 +78,5 @@ var prebuildDeleteCmd = &cobra.Command{
 }
 
 func init() {
-	prebuildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete prebuild")
 }

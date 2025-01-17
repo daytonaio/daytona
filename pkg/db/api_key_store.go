@@ -4,72 +4,71 @@
 package db
 
 import (
-	"github.com/daytonaio/daytona/pkg/apikey"
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"gorm.io/gorm"
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type ApiKeyStore struct {
-	db *gorm.DB
+	IStore
 }
 
-func NewApiKeyStore(db *gorm.DB) (*ApiKeyStore, error) {
-	err := db.AutoMigrate(&ApiKeyDTO{})
+func NewApiKeyStore(store IStore) (stores.ApiKeyStore, error) {
+	err := store.AutoMigrate(&models.ApiKey{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &ApiKeyStore{db: db}, nil
+	return &ApiKeyStore{store}, nil
 }
 
-func (a *ApiKeyStore) List() ([]*apikey.ApiKey, error) {
-	apiKeyDTOs := []ApiKeyDTO{}
-	tx := a.db.Find(&apiKeyDTOs)
+func (a *ApiKeyStore) List(ctx context.Context) ([]*models.ApiKey, error) {
+	tx := a.GetTransaction(ctx)
+
+	apiKeys := []*models.ApiKey{}
+	tx = tx.Find(&apiKeys)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
 
-	apiKeys := []*apikey.ApiKey{}
-	for _, apiKeyDTO := range apiKeyDTOs {
-		apiKey := ToApiKey(apiKeyDTO)
-		apiKeys = append(apiKeys, &apiKey)
-	}
 	return apiKeys, nil
 }
 
-func (a *ApiKeyStore) Find(key string) (*apikey.ApiKey, error) {
-	apiKeyDTO := ApiKeyDTO{}
-	tx := a.db.Where("key_hash = ?", key).First(&apiKeyDTO)
+func (a *ApiKeyStore) Find(ctx context.Context, key string) (*models.ApiKey, error) {
+	tx := a.GetTransaction(ctx)
+
+	apiKey := &models.ApiKey{}
+	tx = tx.Where("key_hash = ?", key).First(apiKey)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, apikey.ErrApiKeyNotFound
+			return nil, stores.ErrApiKeyNotFound
 		}
 		return nil, tx.Error
 	}
 
-	apiKey := ToApiKey(apiKeyDTO)
-
-	return &apiKey, nil
+	return apiKey, nil
 }
 
-func (a *ApiKeyStore) FindByName(name string) (*apikey.ApiKey, error) {
-	apiKeyDTO := ApiKeyDTO{}
-	tx := a.db.Where("name = ?", name).First(&apiKeyDTO)
+func (a *ApiKeyStore) FindByName(ctx context.Context, name string) (*models.ApiKey, error) {
+	tx := a.GetTransaction(ctx)
+
+	apiKey := &models.ApiKey{}
+	tx = tx.Where("name = ?", name).First(apiKey)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, apikey.ErrApiKeyNotFound
+			return nil, stores.ErrApiKeyNotFound
 		}
 		return nil, tx.Error
 	}
 
-	apiKey := ToApiKey(apiKeyDTO)
-
-	return &apiKey, nil
+	return apiKey, nil
 }
 
-func (a *ApiKeyStore) Save(apiKey *apikey.ApiKey) error {
-	apiKeyDTO := ToApiKeyDTO(*apiKey)
-	tx := a.db.Save(&apiKeyDTO)
+func (a *ApiKeyStore) Save(ctx context.Context, apiKey *models.ApiKey) error {
+	tx := a.GetTransaction(ctx)
+
+	tx = tx.Save(apiKey)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -77,13 +76,15 @@ func (a *ApiKeyStore) Save(apiKey *apikey.ApiKey) error {
 	return nil
 }
 
-func (a *ApiKeyStore) Delete(apiKey *apikey.ApiKey) error {
-	tx := a.db.Where("key_hash = ?", apiKey.KeyHash).Delete(&ApiKeyDTO{})
+func (a *ApiKeyStore) Delete(ctx context.Context, apiKey *models.ApiKey) error {
+	tx := a.GetTransaction(ctx)
+
+	tx = tx.Where("key_hash = ?", apiKey.KeyHash).Delete(&models.ApiKey{})
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return apikey.ErrApiKeyNotFound
+		return stores.ErrApiKeyNotFound
 	}
 
 	return nil

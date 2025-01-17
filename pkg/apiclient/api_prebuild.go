@@ -23,11 +23,11 @@ import (
 type PrebuildAPIService service
 
 type ApiDeletePrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuildId string
-	force      *bool
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuildId   string
+	force        *bool
 }
 
 // Force
@@ -46,16 +46,16 @@ DeletePrebuild Delete prebuild
 Delete prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Project config name
+	@param templateName Workspace template name
 	@param prebuildId Prebuild ID
 	@return ApiDeletePrebuildRequest
 */
-func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, configName string, prebuildId string) ApiDeletePrebuildRequest {
+func (a *PrebuildAPIService) DeletePrebuild(ctx context.Context, templateName string, prebuildId string) ApiDeletePrebuildRequest {
 	return ApiDeletePrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
-		prebuildId: prebuildId,
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
+		prebuildId:   prebuildId,
 	}
 }
 
@@ -72,8 +72,8 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild/{prebuildId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild/{prebuildId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -142,40 +142,40 @@ func (a *PrebuildAPIService) DeletePrebuildExecute(r ApiDeletePrebuildRequest) (
 	return localVarHTTPResponse, nil
 }
 
-type ApiGetPrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuildId string
+type ApiFindPrebuildRequest struct {
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuildId   string
 }
 
-func (r ApiGetPrebuildRequest) Execute() (*PrebuildDTO, *http.Response, error) {
-	return r.ApiService.GetPrebuildExecute(r)
+func (r ApiFindPrebuildRequest) Execute() (*PrebuildDTO, *http.Response, error) {
+	return r.ApiService.FindPrebuildExecute(r)
 }
 
 /*
-GetPrebuild Get prebuild
+FindPrebuild Find prebuild
 
-Get prebuild
+Find prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Project config name
+	@param templateName Workspace template name
 	@param prebuildId Prebuild ID
-	@return ApiGetPrebuildRequest
+	@return ApiFindPrebuildRequest
 */
-func (a *PrebuildAPIService) GetPrebuild(ctx context.Context, configName string, prebuildId string) ApiGetPrebuildRequest {
-	return ApiGetPrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
-		prebuildId: prebuildId,
+func (a *PrebuildAPIService) FindPrebuild(ctx context.Context, templateName string, prebuildId string) ApiFindPrebuildRequest {
+	return ApiFindPrebuildRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
+		prebuildId:   prebuildId,
 	}
 }
 
 // Execute executes the request
 //
 //	@return PrebuildDTO
-func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*PrebuildDTO, *http.Response, error) {
+func (a *PrebuildAPIService) FindPrebuildExecute(r ApiFindPrebuildRequest) (*PrebuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -183,13 +183,13 @@ func (a *PrebuildAPIService) GetPrebuildExecute(r ApiGetPrebuildRequest) (*Prebu
 		localVarReturnValue *PrebuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.GetPrebuild")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.FindPrebuild")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild/{prebuildId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild/{prebuildId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 	localVarPath = strings.Replace(localVarPath, "{"+"prebuildId"+"}", url.PathEscape(parameterValueToString(r.prebuildId, "prebuildId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
@@ -304,7 +304,7 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild"
+	localVarPath := localBasePath + "/workspace-template/prebuild"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -378,37 +378,37 @@ func (a *PrebuildAPIService) ListPrebuildsExecute(r ApiListPrebuildsRequest) ([]
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiListPrebuildsForProjectConfigRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
+type ApiListPrebuildsForWorkspaceTemplateRequest struct {
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
 }
 
-func (r ApiListPrebuildsForProjectConfigRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
-	return r.ApiService.ListPrebuildsForProjectConfigExecute(r)
+func (r ApiListPrebuildsForWorkspaceTemplateRequest) Execute() ([]PrebuildDTO, *http.Response, error) {
+	return r.ApiService.ListPrebuildsForWorkspaceTemplateExecute(r)
 }
 
 /*
-ListPrebuildsForProjectConfig List prebuilds for project config
+ListPrebuildsForWorkspaceTemplate List prebuilds for workspace template
 
-List prebuilds for project config
+List prebuilds for workspace template
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiListPrebuildsForProjectConfigRequest
+	@param templateName Template name
+	@return ApiListPrebuildsForWorkspaceTemplateRequest
 */
-func (a *PrebuildAPIService) ListPrebuildsForProjectConfig(ctx context.Context, configName string) ApiListPrebuildsForProjectConfigRequest {
-	return ApiListPrebuildsForProjectConfigRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceTemplate(ctx context.Context, templateName string) ApiListPrebuildsForWorkspaceTemplateRequest {
+	return ApiListPrebuildsForWorkspaceTemplateRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
 	}
 }
 
 // Execute executes the request
 //
 //	@return []PrebuildDTO
-func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebuildsForProjectConfigRequest) ([]PrebuildDTO, *http.Response, error) {
+func (a *PrebuildAPIService) ListPrebuildsForWorkspaceTemplateExecute(r ApiListPrebuildsForWorkspaceTemplateRequest) ([]PrebuildDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -416,13 +416,13 @@ func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebu
 		localVarReturnValue []PrebuildDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForProjectConfig")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.ListPrebuildsForWorkspaceTemplate")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -499,12 +499,12 @@ func (a *PrebuildAPIService) ListPrebuildsForProjectConfigExecute(r ApiListPrebu
 type ApiProcessGitEventRequest struct {
 	ctx        context.Context
 	ApiService *PrebuildAPIService
-	workspace  *map[string]interface{}
+	body       *map[string]interface{}
 }
 
 // Webhook event
-func (r ApiProcessGitEventRequest) Workspace(workspace map[string]interface{}) ApiProcessGitEventRequest {
-	r.workspace = &workspace
+func (r ApiProcessGitEventRequest) Body(body map[string]interface{}) ApiProcessGitEventRequest {
+	r.body = &body
 	return r
 }
 
@@ -540,13 +540,13 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/prebuild/process-git-event"
+	localVarPath := localBasePath + "/workspace-template/prebuild/process-git-event"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.workspace == nil {
-		return nil, reportError("workspace is required and must be specified")
+	if r.body == nil {
+		return nil, reportError("body is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -567,7 +567,7 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.workspace
+	localVarPostBody = r.body
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -610,44 +610,44 @@ func (a *PrebuildAPIService) ProcessGitEventExecute(r ApiProcessGitEventRequest)
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetPrebuildRequest struct {
-	ctx        context.Context
-	ApiService *PrebuildAPIService
-	configName string
-	prebuild   *CreatePrebuildDTO
+type ApiSavePrebuildRequest struct {
+	ctx          context.Context
+	ApiService   *PrebuildAPIService
+	templateName string
+	prebuild     *CreatePrebuildDTO
 }
 
 // Prebuild
-func (r ApiSetPrebuildRequest) Prebuild(prebuild CreatePrebuildDTO) ApiSetPrebuildRequest {
+func (r ApiSavePrebuildRequest) Prebuild(prebuild CreatePrebuildDTO) ApiSavePrebuildRequest {
 	r.prebuild = &prebuild
 	return r
 }
 
-func (r ApiSetPrebuildRequest) Execute() (string, *http.Response, error) {
-	return r.ApiService.SetPrebuildExecute(r)
+func (r ApiSavePrebuildRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.SavePrebuildExecute(r)
 }
 
 /*
-SetPrebuild Set prebuild
+SavePrebuild Save prebuild
 
-Set prebuild
+Save prebuild
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param configName Config name
-	@return ApiSetPrebuildRequest
+	@param templateName Template name
+	@return ApiSavePrebuildRequest
 */
-func (a *PrebuildAPIService) SetPrebuild(ctx context.Context, configName string) ApiSetPrebuildRequest {
-	return ApiSetPrebuildRequest{
-		ApiService: a,
-		ctx:        ctx,
-		configName: configName,
+func (a *PrebuildAPIService) SavePrebuild(ctx context.Context, templateName string) ApiSavePrebuildRequest {
+	return ApiSavePrebuildRequest{
+		ApiService:   a,
+		ctx:          ctx,
+		templateName: templateName,
 	}
 }
 
 // Execute executes the request
 //
 //	@return string
-func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string, *http.Response, error) {
+func (a *PrebuildAPIService) SavePrebuildExecute(r ApiSavePrebuildRequest) (string, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPut
 		localVarPostBody    interface{}
@@ -655,13 +655,13 @@ func (a *PrebuildAPIService) SetPrebuildExecute(r ApiSetPrebuildRequest) (string
 		localVarReturnValue string
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.SetPrebuild")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PrebuildAPIService.SavePrebuild")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/project-config/{configName}/prebuild"
-	localVarPath = strings.Replace(localVarPath, "{"+"configName"+"}", url.PathEscape(parameterValueToString(r.configName, "configName")), -1)
+	localVarPath := localBasePath + "/workspace-template/{templateName}/prebuild"
+	localVarPath = strings.Replace(localVarPath, "{"+"templateName"+"}", url.PathEscape(parameterValueToString(r.templateName, "templateName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

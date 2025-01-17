@@ -1,9 +1,0 @@
-name: daytona git-providers update
-synopsis: Update a Git provider
-usage: daytona git-providers update [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona git-providers - Manage Git providers

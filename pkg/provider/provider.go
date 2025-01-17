@@ -6,31 +6,29 @@ package provider
 import (
 	"net/rpc"
 
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 	"github.com/hashicorp/go-plugin"
 )
 
 type Provider interface {
 	Initialize(InitializeProviderRequest) (*util.Empty, error)
-	GetInfo() (ProviderInfo, error)
+	GetInfo() (models.ProviderInfo, error)
 	CheckRequirements() (*[]RequirementStatus, error)
 
-	GetTargetManifest() (*ProviderTargetManifest, error)
-	GetPresetTargets() (*[]ProviderTarget, error)
+	GetPresetTargetConfigs() (*[]TargetConfig, error)
+
+	CreateTarget(*TargetRequest) (*util.Empty, error)
+	StartTarget(*TargetRequest) (*util.Empty, error)
+	StopTarget(*TargetRequest) (*util.Empty, error)
+	DestroyTarget(*TargetRequest) (*util.Empty, error)
+	GetTargetProviderMetadata(*TargetRequest) (string, error)
 
 	CreateWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StartWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	StopWorkspace(*WorkspaceRequest) (*util.Empty, error)
 	DestroyWorkspace(*WorkspaceRequest) (*util.Empty, error)
-	GetWorkspaceInfo(*WorkspaceRequest) (*workspace.WorkspaceInfo, error)
-
-	CreateProject(*ProjectRequest) (*util.Empty, error)
-	StartProject(*ProjectRequest) (*util.Empty, error)
-	StopProject(*ProjectRequest) (*util.Empty, error)
-	DestroyProject(*ProjectRequest) (*util.Empty, error)
-	GetProjectInfo(*ProjectRequest) (*project.ProjectInfo, error)
+	GetWorkspaceProviderMetadata(*WorkspaceRequest) (string, error)
 }
 
 type ProviderPlugin struct {

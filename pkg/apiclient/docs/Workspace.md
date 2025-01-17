@@ -4,16 +4,28 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**ApiKey** | **string** |  | 
+**BuildConfig** | Pointer to [**BuildConfig**](BuildConfig.md) |  | [optional] 
+**EnvVars** | **map[string]string** |  | 
+**GitProviderConfigId** | Pointer to **string** |  | [optional] 
 **Id** | **string** |  | 
+**Image** | **string** |  | 
+**Labels** | **map[string]string** |  | 
+**LastJob** | Pointer to [**Job**](Job.md) |  | [optional] 
+**LastJobId** | Pointer to **string** |  | [optional] 
+**Metadata** | Pointer to [**WorkspaceMetadata**](WorkspaceMetadata.md) |  | [optional] 
 **Name** | **string** |  | 
-**Projects** | [**[]Project**](Project.md) |  | 
-**Target** | **string** |  | 
+**ProviderMetadata** | Pointer to **string** |  | [optional] 
+**Repository** | [**GitRepository**](GitRepository.md) |  | 
+**Target** | [**Target**](Target.md) |  | 
+**TargetId** | **string** |  | 
+**User** | **string** |  | 
 
 ## Methods
 
 ### NewWorkspace
 
-`func NewWorkspace(id string, name string, projects []Project, target string, ) *Workspace`
+`func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, target Target, targetId string, user string, ) *Workspace`
 
 NewWorkspace instantiates a new Workspace object
 This constructor will assign default values to properties that have it defined,
@@ -27,6 +39,96 @@ will change when the set of required properties is changed
 NewWorkspaceWithDefaults instantiates a new Workspace object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetApiKey
+
+`func (o *Workspace) GetApiKey() string`
+
+GetApiKey returns the ApiKey field if non-nil, zero value otherwise.
+
+### GetApiKeyOk
+
+`func (o *Workspace) GetApiKeyOk() (*string, bool)`
+
+GetApiKeyOk returns a tuple with the ApiKey field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetApiKey
+
+`func (o *Workspace) SetApiKey(v string)`
+
+SetApiKey sets ApiKey field to given value.
+
+
+### GetBuildConfig
+
+`func (o *Workspace) GetBuildConfig() BuildConfig`
+
+GetBuildConfig returns the BuildConfig field if non-nil, zero value otherwise.
+
+### GetBuildConfigOk
+
+`func (o *Workspace) GetBuildConfigOk() (*BuildConfig, bool)`
+
+GetBuildConfigOk returns a tuple with the BuildConfig field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetBuildConfig
+
+`func (o *Workspace) SetBuildConfig(v BuildConfig)`
+
+SetBuildConfig sets BuildConfig field to given value.
+
+### HasBuildConfig
+
+`func (o *Workspace) HasBuildConfig() bool`
+
+HasBuildConfig returns a boolean if a field has been set.
+
+### GetEnvVars
+
+`func (o *Workspace) GetEnvVars() map[string]string`
+
+GetEnvVars returns the EnvVars field if non-nil, zero value otherwise.
+
+### GetEnvVarsOk
+
+`func (o *Workspace) GetEnvVarsOk() (*map[string]string, bool)`
+
+GetEnvVarsOk returns a tuple with the EnvVars field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetEnvVars
+
+`func (o *Workspace) SetEnvVars(v map[string]string)`
+
+SetEnvVars sets EnvVars field to given value.
+
+
+### GetGitProviderConfigId
+
+`func (o *Workspace) GetGitProviderConfigId() string`
+
+GetGitProviderConfigId returns the GitProviderConfigId field if non-nil, zero value otherwise.
+
+### GetGitProviderConfigIdOk
+
+`func (o *Workspace) GetGitProviderConfigIdOk() (*string, bool)`
+
+GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGitProviderConfigId
+
+`func (o *Workspace) SetGitProviderConfigId(v string)`
+
+SetGitProviderConfigId sets GitProviderConfigId field to given value.
+
+### HasGitProviderConfigId
+
+`func (o *Workspace) HasGitProviderConfigId() bool`
+
+HasGitProviderConfigId returns a boolean if a field has been set.
 
 ### GetId
 
@@ -48,6 +150,121 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
+### GetImage
+
+`func (o *Workspace) GetImage() string`
+
+GetImage returns the Image field if non-nil, zero value otherwise.
+
+### GetImageOk
+
+`func (o *Workspace) GetImageOk() (*string, bool)`
+
+GetImageOk returns a tuple with the Image field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetImage
+
+`func (o *Workspace) SetImage(v string)`
+
+SetImage sets Image field to given value.
+
+
+### GetLabels
+
+`func (o *Workspace) GetLabels() map[string]string`
+
+GetLabels returns the Labels field if non-nil, zero value otherwise.
+
+### GetLabelsOk
+
+`func (o *Workspace) GetLabelsOk() (*map[string]string, bool)`
+
+GetLabelsOk returns a tuple with the Labels field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabels
+
+`func (o *Workspace) SetLabels(v map[string]string)`
+
+SetLabels sets Labels field to given value.
+
+
+### GetLastJob
+
+`func (o *Workspace) GetLastJob() Job`
+
+GetLastJob returns the LastJob field if non-nil, zero value otherwise.
+
+### GetLastJobOk
+
+`func (o *Workspace) GetLastJobOk() (*Job, bool)`
+
+GetLastJobOk returns a tuple with the LastJob field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJob
+
+`func (o *Workspace) SetLastJob(v Job)`
+
+SetLastJob sets LastJob field to given value.
+
+### HasLastJob
+
+`func (o *Workspace) HasLastJob() bool`
+
+HasLastJob returns a boolean if a field has been set.
+
+### GetLastJobId
+
+`func (o *Workspace) GetLastJobId() string`
+
+GetLastJobId returns the LastJobId field if non-nil, zero value otherwise.
+
+### GetLastJobIdOk
+
+`func (o *Workspace) GetLastJobIdOk() (*string, bool)`
+
+GetLastJobIdOk returns a tuple with the LastJobId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLastJobId
+
+`func (o *Workspace) SetLastJobId(v string)`
+
+SetLastJobId sets LastJobId field to given value.
+
+### HasLastJobId
+
+`func (o *Workspace) HasLastJobId() bool`
+
+HasLastJobId returns a boolean if a field has been set.
+
+### GetMetadata
+
+`func (o *Workspace) GetMetadata() WorkspaceMetadata`
+
+GetMetadata returns the Metadata field if non-nil, zero value otherwise.
+
+### GetMetadataOk
+
+`func (o *Workspace) GetMetadataOk() (*WorkspaceMetadata, bool)`
+
+GetMetadataOk returns a tuple with the Metadata field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMetadata
+
+`func (o *Workspace) SetMetadata(v WorkspaceMetadata)`
+
+SetMetadata sets Metadata field to given value.
+
+### HasMetadata
+
+`func (o *Workspace) HasMetadata() bool`
+
+HasMetadata returns a boolean if a field has been set.
+
 ### GetName
 
 `func (o *Workspace) GetName() string`
@@ -68,44 +285,109 @@ and a boolean to check if the value has been set.
 SetName sets Name field to given value.
 
 
-### GetProjects
+### GetProviderMetadata
 
-`func (o *Workspace) GetProjects() []Project`
+`func (o *Workspace) GetProviderMetadata() string`
 
-GetProjects returns the Projects field if non-nil, zero value otherwise.
+GetProviderMetadata returns the ProviderMetadata field if non-nil, zero value otherwise.
 
-### GetProjectsOk
+### GetProviderMetadataOk
 
-`func (o *Workspace) GetProjectsOk() (*[]Project, bool)`
+`func (o *Workspace) GetProviderMetadataOk() (*string, bool)`
 
-GetProjectsOk returns a tuple with the Projects field if it's non-nil, zero value otherwise
+GetProviderMetadataOk returns a tuple with the ProviderMetadata field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProjects
+### SetProviderMetadata
 
-`func (o *Workspace) SetProjects(v []Project)`
+`func (o *Workspace) SetProviderMetadata(v string)`
 
-SetProjects sets Projects field to given value.
+SetProviderMetadata sets ProviderMetadata field to given value.
+
+### HasProviderMetadata
+
+`func (o *Workspace) HasProviderMetadata() bool`
+
+HasProviderMetadata returns a boolean if a field has been set.
+
+### GetRepository
+
+`func (o *Workspace) GetRepository() GitRepository`
+
+GetRepository returns the Repository field if non-nil, zero value otherwise.
+
+### GetRepositoryOk
+
+`func (o *Workspace) GetRepositoryOk() (*GitRepository, bool)`
+
+GetRepositoryOk returns a tuple with the Repository field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetRepository
+
+`func (o *Workspace) SetRepository(v GitRepository)`
+
+SetRepository sets Repository field to given value.
 
 
 ### GetTarget
 
-`func (o *Workspace) GetTarget() string`
+`func (o *Workspace) GetTarget() Target`
 
 GetTarget returns the Target field if non-nil, zero value otherwise.
 
 ### GetTargetOk
 
-`func (o *Workspace) GetTargetOk() (*string, bool)`
+`func (o *Workspace) GetTargetOk() (*Target, bool)`
 
 GetTargetOk returns a tuple with the Target field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetTarget
 
-`func (o *Workspace) SetTarget(v string)`
+`func (o *Workspace) SetTarget(v Target)`
 
 SetTarget sets Target field to given value.
+
+
+### GetTargetId
+
+`func (o *Workspace) GetTargetId() string`
+
+GetTargetId returns the TargetId field if non-nil, zero value otherwise.
+
+### GetTargetIdOk
+
+`func (o *Workspace) GetTargetIdOk() (*string, bool)`
+
+GetTargetIdOk returns a tuple with the TargetId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTargetId
+
+`func (o *Workspace) SetTargetId(v string)`
+
+SetTargetId sets TargetId field to given value.
+
+
+### GetUser
+
+`func (o *Workspace) GetUser() string`
+
+GetUser returns the User field if non-nil, zero value otherwise.
+
+### GetUserOk
+
+`func (o *Workspace) GetUserOk() (*string, bool)`
+
+GetUserOk returns a tuple with the User field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetUser
+
+`func (o *Workspace) SetUser(v string)`
+
+SetUser sets User field to given value.
 
 
 

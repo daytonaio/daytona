@@ -13,10 +13,9 @@ import (
 var showApiKeysFlag bool
 
 var configCmd = &cobra.Command{
-	Use:     "config",
-	Short:   "Output Daytona configuration",
-	Aliases: []string{"cfg"},
-	Args:    cobra.NoArgs,
+	Use:   "config",
+	Short: "Output Daytona configuration",
+	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {

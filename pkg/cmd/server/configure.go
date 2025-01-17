@@ -26,17 +26,12 @@ var configureCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		containerRegistries, res, err := apiClient.ContainerRegistryAPI.ListContainerRegistries(context.Background()).Execute()
-		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
-		}
-
-		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig, containerRegistries)
+		apiServerConfig, err = server_view.ConfigurationForm(apiServerConfig)
 		if err != nil {
 			return err
 		}
 
-		_, res, err = apiClient.ServerAPI.SetConfig(context.Background()).Config(*apiServerConfig).Execute()
+		_, res, err = apiClient.ServerAPI.SaveConfig(context.Background()).Config(*apiServerConfig).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

@@ -1,0 +1,9 @@
+name: daytona template update
+synopsis: Update a workspace template
+usage: daytona template update [flags]
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona template - Manage workspace templates

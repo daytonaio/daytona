@@ -6,27 +6,162 @@ package workspaces
 import (
 	"context"
 	"errors"
-	"fmt"
-	"io"
 	"regexp"
 
 	"github.com/daytonaio/daytona/internal/util"
-	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
-	"github.com/daytonaio/daytona/pkg/apikey"
-	"github.com/daytonaio/daytona/pkg/build"
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
 
 	log "github.com/sirupsen/logrus"
 )
+
+func (s *WorkspaceService) Create(ctx context.Context, req services.CreateWorkspaceDTO) (*services.WorkspaceDTO, error) {
+	var err error
+	ctx, err = s.workspaceStore.BeginTransaction(ctx)
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
+	}
+
+	defer stores.RecoverAndRollback(ctx, s.workspaceStore)
+
+	_, err = s.workspaceStore.Find(ctx, req.Name)
+	if err == nil {
+		return s.handleCreateError(ctx, nil, services.ErrWorkspaceAlreadyExists)
+	}
+
+	target, err := s.findTarget(ctx, req.TargetId)
+	if err != nil {
+		return s.handleCreateError(ctx, nil, err)
+	}
+
+	w := req.ToWorkspace()
+	w.Target = *target
+
+	if !isValidWorkspaceName(w.Name) {
+		return s.handleCreateError(ctx, w, services.ErrInvalidWorkspaceName)
+	}
+
+	w.Repository.Url = util.CleanUpRepositoryUrl(w.Repository.Url)
+
+	if w.GitProviderConfigId == nil || *w.GitProviderConfigId == "" {
+		configs, err := s.listGitProviderConfigs(ctx, w.Repository.Url)
+		if err != nil {
+			return s.handleCreateError(ctx, w, err)
+		}
+
+		if len(configs) > 1 {
+			return s.handleCreateError(ctx, w, errors.New("multiple git provider configs found for the repository url"))
+		}
+
+		if len(configs) == 1 {
+			w.GitProviderConfigId = &configs[0].Id
+		}
+	}
+
+	if w.GitProviderConfigId != nil && *w.GitProviderConfigId == "" {
+		w.GitProviderConfigId = nil
+	}
+
+	if w.Repository.Sha == "" {
+		sha, err := s.getLastCommitSha(ctx, w.Repository)
+		if err != nil {
+			return s.handleCreateError(ctx, w, err)
+		}
+		w.Repository.Sha = sha
+	}
+
+	if w.BuildConfig != nil {
+		cachedBuild, err := s.findCachedBuild(ctx, w)
+		if err == nil {
+			w.BuildConfig.CachedBuild = cachedBuild
+		}
+	}
+
+	if w.Image == "" {
+		w.Image = s.defaultWorkspaceImage
+	}
+
+	if w.User == "" {
+		w.User = s.defaultWorkspaceUser
+	}
+
+	apiKey, err := s.createApiKey(ctx, w.Id)
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
+	w.ApiKey = apiKey
+
+	err = s.workspaceMetadataStore.Save(ctx, &models.WorkspaceMetadata{
+		WorkspaceId: w.Id,
+		Uptime:      0,
+		GitStatus:   &models.GitStatus{},
+	})
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
+
+	daytonaWorkspaceEnvVars := GetWorkspaceEnvVars(w, WorkspaceEnvVarParams{
+		ApiUrl:           s.serverApiUrl,
+		ServerUrl:        s.serverUrl,
+		ServerVersion:    s.serverVersion,
+		ClientId:         telemetry.ClientId(ctx),
+		TelemetryEnabled: telemetry.TelemetryEnabled(ctx),
+	})
+	w.EnvVars = util.MergeEnvVars(daytonaWorkspaceEnvVars, w.EnvVars)
+
+	err = s.workspaceStore.Save(ctx, w)
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
+
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionCreate)
+	if err != nil {
+		return s.handleCreateError(ctx, w, err)
+	}
+
+	err = s.workspaceStore.CommitTransaction(ctx)
+	return s.handleCreateError(ctx, w, err)
+}
+
+func (s *WorkspaceService) handleCreateError(ctx context.Context, w *models.Workspace, err error) (*services.WorkspaceDTO, error) {
+	if err != nil {
+		err = s.workspaceStore.RollbackTransaction(ctx, err)
+	}
+
+	if !telemetry.TelemetryEnabled(ctx) {
+		if w == nil {
+			return nil, err
+		}
+		return &services.WorkspaceDTO{
+			Workspace: *w,
+			State:     w.GetState(),
+		}, err
+	}
+
+	clientId := telemetry.ClientId(ctx)
+
+	eventName := telemetry.WorkspaceEventLifecycleCreated
+	if err != nil {
+		eventName = telemetry.WorkspaceEventLifecycleCreationFailed
+	}
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	if w == nil {
+		return nil, err
+	}
+
+	return &services.WorkspaceDTO{
+		Workspace: *w,
+		State:     w.GetState(),
+	}, err
+}
 
 func isValidWorkspaceName(name string) bool {
 	// The repository name can only contain ASCII letters, digits, and the characters ., -, and _.
@@ -43,245 +178,4 @@ func isValidWorkspaceName(name string) bool {
 	}
 
 	return true
-}
-
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error) {
-	_, err := s.workspaceStore.Find(req.Name)
-	if err == nil {
-		return nil, ErrWorkspaceAlreadyExists
-	}
-
-	// Repo name is taken as the name for workspace by default
-	if !isValidWorkspaceName(req.Name) {
-		return nil, ErrInvalidWorkspaceName
-	}
-
-	w := &workspace.Workspace{
-		Id:     req.Id,
-		Name:   req.Name,
-		Target: req.Target,
-	}
-
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, w.Id)
-	if err != nil {
-		return nil, err
-	}
-	w.ApiKey = apiKey
-
-	w.Projects = []*project.Project{}
-
-	for _, projectDto := range req.Projects {
-		p := conversion.CreateDtoToProject(projectDto)
-
-		isValidProjectName := regexp.MustCompile(`^[a-zA-Z0-9-_.]+$`).MatchString
-		if !isValidProjectName(p.Name) {
-			return nil, ErrInvalidProjectName
-		}
-
-		p.Repository.Url = util.CleanUpRepositoryUrl(p.Repository.Url)
-		if p.GitProviderConfigId == nil || *p.GitProviderConfigId == "" {
-			configs, err := s.gitProviderService.ListConfigsForUrl(p.Repository.Url)
-			if err != nil {
-				return nil, err
-			}
-
-			if len(configs) > 1 {
-				return nil, errors.New("multiple git provider configs found for the repository url")
-			}
-
-			if len(configs) == 1 {
-				p.GitProviderConfigId = &configs[0].Id
-			}
-		}
-
-		if p.Repository.Sha == "" {
-			sha, err := s.gitProviderService.GetLastCommitSha(p.Repository)
-			if err != nil {
-				return nil, err
-			}
-			p.Repository.Sha = sha
-		}
-
-		if p.BuildConfig != nil {
-			cachedBuild, err := s.getCachedBuildForProject(p)
-			if err == nil {
-				p.BuildConfig.CachedBuild = cachedBuild
-			}
-		}
-
-		if p.Image == "" {
-			p.Image = s.defaultProjectImage
-		}
-
-		if p.User == "" {
-			p.User = s.defaultProjectUser
-		}
-
-		apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, fmt.Sprintf("%s/%s", w.Id, p.Name))
-		if err != nil {
-			return nil, err
-		}
-
-		p.WorkspaceId = w.Id
-		p.ApiKey = apiKey
-		p.Target = w.Target
-		w.Projects = append(w.Projects, p)
-	}
-
-	err = s.workspaceStore.Save(w)
-	if err != nil {
-		return nil, err
-	}
-
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
-	if err != nil {
-		return w, err
-	}
-
-	w, err = s.createWorkspace(ctx, w, target)
-
-	if !telemetry.TelemetryEnabled(ctx) {
-		return w, err
-	}
-
-	clientId := telemetry.ClientId(ctx)
-
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
-	event := telemetry.ServerEventWorkspaceCreated
-	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventWorkspaceCreateError
-	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
-	if telemetryError != nil {
-		log.Trace(err)
-	}
-
-	return w, err
-}
-
-func (s *WorkspaceService) createProject(p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Creating project %s\n", p.Name)))
-
-	cr, err := s.containerRegistryService.FindByImageName(p.Image)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	var gc *gitprovider.GitProviderConfig
-
-	if p.GitProviderConfigId != nil {
-		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
-		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
-			return err
-		}
-	}
-
-	err = s.provisioner.CreateProject(provisioner.ProjectParams{
-		Project:                       p,
-		Target:                        target,
-		ContainerRegistry:             cr,
-		GitProviderConfig:             gc,
-		BuilderImage:                  s.builderImage,
-		BuilderImageContainerRegistry: builderCr,
-	})
-	if err != nil {
-		return err
-	}
-
-	logWriter.Write([]byte(fmt.Sprintf("Project %s created\n", p.Name)))
-
-	return nil
-}
-
-func (s *WorkspaceService) createWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget) (*workspace.Workspace, error) {
-	wsLogger := s.loggerFactory.CreateWorkspaceLogger(ws.Id, logs.LogSourceServer)
-	defer wsLogger.Close()
-
-	wsLogger.Write([]byte(fmt.Sprintf("Creating workspace %s (%s)\n", ws.Name, ws.Id)))
-
-	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
-
-	err := s.provisioner.CreateWorkspace(ws, target)
-	if err != nil {
-		return nil, err
-	}
-
-	for i, p := range ws.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, p.Name, logs.LogSourceServer)
-		defer projectLogger.Close()
-
-		projectWithEnv := *p
-		projectWithEnv.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
-			ApiUrl:        s.serverApiUrl,
-			ServerUrl:     s.serverUrl,
-			ServerVersion: s.serverVersion,
-			ClientId:      telemetry.ClientId(ctx),
-		}, telemetry.TelemetryEnabled(ctx))
-
-		for k, v := range p.EnvVars {
-			projectWithEnv.EnvVars[k] = v
-		}
-
-		var err error
-
-		p = &projectWithEnv
-
-		ws.Projects[i] = p
-		err = s.workspaceStore.Save(ws)
-		if err != nil {
-			return nil, err
-		}
-
-		err = s.createProject(p, target, projectLogger)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	wsLogger.Write([]byte("Workspace creation complete. Pending start...\n"))
-
-	err = s.startWorkspace(ctx, ws, target, wsLogger)
-	if err != nil {
-		return nil, err
-	}
-
-	return ws, nil
-}
-
-func (s *WorkspaceService) getCachedBuildForProject(p *project.Project) (*buildconfig.CachedBuild, error) {
-	validStates := &[]build.BuildState{
-		build.BuildState(build.BuildStatePublished),
-	}
-
-	build, err := s.buildService.Find(&build.Filter{
-		States:        validStates,
-		RepositoryUrl: &p.Repository.Url,
-		Branch:        &p.Repository.Branch,
-		EnvVars:       &p.EnvVars,
-		BuildConfig:   p.BuildConfig,
-		GetNewest:     util.Pointer(true),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	if build.Image == nil || build.User == nil {
-		return nil, errors.New("cached build is missing image or user")
-	}
-
-	return &buildconfig.CachedBuild{
-		User:  *build.User,
-		Image: *build.Image,
-	}, nil
 }

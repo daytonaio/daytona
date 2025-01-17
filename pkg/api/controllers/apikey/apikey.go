@@ -7,7 +7,11 @@ import (
 	"fmt"
 	"net/http"
 
+	internal_util "github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/api/controllers/apikey/dto"
+	"github.com/daytonaio/daytona/pkg/api/util"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,40 +21,57 @@ import (
 //	@Summary		List API keys
 //	@Description	List API keys
 //	@Produce		json
-//	@Success		200	{array}	ApiKey
+//	@Success		200	{array}	ApiKeyViewDTO
 //	@Router			/apikey [get]
 //
 //	@id				ListClientApiKeys
 func ListClientApiKeys(ctx *gin.Context) {
 	server := server.GetInstance(nil)
 
-	response, err := server.ApiKeyService.ListClientKeys()
+	currentApiKeyName, _ := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
+
+	response, err := server.ApiKeyService.ListClientKeys(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get client API keys: %w", err))
 		return
 	}
 
-	ctx.JSON(200, response)
+	result := internal_util.ArrayMap(response, func(key *services.ApiKeyDTO) dto.ApiKeyViewDTO {
+		return dto.ApiKeyViewDTO{Name: key.Name, Type: key.Type, Current: key.Name == currentApiKeyName}
+	})
+
+	ctx.JSON(200, result)
 }
 
-// RevokeApiKey		godoc
+// DeleteApiKey		godoc
 //
 //	@Tags			apiKey
-//	@Summary		Revoke API key
-//	@Description	Revoke API key
+//	@Summary		Delete API key
+//	@Description	Delete API key
 //	@Param			apiKeyName	path	string	true	"API key name"
 //	@Success		200
 //	@Router			/apikey/{apiKeyName} [delete]
 //
-//	@id				RevokeApiKey
-func RevokeApiKey(ctx *gin.Context) {
+//	@id				DeleteApiKey
+func DeleteApiKey(ctx *gin.Context) {
 	apiKeyName := ctx.Param("apiKeyName")
 
 	server := server.GetInstance(nil)
 
-	err := server.ApiKeyService.Revoke(apiKeyName)
+	currentApiKeyName, err := server.ApiKeyService.GetApiKeyName(ctx.Request.Context(), util.ExtractToken(ctx))
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to revoke api key: %w", err))
+		ctx.AbortWithError(http.StatusNotFound, fmt.Errorf("failed to get current api key name: %w", err))
+		return
+	}
+
+	if currentApiKeyName == apiKeyName {
+		ctx.AbortWithError(http.StatusForbidden, fmt.Errorf("cannot delete current api key"))
+		return
+	}
+
+	err = server.ApiKeyService.Delete(ctx.Request.Context(), apiKeyName)
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to delete api key: %w", err))
 		return
 	}
 

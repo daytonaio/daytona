@@ -1,9 +1,0 @@
-name: daytona api-key generate
-synopsis: Generate a new API key
-usage: daytona api-key generate [NAME] [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona api-key - Api Key commands

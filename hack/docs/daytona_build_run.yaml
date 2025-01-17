@@ -1,5 +1,5 @@
 name: daytona build run
-synopsis: Run a build from a project config
+synopsis: Run a build from a workspace template
 usage: daytona build run [flags]
 inherited_options:
     - name: help

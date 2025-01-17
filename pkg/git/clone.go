@@ -38,13 +38,13 @@ func (s *Service) CloneRepository(repo *gitprovider.GitRepository, auth *http.Ba
 
 	cloneOptions.ReferenceName = plumbing.ReferenceName("refs/heads/" + repo.Branch)
 
-	_, err := git.PlainClone(s.ProjectDir, false, cloneOptions)
+	_, err := git.PlainClone(s.WorkspaceDir, false, cloneOptions)
 	if err != nil {
 		return err
 	}
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		r, err := git.PlainOpen(s.ProjectDir)
+		r, err := git.PlainOpen(s.WorkspaceDir)
 		if err != nil {
 			return err
 		}
@@ -78,10 +78,10 @@ func (s *Service) CloneRepositoryCmd(repo *gitprovider.GitRepository, auth *http
 		cloneUrl = fmt.Sprintf("%s://%s:%s@%s", strings.Split(cloneUrl, "://")[0], auth.Username, auth.Password, strings.SplitN(cloneUrl, "://", 2)[1])
 	}
 
-	cloneCmd = append(cloneCmd, cloneUrl, s.ProjectDir)
+	cloneCmd = append(cloneCmd, cloneUrl, s.WorkspaceDir)
 
 	if repo.Target == gitprovider.CloneTargetCommit {
-		cloneCmd = append(cloneCmd, "&&", "cd", s.ProjectDir)
+		cloneCmd = append(cloneCmd, "&&", "cd", s.WorkspaceDir)
 		cloneCmd = append(cloneCmd, "&&", "git", "checkout", repo.Sha)
 	}
 

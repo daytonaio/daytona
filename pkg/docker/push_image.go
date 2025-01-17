@@ -7,12 +7,12 @@ import (
 	"context"
 	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (d *DockerClient) PushImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error {
+func (d *DockerClient) PushImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error {
 	ctx := context.Background()
 
 	if logWriter != nil {

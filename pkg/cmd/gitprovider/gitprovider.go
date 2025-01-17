@@ -9,15 +9,16 @@ import (
 )
 
 var GitProviderCmd = &cobra.Command{
-	Use:     "git-providers",
-	Aliases: []string{"git-provider", "gp"},
-	Short:   "Manage Git providers",
+	Use:     "git-provider",
+	Short:   "Manage Git provider configs",
+	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
+	Aliases: []string{"git-providers", "gp"},
 }
 
 func init() {
-	GitProviderCmd.AddCommand(GitProviderAddCmd)
-	GitProviderCmd.AddCommand(gitProviderUpdateCmd)
-	GitProviderCmd.AddCommand(gitProviderDeleteCmd)
-	GitProviderCmd.AddCommand(gitProviderListCmd)
+	GitProviderCmd.AddCommand(GitProviderCreateCmd)
+	GitProviderCmd.AddCommand(updateCmd)
+	GitProviderCmd.AddCommand(deleteCmd)
+	GitProviderCmd.AddCommand(listCmd)
 }

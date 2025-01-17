@@ -1,18 +1,15 @@
 name: daytona start
 synopsis: Start a workspace
-usage: daytona start [WORKSPACE] [flags]
+usage: daytona start [WORKSPACE]... [flags]
 options:
     - name: all
       shorthand: a
       default_value: "false"
-      usage: Start all workspaces
+      usage: Start all targets
     - name: code
       shorthand: c
       default_value: "false"
-      usage: Open the workspace in the IDE after workspace start
-    - name: project
-      shorthand: p
-      usage: Start a single project in the workspace (project name)
+      usage: Open the target in the IDE after target start
     - name: "yes"
       shorthand: "y"
       default_value: "false"

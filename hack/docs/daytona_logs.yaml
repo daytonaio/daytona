@@ -1,15 +1,11 @@
 name: daytona logs
-synopsis: View logs for a workspace/project
-usage: daytona logs [WORKSPACE] [PROJECT_NAME] [flags]
+synopsis: View the logs of a workspace
+usage: daytona logs [WORKSPACE] [flags]
 options:
     - name: follow
       shorthand: f
       default_value: "false"
       usage: Follow logs
-    - name: workspace
-      shorthand: w
-      default_value: "false"
-      usage: View workspace logs
 inherited_options:
     - name: help
       default_value: "false"

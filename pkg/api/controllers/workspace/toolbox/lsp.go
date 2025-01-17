@@ -9,13 +9,12 @@ import "github.com/gin-gonic/gin"
 //
 //	@Tags			workspace toolbox
 //	@Summary		Start Lsp server
-//	@Description	Start Lsp server process inside workspace project
+//	@Description	Start Lsp server process inside a workspace
 //	@Produce		json
 //	@Param			workspaceId	path	string				true	"Workspace ID or Name"
-//	@Param			projectId	path	string				true	"Project ID"
 //	@Param			params		body	LspServerRequest	true	"LspServerRequest"
 //	@Success		200
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/start [post]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/start [post]
 //
 //	@id				LspStart
 func LspStart(ctx *gin.Context) {
@@ -26,13 +25,12 @@ func LspStart(ctx *gin.Context) {
 //
 //	@Tags			workspace toolbox
 //	@Summary		Stop Lsp server
-//	@Description	Stop Lsp server process inside workspace project
+//	@Description	Stop Lsp server process inside a workspace
 //	@Produce		json
 //	@Param			workspaceId	path	string				true	"Workspace ID or Name"
-//	@Param			projectId	path	string				true	"Project ID"
 //	@Param			params		body	LspServerRequest	true	"LspServerRequest"
 //	@Success		200
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop [post]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/stop [post]
 //
 //	@id				LspStop
 func LspStop(ctx *gin.Context) {
@@ -46,10 +44,9 @@ func LspStop(ctx *gin.Context) {
 //	@Description	The document open notification is sent from the client to the server to signal newly opened text documents.
 //	@Produce		json
 //	@Param			workspaceId	path	string				true	"Workspace ID or Name"
-//	@Param			projectId	path	string				true	"Project ID"
 //	@Param			params		body	LspDocumentRequest	true	"LspDocumentRequest"
 //	@Success		200
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open [post]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/did-open [post]
 //
 //	@id				LspDidOpen
 func LspDidOpen(ctx *gin.Context) {
@@ -63,10 +60,9 @@ func LspDidOpen(ctx *gin.Context) {
 //	@Description	The document close notification is sent from the client to the server when the document got closed in the client.
 //	@Produce		json
 //	@Param			workspaceId	path	string				true	"Workspace ID or Name"
-//	@Param			projectId	path	string				true	"Project ID"
 //	@Param			params		body	LspDocumentRequest	true	"LspDocumentRequest"
 //	@Success		200
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close [post]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/did-close [post]
 //
 //	@id				LspDidClose
 func LspDidClose(ctx *gin.Context) {
@@ -80,12 +76,11 @@ func LspDidClose(ctx *gin.Context) {
 //	@Description	The document symbol request is sent from the client to the server.
 //	@Produce		json
 //	@Param			workspaceId		path	string	true	"Workspace ID or Name"
-//	@Param			projectId		path	string	true	"Project ID"
 //	@Param			languageId		query	string	true	"Language ID"
 //	@Param			pathToProject	query	string	true	"Path to project"
 //	@Param			uri				query	string	true	"Document Uri"
 //	@Success		200				{array}	LspSymbol
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols [get]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/document-symbols [get]
 //
 //	@id				LspDocumentSymbols
 func LspDocumentSymbols(ctx *gin.Context) {
@@ -99,12 +94,11 @@ func LspDocumentSymbols(ctx *gin.Context) {
 //	@Description	The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 //	@Produce		json
 //	@Param			workspaceId		path	string	true	"Workspace ID or Name"
-//	@Param			projectId		path	string	true	"Project ID"
 //	@Param			languageId		query	string	true	"Language ID"
 //	@Param			pathToProject	query	string	true	"Path to project"
 //	@Param			query			query	string	true	"Symbol Query"
 //	@Success		200				{array}	LspSymbol
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols [get]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/workspace-symbols [get]
 //
 //	@id				LspWorkspaceSymbols
 func LspWorkspaceSymbols(ctx *gin.Context) {
@@ -118,10 +112,9 @@ func LspWorkspaceSymbols(ctx *gin.Context) {
 //	@Description	The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 //	@Produce		json
 //	@Param			workspaceId	path		string				true	"Workspace ID or Name"
-//	@Param			projectId	path		string				true	"Project ID"
 //	@Param			params		body		LspCompletionParams	true	"LspCompletionParams"
 //	@Success		200			{object}	CompletionList
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions [post]
+//	@Router			/workspace/{workspaceId}/toolbox/lsp/completions [post]
 //
 //	@id				LspCompletions
 func LspCompletions(ctx *gin.Context) {

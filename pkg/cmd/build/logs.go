@@ -9,16 +9,18 @@ import (
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var buildLogsCmd = &cobra.Command{
+var logsCmd = &cobra.Command{
 	Use:     "logs",
 	Short:   "View logs for build",
 	Args:    cobra.RangeArgs(0, 1),
-	Aliases: []string{"log"},
+	Aliases: common.GetAliases("logs"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -28,11 +30,6 @@ var buildLogsCmd = &cobra.Command{
 		activeProfile, err := c.GetActiveProfile()
 		if err != nil {
 			return err
-		}
-
-		query := ""
-		if followFlag {
-			query += "follow=true"
 		}
 
 		ctx := context.Background()
@@ -63,12 +60,17 @@ var buildLogsCmd = &cobra.Command{
 			buildId = args[0]
 		}
 
-		_, _, err = apiClient.BuildAPI.GetBuild(ctx, buildId).Execute()
+		_, _, err = apiClient.BuildAPI.FindBuild(ctx, buildId).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(nil, err)
 		}
 
-		apiclient_util.ReadBuildLogs(ctx, activeProfile, buildId, query)
+		cmd_common.ReadBuildLogs(ctx, cmd_common.ReadLogParams{
+			Id:        buildId,
+			ServerUrl: activeProfile.Api.Url,
+			ApiKey:    activeProfile.Api.Key,
+			Follow:    &followFlag,
+		})
 
 		// Make sure the terminal cursor is reset
 		fmt.Print("\033[?25h")
@@ -80,5 +82,5 @@ var buildLogsCmd = &cobra.Command{
 var followFlag bool
 
 func init() {
-	buildLogsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
+	logsCmd.Flags().BoolVarP(&followFlag, "follow", "f", false, "Follow logs")
 }

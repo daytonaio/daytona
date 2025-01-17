@@ -9,17 +9,17 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/provider"
-	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
 	"github.com/spf13/cobra"
 )
 
-var providerListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List installed providers",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -44,32 +44,39 @@ var providerListCmd = &cobra.Command{
 	},
 }
 
-func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []apiclient.Provider, ctx context.Context) ([]provider_view.ProviderView, error) {
-	var result []provider_view.ProviderView
+func GetProviderViewOptions(ctx context.Context, apiClient *apiclient.APIClient, latestProviders []apiclient.ProviderInfo) ([]provider.ProviderView, error) {
+	var result []provider.ProviderView
 
 	installedProviders, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
 	if err != nil {
 		return nil, apiclient_util.HandleErrorResponse(res, err)
 	}
 
-	providerMap := make(map[string]provider_view.ProviderView)
+	providerMap := make(map[string]provider.ProviderView)
 
 	for _, installedProvider := range installedProviders {
-		providerMap[installedProvider.Name] = provider_view.ProviderView{
-			Name:      installedProvider.Name,
-			Label:     installedProvider.Label,
-			Version:   installedProvider.Version,
-			Installed: util.Pointer(true),
+		providerMap[installedProvider.Name] = provider.ProviderView{
+			Name:                 installedProvider.Name,
+			AgentlessTarget:      installedProvider.AgentlessTarget,
+			Label:                installedProvider.Label,
+			Version:              installedProvider.Version,
+			Installed:            util.Pointer(true),
+			RunnerId:             installedProvider.RunnerId,
+			RunnerName:           installedProvider.RunnerName,
+			TargetConfigManifest: installedProvider.TargetConfigManifest,
 		}
 	}
 
 	for _, latestProvider := range latestProviders {
 		if _, exists := providerMap[latestProvider.Name]; !exists {
-			providerMap[latestProvider.Name] = provider_view.ProviderView{
-				Name:      latestProvider.Name,
-				Label:     latestProvider.Label,
-				Version:   latestProvider.Version,
-				Installed: util.Pointer(false),
+			providerMap[latestProvider.Name] = provider.ProviderView{
+				Name:                 latestProvider.Name,
+				Label:                latestProvider.Label,
+				Version:              latestProvider.Version,
+				Installed:            util.Pointer(false),
+				RunnerId:             latestProvider.RunnerId,
+				RunnerName:           latestProvider.RunnerName,
+				TargetConfigManifest: latestProvider.TargetConfigManifest,
 			}
 		}
 	}
@@ -82,5 +89,5 @@ func GetProviderViewOptions(apiClient *apiclient.APIClient, latestProviders []ap
 }
 
 func init() {
-	format.RegisterFormatFlag(providerListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

@@ -12,25 +12,26 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
-	"github.com/daytonaio/daytona/internal"
 	. "github.com/daytonaio/daytona/internal/util"
 	. "github.com/daytonaio/daytona/pkg/cmd/apikey"
 	. "github.com/daytonaio/daytona/pkg/cmd/autocomplete"
 	. "github.com/daytonaio/daytona/pkg/cmd/build"
-	. "github.com/daytonaio/daytona/pkg/cmd/containerregistry"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
+	. "github.com/daytonaio/daytona/pkg/cmd/env"
 	. "github.com/daytonaio/daytona/pkg/cmd/gitprovider"
 	. "github.com/daytonaio/daytona/pkg/cmd/ports"
 	. "github.com/daytonaio/daytona/pkg/cmd/prebuild"
 	. "github.com/daytonaio/daytona/pkg/cmd/profile"
-	. "github.com/daytonaio/daytona/pkg/cmd/profiledata/env"
-	. "github.com/daytonaio/daytona/pkg/cmd/projectconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/provider"
+	. "github.com/daytonaio/daytona/pkg/cmd/runner"
 	. "github.com/daytonaio/daytona/pkg/cmd/server"
 	. "github.com/daytonaio/daytona/pkg/cmd/target"
+	. "github.com/daytonaio/daytona/pkg/cmd/targetconfig"
 	. "github.com/daytonaio/daytona/pkg/cmd/telemetry"
 	. "github.com/daytonaio/daytona/pkg/cmd/workspace"
+	. "github.com/daytonaio/daytona/pkg/cmd/workspace/create"
+	. "github.com/daytonaio/daytona/pkg/cmd/workspacetemplate"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	view "github.com/daytonaio/daytona/pkg/views/initial"
 	log "github.com/sirupsen/logrus"
@@ -49,25 +50,26 @@ var rootCmd = &cobra.Command{
 }
 
 func Execute() error {
-	rootCmd.AddGroup(&cobra.Group{ID: WORKSPACE_GROUP, Title: "Workspaces & Projects"})
+	rootCmd.AddGroup(&cobra.Group{ID: TARGET_GROUP, Title: "Targets & Workspaces"})
 	rootCmd.AddGroup(&cobra.Group{ID: SERVER_GROUP, Title: "Server"})
 	rootCmd.AddGroup(&cobra.Group{ID: PROFILE_GROUP, Title: "Profile"})
+	rootCmd.AddGroup(&cobra.Group{ID: RUNNER_GROUP, Title: "Runner"})
 
 	rootCmd.AddCommand(CodeCmd)
 	rootCmd.AddCommand(SshCmd)
 	rootCmd.AddCommand(SshProxyCmd)
 	rootCmd.AddCommand(CreateCmd)
 	rootCmd.AddCommand(DeleteCmd)
-	rootCmd.AddCommand(ProjectConfigCmd)
+	rootCmd.AddCommand(WorkspaceTemplateCmd)
 	rootCmd.AddCommand(ServeCmd)
 	rootCmd.AddCommand(DaemonServeCmd)
 	rootCmd.AddCommand(ServerCmd)
 	rootCmd.AddCommand(ApiKeyCmd)
-	rootCmd.AddCommand(ContainerRegistryCmd)
 	rootCmd.AddCommand(ProviderCmd)
-	rootCmd.AddCommand(TargetCmd)
+	rootCmd.AddCommand(TargetConfigCmd)
 	rootCmd.AddCommand(configCmd)
 	rootCmd.AddCommand(ideCmd)
+	rootCmd.AddCommand(RunnerCmd)
 	rootCmd.AddCommand(ProfileCmd)
 	rootCmd.AddCommand(ProfileUseCmd)
 	rootCmd.AddCommand(whoamiCmd)
@@ -76,6 +78,7 @@ func Execute() error {
 	rootCmd.AddCommand(StartCmd)
 	rootCmd.AddCommand(StopCmd)
 	rootCmd.AddCommand(RestartCmd)
+	rootCmd.AddCommand(LogsCmd)
 	rootCmd.AddCommand(InfoCmd)
 	rootCmd.AddCommand(PrebuildCmd)
 	rootCmd.AddCommand(BuildCmd)
@@ -83,6 +86,7 @@ func Execute() error {
 	rootCmd.AddCommand(EnvCmd)
 	rootCmd.AddCommand(TelemetryCmd)
 	rootCmd.AddCommand(updateCmd)
+	rootCmd.AddCommand(TargetCmd)
 
 	SetupRootCommand(rootCmd)
 
@@ -90,7 +94,7 @@ func Execute() error {
 	clientId := config.GetClientId()
 	telemetryEnabled := config.TelemetryEnabled()
 
-	telemetryService, cmd, flags, isCompletion, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
+	cmd, flags, isCompletion, err := PreRun(rootCmd, os.Args[1:], telemetryEnabled, clientId, startTime)
 	if err != nil {
 		fmt.Printf("Error: %v\n\n", err)
 		return cmd.Help()
@@ -101,7 +105,7 @@ func Execute() error {
 	endTime := time.Now()
 
 	if !isCompletion {
-		PostRun(cmd, err, telemetryService, clientId, startTime, endTime, flags)
+		PostRun(cmd, err, clientId, startTime, endTime, flags)
 	}
 
 	return err
@@ -153,7 +157,6 @@ func SetupRootCommand(cmd *cobra.Command) {
 	cmd.AddCommand(ListCmd)
 	cmd.AddCommand(generateDocsCmd)
 	cmd.AddCommand(DocsCmd)
-	cmd.AddCommand(logsCmd)
 
 	cmd.CompletionOptions.HiddenDefaultCmd = true
 	cmd.PersistentFlags().BoolP("help", "", false, "help for daytona")
@@ -188,10 +191,10 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 		return CreateCmd.RunE(cmd, []string{})
 	case "code":
 		return CodeCmd.RunE(cmd, []string{})
-	case "git-provider add":
-		return GitProviderAddCmd.RunE(cmd, []string{})
-	case "target set":
-		return TargetSetCmd.RunE(cmd, []string{})
+	case "git-provider create":
+		return GitProviderCreateCmd.RunE(cmd, []string{})
+	case "target-config create":
+		return TargetConfigCreateCmd.RunE(cmd, []string{})
 	case "docs":
 		return DocsCmd.RunE(cmd, []string{})
 	case "help":
@@ -201,58 +204,27 @@ func RunInitialScreenFlow(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func GetCmdTelemetryData(cmd *cobra.Command, flags []string) map[string]interface{} {
-	path := cmd.CommandPath()
-
-	// Trim daytona from the path if a non-root command was invoked
-	// This prevents a `daytona` pileup in the telemetry data
-	if path != "daytona" {
-		path = strings.TrimPrefix(path, "daytona ")
-	}
-
-	source := telemetry.CLI_SOURCE
-	if internal.WorkspaceMode() {
-		source = telemetry.CLI_PROJECT_SOURCE
-	}
-
-	calledAs := cmd.CalledAs()
-
-	data := telemetry.AdditionalData
-	data["command"] = path
-	data["called_as"] = calledAs
-	data["source"] = source
-	data["flags"] = flags
-
-	return data
-}
-
-func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (telemetry.TelemetryService, *cobra.Command, []string, bool, error) {
-	var telemetryService telemetry.TelemetryService
-
-	if telemetryEnabled {
-		telemetryService = posthogservice.NewTelemetryService(posthogservice.PosthogServiceConfig{
-			ApiKey:   internal.PosthogApiKey,
-			Endpoint: internal.PosthogEndpoint,
-			Version:  internal.Version,
-		})
-	}
-
+func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, clientId string, startTime time.Time) (*cobra.Command, []string, bool, error) {
 	cmd, flags, isCompletion, err := validateCommands(rootCmd, os.Args[1:])
 	if err != nil && !isCompletion {
-		if telemetryEnabled && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
-			props := GetCmdTelemetryData(cmd, flags)
-			err := telemetryService.TrackCliEvent(telemetry.CliEventInvalidCmd, clientId, props)
+		if !shouldIgnoreCommand(cmd.CommandPath()) {
+			event := telemetry.NewCliEvent(telemetry.CliEventCommandInvalid, cmd, flags, err, nil)
+			err := cmd_common.TrackTelemetryEvent(event, clientId)
 			if err != nil {
 				log.Trace(err)
 			}
-			telemetryService.Close()
+			err = cmd_common.CloseTelemetryService()
+			if err != nil {
+				log.Trace(err)
+			}
 		}
 
-		return telemetryService, cmd, flags, isCompletion, err
+		return cmd, flags, isCompletion, err
 	}
 
-	if telemetryEnabled && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") && !isCompletion {
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdStart, clientId, GetCmdTelemetryData(cmd, flags))
+	if !shouldIgnoreCommand(cmd.CommandPath()) && !isCompletion {
+		event := telemetry.NewCliEvent(telemetry.CliEventCommandStarted, cmd, flags, nil, nil)
+		err := cmd_common.TrackTelemetryEvent(event, clientId)
 		if err != nil {
 			log.Trace(err)
 		}
@@ -264,36 +236,55 @@ func PreRun(rootCmd *cobra.Command, args []string, telemetryEnabled bool, client
 			for range interruptChannel {
 				endTime := time.Now()
 				execTime := endTime.Sub(startTime)
-				props := GetCmdTelemetryData(cmd, flags)
-				props["exec time (µs)"] = execTime.Microseconds()
-				props["error"] = "interrupted"
-
-				err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+				extras := map[string]interface{}{"exec_time_µs": execTime.Microseconds()}
+				event := telemetry.NewCliEvent(telemetry.CliEventCommandInterrupted, cmd, flags, nil, extras)
+				err := cmd_common.TrackTelemetryEvent(event, clientId)
 				if err != nil {
 					log.Trace(err)
 				}
-				telemetryService.Close()
+
+				err = cmd_common.CloseTelemetryService()
+				if err != nil {
+					log.Trace(err)
+				}
 				os.Exit(0)
 			}
 		}()
 	}
 
-	return telemetryService, cmd, flags, isCompletion, nil
+	return cmd, flags, isCompletion, nil
 }
 
-func PostRun(cmd *cobra.Command, cmdErr error, telemetryService telemetry.TelemetryService, clientId string, startTime time.Time, endTime time.Time, flags []string) {
-	if telemetryService != nil && !strings.HasSuffix(cmd.CommandPath(), "daemon-serve") {
+func PostRun(cmd *cobra.Command, cmdErr error, clientId string, startTime time.Time, endTime time.Time, flags []string) {
+	if !shouldIgnoreCommand(cmd.CommandPath()) {
 		execTime := endTime.Sub(startTime)
-		props := GetCmdTelemetryData(cmd, flags)
-		props["exec time (µs)"] = execTime.Microseconds()
+		extras := map[string]interface{}{"exec_time_µs": execTime.Microseconds()}
+		eventName := telemetry.CliEventCommandCompleted
 		if cmdErr != nil {
-			props["error"] = cmdErr.Error()
+			eventName = telemetry.CliEventCommandFailed
 		}
+		event := telemetry.NewCliEvent(eventName, cmd, flags, cmdErr, extras)
 
-		err := telemetryService.TrackCliEvent(telemetry.CliEventCmdEnd, clientId, props)
+		err := cmd_common.TrackTelemetryEvent(event, clientId)
 		if err != nil {
 			log.Trace(err)
 		}
-		telemetryService.Close()
+
+		err = cmd_common.CloseTelemetryService()
+		if err != nil {
+			log.Trace(err)
+		}
 	}
+}
+
+func shouldIgnoreCommand(commandPath string) bool {
+	ignoredPaths := []string{"daemon-serve", "ssh-proxy"}
+
+	for _, ignoredPath := range ignoredPaths {
+		if strings.HasSuffix(commandPath, ignoredPath) {
+			return true
+		}
+	}
+
+	return false
 }

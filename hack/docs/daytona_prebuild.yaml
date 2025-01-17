@@ -6,7 +6,7 @@ inherited_options:
       usage: help for daytona
 see_also:
     - daytona - Daytona is a Dev Environment Manager
-    - daytona prebuild add - Add a prebuild configuration
+    - daytona prebuild create - Create a prebuild configuration
     - daytona prebuild delete - Delete a prebuild configuration
     - daytona prebuild info - Show prebuild configuration info
     - daytona prebuild list - List prebuild configurations

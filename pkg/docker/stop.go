@@ -10,20 +10,22 @@ import (
 	"strings"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) StopProject(p *project.Project, logWriter io.Writer) error {
-	return d.stopProjectContainer(p, logWriter)
+func (d *DockerClient) StopWorkspace(w *models.Workspace, logWriter io.Writer) error {
+	return d.stopWorkspaceContainer(w, logWriter)
 }
 
-func (d *DockerClient) stopProjectContainer(p *project.Project, logWriter io.Writer) error {
-	containerName := d.GetProjectContainerName(p)
+func (d *DockerClient) stopWorkspaceContainer(w *models.Workspace, logWriter io.Writer) error {
+	containerName := d.GetWorkspaceContainerName(w)
 	ctx := context.Background()
 
-	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{})
+	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{
+		Signal: "SIGKILL",
+	})
 	if err != nil {
 		return err
 	}
@@ -59,7 +61,9 @@ func (d *DockerClient) stopProjectContainer(p *project.Project, logWriter io.Wri
 	}
 
 	for _, c := range composeContainers {
-		err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{})
+		err = d.apiClient.ContainerStop(ctx, c.ID, container.StopOptions{
+			Signal: "SIGKILL",
+		})
 		if err != nil {
 			return err
 		}

@@ -4,13 +4,14 @@
 package gitproviders
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 )
 
-func (s *GitProviderService) GetPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error) {
-	gitProvider, err := s.GetGitProvider(gitProviderId)
+func (s *GitProviderService) GetPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (*string, error) {
+	gitProvider, err := s.GetGitProvider(ctx, gitProviderId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get git provider: %s", err.Error())
 	}
@@ -23,8 +24,8 @@ func (s *GitProviderService) GetPrebuildWebhook(gitProviderId string, repo *gitp
 	return id, nil
 }
 
-func (s *GitProviderService) RegisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error) {
-	gitProvider, err := s.GetGitProvider(gitProviderId)
+func (s *GitProviderService) RegisterPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, endpointUrl string) (string, error) {
+	gitProvider, err := s.GetGitProvider(ctx, gitProviderId)
 	if err != nil {
 		return "", fmt.Errorf("failed to get git provider: %s", err.Error())
 	}
@@ -37,8 +38,8 @@ func (s *GitProviderService) RegisterPrebuildWebhook(gitProviderId string, repo 
 	return id, nil
 }
 
-func (s *GitProviderService) UnregisterPrebuildWebhook(gitProviderId string, repo *gitprovider.GitRepository, id string) error {
-	gitProvider, err := s.GetGitProvider(gitProviderId)
+func (s *GitProviderService) UnregisterPrebuildWebhook(ctx context.Context, gitProviderId string, repo *gitprovider.GitRepository, id string) error {
+	gitProvider, err := s.GetGitProvider(ctx, gitProviderId)
 	if err != nil {
 		return fmt.Errorf("failed to get git provider: %s", err.Error())
 	}

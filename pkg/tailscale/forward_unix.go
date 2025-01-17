@@ -12,7 +12,6 @@ import (
 )
 
 type ForwardConfig struct {
-	Ctx        context.Context
 	TsnetConn  *tsnet.Server
 	Hostname   string
 	SshPort    int
@@ -20,7 +19,7 @@ type ForwardConfig struct {
 	RemoteSock string
 }
 
-func ForwardRemoteUnixSock(config ForwardConfig) (chan bool, chan error) {
+func ForwardRemoteUnixSock(ctx context.Context, config ForwardConfig) (chan bool, chan error) {
 	sshTun := tunnel.NewUnix(config.TsnetConn, config.LocalSock, config.Hostname, config.SshPort, config.RemoteSock)
 
 	errChan := make(chan error)
@@ -44,7 +43,7 @@ func ForwardRemoteUnixSock(config ForwardConfig) (chan bool, chan error) {
 	})
 
 	go func() {
-		errChan <- sshTun.Start(config.Ctx)
+		errChan <- sshTun.Start(ctx)
 	}()
 
 	return startedChann, errChan

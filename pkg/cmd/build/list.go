@@ -7,16 +7,17 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	view "github.com/daytonaio/daytona/pkg/views/build/list"
 	"github.com/spf13/cobra"
 )
 
-var buildListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List all builds",
-	Aliases: []string{"ls"},
 	Args:    cobra.NoArgs,
+	Aliases: common.GetAliases("ls"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -47,5 +48,5 @@ var buildListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(buildListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

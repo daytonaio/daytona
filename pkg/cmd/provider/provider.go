@@ -11,12 +11,14 @@ import (
 var ProviderCmd = &cobra.Command{
 	Use:     "provider",
 	Short:   "Manage providers",
+	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
+	Aliases: []string{"providers"},
 }
 
 func init() {
-	ProviderCmd.AddCommand(providerListCmd)
-	ProviderCmd.AddCommand(providerUninstallCmd)
-	ProviderCmd.AddCommand(providerInstallCmd)
-	ProviderCmd.AddCommand(providerUpdateCmd)
+	ProviderCmd.AddCommand(listCmd)
+	ProviderCmd.AddCommand(uninstallCmd)
+	ProviderCmd.AddCommand(installCmd)
+	ProviderCmd.AddCommand(updateCmd)
 }

@@ -1,6 +1,6 @@
 name: daytona profile delete
-synopsis: Delete profile [PROFILE_NAME]
-usage: daytona profile delete [flags]
+synopsis: Delete a profile
+usage: daytona profile delete [PROFILE_NAME] [flags]
 inherited_options:
     - name: help
       default_value: "false"

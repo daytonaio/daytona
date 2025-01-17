@@ -1,15 +1,15 @@
 ## daytona ssh
 
-SSH into a project using the terminal
+SSH into a workspace using the terminal
 
 ```
-daytona ssh [WORKSPACE] [PROJECT] [CMD...] [flags]
+daytona ssh [WORKSPACE] [CMD...] [flags]
 ```
 
 ### Options
 
 ```
-  -e, --edit                 Edit the project's SSH config
+  -e, --edit                 Edit the workspace's SSH config
   -o, --option stringArray   Specify SSH options in KEY=VALUE format.
   -y, --yes                  Automatically confirm any prompts
 ```

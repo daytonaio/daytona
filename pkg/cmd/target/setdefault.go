@@ -7,27 +7,29 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/common"
+	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
-	target_view "github.com/daytonaio/daytona/pkg/views/target"
+	"github.com/daytonaio/daytona/pkg/views/target/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
 
-var targetSetDefaultCmd = &cobra.Command{
-	Use:   "set-default [TARGET_NAME]",
-	Short: "Set target to be used by default",
-	Args:  cobra.RangeArgs(0, 1),
+var setDefaultCmd = &cobra.Command{
+	Use:     "set-default [TARGET]",
+	Short:   "Set default target",
+	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("set-default"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var targetName string
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
 		}
+
+		var target *apiclient.TargetDTO
 
 		if len(args) == 0 {
 			targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
@@ -40,40 +42,27 @@ var targetSetDefaultCmd = &cobra.Command{
 				return nil
 			}
 
-			c, err := config.GetConfig()
-			if err != nil {
-				return err
-			}
-
-			activeProfile, err := c.GetActiveProfile()
-			if err != nil {
-				return err
-			}
-
-			selectedTarget, err := target_view.GetTargetFromPrompt(targetList, activeProfile.Name, nil, false, "Make Default")
-			if err != nil {
-				if common.IsCtrlCAbort(err) {
-					return nil
-				} else {
-					return err
-				}
-			}
-
-			if selectedTarget == nil {
-				return nil
-			}
-
-			targetName = selectedTarget.Name
+			target = selection.GetTargetFromPrompt(targetList, false, "Set As Default")
 		} else {
-			targetName = args[0]
+			target, _, err = apiclient_util.GetTarget(args[0])
+			if err != nil {
+				return err
+			}
 		}
 
-		res, err := apiClient.TargetAPI.SetDefaultTarget(ctx, targetName).Execute()
+		if target == nil {
+			return nil
+		}
+
+		res, err := apiClient.TargetAPI.SetDefaultTarget(ctx, target.Id).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessage(fmt.Sprintf("Target '%s' set as default", targetName))
+		views.RenderInfoMessage(fmt.Sprintf("Target '%s' set as default", target.Name))
 		return nil
+	},
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		return getAllTargetsByState(nil)
 	},
 }

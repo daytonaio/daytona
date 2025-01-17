@@ -21,25 +21,25 @@ import (
 // ServerAPIService ServerAPI service
 type ServerAPIService service
 
-type ApiGenerateNetworkKeyRequest struct {
+type ApiCreateNetworkKeyRequest struct {
 	ctx        context.Context
 	ApiService *ServerAPIService
 }
 
-func (r ApiGenerateNetworkKeyRequest) Execute() (*NetworkKey, *http.Response, error) {
-	return r.ApiService.GenerateNetworkKeyExecute(r)
+func (r ApiCreateNetworkKeyRequest) Execute() (*NetworkKey, *http.Response, error) {
+	return r.ApiService.CreateNetworkKeyExecute(r)
 }
 
 /*
-GenerateNetworkKey Generate a new authentication key
+CreateNetworkKey Create a new authentication key
 
-Generate a new authentication key
+Create a new authentication key
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiGenerateNetworkKeyRequest
+	@return ApiCreateNetworkKeyRequest
 */
-func (a *ServerAPIService) GenerateNetworkKey(ctx context.Context) ApiGenerateNetworkKeyRequest {
-	return ApiGenerateNetworkKeyRequest{
+func (a *ServerAPIService) CreateNetworkKey(ctx context.Context) ApiCreateNetworkKeyRequest {
+	return ApiCreateNetworkKeyRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -48,7 +48,7 @@ func (a *ServerAPIService) GenerateNetworkKey(ctx context.Context) ApiGenerateNe
 // Execute executes the request
 //
 //	@return NetworkKey
-func (a *ServerAPIService) GenerateNetworkKeyExecute(r ApiGenerateNetworkKeyRequest) (*NetworkKey, *http.Response, error) {
+func (a *ServerAPIService) CreateNetworkKeyExecute(r ApiCreateNetworkKeyRequest) (*NetworkKey, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -56,7 +56,7 @@ func (a *ServerAPIService) GenerateNetworkKeyExecute(r ApiGenerateNetworkKeyRequ
 		localVarReturnValue *NetworkKey
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.GenerateNetworkKey")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.CreateNetworkKey")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -259,9 +259,9 @@ func (r ApiGetServerLogFilesRequest) Execute() ([]string, *http.Response, error)
 }
 
 /*
-GetServerLogFiles List server log files
+GetServerLogFiles Get server log files
 
-List server log files
+Get server log files
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiGetServerLogFilesRequest
@@ -363,32 +363,32 @@ func (a *ServerAPIService) GetServerLogFilesExecute(r ApiGetServerLogFilesReques
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiSetConfigRequest struct {
+type ApiSaveConfigRequest struct {
 	ctx        context.Context
 	ApiService *ServerAPIService
 	config     *ServerConfig
 }
 
 // Server configuration
-func (r ApiSetConfigRequest) Config(config ServerConfig) ApiSetConfigRequest {
+func (r ApiSaveConfigRequest) Config(config ServerConfig) ApiSaveConfigRequest {
 	r.config = &config
 	return r
 }
 
-func (r ApiSetConfigRequest) Execute() (*ServerConfig, *http.Response, error) {
-	return r.ApiService.SetConfigExecute(r)
+func (r ApiSaveConfigRequest) Execute() (*ServerConfig, *http.Response, error) {
+	return r.ApiService.SaveConfigExecute(r)
 }
 
 /*
-SetConfig Set the server configuration
+SaveConfig Save the server configuration
 
-Set the server configuration
+Save the server configuration
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiSetConfigRequest
+	@return ApiSaveConfigRequest
 */
-func (a *ServerAPIService) SetConfig(ctx context.Context) ApiSetConfigRequest {
-	return ApiSetConfigRequest{
+func (a *ServerAPIService) SaveConfig(ctx context.Context) ApiSaveConfigRequest {
+	return ApiSaveConfigRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
@@ -397,15 +397,15 @@ func (a *ServerAPIService) SetConfig(ctx context.Context) ApiSetConfigRequest {
 // Execute executes the request
 //
 //	@return ServerConfig
-func (a *ServerAPIService) SetConfigExecute(r ApiSetConfigRequest) (*ServerConfig, *http.Response, error) {
+func (a *ServerAPIService) SaveConfigExecute(r ApiSaveConfigRequest) (*ServerConfig, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
+		localVarHTTPMethod  = http.MethodPut
 		localVarPostBody    interface{}
 		formFiles           []formFile
 		localVarReturnValue *ServerConfig
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.SetConfig")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ServerAPIService.SaveConfig")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

@@ -20,19 +20,19 @@ import (
 )
 
 type Server struct {
-	ProjectDir string
+	WorkspaceDir string
 }
 
-type ProjectDirResponse struct {
+type WorkspaceDirResponse struct {
 	Dir string `json:"dir"`
-} // @name ProjectDirResponse
+} // @name WorkspaceDirResponse
 
-func (s *Server) GetProjectDir(ctx *gin.Context) {
-	projectDir := ProjectDirResponse{
-		Dir: s.ProjectDir,
+func (s *Server) GetWorkspaceDir(ctx *gin.Context) {
+	workspaceDir := WorkspaceDirResponse{
+		Dir: s.WorkspaceDir,
 	}
 
-	ctx.JSON(200, projectDir)
+	ctx.JSON(200, workspaceDir)
 }
 
 func (s *Server) Start() error {
@@ -41,7 +41,7 @@ func (s *Server) Start() error {
 	r.Use(middlewares.LoggingMiddleware())
 	binding.Validator = new(api.DefaultValidator)
 
-	r.GET("/project-dir", s.GetProjectDir)
+	r.GET("/workspace-dir", s.GetWorkspaceDir)
 
 	fsController := r.Group("/files")
 	{

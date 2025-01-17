@@ -1,0 +1,12 @@
+name: daytona git-provider
+synopsis: Manage Git provider configs
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona git-provider create - Create a Git provider config
+    - daytona git-provider delete - Delete a Git provider config
+    - daytona git-provider list - Lists your registered Git provider configs
+    - daytona git-provider update - Update a Git provider

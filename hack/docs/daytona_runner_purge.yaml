@@ -1,0 +1,14 @@
+name: daytona runner purge
+synopsis: Purges the Daytona Runner
+usage: daytona runner purge [flags]
+options:
+    - name: "yes"
+      shorthand: "y"
+      default_value: "false"
+      usage: Execute Daytona Runner purge without a prompt
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona runner - Manage the runner

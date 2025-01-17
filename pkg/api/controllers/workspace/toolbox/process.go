@@ -9,13 +9,12 @@ import "github.com/gin-gonic/gin"
 //
 //	@Tags			workspace toolbox
 //	@Summary		Execute command
-//	@Description	Execute command synchronously inside workspace project
+//	@Description	Execute command synchronously inside a workspace
 //	@Produce		json
 //	@Param			workspaceId	path		string			true	"Workspace ID or Name"
-//	@Param			projectId	path		string			true	"Project ID"
 //	@Param			params		body		ExecuteRequest	true	"Execute command request"
 //	@Success		200			{object}	ExecuteResponse
-//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/execute [post]
+//	@Router			/workspace/{workspaceId}/toolbox/process/execute [post]
 //
 //	@id				ProcessExecuteCommand
 func ProcessExecuteCommand(ctx *gin.Context) {

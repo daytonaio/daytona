@@ -27,7 +27,7 @@ func GetGitUser(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.GetGitUser(gitProviderId)
+	response, err := server.GitProviderService.GetGitUser(ctx.Request.Context(), gitProviderId)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

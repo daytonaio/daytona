@@ -4,128 +4,180 @@
 package builds
 
 import (
-	"errors"
+	"context"
 	"io"
-	"time"
 
-	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/server/builds/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project/containerconfig"
-	"github.com/docker/docker/pkg/stringid"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
+	"github.com/daytonaio/daytona/pkg/telemetry"
+
+	log "github.com/sirupsen/logrus"
 )
 
-type IBuildService interface {
-	Create(dto.BuildCreationData) (string, error)
-	Find(filter *build.Filter) (*build.Build, error)
-	List(filter *build.Filter) ([]*build.Build, error)
-	MarkForDeletion(filter *build.Filter, force bool) []error
-	Delete(id string) error
-	AwaitEmptyList(time.Duration) error
-	GetBuildLogReader(buildId string) (io.Reader, error)
-}
-
 type BuildServiceConfig struct {
-	BuildStore    build.Store
-	LoggerFactory logs.LoggerFactory
+	BuildStore            stores.BuildStore
+	FindWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
+	GetRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	CreateJob             func(ctx context.Context, buildId string, action models.JobAction) error
+	TrackTelemetryEvent   func(event telemetry.Event, clientId string) error
+	LoggerFactory         logs.ILoggerFactory
 }
 
 type BuildService struct {
-	buildStore    build.Store
-	loggerFactory logs.LoggerFactory
+	buildStore            stores.BuildStore
+	findWorkspaceTemplate func(ctx context.Context, name string) (*models.WorkspaceTemplate, error)
+	getRepositoryContext  func(ctx context.Context, url, branch string) (*gitprovider.GitRepository, error)
+	createJob             func(ctx context.Context, buildId string, action models.JobAction) error
+	trackTelemetryEvent   func(event telemetry.Event, clientId string) error
+	loggerFactory         logs.ILoggerFactory
 }
 
-func NewBuildService(config BuildServiceConfig) IBuildService {
+func NewBuildService(config BuildServiceConfig) services.IBuildService {
 	return &BuildService{
-		buildStore:    config.BuildStore,
-		loggerFactory: config.LoggerFactory,
+		buildStore:            config.BuildStore,
+		findWorkspaceTemplate: config.FindWorkspaceTemplate,
+		getRepositoryContext:  config.GetRepositoryContext,
+		loggerFactory:         config.LoggerFactory,
+		createJob:             config.CreateJob,
+		trackTelemetryEvent:   config.TrackTelemetryEvent,
 	}
 }
 
-func (s *BuildService) Create(b dto.BuildCreationData) (string, error) {
-	var newBuild build.Build
+func (s *BuildService) Find(ctx context.Context, filter *services.BuildFilter) (*services.BuildDTO, error) {
+	var storeFilter *stores.BuildFilter
 
-	id := stringid.GenerateRandomID()
-	id = stringid.TruncateID(id)
-
-	newBuild.Id = id
-	newBuild.State = build.BuildStatePendingRun
-	newBuild.ContainerConfig = containerconfig.ContainerConfig{
-		Image: b.Image,
-		User:  b.User,
+	if filter != nil {
+		storeFilter = &filter.StoreFilter
 	}
-	newBuild.BuildConfig = b.BuildConfig
-	newBuild.Repository = b.Repository
-	newBuild.EnvVars = b.EnvVars
-	newBuild.PrebuildId = b.PrebuildId
 
-	err := s.buildStore.Save(&newBuild)
+	build, err := s.buildStore.Find(ctx, storeFilter)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return id, nil
+	state := build.GetState()
+
+	if state.Name == models.ResourceStateNameDeleted && (filter == nil || !filter.ShowDeleted) {
+		return nil, services.ErrBuildDeleted
+	}
+
+	return &services.BuildDTO{
+		Build: *build,
+		State: state,
+	}, nil
 }
 
-func (s *BuildService) Find(filter *build.Filter) (*build.Build, error) {
-	return s.buildStore.Find(filter)
+func (s *BuildService) List(ctx context.Context, filter *services.BuildFilter) ([]*services.BuildDTO, error) {
+	var storeFilter *stores.BuildFilter
+
+	if filter != nil {
+		storeFilter = &filter.StoreFilter
+	}
+
+	builds, err := s.buildStore.List(ctx, storeFilter)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*services.BuildDTO
+
+	for _, b := range builds {
+		state := b.GetState()
+
+		if state.Name == models.ResourceStateNameDeleted && (filter == nil || !filter.ShowDeleted) {
+			continue
+		}
+
+		result = append(result, &services.BuildDTO{
+			Build: *b,
+			State: state,
+		})
+	}
+
+	return result, nil
 }
 
-func (s *BuildService) List(filter *build.Filter) ([]*build.Build, error) {
-	return s.buildStore.List(filter)
+func (s *BuildService) HandleSuccessfulRemoval(ctx context.Context, id string) error {
+	return s.buildStore.Delete(ctx, id)
 }
 
-func (s *BuildService) MarkForDeletion(filter *build.Filter, force bool) []error {
+func (s *BuildService) Delete(ctx context.Context, filter *services.BuildFilter, force bool) []error {
 	var errors []error
 
-	builds, err := s.List(filter)
+	builds, err := s.List(ctx, filter)
 	if err != nil {
-		return []error{err}
+		return []error{s.handleDeleteError(ctx, nil, err, force)}
 	}
 
 	for _, b := range builds {
 		if force {
-			b.State = build.BuildStatePendingForcedDelete
+			err = s.createJob(ctx, b.Id, models.JobActionForceDelete)
+			err = s.handleDeleteError(ctx, &b.Build, err, force)
+			if err != nil {
+				errors = append(errors, err)
+			}
 		} else {
-			b.State = build.BuildStatePendingDelete
-		}
-
-		err = s.buildStore.Save(b)
-		if err != nil {
-			errors = append(errors, err)
+			err = s.createJob(ctx, b.Id, models.JobActionDelete)
+			err = s.handleDeleteError(ctx, &b.Build, err, force)
+			if err != nil {
+				errors = append(errors, err)
+			}
 		}
 	}
 
 	return errors
 }
 
-func (s *BuildService) Delete(id string) error {
-	return s.buildStore.Delete(id)
-}
+func (s *BuildService) handleDeleteError(ctx context.Context, b *models.Build, err error, force bool) error {
+	if !telemetry.TelemetryEnabled(ctx) {
+		return err
+	}
 
-func (s *BuildService) AwaitEmptyList(waitTime time.Duration) error {
-	timeout := time.NewTimer(waitTime)
-	defer timeout.Stop()
+	clientId := telemetry.ClientId(ctx)
 
-	for {
-		select {
-		case <-timeout.C:
-			return errors.New("awaiting empty build list timed out")
-		default:
-			builds, err := s.List(nil)
-			if err != nil {
-				return err
-			}
-
-			if len(builds) == 0 {
-				return nil
-			}
-
-			time.Sleep(time.Second)
+	eventName := telemetry.BuildEventLifecycleDeleted
+	if force {
+		eventName = telemetry.BuildEventLifecycleForceDeleted
+	}
+	if err != nil {
+		eventName = telemetry.BuildEventLifecycleDeletionFailed
+		if force {
+			eventName = telemetry.BuildEventLifecycleForceDeletionFailed
 		}
 	}
+
+	event := telemetry.NewBuildEvent(eventName, b, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
+	if telemetryError != nil {
+		log.Trace(telemetryError)
+	}
+
+	return err
 }
 
-func (s *BuildService) GetBuildLogReader(buildId string) (io.Reader, error) {
-	return s.loggerFactory.CreateBuildLogReader(buildId)
+func (s *BuildService) UpdateLastJob(ctx context.Context, buildId, jobId string) error {
+	b, err := s.buildStore.Find(ctx, &stores.BuildFilter{
+		Id: &buildId,
+	})
+	if err != nil {
+		return err
+	}
+
+	b.LastJobId = &jobId
+	// Make sure the old relation doesn't get saved to the store
+	b.LastJob = nil
+
+	return s.buildStore.Save(ctx, b)
+}
+
+func (s *BuildService) GetBuildLogReader(ctx context.Context, buildId string) (io.Reader, error) {
+	return s.loggerFactory.CreateLogReader(buildId)
+}
+
+func (s *BuildService) GetBuildLogWriter(ctx context.Context, buildId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(buildId)
 }

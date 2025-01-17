@@ -1,6 +1,6 @@
 ## daytona env list
 
-List profile environment variables
+List server environment variables
 
 ```
 daytona env list [flags]
@@ -10,6 +10,7 @@ daytona env list [flags]
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
+  -v, --show-values     Show environment variable values
 ```
 
 ### Options inherited from parent commands
@@ -20,5 +21,5 @@ daytona env list [flags]
 
 ### SEE ALSO
 
-* [daytona env](daytona_env.md)	 - Manage profile environment variables that are added to all workspaces
+* [daytona env](daytona_env.md)	 - Manage server environment variables that are added to all targets and workspaces
 

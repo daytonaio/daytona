@@ -62,15 +62,15 @@ type Model struct {
 	width  int
 }
 
-func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
+func GetRepositoryFromUrlInput(multiWorkspace bool, workspaceOrder int, apiClient *apiclient.APIClient, selectedRepos map[string]int) (*apiclient.GitRepository, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
 
 	title := "Git repository"
 
-	if multiProject {
-		title = getOrderNumberString(projectOrder) + " project repository"
+	if multiWorkspace {
+		title = getOrderNumberString(workspaceOrder) + " workspace repository"
 	}
 
 	var initialRepoUrl string
@@ -82,7 +82,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 	initialRepoInput := huh.NewInput().
 		Title(title).
 		Value(&initialRepoUrl).
-		Key("initialProjectRepo").
+		Key("initialWorkspaceRepo").
 		Validate(func(str string) error {
 			if str == previousRepoUrl && previousError != nil {
 				return previousError
@@ -125,7 +125,7 @@ func GetRepositoryFromUrlInput(multiProject bool, projectOrder int, apiClient *a
 	return repo, nil
 }
 
-func RunAddMoreProjectsForm() (bool, error) {
+func RunAddMoreWorkspacesForm() (bool, error) {
 	m := Model{width: maxWidth}
 	m.lg = lipgloss.DefaultRenderer()
 	m.styles = NewStyles(m.lg)
@@ -134,7 +134,7 @@ func RunAddMoreProjectsForm() (bool, error) {
 
 	confirmInput :=
 		huh.NewConfirm().
-			Title("Add another project?").
+			Title("Add another workspace?").
 			Value(&addMore)
 
 	m.form = huh.NewForm(

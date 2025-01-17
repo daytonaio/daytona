@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenVScodiumInsiders(activeProfile config.Profile, workspaceId string, projectName string, projectProviderMetadata string, gpgkey string) error {
+func OpenVScodiumInsiders(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey *string) error {
 	path, err := GetCodiumInsidersBinaryPath()
 	if err != nil {
 		return err
@@ -23,14 +23,15 @@ func OpenVScodiumInsiders(activeProfile config.Profile, workspaceId string, proj
 	if err != nil {
 		return err
 	}
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
 
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgkey)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
+
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
 	if err != nil {
 		return err
 	}
 
-	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", projectHostname, projectDir)
+	commandArgument := fmt.Sprintf("vscode-remote://ssh-remote+%s/%s", workspaceHostname, workspaceDir)
 
 	codiumInsidersCommand := exec.Command(path, "--disable-extension", "ms-vscode-remote.remote-containers", "--folder-uri", commandArgument)
 
@@ -39,11 +40,11 @@ func OpenVScodiumInsiders(activeProfile config.Profile, workspaceId string, proj
 		return err
 	}
 
-	if projectProviderMetadata == "" {
+	if workspaceProviderMetadata == "" {
 		return nil
 	}
 
-	return setupVSCodeCustomizations(projectHostname, projectProviderMetadata, devcontainer.Vscode, "*/.vscodium-server-insiders/*/bin/codium-server-insiders", "$HOME/.vscodium-server-insiders/data/Machine/settings.json", ".daytona-customizations-lock-codium-insiders")
+	return setupVSCodeCustomizations(workspaceHostname, workspaceProviderMetadata, devcontainer.Vscode, "*/.vscodium-server-insiders/*/bin/codium-server-insiders", "$HOME/.vscodium-server-insiders/data/Machine/settings.json", ".daytona-customizations-lock-codium-insiders")
 }
 
 func GetCodiumInsidersBinaryPath() (string, error) {

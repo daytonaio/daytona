@@ -3,7 +3,7 @@
 Open a workspace in your preferred IDE
 
 ```
-daytona code [WORKSPACE] [PROJECT] [flags]
+daytona code [WORKSPACE] [flags]
 ```
 
 ### Options

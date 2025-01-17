@@ -3,17 +3,21 @@
 
 package apikeys_test
 
-import "github.com/daytonaio/daytona/pkg/apikey"
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
+)
 
 func (s *ApiKeyServiceTestSuite) TestIsValidKey_True() {
 	keyName := "api-key"
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
+	apiKey, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
-	res := s.apiKeyService.IsValidApiKey(apiKey)
+	res := s.apiKeyService.IsValidApiKey(context.TODO(), apiKey)
 	require.True(res)
 }
 
@@ -22,54 +26,19 @@ func (s *ApiKeyServiceTestSuite) TestIsValidKey_False() {
 
 	require := s.Require()
 
-	res := s.apiKeyService.IsValidApiKey(unknownKey)
+	res := s.apiKeyService.IsValidApiKey(context.TODO(), unknownKey)
 	require.False(res)
 }
 
-func (s *ApiKeyServiceTestSuite) TestIsProjectApiKey_True() {
-	keyName := "projectKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeProject, keyName)
-	require.Nil(err)
-
-	res := s.apiKeyService.IsProjectApiKey(apiKey)
-	require.True(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsProjectApiKey_False() {
-	keyName := "clientKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
-	require.Nil(err)
-
-	res := s.apiKeyService.IsProjectApiKey(apiKey)
-	require.False(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_True() {
+func (s *ApiKeyServiceTestSuite) TestGetApiKeyType() {
 	keyName := "workspaceKey"
 
 	require := s.Require()
 
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeWorkspace, keyName)
+	apiKey, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeWorkspace, keyName)
 	require.Nil(err)
 
-	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
-	require.True(res)
-}
-
-func (s *ApiKeyServiceTestSuite) TestIsWorkspaceApiKey_False() {
-	keyName := "clientKey"
-
-	require := s.Require()
-
-	apiKey, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+	apiKeyType, err := s.apiKeyService.GetApiKeyType(context.TODO(), apiKey)
 	require.Nil(err)
-
-	res := s.apiKeyService.IsWorkspaceApiKey(apiKey)
-	require.False(res)
+	require.Equal(models.ApiKeyTypeWorkspace, apiKeyType)
 }

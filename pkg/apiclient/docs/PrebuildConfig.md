@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Branch** | **string** |  | 
-**CommitInterval** | **int32** |  | 
+**CommitInterval** | Pointer to **int32** |  | [optional] 
 **Id** | **string** |  | 
 **Retention** | **int32** |  | 
 **TriggerFiles** | **[]string** |  | 
@@ -14,7 +14,7 @@ Name | Type | Description | Notes
 
 ### NewPrebuildConfig
 
-`func NewPrebuildConfig(branch string, commitInterval int32, id string, retention int32, triggerFiles []string, ) *PrebuildConfig`
+`func NewPrebuildConfig(branch string, id string, retention int32, triggerFiles []string, ) *PrebuildConfig`
 
 NewPrebuildConfig instantiates a new PrebuildConfig object
 This constructor will assign default values to properties that have it defined,
@@ -68,6 +68,11 @@ and a boolean to check if the value has been set.
 
 SetCommitInterval sets CommitInterval field to given value.
 
+### HasCommitInterval
+
+`func (o *PrebuildConfig) HasCommitInterval() bool`
+
+HasCommitInterval returns a boolean if a field has been set.
 
 ### GetId
 

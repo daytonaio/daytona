@@ -1,6 +1,6 @@
 name: daytona prebuild delete
 synopsis: Delete a prebuild configuration
-usage: daytona prebuild delete [PROJECT_CONFIG] [PREBUILD] [flags]
+usage: daytona prebuild delete [WORKSPACE_CONFIG] [PREBUILD] [flags]
 options:
     - name: force
       shorthand: f

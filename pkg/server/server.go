@@ -4,39 +4,28 @@
 package server
 
 import (
-	"os"
-	"os/signal"
-
-	"github.com/daytonaio/daytona/pkg/provider/manager"
-	"github.com/daytonaio/daytona/pkg/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/profiledata"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/server/providertargets"
-	"github.com/daytonaio/daytona/pkg/server/workspaces"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/hashicorp/go-plugin"
 
 	log "github.com/sirupsen/logrus"
 )
 
 type ServerInstanceConfig struct {
-	Config                   Config
-	Version                  string
-	TailscaleServer          TailscaleServer
-	ProviderTargetService    providertargets.IProviderTargetService
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
-	LocalContainerRegistry   ILocalContainerRegistry
-	WorkspaceService         workspaces.IWorkspaceService
-	ApiKeyService            apikeys.IApiKeyService
-	GitProviderService       gitproviders.IGitProviderService
-	ProviderManager          manager.IProviderManager
-	ProfileDataService       profiledata.IProfileDataService
-	TelemetryService         telemetry.TelemetryService
+	Config                     Config
+	Version                    string
+	TailscaleServer            TailscaleServer
+	TargetConfigService        services.ITargetConfigService
+	BuildService               services.IBuildService
+	WorkspaceTemplateService   services.IWorkspaceTemplateService
+	WorkspaceService           services.IWorkspaceService
+	LocalContainerRegistry     ILocalContainerRegistry
+	TargetService              services.ITargetService
+	ApiKeyService              services.IApiKeyService
+	GitProviderService         services.IGitProviderService
+	EnvironmentVariableService services.IEnvironmentVariableService
+	JobService                 services.IJobService
+	RunnerService              services.IRunnerService
+	TelemetryService           telemetry.TelemetryService
 }
 
 var server *Server
@@ -51,21 +40,22 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 			log.Fatal("Server not initialized")
 		}
 		server = &Server{
-			Id:                       serverConfig.Config.Id,
-			config:                   serverConfig.Config,
-			Version:                  serverConfig.Version,
-			TailscaleServer:          serverConfig.TailscaleServer,
-			ProviderTargetService:    serverConfig.ProviderTargetService,
-			ContainerRegistryService: serverConfig.ContainerRegistryService,
-			BuildService:             serverConfig.BuildService,
-			ProjectConfigService:     serverConfig.ProjectConfigService,
-			LocalContainerRegistry:   serverConfig.LocalContainerRegistry,
-			WorkspaceService:         serverConfig.WorkspaceService,
-			ApiKeyService:            serverConfig.ApiKeyService,
-			GitProviderService:       serverConfig.GitProviderService,
-			ProviderManager:          serverConfig.ProviderManager,
-			ProfileDataService:       serverConfig.ProfileDataService,
-			TelemetryService:         serverConfig.TelemetryService,
+			Id:                         serverConfig.Config.Id,
+			config:                     serverConfig.Config,
+			Version:                    serverConfig.Version,
+			TailscaleServer:            serverConfig.TailscaleServer,
+			TargetConfigService:        serverConfig.TargetConfigService,
+			BuildService:               serverConfig.BuildService,
+			WorkspaceTemplateService:   serverConfig.WorkspaceTemplateService,
+			WorkspaceService:           serverConfig.WorkspaceService,
+			LocalContainerRegistry:     serverConfig.LocalContainerRegistry,
+			TargetService:              serverConfig.TargetService,
+			ApiKeyService:              serverConfig.ApiKeyService,
+			GitProviderService:         serverConfig.GitProviderService,
+			EnvironmentVariableService: serverConfig.EnvironmentVariableService,
+			JobService:                 serverConfig.JobService,
+			RunnerService:              serverConfig.RunnerService,
+			TelemetryService:           serverConfig.TelemetryService,
 		}
 	}
 
@@ -73,49 +63,24 @@ func GetInstance(serverConfig *ServerInstanceConfig) *Server {
 }
 
 type Server struct {
-	Id                       string
-	config                   Config
-	Version                  string
-	TailscaleServer          TailscaleServer
-	ProviderTargetService    providertargets.IProviderTargetService
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
-	LocalContainerRegistry   ILocalContainerRegistry
-	WorkspaceService         workspaces.IWorkspaceService
-	ApiKeyService            apikeys.IApiKeyService
-	GitProviderService       gitproviders.IGitProviderService
-	ProviderManager          manager.IProviderManager
-	ProfileDataService       profiledata.IProfileDataService
-	TelemetryService         telemetry.TelemetryService
+	Id                         string
+	config                     Config
+	Version                    string
+	TailscaleServer            TailscaleServer
+	TargetConfigService        services.ITargetConfigService
+	BuildService               services.IBuildService
+	WorkspaceTemplateService   services.IWorkspaceTemplateService
+	WorkspaceService           services.IWorkspaceService
+	LocalContainerRegistry     ILocalContainerRegistry
+	TargetService              services.ITargetService
+	ApiKeyService              services.IApiKeyService
+	GitProviderService         services.IGitProviderService
+	EnvironmentVariableService services.IEnvironmentVariableService
+	JobService                 services.IJobService
+	RunnerService              services.IRunnerService
+	TelemetryService           telemetry.TelemetryService
 }
 
 func (s *Server) Initialize() error {
 	return s.initLogs()
-}
-
-func (s *Server) Start() error {
-	log.Info("Starting Daytona server")
-
-	go func() {
-		interruptChannel := make(chan os.Signal, 1)
-		signal.Notify(interruptChannel, os.Interrupt)
-
-		for range interruptChannel {
-			plugin.CleanupClients()
-		}
-	}()
-
-	// Terminate orphaned provider processes
-	err := s.ProviderManager.TerminateProviderProcesses(s.config.ProvidersDir)
-	if err != nil {
-		log.Errorf("Failed to terminate orphaned provider processes: %s", err)
-	}
-
-	err = s.downloadDefaultProviders()
-	if err != nil {
-		return err
-	}
-
-	return s.registerProviders()
 }

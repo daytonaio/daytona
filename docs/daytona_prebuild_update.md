@@ -3,7 +3,7 @@
 Update a prebuild configuration
 
 ```
-daytona prebuild update [PROJECT_CONFIG] [PREBUILD_ID] [flags]
+daytona prebuild update [WORKSPACE_CONFIG] [PREBUILD_ID] [flags]
 ```
 
 ### Options

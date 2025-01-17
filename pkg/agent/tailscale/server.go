@@ -87,7 +87,7 @@ func (s *Server) getNetworkKey() (string, error) {
 		return "", err
 	}
 
-	networkKey, _, err := apiClient.ServerAPI.GenerateNetworkKeyExecute(apiclient.ApiGenerateNetworkKeyRequest{})
+	networkKey, _, err := apiClient.ServerAPI.CreateNetworkKeyExecute(apiclient.ApiCreateNetworkKeyRequest{})
 	// Retry indefinitely. Used to reconnect to the Daytona Server
 	if err != nil {
 		log.Tracef("Failed to get network key: %v", err)

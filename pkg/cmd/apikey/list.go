@@ -7,6 +7,7 @@ import (
 	"context"
 
 	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/apikey"
 	"github.com/spf13/cobra"
@@ -15,7 +16,7 @@ import (
 var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List API keys",
-	Aliases: []string{"ls"},
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

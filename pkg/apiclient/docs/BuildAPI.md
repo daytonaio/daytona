@@ -8,8 +8,9 @@ Method | HTTP request | Description
 [**DeleteAllBuilds**](BuildAPI.md#DeleteAllBuilds) | **Delete** /build | Delete ALL builds
 [**DeleteBuild**](BuildAPI.md#DeleteBuild) | **Delete** /build/{buildId} | Delete build
 [**DeleteBuildsFromPrebuild**](BuildAPI.md#DeleteBuildsFromPrebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
-[**GetBuild**](BuildAPI.md#GetBuild) | **Get** /build/{buildId} | Get build data
+[**FindBuild**](BuildAPI.md#FindBuild) | **Get** /build/{buildId} | Find build
 [**ListBuilds**](BuildAPI.md#ListBuilds) | **Get** /build | List builds
+[**ListSuccessfulBuilds**](BuildAPI.md#ListSuccessfulBuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
 
 
 
@@ -34,7 +35,7 @@ import (
 )
 
 func main() {
-	createBuildDto := *openapiclient.NewCreateBuildDTO("Branch_example", map[string]string{"key": "Inner_example"}, "ProjectConfigName_example") // CreateBuildDTO | Create Build DTO
+	createBuildDto := *openapiclient.NewCreateBuildDTO("Branch_example", map[string]string{"key": "Inner_example"}, "WorkspaceTemplateName_example") // CreateBuildDTO | Create Build DTO
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
@@ -283,11 +284,11 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
-## GetBuild
+## FindBuild
 
-> Build GetBuild(ctx, buildId).Execute()
+> BuildDTO FindBuild(ctx, buildId).Execute()
 
-Get build data
+Find build
 
 
 
@@ -308,13 +309,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.BuildAPI.GetBuild(context.Background(), buildId).Execute()
+	resp, r, err := apiClient.BuildAPI.FindBuild(context.Background(), buildId).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.GetBuild``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.FindBuild``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GetBuild`: Build
-	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.GetBuild`: %v\n", resp)
+	// response from `FindBuild`: BuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.FindBuild`: %v\n", resp)
 }
 ```
 
@@ -328,7 +329,7 @@ Name | Type | Description  | Notes
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGetBuildRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiFindBuildRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes
@@ -337,7 +338,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-[**Build**](Build.md)
+[**BuildDTO**](BuildDTO.md)
 
 ### Authorization
 
@@ -355,7 +356,7 @@ Name | Type | Description  | Notes
 
 ## ListBuilds
 
-> []Build ListBuilds(ctx).Execute()
+> []BuildDTO ListBuilds(ctx).Execute()
 
 List builds
 
@@ -382,7 +383,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.ListBuilds``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `ListBuilds`: []Build
+	// response from `ListBuilds`: []BuildDTO
 	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.ListBuilds`: %v\n", resp)
 }
 ```
@@ -398,7 +399,77 @@ Other parameters are passed through a pointer to a apiListBuildsRequest struct v
 
 ### Return type
 
-[**[]Build**](Build.md)
+[**[]BuildDTO**](BuildDTO.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## ListSuccessfulBuilds
+
+> []BuildDTO ListSuccessfulBuilds(ctx, repoUrl).Execute()
+
+List successful builds for Git repository
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	repoUrl := "repoUrl_example" // string | Repository URL
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.BuildAPI.ListSuccessfulBuilds(context.Background(), repoUrl).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `BuildAPI.ListSuccessfulBuilds``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListSuccessfulBuilds`: []BuildDTO
+	fmt.Fprintf(os.Stdout, "Response from `BuildAPI.ListSuccessfulBuilds`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**repoUrl** | **string** | Repository URL | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListSuccessfulBuildsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]BuildDTO**](BuildDTO.md)
 
 ### Authorization
 

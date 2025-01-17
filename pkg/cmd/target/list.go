@@ -6,28 +6,31 @@ package target
 import (
 	"context"
 
-	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	list_view "github.com/daytonaio/daytona/pkg/views/target/list"
 	"github.com/spf13/cobra"
 )
 
-var targetListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List targets",
-	Args:    cobra.NoArgs,
-	Aliases: []string{"ls"},
+	Args:    cobra.ExactArgs(0),
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
-		apiClient, err := apiclient_util.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			return err
 		}
 
-		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).Execute()
+		targetList, res, err := apiClient.TargetAPI.ListTargets(ctx).ShowOptions(showOptions).Execute()
+
 		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
+			return apiclient.HandleErrorResponse(res, err)
 		}
 
 		if format.FormatFlag != "" {
@@ -36,11 +39,22 @@ var targetListCmd = &cobra.Command{
 			return nil
 		}
 
-		list_view.ListTargets(targetList)
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			return err
+		}
+
+		list_view.ListTargets(targetList, activeProfile.Name, showOptions)
 		return nil
 	},
 }
 
 func init() {
-	format.RegisterFormatFlag(targetListCmd)
+	listCmd.Flags().BoolVarP(&showOptions, "show-options", "v", false, "Show target options")
+	format.RegisterFormatFlag(listCmd)
 }

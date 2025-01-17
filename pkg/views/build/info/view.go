@@ -11,8 +11,8 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/views"
-	projectconfig_info "github.com/daytonaio/daytona/pkg/views/projectconfig/info"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
+	workspacetemplate_info "github.com/daytonaio/daytona/pkg/views/workspacetemplate/info"
 	"golang.org/x/term"
 )
 
@@ -25,7 +25,7 @@ var propertyValueStyle = lipgloss.NewStyle().
 	Foreground(views.Light).
 	Bold(true)
 
-func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUnstyled bool) {
+func Render(b *apiclient.BuildDTO, apiServerConfig *apiclient.ServerConfig, forceUnstyled bool) {
 	var output string
 	output += "\n\n"
 
@@ -33,7 +33,7 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 
 	output += getInfoLine("ID", b.Id) + "\n"
 
-	output += getInfoLine("State", string(b.State)) + "\n"
+	output += getInfoLine("State", views.GetStateLabel(b.State.Name)) + "\n"
 
 	output += getInfoLine("Repository", b.Repository.Url) + "\n"
 
@@ -45,15 +45,15 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 		output += getInfoLine("User", *b.User) + "\n"
 	}
 
-	if projectconfig_info.GetLabelFromBuild(b.BuildConfig) != "" {
-		projectDefaults := &views_util.ProjectConfigDefaults{
-			Image:     &apiServerConfig.DefaultProjectImage,
-			ImageUser: &apiServerConfig.DefaultProjectUser,
+	if workspacetemplate_info.GetLabelFromBuild(b.BuildConfig) != "" {
+		workspaceDefaults := &views_util.WorkspaceTemplateDefaults{
+			Image:     &apiServerConfig.DefaultWorkspaceImage,
+			ImageUser: &apiServerConfig.DefaultWorkspaceUser,
 		}
 
-		_, buildChoice := views_util.GetProjectBuildChoice(apiclient.CreateProjectDTO{
+		_, buildChoice := views_util.GetWorkspaceBuildChoice(apiclient.CreateWorkspaceDTO{
 			BuildConfig: b.BuildConfig,
-		}, projectDefaults)
+		}, workspaceDefaults)
 		output += getInfoLine("Build", buildChoice) + "\n"
 	}
 
@@ -61,7 +61,9 @@ func Render(b *apiclient.Build, apiServerConfig *apiclient.ServerConfig, forceUn
 		output += getInfoLine("Devcontainer path", b.BuildConfig.Devcontainer.FilePath) + "\n"
 	}
 
-	output += getInfoLine("Prebuild ID", b.PrebuildId) + "\n"
+	if b.PrebuildId != nil {
+		output += getInfoLine("Prebuild ID", *b.PrebuildId) + "\n"
+	}
 
 	output += getInfoLine("Created", util.FormatTimestamp(b.CreatedAt)) + "\n"
 

@@ -3,13 +3,7 @@
 Restart a workspace
 
 ```
-daytona restart [WORKSPACE] [flags]
-```
-
-### Options
-
-```
-  -p, --project string   Restart a single project in the workspace (project name)
+daytona restart [WORKSPACE]... [flags]
 ```
 
 ### Options inherited from parent commands

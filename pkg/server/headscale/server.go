@@ -126,10 +126,5 @@ func (s *HeadscaleServer) Stop() error {
 }
 
 func (s *HeadscaleServer) Purge() error {
-	err := s.Stop()
-	if err != nil {
-		return err
-	}
-
 	return os.RemoveAll(s.configDir)
 }

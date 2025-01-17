@@ -34,7 +34,7 @@ try_download() {
     curl -fsSL "$url" -H "Authorization: Bearer $DAYTONA_SERVER_API_KEY" -o "$temp_file" && return 0
     exit_code=$?
   else
-    echo "error: Make sure curl or wget is available in the project container"
+    echo "error: Make sure curl or wget is available in the workspace container"
     exit 127
   fi
   >&2 echo "error: Daytona binary download failed. Exit Code: ${exit_code}"

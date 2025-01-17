@@ -16,7 +16,7 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
-	workspace_util "github.com/daytonaio/daytona/pkg/cmd/workspace/util"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -31,10 +31,10 @@ var (
 )
 
 var SshCmd = &cobra.Command{
-	Use:     "ssh [WORKSPACE] [PROJECT] [CMD...]",
-	Short:   "SSH into a project using the terminal",
+	Use:     "ssh [WORKSPACE] [CMD...]",
+	Short:   "SSH into a workspace using the terminal",
 	Args:    cobra.ArbitraryArgs,
-	GroupID: util.WORKSPACE_GROUP,
+	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {
@@ -47,9 +47,7 @@ var SshCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		var workspace *apiclient.WorkspaceDTO
-		var projectName string
-		var providerConfigId *string
+		var ws *apiclient.WorkspaceDTO
 
 		apiClient, err := apiclient_util.GetApiClient(&activeProfile)
 		if err != nil {
@@ -67,49 +65,27 @@ var SshCmd = &cobra.Command{
 				return nil
 			}
 
-			workspace = selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
-			if workspace == nil {
+			ws = selection.GetWorkspaceFromPrompt(workspaceList, "SSH Into")
+			if ws == nil {
 				return nil
 			}
 		} else {
-			workspace, err = apiclient_util.GetWorkspace(args[0], true)
+			ws, _, err = apiclient_util.GetWorkspace(args[0])
 			if err != nil {
 				return err
-			}
-		}
-
-		if len(args) == 0 || len(args) == 1 {
-			selectedProject, err := selectWorkspaceProject(workspace.Id, &activeProfile)
-			if err != nil {
-				return err
-			}
-			if selectedProject == nil {
-				return nil
-			}
-			projectName = selectedProject.Name
-			providerConfigId = selectedProject.GitProviderConfigId
-		}
-
-		if len(args) >= 2 {
-			projectName = args[1]
-			for _, project := range workspace.Projects {
-				if project.Name == projectName {
-					providerConfigId = project.GitProviderConfigId
-					break
-				}
 			}
 		}
 
 		if edit {
-			err := editSSHConfig(activeProfile, workspace, projectName)
+			err := editSSHConfig(activeProfile, ws)
 			if err != nil {
 				return err
 			}
 			return nil
 		}
 
-		if !workspace_util.IsProjectRunning(workspace, projectName) {
-			wsRunningStatus, err := AutoStartWorkspace(workspace.Name, projectName)
+		if ws.State.Name == apiclient.ResourceStateNameStopped {
+			wsRunningStatus, err := AutoStartWorkspace(*ws)
 			if err != nil {
 				return err
 			}
@@ -119,36 +95,29 @@ var SshCmd = &cobra.Command{
 		}
 
 		sshArgs := []string{}
-		if len(args) > 2 {
-			sshArgs = append(sshArgs, args[2:]...)
+		if len(args) > 1 {
+			sshArgs = append(sshArgs, args[1:]...)
 		}
 
-		gpgKey, err := GetGitProviderGpgKey(apiClient, ctx, providerConfigId)
+		gpgKey, err := common.GetGitProviderGpgKey(apiClient, ctx, ws.GitProviderConfigId)
 		if err != nil {
 			log.Warn(err)
 		}
 
-		return ide.OpenTerminalSsh(activeProfile, workspace.Id, projectName, gpgKey, sshOptions, sshArgs...)
+		return ide.OpenTerminalSsh(activeProfile, ws.Id, gpgKey, sshOptions, sshArgs...)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if len(args) >= 2 {
-			return nil, cobra.ShellCompDirectiveNoFileComp
-		}
-		if len(args) == 1 {
-			return getProjectNameCompletions(cmd, args, toComplete)
-		}
-
-		return getWorkspaceNameCompletions()
+		return common.GetWorkspaceNameCompletions()
 	},
 }
 
 func init() {
 	SshCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
-	SshCmd.Flags().BoolVarP(&edit, "edit", "e", false, "Edit the project's SSH config")
+	SshCmd.Flags().BoolVarP(&edit, "edit", "e", false, "Edit the workspace's SSH config")
 	SshCmd.Flags().StringArrayVarP(&sshOptions, "option", "o", []string{}, "Specify SSH options in KEY=VALUE format.")
 }
 
-func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceDTO, projectName string) error {
+func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceDTO) error {
 	sshDir := filepath.Join(config.SshHomeDir, ".ssh")
 	configPath := filepath.Join(sshDir, "daytona_config")
 	sshConfig, err := config.ReadSshConfig(configPath)
@@ -156,11 +125,11 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 		return err
 	}
 
-	hostLine := fmt.Sprintf("Host %s", config.GetProjectHostname(activeProfile.Id, workspace.Id, projectName))
+	hostLine := fmt.Sprintf("Host %s", config.GetHostname(activeProfile.Id, workspace.Id))
 	regex := regexp.MustCompile(fmt.Sprintf(`%s\s*\n(?:\t.*\n?)*`, hostLine))
 	matchedEntry := regex.FindString(sshConfig)
 	if matchedEntry == "" {
-		return fmt.Errorf("no SSH entry found for project %s", projectName)
+		return fmt.Errorf("no SSH entry found for workspace %s", workspace.Name)
 	}
 
 	lines := strings.Split(matchedEntry, "\n")
@@ -213,11 +182,11 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 	}
 
 	if modifiedContent == "" {
-		err = config.RemoveWorkspaceSshEntries(activeProfile.Id, workspace.Id, projectName)
+		err = config.RemoveSshEntries(activeProfile.Id, workspace.Id)
 		if err != nil {
 			return err
 		}
-		views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s removed successfully", projectName))
+		views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s removed successfully", workspace.Name))
 
 		return nil
 	}
@@ -237,12 +206,12 @@ func editSSHConfig(activeProfile config.Profile, workspace *apiclient.WorkspaceD
 		modifiedContent += "\n"
 	}
 
-	err = config.UpdateWorkspaceSshEntry(activeProfile.Id, workspace.Id, projectName, modifiedContent)
+	err = config.UpdateSshEntry(activeProfile.Id, workspace.Id, modifiedContent)
 	if err != nil {
 		return err
 	}
 
-	views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s updated successfully", projectName))
+	views.RenderInfoMessage(fmt.Sprintf("SSH configuration for %s updated successfully", workspace.Name))
 
 	return nil
 }

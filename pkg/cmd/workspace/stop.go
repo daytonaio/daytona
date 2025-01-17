@@ -12,40 +12,21 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
+
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var stopProjectFlag string
-
 var StopCmd = &cobra.Command{
-	Use:     "stop [WORKSPACE]",
+	Use:     "stop [WORKSPACE]...",
 	Short:   "Stop a workspace",
-	GroupID: util.WORKSPACE_GROUP,
-	Args:    cobra.RangeArgs(0, 1),
+	GroupID: util.TARGET_GROUP,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		timeFormat := time.Now().Format("2006-01-02 15:04:05")
-		from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
-		if err != nil {
-			return err
-		}
-
-		c, err := config.GetConfig()
-		if err != nil {
-			return err
-		}
-
-		activeProfile, err := c.GetActiveProfile()
-		if err != nil {
-			return err
-		}
-
-		if allFlag {
-			return stopAllWorkspaces(activeProfile, from)
-		}
+		var selectedWorkspaces []*apiclient.WorkspaceDTO
 
 		ctx := context.Background()
 
@@ -54,10 +35,11 @@ var StopCmd = &cobra.Command{
 			return err
 		}
 
+		if allFlag {
+			return stopAllWorkspaces()
+		}
+
 		if len(args) == 0 {
-			if stopProjectFlag != "" {
-				return cmd.Help()
-			}
 			workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
@@ -68,64 +50,50 @@ var StopCmd = &cobra.Command{
 				return nil
 			}
 
-			selectedWorkspaces := selection.GetWorkspacesFromPrompt(workspaceList, "Stop")
-
-			for _, workspace := range selectedWorkspaces {
-				err := StopWorkspace(apiClient, workspace.Name, "")
+			selectedWorkspaces = selection.GetWorkspacesFromPrompt(workspaceList, selection.StopActionVerb)
+		} else {
+			for _, arg := range args {
+				workspace, _, err := apiclient_util.GetWorkspace(arg)
 				if err != nil {
-					log.Errorf("Failed to stop workspace %s: %v\n\n", workspace.Name, err)
+					log.Error(fmt.Sprintf("[ %s ] : %v", arg, err))
 					continue
 				}
-
-				projectNames := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
-					return p.Name
-				})
-				apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, &from)
-				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
+				selectedWorkspaces = append(selectedWorkspaces, workspace)
 			}
+		}
+
+		if len(selectedWorkspaces) == 1 {
+			workspace := selectedWorkspaces[0]
+
+			err = StopWorkspace(apiClient, *workspace)
+			if err != nil {
+				return err
+			}
+
+			views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' stopped successfully", workspace.Name))
 		} else {
-			workspaceId := args[0]
-			var projectNames []string
-
-			err = StopWorkspace(apiClient, workspaceId, stopProjectFlag)
-			if err != nil {
-				return err
-			}
-
-			workspace, err := apiclient_util.GetWorkspace(workspaceId, false)
-			if err != nil {
-				return err
-			}
-
-			if startProjectFlag != "" {
-				projectNames = append(projectNames, stopProjectFlag)
-			} else {
-				projectNames = util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
-					return p.Name
-				})
-			}
-
-			apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, &from)
-
-			if stopProjectFlag != "" {
-				views.RenderInfoMessage(fmt.Sprintf("Project '%s' from workspace '%s' successfully stopped", stopProjectFlag, workspaceId))
-			} else {
-				views.RenderInfoMessage(fmt.Sprintf("Workspace '%s' successfully stopped", workspaceId))
+			for _, ws := range selectedWorkspaces {
+				err := StopWorkspace(apiClient, *ws)
+				if err != nil {
+					log.Errorf("Failed to stop workspace %s: %v\n\n", ws.Name, err)
+					continue
+				}
+				views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' stopped successfully", ws.Name))
 			}
 		}
 		return nil
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		return getAllWorkspacesByState(WORKSPACE_STATUS_RUNNING)
+		return common.GetAllWorkspacesByState(apiclient.ResourceStateNameStarted)
 	},
 }
 
 func init() {
-	StopCmd.Flags().StringVarP(&stopProjectFlag, "project", "p", "", "Stop a single project in the workspace (project name)")
-	StopCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Stop all workspaces")
+	StopCmd.PersistentFlags().BoolVarP(&allFlag, "all", "a", false, "Stop all targets")
+	StopCmd.PersistentFlags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }
 
-func stopAllWorkspaces(activeProfile config.Profile, from time.Time) error {
+func stopAllWorkspaces() error {
 	ctx := context.Background()
 	apiClient, err := apiclient_util.GetApiClient(nil)
 	if err != nil {
@@ -138,51 +106,61 @@ func stopAllWorkspaces(activeProfile config.Profile, from time.Time) error {
 	}
 
 	for _, workspace := range workspaceList {
-		err := StopWorkspace(apiClient, workspace.Name, "")
+		err := StopWorkspace(apiClient, workspace)
 		if err != nil {
 			log.Errorf("Failed to stop workspace %s: %v\n\n", workspace.Name, err)
 			continue
 		}
 
-		projectNames := util.ArrayMap(workspace.Projects, func(p apiclient.Project) string {
-			return p.Name
-		})
-
-		apiclient_util.ReadWorkspaceLogs(ctx, activeProfile, workspace.Id, projectNames, false, true, &from)
-		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' successfully stopped", workspace.Name))
+		views.RenderInfoMessage(fmt.Sprintf("- Workspace '%s' stopped successfully", workspace.Name))
 	}
 	return nil
 }
 
-func StopWorkspace(apiClient *apiclient.APIClient, workspaceId, projectName string) error {
+func StopWorkspace(apiClient *apiclient.APIClient, workspace apiclient.WorkspaceDTO) error {
 	ctx := context.Background()
-	var message string
-	var stopFunc func() error
-
-	if projectName == "" {
-		message = fmt.Sprintf("Workspace '%s' is stopping", workspaceId)
-		stopFunc = func() error {
-			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspaceId).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-			return nil
-		}
-	} else {
-		message = fmt.Sprintf("Project '%s' from workspace '%s' is stopping", projectName, workspaceId)
-		stopFunc = func() error {
-			res, err := apiClient.WorkspaceAPI.StopProject(ctx, workspaceId, projectName).Execute()
-			if err != nil {
-				return apiclient_util.HandleErrorResponse(res, err)
-			}
-			return nil
-		}
-	}
-
-	err := views_util.WithInlineSpinner(message, stopFunc)
+	timeFormat := time.Now().Format("2006-01-02 15:04:05")
+	from, err := time.Parse("2006-01-02 15:04:05", timeFormat)
 	if err != nil {
 		return err
 	}
 
+	c, err := config.GetConfig()
+	if err != nil {
+		return err
+	}
+
+	activeProfile, err := c.GetActiveProfile()
+	if err != nil {
+		return err
+	}
+
+	logsContext, stopLogs := context.WithCancel(context.Background())
+	go common.ReadWorkspaceLogs(logsContext, common.ReadLogParams{
+		Id:        workspace.Id,
+		Label:     &workspace.Name,
+		ServerUrl: activeProfile.Api.Url,
+		ApiKey:    activeProfile.Api.Key,
+		Index:     util.Pointer(0),
+		Follow:    util.Pointer(true),
+		From:      &from,
+	})
+
+	res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, workspace.Id).Execute()
+	if err != nil {
+		stopLogs()
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	err = common.AwaitWorkspaceState(workspace.Id, apiclient.ResourceStateNameStopped)
+	if err != nil {
+		stopLogs()
+		return err
+	}
+
+	// Ensure reading remaining logs is completed
+	time.Sleep(100 * time.Millisecond)
+
+	stopLogs()
 	return nil
 }
