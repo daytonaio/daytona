@@ -155,6 +155,8 @@ func (r *Runner) Start(ctx context.Context) error {
 			err := r.CheckAndRunJobs(ctx)
 			if err != nil {
 				r.logger.Error(err)
+				// Handle the function continuously erroring (e.g. authentication)
+				time.Sleep(3 * time.Second)
 			}
 		}
 	}()
