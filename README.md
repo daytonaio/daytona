@@ -24,7 +24,7 @@
 
 <div style="width: 80%; margin: 0 auto;">
 
-![Daytona Demo](https://github.com/daytonaio/daytona/raw/readme-rework/assets/images/daytona_demo.gif)
+![Daytona Demo](https://github.com/daytonaio/daytona/raw/target-workspace-refactor/assets/images/daytona_demo.gif)
 
 </div>
 
