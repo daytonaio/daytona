@@ -103,6 +103,7 @@ func GetWorkspacesCreationDataFromPrompt(ctx context.Context, params WorkspacesD
 					Image:       params.Defaults.Image,
 					User:        params.Defaults.ImageUser,
 					EnvVars:     workspaceTemplate.EnvVars,
+					Labels:      workspaceTemplate.Labels,
 				}
 
 				if workspaceTemplate.Image != "" {
@@ -339,6 +340,7 @@ func newCreateWorkspaceTemplateDTO(params WorkspacesDataPromptParams, providerRe
 		Image:       params.Defaults.Image,
 		User:        params.Defaults.ImageUser,
 		EnvVars:     map[string]string{},
+		Labels:      map[string]string{},
 	}
 
 	return workspace

@@ -23,6 +23,7 @@ type WorkspaceTemplateDefaults struct {
 	Image                *string
 	ImageUser            *string
 	DevcontainerFilePath string
+	Labels               map[string]string
 }
 
 func GetWorkspaceBuildChoice(workspace apiclient.CreateWorkspaceDTO, defaults *WorkspaceTemplateDefaults) (BuildChoice, string) {
