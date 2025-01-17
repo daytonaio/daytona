@@ -1202,6 +1202,39 @@ const docTemplate = `{
                 }
             }
         },
+        "/runner/{runnerId}/provider": {
+            "get": {
+                "description": "Get runner providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Get runner providers",
+                "operationId": "GetRunnerProviders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderInfo"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/runner/{runnerId}/provider/install": {
             "post": {
                 "description": "Install provider",
@@ -1802,6 +1835,36 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/state": {
+            "get": {
+                "description": "Get target state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Get target state",
+                "operationId": "GetTargetState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceState"
+                        }
                     }
                 }
             }
@@ -2457,6 +2520,36 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/state": {
+            "get": {
+                "description": "Get workspace state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Get workspace state",
+                "operationId": "GetWorkspaceState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceState"
+                        }
                     }
                 }
             }

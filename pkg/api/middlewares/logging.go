@@ -14,9 +14,12 @@ import (
 var ignoreLoggingPaths = map[string]bool{
 	"/job/":                               true,
 	"/workspace/:workspaceId/metadata":    true,
+	"/workspace/:workspaceId/state":       true,
 	"/target/:targetId/metadata":          true,
+	"/target/:targetId/state":             true,
 	"/runner/:runnerId/jobs":              true,
 	"/runner/:runnerId/metadata":          true,
+	"/runner/:runnerId/provider":          true,
 	"/runner/:runnerId/jobs/:jobId/state": true,
 }
 

@@ -65,6 +65,35 @@ func FindTarget(ctx *gin.Context) {
 	ctx.JSON(200, t)
 }
 
+// GetTargetState 			godoc
+//
+//	@Tags			target
+//	@Summary		Get target state
+//	@Description	Get target state
+//	@Produce		json
+//	@Param			targetId	path		string	true	"Target ID or Name"
+//	@Success		200			{object}	ResourceState
+//	@Router			/target/{targetId}/state [get]
+//
+//	@id				GetTargetState
+func GetTargetState(ctx *gin.Context) {
+	targetId := ctx.Param("targetId")
+
+	server := server.GetInstance(nil)
+
+	t, err := server.TargetService.Find(ctx.Request.Context(), &stores.TargetFilter{IdOrName: &targetId}, services.TargetRetrievalParams{})
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		if stores.IsTargetNotFound(err) || services.IsTargetDeleted(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find target: %w", err))
+		return
+	}
+
+	ctx.JSON(200, t.State)
+}
+
 // ListTargets 			godoc
 //
 //	@Tags			target

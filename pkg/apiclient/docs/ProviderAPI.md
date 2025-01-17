@@ -4,11 +4,82 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**GetRunnerProviders**](ProviderAPI.md#GetRunnerProviders) | **Get** /runner/{runnerId}/provider | Get runner providers
 [**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /runner/{runnerId}/provider/install | Install provider
 [**ListProviders**](ProviderAPI.md#ListProviders) | **Get** /runner/provider | List providers
 [**UninstallProvider**](ProviderAPI.md#UninstallProvider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
 [**UpdateProvider**](ProviderAPI.md#UpdateProvider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
 
+
+
+## GetRunnerProviders
+
+> []ProviderInfo GetRunnerProviders(ctx, runnerId).Execute()
+
+Get runner providers
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	runnerId := "runnerId_example" // string | Runner ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.ProviderAPI.GetRunnerProviders(context.Background(), runnerId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.GetRunnerProviders``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetRunnerProviders`: []ProviderInfo
+	fmt.Fprintf(os.Stdout, "Response from `ProviderAPI.GetRunnerProviders`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**runnerId** | **string** | Runner ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetRunnerProvidersRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+### Return type
+
+[**[]ProviderInfo**](ProviderInfo.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## InstallProvider
