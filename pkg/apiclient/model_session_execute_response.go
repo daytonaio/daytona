@@ -19,8 +19,9 @@ var _ MappedNullable = &SessionExecuteResponse{}
 
 // SessionExecuteResponse struct for SessionExecuteResponse
 type SessionExecuteResponse struct {
-	CmdId  *string `json:"cmdId,omitempty"`
-	Output *string `json:"output,omitempty"`
+	CmdId    *string `json:"cmdId,omitempty"`
+	ExitCode *int32  `json:"exitCode,omitempty"`
+	Output   *string `json:"output,omitempty"`
 }
 
 // NewSessionExecuteResponse instantiates a new SessionExecuteResponse object
@@ -72,6 +73,38 @@ func (o *SessionExecuteResponse) SetCmdId(v string) {
 	o.CmdId = &v
 }
 
+// GetExitCode returns the ExitCode field value if set, zero value otherwise.
+func (o *SessionExecuteResponse) GetExitCode() int32 {
+	if o == nil || IsNil(o.ExitCode) {
+		var ret int32
+		return ret
+	}
+	return *o.ExitCode
+}
+
+// GetExitCodeOk returns a tuple with the ExitCode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SessionExecuteResponse) GetExitCodeOk() (*int32, bool) {
+	if o == nil || IsNil(o.ExitCode) {
+		return nil, false
+	}
+	return o.ExitCode, true
+}
+
+// HasExitCode returns a boolean if a field has been set.
+func (o *SessionExecuteResponse) HasExitCode() bool {
+	if o != nil && !IsNil(o.ExitCode) {
+		return true
+	}
+
+	return false
+}
+
+// SetExitCode gets a reference to the given int32 and assigns it to the ExitCode field.
+func (o *SessionExecuteResponse) SetExitCode(v int32) {
+	o.ExitCode = &v
+}
+
 // GetOutput returns the Output field value if set, zero value otherwise.
 func (o *SessionExecuteResponse) GetOutput() string {
 	if o == nil || IsNil(o.Output) {
@@ -116,6 +149,9 @@ func (o SessionExecuteResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.CmdId) {
 		toSerialize["cmdId"] = o.CmdId
+	}
+	if !IsNil(o.ExitCode) {
+		toSerialize["exitCode"] = o.ExitCode
 	}
 	if !IsNil(o.Output) {
 		toSerialize["output"] = o.Output

@@ -239,6 +239,8 @@ definitions:
     type: object
   CreateSessionRequest:
     properties:
+      alias:
+        type: string
       sessionId:
         type: string
     required:
@@ -1043,6 +1045,15 @@ definitions:
     - registryUrl
     - serverDownloadUrl
     type: object
+  SessionDTO:
+    properties:
+      alias:
+        type: string
+      sessionId:
+        type: string
+    required:
+    - sessionId
+    type: object
   SessionExecuteRequest:
     properties:
       async:
@@ -1056,6 +1067,8 @@ definitions:
     properties:
       cmdId:
         type: string
+      exitCode:
+        type: integer
       output:
         type: string
     type: object
@@ -3380,6 +3393,32 @@ paths:
       tags:
       - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    get:
+      description: List sessions inside workspace project
+      operationId: ListSessions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/SessionDTO'
+            type: array
+      summary: List sessions
+      tags:
+      - workspace toolbox
     post:
       description: Create exec session inside workspace project
       operationId: CreateSession

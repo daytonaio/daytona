@@ -2341,6 +2341,34 @@ paths:
       - workspace toolbox
       x-codegen-request-body-name: params
   /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    get:
+      description: List sessions inside workspace project
+      operationId: ListSessions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/SessionDTO'
+                type: array
+          description: OK
+      summary: List sessions
+      tags:
+      - workspace toolbox
     post:
       description: Create exec session inside workspace project
       operationId: CreateSession
@@ -2862,8 +2890,11 @@ components:
       type: object
     CreateSessionRequest:
       example:
+        alias: alias
         sessionId: sessionId
       properties:
+        alias:
+          type: string
         sessionId:
           type: string
       required:
@@ -4091,6 +4122,18 @@ components:
       - registryUrl
       - serverDownloadUrl
       type: object
+    SessionDTO:
+      example:
+        alias: alias
+        sessionId: sessionId
+      properties:
+        alias:
+          type: string
+        sessionId:
+          type: string
+      required:
+      - sessionId
+      type: object
     SessionExecuteRequest:
       example:
         async: true
@@ -4107,9 +4150,12 @@ components:
       example:
         output: output
         cmdId: cmdId
+        exitCode: 0
       properties:
         cmdId:
           type: string
+        exitCode:
+          type: integer
         output:
           type: string
       type: object

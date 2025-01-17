@@ -16,37 +16,37 @@ import (
 	"fmt"
 )
 
-// checks if the CreateSessionRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateSessionRequest{}
+// checks if the SessionDTO type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &SessionDTO{}
 
-// CreateSessionRequest struct for CreateSessionRequest
-type CreateSessionRequest struct {
+// SessionDTO struct for SessionDTO
+type SessionDTO struct {
 	Alias     *string `json:"alias,omitempty"`
 	SessionId string  `json:"sessionId"`
 }
 
-type _CreateSessionRequest CreateSessionRequest
+type _SessionDTO SessionDTO
 
-// NewCreateSessionRequest instantiates a new CreateSessionRequest object
+// NewSessionDTO instantiates a new SessionDTO object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateSessionRequest(sessionId string) *CreateSessionRequest {
-	this := CreateSessionRequest{}
+func NewSessionDTO(sessionId string) *SessionDTO {
+	this := SessionDTO{}
 	this.SessionId = sessionId
 	return &this
 }
 
-// NewCreateSessionRequestWithDefaults instantiates a new CreateSessionRequest object
+// NewSessionDTOWithDefaults instantiates a new SessionDTO object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateSessionRequestWithDefaults() *CreateSessionRequest {
-	this := CreateSessionRequest{}
+func NewSessionDTOWithDefaults() *SessionDTO {
+	this := SessionDTO{}
 	return &this
 }
 
 // GetAlias returns the Alias field value if set, zero value otherwise.
-func (o *CreateSessionRequest) GetAlias() string {
+func (o *SessionDTO) GetAlias() string {
 	if o == nil || IsNil(o.Alias) {
 		var ret string
 		return ret
@@ -56,7 +56,7 @@ func (o *CreateSessionRequest) GetAlias() string {
 
 // GetAliasOk returns a tuple with the Alias field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateSessionRequest) GetAliasOk() (*string, bool) {
+func (o *SessionDTO) GetAliasOk() (*string, bool) {
 	if o == nil || IsNil(o.Alias) {
 		return nil, false
 	}
@@ -64,7 +64,7 @@ func (o *CreateSessionRequest) GetAliasOk() (*string, bool) {
 }
 
 // HasAlias returns a boolean if a field has been set.
-func (o *CreateSessionRequest) HasAlias() bool {
+func (o *SessionDTO) HasAlias() bool {
 	if o != nil && !IsNil(o.Alias) {
 		return true
 	}
@@ -73,12 +73,12 @@ func (o *CreateSessionRequest) HasAlias() bool {
 }
 
 // SetAlias gets a reference to the given string and assigns it to the Alias field.
-func (o *CreateSessionRequest) SetAlias(v string) {
+func (o *SessionDTO) SetAlias(v string) {
 	o.Alias = &v
 }
 
 // GetSessionId returns the SessionId field value
-func (o *CreateSessionRequest) GetSessionId() string {
+func (o *SessionDTO) GetSessionId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -89,7 +89,7 @@ func (o *CreateSessionRequest) GetSessionId() string {
 
 // GetSessionIdOk returns a tuple with the SessionId field value
 // and a boolean to check if the value has been set.
-func (o *CreateSessionRequest) GetSessionIdOk() (*string, bool) {
+func (o *SessionDTO) GetSessionIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -97,11 +97,11 @@ func (o *CreateSessionRequest) GetSessionIdOk() (*string, bool) {
 }
 
 // SetSessionId sets field value
-func (o *CreateSessionRequest) SetSessionId(v string) {
+func (o *SessionDTO) SetSessionId(v string) {
 	o.SessionId = v
 }
 
-func (o CreateSessionRequest) MarshalJSON() ([]byte, error) {
+func (o SessionDTO) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -109,7 +109,7 @@ func (o CreateSessionRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateSessionRequest) ToMap() (map[string]interface{}, error) {
+func (o SessionDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.Alias) {
 		toSerialize["alias"] = o.Alias
@@ -118,7 +118,7 @@ func (o CreateSessionRequest) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateSessionRequest) UnmarshalJSON(data []byte) (err error) {
+func (o *SessionDTO) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -140,53 +140,53 @@ func (o *CreateSessionRequest) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateSessionRequest := _CreateSessionRequest{}
+	varSessionDTO := _SessionDTO{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateSessionRequest)
+	err = decoder.Decode(&varSessionDTO)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateSessionRequest(varCreateSessionRequest)
+	*o = SessionDTO(varSessionDTO)
 
 	return err
 }
 
-type NullableCreateSessionRequest struct {
-	value *CreateSessionRequest
+type NullableSessionDTO struct {
+	value *SessionDTO
 	isSet bool
 }
 
-func (v NullableCreateSessionRequest) Get() *CreateSessionRequest {
+func (v NullableSessionDTO) Get() *SessionDTO {
 	return v.value
 }
 
-func (v *NullableCreateSessionRequest) Set(val *CreateSessionRequest) {
+func (v *NullableSessionDTO) Set(val *SessionDTO) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateSessionRequest) IsSet() bool {
+func (v NullableSessionDTO) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateSessionRequest) Unset() {
+func (v *NullableSessionDTO) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateSessionRequest(val *CreateSessionRequest) *NullableCreateSessionRequest {
-	return &NullableCreateSessionRequest{value: val, isSet: true}
+func NewNullableSessionDTO(val *SessionDTO) *NullableSessionDTO {
+	return &NullableSessionDTO{value: val, isSet: true}
 }
 
-func (v NullableCreateSessionRequest) MarshalJSON() ([]byte, error) {
+func (v NullableSessionDTO) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateSessionRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableSessionDTO) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -164,6 +164,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**GitGitStatus**](docs/WorkspaceToolboxAPI.md#gitgitstatus) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/status | Get git status
 *WorkspaceToolboxAPI* | [**GitPullChanges**](docs/WorkspaceToolboxAPI.md#gitpullchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/pull | Pull changes
 *WorkspaceToolboxAPI* | [**GitPushChanges**](docs/WorkspaceToolboxAPI.md#gitpushchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/push | Push changes
+*WorkspaceToolboxAPI* | [**ListSessions**](docs/WorkspaceToolboxAPI.md#listsessions) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session | List sessions
 *WorkspaceToolboxAPI* | [**LspCompletions**](docs/WorkspaceToolboxAPI.md#lspcompletions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions | Get Lsp Completions
 *WorkspaceToolboxAPI* | [**LspDidClose**](docs/WorkspaceToolboxAPI.md#lspdidclose) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close | Call Lsp DidClose
 *WorkspaceToolboxAPI* | [**LspDidOpen**](docs/WorkspaceToolboxAPI.md#lspdidopen) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open | Call Lsp DidOpen
@@ -250,6 +251,7 @@ Class | Method | HTTP request | Description
  - [Sample](docs/Sample.md)
  - [SearchFilesResponse](docs/SearchFilesResponse.md)
  - [ServerConfig](docs/ServerConfig.md)
+ - [SessionDTO](docs/SessionDTO.md)
  - [SessionExecuteRequest](docs/SessionExecuteRequest.md)
  - [SessionExecuteResponse](docs/SessionExecuteResponse.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)

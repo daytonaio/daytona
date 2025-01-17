@@ -3192,6 +3192,44 @@ const docTemplate = `{
             }
         },
         "/workspace/{workspaceId}/{projectId}/toolbox/process/session": {
+            "get": {
+                "description": "List sessions inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "List sessions",
+                "operationId": "ListSessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/SessionDTO"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "description": "Create exec session inside workspace project",
                 "produces": [
@@ -3723,6 +3761,9 @@ const docTemplate = `{
                 "sessionId"
             ],
             "properties": {
+                "alias": {
+                    "type": "string"
+                },
                 "sessionId": {
                     "type": "string"
                 }
@@ -4896,6 +4937,20 @@ const docTemplate = `{
                 }
             }
         },
+        "SessionDTO": {
+            "type": "object",
+            "required": [
+                "sessionId"
+            ],
+            "properties": {
+                "alias": {
+                    "type": "string"
+                },
+                "sessionId": {
+                    "type": "string"
+                }
+            }
+        },
         "SessionExecuteRequest": {
             "type": "object",
             "required": [
@@ -4915,6 +4970,9 @@ const docTemplate = `{
             "properties": {
                 "cmdId": {
                     "type": "string"
+                },
+                "exitCode": {
+                    "type": "integer"
                 },
                 "output": {
                     "type": "string"

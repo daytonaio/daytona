@@ -4,7 +4,9 @@
 package headscale
 
 import (
+	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"path/filepath"
 
@@ -58,4 +60,8 @@ func (s *HeadscaleServer) Connect() error {
 
 func (s *HeadscaleServer) HTTPClient() *http.Client {
 	return tsNetServer.HTTPClient()
+}
+
+func (s *HeadscaleServer) Dial(ctx context.Context, network, addr string) (net.Conn, error) {
+	return tsNetServer.Dial(ctx, network, addr)
 }

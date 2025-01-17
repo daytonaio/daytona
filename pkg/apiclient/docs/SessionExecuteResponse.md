@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **CmdId** | Pointer to **string** |  | [optional] 
+**ExitCode** | Pointer to **int32** |  | [optional] 
 **Output** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -50,6 +51,31 @@ SetCmdId sets CmdId field to given value.
 `func (o *SessionExecuteResponse) HasCmdId() bool`
 
 HasCmdId returns a boolean if a field has been set.
+
+### GetExitCode
+
+`func (o *SessionExecuteResponse) GetExitCode() int32`
+
+GetExitCode returns the ExitCode field if non-nil, zero value otherwise.
+
+### GetExitCodeOk
+
+`func (o *SessionExecuteResponse) GetExitCodeOk() (*int32, bool)`
+
+GetExitCodeOk returns a tuple with the ExitCode field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetExitCode
+
+`func (o *SessionExecuteResponse) SetExitCode(v int32)`
+
+SetExitCode sets ExitCode field to given value.
+
+### HasExitCode
+
+`func (o *SessionExecuteResponse) HasExitCode() bool`
+
+HasExitCode returns a boolean if a field has been set.
 
 ### GetOutput
 

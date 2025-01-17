@@ -56,3 +56,23 @@ func SessionExecuteCommand(ctx *gin.Context) {
 func DeleteSession(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }
+
+// ListSessions 			godoc
+//
+//	@Tags			workspace toolbox
+//	@Summary		List sessions
+//	@Description	List sessions inside workspace project
+//	@Produce		json
+//	@Param			workspaceId	path	string	true	"Workspace ID or Name"
+//	@Param			projectId	path	string	true	"Project ID"
+//	@Success		200			{array}	SessionDTO
+//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session [get]
+//
+//	@id				ListSessions
+func ListSessions(ctx *gin.Context) {
+	forwardRequestToToolbox(ctx)
+}
+
+func SessionCommandLogs(ctx *gin.Context) {
+	forwardRequestToToolbox(ctx)
+}
