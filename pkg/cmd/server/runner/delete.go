@@ -56,7 +56,7 @@ var deleteCmd = &cobra.Command{
 				return nil
 			}
 
-			selectedRunner, err := runner.GetRunnerFromPrompt(runners, activeProfile.Name, "Unregister")
+			selectedRunner, err := runner.GetRunnerFromPrompt(runners, activeProfile.Name, "Delete")
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -80,7 +80,7 @@ var deleteCmd = &cobra.Command{
 			form := huh.NewForm(
 				huh.NewGroup(
 					huh.NewConfirm().
-						Title(fmt.Sprintf("Unregister runner %s?", selectedRunnerId)).
+						Title(fmt.Sprintf("Delete runner %s?", selectedRunnerId)).
 						Description("It is recommended that you remove all target configs, targets and workspaces associated with it.").
 						Value(&confirm),
 				),
@@ -97,7 +97,7 @@ var deleteCmd = &cobra.Command{
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		views.RenderInfoMessageBold(fmt.Sprintf("Runner %s unregistered successfully", selectedRunnerId))
+		views.RenderInfoMessageBold(fmt.Sprintf("Runner %s deleted successfully", selectedRunnerId))
 		return nil
 	},
 }
