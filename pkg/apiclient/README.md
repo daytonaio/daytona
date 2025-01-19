@@ -114,6 +114,7 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**SavePrebuild**](docs/PrebuildAPI.md#saveprebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/install | Install provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
+*ProviderAPI* | [**ListProvidersForInstall**](docs/ProviderAPI.md#listprovidersforinstall) | **Get** /runner/provider/for-install | List providers available for installation
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
 *ProviderAPI* | [**UpdateProvider**](docs/ProviderAPI.md#updateprovider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
 *RunnerAPI* | [**CreateRunner**](docs/RunnerAPI.md#createrunner) | **Post** /runner | Create a runner
@@ -253,6 +254,7 @@ Class | Method | HTTP request | Description
  - [Position](docs/Position.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
+ - [ProviderDTO](docs/ProviderDTO.md)
  - [ProviderInfo](docs/ProviderInfo.md)
  - [ReplaceRequest](docs/ReplaceRequest.md)
  - [ReplaceResult](docs/ReplaceResult.md)

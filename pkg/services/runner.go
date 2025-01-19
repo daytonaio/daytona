@@ -23,7 +23,8 @@ type IRunnerService interface {
 	ListRunnerJobs(ctx context.Context, runnerId string) ([]*models.Job, error)
 
 	ListProviders(ctx context.Context, runnerId *string) ([]models.ProviderInfo, error)
-	InstallProvider(ctx context.Context, runnerId string, providerDto InstallProviderDTO) error
+	ListProvidersForInstall(ctx context.Context, serverRegistryUrl string) ([]ProviderDTO, error)
+	InstallProvider(ctx context.Context, runnerId string, serverRegistryUrl string, providerDto InstallProviderDTO) error
 	UninstallProvider(ctx context.Context, runnerId string, providerName string) error
 	UpdateProvider(ctx context.Context, runnerId string, providerName string, providerDto UpdateProviderDTO) error
 
@@ -51,16 +52,28 @@ type UpdateJobStateDTO struct {
 	ErrorMessage *string         `json:"errorMessage,omitempty" validate:"optional"`
 } // @name UpdateJobState
 
+type ProviderDTO struct {
+	Name    string  `json:"name" validate:"required"`
+	Label   *string `json:"label" validate:"optional"`
+	Version string  `json:"version" validate:"required"`
+	Latest  bool    `json:"latest" validate:"required"`
+} // @name ProviderDTO
+
 type InstallProviderDTO struct {
-	Name         string       `json:"name" validate:"required"`
-	DownloadUrls DownloadUrls `json:"downloadUrls" validate:"required"`
-	Version      string       `json:"version" validate:"required"`
+	Name    string `json:"name" validate:"required"`
+	Version string `json:"version" validate:"required"`
 } // @name InstallProviderDTO
 
 type UpdateProviderDTO struct {
 	DownloadUrls DownloadUrls `json:"downloadUrls" validate:"required"`
 	Version      string       `json:"version" validate:"required"`
 } // @name UpdateProviderDTO
+
+type ProviderJobMetadata struct {
+	Name         string       `json:"name" validate:"required"`
+	Version      string       `json:"version" validate:"required"`
+	DownloadUrls DownloadUrls `json:"downloadUrls" validate:"required"`
+}
 
 type DownloadUrls map[os.OperatingSystem]string // @name DownloadUrls
 

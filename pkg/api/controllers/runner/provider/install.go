@@ -33,9 +33,15 @@ func InstallProvider(ctx *gin.Context) {
 		return
 	}
 
+	config, err := server.GetConfig()
+	if err != nil {
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %w", err))
+		return
+	}
+
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, installProviderMetadataDto)
+	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, config.RegistryUrl, installProviderMetadataDto)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to install provider: %w", err))
 		return
