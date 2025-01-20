@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/git"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/lsp"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/process"
+	"github.com/daytonaio/daytona/pkg/agent/toolbox/process/session"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,7 @@ import (
 
 type Server struct {
 	ProjectDir string
+	ConfigDir  string
 }
 
 type ProjectDirResponse struct {
@@ -65,7 +67,16 @@ func (s *Server) Start() error {
 
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand)
+		processController.POST("/execute", process.ExecuteCommand(s.ProjectDir))
+
+		sessionController := processController.Group("/session")
+		{
+			sessionController.GET("", session.ListSessions)
+			sessionController.POST("", session.CreateSession(s.ProjectDir, s.ConfigDir))
+			sessionController.POST("/:sessionId/exec", session.SessionExecuteCommand(s.ConfigDir))
+			sessionController.DELETE("/:sessionId", session.DeleteSession(s.ConfigDir))
+			sessionController.GET("/:sessionId/command/:commandId/logs", session.GetSessionCommandLogs(s.ConfigDir))
+		}
 	}
 
 	gitController := r.Group("/git")

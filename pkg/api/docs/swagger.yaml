@@ -75,6 +75,18 @@ definitions:
     x-enum-varnames:
     - CloneTargetBranch
     - CloneTargetCommit
+  Command:
+    properties:
+      command:
+        type: string
+      exitCode:
+        type: integer
+      id:
+        type: string
+    required:
+    - command
+    - id
+    type: object
   CompletionContext:
     properties:
       triggerCharacter:
@@ -236,6 +248,13 @@ definitions:
     - name
     - options
     - providerInfo
+    type: object
+  CreateSessionRequest:
+    properties:
+      sessionId:
+        type: string
+    required:
+    - sessionId
     type: object
   CreateWorkspaceDTO:
     properties:
@@ -1035,6 +1054,36 @@ definitions:
     - providersDir
     - registryUrl
     - serverDownloadUrl
+    type: object
+  Session:
+    properties:
+      commands:
+        items:
+          $ref: '#/definitions/Command'
+        type: array
+      sessionId:
+        type: string
+    required:
+    - commands
+    - sessionId
+    type: object
+  SessionExecuteRequest:
+    properties:
+      async:
+        type: boolean
+      command:
+        type: string
+    required:
+    - command
+    type: object
+  SessionExecuteResponse:
+    properties:
+      cmdId:
+        type: string
+      exitCode:
+        type: integer
+      output:
+        type: string
     type: object
   SetGitProviderConfig:
     properties:
@@ -3354,6 +3403,160 @@ paths:
           schema:
             $ref: '#/definitions/ExecuteResponse'
       summary: Execute command
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    get:
+      description: List sessions inside workspace project
+      operationId: ListSessions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/Session'
+            type: array
+      summary: List sessions
+      tags:
+      - workspace toolbox
+    post:
+      description: Create exec session inside workspace project
+      operationId: CreateSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Create session request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/CreateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+      summary: Create exec session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a session inside workspace project
+      operationId: DeleteSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+      summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: |-
+        Get logs of a command inside a session inside workspace project
+        Connect with websocket to get a stream of the logs
+      operationId: GetSessionCommandLogs
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Command ID
+        in: path
+        name: commandId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: command logs
+          schema:
+            type: string
+      summary: Get session command logs
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute command inside a session inside workspace project
+      operationId: SessionExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Execute command request
+        in: body
+        name: params
+        required: true
+        schema:
+          $ref: '#/definitions/SessionExecuteRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/SessionExecuteResponse'
+      summary: Execute command in session
       tags:
       - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
