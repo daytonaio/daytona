@@ -10,8 +10,7 @@ import (
 )
 
 type CreateSessionRequest struct {
-	SessionId string  `json:"sessionId" validate:"required"`
-	Alias     *string `json:"alias,omitempty" validate:"optional"`
+	SessionId string `json:"sessionId" validate:"required"`
 } // @name CreateSessionRequest
 
 type SessionExecuteRequest struct {
@@ -27,13 +26,11 @@ type SessionExecuteResponse struct {
 
 type Session struct {
 	SessionId string     `json:"sessionId" validate:"required"`
-	Alias     *string    `json:"alias,omitempty" validate:"optional"`
 	Commands  []*Command `json:"commands" validate:"required"`
 } // @name Session
 
 type session struct {
 	cmd         *exec.Cmd
-	alias       *string
 	outReader   *bufio.Scanner
 	stdinWriter io.Writer
 	commands    map[string]*Command

@@ -251,8 +251,6 @@ definitions:
     type: object
   CreateSessionRequest:
     properties:
-      alias:
-        type: string
       sessionId:
         type: string
     required:
@@ -1059,8 +1057,6 @@ definitions:
     type: object
   Session:
     properties:
-      alias:
-        type: string
       commands:
         items:
           $ref: '#/definitions/Command'
@@ -3490,6 +3486,41 @@ paths:
         "204":
           description: No Content
       summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: |-
+        Get logs of a command inside a session inside workspace project
+        Connect with websocket to get a stream of the logs
+      operationId: GetSessionCommandLogs
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        type: string
+      - description: Command ID
+        in: path
+        name: commandId
+        required: true
+        type: string
+      responses:
+        "200":
+          description: command logs
+          schema:
+            type: string
+      summary: Get session command logs
       tags:
       - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:

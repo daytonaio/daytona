@@ -2430,6 +2430,47 @@ paths:
       summary: Delete session
       tags:
       - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: |-
+        Get logs of a command inside a session inside workspace project
+        Connect with websocket to get a stream of the logs
+      operationId: GetSessionCommandLogs
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      - description: Command ID
+        in: path
+        name: commandId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: command logs
+      summary: Get session command logs
+      tags:
+      - workspace toolbox
   /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
     post:
       description: Execute command inside a session inside workspace project
@@ -2906,11 +2947,8 @@ components:
       type: object
     CreateSessionRequest:
       example:
-        alias: alias
         sessionId: sessionId
       properties:
-        alias:
-          type: string
         sessionId:
           type: string
       required:
@@ -4140,7 +4178,6 @@ components:
       type: object
     Session:
       example:
-        alias: alias
         sessionId: sessionId
         commands:
         - exitCode: 0
@@ -4150,8 +4187,6 @@ components:
           id: id
           command: command
       properties:
-        alias:
-          type: string
         commands:
           items:
             $ref: '#/components/schemas/Command'

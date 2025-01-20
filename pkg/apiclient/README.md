@@ -155,6 +155,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**FsSetFilePermissions**](docs/WorkspaceToolboxAPI.md#fssetfilepermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
 *WorkspaceToolboxAPI* | [**FsUploadFile**](docs/WorkspaceToolboxAPI.md#fsuploadfile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
 *WorkspaceToolboxAPI* | [**GetProjectDir**](docs/WorkspaceToolboxAPI.md#getprojectdir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
+*WorkspaceToolboxAPI* | [**GetSessionCommandLogs**](docs/WorkspaceToolboxAPI.md#getsessioncommandlogs) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get session command logs
 *WorkspaceToolboxAPI* | [**GitAddFiles**](docs/WorkspaceToolboxAPI.md#gitaddfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 *WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
 *WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository

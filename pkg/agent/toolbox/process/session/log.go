@@ -14,7 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SessionCommandLogs(configDir string) func(c *gin.Context) {
+func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		sessionId := c.Param("sessionId")
 		cmdId := c.Param("commandId")
@@ -36,7 +36,25 @@ func SessionCommandLogs(configDir string) func(c *gin.Context) {
 			return
 		}
 
-		logFile, err := os.Open(filepath.Join(configDir, "sessions", sessionId, cmdId, "output.log"))
+		path := filepath.Join(configDir, "sessions", sessionId, cmdId, "output.log")
+
+		if c.Request.Header.Get("Upgrade") == "websocket" {
+			logFile, err := os.Open(path)
+			if err != nil {
+				if os.IsNotExist(err) {
+					c.AbortWithError(http.StatusNotFound, errors.New("log file not found"))
+					return
+				}
+				c.AbortWithError(http.StatusInternalServerError, err)
+				return
+			}
+			defer logFile.Close()
+
+			log.ReadLog(c, logFile, util.ReadLog, log.WriteToWs)
+			return
+		}
+
+		content, err := os.ReadFile(path)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.AbortWithError(http.StatusNotFound, errors.New("log file not found"))
@@ -45,8 +63,7 @@ func SessionCommandLogs(configDir string) func(c *gin.Context) {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
-		defer logFile.Close()
 
-		log.ReadLog(c, logFile, util.ReadLog, log.WriteToWs)
+		c.String(http.StatusOK, string(content))
 	}
 }

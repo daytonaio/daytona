@@ -18,6 +18,7 @@ Method | HTTP request | Description
 [**FsSetFilePermissions**](WorkspaceToolboxAPI.md#FsSetFilePermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
 [**FsUploadFile**](WorkspaceToolboxAPI.md#FsUploadFile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
 [**GetProjectDir**](WorkspaceToolboxAPI.md#GetProjectDir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
+[**GetSessionCommandLogs**](WorkspaceToolboxAPI.md#GetSessionCommandLogs) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get session command logs
 [**GitAddFiles**](WorkspaceToolboxAPI.md#GitAddFiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 [**GitBranchList**](WorkspaceToolboxAPI.md#GitBranchList) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
 [**GitCloneRepository**](WorkspaceToolboxAPI.md#GitCloneRepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
@@ -1085,6 +1086,85 @@ Name | Type | Description  | Notes
 
 - **Content-Type**: Not defined
 - **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetSessionCommandLogs
+
+> string GetSessionCommandLogs(ctx, workspaceId, projectId, sessionId, commandId).Execute()
+
+Get session command logs
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+	sessionId := "sessionId_example" // string | Session ID
+	commandId := "commandId_example" // string | Command ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkspaceToolboxAPI.GetSessionCommandLogs(context.Background(), workspaceId, projectId, sessionId, commandId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.GetSessionCommandLogs``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetSessionCommandLogs`: string
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.GetSessionCommandLogs`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+**sessionId** | **string** | Session ID | 
+**commandId** | **string** | Command ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetSessionCommandLogsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+
+
+### Return type
+
+**string**
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: */*
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
 [[Back to Model list]](../README.md#documentation-for-models)

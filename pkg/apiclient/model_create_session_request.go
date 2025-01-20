@@ -21,8 +21,7 @@ var _ MappedNullable = &CreateSessionRequest{}
 
 // CreateSessionRequest struct for CreateSessionRequest
 type CreateSessionRequest struct {
-	Alias     *string `json:"alias,omitempty"`
-	SessionId string  `json:"sessionId"`
+	SessionId string `json:"sessionId"`
 }
 
 type _CreateSessionRequest CreateSessionRequest
@@ -43,38 +42,6 @@ func NewCreateSessionRequest(sessionId string) *CreateSessionRequest {
 func NewCreateSessionRequestWithDefaults() *CreateSessionRequest {
 	this := CreateSessionRequest{}
 	return &this
-}
-
-// GetAlias returns the Alias field value if set, zero value otherwise.
-func (o *CreateSessionRequest) GetAlias() string {
-	if o == nil || IsNil(o.Alias) {
-		var ret string
-		return ret
-	}
-	return *o.Alias
-}
-
-// GetAliasOk returns a tuple with the Alias field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateSessionRequest) GetAliasOk() (*string, bool) {
-	if o == nil || IsNil(o.Alias) {
-		return nil, false
-	}
-	return o.Alias, true
-}
-
-// HasAlias returns a boolean if a field has been set.
-func (o *CreateSessionRequest) HasAlias() bool {
-	if o != nil && !IsNil(o.Alias) {
-		return true
-	}
-
-	return false
-}
-
-// SetAlias gets a reference to the given string and assigns it to the Alias field.
-func (o *CreateSessionRequest) SetAlias(v string) {
-	o.Alias = &v
 }
 
 // GetSessionId returns the SessionId field value
@@ -111,9 +78,6 @@ func (o CreateSessionRequest) MarshalJSON() ([]byte, error) {
 
 func (o CreateSessionRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Alias) {
-		toSerialize["alias"] = o.Alias
-	}
 	toSerialize["sessionId"] = o.SessionId
 	return toSerialize, nil
 }

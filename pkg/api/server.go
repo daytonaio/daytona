@@ -165,7 +165,7 @@ func (a *ApiServer) Start() error {
 					sessionController.POST("", toolbox.CreateSession)
 					sessionController.POST("/:sessionId/exec", toolbox.SessionExecuteCommand)
 					sessionController.DELETE("/:sessionId", toolbox.DeleteSession)
-					sessionController.GET("/:sessionId/:commandId/logs", toolbox.SessionCommandLogs)
+					sessionController.GET("/:sessionId/command/:commandId/logs", toolbox.GetSessionCommandLogs)
 				}
 			}
 

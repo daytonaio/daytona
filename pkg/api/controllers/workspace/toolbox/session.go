@@ -73,6 +73,20 @@ func ListSessions(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }
 
-func SessionCommandLogs(ctx *gin.Context) {
+// GetSessionCommandLogs 			godoc
+//
+//	@Tags			workspace toolbox
+//	@Summary		Get session command logs
+//	@Description	Get logs of a command inside a session inside workspace project
+//	@Description	Connect with websocket to get a stream of the logs
+//	@Param			workspaceId	path		string	true	"Workspace ID or Name"
+//	@Param			projectId	path		string	true	"Project ID"
+//	@Param			sessionId	path		string	true	"Session ID"
+//	@Param			commandId	path		string	true	"Command ID"
+//	@Success		200			{string}	string	"command logs"
+//	@Router			/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs [get]
+//
+//	@id				GetSessionCommandLogs
+func GetSessionCommandLogs(ctx *gin.Context) {
 	forwardRequestToToolbox(ctx)
 }

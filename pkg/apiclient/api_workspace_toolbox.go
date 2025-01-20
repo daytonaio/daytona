@@ -1883,6 +1883,137 @@ func (a *WorkspaceToolboxAPIService) GetProjectDirExecute(r ApiGetProjectDirRequ
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGetSessionCommandLogsRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceToolboxAPIService
+	workspaceId string
+	projectId   string
+	sessionId   string
+	commandId   string
+}
+
+func (r ApiGetSessionCommandLogsRequest) Execute() (string, *http.Response, error) {
+	return r.ApiService.GetSessionCommandLogsExecute(r)
+}
+
+/*
+GetSessionCommandLogs Get session command logs
+
+Get logs of a command inside a session inside workspace project
+Connect with websocket to get a stream of the logs
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID or Name
+	@param projectId Project ID
+	@param sessionId Session ID
+	@param commandId Command ID
+	@return ApiGetSessionCommandLogsRequest
+*/
+func (a *WorkspaceToolboxAPIService) GetSessionCommandLogs(ctx context.Context, workspaceId string, projectId string, sessionId string, commandId string) ApiGetSessionCommandLogsRequest {
+	return ApiGetSessionCommandLogsRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+		projectId:   projectId,
+		sessionId:   sessionId,
+		commandId:   commandId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return string
+func (a *WorkspaceToolboxAPIService) GetSessionCommandLogsExecute(r ApiGetSessionCommandLogsRequest) (string, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue string
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceToolboxAPIService.GetSessionCommandLogs")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"sessionId"+"}", url.PathEscape(parameterValueToString(r.sessionId, "sessionId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"commandId"+"}", url.PathEscape(parameterValueToString(r.commandId, "commandId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGitAddFilesRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceToolboxAPIService

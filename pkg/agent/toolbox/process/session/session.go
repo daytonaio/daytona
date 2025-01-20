@@ -63,7 +63,6 @@ func CreateSession(projectDir, configDir string) func(c *gin.Context) {
 
 		sessions[request.SessionId] = &session{
 			cmd:         cmd,
-			alias:       request.Alias,
 			outReader:   bufio.NewScanner(outReader),
 			stdinWriter: stdinWriter,
 			commands:    map[string]*Command{},
@@ -107,7 +106,6 @@ func ListSessions(c *gin.Context) {
 	for sessionId, session := range sessions {
 		sessionDTOs = append(sessionDTOs, Session{
 			SessionId: sessionId,
-			Alias:     session.alias,
 			Commands:  slices.Collect(maps.Values(session.commands)),
 		})
 	}

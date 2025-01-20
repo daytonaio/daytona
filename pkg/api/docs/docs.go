@@ -3313,6 +3313,54 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs": {
+            "get": {
+                "description": "Get logs of a command inside a session inside workspace project\nConnect with websocket to get a stream of the logs",
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get session command logs",
+                "operationId": "GetSessionCommandLogs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Project ID",
+                        "name": "projectId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Command ID",
+                        "name": "commandId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "command logs",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec": {
             "post": {
                 "description": "Execute command inside a session inside workspace project",
@@ -3779,9 +3827,6 @@ const docTemplate = `{
                 "sessionId"
             ],
             "properties": {
-                "alias": {
-                    "type": "string"
-                },
                 "sessionId": {
                     "type": "string"
                 }
@@ -4962,9 +5007,6 @@ const docTemplate = `{
                 "sessionId"
             ],
             "properties": {
-                "alias": {
-                    "type": "string"
-                },
                 "commands": {
                     "type": "array",
                     "items": {

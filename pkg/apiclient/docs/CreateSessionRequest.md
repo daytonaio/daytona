@@ -4,7 +4,6 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Alias** | Pointer to **string** |  | [optional] 
 **SessionId** | **string** |  | 
 
 ## Methods
@@ -25,31 +24,6 @@ will change when the set of required properties is changed
 NewCreateSessionRequestWithDefaults instantiates a new CreateSessionRequest object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
-
-### GetAlias
-
-`func (o *CreateSessionRequest) GetAlias() string`
-
-GetAlias returns the Alias field if non-nil, zero value otherwise.
-
-### GetAliasOk
-
-`func (o *CreateSessionRequest) GetAliasOk() (*string, bool)`
-
-GetAliasOk returns a tuple with the Alias field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAlias
-
-`func (o *CreateSessionRequest) SetAlias(v string)`
-
-SetAlias sets Alias field to given value.
-
-### HasAlias
-
-`func (o *CreateSessionRequest) HasAlias() bool`
-
-HasAlias returns a boolean if a field has been set.
 
 ### GetSessionId
 
