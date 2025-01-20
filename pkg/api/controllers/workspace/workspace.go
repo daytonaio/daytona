@@ -52,6 +52,34 @@ func FindWorkspace(ctx *gin.Context) {
 	ctx.JSON(200, w)
 }
 
+// GetWorkspaceState 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Get workspace state
+//	@Description	Get workspace state
+//	@Produce		json
+//	@Param			workspaceId	path		string	true	"Workspace ID or Name"
+//	@Success		200			{object}	ResourceState
+//	@Router			/workspace/{workspaceId}/state [get]
+//
+//	@id				GetWorkspaceState
+func GetWorkspaceState(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	server := server.GetInstance(nil)
+
+	w, err := server.WorkspaceService.Find(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find workspace: %w", err))
+		return
+	}
+
+	ctx.JSON(200, w.State)
+}
+
 // ListWorkspaces 			godoc
 //
 //	@Tags			workspace
