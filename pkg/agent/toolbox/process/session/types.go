@@ -4,7 +4,6 @@
 package session
 
 import (
-	"bufio"
 	"io"
 	"os/exec"
 )
@@ -31,7 +30,6 @@ type Session struct {
 
 type session struct {
 	cmd         *exec.Cmd
-	outReader   *bufio.Scanner
 	stdinWriter io.Writer
 	commands    map[string]*Command
 }

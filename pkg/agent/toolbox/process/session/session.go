@@ -4,10 +4,8 @@
 package session
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"maps"
 	"net/http"
 	"os"
@@ -44,11 +42,6 @@ func CreateSession(projectDir, configDir string) func(c *gin.Context) {
 			return
 		}
 
-		outReader, outWriter := io.Pipe()
-
-		cmd.Stdout = outWriter
-		cmd.Stderr = outWriter
-
 		err = cmd.Start()
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
@@ -63,7 +56,6 @@ func CreateSession(projectDir, configDir string) func(c *gin.Context) {
 
 		sessions[request.SessionId] = &session{
 			cmd:         cmd,
-			outReader:   bufio.NewScanner(outReader),
 			stdinWriter: stdinWriter,
 			commands:    map[string]*Command{},
 		}
