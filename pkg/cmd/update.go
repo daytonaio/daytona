@@ -90,12 +90,7 @@ var updateCmd = &cobra.Command{
 
 		fmt.Println("Updating to version", version, "from", currentVersion)
 
-		err = updateToVersion(version, changelog)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		return updateToVersion(version, changelog)
 	},
 }
 
