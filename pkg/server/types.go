@@ -4,6 +4,8 @@
 package server
 
 import (
+	"context"
+	"net"
 	"net/http"
 )
 
@@ -12,6 +14,7 @@ type TailscaleServer interface {
 	CreateAuthKey() (string, error)
 	CreateUser() error
 	HTTPClient() *http.Client
+	Dial(ctx context.Context, network, address string) (net.Conn, error)
 	Start(errChan chan error) error
 	Stop() error
 	Purge() error

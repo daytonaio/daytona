@@ -4,6 +4,8 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
+[**CreateSession**](WorkspaceToolboxAPI.md#CreateSession) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/session | Create exec session
+[**DeleteSession**](WorkspaceToolboxAPI.md#DeleteSession) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId} | Delete session
 [**FsCreateFolder**](WorkspaceToolboxAPI.md#FsCreateFolder) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/folder | Create folder
 [**FsDeleteFile**](WorkspaceToolboxAPI.md#FsDeleteFile) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/files | Delete file
 [**FsDownloadFile**](WorkspaceToolboxAPI.md#FsDownloadFile) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/download | Download file
@@ -25,6 +27,7 @@ Method | HTTP request | Description
 [**GitGitStatus**](WorkspaceToolboxAPI.md#GitGitStatus) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/status | Get git status
 [**GitPullChanges**](WorkspaceToolboxAPI.md#GitPullChanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/pull | Pull changes
 [**GitPushChanges**](WorkspaceToolboxAPI.md#GitPushChanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/push | Push changes
+[**ListSessions**](WorkspaceToolboxAPI.md#ListSessions) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session | List sessions
 [**LspCompletions**](WorkspaceToolboxAPI.md#LspCompletions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions | Get Lsp Completions
 [**LspDidClose**](WorkspaceToolboxAPI.md#LspDidClose) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close | Call Lsp DidClose
 [**LspDidOpen**](WorkspaceToolboxAPI.md#LspDidOpen) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open | Call Lsp DidOpen
@@ -33,7 +36,155 @@ Method | HTTP request | Description
 [**LspStop**](WorkspaceToolboxAPI.md#LspStop) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop | Stop Lsp server
 [**LspWorkspaceSymbols**](WorkspaceToolboxAPI.md#LspWorkspaceSymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols
 [**ProcessExecuteCommand**](WorkspaceToolboxAPI.md#ProcessExecuteCommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/execute | Execute command
+[**SessionExecuteCommand**](WorkspaceToolboxAPI.md#SessionExecuteCommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec | Execute command in session
 
+
+
+## CreateSession
+
+> CreateSession(ctx, workspaceId, projectId).Params(params).Execute()
+
+Create exec session
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+	params := *openapiclient.NewCreateSessionRequest("SessionId_example") // CreateSessionRequest | Create session request
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.WorkspaceToolboxAPI.CreateSession(context.Background(), workspaceId, projectId).Params(params).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.CreateSession``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiCreateSessionRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+ **params** | [**CreateSessionRequest**](CreateSessionRequest.md) | Create session request | 
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## DeleteSession
+
+> DeleteSession(ctx, workspaceId, projectId, sessionId).Execute()
+
+Delete session
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+	sessionId := "sessionId_example" // string | Session ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	r, err := apiClient.WorkspaceToolboxAPI.DeleteSession(context.Background(), workspaceId, projectId, sessionId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.DeleteSession``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+**sessionId** | **string** | Session ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiDeleteSessionRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+
+### Return type
+
+ (empty response body)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: Not defined
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
 
 
 ## FsCreateFolder
@@ -1605,6 +1756,79 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## ListSessions
+
+> []Session ListSessions(ctx, workspaceId, projectId).Execute()
+
+List sessions
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkspaceToolboxAPI.ListSessions(context.Background(), workspaceId, projectId).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.ListSessions``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `ListSessions`: []Session
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.ListSessions`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiListSessionsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+### Return type
+
+[**[]Session**](Session.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## LspCompletions
 
 > CompletionList LspCompletions(ctx, workspaceId, projectId).Params(params).Execute()
@@ -2190,6 +2414,84 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**ExecuteResponse**](ExecuteResponse.md)
+
+### Authorization
+
+[Bearer](../README.md#Bearer)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SessionExecuteCommand
+
+> SessionExecuteResponse SessionExecuteCommand(ctx, workspaceId, projectId, sessionId).Params(params).Execute()
+
+Execute command in session
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/GIT_USER_ID/GIT_REPO_ID/apiclient"
+)
+
+func main() {
+	workspaceId := "workspaceId_example" // string | Workspace ID or Name
+	projectId := "projectId_example" // string | Project ID
+	sessionId := "sessionId_example" // string | Session ID
+	params := *openapiclient.NewSessionExecuteRequest("Command_example") // SessionExecuteRequest | Execute command request
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkspaceToolboxAPI.SessionExecuteCommand(context.Background(), workspaceId, projectId, sessionId).Params(params).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkspaceToolboxAPI.SessionExecuteCommand``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `SessionExecuteCommand`: SessionExecuteResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkspaceToolboxAPI.SessionExecuteCommand`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workspaceId** | **string** | Workspace ID or Name | 
+**projectId** | **string** | Project ID | 
+**sessionId** | **string** | Session ID | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSessionExecuteCommandRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+
+
+ **params** | [**SessionExecuteRequest**](SessionExecuteRequest.md) | Execute command request | 
+
+### Return type
+
+[**SessionExecuteResponse**](SessionExecuteResponse.md)
 
 ### Authorization
 

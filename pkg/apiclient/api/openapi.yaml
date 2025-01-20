@@ -2340,6 +2340,137 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session:
+    get:
+      description: List sessions inside workspace project
+      operationId: ListSessions
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Session'
+                type: array
+          description: OK
+      summary: List sessions
+      tags:
+      - workspace toolbox
+    post:
+      description: Create exec session inside workspace project
+      operationId: CreateSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+        description: Create session request
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Create exec session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a session inside workspace project
+      operationId: DeleteSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute command inside a session inside workspace project
+      operationId: SessionExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SessionExecuteRequest'
+        description: Execute command request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionExecuteResponse'
+          description: OK
+      summary: Execute command in session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
   /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
     get:
       description: Get project directory
@@ -2487,6 +2618,22 @@ components:
       x-enum-varnames:
       - CloneTargetBranch
       - CloneTargetCommit
+    Command:
+      example:
+        exitCode: 0
+        id: id
+        command: command
+      properties:
+        command:
+          type: string
+        exitCode:
+          type: integer
+        id:
+          type: string
+      required:
+      - command
+      - id
+      type: object
     CompletionContext:
       example:
         triggerCharacter: triggerCharacter
@@ -2756,6 +2903,18 @@ components:
       - name
       - options
       - providerInfo
+      type: object
+    CreateSessionRequest:
+      example:
+        alias: alias
+        sessionId: sessionId
+      properties:
+        alias:
+          type: string
+        sessionId:
+          type: string
+      required:
+      - sessionId
       type: object
     CreateWorkspaceDTO:
       example:
@@ -3978,6 +4137,55 @@ components:
       - providersDir
       - registryUrl
       - serverDownloadUrl
+      type: object
+    Session:
+      example:
+        alias: alias
+        sessionId: sessionId
+        commands:
+        - exitCode: 0
+          id: id
+          command: command
+        - exitCode: 0
+          id: id
+          command: command
+      properties:
+        alias:
+          type: string
+        commands:
+          items:
+            $ref: '#/components/schemas/Command'
+          type: array
+        sessionId:
+          type: string
+      required:
+      - commands
+      - sessionId
+      type: object
+    SessionExecuteRequest:
+      example:
+        async: true
+        command: command
+      properties:
+        async:
+          type: boolean
+        command:
+          type: string
+      required:
+      - command
+      type: object
+    SessionExecuteResponse:
+      example:
+        output: output
+        cmdId: cmdId
+        exitCode: 0
+      properties:
+        cmdId:
+          type: string
+        exitCode:
+          type: integer
+        output:
+          type: string
       type: object
     SetGitProviderConfig:
       example:
