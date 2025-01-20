@@ -141,6 +141,8 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
 *WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
+*WorkspaceToolboxAPI* | [**CreateSession**](docs/WorkspaceToolboxAPI.md#createsession) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/session | Create exec session
+*WorkspaceToolboxAPI* | [**DeleteSession**](docs/WorkspaceToolboxAPI.md#deletesession) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId} | Delete session
 *WorkspaceToolboxAPI* | [**FsCreateFolder**](docs/WorkspaceToolboxAPI.md#fscreatefolder) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/folder | Create folder
 *WorkspaceToolboxAPI* | [**FsDeleteFile**](docs/WorkspaceToolboxAPI.md#fsdeletefile) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/files | Delete file
 *WorkspaceToolboxAPI* | [**FsDownloadFile**](docs/WorkspaceToolboxAPI.md#fsdownloadfile) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/download | Download file
@@ -153,6 +155,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**FsSetFilePermissions**](docs/WorkspaceToolboxAPI.md#fssetfilepermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
 *WorkspaceToolboxAPI* | [**FsUploadFile**](docs/WorkspaceToolboxAPI.md#fsuploadfile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
 *WorkspaceToolboxAPI* | [**GetProjectDir**](docs/WorkspaceToolboxAPI.md#getprojectdir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
+*WorkspaceToolboxAPI* | [**GetSessionCommandLogs**](docs/WorkspaceToolboxAPI.md#getsessioncommandlogs) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get session command logs
 *WorkspaceToolboxAPI* | [**GitAddFiles**](docs/WorkspaceToolboxAPI.md#gitaddfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
 *WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
 *WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
@@ -162,6 +165,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**GitGitStatus**](docs/WorkspaceToolboxAPI.md#gitgitstatus) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/status | Get git status
 *WorkspaceToolboxAPI* | [**GitPullChanges**](docs/WorkspaceToolboxAPI.md#gitpullchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/pull | Pull changes
 *WorkspaceToolboxAPI* | [**GitPushChanges**](docs/WorkspaceToolboxAPI.md#gitpushchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/push | Push changes
+*WorkspaceToolboxAPI* | [**ListSessions**](docs/WorkspaceToolboxAPI.md#listsessions) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/process/session | List sessions
 *WorkspaceToolboxAPI* | [**LspCompletions**](docs/WorkspaceToolboxAPI.md#lspcompletions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions | Get Lsp Completions
 *WorkspaceToolboxAPI* | [**LspDidClose**](docs/WorkspaceToolboxAPI.md#lspdidclose) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close | Call Lsp DidClose
 *WorkspaceToolboxAPI* | [**LspDidOpen**](docs/WorkspaceToolboxAPI.md#lspdidopen) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open | Call Lsp DidOpen
@@ -170,6 +174,7 @@ Class | Method | HTTP request | Description
 *WorkspaceToolboxAPI* | [**LspStop**](docs/WorkspaceToolboxAPI.md#lspstop) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop | Stop Lsp server
 *WorkspaceToolboxAPI* | [**LspWorkspaceSymbols**](docs/WorkspaceToolboxAPI.md#lspworkspacesymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols
 *WorkspaceToolboxAPI* | [**ProcessExecuteCommand**](docs/WorkspaceToolboxAPI.md#processexecutecommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/execute | Execute command
+*WorkspaceToolboxAPI* | [**SessionExecuteCommand**](docs/WorkspaceToolboxAPI.md#sessionexecutecommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/session/{sessionId}/exec | Execute command in session
 
 
 ## Documentation For Models
@@ -181,6 +186,7 @@ Class | Method | HTTP request | Description
  - [BuildConfig](docs/BuildConfig.md)
  - [CachedBuild](docs/CachedBuild.md)
  - [CloneTarget](docs/CloneTarget.md)
+ - [Command](docs/Command.md)
  - [CompletionContext](docs/CompletionContext.md)
  - [CompletionItem](docs/CompletionItem.md)
  - [CompletionList](docs/CompletionList.md)
@@ -192,6 +198,7 @@ Class | Method | HTTP request | Description
  - [CreateProjectDTO](docs/CreateProjectDTO.md)
  - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
  - [CreateProviderTargetDTO](docs/CreateProviderTargetDTO.md)
+ - [CreateSessionRequest](docs/CreateSessionRequest.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
  - [ExecuteRequest](docs/ExecuteRequest.md)
@@ -246,6 +253,9 @@ Class | Method | HTTP request | Description
  - [Sample](docs/Sample.md)
  - [SearchFilesResponse](docs/SearchFilesResponse.md)
  - [ServerConfig](docs/ServerConfig.md)
+ - [Session](docs/Session.md)
+ - [SessionExecuteRequest](docs/SessionExecuteRequest.md)
+ - [SessionExecuteResponse](docs/SessionExecuteResponse.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
  - [SetProjectState](docs/SetProjectState.md)
  - [SigningMethod](docs/SigningMethod.md)

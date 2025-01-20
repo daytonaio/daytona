@@ -8,12 +8,12 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"strings"
 	"syscall"
 	"unsafe"
 
 	"github.com/creack/pty"
 	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 	"golang.org/x/sys/unix"
@@ -81,7 +81,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	shell := s.getShell()
+	shell := common.GetShell()
 	cmd := exec.Command(shell)
 
 	cmd.Dir = s.ProjectDir
@@ -231,37 +231,6 @@ func (s *Server) osSignalFrom(sig ssh.Signal) os.Signal {
 	default:
 		return unix.SIGKILL
 	}
-}
-
-func (s *Server) getShell() string {
-	out, err := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells").Output()
-	if err != nil {
-		return "sh"
-	}
-
-	if strings.Contains(string(out), "/usr/bin/zsh") {
-		return "/usr/bin/zsh"
-	}
-
-	if strings.Contains(string(out), "/bin/zsh") {
-		return "/bin/zsh"
-	}
-
-	if strings.Contains(string(out), "/usr/bin/bash") {
-		return "/usr/bin/bash"
-	}
-
-	if strings.Contains(string(out), "/bin/bash") {
-		return "/bin/bash"
-	}
-
-	shellEnv, shellSet := os.LookupEnv("SHELL")
-
-	if shellSet {
-		return shellEnv
-	}
-
-	return "sh"
 }
 
 func (s *Server) sftpHandler(session ssh.Session) {
