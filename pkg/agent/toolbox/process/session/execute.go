@@ -4,6 +4,8 @@
 package session
 
 import (
+	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -37,74 +39,71 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 		var cmdId *string
 		var logFile *os.File
 
-		if request.Async {
-			cmdId = util.Pointer(uuid.NewString())
+		cmdId = util.Pointer(uuid.NewString())
 
-			command := &Command{
-				Id:      *cmdId,
-				Command: request.Command,
-			}
-			session.commands[*cmdId] = command
+		command := &Command{
+			Id:      *cmdId,
+			Command: request.Command,
+		}
+		session.commands[*cmdId] = command
 
-			err := os.MkdirAll(filepath.Join(configDir, "sessions", sessionId, *cmdId), 0755)
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-
-			logFile, err = os.Create(filepath.Join(configDir, "sessions", sessionId, *cmdId, "output.log"))
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
+		err := os.MkdirAll(filepath.Join(configDir, "sessions", sessionId, *cmdId), 0755)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
-		cmdToExec := fmt.Sprintf("\n%s ; echo \"DAYTONA_CMD_EXIT_CODE: $?\"\n", request.Command)
+		logFile, err = os.Create(filepath.Join(configDir, "sessions", sessionId, *cmdId, "output.log"))
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
+		}
+
+		cmdToExec := fmt.Sprintf("%s > %s 2>&1 ; echo \"DTN_EXIT: $?\" >> %s\n", request.Command, logFile.Name(), logFile.Name())
 
 		type execResult struct {
 			out      string
 			err      error
 			exitCode *int
 		}
-
 		resultChan := make(chan execResult)
 
 		go func() {
 			out := ""
-			var exitCode *int
 			defer close(resultChan)
 
-			for session.outReader.Scan() {
-				line := session.outReader.Text()
-				line = line + "\n"
+			logChan := make(chan []byte)
+			errChan := make(chan error)
 
-				exitCode, line = extractExitCode(line)
+			go util.ReadLog(context.Background(), logFile, true, logChan, errChan)
 
-				if request.Async {
-					_, err := logFile.Write([]byte(line))
-					if err != nil {
-						resultChan <- execResult{err: err}
+			defer logFile.Close()
+
+			for {
+				select {
+				case logEntry := <-logChan:
+					logEntry = bytes.Trim(logEntry, "\x00")
+					if len(logEntry) == 0 {
+						continue
+					}
+					exitCode, line := extractExitCode(string(logEntry))
+					out += line
+
+					if exitCode != nil {
+						sessions[sessionId].commands[*cmdId].ExitCode = exitCode
+						resultChan <- execResult{out: out, exitCode: exitCode, err: nil}
 						return
 					}
-				} else {
-					out += line
-				}
-
-				if exitCode != nil {
-					if request.Async {
-						sessions[sessionId].commands[*cmdId].ExitCode = exitCode
+				case err := <-errChan:
+					if err != nil {
+						resultChan <- execResult{out: out, exitCode: nil, err: err}
+						return
 					}
-					break
 				}
 			}
-
-			if logFile != nil {
-				logFile.Close()
-			}
-			resultChan <- execResult{out: out, exitCode: exitCode, err: session.outReader.Err()}
 		}()
 
-		_, err := session.stdinWriter.Write([]byte(cmdToExec))
+		_, err = session.stdinWriter.Write([]byte(cmdToExec))
 		if err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
@@ -134,7 +133,7 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 func extractExitCode(output string) (*int, string) {
 	var exitCode *int
 
-	regex := regexp.MustCompile(`DAYTONA_CMD_EXIT_CODE: (\d+)\n`)
+	regex := regexp.MustCompile(`DTN_EXIT: (\d+)\n`)
 	matches := regex.FindStringSubmatch(output)
 	if len(matches) > 1 {
 		code, err := strconv.Atoi(matches[1])
@@ -145,7 +144,7 @@ func extractExitCode(output string) (*int, string) {
 	}
 
 	if exitCode != nil {
-		output = strings.Replace(output, fmt.Sprintf("DAYTONA_CMD_EXIT_CODE: %d\n", *exitCode), "", 1)
+		output = strings.Replace(output, fmt.Sprintf("DTN_EXIT: %d\n", *exitCode), "", 1)
 	}
 
 	return exitCode, output

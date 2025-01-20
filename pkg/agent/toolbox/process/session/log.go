@@ -12,17 +12,13 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api/controllers/log"
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		sessionId := c.Param("sessionId")
 		cmdId := c.Param("commandId")
-
-		if cmdId == "" {
-			c.AbortWithError(http.StatusBadRequest, errors.New("commandId is required"))
-			return
-		}
 
 		_, ok := sessions[sessionId]
 		if !ok {
@@ -49,8 +45,17 @@ func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 				return
 			}
 			defer logFile.Close()
-
-			log.ReadLog(c, logFile, util.ReadLog, log.WriteToWs)
+			log.ReadLog(c, logFile, util.ReadLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+				for {
+					msg := <-messages
+					_, output := extractExitCode(string(msg))
+					err := conn.WriteMessage(websocket.TextMessage, []byte(output))
+					if err != nil {
+						errors <- err
+						break
+					}
+				}
+			})
 			return
 		}
 
@@ -64,6 +69,7 @@ func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 			return
 		}
 
-		c.String(http.StatusOK, string(content))
+		_, output := extractExitCode(string(content))
+		c.String(http.StatusOK, output)
 	}
 }
