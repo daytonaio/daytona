@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"slices"
 
 	"github.com/daytonaio/daytona/pkg/common"
@@ -48,16 +47,18 @@ func CreateSession(projectDir, configDir string) func(c *gin.Context) {
 			return
 		}
 
-		err = os.MkdirAll(filepath.Join(configDir, "sessions", request.SessionId), 0755)
-		if err != nil {
-			c.AbortWithError(http.StatusInternalServerError, err)
-			return
-		}
-
-		sessions[request.SessionId] = &session{
+		session := &session{
+			id:          request.SessionId,
 			cmd:         cmd,
 			stdinWriter: stdinWriter,
 			commands:    map[string]*Command{},
+		}
+		sessions[request.SessionId] = session
+
+		err = os.MkdirAll(session.Dir(configDir), 0755)
+		if err != nil {
+			c.AbortWithError(http.StatusInternalServerError, err)
+			return
 		}
 
 		c.Status(http.StatusCreated)
@@ -82,7 +83,7 @@ func DeleteSession(configDir string) func(c *gin.Context) {
 
 		delete(sessions, sessionId)
 
-		err = os.RemoveAll(filepath.Join(configDir, "sessions", sessionId))
+		err = os.RemoveAll(session.Dir(configDir))
 		if err != nil {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return

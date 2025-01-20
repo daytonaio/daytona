@@ -25,7 +25,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
-func WriteToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
+func writeToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	for {
 		err := ws.WriteMessage(websocket.TextMessage, <-c)
 		if err != nil {
@@ -35,7 +35,7 @@ func WriteToWs(ws *websocket.Conn, c chan []byte, errChan chan error) {
 	}
 }
 
-func WriteJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
+func writeJSONToWs(ws *websocket.Conn, c chan interface{}, errChan chan error) {
 	for {
 		err := ws.WriteJSON(<-c)
 		if err != nil {
@@ -123,7 +123,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 				return
 			}
 			if err == nil {
-				ReadLog(ginCtx, reader, util.ReadLog, WriteToWs)
+				ReadLog(ginCtx, reader, util.ReadLog, writeToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -140,7 +140,7 @@ func ReadServerLog(ginCtx *gin.Context) {
 		return
 	}
 
-	ReadLog(ginCtx, reader, util.ReadLog, WriteToWs)
+	ReadLog(ginCtx, reader, util.ReadLog, writeToWs)
 }
 
 func ReadWorkspaceLog(ginCtx *gin.Context) {
@@ -154,7 +154,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		for {
 			wsLogReader, err := server.WorkspaceService.GetWorkspaceLogReader(workspaceId)
 			if err == nil {
-				ReadLog(ginCtx, wsLogReader, util.ReadJSONLog, WriteJSONToWs)
+				ReadLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -167,7 +167,7 @@ func ReadWorkspaceLog(ginCtx *gin.Context) {
 		return
 	}
 
-	ReadLog(ginCtx, wsLogReader, util.ReadJSONLog, WriteJSONToWs)
+	ReadLog(ginCtx, wsLogReader, util.ReadJSONLog, writeJSONToWs)
 }
 
 func ReadProjectLog(ginCtx *gin.Context) {
@@ -182,7 +182,7 @@ func ReadProjectLog(ginCtx *gin.Context) {
 		for {
 			projectLogReader, err := server.WorkspaceService.GetProjectLogReader(workspaceId, projectName)
 			if err == nil {
-				ReadLog(ginCtx, projectLogReader, util.ReadJSONLog, WriteJSONToWs)
+				ReadLog(ginCtx, projectLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -195,7 +195,7 @@ func ReadProjectLog(ginCtx *gin.Context) {
 		return
 	}
 
-	ReadLog(ginCtx, projectLogReader, util.ReadJSONLog, WriteJSONToWs)
+	ReadLog(ginCtx, projectLogReader, util.ReadJSONLog, writeJSONToWs)
 }
 
 func ReadBuildLog(ginCtx *gin.Context) {
@@ -210,7 +210,7 @@ func ReadBuildLog(ginCtx *gin.Context) {
 			buildLogReader, err := server.BuildService.GetBuildLogReader(buildId)
 
 			if err == nil {
-				ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, WriteJSONToWs)
+				ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
 				return
 			}
 			time.Sleep(TIMEOUT)
@@ -223,5 +223,5 @@ func ReadBuildLog(ginCtx *gin.Context) {
 		return
 	}
 
-	ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, WriteJSONToWs)
+	ReadLog(ginCtx, buildLogReader, util.ReadJSONLog, writeJSONToWs)
 }

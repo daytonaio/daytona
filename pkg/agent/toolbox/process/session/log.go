@@ -7,7 +7,6 @@ import (
 	"errors"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api/controllers/log"
@@ -20,19 +19,19 @@ func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 		sessionId := c.Param("sessionId")
 		cmdId := c.Param("commandId")
 
-		_, ok := sessions[sessionId]
+		session, ok := sessions[sessionId]
 		if !ok {
 			c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
 			return
 		}
 
-		_, ok = sessions[sessionId].commands[cmdId]
+		command, ok := sessions[sessionId].commands[cmdId]
 		if !ok {
 			c.AbortWithError(http.StatusNotFound, errors.New("command not found"))
 			return
 		}
 
-		path := filepath.Join(configDir, "sessions", sessionId, cmdId, "output.log")
+		path := command.LogFilePath(session.Dir(configDir))
 
 		if c.Request.Header.Get("Upgrade") == "websocket" {
 			logFile, err := os.Open(path)

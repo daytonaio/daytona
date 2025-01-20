@@ -6,6 +6,7 @@ package session
 import (
 	"io"
 	"os/exec"
+	"path/filepath"
 )
 
 type CreateSessionRequest struct {
@@ -29,9 +30,14 @@ type Session struct {
 } // @name Session
 
 type session struct {
+	id          string
 	cmd         *exec.Cmd
 	stdinWriter io.Writer
 	commands    map[string]*Command
+}
+
+func (s *session) Dir(configDir string) string {
+	return filepath.Join(configDir, "sessions", s.id)
 }
 
 type Command struct {
@@ -39,3 +45,7 @@ type Command struct {
 	Command  string `json:"command" validate:"required"`
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
 } // @name Command
+
+func (c *Command) LogFilePath(sessionDir string) string {
+	return filepath.Join(sessionDir, c.Id, "output.log")
+}

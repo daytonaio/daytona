@@ -47,13 +47,15 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 		}
 		session.commands[*cmdId] = command
 
-		err := os.MkdirAll(filepath.Join(configDir, "sessions", sessionId, *cmdId), 0755)
+		logFilePath := command.LogFilePath(session.Dir(configDir))
+
+		err := os.MkdirAll(filepath.Dir(logFilePath), 0755)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
 		}
 
-		logFile, err = os.Create(filepath.Join(configDir, "sessions", sessionId, *cmdId, "output.log"))
+		logFile, err = os.Create(logFilePath)
 		if err != nil {
 			c.AbortWithError(http.StatusInternalServerError, err)
 			return
