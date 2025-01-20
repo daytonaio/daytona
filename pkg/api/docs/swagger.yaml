@@ -2408,6 +2408,28 @@ paths:
       summary: Update runner metadata
       tags:
       - runner
+  /runner/{runnerId}/provider:
+    get:
+      description: Get runner providers
+      operationId: GetRunnerProviders
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderInfo'
+            type: array
+      summary: Get runner providers
+      tags:
+      - provider
   /runner/{runnerId}/provider/{providerName}/uninstall:
     post:
       description: Uninstall provider
@@ -2830,6 +2852,26 @@ paths:
         "200":
           description: OK
       summary: Start target
+      tags:
+      - target
+  /target/{targetId}/state:
+    get:
+      description: Get target state
+      operationId: GetTargetState
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ResourceState'
+      summary: Get target state
       tags:
       - target
   /target/{targetId}/stop:
@@ -3268,6 +3310,26 @@ paths:
         "200":
           description: OK
       summary: Start workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/state:
+    get:
+      description: Get workspace state
+      operationId: GetWorkspaceState
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/ResourceState'
+      summary: Get workspace state
       tags:
       - workspace
   /workspace/{workspaceId}/stop:

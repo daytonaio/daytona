@@ -112,6 +112,7 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SavePrebuild**](docs/PrebuildAPI.md#saveprebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
+*ProviderAPI* | [**GetRunnerProviders**](docs/ProviderAPI.md#getrunnerproviders) | **Get** /runner/{runnerId}/provider | Get runner providers
 *ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/install | Install provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
@@ -131,6 +132,7 @@ Class | Method | HTTP request | Description
 *TargetAPI* | [**CreateTarget**](docs/TargetAPI.md#createtarget) | **Post** /target | Create a target
 *TargetAPI* | [**DeleteTarget**](docs/TargetAPI.md#deletetarget) | **Delete** /target/{targetId} | Delete target
 *TargetAPI* | [**FindTarget**](docs/TargetAPI.md#findtarget) | **Get** /target/{targetId} | Find target
+*TargetAPI* | [**GetTargetState**](docs/TargetAPI.md#gettargetstate) | **Get** /target/{targetId}/state | Get target state
 *TargetAPI* | [**HandleSuccessfulCreation**](docs/TargetAPI.md#handlesuccessfulcreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
 *TargetAPI* | [**RestartTarget**](docs/TargetAPI.md#restarttarget) | **Post** /target/{targetId}/restart | Restart target
@@ -145,6 +147,7 @@ Class | Method | HTTP request | Description
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
 *WorkspaceAPI* | [**DeleteWorkspace**](docs/WorkspaceAPI.md#deleteworkspace) | **Delete** /workspace/{workspaceId} | Delete workspace
 *WorkspaceAPI* | [**FindWorkspace**](docs/WorkspaceAPI.md#findworkspace) | **Get** /workspace/{workspaceId} | Find workspace
+*WorkspaceAPI* | [**GetWorkspaceState**](docs/WorkspaceAPI.md#getworkspacestate) | **Get** /workspace/{workspaceId}/state | Get workspace state
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
 *WorkspaceAPI* | [**RestartWorkspace**](docs/WorkspaceAPI.md#restartworkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace

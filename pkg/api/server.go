@@ -145,6 +145,7 @@ func (a *ApiServer) Start() error {
 	targetController := protected.Group("/target")
 	{
 		targetController.GET("/:targetId", target.FindTarget)
+		targetController.GET("/:targetId/state", target.GetTargetState)
 		targetController.GET("", target.ListTargets)
 		targetController.POST("", target.CreateTarget)
 		targetController.POST("/:targetId/start", target.StartTarget)
@@ -221,6 +222,7 @@ func (a *ApiServer) Start() error {
 		}
 
 		workspaceController.GET("/:workspaceId", workspace.FindWorkspace)
+		workspaceController.GET("/:workspaceId/state", workspace.GetWorkspaceState)
 		workspaceController.GET("", workspace.ListWorkspaces)
 		workspaceController.POST("", workspace.CreateWorkspace)
 		workspaceController.DELETE("/:workspaceId", workspace.DeleteWorkspace)
@@ -355,6 +357,7 @@ func (a *ApiServer) Start() error {
 		{
 			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
 			{
+				runnerIdProviderGroup.GET("", provider.GetRunnerProviders)
 				runnerIdProviderGroup.POST("/install", provider.InstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
