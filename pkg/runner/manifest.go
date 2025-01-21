@@ -1,15 +1,18 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package util
+package runner
 
 import (
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
+	"strings"
 
 	"github.com/daytonaio/daytona/pkg/os"
+	"github.com/daytonaio/daytona/pkg/services"
 	"golang.org/x/mod/semver"
 )
 
@@ -47,6 +50,15 @@ func GetProvidersManifest(registryUrl string) (*ProvidersManifest, error) {
 	}
 
 	return &manifest, nil
+}
+
+func GetProviderDownloadUrls(name, version, registryUrl string) (map[os.OperatingSystem]string, error) {
+	manifest, err := GetProvidersManifest(registryUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return (*manifest)[name].Versions[version].DownloadUrls, nil
 }
 
 func (p *ProviderManifest) FindLatestVersion() (string, *Version) {
@@ -116,4 +128,25 @@ func (m *ProvidersManifest) GetLatestVersions() *ProvidersManifest {
 	}
 
 	return &latestManifest
+}
+
+func (m *ProvidersManifest) GetProviderListFromManifest() []services.ProviderDTO {
+	providerList := []services.ProviderDTO{}
+	for providerName, providerManifest := range *m {
+		latestVersion, _ := providerManifest.FindLatestVersion()
+		for version := range providerManifest.Versions {
+			providerList = append(providerList, services.ProviderDTO{
+				Name:    providerName,
+				Label:   providerManifest.Label,
+				Version: version,
+				Latest:  version == latestVersion,
+			})
+		}
+	}
+
+	slices.SortFunc(providerList, func(a, b services.ProviderDTO) int {
+		return strings.Compare(a.Name, b.Name)
+	})
+
+	return providerList
 }

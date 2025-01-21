@@ -235,11 +235,13 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) {
 		job = r.runnerJobFactory.Create(*j)
 	default:
 		r.handleRunFailed(j, errors.New("invalid resource type for job"), startTime)
+		return
 	}
 
 	err := job.Execute(ctx)
 	if err != nil {
 		r.handleRunFailed(j, err, startTime)
+		return
 	}
 
 	j.State = models.JobStateSuccess
@@ -247,6 +249,7 @@ func (r *Runner) runJob(ctx context.Context, j *models.Job) {
 	err = r.updateJobState(ctx, j.Id, models.JobStateSuccess, nil)
 	if err != nil {
 		r.handleRunFailed(j, err, startTime)
+		return
 	}
 
 	if r.Config.TelemetryEnabled {

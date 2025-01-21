@@ -351,6 +351,7 @@ func (a *ApiServer) Start() error {
 		providersGroup := runnerController.Group(providerRoutePath)
 		{
 			providersGroup.GET("", provider.ListProviders)
+			providersGroup.GET("/for-install", provider.ListProvidersForInstall)
 		}
 
 		runnerIdGroup := runnerController.Group(":runnerId")
@@ -358,7 +359,7 @@ func (a *ApiServer) Start() error {
 			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
 			{
 				runnerIdProviderGroup.GET("", provider.GetRunnerProviders)
-				runnerIdProviderGroup.POST("/install", provider.InstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/install", provider.InstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
 			}

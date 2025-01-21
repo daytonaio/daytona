@@ -1,7 +1,7 @@
 // Copyright 2024 Daytona Platforms Inc.
 // SPDX-License-Identifier: Apache-2.0
 
-package provider
+package install
 
 import (
 	"fmt"
@@ -12,13 +12,12 @@ import (
 )
 
 type rowData struct {
-	Label      string
-	RunnerName string
-	Name       string
-	Version    string
+	Label   string
+	Name    string
+	Version string
 }
 
-func List(providerList []apiclient.ProviderInfo) {
+func List(providerList []apiclient.ProviderDTO) {
 	if len(providerList) == 0 {
 		util.NotifyEmptyProviderList(true)
 		return
@@ -39,7 +38,7 @@ func List(providerList []apiclient.ProviderInfo) {
 	fmt.Println(table)
 }
 
-func getRowFromData(provider *apiclient.ProviderInfo) []string {
+func getRowFromData(provider *apiclient.ProviderDTO) []string {
 	var data rowData
 
 	if provider.Label != nil {
@@ -47,26 +46,23 @@ func getRowFromData(provider *apiclient.ProviderInfo) []string {
 	} else {
 		data.Label = provider.Name
 	}
-	data.RunnerName = provider.RunnerName
 	data.Name = provider.Name
 	data.Version = provider.Version
 
 	return []string{
 		views.NameStyle.Render(data.Label),
-		views.DefaultRowDataStyle.Render(data.RunnerName),
 		views.DefaultRowDataStyle.Render(data.Name),
 		views.DefaultRowDataStyle.Render(data.Version),
 	}
 }
 
-func renderUnstyledList(providerList []apiclient.ProviderInfo) {
+func renderUnstyledList(providerList []apiclient.ProviderDTO) {
 	output := "\n"
 
 	for _, provider := range providerList {
 		if provider.Label != nil {
 			output += fmt.Sprintf("%s %s", views.GetPropertyKey("Provider: "), *provider.Label) + "\n\n"
 		}
-		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Runner: "), provider.RunnerName) + "\n\n"
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Name: "), provider.Name) + "\n\n"
 		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Version: "), provider.Version) + "\n"
 
