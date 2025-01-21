@@ -22,7 +22,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_view "github.com/daytonaio/daytona/pkg/views/provider"
-	provider_install "github.com/daytonaio/daytona/pkg/views/provider/install"
+	"github.com/daytonaio/daytona/pkg/views/provider/install"
 	"github.com/daytonaio/daytona/pkg/views/targetconfig"
 	"github.com/spf13/cobra"
 )
@@ -165,7 +165,7 @@ func TargetConfigCreationFlow(ctx context.Context, apiClient *apiclient.APIClien
 			return nil, nil
 		}
 
-		err = provider.InstallProvider(apiClient, selectedRunner.Id, provider_install.ProviderInstallView{
+		err = provider.InstallProvider(apiClient, selectedRunner.Id, install.ProviderInstallView{
 			Name:    selectedProvider.Name,
 			Version: selectedProvider.Version,
 			Label:   selectedProvider.Label,

@@ -12,7 +12,7 @@ import (
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/views"
-	provider_install "github.com/daytonaio/daytona/pkg/views/provider/install"
+	"github.com/daytonaio/daytona/pkg/views/provider/install"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
 	"github.com/spf13/cobra"
 )
@@ -73,7 +73,7 @@ var installCmd = &cobra.Command{
 			Latest:  false,
 		})
 
-		providerToInstall, err := provider_install.GetProviderFromInstallPrompt(provider_install.ProviderInstallListToView(latestProviderList), "Choose a Provider to Install", false)
+		providerToInstall, err := install.GetProviderFromInstallPrompt(install.ProviderInstallListToView(latestProviderList), "Choose a Provider to Install", false)
 		if err != nil {
 			if common.IsCtrlCAbort(err) {
 				return nil
@@ -87,7 +87,7 @@ var installCmd = &cobra.Command{
 		}
 
 		if providerToInstall.Name == specificProviderName {
-			providerToInstall, err = provider_install.GetProviderFromInstallPrompt(provider_install.ProviderInstallListToView(availableProviderList), "Choose a specific provider to install", false)
+			providerToInstall, err = install.GetProviderFromInstallPrompt(install.ProviderInstallListToView(availableProviderList), "Choose a specific provider to install", false)
 			if err != nil {
 				if common.IsCtrlCAbort(err) {
 					return nil
@@ -115,7 +115,7 @@ func init() {
 	installCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Automatically confirm any prompts")
 }
 
-func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall provider_install.ProviderInstallView) error {
+func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall install.ProviderInstallView) error {
 	err := views_util.WithInlineSpinner("Installing", func() error {
 		res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId, providerToInstall.Name).ProviderVersion(providerToInstall.Version).Execute()
 		if err != nil {
