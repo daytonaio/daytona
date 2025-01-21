@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/pkg/api/controllers/log"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -44,7 +44,7 @@ func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 				return
 			}
 			defer logFile.Close()
-			log.ReadLog(c, logFile, util.ReadLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+			log.ReadLog(c, logFile, logs.ReadLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
 				for {
 					msg := <-messages
 					_, output := extractExitCode(string(msg))
