@@ -6,20 +6,24 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 )
 
 func (rj *RunnerJob) installProvider(ctx context.Context, j *models.Job) error {
-	var installProviderDto services.InstallProviderDTO
+	if j.Metadata == nil {
+		return errors.New("metadata is required")
+	}
 
-	err := json.Unmarshal([]byte(*j.Metadata), &installProviderDto)
+	var providerJobMetadata services.ProviderMetadata
+	err := json.Unmarshal([]byte(*j.Metadata), &providerJobMetadata)
 	if err != nil {
 		return err
 	}
 
-	downloadPath, err := rj.providerManager.DownloadProvider(ctx, installProviderDto.DownloadUrls, installProviderDto.Name)
+	downloadPath, err := rj.providerManager.DownloadProvider(ctx, providerJobMetadata.DownloadUrls, providerJobMetadata.Name)
 	if err != nil {
 		return err
 	}

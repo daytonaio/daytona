@@ -314,10 +314,6 @@ definitions:
     required:
     - filePath
     type: object
-  DownloadUrls:
-    additionalProperties:
-      type: string
-    type: object
   EnvironmentVariable:
     properties:
       key:
@@ -657,19 +653,6 @@ definitions:
     - name
     - username
     type: object
-  InstallProviderDTO:
-    properties:
-      downloadUrls:
-        $ref: '#/definitions/DownloadUrls'
-      name:
-        type: string
-      version:
-        type: string
-    required:
-    - downloadUrls
-    - name
-    - version
-    type: object
   Job:
     properties:
       action:
@@ -898,6 +881,21 @@ definitions:
     - id
     - retention
     - workspaceTemplateName
+    type: object
+  ProviderDTO:
+    properties:
+      label:
+        type: string
+      latest:
+        type: boolean
+      name:
+        type: string
+      version:
+        type: string
+    required:
+    - latest
+    - name
+    - version
     type: object
   ProviderInfo:
     properties:
@@ -1319,16 +1317,6 @@ definitions:
         $ref: '#/definitions/JobState'
     required:
     - state
-    type: object
-  UpdateProviderDTO:
-    properties:
-      downloadUrls:
-        $ref: '#/definitions/DownloadUrls'
-      version:
-        type: string
-    required:
-    - downloadUrls
-    - version
     type: object
   UpdateRunnerMetadataDTO:
     properties:
@@ -2430,6 +2418,31 @@ paths:
       summary: Get runner providers
       tags:
       - provider
+  /runner/{runnerId}/provider/{providerName}/install:
+    post:
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        type: string
+      - description: Provider version - defaults to 'latest'
+        in: query
+        name: providerVersion
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: Install provider
+      tags:
+      - provider
   /runner/{runnerId}/provider/{providerName}/uninstall:
     post:
       description: Uninstall provider
@@ -2456,12 +2469,6 @@ paths:
       description: Update provider
       operationId: UpdateProvider
       parameters:
-      - description: Update provider
-        in: body
-        name: updateProviderDto
-        required: true
-        schema:
-          $ref: '#/definitions/UpdateProviderDTO'
       - description: Runner ID
         in: path
         name: runnerId
@@ -2472,32 +2479,14 @@ paths:
         name: providerName
         required: true
         type: string
-      responses:
-        "200":
-          description: OK
-      summary: Update provider
-      tags:
-      - provider
-  /runner/{runnerId}/provider/install:
-    post:
-      description: Install provider
-      operationId: InstallProvider
-      parameters:
-      - description: Install provider
-        in: body
-        name: installProviderDto
-        required: true
-        schema:
-          $ref: '#/definitions/InstallProviderDTO'
-      - description: Runner ID
-        in: path
-        name: runnerId
-        required: true
+      - description: Provider version - defaults to 'latest'
+        in: query
+        name: providerVersion
         type: string
       responses:
         "200":
           description: OK
-      summary: Install provider
+      summary: Update provider
       tags:
       - provider
   /runner/provider:
@@ -2519,6 +2508,22 @@ paths:
               $ref: '#/definitions/ProviderInfo'
             type: array
       summary: List providers
+      tags:
+      - provider
+  /runner/provider/for-install:
+    get:
+      description: List providers available for installation
+      operationId: ListProvidersForInstall
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/ProviderDTO'
+            type: array
+      summary: List providers available for installation
       tags:
       - provider
   /sample:
