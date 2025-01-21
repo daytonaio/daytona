@@ -1256,7 +1256,7 @@
                 }
             }
         },
-        "/runner/{runnerId}/provider/install": {
+        "/runner/{runnerId}/provider/{providerName}/install": {
             "post": {
                 "description": "Install provider",
                 "tags": [
@@ -1266,20 +1266,24 @@
                 "operationId": "InstallProvider",
                 "parameters": [
                     {
-                        "description": "Install provider",
-                        "name": "installProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/InstallProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1330,15 +1334,6 @@
                 "operationId": "UpdateProvider",
                 "parameters": [
                     {
-                        "description": "Update provider",
-                        "name": "updateProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UpdateProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
@@ -1351,6 +1346,12 @@
                         "name": "providerName",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4181,12 +4182,6 @@
                 }
             }
         },
-        "DownloadUrls": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
         "EnvironmentVariable": {
             "type": "object",
             "required": [
@@ -4678,21 +4673,6 @@
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "InstallProviderDTO": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "version": {
                     "type": "string"
                 }
             }
@@ -5598,21 +5578,6 @@
                 },
                 "state": {
                     "$ref": "#/definitions/JobState"
-                }
-            }
-        },
-        "UpdateProviderDTO": {
-            "type": "object",
-            "required": [
-                "downloadUrls",
-                "version"
-            ],
-            "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },

@@ -6,34 +6,33 @@ package runner
 import (
 	"context"
 	"encoding/json"
+	"errors"
 
 	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/services"
 )
 
 func (pj *RunnerJob) updateProvider(ctx context.Context, j *models.Job) error {
-	metadata := j.Metadata
+	if j.Metadata == nil {
+		return errors.New("metadata is required")
+	}
 
-	var metadataJson services.ProviderJobMetadata
-	err := json.Unmarshal([]byte(*j.Metadata), &metadataJson)
+	installMetadata := j.Metadata
+
+	var metadata services.ProviderMetadata
+	err := json.Unmarshal([]byte(*j.Metadata), &metadata)
 	if err != nil {
 		return err
 	}
 
-	uninstallMetadataJson, err := json.Marshal(metadataJson.Name)
-	if err != nil {
-		return err
-	}
-
-	uninstallMetadata := string(uninstallMetadataJson)
-	j.Metadata = &uninstallMetadata
+	j.Metadata = &metadata.Name
 
 	err = pj.uninstallProvider(ctx, j)
 	if err != nil {
 		return err
 	}
 
-	j.Metadata = metadata
+	j.Metadata = installMetadata
 
 	return pj.installProvider(ctx, j)
 }

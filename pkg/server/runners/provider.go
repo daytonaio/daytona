@@ -39,8 +39,8 @@ func (s *RunnerService) ListProviders(ctx context.Context, runnerId *string) ([]
 	return providers, nil
 }
 
-func (s *RunnerService) ListProvidersForInstall(ctx context.Context, serverRegistryUrl string) ([]services.ProviderDTO, error) {
-	providersManifest, err := runner.GetProvidersManifest(serverRegistryUrl)
+func (s *RunnerService) ListProvidersForInstall(ctx context.Context, registryUrl string) ([]services.ProviderDTO, error) {
+	providersManifest, err := runner.GetProvidersManifest(registryUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -48,15 +48,15 @@ func (s *RunnerService) ListProvidersForInstall(ctx context.Context, serverRegis
 	return providersManifest.GetProviderListFromManifest(), nil
 }
 
-func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, serverRegistryUrl string, providerDto services.InstallProviderDTO) error {
+func (s *RunnerService) InstallProvider(ctx context.Context, runnerId, name, version, registryUrl string) error {
 	params := providerActionParams{
-		providerName:    providerDto.Name,
-		providerVersion: &providerDto.Version,
+		providerName:    name,
+		providerVersion: &version,
 		eventName:       telemetry.RunnerEventProviderInstalled,
 		errEventName:    telemetry.RunnerEventProviderInstallationFailed,
 	}
 
-	downloadUrls, err := runner.GetProviderDownloadUrls(serverRegistryUrl, providerDto.Name, providerDto.Version)
+	downloadUrls, err := runner.GetProviderDownloadUrls(name, version, registryUrl)
 	if err != nil {
 		return s.handleProviderActionError(ctx, params, err)
 	}
@@ -68,9 +68,9 @@ func (s *RunnerService) InstallProvider(ctx context.Context, runnerId string, se
 
 	params.runner = runner
 
-	metadata, err := json.Marshal(services.ProviderJobMetadata{
-		Name:         providerDto.Name,
-		Version:      providerDto.Version,
+	metadata, err := json.Marshal(services.ProviderMetadata{
+		Name:         name,
+		Version:      version,
 		DownloadUrls: downloadUrls,
 	})
 	if err != nil {
@@ -99,27 +99,38 @@ func (s *RunnerService) UninstallProvider(ctx context.Context, runnerId string, 
 	return s.handleProviderActionError(ctx, params, err)
 }
 
-func (s *RunnerService) UpdateProvider(ctx context.Context, runnerId string, providerName string, providerDto services.UpdateProviderDTO) error {
+func (s *RunnerService) UpdateProvider(ctx context.Context, runnerId, name, version, registryUrl string) error {
 	params := providerActionParams{
-		providerName:    providerName,
-		providerVersion: &providerDto.Version,
+		providerName:    name,
+		providerVersion: &version,
 		eventName:       telemetry.RunnerEventProviderUpdated,
 		errEventName:    telemetry.RunnerEventProviderUpdateFailed,
 	}
 
-	runner, err := s.runnerStore.Find(ctx, runnerId)
+	r, err := s.runnerStore.Find(ctx, runnerId)
 	if err != nil {
 		return s.handleProviderActionError(ctx, params, err)
 	}
 
-	params.runner = runner
+	params.runner = r
+
+	downloadUrls, err := runner.GetProviderDownloadUrls(name, version, registryUrl)
+	if err != nil {
+		return s.handleProviderActionError(ctx, params, err)
+	}
+
+	providerDto := services.ProviderMetadata{
+		DownloadUrls: downloadUrls,
+		Version:      version,
+		Name:         name,
+	}
 
 	metadata, err := json.Marshal(providerDto)
 	if err != nil {
 		return s.handleProviderActionError(ctx, params, err)
 	}
 
-	err = s.createJob(ctx, runner.Id, models.JobActionUpdateProvider, string(metadata))
+	err = s.createJob(ctx, r.Id, models.JobActionUpdateProvider, string(metadata))
 	return s.handleProviderActionError(ctx, params, err)
 }
 

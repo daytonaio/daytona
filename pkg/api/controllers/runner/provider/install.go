@@ -8,7 +8,6 @@ import (
 	"net/http"
 
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,21 +16,17 @@ import (
 //	@Tags			provider
 //	@Summary		Install provider
 //	@Description	Install provider
-//	@Param			installProviderDto	body	InstallProviderDTO	true	"Install provider"
-//	@Param			runnerId			path	string				true	"Runner ID"
+//	@Param			runnerId		path	string	true	"Runner ID"
+//	@Param			providerName	path	string	true	"Provider name"
+//	@Param			providerVersion	query	string	false	"Provider version - defaults to 'latest'"
 //	@Success		200
-//	@Router			/runner/{runnerId}/provider/install [post]
+//	@Router			/runner/{runnerId}/provider/{providerName}/install [post]
 //
 //	@id				InstallProvider
 func InstallProvider(ctx *gin.Context) {
 	runnerId := ctx.Param("runnerId")
-
-	var installProviderMetadataDto services.InstallProviderDTO
-	err := ctx.BindJSON(&installProviderMetadataDto)
-	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
-		return
-	}
+	providerName := ctx.Param("providerName")
+	providerVersion := ctx.DefaultQuery("providerVersion", "latest")
 
 	config, err := server.GetConfig()
 	if err != nil {
@@ -48,13 +43,13 @@ func InstallProvider(ctx *gin.Context) {
 	}
 
 	for _, provider := range installedProviders {
-		if provider.Name == installProviderMetadataDto.Name {
-			ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("provider %s is already installed", installProviderMetadataDto.Name))
+		if provider.Name == providerName {
+			ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("provider %s is already installed", providerName))
 			return
 		}
 	}
 
-	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, config.RegistryUrl, installProviderMetadataDto)
+	err = server.RunnerService.InstallProvider(ctx.Request.Context(), runnerId, providerName, providerVersion, config.RegistryUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to install provider: %w", err))
 		return

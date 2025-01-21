@@ -52,13 +52,13 @@ func GetProvidersManifest(registryUrl string) (*ProvidersManifest, error) {
 	return &manifest, nil
 }
 
-func GetProviderDownloadUrls(registryUrl string, providerName, providerVersion string) (map[os.OperatingSystem]string, error) {
-	manifests, err := GetProvidersManifest(registryUrl)
+func GetProviderDownloadUrls(name, version, registryUrl string) (map[os.OperatingSystem]string, error) {
+	manifest, err := GetProvidersManifest(registryUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	return (*manifests)[providerName].Versions[providerVersion].DownloadUrls, nil
+	return (*manifest)[name].Versions[version].DownloadUrls, nil
 }
 
 func (p *ProviderManifest) FindLatestVersion() (string, *Version) {

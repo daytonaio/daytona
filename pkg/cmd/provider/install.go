@@ -11,7 +11,6 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/os"
 	"github.com/daytonaio/daytona/pkg/views"
 	provider_install "github.com/daytonaio/daytona/pkg/views/provider/install"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
@@ -118,10 +117,7 @@ func init() {
 
 func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerToInstall provider_install.ProviderInstallView) error {
 	err := views_util.WithInlineSpinner("Installing", func() error {
-		res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId).InstallProviderDto(apiclient.InstallProviderDTO{
-			Name:    providerToInstall.Name,
-			Version: providerToInstall.Version,
-		}).Execute()
+		res, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId, providerToInstall.Name).ProviderVersion(providerToInstall.Version).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}
@@ -130,13 +126,4 @@ func InstallProvider(apiClient *apiclient.APIClient, runnerId string, providerTo
 	})
 
 	return err
-}
-
-func convertOSToStringMap(downloadUrls map[os.OperatingSystem]string) map[string]string {
-	stringMap := map[string]string{}
-	for os, url := range downloadUrls {
-		stringMap[string(os)] = url
-	}
-
-	return stringMap
 }

@@ -5,7 +5,7 @@ All URIs are relative to *http://localhost:3986*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**GetRunnerProviders**](ProviderAPI.md#GetRunnerProviders) | **Get** /runner/{runnerId}/provider | Get runner providers
-[**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /runner/{runnerId}/provider/install | Install provider
+[**InstallProvider**](ProviderAPI.md#InstallProvider) | **Post** /runner/{runnerId}/provider/{providerName}/install | Install provider
 [**ListProviders**](ProviderAPI.md#ListProviders) | **Get** /runner/provider | List providers
 [**ListProvidersForInstall**](ProviderAPI.md#ListProvidersForInstall) | **Get** /runner/provider/for-install | List providers available for installation
 [**UninstallProvider**](ProviderAPI.md#UninstallProvider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
@@ -85,7 +85,7 @@ Name | Type | Description  | Notes
 
 ## InstallProvider
 
-> InstallProvider(ctx, runnerId).InstallProviderDto(installProviderDto).Execute()
+> InstallProvider(ctx, runnerId, providerName).ProviderVersion(providerVersion).Execute()
 
 Install provider
 
@@ -105,11 +105,12 @@ import (
 
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
-	installProviderDto := *openapiclient.NewInstallProviderDTO("Name_example", "Version_example") // InstallProviderDTO | Install provider
+	providerName := "providerName_example" // string | Provider name
+	providerVersion := "providerVersion_example" // string | Provider version - defaults to 'latest' (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId).InstallProviderDto(installProviderDto).Execute()
+	r, err := apiClient.ProviderAPI.InstallProvider(context.Background(), runnerId, providerName).ProviderVersion(providerVersion).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.InstallProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -124,6 +125,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 **ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
 **runnerId** | **string** | Runner ID | 
+**providerName** | **string** | Provider name | 
 
 ### Other Parameters
 
@@ -133,7 +135,8 @@ Other parameters are passed through a pointer to a apiInstallProviderRequest str
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **installProviderDto** | [**InstallProviderDTO**](InstallProviderDTO.md) | Install provider | 
+
+ **providerVersion** | **string** | Provider version - defaults to &#39;latest&#39; | 
 
 ### Return type
 
@@ -353,7 +356,7 @@ Name | Type | Description  | Notes
 
 ## UpdateProvider
 
-> UpdateProvider(ctx, runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
+> UpdateProvider(ctx, runnerId, providerName).ProviderVersion(providerVersion).Execute()
 
 Update provider
 
@@ -374,11 +377,11 @@ import (
 func main() {
 	runnerId := "runnerId_example" // string | Runner ID
 	providerName := "providerName_example" // string | Provider name
-	updateProviderDto := *openapiclient.NewUpdateProviderDTO(map[string]string{"key": "Inner_example"}, "Version_example") // UpdateProviderDTO | Update provider
+	providerVersion := "providerVersion_example" // string | Provider version - defaults to 'latest' (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).UpdateProviderDto(updateProviderDto).Execute()
+	r, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), runnerId, providerName).ProviderVersion(providerVersion).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `ProviderAPI.UpdateProvider``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -404,7 +407,7 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
 
- **updateProviderDto** | [**UpdateProviderDTO**](UpdateProviderDTO.md) | Update provider | 
+ **providerVersion** | **string** | Provider version - defaults to &#39;latest&#39; | 
 
 ### Return type
 

@@ -1259,7 +1259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/runner/{runnerId}/provider/install": {
+        "/runner/{runnerId}/provider/{providerName}/install": {
             "post": {
                 "description": "Install provider",
                 "tags": [
@@ -1269,20 +1269,24 @@ const docTemplate = `{
                 "operationId": "InstallProvider",
                 "parameters": [
                     {
-                        "description": "Install provider",
-                        "name": "installProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/InstallProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1333,15 +1337,6 @@ const docTemplate = `{
                 "operationId": "UpdateProvider",
                 "parameters": [
                     {
-                        "description": "Update provider",
-                        "name": "updateProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UpdateProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
@@ -1354,6 +1349,12 @@ const docTemplate = `{
                         "name": "providerName",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4184,12 +4185,6 @@ const docTemplate = `{
                 }
             }
         },
-        "DownloadUrls": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
         "EnvironmentVariable": {
             "type": "object",
             "required": [
@@ -4681,21 +4676,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "InstallProviderDTO": {
-            "type": "object",
-            "required": [
-                "name",
-                "version"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "version": {
                     "type": "string"
                 }
             }
@@ -5601,21 +5581,6 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/JobState"
-                }
-            }
-        },
-        "UpdateProviderDTO": {
-            "type": "object",
-            "required": [
-                "downloadUrls",
-                "version"
-            ],
-            "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },

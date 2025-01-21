@@ -141,15 +141,16 @@ func (a *ProviderAPIService) GetRunnerProvidersExecute(r ApiGetRunnerProvidersRe
 }
 
 type ApiInstallProviderRequest struct {
-	ctx                context.Context
-	ApiService         *ProviderAPIService
-	runnerId           string
-	installProviderDto *InstallProviderDTO
+	ctx             context.Context
+	ApiService      *ProviderAPIService
+	runnerId        string
+	providerName    string
+	providerVersion *string
 }
 
-// Install provider
-func (r ApiInstallProviderRequest) InstallProviderDto(installProviderDto InstallProviderDTO) ApiInstallProviderRequest {
-	r.installProviderDto = &installProviderDto
+// Provider version - defaults to &#39;latest&#39;
+func (r ApiInstallProviderRequest) ProviderVersion(providerVersion string) ApiInstallProviderRequest {
+	r.providerVersion = &providerVersion
 	return r
 }
 
@@ -164,13 +165,15 @@ Install provider
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param runnerId Runner ID
+	@param providerName Provider name
 	@return ApiInstallProviderRequest
 */
-func (a *ProviderAPIService) InstallProvider(ctx context.Context, runnerId string) ApiInstallProviderRequest {
+func (a *ProviderAPIService) InstallProvider(ctx context.Context, runnerId string, providerName string) ApiInstallProviderRequest {
 	return ApiInstallProviderRequest{
-		ApiService: a,
-		ctx:        ctx,
-		runnerId:   runnerId,
+		ApiService:   a,
+		ctx:          ctx,
+		runnerId:     runnerId,
+		providerName: providerName,
 	}
 }
 
@@ -187,16 +190,17 @@ func (a *ProviderAPIService) InstallProviderExecute(r ApiInstallProviderRequest)
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/runner/{runnerId}/provider/install"
+	localVarPath := localBasePath + "/runner/{runnerId}/provider/{providerName}/install"
 	localVarPath = strings.Replace(localVarPath, "{"+"runnerId"+"}", url.PathEscape(parameterValueToString(r.runnerId, "runnerId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"providerName"+"}", url.PathEscape(parameterValueToString(r.providerName, "providerName")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.installProviderDto == nil {
-		return nil, reportError("installProviderDto is required and must be specified")
-	}
 
+	if r.providerVersion != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "providerVersion", r.providerVersion, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -214,8 +218,6 @@ func (a *ProviderAPIService) InstallProviderExecute(r ApiInstallProviderRequest)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	// body params
-	localVarPostBody = r.installProviderDto
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -607,16 +609,16 @@ func (a *ProviderAPIService) UninstallProviderExecute(r ApiUninstallProviderRequ
 }
 
 type ApiUpdateProviderRequest struct {
-	ctx               context.Context
-	ApiService        *ProviderAPIService
-	runnerId          string
-	providerName      string
-	updateProviderDto *UpdateProviderDTO
+	ctx             context.Context
+	ApiService      *ProviderAPIService
+	runnerId        string
+	providerName    string
+	providerVersion *string
 }
 
-// Update provider
-func (r ApiUpdateProviderRequest) UpdateProviderDto(updateProviderDto UpdateProviderDTO) ApiUpdateProviderRequest {
-	r.updateProviderDto = &updateProviderDto
+// Provider version - defaults to &#39;latest&#39;
+func (r ApiUpdateProviderRequest) ProviderVersion(providerVersion string) ApiUpdateProviderRequest {
+	r.providerVersion = &providerVersion
 	return r
 }
 
@@ -663,10 +665,10 @@ func (a *ProviderAPIService) UpdateProviderExecute(r ApiUpdateProviderRequest) (
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.updateProviderDto == nil {
-		return nil, reportError("updateProviderDto is required and must be specified")
-	}
 
+	if r.providerVersion != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "providerVersion", r.providerVersion, "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
@@ -684,8 +686,6 @@ func (a *ProviderAPIService) UpdateProviderExecute(r ApiUpdateProviderRequest) (
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	// body params
-	localVarPostBody = r.updateProviderDto
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

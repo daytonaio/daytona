@@ -113,7 +113,7 @@ Class | Method | HTTP request | Description
 *PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
 *PrebuildAPI* | [**SavePrebuild**](docs/PrebuildAPI.md#saveprebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
 *ProviderAPI* | [**GetRunnerProviders**](docs/ProviderAPI.md#getrunnerproviders) | **Get** /runner/{runnerId}/provider | Get runner providers
-*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/install | Install provider
+*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/{providerName}/install | Install provider
 *ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
 *ProviderAPI* | [**ListProvidersForInstall**](docs/ProviderAPI.md#listprovidersforinstall) | **Get** /runner/provider/for-install | List providers available for installation
 *ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
@@ -236,7 +236,6 @@ Class | Method | HTTP request | Description
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
- - [InstallProviderDTO](docs/InstallProviderDTO.md)
  - [Job](docs/Job.md)
  - [JobState](docs/JobState.md)
  - [ListBranchResponse](docs/ListBranchResponse.md)
@@ -278,7 +277,6 @@ Class | Method | HTTP request | Description
  - [TargetDTO](docs/TargetDTO.md)
  - [TargetMetadata](docs/TargetMetadata.md)
  - [UpdateJobState](docs/UpdateJobState.md)
- - [UpdateProviderDTO](docs/UpdateProviderDTO.md)
  - [UpdateRunnerMetadataDTO](docs/UpdateRunnerMetadataDTO.md)
  - [UpdateTargetMetadataDTO](docs/UpdateTargetMetadataDTO.md)
  - [UpdateTargetProviderMetadataDTO](docs/UpdateTargetProviderMetadataDTO.md)

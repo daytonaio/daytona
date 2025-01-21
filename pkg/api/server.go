@@ -347,7 +347,7 @@ func (a *ApiServer) Start() error {
 			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
 			{
 				runnerIdProviderGroup.GET("", provider.GetRunnerProviders)
-				runnerIdProviderGroup.POST("/install", provider.InstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/install", provider.InstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
 				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
 			}
