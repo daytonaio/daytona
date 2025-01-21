@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -77,7 +78,7 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 			logChan := make(chan []byte)
 			errChan := make(chan error)
 
-			go util.ReadLog(context.Background(), logFile, true, logChan, errChan)
+			go logs.ReadLog(context.Background(), logFile, true, logChan, errChan)
 
 			defer logFile.Close()
 
