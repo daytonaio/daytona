@@ -9,7 +9,6 @@ import (
 
 	_ "github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
-	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,9 +17,9 @@ import (
 //	@Tags			provider
 //	@Summary		Update provider
 //	@Description	Update provider
-//	@Param			updateProviderDto	body	UpdateProviderDTO	true	"Update provider"
-//	@Param			runnerId			path	string				true	"Runner ID"
-//	@Param			providerName		path	string				true	"Provider name"
+//	@Param			runnerId		path	string	true	"Runner ID"
+//	@Param			providerName	path	string	true	"Provider name"
+//	@Param			providerVersion	query	string	false	"Provider version - defaults to 'latest'"
 //	@Success		200
 //	@Router			/runner/{runnerId}/provider/{providerName}/update [post]
 //
@@ -28,17 +27,17 @@ import (
 func UpdateProvider(ctx *gin.Context) {
 	runnerId := ctx.Param("runnerId")
 	providerName := ctx.Param("providerName")
+	providerVersion := ctx.DefaultQuery("providerVersion", "latest")
 
-	var updateProviderMetadataDto services.UpdateProviderDTO
-	err := ctx.BindJSON(&updateProviderMetadataDto)
+	config, err := server.GetConfig()
 	if err != nil {
-		ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid request body: %w", err))
+		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get config: %w", err))
 		return
 	}
 
 	server := server.GetInstance(nil)
 
-	err = server.RunnerService.UpdateProvider(ctx.Request.Context(), runnerId, providerName, updateProviderMetadataDto)
+	err = server.RunnerService.UpdateProvider(ctx.Request.Context(), runnerId, providerName, providerVersion, config.RegistryUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to update provider: %w", err))
 		return

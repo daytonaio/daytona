@@ -1041,6 +1041,30 @@ const docTemplate = `{
                 }
             }
         },
+        "/runner/provider/for-install": {
+            "get": {
+                "description": "List providers available for installation",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "List providers available for installation",
+                "operationId": "ListProvidersForInstall",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/runner/{runnerId}": {
             "get": {
                 "description": "Find a runner",
@@ -1235,7 +1259,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/runner/{runnerId}/provider/install": {
+        "/runner/{runnerId}/provider/{providerName}/install": {
             "post": {
                 "description": "Install provider",
                 "tags": [
@@ -1245,20 +1269,24 @@ const docTemplate = `{
                 "operationId": "InstallProvider",
                 "parameters": [
                     {
-                        "description": "Install provider",
-                        "name": "installProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/InstallProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1309,15 +1337,6 @@ const docTemplate = `{
                 "operationId": "UpdateProvider",
                 "parameters": [
                     {
-                        "description": "Update provider",
-                        "name": "updateProviderDto",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/UpdateProviderDTO"
-                        }
-                    },
-                    {
                         "type": "string",
                         "description": "Runner ID",
                         "name": "runnerId",
@@ -1330,6 +1349,12 @@ const docTemplate = `{
                         "name": "providerName",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -4377,12 +4402,6 @@ const docTemplate = `{
                 }
             }
         },
-        "DownloadUrls": {
-            "type": "object",
-            "additionalProperties": {
-                "type": "string"
-            }
-        },
         "EnvironmentVariable": {
             "type": "object",
             "required": [
@@ -4878,25 +4897,6 @@ const docTemplate = `{
                 }
             }
         },
-        "InstallProviderDTO": {
-            "type": "object",
-            "required": [
-                "downloadUrls",
-                "name",
-                "version"
-            ],
-            "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "version": {
-                    "type": "string"
-                }
-            }
-        },
         "Job": {
             "type": "object",
             "required": [
@@ -5226,6 +5226,28 @@ const docTemplate = `{
                     }
                 },
                 "workspaceTemplateName": {
+                    "type": "string"
+                }
+            }
+        },
+        "ProviderDTO": {
+            "type": "object",
+            "required": [
+                "latest",
+                "name",
+                "version"
+            ],
+            "properties": {
+                "label": {
+                    "type": "string"
+                },
+                "latest": {
+                    "type": "boolean"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "version": {
                     "type": "string"
                 }
             }
@@ -5822,21 +5844,6 @@ const docTemplate = `{
                 },
                 "state": {
                     "$ref": "#/definitions/JobState"
-                }
-            }
-        },
-        "UpdateProviderDTO": {
-            "type": "object",
-            "required": [
-                "downloadUrls",
-                "version"
-            ],
-            "properties": {
-                "downloadUrls": {
-                    "$ref": "#/definitions/DownloadUrls"
-                },
-                "version": {
-                    "type": "string"
                 }
             }
         },
