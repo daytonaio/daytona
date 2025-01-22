@@ -201,10 +201,6 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	}
 }
 
-func (s *Server) getShell() string {
-	return "sh"
-}
-
 func (s *Server) sftpHandler(session ssh.Session) {
 	debugStream := io.Discard
 	serverOptions := []sftp.ServerOption{
