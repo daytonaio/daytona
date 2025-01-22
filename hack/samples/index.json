@@ -35,6 +35,11 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "name": "Deno",
+    "description": "Develop Deno based web applications. Includes appropriate runtime args, Deno, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-deno"
+  },
+  {
     "name": "target",
     "description": "It is a sample institute website featuring dynamic content such as courses, achievers, and a director's column.",
     "gitUrl": "https://github.com/Prince94201/target"
@@ -156,6 +161,11 @@
     "gitUrl": "https://github.com/BigBang001/EchoBrain-Daytona"
   },
   {
+    "name": "Prolog",
+    "description": "Develop Prolog based applications. Includes appropriate runtime args, GNU Prolog, SWI-Prolog, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-prolog"
+  },
+  {
     "name": "Python",
     "description": "Develop Python applications.",
     "gitUrl": "https://github.com/daytonaio/sample-python"
@@ -189,6 +199,11 @@
     "name": "Python - FastAPI",
     "description": "FastAPI starter based on copier-pdm and daytona",
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
+  },
+  {
+    "name": "Racket",
+    "description": "Develop Racket based applications. Includes appropriate runtime args, Racket and its IDE named DrRacket available through VNC, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-racket"
   },
   {
     "name": "Ruby",
@@ -720,5 +735,10 @@
     "name": "An Web site Builder with prompt",
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
+  },
+  {
+    "name": "Zig",
+    "description": "Develop Zig based applications. Includes appropriate runtime args, Zig, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-zig"
   }
 ]
