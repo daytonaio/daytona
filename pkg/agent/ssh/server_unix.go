@@ -7,16 +7,35 @@ package ssh
 
 import (
 	"os"
+	"os/exec"
 	"syscall"
 	"unsafe"
 
+	"github.com/creack/pty"
 	"github.com/gliderlabs/ssh"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/sys/unix"
 )
 
-func SetPtySize(f *os.File, win ssh.Window) {
-	syscall.Syscall(syscall.SYS_IOCTL, f.Fd(), uintptr(syscall.TIOCSWINSZ),
-		uintptr(unsafe.Pointer(&struct{ h, w, x, y uint16 }{uint16(win.Height), uint16(win.Width), 0, 0})))
+func Start(cmd interface{}) *os.File {
+	if command, ok := cmd.(*exec.Cmd); ok {
+		f, err := pty.Start(command)
+		if err != nil {
+			log.Errorf("Unable to start PTY: %v", err)
+			return nil
+		}
+		return f
+	}
+	return nil
+}
+
+func SetPtySize(f interface{}, win ssh.Window) {
+	if file, ok := f.(*os.File); ok {
+		syscall.Syscall(syscall.SYS_IOCTL, file.Fd(), uintptr(syscall.TIOCSWINSZ),
+			uintptr(unsafe.Pointer(&struct{ h, w, x, y uint16 }{uint16(win.Height), uint16(win.Width), 0, 0})))
+	} else {
+		log.Errorf("Unable to resize PTY")
+	}
 }
 
 func OsSignalFrom(sig ssh.Signal) os.Signal {
