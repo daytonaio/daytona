@@ -9,17 +9,19 @@ import (
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	"github.com/daytonaio/daytona/pkg/views/prebuild/info"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var prebuildInfoCmd = &cobra.Command{
-	Use:   "info",
-	Short: "Show prebuild configuration info",
-	Args:  cobra.MaximumNArgs(2),
+var infoCmd = &cobra.Command{
+	Use:     "info",
+	Short:   "Show prebuild configuration info",
+	Args:    cobra.MaximumNArgs(2),
+	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var prebuild *apiclient.PrebuildDTO
 		var res *http.Response
@@ -33,11 +35,11 @@ var prebuildInfoCmd = &cobra.Command{
 
 		if len(args) < 2 {
 			var prebuilds []apiclient.PrebuildDTO
-			var selectedProjectConfigName string
+			var selectedWorkspaceTemplateName string
 
 			if len(args) == 1 {
-				selectedProjectConfigName = args[0]
-				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForProjectConfig(context.Background(), selectedProjectConfigName).Execute()
+				selectedWorkspaceTemplateName = args[0]
+				prebuilds, res, err = apiClient.PrebuildAPI.ListPrebuildsForWorkspaceTemplate(context.Background(), selectedWorkspaceTemplateName).Execute()
 				if err != nil {
 					return apiclient_util.HandleErrorResponse(res, err)
 				}
@@ -66,7 +68,7 @@ var prebuildInfoCmd = &cobra.Command{
 				return nil
 			}
 		} else {
-			prebuild, res, err = apiClient.PrebuildAPI.GetPrebuild(ctx, args[0], args[1]).Execute()
+			prebuild, res, err = apiClient.PrebuildAPI.FindPrebuild(ctx, args[0], args[1]).Execute()
 			if err != nil {
 				return apiclient_util.HandleErrorResponse(res, err)
 			}
@@ -84,5 +86,5 @@ var prebuildInfoCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(prebuildInfoCmd)
+	format.RegisterFormatFlag(infoCmd)
 }

@@ -17,7 +17,7 @@ import (
 func (s *DockerClientTestSuite) TestGetContainerLogs() {
 	s.mockClient.On("ContainerList", mock.Anything, mock.Anything).Return([]types.Container{}, nil)
 
-	containerName := s.dockerClient.GetProjectContainerName(project1)
+	containerName := s.dockerClient.GetWorkspaceContainerName(workspace1)
 	logWriter := io.MultiWriter(&util.DebugLogWriter{})
 
 	s.mockClient.On("ContainerInspect", mock.Anything, containerName).Return(types.ContainerJSON{

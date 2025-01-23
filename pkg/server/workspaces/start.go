@@ -5,155 +5,44 @@ package workspaces
 
 import (
 	"context"
-	"fmt"
-	"io"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
-	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/provisioner"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 	log "github.com/sirupsen/logrus"
-
-	"github.com/daytonaio/daytona/internal/util"
 )
 
-func (s *WorkspaceService) StartWorkspace(ctx context.Context, workspaceId string) error {
-	w, err := s.workspaceStore.Find(workspaceId)
+func (s *WorkspaceService) Start(ctx context.Context, workspaceId string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
-		return ErrWorkspaceNotFound
+		return s.handleStartError(ctx, w, stores.ErrWorkspaceNotFound)
 	}
 
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
+	err = s.createJob(ctx, w.Id, w.Target.TargetConfig.ProviderInfo.RunnerId, models.JobActionStart)
 	if err != nil {
-		return err
+		return s.handleStartError(ctx, w, err)
 	}
 
-	workspaceLogger := s.loggerFactory.CreateWorkspaceLogger(w.Id, logs.LogSourceServer)
-	defer workspaceLogger.Close()
+	return s.handleStartError(ctx, w, err)
+}
 
-	wsLogWriter := io.MultiWriter(&util.InfoLogWriter{}, workspaceLogger)
-
-	err = s.startWorkspace(ctx, w, target, wsLogWriter)
-
+func (s *WorkspaceService) handleStartError(ctx context.Context, w *models.Workspace, err error) error {
 	if !telemetry.TelemetryEnabled(ctx) {
 		return err
 	}
 
 	clientId := telemetry.ClientId(ctx)
 
-	telemetryProps := telemetry.NewWorkspaceEventProps(ctx, w, target)
-	event := telemetry.ServerEventWorkspaceStarted
+	eventName := telemetry.WorkspaceEventLifecycleStarted
 	if err != nil {
-		telemetryProps["error"] = err.Error()
-		event = telemetry.ServerEventWorkspaceStartError
+		eventName = telemetry.WorkspaceEventLifecycleStartFailed
 	}
-	telemetryError := s.telemetryService.TrackServerEvent(event, clientId, telemetryProps)
+	event := telemetry.NewWorkspaceEvent(eventName, w, err, nil)
+
+	telemetryError := s.trackTelemetryEvent(event, clientId)
 	if telemetryError != nil {
 		log.Trace(telemetryError)
 	}
 
 	return err
-}
-
-func (s *WorkspaceService) StartProject(ctx context.Context, workspaceId, projectName string) error {
-	w, err := s.workspaceStore.Find(workspaceId)
-	if err != nil {
-		return ErrWorkspaceNotFound
-	}
-
-	project, err := w.GetProject(projectName)
-	if err != nil {
-		return ErrProjectNotFound
-	}
-
-	target, err := s.targetStore.Find(&provider.TargetFilter{Name: &w.Target})
-	if err != nil {
-		return err
-	}
-
-	projectLogger := s.loggerFactory.CreateProjectLogger(w.Id, project.Name, logs.LogSourceServer)
-	defer projectLogger.Close()
-
-	return s.startProject(ctx, project, target, projectLogger)
-}
-
-func (s *WorkspaceService) startWorkspace(ctx context.Context, ws *workspace.Workspace, target *provider.ProviderTarget, wsLogWriter io.Writer) error {
-	wsLogWriter.Write([]byte("Starting workspace\n"))
-
-	ws.EnvVars = workspace.GetWorkspaceEnvVars(ws, workspace.WorkspaceEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
-
-	err := s.provisioner.StartWorkspace(ws, target)
-	if err != nil {
-		return err
-	}
-
-	for _, project := range ws.Projects {
-		projectLogger := s.loggerFactory.CreateProjectLogger(ws.Id, project.Name, logs.LogSourceServer)
-		defer projectLogger.Close()
-
-		err = s.startProject(ctx, project, target, projectLogger)
-		if err != nil {
-			return err
-		}
-	}
-
-	wsLogWriter.Write([]byte(fmt.Sprintf("Workspace %s started\n", ws.Name)))
-
-	return nil
-}
-
-func (s *WorkspaceService) startProject(ctx context.Context, p *project.Project, target *provider.ProviderTarget, logWriter io.Writer) error {
-	logWriter.Write([]byte(fmt.Sprintf("Starting project %s\n", p.Name)))
-
-	projectToStart := *p
-	projectToStart.EnvVars = project.GetProjectEnvVars(p, project.ProjectEnvVarParams{
-		ApiUrl:        s.serverApiUrl,
-		ServerUrl:     s.serverUrl,
-		ServerVersion: s.serverVersion,
-		ClientId:      telemetry.ClientId(ctx),
-	}, telemetry.TelemetryEnabled(ctx))
-
-	cr, err := s.containerRegistryService.FindByImageName(p.Image)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	builderCr, err := s.containerRegistryService.FindByImageName(s.builderImage)
-	if err != nil && !containerregistry.IsContainerRegistryNotFound(err) {
-		return err
-	}
-
-	var gc *gitprovider.GitProviderConfig
-
-	if p.GitProviderConfigId != nil {
-		gc, err = s.gitProviderService.GetConfig(*p.GitProviderConfigId)
-		if err != nil && !gitprovider.IsGitProviderNotFound(err) {
-			return err
-		}
-	}
-
-	err = s.provisioner.StartProject(provisioner.ProjectParams{
-		Project:                       &projectToStart,
-		Target:                        target,
-		ContainerRegistry:             cr,
-		GitProviderConfig:             gc,
-		BuilderImage:                  s.builderImage,
-		BuilderImageContainerRegistry: builderCr,
-	})
-	if err != nil {
-		return err
-	}
-
-	logWriter.Write([]byte(fmt.Sprintf("Project %s started\n", p.Name)))
-
-	return nil
 }

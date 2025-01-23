@@ -5,121 +5,114 @@ package workspaces
 
 import (
 	"context"
-	"errors"
 	"io"
 
+	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/logs"
-	"github.com/daytonaio/daytona/pkg/provider"
-	"github.com/daytonaio/daytona/pkg/provisioner"
-	"github.com/daytonaio/daytona/pkg/server/apikeys"
-	"github.com/daytonaio/daytona/pkg/server/builds"
-	"github.com/daytonaio/daytona/pkg/server/containerregistries"
-	"github.com/daytonaio/daytona/pkg/server/gitproviders"
-	"github.com/daytonaio/daytona/pkg/server/projectconfig"
-	"github.com/daytonaio/daytona/pkg/server/workspaces/dto"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/daytonaio/daytona/pkg/telemetry"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
-type IWorkspaceService interface {
-	CreateWorkspace(ctx context.Context, req dto.CreateWorkspaceDTO) (*workspace.Workspace, error)
-	GetWorkspace(ctx context.Context, workspaceId string, verbose bool) (*dto.WorkspaceDTO, error)
-	GetWorkspaceLogReader(workspaceId string) (io.Reader, error)
-	GetProjectLogReader(workspaceId, projectName string) (io.Reader, error)
-	ListWorkspaces(ctx context.Context, verbose bool) ([]dto.WorkspaceDTO, error)
-	RemoveWorkspace(ctx context.Context, workspaceId string) error
-	ForceRemoveWorkspace(ctx context.Context, workspaceId string) error
-	SetProjectState(workspaceId string, projectName string, state *project.ProjectState) (*workspace.Workspace, error)
-	StartProject(ctx context.Context, workspaceId string, projectName string) error
-	StartWorkspace(ctx context.Context, workspaceId string) error
-	StopProject(ctx context.Context, workspaceId string, projectName string) error
-	StopWorkspace(ctx context.Context, workspaceId string) error
-}
-
-type targetStore interface {
-	Find(filter *provider.TargetFilter) (*provider.ProviderTarget, error)
-}
-
 type WorkspaceServiceConfig struct {
-	WorkspaceStore           workspace.Store
-	TargetStore              targetStore
-	ContainerRegistryService containerregistries.IContainerRegistryService
-	BuildService             builds.IBuildService
-	ProjectConfigService     projectconfig.IProjectConfigService
-	ServerApiUrl             string
-	ServerUrl                string
-	ServerVersion            string
-	Provisioner              provisioner.IProvisioner
-	DefaultProjectImage      string
-	DefaultProjectUser       string
-	BuilderImage             string
-	ApiKeyService            apikeys.IApiKeyService
-	LoggerFactory            logs.LoggerFactory
-	GitProviderService       gitproviders.IGitProviderService
-	TelemetryService         telemetry.TelemetryService
+	WorkspaceStore         stores.WorkspaceStore
+	WorkspaceMetadataStore stores.WorkspaceMetadataStore
+
+	FindTarget             func(ctx context.Context, targetId string) (*models.Target, error)
+	FindContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
+	FindCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
+	CreateApiKey           func(ctx context.Context, name string) (string, error)
+	DeleteApiKey           func(ctx context.Context, name string) error
+	ListGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
+	FindGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	GetLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	CreateJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
+	TrackTelemetryEvent    func(event telemetry.Event, clientId string) error
+
+	LoggerFactory         logs.ILoggerFactory
+	ServerApiUrl          string
+	ServerUrl             string
+	ServerVersion         string
+	DefaultWorkspaceImage string
+	DefaultWorkspaceUser  string
 }
 
-func NewWorkspaceService(config WorkspaceServiceConfig) IWorkspaceService {
+func NewWorkspaceService(config WorkspaceServiceConfig) services.IWorkspaceService {
 	return &WorkspaceService{
-		workspaceStore:           config.WorkspaceStore,
-		targetStore:              config.TargetStore,
-		containerRegistryService: config.ContainerRegistryService,
-		buildService:             config.BuildService,
-		projectConfigService:     config.ProjectConfigService,
-		serverApiUrl:             config.ServerApiUrl,
-		serverUrl:                config.ServerUrl,
-		serverVersion:            config.ServerVersion,
-		defaultProjectImage:      config.DefaultProjectImage,
-		defaultProjectUser:       config.DefaultProjectUser,
-		provisioner:              config.Provisioner,
-		loggerFactory:            config.LoggerFactory,
-		apiKeyService:            config.ApiKeyService,
-		gitProviderService:       config.GitProviderService,
-		telemetryService:         config.TelemetryService,
-		builderImage:             config.BuilderImage,
+		workspaceStore:         config.WorkspaceStore,
+		workspaceMetadataStore: config.WorkspaceMetadataStore,
+
+		findTarget:             config.FindTarget,
+		findContainerRegistry:  config.FindContainerRegistry,
+		findCachedBuild:        config.FindCachedBuild,
+		createApiKey:           config.CreateApiKey,
+		deleteApiKey:           config.DeleteApiKey,
+		listGitProviderConfigs: config.ListGitProviderConfigs,
+		findGitProviderConfig:  config.FindGitProviderConfig,
+		getLastCommitSha:       config.GetLastCommitSha,
+		createJob:              config.CreateJob,
+		trackTelemetryEvent:    config.TrackTelemetryEvent,
+
+		serverApiUrl:          config.ServerApiUrl,
+		serverUrl:             config.ServerUrl,
+		serverVersion:         config.ServerVersion,
+		defaultWorkspaceImage: config.DefaultWorkspaceImage,
+		defaultWorkspaceUser:  config.DefaultWorkspaceUser,
+		loggerFactory:         config.LoggerFactory,
 	}
 }
 
 type WorkspaceService struct {
-	workspaceStore           workspace.Store
-	targetStore              targetStore
-	containerRegistryService containerregistries.IContainerRegistryService
-	buildService             builds.IBuildService
-	projectConfigService     projectconfig.IProjectConfigService
-	provisioner              provisioner.IProvisioner
-	apiKeyService            apikeys.IApiKeyService
-	serverApiUrl             string
-	serverUrl                string
-	serverVersion            string
-	defaultProjectImage      string
-	defaultProjectUser       string
-	builderImage             string
-	loggerFactory            logs.LoggerFactory
-	gitProviderService       gitproviders.IGitProviderService
-	telemetryService         telemetry.TelemetryService
+	workspaceStore         stores.WorkspaceStore
+	workspaceMetadataStore stores.WorkspaceMetadataStore
+
+	findTarget             func(ctx context.Context, targetId string) (*models.Target, error)
+	findContainerRegistry  func(ctx context.Context, image string, envVars map[string]string) *models.ContainerRegistry
+	findCachedBuild        func(ctx context.Context, w *models.Workspace) (*models.CachedBuild, error)
+	createApiKey           func(ctx context.Context, name string) (string, error)
+	deleteApiKey           func(ctx context.Context, name string) error
+	listGitProviderConfigs func(ctx context.Context, repoUrl string) ([]*models.GitProviderConfig, error)
+	findGitProviderConfig  func(ctx context.Context, id string) (*models.GitProviderConfig, error)
+	getLastCommitSha       func(ctx context.Context, repo *gitprovider.GitRepository) (string, error)
+	createJob              func(ctx context.Context, workspaceId string, runnerId string, action models.JobAction) error
+	trackTelemetryEvent    func(event telemetry.Event, clientId string) error
+
+	serverApiUrl          string
+	serverUrl             string
+	serverVersion         string
+	defaultWorkspaceImage string
+	defaultWorkspaceUser  string
+	loggerFactory         logs.ILoggerFactory
 }
 
-func (s *WorkspaceService) SetProjectState(workspaceId, projectName string, state *project.ProjectState) (*workspace.Workspace, error) {
-	ws, err := s.workspaceStore.Find(workspaceId)
+func (s *WorkspaceService) GetWorkspaceLogReader(ctx context.Context, workspaceId string) (io.Reader, error) {
+	return s.loggerFactory.CreateLogReader(workspaceId)
+}
+
+func (s *WorkspaceService) GetWorkspaceLogWriter(ctx context.Context, workspaceId string) (io.WriteCloser, error) {
+	return s.loggerFactory.CreateLogWriter(workspaceId)
+}
+
+func (s *WorkspaceService) UpdateProviderMetadata(ctx context.Context, workspaceId, metadata string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	for _, project := range ws.Projects {
-		if project.Name == projectName {
-			project.State = state
-			return ws, s.workspaceStore.Save(ws)
-		}
+	w.ProviderMetadata = &metadata
+	return s.workspaceStore.Save(ctx, w)
+}
+
+func (s *WorkspaceService) UpdateLastJob(ctx context.Context, workspaceId, jobId string) error {
+	w, err := s.workspaceStore.Find(ctx, workspaceId)
+	if err != nil {
+		return err
 	}
 
-	return nil, errors.New("project not found")
-}
+	w.LastJobId = &jobId
+	// Make sure the old relation doesn't get saved to the store
+	w.LastJob = nil
 
-func (s *WorkspaceService) GetWorkspaceLogReader(workspaceId string) (io.Reader, error) {
-	return s.loggerFactory.CreateWorkspaceLogReader(workspaceId)
-}
-
-func (s *WorkspaceService) GetProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
-	return s.loggerFactory.CreateProjectLogReader(workspaceId, projectName)
+	return s.workspaceStore.Save(ctx, w)
 }

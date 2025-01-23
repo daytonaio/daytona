@@ -1,9 +1,9 @@
 name: daytona env set
-synopsis: Set profile environment variables
+synopsis: Set server environment variables
 usage: daytona env set [KEY=VALUE]... [flags]
 inherited_options:
     - name: help
       default_value: "false"
       usage: help for daytona
 see_also:
-    - daytona env - Manage profile environment variables that are added to all workspaces
+    - daytona env - Manage server environment variables that are added to all targets and workspaces

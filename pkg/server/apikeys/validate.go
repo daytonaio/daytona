@@ -4,41 +4,38 @@
 package apikeys
 
 import (
-	"github.com/daytonaio/daytona/internal/apikeys"
-	"github.com/daytonaio/daytona/pkg/apikey"
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
-func (s *ApiKeyService) IsValidApiKey(apiKey string) bool {
-	keyHash := apikeys.HashKey(apiKey)
+func (s *ApiKeyService) IsValidApiKey(ctx context.Context, apiKey string) bool {
+	keyHash := s.getKeyHash(apiKey)
 
-	_, err := s.apiKeyStore.Find(keyHash)
+	_, err := s.apiKeyStore.Find(ctx, keyHash)
 	return err == nil
 }
 
-func (s *ApiKeyService) IsProjectApiKey(apiKey string) bool {
-	keyHash := apikeys.HashKey(apiKey)
+func (s *ApiKeyService) GetApiKeyType(ctx context.Context, apiKey string) (models.ApiKeyType, error) {
+	keyHash := s.getKeyHash(apiKey)
 
-	key, err := s.apiKeyStore.Find(keyHash)
+	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
-		return false
+		return models.ApiKeyTypeClient, err
 	}
 
-	if key.Type != apikey.ApiKeyTypeProject {
-		return false
-	}
-
-	return true
+	return key.Type, nil
 }
 
-func (s *ApiKeyService) IsWorkspaceApiKey(apiKey string) bool {
-	keyHash := apikeys.HashKey(apiKey)
+func (s *ApiKeyService) IsTargetApiKey(ctx context.Context, apiKey string) bool {
+	keyHash := s.getKeyHash(apiKey)
 
-	key, err := s.apiKeyStore.Find(keyHash)
+	key, err := s.apiKeyStore.Find(ctx, keyHash)
 	if err != nil {
 		return false
 	}
 
-	if key.Type != apikey.ApiKeyTypeWorkspace {
+	if key.Type != models.ApiKeyTypeTarget {
 		return false
 	}
 

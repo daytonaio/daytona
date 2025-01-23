@@ -4,50 +4,80 @@
 package workspace
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
+	"github.com/daytonaio/daytona/pkg/api/util"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/services"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"github.com/gin-gonic/gin"
 )
 
-// GetWorkspace 			godoc
+// FindWorkspace 			godoc
 //
 //	@Tags			workspace
-//	@Summary		Get workspace info
-//	@Description	Get workspace info
+//	@Summary		Find workspace
+//	@Description	Find workspace
 //	@Produce		json
 //	@Param			workspaceId	path		string	true	"Workspace ID or Name"
-//	@Param			verbose		query		bool	false	"Verbose"
 //	@Success		200			{object}	WorkspaceDTO
 //	@Router			/workspace/{workspaceId} [get]
 //
-//	@id				GetWorkspace
-func GetWorkspace(ctx *gin.Context) {
+//	@id				FindWorkspace
+func FindWorkspace(ctx *gin.Context) {
 	workspaceId := ctx.Param("workspaceId")
-	verboseQuery := ctx.Query("verbose")
-	verbose := false
-	var err error
-
-	if verboseQuery != "" {
-		verbose, err = strconv.ParseBool(verboseQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
-			return
-		}
-	}
-
 	server := server.GetInstance(nil)
 
-	w, err := server.WorkspaceService.GetWorkspace(ctx.Request.Context(), workspaceId, verbose)
+	w, err := server.WorkspaceService.Find(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
 	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get workspace: %w", err))
+		statusCode := http.StatusInternalServerError
+		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find workspace: %w", err))
 		return
 	}
 
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		util.HideDaytonaEnvVars(&w.EnvVars)
+		util.HideDaytonaEnvVars(&w.Target.EnvVars)
+		w.ApiKey = ""
+		w.Target.ApiKey = ""
+	}
+
 	ctx.JSON(200, w)
+}
+
+// GetWorkspaceState 			godoc
+//
+//	@Tags			workspace
+//	@Summary		Get workspace state
+//	@Description	Get workspace state
+//	@Produce		json
+//	@Param			workspaceId	path		string	true	"Workspace ID or Name"
+//	@Success		200			{object}	ResourceState
+//	@Router			/workspace/{workspaceId}/state [get]
+//
+//	@id				GetWorkspaceState
+func GetWorkspaceState(ctx *gin.Context) {
+	workspaceId := ctx.Param("workspaceId")
+	server := server.GetInstance(nil)
+
+	w, err := server.WorkspaceService.Find(ctx.Request.Context(), workspaceId, services.WorkspaceRetrievalParams{})
+	if err != nil {
+		statusCode := http.StatusInternalServerError
+		if stores.IsWorkspaceNotFound(err) || services.IsWorkspaceDeleted(err) {
+			statusCode = http.StatusNotFound
+		}
+		ctx.AbortWithError(statusCode, fmt.Errorf("failed to find workspace: %w", err))
+		return
+	}
+
+	ctx.JSON(200, w.State)
 }
 
 // ListWorkspaces 			godoc
@@ -55,73 +85,44 @@ func GetWorkspace(ctx *gin.Context) {
 //	@Tags			workspace
 //	@Summary		List workspaces
 //	@Description	List workspaces
+//	@Param			labels	query	string	false	"JSON encoded labels"
 //	@Produce		json
 //	@Success		200	{array}	WorkspaceDTO
 //	@Router			/workspace [get]
-//	@Param			verbose	query	bool	false	"Verbose"
 //
 //	@id				ListWorkspaces
 func ListWorkspaces(ctx *gin.Context) {
-	verboseQuery := ctx.Query("verbose")
-	verbose := false
-	var err error
+	labelsQuery := ctx.Query("labels")
 
-	if verboseQuery != "" {
-		verbose, err = strconv.ParseBool(verboseQuery)
+	var labels map[string]string
+
+	if labelsQuery != "" {
+		err := json.Unmarshal([]byte(labelsQuery), &labels)
 		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for verbose flag"))
+			ctx.AbortWithError(http.StatusBadRequest, fmt.Errorf("invalid filters: %w", err))
 			return
 		}
 	}
 
 	server := server.GetInstance(nil)
 
-	workspaceList, err := server.WorkspaceService.ListWorkspaces(ctx.Request.Context(), verbose)
+	workspaceList, err := server.WorkspaceService.List(ctx.Request.Context(), services.WorkspaceRetrievalParams{
+		Labels: labels,
+	})
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list workspaces: %w", err))
 		return
 	}
 
-	ctx.JSON(200, workspaceList)
-}
-
-// RemoveWorkspace 			godoc
-//
-//	@Tags			workspace
-//	@Summary		Remove workspace
-//	@Description	Remove workspace
-//	@Param			workspaceId	path	string	true	"Workspace ID"
-//	@Param			force		query	bool	false	"Force"
-//	@Success		200
-//	@Router			/workspace/{workspaceId} [delete]
-//
-//	@id				RemoveWorkspace
-func RemoveWorkspace(ctx *gin.Context) {
-	workspaceId := ctx.Param("workspaceId")
-	forceQuery := ctx.Query("force")
-	var err error
-	force := false
-
-	if forceQuery != "" {
-		force, err = strconv.ParseBool(forceQuery)
-		if err != nil {
-			ctx.AbortWithError(http.StatusBadRequest, errors.New("invalid value for force flag"))
-			return
+	apiKeyType, ok := ctx.Get("apiKeyType")
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
+		for i := range workspaceList {
+			util.HideDaytonaEnvVars(&workspaceList[i].EnvVars)
+			util.HideDaytonaEnvVars(&workspaceList[i].Target.EnvVars)
+			workspaceList[i].ApiKey = ""
+			workspaceList[i].Target.ApiKey = ""
 		}
 	}
 
-	server := server.GetInstance(nil)
-
-	if force {
-		err = server.WorkspaceService.ForceRemoveWorkspace(ctx.Request.Context(), workspaceId)
-	} else {
-		err = server.WorkspaceService.RemoveWorkspace(ctx.Request.Context(), workspaceId)
-	}
-
-	if err != nil {
-		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to remove workspace: %w", err))
-		return
-	}
-
-	ctx.Status(200)
+	ctx.JSON(200, workspaceList)
 }

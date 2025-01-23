@@ -13,7 +13,7 @@ import (
 
 var NewApiKeyName = "+ New API Key"
 
-func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey bool) (*apiclient.ApiKey, error) {
+func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKeyViewDTO, title string, withNewApiKey bool) (*apiclient.ApiKeyViewDTO, error) {
 	var items []list.Item
 
 	for _, p := range apiKeys {
@@ -25,7 +25,7 @@ func GetApiKeyFromPrompt(apiKeys []apiclient.ApiKey, title string, withNewApiKey
 	if withNewApiKey {
 		name := NewApiKeyName
 		items = append(items, item{
-			apiKey: apiclient.ApiKey{
+			apiKey: apiclient.ApiKeyViewDTO{
 				Name: name,
 			},
 		})

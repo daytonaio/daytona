@@ -10,14 +10,15 @@ import (
 	"io"
 	"strings"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/views"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (d *DockerClient) PullImage(imageName string, cr *containerregistry.ContainerRegistry, logWriter io.Writer) error {
+func (d *DockerClient) PullImage(imageName string, cr *models.ContainerRegistry, logWriter io.Writer) error {
 	ctx := context.Background()
 
 	tag := "latest"
@@ -68,13 +69,13 @@ func (d *DockerClient) PullImage(imageName string, cr *containerregistry.Contain
 		return err
 	}
 	if logWriter != nil {
-		logWriter.Write([]byte("Image pulled successfully\n"))
+		logWriter.Write([]byte(views.GetPrettyLogLine("Image pulled successfully")))
 	}
 
 	return nil
 }
 
-func getRegistryAuth(cr *containerregistry.ContainerRegistry) string {
+func getRegistryAuth(cr *models.ContainerRegistry) string {
 	if cr == nil {
 		// Sometimes registry auth fails if "" is sent, so sending "empty" instead
 		return "empty"

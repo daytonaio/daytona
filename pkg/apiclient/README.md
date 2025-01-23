@@ -77,23 +77,25 @@ All URIs are relative to *http://localhost:3986*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*ApiKeyAPI* | [**GenerateApiKey**](docs/ApiKeyAPI.md#generateapikey) | **Post** /apikey/{apiKeyName} | Generate an API key
+*ApiKeyAPI* | [**CreateApiKey**](docs/ApiKeyAPI.md#createapikey) | **Post** /apikey/{apiKeyName} | Create an API key
+*ApiKeyAPI* | [**DeleteApiKey**](docs/ApiKeyAPI.md#deleteapikey) | **Delete** /apikey/{apiKeyName} | Delete API key
 *ApiKeyAPI* | [**ListClientApiKeys**](docs/ApiKeyAPI.md#listclientapikeys) | **Get** /apikey | List API keys
-*ApiKeyAPI* | [**RevokeApiKey**](docs/ApiKeyAPI.md#revokeapikey) | **Delete** /apikey/{apiKeyName} | Revoke API key
 *BuildAPI* | [**CreateBuild**](docs/BuildAPI.md#createbuild) | **Post** /build | Create a build
 *BuildAPI* | [**DeleteAllBuilds**](docs/BuildAPI.md#deleteallbuilds) | **Delete** /build | Delete ALL builds
 *BuildAPI* | [**DeleteBuild**](docs/BuildAPI.md#deletebuild) | **Delete** /build/{buildId} | Delete build
 *BuildAPI* | [**DeleteBuildsFromPrebuild**](docs/BuildAPI.md#deletebuildsfromprebuild) | **Delete** /build/prebuild/{prebuildId} | Delete builds
-*BuildAPI* | [**GetBuild**](docs/BuildAPI.md#getbuild) | **Get** /build/{buildId} | Get build data
+*BuildAPI* | [**FindBuild**](docs/BuildAPI.md#findbuild) | **Get** /build/{buildId} | Find build
 *BuildAPI* | [**ListBuilds**](docs/BuildAPI.md#listbuilds) | **Get** /build | List builds
-*ContainerRegistryAPI* | [**GetContainerRegistry**](docs/ContainerRegistryAPI.md#getcontainerregistry) | **Get** /container-registry/{server} | Get container registry credentials
-*ContainerRegistryAPI* | [**ListContainerRegistries**](docs/ContainerRegistryAPI.md#listcontainerregistries) | **Get** /container-registry | List container registries
-*ContainerRegistryAPI* | [**RemoveContainerRegistry**](docs/ContainerRegistryAPI.md#removecontainerregistry) | **Delete** /container-registry/{server} | Remove a container registry credentials
-*ContainerRegistryAPI* | [**SetContainerRegistry**](docs/ContainerRegistryAPI.md#setcontainerregistry) | **Put** /container-registry/{server} | Set container registry credentials
+*BuildAPI* | [**ListSuccessfulBuilds**](docs/BuildAPI.md#listsuccessfulbuilds) | **Get** /build/successful/{repoUrl} | List successful builds for Git repository
+*ContainerRegistryAPI* | [**FindContainerRegistry**](docs/ContainerRegistryAPI.md#findcontainerregistry) | **Get** /container-registry/{server} | Find container registry
 *DefaultAPI* | [**HealthCheck**](docs/DefaultAPI.md#healthcheck) | **Get** /health | Health check
+*EnvVarAPI* | [**DeleteEnvironmentVariable**](docs/EnvVarAPI.md#deleteenvironmentvariable) | **Delete** /env/{key} | Delete environment variable
+*EnvVarAPI* | [**ListEnvironmentVariables**](docs/EnvVarAPI.md#listenvironmentvariables) | **Get** /env | List environment variables
+*EnvVarAPI* | [**SaveEnvironmentVariable**](docs/EnvVarAPI.md#saveenvironmentvariable) | **Put** /env | Save environment variable
+*GitProviderAPI* | [**DeleteGitProvider**](docs/GitProviderAPI.md#deletegitprovider) | **Delete** /gitprovider/{gitProviderId} | Delete Git provider
+*GitProviderAPI* | [**FindGitProvider**](docs/GitProviderAPI.md#findgitprovider) | **Get** /gitprovider/{gitProviderId} | Find Git provider
+*GitProviderAPI* | [**FindGitProviderIdForUrl**](docs/GitProviderAPI.md#findgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Find Git provider ID
 *GitProviderAPI* | [**GetGitContext**](docs/GitProviderAPI.md#getgitcontext) | **Post** /gitprovider/context | Get Git context
-*GitProviderAPI* | [**GetGitProvider**](docs/GitProviderAPI.md#getgitprovider) | **Get** /gitprovider/{gitProviderId} | Get Git provider
-*GitProviderAPI* | [**GetGitProviderIdForUrl**](docs/GitProviderAPI.md#getgitprovideridforurl) | **Get** /gitprovider/id-for-url/{url} | Get Git provider ID
 *GitProviderAPI* | [**GetGitUser**](docs/GitProviderAPI.md#getgituser) | **Get** /gitprovider/{gitProviderId}/user | Get Git context
 *GitProviderAPI* | [**GetNamespaces**](docs/GitProviderAPI.md#getnamespaces) | **Get** /gitprovider/{gitProviderId}/namespaces | Get Git namespaces
 *GitProviderAPI* | [**GetRepoBranches**](docs/GitProviderAPI.md#getrepobranches) | **Get** /gitprovider/{gitProviderId}/{namespaceId}/{repositoryId}/branches | Get Git repository branches
@@ -102,85 +104,108 @@ Class | Method | HTTP request | Description
 *GitProviderAPI* | [**GetUrlFromRepository**](docs/GitProviderAPI.md#geturlfromrepository) | **Post** /gitprovider/context/url | Get URL from Git repository
 *GitProviderAPI* | [**ListGitProviders**](docs/GitProviderAPI.md#listgitproviders) | **Get** /gitprovider | List Git providers
 *GitProviderAPI* | [**ListGitProvidersForUrl**](docs/GitProviderAPI.md#listgitprovidersforurl) | **Get** /gitprovider/for-url/{url} | List Git providers for url
-*GitProviderAPI* | [**RemoveGitProvider**](docs/GitProviderAPI.md#removegitprovider) | **Delete** /gitprovider/{gitProviderId} | Remove Git provider
-*GitProviderAPI* | [**SetGitProvider**](docs/GitProviderAPI.md#setgitprovider) | **Put** /gitprovider | Set Git provider
-*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /project-config/{configName}/prebuild/{prebuildId} | Delete prebuild
-*PrebuildAPI* | [**GetPrebuild**](docs/PrebuildAPI.md#getprebuild) | **Get** /project-config/{configName}/prebuild/{prebuildId} | Get prebuild
-*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /project-config/prebuild | List prebuilds
-*PrebuildAPI* | [**ListPrebuildsForProjectConfig**](docs/PrebuildAPI.md#listprebuildsforprojectconfig) | **Get** /project-config/{configName}/prebuild | List prebuilds for project config
-*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /project-config/prebuild/process-git-event | ProcessGitEvent
-*PrebuildAPI* | [**SetPrebuild**](docs/PrebuildAPI.md#setprebuild) | **Put** /project-config/{configName}/prebuild | Set prebuild
-*ProfileAPI* | [**DeleteProfileData**](docs/ProfileAPI.md#deleteprofiledata) | **Delete** /profile | Delete profile data
-*ProfileAPI* | [**GetProfileData**](docs/ProfileAPI.md#getprofiledata) | **Get** /profile | Get profile data
-*ProfileAPI* | [**SetProfileData**](docs/ProfileAPI.md#setprofiledata) | **Put** /profile | Set profile data
-*ProjectConfigAPI* | [**DeleteProjectConfig**](docs/ProjectConfigAPI.md#deleteprojectconfig) | **Delete** /project-config/{configName} | Delete project config data
-*ProjectConfigAPI* | [**GetDefaultProjectConfig**](docs/ProjectConfigAPI.md#getdefaultprojectconfig) | **Get** /project-config/default/{gitUrl} | Get project configs by git url
-*ProjectConfigAPI* | [**GetProjectConfig**](docs/ProjectConfigAPI.md#getprojectconfig) | **Get** /project-config/{configName} | Get project config data
-*ProjectConfigAPI* | [**ListProjectConfigs**](docs/ProjectConfigAPI.md#listprojectconfigs) | **Get** /project-config | List project configs
-*ProjectConfigAPI* | [**SetDefaultProjectConfig**](docs/ProjectConfigAPI.md#setdefaultprojectconfig) | **Patch** /project-config/{configName}/set-default | Set project config to default
-*ProjectConfigAPI* | [**SetProjectConfig**](docs/ProjectConfigAPI.md#setprojectconfig) | **Put** /project-config | Set project config data
-*ProviderAPI* | [**GetTargetManifest**](docs/ProviderAPI.md#gettargetmanifest) | **Get** /provider/{provider}/target-manifest | Get provider target manifest
-*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /provider/install | Install a provider
-*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /provider | List providers
-*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /provider/{provider}/uninstall | Uninstall a provider
+*GitProviderAPI* | [**SaveGitProvider**](docs/GitProviderAPI.md#savegitprovider) | **Put** /gitprovider | Save Git provider
+*JobAPI* | [**ListJobs**](docs/JobAPI.md#listjobs) | **Get** /job | List jobs
+*PrebuildAPI* | [**DeletePrebuild**](docs/PrebuildAPI.md#deleteprebuild) | **Delete** /workspace-template/{templateName}/prebuild/{prebuildId} | Delete prebuild
+*PrebuildAPI* | [**FindPrebuild**](docs/PrebuildAPI.md#findprebuild) | **Get** /workspace-template/{templateName}/prebuild/{prebuildId} | Find prebuild
+*PrebuildAPI* | [**ListPrebuilds**](docs/PrebuildAPI.md#listprebuilds) | **Get** /workspace-template/prebuild | List prebuilds
+*PrebuildAPI* | [**ListPrebuildsForWorkspaceTemplate**](docs/PrebuildAPI.md#listprebuildsforworkspacetemplate) | **Get** /workspace-template/{templateName}/prebuild | List prebuilds for workspace template
+*PrebuildAPI* | [**ProcessGitEvent**](docs/PrebuildAPI.md#processgitevent) | **Post** /workspace-template/prebuild/process-git-event | ProcessGitEvent
+*PrebuildAPI* | [**SavePrebuild**](docs/PrebuildAPI.md#saveprebuild) | **Put** /workspace-template/{templateName}/prebuild | Save prebuild
+*ProviderAPI* | [**GetRunnerProviders**](docs/ProviderAPI.md#getrunnerproviders) | **Get** /runner/{runnerId}/provider | Get runner providers
+*ProviderAPI* | [**InstallProvider**](docs/ProviderAPI.md#installprovider) | **Post** /runner/{runnerId}/provider/{providerName}/install | Install provider
+*ProviderAPI* | [**ListProviders**](docs/ProviderAPI.md#listproviders) | **Get** /runner/provider | List providers
+*ProviderAPI* | [**ListProvidersForInstall**](docs/ProviderAPI.md#listprovidersforinstall) | **Get** /runner/provider/for-install | List providers available for installation
+*ProviderAPI* | [**UninstallProvider**](docs/ProviderAPI.md#uninstallprovider) | **Post** /runner/{runnerId}/provider/{providerName}/uninstall | Uninstall provider
+*ProviderAPI* | [**UpdateProvider**](docs/ProviderAPI.md#updateprovider) | **Post** /runner/{runnerId}/provider/{providerName}/update | Update provider
+*RunnerAPI* | [**CreateRunner**](docs/RunnerAPI.md#createrunner) | **Post** /runner | Create a runner
+*RunnerAPI* | [**DeleteRunner**](docs/RunnerAPI.md#deleterunner) | **Delete** /runner/{runnerId} | Delete runner
+*RunnerAPI* | [**FindRunner**](docs/RunnerAPI.md#findrunner) | **Get** /runner/{runnerId} | Find a runner
+*RunnerAPI* | [**ListRunnerJobs**](docs/RunnerAPI.md#listrunnerjobs) | **Get** /runner/{runnerId}/jobs | List runner jobs
+*RunnerAPI* | [**ListRunners**](docs/RunnerAPI.md#listrunners) | **Get** /runner | List runners
+*RunnerAPI* | [**UpdateJobState**](docs/RunnerAPI.md#updatejobstate) | **Post** /runner/{runnerId}/jobs/{jobId}/state | Update job state
+*RunnerAPI* | [**UpdateRunnerMetadata**](docs/RunnerAPI.md#updaterunnermetadata) | **Post** /runner/{runnerId}/metadata | Update runner metadata
 *SampleAPI* | [**ListSamples**](docs/SampleAPI.md#listsamples) | **Get** /sample | List samples
-*ServerAPI* | [**GenerateNetworkKey**](docs/ServerAPI.md#generatenetworkkey) | **Post** /server/network-key | Generate a new authentication key
+*ServerAPI* | [**CreateNetworkKey**](docs/ServerAPI.md#createnetworkkey) | **Post** /server/network-key | Create a new authentication key
 *ServerAPI* | [**GetConfig**](docs/ServerAPI.md#getconfig) | **Get** /server/config | Get the server configuration
-*ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | List server log files
-*ServerAPI* | [**SetConfig**](docs/ServerAPI.md#setconfig) | **Post** /server/config | Set the server configuration
+*ServerAPI* | [**GetServerLogFiles**](docs/ServerAPI.md#getserverlogfiles) | **Get** /server/logs | Get server log files
+*ServerAPI* | [**SaveConfig**](docs/ServerAPI.md#saveconfig) | **Put** /server/config | Save the server configuration
+*TargetAPI* | [**CreateTarget**](docs/TargetAPI.md#createtarget) | **Post** /target | Create a target
+*TargetAPI* | [**DeleteTarget**](docs/TargetAPI.md#deletetarget) | **Delete** /target/{targetId} | Delete target
+*TargetAPI* | [**FindTarget**](docs/TargetAPI.md#findtarget) | **Get** /target/{targetId} | Find target
+*TargetAPI* | [**GetTargetState**](docs/TargetAPI.md#gettargetstate) | **Get** /target/{targetId}/state | Get target state
+*TargetAPI* | [**HandleSuccessfulCreation**](docs/TargetAPI.md#handlesuccessfulcreation) | **Post** /target/{targetId}/handle-successful-creation | Handles successful creation of the target
 *TargetAPI* | [**ListTargets**](docs/TargetAPI.md#listtargets) | **Get** /target | List targets
-*TargetAPI* | [**RemoveTarget**](docs/TargetAPI.md#removetarget) | **Delete** /target/{target} | Remove a target
-*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{target}/set-default | Set target to default
-*TargetAPI* | [**SetTarget**](docs/TargetAPI.md#settarget) | **Put** /target | Set a target
+*TargetAPI* | [**RestartTarget**](docs/TargetAPI.md#restarttarget) | **Post** /target/{targetId}/restart | Restart target
+*TargetAPI* | [**SetDefaultTarget**](docs/TargetAPI.md#setdefaulttarget) | **Patch** /target/{targetId}/set-default | Set target to be used by default
+*TargetAPI* | [**StartTarget**](docs/TargetAPI.md#starttarget) | **Post** /target/{targetId}/start | Start target
+*TargetAPI* | [**StopTarget**](docs/TargetAPI.md#stoptarget) | **Post** /target/{targetId}/stop | Stop target
+*TargetAPI* | [**UpdateTargetMetadata**](docs/TargetAPI.md#updatetargetmetadata) | **Post** /target/{targetId}/metadata | Update target metadata
+*TargetAPI* | [**UpdateTargetProviderMetadata**](docs/TargetAPI.md#updatetargetprovidermetadata) | **Post** /target/{targetId}/provider-metadata | Update target provider metadata
+*TargetConfigAPI* | [**CreateTargetConfig**](docs/TargetConfigAPI.md#createtargetconfig) | **Post** /target-config | Create a target config
+*TargetConfigAPI* | [**DeleteTargetConfig**](docs/TargetConfigAPI.md#deletetargetconfig) | **Delete** /target-config/{configId} | Delete a target config
+*TargetConfigAPI* | [**ListTargetConfigs**](docs/TargetConfigAPI.md#listtargetconfigs) | **Get** /target-config | List target configs
 *WorkspaceAPI* | [**CreateWorkspace**](docs/WorkspaceAPI.md#createworkspace) | **Post** /workspace | Create a workspace
-*WorkspaceAPI* | [**GetWorkspace**](docs/WorkspaceAPI.md#getworkspace) | **Get** /workspace/{workspaceId} | Get workspace info
+*WorkspaceAPI* | [**DeleteWorkspace**](docs/WorkspaceAPI.md#deleteworkspace) | **Delete** /workspace/{workspaceId} | Delete workspace
+*WorkspaceAPI* | [**FindWorkspace**](docs/WorkspaceAPI.md#findworkspace) | **Get** /workspace/{workspaceId} | Find workspace
+*WorkspaceAPI* | [**GetWorkspaceState**](docs/WorkspaceAPI.md#getworkspacestate) | **Get** /workspace/{workspaceId}/state | Get workspace state
 *WorkspaceAPI* | [**ListWorkspaces**](docs/WorkspaceAPI.md#listworkspaces) | **Get** /workspace | List workspaces
-*WorkspaceAPI* | [**RemoveWorkspace**](docs/WorkspaceAPI.md#removeworkspace) | **Delete** /workspace/{workspaceId} | Remove workspace
-*WorkspaceAPI* | [**SetProjectState**](docs/WorkspaceAPI.md#setprojectstate) | **Post** /workspace/{workspaceId}/{projectId}/state | Set project state
-*WorkspaceAPI* | [**StartProject**](docs/WorkspaceAPI.md#startproject) | **Post** /workspace/{workspaceId}/{projectId}/start | Start project
+*WorkspaceAPI* | [**RestartWorkspace**](docs/WorkspaceAPI.md#restartworkspace) | **Post** /workspace/{workspaceId}/restart | Restart workspace
 *WorkspaceAPI* | [**StartWorkspace**](docs/WorkspaceAPI.md#startworkspace) | **Post** /workspace/{workspaceId}/start | Start workspace
-*WorkspaceAPI* | [**StopProject**](docs/WorkspaceAPI.md#stopproject) | **Post** /workspace/{workspaceId}/{projectId}/stop | Stop project
 *WorkspaceAPI* | [**StopWorkspace**](docs/WorkspaceAPI.md#stopworkspace) | **Post** /workspace/{workspaceId}/stop | Stop workspace
-*WorkspaceToolboxAPI* | [**FsCreateFolder**](docs/WorkspaceToolboxAPI.md#fscreatefolder) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/folder | Create folder
-*WorkspaceToolboxAPI* | [**FsDeleteFile**](docs/WorkspaceToolboxAPI.md#fsdeletefile) | **Delete** /workspace/{workspaceId}/{projectId}/toolbox/files | Delete file
-*WorkspaceToolboxAPI* | [**FsDownloadFile**](docs/WorkspaceToolboxAPI.md#fsdownloadfile) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/download | Download file
-*WorkspaceToolboxAPI* | [**FsFindInFiles**](docs/WorkspaceToolboxAPI.md#fsfindinfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/find | Search for text/pattern in files
-*WorkspaceToolboxAPI* | [**FsGetFileDetails**](docs/WorkspaceToolboxAPI.md#fsgetfiledetails) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/info | Get file info
-*WorkspaceToolboxAPI* | [**FsListFiles**](docs/WorkspaceToolboxAPI.md#fslistfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files | List files
-*WorkspaceToolboxAPI* | [**FsMoveFile**](docs/WorkspaceToolboxAPI.md#fsmovefile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/move | Create folder
-*WorkspaceToolboxAPI* | [**FsReplaceInFiles**](docs/WorkspaceToolboxAPI.md#fsreplaceinfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/replace | Repleace text/pattern in files
-*WorkspaceToolboxAPI* | [**FsSearchFiles**](docs/WorkspaceToolboxAPI.md#fssearchfiles) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/files/search | Search for files
-*WorkspaceToolboxAPI* | [**FsSetFilePermissions**](docs/WorkspaceToolboxAPI.md#fssetfilepermissions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/permissions | Set file owner/group/permissions
-*WorkspaceToolboxAPI* | [**FsUploadFile**](docs/WorkspaceToolboxAPI.md#fsuploadfile) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/files/upload | Upload file
-*WorkspaceToolboxAPI* | [**GetProjectDir**](docs/WorkspaceToolboxAPI.md#getprojectdir) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/project-dir | Get project dir
-*WorkspaceToolboxAPI* | [**GitAddFiles**](docs/WorkspaceToolboxAPI.md#gitaddfiles) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/add | Add files
-*WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Get branch list
-*WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/clone | Clone git repository
-*WorkspaceToolboxAPI* | [**GitCommitChanges**](docs/WorkspaceToolboxAPI.md#gitcommitchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/commit | Commit changes
-*WorkspaceToolboxAPI* | [**GitCommitHistory**](docs/WorkspaceToolboxAPI.md#gitcommithistory) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/history | Get commit history
-*WorkspaceToolboxAPI* | [**GitCreateBranch**](docs/WorkspaceToolboxAPI.md#gitcreatebranch) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/branches | Create branch
-*WorkspaceToolboxAPI* | [**GitGitStatus**](docs/WorkspaceToolboxAPI.md#gitgitstatus) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/git/status | Get git status
-*WorkspaceToolboxAPI* | [**GitPullChanges**](docs/WorkspaceToolboxAPI.md#gitpullchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/pull | Pull changes
-*WorkspaceToolboxAPI* | [**GitPushChanges**](docs/WorkspaceToolboxAPI.md#gitpushchanges) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/git/push | Push changes
-*WorkspaceToolboxAPI* | [**LspCompletions**](docs/WorkspaceToolboxAPI.md#lspcompletions) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions | Get Lsp Completions
-*WorkspaceToolboxAPI* | [**LspDidClose**](docs/WorkspaceToolboxAPI.md#lspdidclose) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close | Call Lsp DidClose
-*WorkspaceToolboxAPI* | [**LspDidOpen**](docs/WorkspaceToolboxAPI.md#lspdidopen) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open | Call Lsp DidOpen
-*WorkspaceToolboxAPI* | [**LspDocumentSymbols**](docs/WorkspaceToolboxAPI.md#lspdocumentsymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols | Call Lsp DocumentSymbols
-*WorkspaceToolboxAPI* | [**LspStart**](docs/WorkspaceToolboxAPI.md#lspstart) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/start | Start Lsp server
-*WorkspaceToolboxAPI* | [**LspStop**](docs/WorkspaceToolboxAPI.md#lspstop) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop | Stop Lsp server
-*WorkspaceToolboxAPI* | [**LspWorkspaceSymbols**](docs/WorkspaceToolboxAPI.md#lspworkspacesymbols) | **Get** /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols
-*WorkspaceToolboxAPI* | [**ProcessExecuteCommand**](docs/WorkspaceToolboxAPI.md#processexecutecommand) | **Post** /workspace/{workspaceId}/{projectId}/toolbox/process/execute | Execute command
+*WorkspaceAPI* | [**UpdateWorkspaceLabels**](docs/WorkspaceAPI.md#updateworkspacelabels) | **Post** /workspace/{workspaceId}/labels | Update workspace labels
+*WorkspaceAPI* | [**UpdateWorkspaceMetadata**](docs/WorkspaceAPI.md#updateworkspacemetadata) | **Post** /workspace/{workspaceId}/metadata | Update workspace metadata
+*WorkspaceAPI* | [**UpdateWorkspaceProviderMetadata**](docs/WorkspaceAPI.md#updateworkspaceprovidermetadata) | **Post** /workspace/{workspaceId}/provider-metadata | Update workspace provider metadata
+*WorkspaceTemplateAPI* | [**DeleteWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#deleteworkspacetemplate) | **Delete** /workspace-template/{templateName} | Delete workspace template data
+*WorkspaceTemplateAPI* | [**FindWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#findworkspacetemplate) | **Get** /workspace-template/{templateName} | Find a workspace template
+*WorkspaceTemplateAPI* | [**GetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#getdefaultworkspacetemplate) | **Get** /workspace-template/default/{gitUrl} | Get default workspace templates by git url
+*WorkspaceTemplateAPI* | [**ListWorkspaceTemplates**](docs/WorkspaceTemplateAPI.md#listworkspacetemplates) | **Get** /workspace-template | List workspace templates
+*WorkspaceTemplateAPI* | [**SaveWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#saveworkspacetemplate) | **Put** /workspace-template | Set workspace template data
+*WorkspaceTemplateAPI* | [**SetDefaultWorkspaceTemplate**](docs/WorkspaceTemplateAPI.md#setdefaultworkspacetemplate) | **Patch** /workspace-template/{templateName}/set-default | Set workspace template to default
+*WorkspaceToolboxAPI* | [**CreateSession**](docs/WorkspaceToolboxAPI.md#createsession) | **Post** /workspace/{workspaceId}/toolbox/process/session | Create exec session
+*WorkspaceToolboxAPI* | [**DeleteSession**](docs/WorkspaceToolboxAPI.md#deletesession) | **Delete** /workspace/{workspaceId}/toolbox/process/session/{sessionId} | Delete session
+*WorkspaceToolboxAPI* | [**FsCreateFolder**](docs/WorkspaceToolboxAPI.md#fscreatefolder) | **Post** /workspace/{workspaceId}/toolbox/files/folder | Create folder
+*WorkspaceToolboxAPI* | [**FsDeleteFile**](docs/WorkspaceToolboxAPI.md#fsdeletefile) | **Delete** /workspace/{workspaceId}/toolbox/files | Delete file
+*WorkspaceToolboxAPI* | [**FsDownloadFile**](docs/WorkspaceToolboxAPI.md#fsdownloadfile) | **Get** /workspace/{workspaceId}/toolbox/files/download | Download file
+*WorkspaceToolboxAPI* | [**FsFindInFiles**](docs/WorkspaceToolboxAPI.md#fsfindinfiles) | **Get** /workspace/{workspaceId}/toolbox/files/find | Search for text/pattern in files
+*WorkspaceToolboxAPI* | [**FsGetFileDetails**](docs/WorkspaceToolboxAPI.md#fsgetfiledetails) | **Get** /workspace/{workspaceId}/toolbox/files/info | Get file info
+*WorkspaceToolboxAPI* | [**FsListFiles**](docs/WorkspaceToolboxAPI.md#fslistfiles) | **Get** /workspace/{workspaceId}/toolbox/files | List files
+*WorkspaceToolboxAPI* | [**FsMoveFile**](docs/WorkspaceToolboxAPI.md#fsmovefile) | **Post** /workspace/{workspaceId}/toolbox/files/move | Create folder
+*WorkspaceToolboxAPI* | [**FsReplaceInFiles**](docs/WorkspaceToolboxAPI.md#fsreplaceinfiles) | **Post** /workspace/{workspaceId}/toolbox/files/replace | Repleace text/pattern in files
+*WorkspaceToolboxAPI* | [**FsSearchFiles**](docs/WorkspaceToolboxAPI.md#fssearchfiles) | **Get** /workspace/{workspaceId}/toolbox/files/search | Search for files
+*WorkspaceToolboxAPI* | [**FsSetFilePermissions**](docs/WorkspaceToolboxAPI.md#fssetfilepermissions) | **Post** /workspace/{workspaceId}/toolbox/files/permissions | Set file owner/group/permissions
+*WorkspaceToolboxAPI* | [**FsUploadFile**](docs/WorkspaceToolboxAPI.md#fsuploadfile) | **Post** /workspace/{workspaceId}/toolbox/files/upload | Upload file
+*WorkspaceToolboxAPI* | [**GetSessionCommandLogs**](docs/WorkspaceToolboxAPI.md#getsessioncommandlogs) | **Get** /workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get session command logs
+*WorkspaceToolboxAPI* | [**GetWorkspaceDir**](docs/WorkspaceToolboxAPI.md#getworkspacedir) | **Get** /workspace/{workspaceId}/toolbox/workspace-dir | Get workspace dir
+*WorkspaceToolboxAPI* | [**GitAddFiles**](docs/WorkspaceToolboxAPI.md#gitaddfiles) | **Post** /workspace/{workspaceId}/toolbox/git/add | Add files
+*WorkspaceToolboxAPI* | [**GitBranchList**](docs/WorkspaceToolboxAPI.md#gitbranchlist) | **Get** /workspace/{workspaceId}/toolbox/git/branches | Get branch list
+*WorkspaceToolboxAPI* | [**GitCloneRepository**](docs/WorkspaceToolboxAPI.md#gitclonerepository) | **Post** /workspace/{workspaceId}/toolbox/git/clone | Clone git repository
+*WorkspaceToolboxAPI* | [**GitCommitChanges**](docs/WorkspaceToolboxAPI.md#gitcommitchanges) | **Post** /workspace/{workspaceId}/toolbox/git/commit | Commit changes
+*WorkspaceToolboxAPI* | [**GitCommitHistory**](docs/WorkspaceToolboxAPI.md#gitcommithistory) | **Get** /workspace/{workspaceId}/toolbox/git/history | Get commit history
+*WorkspaceToolboxAPI* | [**GitCreateBranch**](docs/WorkspaceToolboxAPI.md#gitcreatebranch) | **Post** /workspace/{workspaceId}/toolbox/git/branches | Create branch
+*WorkspaceToolboxAPI* | [**GitGitStatus**](docs/WorkspaceToolboxAPI.md#gitgitstatus) | **Get** /workspace/{workspaceId}/toolbox/git/status | Get git status
+*WorkspaceToolboxAPI* | [**GitPullChanges**](docs/WorkspaceToolboxAPI.md#gitpullchanges) | **Post** /workspace/{workspaceId}/toolbox/git/pull | Pull changes
+*WorkspaceToolboxAPI* | [**GitPushChanges**](docs/WorkspaceToolboxAPI.md#gitpushchanges) | **Post** /workspace/{workspaceId}/toolbox/git/push | Push changes
+*WorkspaceToolboxAPI* | [**ListSessions**](docs/WorkspaceToolboxAPI.md#listsessions) | **Get** /workspace/{workspaceId}/toolbox/process/session | List sessions
+*WorkspaceToolboxAPI* | [**LspCompletions**](docs/WorkspaceToolboxAPI.md#lspcompletions) | **Post** /workspace/{workspaceId}/toolbox/lsp/completions | Get Lsp Completions
+*WorkspaceToolboxAPI* | [**LspDidClose**](docs/WorkspaceToolboxAPI.md#lspdidclose) | **Post** /workspace/{workspaceId}/toolbox/lsp/did-close | Call Lsp DidClose
+*WorkspaceToolboxAPI* | [**LspDidOpen**](docs/WorkspaceToolboxAPI.md#lspdidopen) | **Post** /workspace/{workspaceId}/toolbox/lsp/did-open | Call Lsp DidOpen
+*WorkspaceToolboxAPI* | [**LspDocumentSymbols**](docs/WorkspaceToolboxAPI.md#lspdocumentsymbols) | **Get** /workspace/{workspaceId}/toolbox/lsp/document-symbols | Call Lsp DocumentSymbols
+*WorkspaceToolboxAPI* | [**LspStart**](docs/WorkspaceToolboxAPI.md#lspstart) | **Post** /workspace/{workspaceId}/toolbox/lsp/start | Start Lsp server
+*WorkspaceToolboxAPI* | [**LspStop**](docs/WorkspaceToolboxAPI.md#lspstop) | **Post** /workspace/{workspaceId}/toolbox/lsp/stop | Stop Lsp server
+*WorkspaceToolboxAPI* | [**LspWorkspaceSymbols**](docs/WorkspaceToolboxAPI.md#lspworkspacesymbols) | **Get** /workspace/{workspaceId}/toolbox/lsp/workspace-symbols | Call Lsp WorkspaceSymbols
+*WorkspaceToolboxAPI* | [**ProcessExecuteCommand**](docs/WorkspaceToolboxAPI.md#processexecutecommand) | **Post** /workspace/{workspaceId}/toolbox/process/execute | Execute command
+*WorkspaceToolboxAPI* | [**SessionExecuteCommand**](docs/WorkspaceToolboxAPI.md#sessionexecutecommand) | **Post** /workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec | Execute command in session
 
 
 ## Documentation For Models
 
- - [ApiKey](docs/ApiKey.md)
- - [ApikeyApiKeyType](docs/ApikeyApiKeyType.md)
- - [Build](docs/Build.md)
- - [BuildBuildState](docs/BuildBuildState.md)
+ - [ApiKeyViewDTO](docs/ApiKeyViewDTO.md)
  - [BuildConfig](docs/BuildConfig.md)
+ - [BuildDTO](docs/BuildDTO.md)
  - [CachedBuild](docs/CachedBuild.md)
  - [CloneTarget](docs/CloneTarget.md)
+ - [Command](docs/Command.md)
  - [CompletionContext](docs/CompletionContext.md)
  - [CompletionItem](docs/CompletionItem.md)
  - [CompletionList](docs/CompletionList.md)
@@ -188,12 +213,16 @@ Class | Method | HTTP request | Description
  - [ContainerRegistry](docs/ContainerRegistry.md)
  - [CreateBuildDTO](docs/CreateBuildDTO.md)
  - [CreatePrebuildDTO](docs/CreatePrebuildDTO.md)
- - [CreateProjectConfigDTO](docs/CreateProjectConfigDTO.md)
- - [CreateProjectDTO](docs/CreateProjectDTO.md)
- - [CreateProjectSourceDTO](docs/CreateProjectSourceDTO.md)
- - [CreateProviderTargetDTO](docs/CreateProviderTargetDTO.md)
+ - [CreateRunnerDTO](docs/CreateRunnerDTO.md)
+ - [CreateRunnerResultDTO](docs/CreateRunnerResultDTO.md)
+ - [CreateSessionRequest](docs/CreateSessionRequest.md)
+ - [CreateTargetConfigDTO](docs/CreateTargetConfigDTO.md)
+ - [CreateTargetDTO](docs/CreateTargetDTO.md)
  - [CreateWorkspaceDTO](docs/CreateWorkspaceDTO.md)
+ - [CreateWorkspaceSourceDTO](docs/CreateWorkspaceSourceDTO.md)
+ - [CreateWorkspaceTemplateDTO](docs/CreateWorkspaceTemplateDTO.md)
  - [DevcontainerConfig](docs/DevcontainerConfig.md)
+ - [EnvironmentVariable](docs/EnvironmentVariable.md)
  - [ExecuteRequest](docs/ExecuteRequest.md)
  - [ExecuteResponse](docs/ExecuteResponse.md)
  - [FRPSConfig](docs/FRPSConfig.md)
@@ -214,7 +243,8 @@ Class | Method | HTTP request | Description
  - [GitRepository](docs/GitRepository.md)
  - [GitStatus](docs/GitStatus.md)
  - [GitUser](docs/GitUser.md)
- - [InstallProviderRequest](docs/InstallProviderRequest.md)
+ - [Job](docs/Job.md)
+ - [JobState](docs/JobState.md)
  - [ListBranchResponse](docs/ListBranchResponse.md)
  - [LogFileConfig](docs/LogFileConfig.md)
  - [LspCompletionParams](docs/LspCompletionParams.md)
@@ -225,34 +255,48 @@ Class | Method | HTTP request | Description
  - [LspServerRequest](docs/LspServerRequest.md)
  - [LspSymbol](docs/LspSymbol.md)
  - [Match](docs/Match.md)
+ - [ModelsApiKeyType](docs/ModelsApiKeyType.md)
+ - [ModelsJobAction](docs/ModelsJobAction.md)
+ - [ModelsResourceStateName](docs/ModelsResourceStateName.md)
+ - [ModelsTargetConfigPropertyType](docs/ModelsTargetConfigPropertyType.md)
  - [NetworkKey](docs/NetworkKey.md)
  - [Position](docs/Position.md)
  - [PrebuildConfig](docs/PrebuildConfig.md)
  - [PrebuildDTO](docs/PrebuildDTO.md)
- - [ProfileData](docs/ProfileData.md)
- - [Project](docs/Project.md)
- - [ProjectConfig](docs/ProjectConfig.md)
- - [ProjectDirResponse](docs/ProjectDirResponse.md)
- - [ProjectInfo](docs/ProjectInfo.md)
- - [ProjectState](docs/ProjectState.md)
- - [Provider](docs/Provider.md)
- - [ProviderProviderInfo](docs/ProviderProviderInfo.md)
- - [ProviderProviderTargetProperty](docs/ProviderProviderTargetProperty.md)
- - [ProviderProviderTargetPropertyType](docs/ProviderProviderTargetPropertyType.md)
- - [ProviderTarget](docs/ProviderTarget.md)
+ - [ProviderDTO](docs/ProviderDTO.md)
+ - [ProviderInfo](docs/ProviderInfo.md)
  - [ReplaceRequest](docs/ReplaceRequest.md)
  - [ReplaceResult](docs/ReplaceResult.md)
  - [RepositoryUrl](docs/RepositoryUrl.md)
+ - [ResourceState](docs/ResourceState.md)
+ - [ResourceType](docs/ResourceType.md)
+ - [RunnerDTO](docs/RunnerDTO.md)
+ - [RunnerMetadata](docs/RunnerMetadata.md)
  - [Sample](docs/Sample.md)
  - [SearchFilesResponse](docs/SearchFilesResponse.md)
  - [ServerConfig](docs/ServerConfig.md)
+ - [Session](docs/Session.md)
+ - [SessionExecuteRequest](docs/SessionExecuteRequest.md)
+ - [SessionExecuteResponse](docs/SessionExecuteResponse.md)
  - [SetGitProviderConfig](docs/SetGitProviderConfig.md)
- - [SetProjectState](docs/SetProjectState.md)
  - [SigningMethod](docs/SigningMethod.md)
  - [Status](docs/Status.md)
+ - [Target](docs/Target.md)
+ - [TargetConfig](docs/TargetConfig.md)
+ - [TargetConfigProperty](docs/TargetConfigProperty.md)
+ - [TargetDTO](docs/TargetDTO.md)
+ - [TargetMetadata](docs/TargetMetadata.md)
+ - [UpdateJobState](docs/UpdateJobState.md)
+ - [UpdateRunnerMetadataDTO](docs/UpdateRunnerMetadataDTO.md)
+ - [UpdateTargetMetadataDTO](docs/UpdateTargetMetadataDTO.md)
+ - [UpdateTargetProviderMetadataDTO](docs/UpdateTargetProviderMetadataDTO.md)
+ - [UpdateWorkspaceMetadataDTO](docs/UpdateWorkspaceMetadataDTO.md)
+ - [UpdateWorkspaceProviderMetadataDTO](docs/UpdateWorkspaceProviderMetadataDTO.md)
  - [Workspace](docs/Workspace.md)
  - [WorkspaceDTO](docs/WorkspaceDTO.md)
- - [WorkspaceInfo](docs/WorkspaceInfo.md)
+ - [WorkspaceDirResponse](docs/WorkspaceDirResponse.md)
+ - [WorkspaceMetadata](docs/WorkspaceMetadata.md)
+ - [WorkspaceTemplate](docs/WorkspaceTemplate.md)
 
 
 ## Documentation For Authorization

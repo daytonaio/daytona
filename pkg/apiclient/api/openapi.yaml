@@ -19,7 +19,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ApiKey'
+                  $ref: '#/components/schemas/ApiKeyViewDTO'
                 type: array
           description: OK
       summary: List API keys
@@ -27,8 +27,8 @@ paths:
       - apiKey
   /apikey/{apiKeyName}:
     delete:
-      description: Revoke API key
-      operationId: RevokeApiKey
+      description: Delete API key
+      operationId: DeleteApiKey
       parameters:
       - description: API key name
         in: path
@@ -40,12 +40,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Revoke API key
+      summary: Delete API key
       tags:
       - apiKey
     post:
-      description: Generate an API key
-      operationId: GenerateApiKey
+      description: Create an API key
+      operationId: CreateApiKey
       parameters:
       - description: API key name
         in: path
@@ -60,7 +60,7 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Generate an API key
+      summary: Create an API key
       tags:
       - apiKey
   /build:
@@ -89,7 +89,7 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Build'
+                  $ref: '#/components/schemas/BuildDTO'
                 type: array
           description: OK
       summary: List builds
@@ -139,6 +139,29 @@ paths:
       summary: Delete builds
       tags:
       - build
+  /build/successful/{repoUrl}:
+    get:
+      description: List successful builds for Git repository
+      operationId: ListSuccessfulBuilds
+      parameters:
+      - description: Repository URL
+        in: path
+        name: repoUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/BuildDTO'
+                type: array
+          description: OK
+      summary: List successful builds for Git repository
+      tags:
+      - build
   /build/{buildId}:
     delete:
       description: Delete build
@@ -163,8 +186,8 @@ paths:
       tags:
       - build
     get:
-      description: Get build data
-      operationId: GetBuild
+      description: Find build
+      operationId: FindBuild
       parameters:
       - description: Build ID
         in: path
@@ -177,53 +200,25 @@ paths:
           content:
             '*/*':
               schema:
-                $ref: '#/components/schemas/Build'
+                $ref: '#/components/schemas/BuildDTO'
           description: OK
-      summary: Get build data
+      summary: Find build
       tags:
       - build
-  /container-registry:
-    get:
-      description: List container registries
-      operationId: ListContainerRegistries
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ContainerRegistry'
-                type: array
-          description: OK
-      summary: List container registries
-      tags:
-      - container-registry
   /container-registry/{server}:
-    delete:
-      description: Remove a container registry credentials
-      operationId: RemoveContainerRegistry
+    get:
+      description: Find container registry
+      operationId: FindContainerRegistry
       parameters:
-      - description: Container Registry server name
+      - description: Container registry server
         in: path
         name: server
         required: true
         schema:
           type: string
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Remove a container registry credentials
-      tags:
-      - container-registry
-    get:
-      description: Get container registry credentials
-      operationId: GetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
+      - description: Workspace ID or Name
+        in: query
+        name: workspaceId
         schema:
           type: string
       responses:
@@ -233,34 +228,61 @@ paths:
               schema:
                 $ref: '#/components/schemas/ContainerRegistry'
           description: OK
-      summary: Get container registry credentials
+      summary: Find container registry
       tags:
-      - container-registry
+      - container registry
+  /env:
+    get:
+      description: List environment variables
+      operationId: ListEnvironmentVariables
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/EnvironmentVariable'
+                type: array
+          description: OK
+      summary: List environment variables
+      tags:
+      - envVar
     put:
-      description: Set container registry credentials
-      operationId: SetContainerRegistry
-      parameters:
-      - description: Container Registry server name
-        in: path
-        name: server
-        required: true
-        schema:
-          type: string
+      description: Save environment variable
+      operationId: SaveEnvironmentVariable
       requestBody:
         content:
-          '*/*':
+          application/json:
             schema:
-              $ref: '#/components/schemas/ContainerRegistry'
-        description: Container Registry credentials to set
+              $ref: '#/components/schemas/EnvironmentVariable'
+        description: Environment Variable
         required: true
       responses:
         "201":
           content: {}
           description: Created
-      summary: Set container registry credentials
+      summary: Save environment variable
       tags:
-      - container-registry
-      x-codegen-request-body-name: containerRegistry
+      - envVar
+      x-codegen-request-body-name: environmentVariable
+  /env/{key}:
+    delete:
+      description: Delete environment variable
+      operationId: DeleteEnvironmentVariable
+      parameters:
+      - description: Environment Variable Key
+        in: path
+        name: key
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete environment variable
+      tags:
+      - envVar
   /gitprovider:
     get:
       description: List Git providers
@@ -278,8 +300,8 @@ paths:
       tags:
       - gitProvider
     put:
-      description: Set Git provider
-      operationId: SetGitProvider
+      description: Save Git provider
+      operationId: SaveGitProvider
       requestBody:
         content:
           '*/*':
@@ -291,7 +313,7 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set Git provider
+      summary: Save Git provider
       tags:
       - gitProvider
       x-codegen-request-body-name: gitProviderConfig
@@ -364,8 +386,8 @@ paths:
       - gitProvider
   /gitprovider/id-for-url/{url}:
     get:
-      description: Get Git provider ID
-      operationId: GetGitProviderIdForUrl
+      description: Find Git provider ID
+      operationId: FindGitProviderIdForUrl
       parameters:
       - description: Url
         in: path
@@ -380,13 +402,13 @@ paths:
               schema:
                 type: string
           description: OK
-      summary: Get Git provider ID
+      summary: Find Git provider ID
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}:
     delete:
-      description: Remove Git provider
-      operationId: RemoveGitProvider
+      description: Delete Git provider
+      operationId: DeleteGitProvider
       parameters:
       - description: Git provider
         in: path
@@ -398,12 +420,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove Git provider
+      summary: Delete Git provider
       tags:
       - gitProvider
     get:
-      description: Get Git provider
-      operationId: GetGitProvider
+      description: Find Git provider
+      operationId: FindGitProvider
       parameters:
       - description: ID
         in: path
@@ -418,7 +440,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/GitProvider'
           description: OK
-      summary: Get Git provider
+      summary: Find Git provider
       tags:
       - gitProvider
   /gitprovider/{gitProviderId}/namespaces:
@@ -618,91 +640,37 @@ paths:
                 type: object
           description: OK
       summary: Health check
-  /profile:
-    delete:
-      description: Delete profile data
-      operationId: DeleteProfileData
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Delete profile data
-      tags:
-      - profile
+  /job:
     get:
-      description: Get profile data
-      operationId: GetProfileData
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/ProfileData'
-          description: OK
-      summary: Get profile data
-      tags:
-      - profile
-    put:
-      description: Set profile data
-      operationId: SetProfileData
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ProfileData'
-        description: Profile data
-        required: true
-      responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set profile data
-      tags:
-      - profile
-      x-codegen-request-body-name: profileData
-  /project-config:
-    get:
-      description: List project configs
-      operationId: ListProjectConfigs
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                items:
-                  $ref: '#/components/schemas/ProjectConfig'
-                type: array
-          description: OK
-      summary: List project configs
-      tags:
-      - project-config
-    put:
-      description: Set project config data
-      operationId: SetProjectConfig
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateProjectConfigDTO'
-        description: Project config
-        required: true
-      responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set project config data
-      tags:
-      - project-config
-      x-codegen-request-body-name: projectConfig
-  /project-config/default/{gitUrl}:
-    get:
-      description: Get project configs by git url
-      operationId: GetDefaultProjectConfig
+      description: List jobs
+      operationId: ListJobs
       parameters:
-      - description: Git URL
-        in: path
-        name: gitUrl
-        required: true
+      - description: Job States
+        explode: true
+        in: query
+        name: states
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Job Actions
+        explode: true
+        in: query
+        name: actions
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      - description: Resource ID
+        in: query
+        name: resourceId
+        schema:
+          type: string
+      - description: Resource Type
+        in: query
+        name: resourceType
         schema:
           type: string
       responses:
@@ -710,277 +678,273 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectConfig'
+                items:
+                  $ref: '#/components/schemas/Job'
+                type: array
           description: OK
-      summary: Get project configs by git url
+      summary: List jobs
       tags:
-      - project-config
-  /project-config/prebuild:
+      - job
+  /runner:
     get:
-      description: List prebuilds
-      operationId: ListPrebuilds
+      description: List runners
+      operationId: ListRunners
       responses:
         "200":
           content:
-            '*/*':
+            application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/PrebuildDTO'
+                  $ref: '#/components/schemas/RunnerDTO'
                 type: array
           description: OK
-      summary: List prebuilds
+      summary: List runners
       tags:
-      - prebuild
-  /project-config/prebuild/process-git-event:
+      - runner
     post:
-      description: ProcessGitEvent
-      operationId: ProcessGitEvent
+      description: Create a runner
+      operationId: CreateRunner
       requestBody:
         content:
           '*/*':
             schema:
-              type: object
-        description: Webhook event
+              $ref: '#/components/schemas/CreateRunnerDTO'
+        description: Runner
         required: true
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: ProcessGitEvent
-      tags:
-      - prebuild
-      x-codegen-request-body-name: workspace
-  /project-config/{configName}:
-    delete:
-      description: Delete project config data
-      operationId: DeleteProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      - description: Force
-        in: query
-        name: force
-        schema:
-          type: boolean
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Delete project config data
-      tags:
-      - project-config
-    get:
-      description: Get project config data
-      operationId: GetProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
       responses:
         "200":
           content:
-            '*/*':
+            application/json:
               schema:
-                $ref: '#/components/schemas/ProjectConfig'
+                $ref: '#/components/schemas/CreateRunnerResultDTO'
           description: OK
-      summary: Get project config data
+      summary: Create a runner
       tags:
-      - project-config
-  /project-config/{configName}/prebuild:
-    get:
-      description: List prebuilds for project config
-      operationId: ListPrebuildsForProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                items:
-                  $ref: '#/components/schemas/PrebuildDTO'
-                type: array
-          description: OK
-      summary: List prebuilds for project config
-      tags:
-      - prebuild
-    put:
-      description: Set prebuild
-      operationId: SetPrebuild
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreatePrebuildDTO'
-        description: Prebuild
-        required: true
-      responses:
-        "201":
-          content:
-            '*/*':
-              schema:
-                type: string
-          description: Created
-      summary: Set prebuild
-      tags:
-      - prebuild
-      x-codegen-request-body-name: prebuild
-  /project-config/{configName}/prebuild/{prebuildId}:
-    delete:
-      description: Delete prebuild
-      operationId: DeletePrebuild
-      parameters:
-      - description: Project config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      - description: Prebuild ID
-        in: path
-        name: prebuildId
-        required: true
-        schema:
-          type: string
-      - description: Force
-        in: query
-        name: force
-        schema:
-          type: boolean
-      responses:
-        "204":
-          content: {}
-          description: No Content
-      summary: Delete prebuild
-      tags:
-      - prebuild
-    get:
-      description: Get prebuild
-      operationId: GetPrebuild
-      parameters:
-      - description: Project config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      - description: Prebuild ID
-        in: path
-        name: prebuildId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content:
-            '*/*':
-              schema:
-                $ref: '#/components/schemas/PrebuildDTO'
-          description: OK
-      summary: Get prebuild
-      tags:
-      - prebuild
-  /project-config/{configName}/set-default:
-    patch:
-      description: Set project config to default
-      operationId: SetDefaultProjectConfig
-      parameters:
-      - description: Config name
-        in: path
-        name: configName
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Set project config to default
-      tags:
-      - project-config
-  /provider:
+      - runner
+      x-codegen-request-body-name: runner
+  /runner/provider:
     get:
       description: List providers
       operationId: ListProviders
+      parameters:
+      - description: Runner ID
+        in: query
+        name: runnerId
+        schema:
+          type: string
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/Provider'
+                  $ref: '#/components/schemas/ProviderInfo'
                 type: array
           description: OK
       summary: List providers
       tags:
       - provider
-  /provider/install:
-    post:
-      description: Install a provider
-      operationId: InstallProvider
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/InstallProviderRequest'
-        description: Provider to install
+  /runner/provider/for-install:
+    get:
+      description: List providers available for installation
+      operationId: ListProvidersForInstall
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderDTO'
+                type: array
+          description: OK
+      summary: List providers available for installation
+      tags:
+      - provider
+  /runner/{runnerId}:
+    delete:
+      description: Delete runner
+      operationId: DeleteRunner
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
         required: true
+        schema:
+          type: string
       responses:
         "200":
           content: {}
           description: OK
-      summary: Install a provider
+      summary: Delete runner
       tags:
-      - provider
-      x-codegen-request-body-name: provider
-  /provider/{provider}/target-manifest:
+      - runner
     get:
-      description: Get provider target manifest
-      operationId: GetTargetManifest
+      description: Find a runner
+      operationId: FindRunner
       parameters:
-      - description: Provider name
+      - description: Runner ID
         in: path
-        name: provider
+        name: runnerId
         required: true
         schema:
           type: string
       responses:
         "200":
           content:
-            '*/*':
+            application/json:
               schema:
-                $ref: '#/components/schemas/ProviderTargetManifest'
+                $ref: '#/components/schemas/RunnerDTO'
           description: OK
-      summary: Get provider target manifest
+      summary: Find a runner
+      tags:
+      - runner
+  /runner/{runnerId}/jobs:
+    get:
+      description: List runner jobs
+      operationId: ListRunnerJobs
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Job'
+                type: array
+          description: OK
+      summary: List runner jobs
+      tags:
+      - runner
+  /runner/{runnerId}/jobs/{jobId}/state:
+    post:
+      description: Update job state
+      operationId: UpdateJobState
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Job ID
+        in: path
+        name: jobId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateJobState'
+        description: Update job state
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update job state
+      tags:
+      - runner
+      x-codegen-request-body-name: updateJobState
+  /runner/{runnerId}/metadata:
+    post:
+      description: Update runner metadata
+      operationId: UpdateRunnerMetadata
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateRunnerMetadataDTO'
+        description: Runner Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update runner metadata
+      tags:
+      - runner
+      x-codegen-request-body-name: runnerMetadata
+  /runner/{runnerId}/provider:
+    get:
+      description: Get runner providers
+      operationId: GetRunnerProviders
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ProviderInfo'
+                type: array
+          description: OK
+      summary: Get runner providers
       tags:
       - provider
-  /provider/{provider}/uninstall:
+  /runner/{runnerId}/provider/{providerName}/install:
     post:
-      description: Uninstall a provider
+      description: Install provider
+      operationId: InstallProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        schema:
+          type: string
+      - description: Provider version - defaults to 'latest'
+        in: query
+        name: providerVersion
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Install provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/{providerName}/uninstall:
+    post:
+      description: Uninstall provider
       operationId: UninstallProvider
       parameters:
-      - description: Provider to uninstall
+      - description: Runner ID
         in: path
-        name: provider
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
         required: true
         schema:
           type: string
@@ -988,7 +952,36 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Uninstall a provider
+      summary: Uninstall provider
+      tags:
+      - provider
+  /runner/{runnerId}/provider/{providerName}/update:
+    post:
+      description: Update provider
+      operationId: UpdateProvider
+      parameters:
+      - description: Runner ID
+        in: path
+        name: runnerId
+        required: true
+        schema:
+          type: string
+      - description: Provider name
+        in: path
+        name: providerName
+        required: true
+        schema:
+          type: string
+      - description: Provider version - defaults to 'latest'
+        in: query
+        name: providerVersion
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update provider
       tags:
       - provider
   /sample:
@@ -1021,9 +1014,9 @@ paths:
       summary: Get the server configuration
       tags:
       - server
-    post:
-      description: Set the server configuration
-      operationId: SetConfig
+    put:
+      description: Save the server configuration
+      operationId: SaveConfig
       requestBody:
         content:
           application/json:
@@ -1038,13 +1031,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ServerConfig'
           description: OK
-      summary: Set the server configuration
+      summary: Save the server configuration
       tags:
       - server
       x-codegen-request-body-name: config
   /server/logs:
     get:
-      description: List server log files
+      description: Get server log files
       operationId: GetServerLogFiles
       responses:
         "200":
@@ -1055,13 +1048,13 @@ paths:
                   type: string
                 type: array
           description: OK
-      summary: List server log files
+      summary: Get server log files
       tags:
       - server
   /server/network-key:
     post:
-      description: Generate a new authentication key
-      operationId: GenerateNetworkKey
+      description: Create a new authentication key
+      operationId: CreateNetworkKey
       responses:
         "200":
           content:
@@ -1069,51 +1062,109 @@ paths:
               schema:
                 $ref: '#/components/schemas/NetworkKey'
           description: OK
-      summary: Generate a new authentication key
+      summary: Create a new authentication key
       tags:
       - server
   /target:
     get:
       description: List targets
       operationId: ListTargets
+      parameters:
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
       responses:
         "200":
           content:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/ProviderTarget'
+                  $ref: '#/components/schemas/TargetDTO'
                 type: array
           description: OK
       summary: List targets
       tags:
       - target
-    put:
-      description: Set a target
-      operationId: SetTarget
+    post:
+      description: Create a target
+      operationId: CreateTarget
       requestBody:
         content:
           '*/*':
             schema:
-              $ref: '#/components/schemas/CreateProviderTargetDTO'
-        description: Target to set
+              $ref: '#/components/schemas/CreateTargetDTO'
+        description: Create target
         required: true
       responses:
-        "201":
-          content: {}
-          description: Created
-      summary: Set a target
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Target'
+          description: OK
+      summary: Create a target
       tags:
       - target
       x-codegen-request-body-name: target
-  /target/{target}:
-    delete:
-      description: Remove a target
-      operationId: RemoveTarget
+  /target-config:
+    get:
+      description: List target configs
+      operationId: ListTargetConfigs
       parameters:
-      - description: Target name
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TargetConfig'
+                type: array
+          description: OK
+      summary: List target configs
+      tags:
+      - target-config
+    post:
+      description: Create a target config
+      operationId: CreateTargetConfig
+      parameters:
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateTargetConfigDTO'
+        description: Target config to create
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/TargetConfig'
+          description: OK
+      summary: Create a target config
+      tags:
+      - target-config
+      x-codegen-request-body-name: targetConfig
+  /target-config/{configId}:
+    delete:
+      description: Delete a target config
+      operationId: DeleteTargetConfig
+      parameters:
+      - description: Target Config Id
         in: path
-        name: target
+        name: configId
         required: true
         schema:
           type: string
@@ -1121,17 +1172,65 @@ paths:
         "204":
           content: {}
           description: No Content
-      summary: Remove a target
+      summary: Delete a target config
+      tags:
+      - target-config
+  /target/{targetId}:
+    delete:
+      description: Delete target
+      operationId: DeleteTarget
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Delete target
       tags:
       - target
-  /target/{target}/set-default:
-    patch:
-      description: Set target to default
-      operationId: SetDefaultTarget
+    get:
+      description: Find target
+      operationId: FindTarget
       parameters:
-      - description: Target name
+      - description: Target ID or Name
         in: path
-        name: target
+        name: targetId
+        required: true
+        schema:
+          type: string
+      - description: Show target config options
+        in: query
+        name: showOptions
+        schema:
+          type: boolean
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TargetDTO'
+          description: OK
+      summary: Find target
+      tags:
+      - target
+  /target/{targetId}/handle-successful-creation:
+    post:
+      description: Handles successful creation of the target
+      operationId: HandleSuccessfulCreation
+      parameters:
+      - description: Target ID or name
+        in: path
+        name: targetId
         required: true
         schema:
           type: string
@@ -1139,7 +1238,152 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Set target to default
+      summary: Handles successful creation of the target
+      tags:
+      - target
+  /target/{targetId}/metadata:
+    post:
+      description: Update target metadata
+      operationId: UpdateTargetMetadata
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateTargetMetadataDTO'
+        description: Target Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update target metadata
+      tags:
+      - target
+      x-codegen-request-body-name: targetMetadata
+  /target/{targetId}/provider-metadata:
+    post:
+      description: Update target provider metadata
+      operationId: UpdateTargetProviderMetadata
+      parameters:
+      - description: Target ID
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateTargetProviderMetadataDTO'
+        description: Provider metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update target provider metadata
+      tags:
+      - target
+      x-codegen-request-body-name: metadata
+  /target/{targetId}/restart:
+    post:
+      description: Restart target
+      operationId: RestartTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Restart target
+      tags:
+      - target
+  /target/{targetId}/set-default:
+    patch:
+      description: Set target to be used by default
+      operationId: SetDefaultTarget
+      parameters:
+      - description: Target ID or name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set target to be used by default
+      tags:
+      - target
+  /target/{targetId}/start:
+    post:
+      description: Start target
+      operationId: StartTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Start target
+      tags:
+      - target
+  /target/{targetId}/state:
+    get:
+      description: Get target state
+      operationId: GetTargetState
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceState'
+          description: OK
+      summary: Get target state
+      tags:
+      - target
+  /target/{targetId}/stop:
+    post:
+      description: Stop target
+      operationId: StopTarget
+      parameters:
+      - description: Target ID or Name
+        in: path
+        name: targetId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Stop target
       tags:
       - target
   /workspace:
@@ -1147,11 +1391,11 @@ paths:
       description: List workspaces
       operationId: ListWorkspaces
       parameters:
-      - description: Verbose
+      - description: JSON encoded labels
         in: query
-        name: verbose
+        name: labels
         schema:
-          type: boolean
+          type: string
       responses:
         "200":
           content:
@@ -1179,16 +1423,273 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Workspace'
+                $ref: '#/components/schemas/WorkspaceDTO'
           description: OK
       summary: Create a workspace
       tags:
       - workspace
       x-codegen-request-body-name: workspace
+  /workspace-template:
+    get:
+      description: List workspace templates
+      operationId: ListWorkspaceTemplates
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/WorkspaceTemplate'
+                type: array
+          description: OK
+      summary: List workspace templates
+      tags:
+      - workspace-template
+    put:
+      description: Set workspace template data
+      operationId: SaveWorkspaceTemplate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceTemplateDTO'
+        description: Workspace template
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Set workspace template data
+      tags:
+      - workspace-template
+      x-codegen-request-body-name: workspaceTemplate
+  /workspace-template/default/{gitUrl}:
+    get:
+      description: Get default workspace templates by git url
+      operationId: GetDefaultWorkspaceTemplate
+      parameters:
+      - description: Git URL
+        in: path
+        name: gitUrl
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceTemplate'
+          description: OK
+      summary: Get default workspace templates by git url
+      tags:
+      - workspace-template
+  /workspace-template/prebuild:
+    get:
+      description: List prebuilds
+      operationId: ListPrebuilds
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/PrebuildDTO'
+                type: array
+          description: OK
+      summary: List prebuilds
+      tags:
+      - prebuild
+  /workspace-template/prebuild/process-git-event:
+    post:
+      description: ProcessGitEvent
+      operationId: ProcessGitEvent
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              type: object
+        description: Webhook event
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: ProcessGitEvent
+      tags:
+      - prebuild
+      x-codegen-request-body-name: body
+  /workspace-template/{templateName}:
+    delete:
+      description: Delete workspace template data
+      operationId: DeleteWorkspaceTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete workspace template data
+      tags:
+      - workspace-template
+    get:
+      description: Find a workspace template
+      operationId: FindWorkspaceTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WorkspaceTemplate'
+          description: OK
+      summary: Find a workspace template
+      tags:
+      - workspace-template
+  /workspace-template/{templateName}/prebuild:
+    get:
+      description: List prebuilds for workspace template
+      operationId: ListPrebuildsForWorkspaceTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                items:
+                  $ref: '#/components/schemas/PrebuildDTO'
+                type: array
+          description: OK
+      summary: List prebuilds for workspace template
+      tags:
+      - prebuild
+    put:
+      description: Save prebuild
+      operationId: SavePrebuild
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePrebuildDTO'
+        description: Prebuild
+        required: true
+      responses:
+        "201":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: Created
+      summary: Save prebuild
+      tags:
+      - prebuild
+      x-codegen-request-body-name: prebuild
+  /workspace-template/{templateName}/prebuild/{prebuildId}:
+    delete:
+      description: Delete prebuild
+      operationId: DeletePrebuild
+      parameters:
+      - description: Workspace template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        schema:
+          type: string
+      - description: Force
+        in: query
+        name: force
+        schema:
+          type: boolean
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete prebuild
+      tags:
+      - prebuild
+    get:
+      description: Find prebuild
+      operationId: FindPrebuild
+      parameters:
+      - description: Workspace template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      - description: Prebuild ID
+        in: path
+        name: prebuildId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PrebuildDTO'
+          description: OK
+      summary: Find prebuild
+      tags:
+      - prebuild
+  /workspace-template/{templateName}/set-default:
+    patch:
+      description: Set workspace template to default
+      operationId: SetDefaultWorkspaceTemplate
+      parameters:
+      - description: Template name
+        in: path
+        name: templateName
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Set workspace template to default
+      tags:
+      - workspace-template
   /workspace/{workspaceId}:
     delete:
-      description: Remove workspace
-      operationId: RemoveWorkspace
+      description: Delete workspace
+      operationId: DeleteWorkspace
       parameters:
       - description: Workspace ID
         in: path
@@ -1205,12 +1706,12 @@ paths:
         "200":
           content: {}
           description: OK
-      summary: Remove workspace
+      summary: Delete workspace
       tags:
       - workspace
     get:
-      description: Get workspace info
-      operationId: GetWorkspace
+      description: Find workspace
+      operationId: FindWorkspace
       parameters:
       - description: Workspace ID or Name
         in: path
@@ -1218,11 +1719,6 @@ paths:
         required: true
         schema:
           type: string
-      - description: Verbose
-        in: query
-        name: verbose
-        schema:
-          type: boolean
       responses:
         "200":
           content:
@@ -1230,7 +1726,108 @@ paths:
               schema:
                 $ref: '#/components/schemas/WorkspaceDTO'
           description: OK
-      summary: Get workspace info
+      summary: Find workspace
+      tags:
+      - workspace
+  /workspace/{workspaceId}/labels:
+    post:
+      description: Update workspace labels
+      operationId: UpdateWorkspaceLabels
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+        description: Labels
+        required: true
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/WorkspaceDTO'
+          description: OK
+      summary: Update workspace labels
+      tags:
+      - workspace
+      x-codegen-request-body-name: labels
+  /workspace/{workspaceId}/metadata:
+    post:
+      description: Update workspace metadata
+      operationId: UpdateWorkspaceMetadata
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceMetadataDTO'
+        description: Workspace Metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update workspace metadata
+      tags:
+      - workspace
+      x-codegen-request-body-name: workspaceMetadata
+  /workspace/{workspaceId}/provider-metadata:
+    post:
+      description: Update workspace provider metadata
+      operationId: UpdateWorkspaceProviderMetadata
+      parameters:
+      - description: Workspace ID
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceProviderMetadataDTO'
+        description: Provider metadata
+        required: true
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Update workspace provider metadata
+      tags:
+      - workspace
+      x-codegen-request-body-name: metadata
+  /workspace/{workspaceId}/restart:
+    post:
+      description: Restart workspace
+      operationId: RestartWorkspace
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content: {}
+          description: OK
+      summary: Restart workspace
       tags:
       - workspace
   /workspace/{workspaceId}/start:
@@ -1251,6 +1848,27 @@ paths:
       summary: Start workspace
       tags:
       - workspace
+  /workspace/{workspaceId}/state:
+    get:
+      description: Get workspace state
+      operationId: GetWorkspaceState
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceState'
+          description: OK
+      summary: Get workspace state
+      tags:
+      - workspace
   /workspace/{workspaceId}/stop:
     post:
       description: Stop workspace
@@ -1269,100 +1887,14 @@ paths:
       summary: Stop workspace
       tags:
       - workspace
-  /workspace/{workspaceId}/{projectId}/start:
-    post:
-      description: Start project
-      operationId: StartProject
-      parameters:
-      - description: Workspace ID or Name
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Start project
-      tags:
-      - workspace
-  /workspace/{workspaceId}/{projectId}/state:
-    post:
-      description: Set project state
-      operationId: SetProjectState
-      parameters:
-      - description: Workspace ID or Name
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
-        required: true
-        schema:
-          type: string
-      requestBody:
-        content:
-          '*/*':
-            schema:
-              $ref: '#/components/schemas/SetProjectState'
-        description: Set State
-        required: true
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Set project state
-      tags:
-      - workspace
-      x-codegen-request-body-name: setState
-  /workspace/{workspaceId}/{projectId}/stop:
-    post:
-      description: Stop project
-      operationId: StopProject
-      parameters:
-      - description: Workspace ID or Name
-        in: path
-        name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          content: {}
-          description: OK
-      summary: Stop project
-      tags:
-      - workspace
-  /workspace/{workspaceId}/{projectId}/toolbox/files:
+  /workspace/{workspaceId}/toolbox/files:
     delete:
-      description: Delete file inside workspace project
+      description: Delete file inside a workspace
       operationId: FsDeleteFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1380,18 +1912,12 @@ paths:
       tags:
       - workspace toolbox
     get:
-      description: List files inside workspace project
+      description: List files inside a workspace
       operationId: FsListFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1412,20 +1938,14 @@ paths:
       summary: List files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/download:
+  /workspace/{workspaceId}/toolbox/files/download:
     get:
-      description: Download file from workspace project
+      description: Download file from a workspace
       operationId: FsDownloadFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1446,20 +1966,14 @@ paths:
       summary: Download file
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/find:
+  /workspace/{workspaceId}/toolbox/files/find:
     get:
-      description: Search for text/pattern inside workspace project files
+      description: Search for text/pattern inside a workspace files
       operationId: FsFindInFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1487,20 +2001,14 @@ paths:
       summary: Search for text/pattern in files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/folder:
+  /workspace/{workspaceId}/toolbox/files/folder:
     post:
-      description: Create folder inside workspace project
+      description: Create folder inside a workspace
       operationId: FsCreateFolder
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1523,20 +2031,14 @@ paths:
       summary: Create folder
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/info:
+  /workspace/{workspaceId}/toolbox/files/info:
     get:
-      description: Get file info inside workspace project
+      description: Get file info inside a workspace
       operationId: FsGetFileDetails
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1556,20 +2058,14 @@ paths:
       summary: Get file info
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/move:
+  /workspace/{workspaceId}/toolbox/files/move:
     post:
-      description: Create folder inside workspace project
+      description: Create folder inside a workspace
       operationId: FsMoveFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1592,20 +2088,14 @@ paths:
       summary: Create folder
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/permissions:
+  /workspace/{workspaceId}/toolbox/files/permissions:
     post:
-      description: Set file owner/group/permissions inside workspace project
+      description: Set file owner/group/permissions inside a workspace
       operationId: FsSetFilePermissions
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1637,20 +2127,14 @@ paths:
       summary: Set file owner/group/permissions
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/replace:
+  /workspace/{workspaceId}/toolbox/files/replace:
     post:
-      description: Repleace text/pattern in mutilple files inside workspace project
+      description: Repleace text/pattern in mutilple files inside a workspace
       operationId: FsReplaceInFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1674,20 +2158,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: replace
-  /workspace/{workspaceId}/{projectId}/toolbox/files/search:
+  /workspace/{workspaceId}/toolbox/files/search:
     get:
-      description: Search for files inside workspace project
+      description: Search for files inside a workspace
       operationId: FsSearchFiles
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1713,20 +2191,14 @@ paths:
       summary: Search for files
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/files/upload:
+  /workspace/{workspaceId}/toolbox/files/upload:
     post:
-      description: Upload file inside workspace project
+      description: Upload file inside a workspace
       operationId: FsUploadFile
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1749,7 +2221,7 @@ paths:
       summary: Upload file
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/git/add:
+  /workspace/{workspaceId}/toolbox/git/add:
     post:
       description: Add files to git commit
       operationId: GitAddFiles
@@ -1757,12 +2229,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1781,20 +2247,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/branches:
+  /workspace/{workspaceId}/toolbox/git/branches:
     get:
-      description: Get branch list from git repository inside workspace project
+      description: Get branch list from git repository inside a workspace
       operationId: GitBranchList
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1815,18 +2275,12 @@ paths:
       tags:
       - workspace toolbox
     post:
-      description: Create branch on git repository inside workspace project
+      description: Create branch on git repository inside a workspace
       operationId: GitCreateBranch
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1845,20 +2299,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/clone:
+  /workspace/{workspaceId}/toolbox/git/clone:
     post:
-      description: Clone git repository inside workspace project
+      description: Clone git repository inside a workspace
       operationId: GitCloneRepository
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1877,20 +2325,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/commit:
+  /workspace/{workspaceId}/toolbox/git/commit:
     post:
-      description: Commit changes to git repository inside workspace project
+      description: Commit changes to git repository inside a workspace
       operationId: GitCommitChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1912,20 +2354,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/history:
+  /workspace/{workspaceId}/toolbox/git/history:
     get:
-      description: Get commit history from git repository inside workspace project
+      description: Get commit history from git repository inside a workspace
       operationId: GitCommitHistory
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1947,20 +2383,14 @@ paths:
       summary: Get commit history
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/git/pull:
+  /workspace/{workspaceId}/toolbox/git/pull:
     post:
-      description: Pull changes from remote to git repository inside workspace project
+      description: Pull changes from remote to git repository inside a workspace
       operationId: GitPullChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -1979,20 +2409,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/push:
+  /workspace/{workspaceId}/toolbox/git/push:
     post:
-      description: Push changes to remote from git repository inside workspace project
+      description: Push changes to remote from git repository inside a workspace
       operationId: GitPushChanges
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2011,20 +2435,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/git/status:
+  /workspace/{workspaceId}/toolbox/git/status:
     get:
-      description: Get status from git repository inside workspace project
+      description: Get status from git repository inside a workspace
       operationId: GitGitStatus
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2044,7 +2462,7 @@ paths:
       summary: Get git status
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/completions:
+  /workspace/{workspaceId}/toolbox/lsp/completions:
     post:
       description: The Completion request is sent from the client to the server to
         compute completion items at a given cursor position.
@@ -2053,12 +2471,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2080,7 +2492,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close:
+  /workspace/{workspaceId}/toolbox/lsp/did-close:
     post:
       description: The document close notification is sent from the client to the
         server when the document got closed in the client.
@@ -2089,12 +2501,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2113,7 +2519,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open:
+  /workspace/{workspaceId}/toolbox/lsp/did-open:
     post:
       description: The document open notification is sent from the client to the server
         to signal newly opened text documents.
@@ -2122,12 +2528,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2146,7 +2546,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols:
+  /workspace/{workspaceId}/toolbox/lsp/document-symbols:
     get:
       description: The document symbol request is sent from the client to the server.
       operationId: LspDocumentSymbols
@@ -2154,12 +2554,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2193,20 +2587,14 @@ paths:
       summary: Call Lsp DocumentSymbols
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/start:
+  /workspace/{workspaceId}/toolbox/lsp/start:
     post:
-      description: Start Lsp server process inside workspace project
+      description: Start Lsp server process inside a workspace
       operationId: LspStart
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2225,20 +2613,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/stop:
+  /workspace/{workspaceId}/toolbox/lsp/stop:
     post:
-      description: Stop Lsp server process inside workspace project
+      description: Stop Lsp server process inside a workspace
       operationId: LspStop
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2257,7 +2639,7 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols:
+  /workspace/{workspaceId}/toolbox/lsp/workspace-symbols:
     get:
       description: The workspace symbol request is sent from the client to the server
         to list project-wide symbols matching the query string.
@@ -2266,12 +2648,6 @@ paths:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2305,20 +2681,14 @@ paths:
       summary: Call Lsp WorkspaceSymbols
       tags:
       - workspace toolbox
-  /workspace/{workspaceId}/{projectId}/toolbox/process/execute:
+  /workspace/{workspaceId}/toolbox/process/execute:
     post:
-      description: Execute command synchronously inside workspace project
+      description: Execute command synchronously inside a workspace
       operationId: ProcessExecuteCommand
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2340,20 +2710,14 @@ paths:
       tags:
       - workspace toolbox
       x-codegen-request-body-name: params
-  /workspace/{workspaceId}/{projectId}/toolbox/project-dir:
+  /workspace/{workspaceId}/toolbox/process/session:
     get:
-      description: Get project directory
-      operationId: GetProjectDir
+      description: List sessions inside workspace project
+      operationId: ListSessions
       parameters:
       - description: Workspace ID or Name
         in: path
         name: workspaceId
-        required: true
-        schema:
-          type: string
-      - description: Project ID
-        in: path
-        name: projectId
         required: true
         schema:
           type: string
@@ -2362,49 +2726,193 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProjectDirResponse'
+                items:
+                  $ref: '#/components/schemas/Session'
+                type: array
           description: OK
-      summary: Get project dir
+      summary: List sessions
+      tags:
+      - workspace toolbox
+    post:
+      description: Create exec session inside workspace project
+      operationId: CreateSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+        description: Create session request
+        required: true
+      responses:
+        "201":
+          content: {}
+          description: Created
+      summary: Create exec session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a session inside workspace project
+      operationId: DeleteSession
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          content: {}
+          description: No Content
+      summary: Delete session
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: |-
+        Get logs of a command inside a session inside workspace project
+        Connect with websocket to get a stream of the logs
+      operationId: GetSessionCommandLogs
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      - description: Command ID
+        in: path
+        name: commandId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            '*/*':
+              schema:
+                type: string
+          description: command logs
+      summary: Get session command logs
+      tags:
+      - workspace toolbox
+  /workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute command inside a session inside workspace project
+      operationId: SessionExecuteCommand
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      - description: Session ID
+        in: path
+        name: sessionId
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/SessionExecuteRequest'
+        description: Execute command request
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionExecuteResponse'
+          description: OK
+      summary: Execute command in session
+      tags:
+      - workspace toolbox
+      x-codegen-request-body-name: params
+  /workspace/{workspaceId}/toolbox/workspace-dir:
+    get:
+      description: Get workspace directory
+      operationId: GetWorkspaceDir
+      parameters:
+      - description: Workspace ID or Name
+        in: path
+        name: workspaceId
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceDirResponse'
+          description: OK
+      summary: Get workspace dir
       tags:
       - workspace toolbox
 components:
   schemas:
-    ApiKey:
+    ApiKeyViewDTO:
       example:
-        keyHash: keyHash
+        current: true
         name: name
         type: null
       properties:
-        keyHash:
-          type: string
+        current:
+          type: boolean
         name:
-          description: Project or client name
           type: string
         type:
-          $ref: '#/components/schemas/apikey.ApiKeyType'
+          $ref: '#/components/schemas/models.ApiKeyType'
       required:
-      - keyHash
+      - current
       - name
       - type
       type: object
-    Build:
+    BuildConfig:
       example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        createdAt: createdAt
+        cachedBuild:
+          image: image
+          user: user
+        devcontainer:
+          filePath: filePath
+      properties:
+        cachedBuild:
+          $ref: '#/components/schemas/CachedBuild'
+        devcontainer:
+          $ref: '#/components/schemas/DevcontainerConfig'
+      type: object
+    BuildDTO:
+      example:
         image: image
         containerConfig:
           image: image
           user: user
-        prebuildId: prebuildId
         envVars:
           key: envVars
-        id: id
-        state: null
         repository:
           owner: owner
           path: path
@@ -2416,6 +2924,31 @@ components:
           cloneTarget: null
           sha: sha
           url: url
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        createdAt: createdAt
+        prebuildId: prebuildId
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
         user: user
         updatedAt: updatedAt
       properties:
@@ -2433,12 +2966,16 @@ components:
           type: string
         image:
           type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
         prebuildId:
           type: string
         repository:
           $ref: '#/components/schemas/GitRepository'
         state:
-          $ref: '#/components/schemas/build.BuildState'
+          $ref: '#/components/schemas/ResourceState'
         updatedAt:
           type: string
         user:
@@ -2448,23 +2985,9 @@ components:
       - createdAt
       - envVars
       - id
-      - prebuildId
       - repository
       - state
       - updatedAt
-      type: object
-    BuildConfig:
-      example:
-        cachedBuild:
-          image: image
-          user: user
-        devcontainer:
-          filePath: filePath
-      properties:
-        cachedBuild:
-          $ref: '#/components/schemas/CachedBuild'
-        devcontainer:
-          $ref: '#/components/schemas/DevcontainerConfig'
       type: object
     CachedBuild:
       example:
@@ -2487,6 +3010,22 @@ components:
       x-enum-varnames:
       - CloneTargetBranch
       - CloneTargetCommit
+    Command:
+      example:
+        exitCode: 0
+        id: id
+        command: command
+      properties:
+        command:
+          type: string
+        exitCode:
+          type: integer
+        id:
+          type: string
+      required:
+      - command
+      - id
+      type: object
     CompletionContext:
       example:
         triggerCharacter: triggerCharacter
@@ -2588,10 +3127,10 @@ components:
     CreateBuildDTO:
       example:
         prebuildId: prebuildId
-        projectConfigName: projectConfigName
         envVars:
           key: envVars
         branch: branch
+        workspaceTemplateName: workspaceTemplateName
       properties:
         branch:
           type: string
@@ -2601,12 +3140,12 @@ components:
           type: object
         prebuildId:
           type: string
-        projectConfigName:
+        workspaceTemplateName:
           type: string
       required:
       - branch
       - envVars
-      - projectConfigName
+      - workspaceTemplateName
       type: object
     CreatePrebuildDTO:
       example:
@@ -2633,7 +3172,227 @@ components:
       required:
       - retention
       type: object
-    CreateProjectConfigDTO:
+    CreateRunnerDTO:
+      example:
+        name: name
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    CreateRunnerResultDTO:
+      example:
+        metadata:
+          runningJobs: 0
+          runnerId: runnerId
+          providers:
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          updatedAt: updatedAt
+          uptime: 6
+        apiKey: apiKey
+        name: name
+        id: id
+      properties:
+        apiKey:
+          type: string
+        id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/RunnerMetadata'
+        name:
+          type: string
+      required:
+      - apiKey
+      - id
+      - name
+      type: object
+    CreateSessionRequest:
+      example:
+        sessionId: sessionId
+      properties:
+        sessionId:
+          type: string
+      required:
+      - sessionId
+      type: object
+    CreateTargetConfigDTO:
+      example:
+        name: name
+        options: options
+        providerInfo:
+          runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+      properties:
+        name:
+          type: string
+        options:
+          type: string
+        providerInfo:
+          $ref: '#/components/schemas/ProviderInfo'
+      required:
+      - name
+      - options
+      - providerInfo
+      type: object
+    CreateTargetDTO:
+      example:
+        name: name
+        targetConfigId: targetConfigId
+        id: id
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        targetConfigId:
+          type: string
+      required:
+      - id
+      - name
+      - targetConfigId
+      type: object
+    CreateWorkspaceDTO:
+      example:
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        targetId: targetId
+        envVars:
+          key: envVars
+        name: name
+        id: id
+        source:
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+        user: user
+        labels:
+          key: labels
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+        source:
+          $ref: '#/components/schemas/CreateWorkspaceSourceDTO'
+        targetId:
+          type: string
+        user:
+          type: string
+      required:
+      - envVars
+      - id
+      - labels
+      - name
+      - source
+      - targetId
+      type: object
+    CreateWorkspaceSourceDTO:
+      example:
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+      properties:
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+      required:
+      - repository
+      type: object
+    CreateWorkspaceTemplateDTO:
       example:
         buildConfig:
           cachedBuild:
@@ -2670,164 +3429,6 @@ components:
       - name
       - repositoryUrl
       type: object
-    CreateProjectDTO:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        envVars:
-          key: envVars
-        name: name
-        source:
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-        user: user
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        source:
-          $ref: '#/components/schemas/CreateProjectSourceDTO'
-        user:
-          type: string
-      required:
-      - envVars
-      - name
-      - source
-      type: object
-    CreateProjectSourceDTO:
-      example:
-        repository:
-          owner: owner
-          path: path
-          name: name
-          id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          cloneTarget: null
-          sha: sha
-          url: url
-      properties:
-        repository:
-          $ref: '#/components/schemas/GitRepository'
-      required:
-      - repository
-      type: object
-    CreateProviderTargetDTO:
-      example:
-        name: name
-        options: options
-        providerInfo:
-          name: name
-          label: label
-          version: version
-      properties:
-        name:
-          type: string
-        options:
-          type: string
-        providerInfo:
-          $ref: '#/components/schemas/provider.ProviderInfo'
-      required:
-      - name
-      - options
-      - providerInfo
-      type: object
-    CreateWorkspaceDTO:
-      example:
-        projects:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          source:
-            repository:
-              owner: owner
-              path: path
-              name: name
-              id: id
-              source: source
-              prNumber: 0
-              branch: branch
-              cloneTarget: null
-              sha: sha
-              url: url
-          user: user
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          source:
-            repository:
-              owner: owner
-              path: path
-              name: name
-              id: id
-              source: source
-              prNumber: 0
-              branch: branch
-              cloneTarget: null
-              sha: sha
-              url: url
-          user: user
-        name: name
-        id: id
-        target: target
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        projects:
-          items:
-            $ref: '#/components/schemas/CreateProjectDTO'
-          type: array
-        target:
-          type: string
-      required:
-      - id
-      - name
-      - projects
-      - target
-      type: object
     DevcontainerConfig:
       example:
         filePath: filePath
@@ -2836,6 +3437,19 @@ components:
           type: string
       required:
       - filePath
+      type: object
+    EnvironmentVariable:
+      example:
+        value: value
+        key: key
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+      required:
+      - key
+      - value
       type: object
     ExecuteRequest:
       example:
@@ -3234,7 +3848,7 @@ components:
       type: object
     GitStatus:
       example:
-        behind: 6
+        behind: 1
         fileStatus:
         - extra: extra
           name: name
@@ -3244,7 +3858,7 @@ components:
           name: name
           staging: null
           worktree: null
-        ahead: 0
+        ahead: 6
         branchPublished: true
         currentBranch: currentBranch
       properties:
@@ -3285,22 +3899,61 @@ components:
       - name
       - username
       type: object
-    InstallProviderRequest:
+    Job:
       example:
-        downloadUrls:
-          key: downloadUrls
-        name: name
+        createdAt: createdAt
+        metadata: metadata
+        resourceId: resourceId
+        action: null
+        runnerId: runnerId
+        id: id
+        state: null
+        error: error
+        resourceType: null
+        updatedAt: updatedAt
       properties:
-        downloadUrls:
-          additionalProperties:
-            type: string
-          type: object
-        name:
+        action:
+          $ref: '#/components/schemas/models.JobAction'
+        createdAt:
+          type: string
+        error:
+          type: string
+        id:
+          type: string
+        metadata:
+          description: JSON encoded metadata
+          type: string
+        resourceId:
+          type: string
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+        runnerId:
+          type: string
+        state:
+          $ref: '#/components/schemas/JobState'
+        updatedAt:
           type: string
       required:
-      - downloadUrls
-      - name
+      - action
+      - createdAt
+      - id
+      - resourceId
+      - resourceType
+      - state
+      - updatedAt
       type: object
+    JobState:
+      enum:
+      - pending
+      - running
+      - error
+      - success
+      type: string
+      x-enum-varnames:
+      - JobStatePending
+      - JobStateRunning
+      - JobStateError
+      - JobStateSuccess
     ListBranchResponse:
       example:
         branches:
@@ -3536,14 +4189,12 @@ components:
           type: array
       required:
       - branch
-      - commitInterval
       - id
       - retention
       - triggerFiles
       type: object
     PrebuildDTO:
       example:
-        projectConfigName: projectConfigName
         commitInterval: 0
         id: id
         branch: branch
@@ -3551,6 +4202,7 @@ components:
         triggerFiles:
         - triggerFiles
         - triggerFiles
+        workspaceTemplateName: workspaceTemplateName
       properties:
         branch:
           type: string
@@ -3558,274 +4210,84 @@ components:
           type: integer
         id:
           type: string
-        projectConfigName:
-          type: string
         retention:
           type: integer
         triggerFiles:
           items:
             type: string
           type: array
+        workspaceTemplateName:
+          type: string
       required:
       - branch
       - id
-      - projectConfigName
       - retention
+      - workspaceTemplateName
       type: object
-    ProfileData:
-      example:
-        envVars:
-          key: envVars
-      properties:
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-      required:
-      - envVars
-      type: object
-    Project:
-      example:
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        envVars:
-          key: envVars
-        name: name
-        state:
-          gitStatus:
-            behind: 6
-            fileStatus:
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            - extra: extra
-              name: name
-              staging: null
-              worktree: null
-            ahead: 0
-            branchPublished: true
-            currentBranch: currentBranch
-          updatedAt: updatedAt
-          uptime: 1
-        repository:
-          owner: owner
-          path: path
-          name: name
-          id: id
-          source: source
-          prNumber: 0
-          branch: branch
-          cloneTarget: null
-          sha: sha
-          url: url
-        user: user
-        target: target
-        workspaceId: workspaceId
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        repository:
-          $ref: '#/components/schemas/GitRepository'
-        state:
-          $ref: '#/components/schemas/ProjectState'
-        target:
-          type: string
-        user:
-          type: string
-        workspaceId:
-          type: string
-      required:
-      - envVars
-      - image
-      - name
-      - repository
-      - target
-      - user
-      - workspaceId
-      type: object
-    ProjectConfig:
-      example:
-        prebuilds:
-        - commitInterval: 0
-          id: id
-          branch: branch
-          retention: 6
-          triggerFiles:
-          - triggerFiles
-          - triggerFiles
-        - commitInterval: 0
-          id: id
-          branch: branch
-          retention: 6
-          triggerFiles:
-          - triggerFiles
-          - triggerFiles
-        buildConfig:
-          cachedBuild:
-            image: image
-            user: user
-          devcontainer:
-            filePath: filePath
-        gitProviderConfigId: gitProviderConfigId
-        image: image
-        default: true
-        envVars:
-          key: envVars
-        name: name
-        user: user
-        repositoryUrl: repositoryUrl
-      properties:
-        buildConfig:
-          $ref: '#/components/schemas/BuildConfig'
-        default:
-          type: boolean
-        envVars:
-          additionalProperties:
-            type: string
-          type: object
-        gitProviderConfigId:
-          type: string
-        image:
-          type: string
-        name:
-          type: string
-        prebuilds:
-          items:
-            $ref: '#/components/schemas/PrebuildConfig'
-          type: array
-        repositoryUrl:
-          type: string
-        user:
-          type: string
-      required:
-      - default
-      - envVars
-      - image
-      - name
-      - repositoryUrl
-      - user
-      type: object
-    ProjectDirResponse:
-      example:
-        dir: dir
-      properties:
-        dir:
-          type: string
-      type: object
-    ProjectInfo:
-      example:
-        providerMetadata: providerMetadata
-        isRunning: true
-        created: created
-        name: name
-        workspaceId: workspaceId
-      properties:
-        created:
-          type: string
-        isRunning:
-          type: boolean
-        name:
-          type: string
-        providerMetadata:
-          type: string
-        workspaceId:
-          type: string
-      required:
-      - created
-      - isRunning
-      - name
-      - workspaceId
-      type: object
-    ProjectState:
-      example:
-        gitStatus:
-          behind: 6
-          fileStatus:
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          ahead: 0
-          branchPublished: true
-          currentBranch: currentBranch
-        updatedAt: updatedAt
-        uptime: 1
-      properties:
-        gitStatus:
-          $ref: '#/components/schemas/GitStatus'
-        updatedAt:
-          type: string
-        uptime:
-          type: integer
-      required:
-      - updatedAt
-      - uptime
-      type: object
-    Provider:
+    ProviderDTO:
       example:
         name: name
         label: label
         version: version
+        latest: true
       properties:
         label:
           type: string
+        latest:
+          type: boolean
         name:
           type: string
         version:
           type: string
       required:
+      - latest
       - name
       - version
       type: object
-    ProviderTarget:
+    ProviderInfo:
       example:
-        isDefault: true
+        runnerName: runnerName
+        targetConfigManifest:
+          key:
+            defaultValue: defaultValue
+            options:
+            - options
+            - options
+            description: description
+            suggestions:
+            - suggestions
+            - suggestions
+            type: null
+            disabledPredicate: disabledPredicate
+            inputMasked: true
+        agentlessTarget: true
         name: name
-        options: options
-        providerInfo:
-          name: name
-          label: label
-          version: version
+        runnerId: runnerId
+        label: label
+        version: version
       properties:
-        isDefault:
+        agentlessTarget:
           type: boolean
+        label:
+          type: string
         name:
           type: string
-        options:
-          description: JSON encoded map of options
+        runnerId:
           type: string
-        providerInfo:
-          $ref: '#/components/schemas/provider.ProviderInfo'
+        runnerName:
+          type: string
+        targetConfigManifest:
+          additionalProperties:
+            $ref: '#/components/schemas/TargetConfigProperty'
+          type: object
+        version:
+          type: string
       required:
-      - isDefault
       - name
-      - options
-      - providerInfo
-      type: object
-    ProviderTargetManifest:
-      additionalProperties:
-        $ref: '#/components/schemas/provider.ProviderTargetProperty'
+      - runnerId
+      - runnerName
+      - targetConfigManifest
+      - version
       type: object
     ReplaceRequest:
       example:
@@ -3870,6 +4332,164 @@ components:
       required:
       - url
       type: object
+    ResourceState:
+      example:
+        name: null
+        error: error
+        updatedAt: updatedAt
+      properties:
+        error:
+          type: string
+        name:
+          $ref: '#/components/schemas/models.ResourceStateName'
+        updatedAt:
+          type: string
+      required:
+      - name
+      - updatedAt
+      type: object
+    ResourceType:
+      enum:
+      - workspace
+      - target
+      - build
+      - runner
+      type: string
+      x-enum-varnames:
+      - ResourceTypeWorkspace
+      - ResourceTypeTarget
+      - ResourceTypeBuild
+      - ResourceTypeRunner
+    RunnerDTO:
+      example:
+        metadata:
+          runningJobs: 0
+          runnerId: runnerId
+          providers:
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          - runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+          updatedAt: updatedAt
+          uptime: 6
+        name: name
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
+      properties:
+        id:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/RunnerMetadata'
+        name:
+          type: string
+        state:
+          $ref: '#/components/schemas/ResourceState'
+      required:
+      - id
+      - name
+      - state
+      type: object
+    RunnerMetadata:
+      example:
+        runningJobs: 0
+        runnerId: runnerId
+        providers:
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        updatedAt: updatedAt
+        uptime: 6
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/ProviderInfo'
+          type: array
+        runnerId:
+          type: string
+        runningJobs:
+          type: integer
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
+      required:
+      - providers
+      - runnerId
+      - updatedAt
+      - uptime
+      type: object
     Sample:
       example:
         name: name
@@ -3905,11 +4525,12 @@ components:
         registryUrl: registryUrl
         localBuilderRegistryPort: 5
         localBuilderRegistryImage: localBuilderRegistryImage
-        defaultProjectUser: defaultProjectUser
         builderRegistryServer: builderRegistryServer
         builderImage: builderImage
+        defaultWorkspaceImage: defaultWorkspaceImage
         apiPort: 0
         headscalePort: 1
+        localRunnerDisabled: true
         buildImageNamespace: buildImageNamespace
         serverDownloadUrl: serverDownloadUrl
         binariesPath: binariesPath
@@ -3921,8 +4542,7 @@ components:
           maxBackups: 2
           maxSize: 7
         samplesIndexUrl: samplesIndexUrl
-        defaultProjectImage: defaultProjectImage
-        providersDir: providersDir
+        defaultWorkspaceUser: defaultWorkspaceUser
         id: id
         frps:
           protocol: protocol
@@ -3939,9 +4559,9 @@ components:
           type: string
         builderRegistryServer:
           type: string
-        defaultProjectImage:
+        defaultWorkspaceImage:
           type: string
-        defaultProjectUser:
+        defaultWorkspaceUser:
           type: string
         frps:
           $ref: '#/components/schemas/FRPSConfig'
@@ -3953,10 +4573,10 @@ components:
           type: string
         localBuilderRegistryPort:
           type: integer
+        localRunnerDisabled:
+          type: boolean
         logFile:
           $ref: '#/components/schemas/LogFileConfig'
-        providersDir:
-          type: string
         registryUrl:
           type: string
         samplesIndexUrl:
@@ -3968,16 +4588,61 @@ components:
       - binariesPath
       - builderImage
       - builderRegistryServer
-      - defaultProjectImage
-      - defaultProjectUser
+      - defaultWorkspaceImage
+      - defaultWorkspaceUser
       - headscalePort
       - id
       - localBuilderRegistryImage
       - localBuilderRegistryPort
       - logFile
-      - providersDir
       - registryUrl
       - serverDownloadUrl
+      type: object
+    Session:
+      example:
+        sessionId: sessionId
+        commands:
+        - exitCode: 0
+          id: id
+          command: command
+        - exitCode: 0
+          id: id
+          command: command
+      properties:
+        commands:
+          items:
+            $ref: '#/components/schemas/Command'
+          type: array
+        sessionId:
+          type: string
+      required:
+      - commands
+      - sessionId
+      type: object
+    SessionExecuteRequest:
+      example:
+        async: true
+        command: command
+      properties:
+        async:
+          type: boolean
+        command:
+          type: string
+      required:
+      - command
+      type: object
+    SessionExecuteResponse:
+      example:
+        output: output
+        cmdId: cmdId
+        exitCode: 0
+      properties:
+        cmdId:
+          type: string
+        exitCode:
+          type: integer
+        output:
+          type: string
       type: object
     SetGitProviderConfig:
       example:
@@ -4010,31 +4675,6 @@ components:
       - providerId
       - token
       type: object
-    SetProjectState:
-      example:
-        gitStatus:
-          behind: 6
-          fileStatus:
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          - extra: extra
-            name: name
-            staging: null
-            worktree: null
-          ahead: 0
-          branchPublished: true
-          currentBranch: currentBranch
-        uptime: 0
-      properties:
-        gitStatus:
-          $ref: '#/components/schemas/GitStatus'
-        uptime:
-          type: integer
-      required:
-      - uptime
-      type: object
     SigningMethod:
       enum:
       - ssh
@@ -4063,311 +4703,157 @@ components:
       - Renamed
       - Copied
       - UpdatedButUnmerged
-    Workspace:
+    Target:
       example:
-        projects:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
+        default: true
+        metadata:
+          targetId: targetId
+          updatedAt: updatedAt
+          uptime: 0
+        targetConfig:
+          deleted: true
           name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
+          options: options
+          id: id
+          providerInfo:
+            runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
             name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target: target
-          workspaceId: workspaceId
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target: target
-          workspaceId: workspaceId
-        name: name
-        id: id
-        target: target
-      properties:
-        id:
-          type: string
-        name:
-          type: string
-        projects:
-          items:
-            $ref: '#/components/schemas/Project'
-          type: array
-        target:
-          type: string
-      required:
-      - id
-      - name
-      - projects
-      - target
-      type: object
-    WorkspaceDTO:
-      example:
-        projects:
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target: target
-          workspaceId: workspaceId
-        - buildConfig:
-            cachedBuild:
-              image: image
-              user: user
-            devcontainer:
-              filePath: filePath
-          gitProviderConfigId: gitProviderConfigId
-          image: image
-          envVars:
-            key: envVars
-          name: name
-          state:
-            gitStatus:
-              behind: 6
-              fileStatus:
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              - extra: extra
-                name: name
-                staging: null
-                worktree: null
-              ahead: 0
-              branchPublished: true
-              currentBranch: currentBranch
-            updatedAt: updatedAt
-            uptime: 1
-          repository:
-            owner: owner
-            path: path
-            name: name
-            id: id
-            source: source
-            prNumber: 0
-            branch: branch
-            cloneTarget: null
-            sha: sha
-            url: url
-          user: user
-          target: target
-          workspaceId: workspaceId
-        name: name
-        id: id
-        info:
-          projects:
-          - providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            workspaceId: workspaceId
-          - providerMetadata: providerMetadata
-            isRunning: true
-            created: created
-            name: name
-            workspaceId: workspaceId
-          providerMetadata: providerMetadata
-          name: name
-        target: target
-      properties:
-        id:
-          type: string
-        info:
-          $ref: '#/components/schemas/WorkspaceInfo'
-        name:
-          type: string
-        projects:
-          items:
-            $ref: '#/components/schemas/Project'
-          type: array
-        target:
-          type: string
-      required:
-      - id
-      - name
-      - projects
-      - target
-      type: object
-    WorkspaceInfo:
-      example:
-        projects:
-        - providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          workspaceId: workspaceId
-        - providerMetadata: providerMetadata
-          isRunning: true
-          created: created
-          name: name
-          workspaceId: workspaceId
+            runnerId: runnerId
+            label: label
+            version: version
         providerMetadata: providerMetadata
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        envVars:
+          key: envVars
         name: name
+        targetConfigId: targetConfigId
+        id: id
+        workspaces:
+        - null
+        - null
       properties:
+        default:
+          type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TargetMetadata'
         name:
           type: string
-        projects:
-          items:
-            $ref: '#/components/schemas/ProjectInfo'
-          type: array
         providerMetadata:
           type: string
+        targetConfig:
+          $ref: '#/components/schemas/TargetConfig'
+        targetConfigId:
+          type: string
+        workspaces:
+          items:
+            $ref: '#/components/schemas/Workspace'
+          type: array
       required:
+      - default
+      - envVars
+      - id
       - name
-      - projects
+      - targetConfig
+      - targetConfigId
+      - workspaces
       type: object
-    apikey.ApiKeyType:
-      enum:
-      - client
-      - project
-      - workspace
-      type: string
-      x-enum-varnames:
-      - ApiKeyTypeClient
-      - ApiKeyTypeProject
-      - ApiKeyTypeWorkspace
-    build.BuildState:
-      enum:
-      - pending-run
-      - running
-      - error
-      - success
-      - published
-      - pending-delete
-      - pending-forced-delete
-      - deleting
-      type: string
-      x-enum-varnames:
-      - BuildStatePendingRun
-      - BuildStateRunning
-      - BuildStateError
-      - BuildStateSuccess
-      - BuildStatePublished
-      - BuildStatePendingDelete
-      - BuildStatePendingForcedDelete
-      - BuildStateDeleting
-    provider.ProviderInfo:
+    TargetConfig:
       example:
+        deleted: true
         name: name
-        label: label
-        version: version
+        options: options
+        id: id
+        providerInfo:
+          runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
       properties:
-        label:
+        deleted:
+          type: boolean
+        id:
           type: string
         name:
           type: string
-        version:
+        options:
+          description: JSON encoded map of options
           type: string
+        providerInfo:
+          $ref: '#/components/schemas/ProviderInfo'
       required:
+      - deleted
+      - id
       - name
-      - version
+      - options
+      - providerInfo
       type: object
-    provider.ProviderTargetProperty:
+    TargetConfigManifest:
+      additionalProperties:
+        $ref: '#/components/schemas/TargetConfigProperty'
+      type: object
+    TargetConfigProperty:
+      example:
+        defaultValue: defaultValue
+        options:
+        - options
+        - options
+        description: description
+        suggestions:
+        - suggestions
+        - suggestions
+        type: null
+        disabledPredicate: disabledPredicate
+        inputMasked: true
       properties:
         defaultValue:
           description: |-
@@ -4379,14 +4865,14 @@ components:
           type: string
         disabledPredicate:
           description: |-
-            A regex string matched with the name of the target to determine if the property should be disabled
-            If the regex matches the target name, the property will be disabled
+            A regex string matched with the name of the target config to determine if the property should be disabled
+            If the regex matches the target config name, the property will be disabled
             E.g. "^local$" will disable the property for the local target
           type: string
         inputMasked:
           type: boolean
         options:
-          description: Options is only used if the Type is ProviderTargetPropertyTypeOption
+          description: Options is only used if the Type is TargetConfigPropertyTypeOption
           items:
             type: string
           type: array
@@ -4397,9 +4883,980 @@ components:
             type: string
           type: array
         type:
-          $ref: '#/components/schemas/provider.ProviderTargetPropertyType'
+          $ref: '#/components/schemas/models.TargetConfigPropertyType'
       type: object
-    provider.ProviderTargetPropertyType:
+    TargetDTO:
+      example:
+        default: true
+        metadata:
+          targetId: targetId
+          updatedAt: updatedAt
+          uptime: 0
+        targetConfig:
+          deleted: true
+          name: name
+          options: options
+          id: id
+          providerInfo:
+            runnerName: runnerName
+            targetConfigManifest:
+              key:
+                defaultValue: defaultValue
+                options:
+                - options
+                - options
+                description: description
+                suggestions:
+                - suggestions
+                - suggestions
+                type: null
+                disabledPredicate: disabledPredicate
+                inputMasked: true
+            agentlessTarget: true
+            name: name
+            runnerId: runnerId
+            label: label
+            version: version
+        providerMetadata: providerMetadata
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        envVars:
+          key: envVars
+        name: name
+        targetConfigId: targetConfigId
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
+        workspaces:
+        - gitProviderConfigId: gitProviderConfigId
+          image: image
+          metadata:
+            gitStatus:
+              behind: 1
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              ahead: 6
+              branchPublished: true
+              currentBranch: currentBranch
+            updatedAt: updatedAt
+            uptime: 5
+            workspaceId: workspaceId
+          providerMetadata: providerMetadata
+          apiKey: apiKey
+          targetId: targetId
+          envVars:
+            key: envVars
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+          labels:
+            key: labels
+          target:
+            default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                runnerName: runnerName
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
+                agentlessTarget: true
+                name: name
+                runnerId: runnerId
+                label: label
+                version: version
+            providerMetadata: providerMetadata
+            lastJobId: lastJobId
+            lastJob:
+              createdAt: createdAt
+              metadata: metadata
+              resourceId: resourceId
+              action: null
+              runnerId: runnerId
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
+            name: name
+            targetConfigId: targetConfigId
+            id: id
+            workspaces:
+            - null
+            - null
+          buildConfig:
+            cachedBuild:
+              image: image
+              user: user
+            devcontainer:
+              filePath: filePath
+          lastJobId: lastJobId
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          name: name
+          id: id
+          user: user
+        - gitProviderConfigId: gitProviderConfigId
+          image: image
+          metadata:
+            gitStatus:
+              behind: 1
+              fileStatus:
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              - extra: extra
+                name: name
+                staging: null
+                worktree: null
+              ahead: 6
+              branchPublished: true
+              currentBranch: currentBranch
+            updatedAt: updatedAt
+            uptime: 5
+            workspaceId: workspaceId
+          providerMetadata: providerMetadata
+          apiKey: apiKey
+          targetId: targetId
+          envVars:
+            key: envVars
+          repository:
+            owner: owner
+            path: path
+            name: name
+            id: id
+            source: source
+            prNumber: 0
+            branch: branch
+            cloneTarget: null
+            sha: sha
+            url: url
+          labels:
+            key: labels
+          target:
+            default: true
+            metadata:
+              targetId: targetId
+              updatedAt: updatedAt
+              uptime: 0
+            targetConfig:
+              deleted: true
+              name: name
+              options: options
+              id: id
+              providerInfo:
+                runnerName: runnerName
+                targetConfigManifest:
+                  key:
+                    defaultValue: defaultValue
+                    options:
+                    - options
+                    - options
+                    description: description
+                    suggestions:
+                    - suggestions
+                    - suggestions
+                    type: null
+                    disabledPredicate: disabledPredicate
+                    inputMasked: true
+                agentlessTarget: true
+                name: name
+                runnerId: runnerId
+                label: label
+                version: version
+            providerMetadata: providerMetadata
+            lastJobId: lastJobId
+            lastJob:
+              createdAt: createdAt
+              metadata: metadata
+              resourceId: resourceId
+              action: null
+              runnerId: runnerId
+              id: id
+              state: null
+              error: error
+              resourceType: null
+              updatedAt: updatedAt
+            envVars:
+              key: envVars
+            name: name
+            targetConfigId: targetConfigId
+            id: id
+            workspaces:
+            - null
+            - null
+          buildConfig:
+            cachedBuild:
+              image: image
+              user: user
+            devcontainer:
+              filePath: filePath
+          lastJobId: lastJobId
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          name: name
+          id: id
+          user: user
+      properties:
+        default:
+          type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          type: string
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/TargetMetadata'
+        name:
+          type: string
+        providerMetadata:
+          type: string
+        state:
+          $ref: '#/components/schemas/ResourceState'
+        targetConfig:
+          $ref: '#/components/schemas/TargetConfig'
+        targetConfigId:
+          type: string
+        workspaces:
+          items:
+            $ref: '#/components/schemas/Workspace'
+          type: array
+      required:
+      - default
+      - envVars
+      - id
+      - name
+      - state
+      - targetConfig
+      - targetConfigId
+      - workspaces
+      type: object
+    TargetMetadata:
+      example:
+        targetId: targetId
+        updatedAt: updatedAt
+        uptime: 0
+      properties:
+        targetId:
+          type: string
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
+      required:
+      - targetId
+      - updatedAt
+      - uptime
+      type: object
+    UpdateJobState:
+      example:
+        errorMessage: errorMessage
+        state: null
+      properties:
+        errorMessage:
+          type: string
+        state:
+          $ref: '#/components/schemas/JobState'
+      required:
+      - state
+      type: object
+    UpdateRunnerMetadataDTO:
+      example:
+        runningJobs: 0
+        providers:
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        - runnerName: runnerName
+          targetConfigManifest:
+            key:
+              defaultValue: defaultValue
+              options:
+              - options
+              - options
+              description: description
+              suggestions:
+              - suggestions
+              - suggestions
+              type: null
+              disabledPredicate: disabledPredicate
+              inputMasked: true
+          agentlessTarget: true
+          name: name
+          runnerId: runnerId
+          label: label
+          version: version
+        uptime: 6
+      properties:
+        providers:
+          items:
+            $ref: '#/components/schemas/ProviderInfo'
+          type: array
+        runningJobs:
+          type: integer
+        uptime:
+          type: integer
+      required:
+      - providers
+      - uptime
+      type: object
+    UpdateTargetMetadataDTO:
+      example:
+        uptime: 0
+      properties:
+        uptime:
+          type: integer
+      required:
+      - uptime
+      type: object
+    UpdateTargetProviderMetadataDTO:
+      example:
+        metadata: metadata
+      properties:
+        metadata:
+          type: string
+      required:
+      - metadata
+      type: object
+    UpdateWorkspaceMetadataDTO:
+      example:
+        gitStatus:
+          behind: 1
+          fileStatus:
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          ahead: 6
+          branchPublished: true
+          currentBranch: currentBranch
+        uptime: 0
+      properties:
+        gitStatus:
+          $ref: '#/components/schemas/GitStatus'
+        uptime:
+          type: integer
+      required:
+      - uptime
+      type: object
+    UpdateWorkspaceProviderMetadataDTO:
+      example:
+        metadata: metadata
+      properties:
+        metadata:
+          type: string
+      required:
+      - metadata
+      type: object
+    Workspace:
+      example:
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        metadata:
+          gitStatus:
+            behind: 1
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            ahead: 6
+            branchPublished: true
+            currentBranch: currentBranch
+          updatedAt: updatedAt
+          uptime: 5
+          workspaceId: workspaceId
+        providerMetadata: providerMetadata
+        apiKey: apiKey
+        targetId: targetId
+        envVars:
+          key: envVars
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        labels:
+          key: labels
+        target:
+          default: true
+          metadata:
+            targetId: targetId
+            updatedAt: updatedAt
+            uptime: 0
+          targetConfig:
+            deleted: true
+            name: name
+            options: options
+            id: id
+            providerInfo:
+              runnerName: runnerName
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
+              agentlessTarget: true
+              name: name
+              runnerId: runnerId
+              label: label
+              version: version
+          providerMetadata: providerMetadata
+          lastJobId: lastJobId
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
+          name: name
+          targetConfigId: targetConfigId
+          id: id
+          workspaces:
+          - null
+          - null
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        name: name
+        id: id
+        user: user
+      properties:
+        apiKey:
+          type: string
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/WorkspaceMetadata'
+        name:
+          type: string
+        providerMetadata:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        target:
+          $ref: '#/components/schemas/Target'
+        targetId:
+          type: string
+        user:
+          type: string
+      required:
+      - apiKey
+      - envVars
+      - id
+      - image
+      - labels
+      - name
+      - repository
+      - target
+      - targetId
+      - user
+      type: object
+    WorkspaceDTO:
+      example:
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        metadata:
+          gitStatus:
+            behind: 1
+            fileStatus:
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            - extra: extra
+              name: name
+              staging: null
+              worktree: null
+            ahead: 6
+            branchPublished: true
+            currentBranch: currentBranch
+          updatedAt: updatedAt
+          uptime: 5
+          workspaceId: workspaceId
+        providerMetadata: providerMetadata
+        apiKey: apiKey
+        targetId: targetId
+        envVars:
+          key: envVars
+        repository:
+          owner: owner
+          path: path
+          name: name
+          id: id
+          source: source
+          prNumber: 0
+          branch: branch
+          cloneTarget: null
+          sha: sha
+          url: url
+        labels:
+          key: labels
+        target:
+          default: true
+          metadata:
+            targetId: targetId
+            updatedAt: updatedAt
+            uptime: 0
+          targetConfig:
+            deleted: true
+            name: name
+            options: options
+            id: id
+            providerInfo:
+              runnerName: runnerName
+              targetConfigManifest:
+                key:
+                  defaultValue: defaultValue
+                  options:
+                  - options
+                  - options
+                  description: description
+                  suggestions:
+                  - suggestions
+                  - suggestions
+                  type: null
+                  disabledPredicate: disabledPredicate
+                  inputMasked: true
+              agentlessTarget: true
+              name: name
+              runnerId: runnerId
+              label: label
+              version: version
+          providerMetadata: providerMetadata
+          lastJobId: lastJobId
+          lastJob:
+            createdAt: createdAt
+            metadata: metadata
+            resourceId: resourceId
+            action: null
+            runnerId: runnerId
+            id: id
+            state: null
+            error: error
+            resourceType: null
+            updatedAt: updatedAt
+          envVars:
+            key: envVars
+          name: name
+          targetConfigId: targetConfigId
+          id: id
+          workspaces:
+          - null
+          - null
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        lastJobId: lastJobId
+        lastJob:
+          createdAt: createdAt
+          metadata: metadata
+          resourceId: resourceId
+          action: null
+          runnerId: runnerId
+          id: id
+          state: null
+          error: error
+          resourceType: null
+          updatedAt: updatedAt
+        name: name
+        id: id
+        state:
+          name: null
+          error: error
+          updatedAt: updatedAt
+        user: user
+      properties:
+        apiKey:
+          type: string
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        id:
+          type: string
+        image:
+          type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
+        lastJob:
+          $ref: '#/components/schemas/Job'
+        lastJobId:
+          type: string
+        metadata:
+          $ref: '#/components/schemas/WorkspaceMetadata'
+        name:
+          type: string
+        providerMetadata:
+          type: string
+        repository:
+          $ref: '#/components/schemas/GitRepository'
+        state:
+          $ref: '#/components/schemas/ResourceState'
+        target:
+          $ref: '#/components/schemas/Target'
+        targetId:
+          type: string
+        user:
+          type: string
+      required:
+      - apiKey
+      - envVars
+      - id
+      - image
+      - labels
+      - name
+      - repository
+      - state
+      - target
+      - targetId
+      - user
+      type: object
+    WorkspaceDirResponse:
+      example:
+        dir: dir
+      properties:
+        dir:
+          type: string
+      type: object
+    WorkspaceMetadata:
+      example:
+        gitStatus:
+          behind: 1
+          fileStatus:
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          - extra: extra
+            name: name
+            staging: null
+            worktree: null
+          ahead: 6
+          branchPublished: true
+          currentBranch: currentBranch
+        updatedAt: updatedAt
+        uptime: 5
+        workspaceId: workspaceId
+      properties:
+        gitStatus:
+          $ref: '#/components/schemas/GitStatus'
+        updatedAt:
+          type: string
+        uptime:
+          type: integer
+        workspaceId:
+          type: string
+      required:
+      - updatedAt
+      - uptime
+      - workspaceId
+      type: object
+    WorkspaceTemplate:
+      example:
+        prebuilds:
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        - commitInterval: 0
+          id: id
+          branch: branch
+          retention: 6
+          triggerFiles:
+          - triggerFiles
+          - triggerFiles
+        buildConfig:
+          cachedBuild:
+            image: image
+            user: user
+          devcontainer:
+            filePath: filePath
+        gitProviderConfigId: gitProviderConfigId
+        image: image
+        default: true
+        envVars:
+          key: envVars
+        name: name
+        user: user
+        labels:
+          key: labels
+        repositoryUrl: repositoryUrl
+      properties:
+        buildConfig:
+          $ref: '#/components/schemas/BuildConfig'
+        default:
+          type: boolean
+        envVars:
+          additionalProperties:
+            type: string
+          type: object
+        gitProviderConfigId:
+          type: string
+        image:
+          type: string
+        labels:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+        prebuilds:
+          items:
+            $ref: '#/components/schemas/PrebuildConfig'
+          type: array
+        repositoryUrl:
+          type: string
+        user:
+          type: string
+      required:
+      - default
+      - envVars
+      - image
+      - labels
+      - name
+      - repositoryUrl
+      - user
+      type: object
+    models.ApiKeyType:
+      enum:
+      - client
+      - workspace
+      - target
+      - runner
+      type: string
+      x-enum-varnames:
+      - ApiKeyTypeClient
+      - ApiKeyTypeWorkspace
+      - ApiKeyTypeTarget
+      - ApiKeyTypeRunner
+    models.JobAction:
+      enum:
+      - create
+      - start
+      - stop
+      - restart
+      - delete
+      - force-delete
+      - run
+      - install-provider
+      - uninstall-provider
+      - update-provider
+      type: string
+      x-enum-varnames:
+      - JobActionCreate
+      - JobActionStart
+      - JobActionStop
+      - JobActionRestart
+      - JobActionDelete
+      - JobActionForceDelete
+      - JobActionRun
+      - JobActionInstallProvider
+      - JobActionUninstallProvider
+      - JobActionUpdateProvider
+    models.ResourceStateName:
+      enum:
+      - undefined
+      - pending-run
+      - running
+      - run-successful
+      - pending-create
+      - creating
+      - pending-start
+      - starting
+      - started
+      - pending-stop
+      - stopping
+      - stopped
+      - pending-restart
+      - error
+      - unresponsive
+      - pending-delete
+      - pending-forced-delete
+      - deleting
+      - deleted
+      type: string
+      x-enum-varnames:
+      - ResourceStateNameUndefined
+      - ResourceStateNamePendingRun
+      - ResourceStateNameRunning
+      - ResourceStateNameRunSuccessful
+      - ResourceStateNamePendingCreate
+      - ResourceStateNameCreating
+      - ResourceStateNamePendingStart
+      - ResourceStateNameStarting
+      - ResourceStateNameStarted
+      - ResourceStateNamePendingStop
+      - ResourceStateNameStopping
+      - ResourceStateNameStopped
+      - ResourceStateNamePendingRestart
+      - ResourceStateNameError
+      - ResourceStateNameUnresponsive
+      - ResourceStateNamePendingDelete
+      - ResourceStateNamePendingForcedDelete
+      - ResourceStateNameDeleting
+      - ResourceStateNameDeleted
+    models.TargetConfigPropertyType:
       enum:
       - string
       - option
@@ -4409,12 +5866,12 @@ components:
       - file-path
       type: string
       x-enum-varnames:
-      - ProviderTargetPropertyTypeString
-      - ProviderTargetPropertyTypeOption
-      - ProviderTargetPropertyTypeBoolean
-      - ProviderTargetPropertyTypeInt
-      - ProviderTargetPropertyTypeFloat
-      - ProviderTargetPropertyTypeFilePath
+      - TargetConfigPropertyTypeString
+      - TargetConfigPropertyTypeOption
+      - TargetConfigPropertyTypeBoolean
+      - TargetConfigPropertyTypeInt
+      - TargetConfigPropertyTypeFloat
+      - TargetConfigPropertyTypeFilePath
     FsUploadFile_request:
       properties:
         file:

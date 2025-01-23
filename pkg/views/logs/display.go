@@ -5,6 +5,8 @@ package logs
 
 import (
 	"fmt"
+	"io"
+	"slices"
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
@@ -12,15 +14,25 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-var FIRST_PROJECT_INDEX = 0
-var STATIC_INDEX = -1
-var WORKSPACE_PREFIX = "WORKSPACE"
-var PROVIDER_PREFIX = "PROVIDER"
+const FIRST_WORKSPACE_INDEX = 0
+const STATIC_INDEX = -1
 
-var longestPrefixLength = len(WORKSPACE_PREFIX)
-var maxPrefixLength = 20
-var prefixDelimiter = " | "
-var prefixPadding = " "
+var minimumLongestPrefixLength = 4
+
+const maxPrefixLength = 20
+const prefixDelimiter = " | "
+const prefixPadding = " "
+
+func DisplayLogsFromReader(reader io.Reader) {
+	for {
+		buf := make([]byte, 1024)
+		n, err := reader.Read(buf)
+		if err != nil {
+			break
+		}
+		fmt.Print(string(buf[:n]))
+	}
+}
 
 func DisplayLogs(logEntriesChan <-chan logs.LogEntry, index int) {
 	for logEntry := range logEntriesChan {
@@ -32,38 +44,21 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	line := logEntry.Msg
 
 	prefixColor := getPrefixColor(index, logEntry.Source)
-	var prefixText string
+	prefixText := logEntry.Label
 
-	if logEntry.ProjectName != nil {
-		prefixText = *logEntry.ProjectName
-	}
-
-	if logEntry.BuildId != nil {
-		prefixText = *logEntry.BuildId
-	}
-
-	if index == STATIC_INDEX {
-		if logEntry.Source == string(logs.LogSourceProvider) {
-			prefixText = PROVIDER_PREFIX
-		} else {
-			prefixText = WORKSPACE_PREFIX
-		}
+	if prefixText == "" {
+		prefixText = strings.ToUpper(logEntry.Source)
 	}
 
 	prefix := lipgloss.NewStyle().Foreground(prefixColor).Bold(true).Render(formatPrefixText(prefixText))
 
 	if index == STATIC_INDEX {
-		if logEntry.Source == string(logs.LogSourceProvider) {
-			line = fmt.Sprintf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
-		} else {
-			line = fmt.Sprintf("%s%s%s \033[1m%s\033[0m", prefixPadding, prefix, views.CheckmarkSymbol, line)
-		}
-		fmt.Print(line)
+		fmt.Printf("%s%s\033[1m%s\033[0m", prefixPadding, prefix, line)
 		return
 	}
 
 	// Ensure the cursor moving never overwrites the prefix
-	cursorOffset := longestPrefixLength + len(prefixDelimiter) + 2*len(prefixPadding)
+	cursorOffset := minimumLongestPrefixLength + len(prefixDelimiter) + 2*len(prefixPadding)
 	line = strings.ReplaceAll(line, "\r", fmt.Sprintf("\u001b[%dG", cursorOffset))
 	line = strings.ReplaceAll(line, "\u001b[0G", fmt.Sprintf("\u001b[%dG", cursorOffset))
 
@@ -88,19 +83,17 @@ func DisplayLogEntry(logEntry logs.LogEntry, index int) {
 	fmt.Print(result)
 }
 
-func CalculateLongestPrefixLength(projectNames []string) {
-	for _, projectName := range projectNames {
-		if len(projectName) > longestPrefixLength {
-			longestPrefixLength = len(projectName)
-		}
-	}
+func SetupLongestPrefixLength(workspaceNames []string) {
+	minimumLongestPrefixLength = len(slices.MaxFunc(workspaceNames, func(a, b string) int {
+		return len(a) - len(b)
+	}))
 }
 
 func formatPrefixText(input string) string {
-	prefixLength := longestPrefixLength
+	prefixLength := minimumLongestPrefixLength
 	if prefixLength > maxPrefixLength {
 		prefixLength = maxPrefixLength
-		longestPrefixLength = maxPrefixLength
+		minimumLongestPrefixLength = maxPrefixLength
 	}
 
 	// Trim input if longer than maxPrefixLength

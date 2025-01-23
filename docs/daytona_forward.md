@@ -1,9 +1,9 @@
 ## daytona forward
 
-Forward a port from a project to your local machine
+Forward a port from a workspace to your local machine
 
 ```
-daytona forward [PORT] [WORKSPACE] [PROJECT] [flags]
+daytona forward [PORT] [WORKSPACE] [flags]
 ```
 
 ### Options

@@ -14,7 +14,7 @@ import (
 )
 
 type item struct {
-	apiKey apiclient.ApiKey
+	apiKey apiclient.ApiKeyViewDTO
 }
 
 func (i item) Title() string { return i.apiKey.Name }
@@ -25,7 +25,7 @@ func (i item) FilterValue() string { return i.apiKey.Name }
 
 type model struct {
 	list   list.Model
-	choice *apiclient.ApiKey
+	choice *apiclient.ApiKeyViewDTO
 }
 
 func (m model) Init() tea.Cmd {

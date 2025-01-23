@@ -13,13 +13,14 @@ import (
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/fs"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	log "github.com/sirupsen/logrus"
 )
@@ -33,8 +34,13 @@ func (a *Agent) Start() error {
 
 	a.startTime = time.Now()
 
-	if a.Config.Mode == agent_config.ModeProject {
-		err := a.startProjectMode()
+	err := a.ensureDefaultProfile()
+	if err != nil {
+		return err
+	}
+
+	if a.Config.Mode == agent_config.ModeWorkspace {
+		err := a.startWorkspaceMode()
 		if err != nil {
 			return err
 		}
@@ -45,6 +51,13 @@ func (a *Agent) Start() error {
 				errChan <- err
 			}
 		}()
+	}
+
+	if a.Config.Mode == agent_config.ModeTarget {
+		err := a.startTargetMode()
+		if err != nil {
+			return err
+		}
 	}
 
 	go func() {
@@ -65,20 +78,25 @@ func (a *Agent) Start() error {
 	return <-errChan
 }
 
-func (a *Agent) startProjectMode() error {
-	err := a.ensureDefaultProfile()
-	if err != nil {
-		return err
-	}
+func (a *Agent) startTargetMode() error {
+	go func() {
+		for {
+			err := a.updateTargetMetadata()
+			if err != nil {
+				log.Error(fmt.Sprintf("failed to update target state: %s", err))
+			}
 
-	if a.Config.SkipClone == "" {
-		project, err := a.getProject()
-		if err != nil {
-			return err
+			time.Sleep(2 * time.Second)
 		}
+	}()
 
+	return nil
+}
+
+func (a *Agent) startWorkspaceMode() error {
+	if a.Config.SkipClone == "" {
 		// Ignoring error because we don't want to fail if the git provider is not found
-		gitProvider, _ := a.getGitProvider(project.Repository.Url)
+		gitProvider, _ := a.getGitProvider(a.Workspace.Repository.Url)
 
 		var auth *http.BasicAuth
 		if gitProvider != nil {
@@ -94,14 +112,13 @@ func (a *Agent) startProjectMode() error {
 			if exists {
 				log.Info("Repository already exists. Skipping clone...")
 			} else {
-				if stat, err := os.Stat(a.Config.ProjectDir); err == nil {
-					ownerUid, err := fs.GetFileUid(stat)
-					if err != nil {
-						log.Error(err)
-					}
-
+        if stat, err := os. Stat(a.Config.WorkspaceDir); err == nil {
+          ownerVid, err := fs.GetFileUid(stat)
+          if err != nil {
+            log.Error(err)
+          }
 					if ownerUid != uint32(os.Getuid()) {
-						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", project.User, project.User), a.Config.ProjectDir)
+						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", a.Workspace.User, a.Workspace.User), a.Config.WorkspaceDir)
 						err = chownCmd.Run()
 						if err != nil {
 							log.Error(err)
@@ -110,7 +127,7 @@ func (a *Agent) startProjectMode() error {
 				}
 
 				log.Info("Cloning repository...")
-				err = a.Git.CloneRepository(project.Repository, auth)
+				err = a.Git.CloneRepository(a.Workspace.Repository, auth)
 				if err != nil {
 					log.Error(fmt.Sprintf("failed to clone repository: %s", err))
 				} else {
@@ -134,10 +151,10 @@ func (a *Agent) startProjectMode() error {
 			}
 		}
 
-		var providerConfig *gitprovider.GitProviderConfig
+		var providerConfig *models.GitProviderConfig
 		if gitProvider != nil {
-			providerConfig = &gitprovider.GitProviderConfig{
-				SigningMethod: (*gitprovider.SigningMethod)(gitProvider.SigningMethod),
+			providerConfig = &models.GitProviderConfig{
+				SigningMethod: (*models.SigningMethod)(gitProvider.SigningMethod),
 				SigningKey:    gitProvider.SigningKey,
 			}
 		}
@@ -147,11 +164,16 @@ func (a *Agent) startProjectMode() error {
 		}
 	}
 
+	err := a.DockerCredHelper.SetDockerConfig()
+	if err != nil {
+		log.Error(fmt.Sprintf("failed to set docker config: %s", err))
+	}
+
 	go func() {
 		for {
-			err := a.updateProjectState()
+			err := a.updateWorkspaceMetadata()
 			if err != nil {
-				log.Error(fmt.Sprintf("failed to update project state: %s", err))
+				log.Error(fmt.Sprintf("failed to update workspace state: %s", err))
 			}
 
 			time.Sleep(2 * time.Second)
@@ -159,28 +181,6 @@ func (a *Agent) startProjectMode() error {
 	}()
 
 	return nil
-}
-
-func (a *Agent) getProject() (*project.Project, error) {
-	ctx := context.Background()
-
-	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
-	if err != nil {
-		return nil, err
-	}
-
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, a.Config.WorkspaceId).Execute()
-	if err != nil {
-		return nil, apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	for _, project := range workspace.Projects {
-		if project.Name == a.Config.ProjectName {
-			return conversion.ToProject(&project), nil
-		}
-	}
-
-	return nil, errors.New("project not found")
 }
 
 func (a *Agent) getGitProvider(repoUrl string) (*apiclient.GitProvider, error) {
@@ -252,13 +252,13 @@ func (a *Agent) uptime() int32 {
 	return max(int32(time.Since(a.startTime).Seconds()), 1)
 }
 
-func (a *Agent) updateProjectState() error {
+func (a *Agent) updateWorkspaceMetadata() error {
 	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
 	if err != nil {
 		return err
 	}
 
-	var gitStatus *project.GitStatus
+	var gitStatus *models.GitStatus
 	if a.Config.SkipClone == "" {
 		var err error
 		gitStatus, err = a.Git.GetGitStatus()
@@ -268,13 +268,47 @@ func (a *Agent) updateProjectState() error {
 	}
 
 	uptime := a.uptime()
-	res, err := apiClient.WorkspaceAPI.SetProjectState(context.Background(), a.Config.WorkspaceId, a.Config.ProjectName).SetState(apiclient.SetProjectState{
+
+	gitStatusDto, err := conversion.Convert[models.GitStatus, apiclient.GitStatus](gitStatus)
+	if err != nil {
+		return err
+	}
+
+	res, err := apiClient.WorkspaceAPI.UpdateWorkspaceMetadata(context.Background(), a.Config.WorkspaceId).WorkspaceMetadata(apiclient.UpdateWorkspaceMetadataDTO{
 		Uptime:    uptime,
-		GitStatus: conversion.ToGitStatusDTO(gitStatus),
+		GitStatus: gitStatusDto,
 	}).Execute()
 	if err != nil {
 		return apiclient_util.HandleErrorResponse(res, err)
 	}
 
 	return nil
+}
+
+func (a *Agent) updateTargetMetadata() error {
+	apiClient, err := apiclient_util.GetAgentApiClient(a.Config.Server.ApiUrl, a.Config.Server.ApiKey, a.Config.ClientId, a.TelemetryEnabled)
+	if err != nil {
+		return err
+	}
+
+	uptime := a.uptime()
+	res, err := apiClient.TargetAPI.UpdateTargetMetadata(context.Background(), a.Config.TargetId).TargetMetadata(apiclient.UpdateTargetMetadataDTO{
+		Uptime: uptime,
+	}).Execute()
+	if err != nil {
+		return apiclient_util.HandleErrorResponse(res, err)
+	}
+
+	return nil
+}
+
+func (s *Agent) initLogs() {
+	logFormatter := &util.LogFormatter{
+		TextFormatter: &log.TextFormatter{
+			ForceColors: true,
+		},
+		ProcessLogWriter: s.LogWriter,
+	}
+
+	log.SetFormatter(logFormatter)
 }

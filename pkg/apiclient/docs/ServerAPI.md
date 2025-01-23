@@ -4,18 +4,18 @@ All URIs are relative to *http://localhost:3986*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**GenerateNetworkKey**](ServerAPI.md#GenerateNetworkKey) | **Post** /server/network-key | Generate a new authentication key
+[**CreateNetworkKey**](ServerAPI.md#CreateNetworkKey) | **Post** /server/network-key | Create a new authentication key
 [**GetConfig**](ServerAPI.md#GetConfig) | **Get** /server/config | Get the server configuration
-[**GetServerLogFiles**](ServerAPI.md#GetServerLogFiles) | **Get** /server/logs | List server log files
-[**SetConfig**](ServerAPI.md#SetConfig) | **Post** /server/config | Set the server configuration
+[**GetServerLogFiles**](ServerAPI.md#GetServerLogFiles) | **Get** /server/logs | Get server log files
+[**SaveConfig**](ServerAPI.md#SaveConfig) | **Put** /server/config | Save the server configuration
 
 
 
-## GenerateNetworkKey
+## CreateNetworkKey
 
-> NetworkKey GenerateNetworkKey(ctx).Execute()
+> NetworkKey CreateNetworkKey(ctx).Execute()
 
-Generate a new authentication key
+Create a new authentication key
 
 
 
@@ -35,13 +35,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ServerAPI.GenerateNetworkKey(context.Background()).Execute()
+	resp, r, err := apiClient.ServerAPI.CreateNetworkKey(context.Background()).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.GenerateNetworkKey``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.CreateNetworkKey``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `GenerateNetworkKey`: NetworkKey
-	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.GenerateNetworkKey`: %v\n", resp)
+	// response from `CreateNetworkKey`: NetworkKey
+	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.CreateNetworkKey`: %v\n", resp)
 }
 ```
 
@@ -51,7 +51,7 @@ This endpoint does not need any parameter.
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiGenerateNetworkKeyRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiCreateNetworkKeyRequest struct via the builder pattern
 
 
 ### Return type
@@ -137,7 +137,7 @@ Other parameters are passed through a pointer to a apiGetConfigRequest struct vi
 
 > []string GetServerLogFiles(ctx).Execute()
 
-List server log files
+Get server log files
 
 
 
@@ -194,11 +194,11 @@ Other parameters are passed through a pointer to a apiGetServerLogFilesRequest s
 [[Back to README]](../README.md)
 
 
-## SetConfig
+## SaveConfig
 
-> ServerConfig SetConfig(ctx).Config(config).Execute()
+> ServerConfig SaveConfig(ctx).Config(config).Execute()
 
-Set the server configuration
+Save the server configuration
 
 
 
@@ -215,17 +215,17 @@ import (
 )
 
 func main() {
-	config := *openapiclient.NewServerConfig(int32(123), "BinariesPath_example", "BuilderImage_example", "BuilderRegistryServer_example", "DefaultProjectImage_example", "DefaultProjectUser_example", int32(123), "Id_example", "LocalBuilderRegistryImage_example", int32(123), *openapiclient.NewLogFileConfig(int32(123), int32(123), int32(123), "Path_example"), "ProvidersDir_example", "RegistryUrl_example", "ServerDownloadUrl_example") // ServerConfig | Server configuration
+	config := *openapiclient.NewServerConfig(int32(123), "BinariesPath_example", "BuilderImage_example", "BuilderRegistryServer_example", "DefaultWorkspaceImage_example", "DefaultWorkspaceUser_example", int32(123), "Id_example", "LocalBuilderRegistryImage_example", int32(123), *openapiclient.NewLogFileConfig(int32(123), int32(123), int32(123), "Path_example"), "RegistryUrl_example", "ServerDownloadUrl_example") // ServerConfig | Server configuration
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.ServerAPI.SetConfig(context.Background()).Config(config).Execute()
+	resp, r, err := apiClient.ServerAPI.SaveConfig(context.Background()).Config(config).Execute()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.SetConfig``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Error when calling `ServerAPI.SaveConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
-	// response from `SetConfig`: ServerConfig
-	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.SetConfig`: %v\n", resp)
+	// response from `SaveConfig`: ServerConfig
+	fmt.Fprintf(os.Stdout, "Response from `ServerAPI.SaveConfig`: %v\n", resp)
 }
 ```
 
@@ -235,7 +235,7 @@ func main() {
 
 ### Other Parameters
 
-Other parameters are passed through a pointer to a apiSetConfigRequest struct via the builder pattern
+Other parameters are passed through a pointer to a apiSaveConfigRequest struct via the builder pattern
 
 
 Name | Type | Description  | Notes

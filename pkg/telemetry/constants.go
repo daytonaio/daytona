@@ -20,7 +20,9 @@ var (
 type TelemetrySource string
 
 var (
-	CLI_SOURCE         TelemetrySource = "cli"
-	CLI_PROJECT_SOURCE TelemetrySource = "cli-project"
-	AGENT_SOURCE       TelemetrySource = "agent"
+	CLI_SOURCE            TelemetrySource = "cli"
+	CLI_AGENT_MODE_SOURCE TelemetrySource = "cli_agent_mode"
+	AGENT_SOURCE          TelemetrySource = "agent"
+	RUNNER_SOURCE         TelemetrySource = "runner"
+	SERVER_SOURCE         TelemetrySource = "server"
 )

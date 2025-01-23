@@ -21,11 +21,23 @@ var _ MappedNullable = &WorkspaceDTO{}
 
 // WorkspaceDTO struct for WorkspaceDTO
 type WorkspaceDTO struct {
-	Id       string         `json:"id"`
-	Info     *WorkspaceInfo `json:"info,omitempty"`
-	Name     string         `json:"name"`
-	Projects []Project      `json:"projects"`
-	Target   string         `json:"target"`
+	ApiKey              string             `json:"apiKey"`
+	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string  `json:"envVars"`
+	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
+	Id                  string             `json:"id"`
+	Image               string             `json:"image"`
+	Labels              map[string]string  `json:"labels"`
+	LastJob             *Job               `json:"lastJob,omitempty"`
+	LastJobId           *string            `json:"lastJobId,omitempty"`
+	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
+	Name                string             `json:"name"`
+	ProviderMetadata    *string            `json:"providerMetadata,omitempty"`
+	Repository          GitRepository      `json:"repository"`
+	State               ResourceState      `json:"state"`
+	Target              Target             `json:"target"`
+	TargetId            string             `json:"targetId"`
+	User                string             `json:"user"`
 }
 
 type _WorkspaceDTO WorkspaceDTO
@@ -34,12 +46,19 @@ type _WorkspaceDTO WorkspaceDTO
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspaceDTO(id string, name string, projects []Project, target string) *WorkspaceDTO {
+func NewWorkspaceDTO(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, state ResourceState, target Target, targetId string, user string) *WorkspaceDTO {
 	this := WorkspaceDTO{}
+	this.ApiKey = apiKey
+	this.EnvVars = envVars
 	this.Id = id
+	this.Image = image
+	this.Labels = labels
 	this.Name = name
-	this.Projects = projects
+	this.Repository = repository
+	this.State = state
 	this.Target = target
+	this.TargetId = targetId
+	this.User = user
 	return &this
 }
 
@@ -49,6 +68,118 @@ func NewWorkspaceDTO(id string, name string, projects []Project, target string) 
 func NewWorkspaceDTOWithDefaults() *WorkspaceDTO {
 	this := WorkspaceDTO{}
 	return &this
+}
+
+// GetApiKey returns the ApiKey field value
+func (o *WorkspaceDTO) GetApiKey() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ApiKey
+}
+
+// GetApiKeyOk returns a tuple with the ApiKey field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetApiKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ApiKey, true
+}
+
+// SetApiKey sets field value
+func (o *WorkspaceDTO) SetApiKey(v string) {
+	o.ApiKey = v
+}
+
+// GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetBuildConfig() BuildConfig {
+	if o == nil || IsNil(o.BuildConfig) {
+		var ret BuildConfig
+		return ret
+	}
+	return *o.BuildConfig
+}
+
+// GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetBuildConfigOk() (*BuildConfig, bool) {
+	if o == nil || IsNil(o.BuildConfig) {
+		return nil, false
+	}
+	return o.BuildConfig, true
+}
+
+// HasBuildConfig returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasBuildConfig() bool {
+	if o != nil && !IsNil(o.BuildConfig) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
+func (o *WorkspaceDTO) SetBuildConfig(v BuildConfig) {
+	o.BuildConfig = &v
+}
+
+// GetEnvVars returns the EnvVars field value
+func (o *WorkspaceDTO) GetEnvVars() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.EnvVars
+}
+
+// GetEnvVarsOk returns a tuple with the EnvVars field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.EnvVars, true
+}
+
+// SetEnvVars sets field value
+func (o *WorkspaceDTO) SetEnvVars(v map[string]string) {
+	o.EnvVars = v
+}
+
+// GetGitProviderConfigId returns the GitProviderConfigId field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetGitProviderConfigId() string {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		var ret string
+		return ret
+	}
+	return *o.GitProviderConfigId
+}
+
+// GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetGitProviderConfigIdOk() (*string, bool) {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		return nil, false
+	}
+	return o.GitProviderConfigId, true
+}
+
+// HasGitProviderConfigId returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasGitProviderConfigId() bool {
+	if o != nil && !IsNil(o.GitProviderConfigId) {
+		return true
+	}
+
+	return false
+}
+
+// SetGitProviderConfigId gets a reference to the given string and assigns it to the GitProviderConfigId field.
+func (o *WorkspaceDTO) SetGitProviderConfigId(v string) {
+	o.GitProviderConfigId = &v
 }
 
 // GetId returns the Id field value
@@ -75,36 +206,148 @@ func (o *WorkspaceDTO) SetId(v string) {
 	o.Id = v
 }
 
-// GetInfo returns the Info field value if set, zero value otherwise.
-func (o *WorkspaceDTO) GetInfo() WorkspaceInfo {
-	if o == nil || IsNil(o.Info) {
-		var ret WorkspaceInfo
+// GetImage returns the Image field value
+func (o *WorkspaceDTO) GetImage() string {
+	if o == nil {
+		var ret string
 		return ret
 	}
-	return *o.Info
+
+	return o.Image
 }
 
-// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
+// GetImageOk returns a tuple with the Image field value
 // and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetInfoOk() (*WorkspaceInfo, bool) {
-	if o == nil || IsNil(o.Info) {
+func (o *WorkspaceDTO) GetImageOk() (*string, bool) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Info, true
+	return &o.Image, true
 }
 
-// HasInfo returns a boolean if a field has been set.
-func (o *WorkspaceDTO) HasInfo() bool {
-	if o != nil && !IsNil(o.Info) {
+// SetImage sets field value
+func (o *WorkspaceDTO) SetImage(v string) {
+	o.Image = v
+}
+
+// GetLabels returns the Labels field value
+func (o *WorkspaceDTO) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *WorkspaceDTO) SetLabels(v map[string]string) {
+	o.Labels = v
+}
+
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
 		return true
 	}
 
 	return false
 }
 
-// SetInfo gets a reference to the given WorkspaceInfo and assigns it to the Info field.
-func (o *WorkspaceDTO) SetInfo(v WorkspaceInfo) {
-	o.Info = &v
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *WorkspaceDTO) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetLastJobId returns the LastJobId field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetLastJobId() string {
+	if o == nil || IsNil(o.LastJobId) {
+		var ret string
+		return ret
+	}
+	return *o.LastJobId
+}
+
+// GetLastJobIdOk returns a tuple with the LastJobId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetLastJobIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LastJobId) {
+		return nil, false
+	}
+	return o.LastJobId, true
+}
+
+// HasLastJobId returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasLastJobId() bool {
+	if o != nil && !IsNil(o.LastJobId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJobId gets a reference to the given string and assigns it to the LastJobId field.
+func (o *WorkspaceDTO) SetLastJobId(v string) {
+	o.LastJobId = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetMetadata() WorkspaceMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret WorkspaceMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetMetadataOk() (*WorkspaceMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given WorkspaceMetadata and assigns it to the Metadata field.
+func (o *WorkspaceDTO) SetMetadata(v WorkspaceMetadata) {
+	o.Metadata = &v
 }
 
 // GetName returns the Name field value
@@ -131,34 +374,90 @@ func (o *WorkspaceDTO) SetName(v string) {
 	o.Name = v
 }
 
-// GetProjects returns the Projects field value
-func (o *WorkspaceDTO) GetProjects() []Project {
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *WorkspaceDTO) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ProviderMetadata
+}
+
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		return nil, false
+	}
+	return o.ProviderMetadata, true
+}
+
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *WorkspaceDTO) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *WorkspaceDTO) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
+}
+
+// GetRepository returns the Repository field value
+func (o *WorkspaceDTO) GetRepository() GitRepository {
 	if o == nil {
-		var ret []Project
+		var ret GitRepository
 		return ret
 	}
 
-	return o.Projects
+	return o.Repository
 }
 
-// GetProjectsOk returns a tuple with the Projects field value
+// GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetProjectsOk() ([]Project, bool) {
+func (o *WorkspaceDTO) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Projects, true
+	return &o.Repository, true
 }
 
-// SetProjects sets field value
-func (o *WorkspaceDTO) SetProjects(v []Project) {
-	o.Projects = v
+// SetRepository sets field value
+func (o *WorkspaceDTO) SetRepository(v GitRepository) {
+	o.Repository = v
+}
+
+// GetState returns the State field value
+func (o *WorkspaceDTO) GetState() ResourceState {
+	if o == nil {
+		var ret ResourceState
+		return ret
+	}
+
+	return o.State
+}
+
+// GetStateOk returns a tuple with the State field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetStateOk() (*ResourceState, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.State, true
+}
+
+// SetState sets field value
+func (o *WorkspaceDTO) SetState(v ResourceState) {
+	o.State = v
 }
 
 // GetTarget returns the Target field value
-func (o *WorkspaceDTO) GetTarget() string {
+func (o *WorkspaceDTO) GetTarget() Target {
 	if o == nil {
-		var ret string
+		var ret Target
 		return ret
 	}
 
@@ -167,7 +466,7 @@ func (o *WorkspaceDTO) GetTarget() string {
 
 // GetTargetOk returns a tuple with the Target field value
 // and a boolean to check if the value has been set.
-func (o *WorkspaceDTO) GetTargetOk() (*string, bool) {
+func (o *WorkspaceDTO) GetTargetOk() (*Target, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -175,8 +474,56 @@ func (o *WorkspaceDTO) GetTargetOk() (*string, bool) {
 }
 
 // SetTarget sets field value
-func (o *WorkspaceDTO) SetTarget(v string) {
+func (o *WorkspaceDTO) SetTarget(v Target) {
 	o.Target = v
+}
+
+// GetTargetId returns the TargetId field value
+func (o *WorkspaceDTO) GetTargetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TargetId
+}
+
+// GetTargetIdOk returns a tuple with the TargetId field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetTargetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetId, true
+}
+
+// SetTargetId sets field value
+func (o *WorkspaceDTO) SetTargetId(v string) {
+	o.TargetId = v
+}
+
+// GetUser returns the User field value
+func (o *WorkspaceDTO) GetUser() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.User
+}
+
+// GetUserOk returns a tuple with the User field value
+// and a boolean to check if the value has been set.
+func (o *WorkspaceDTO) GetUserOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.User, true
+}
+
+// SetUser sets field value
+func (o *WorkspaceDTO) SetUser(v string) {
+	o.User = v
 }
 
 func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
@@ -189,13 +536,35 @@ func (o WorkspaceDTO) MarshalJSON() ([]byte, error) {
 
 func (o WorkspaceDTO) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["apiKey"] = o.ApiKey
+	if !IsNil(o.BuildConfig) {
+		toSerialize["buildConfig"] = o.BuildConfig
+	}
+	toSerialize["envVars"] = o.EnvVars
+	if !IsNil(o.GitProviderConfigId) {
+		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
+	}
 	toSerialize["id"] = o.Id
-	if !IsNil(o.Info) {
-		toSerialize["info"] = o.Info
+	toSerialize["image"] = o.Image
+	toSerialize["labels"] = o.Labels
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.LastJobId) {
+		toSerialize["lastJobId"] = o.LastJobId
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
 	}
 	toSerialize["name"] = o.Name
-	toSerialize["projects"] = o.Projects
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
+	}
+	toSerialize["repository"] = o.Repository
+	toSerialize["state"] = o.State
 	toSerialize["target"] = o.Target
+	toSerialize["targetId"] = o.TargetId
+	toSerialize["user"] = o.User
 	return toSerialize, nil
 }
 
@@ -204,10 +573,17 @@ func (o *WorkspaceDTO) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"apiKey",
+		"envVars",
 		"id",
+		"image",
+		"labels",
 		"name",
-		"projects",
+		"repository",
+		"state",
 		"target",
+		"targetId",
+		"user",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -1,0 +1,14 @@
+name: daytona agent
+synopsis: Start the agent process
+usage: daytona agent [flags]
+options:
+    - name: target
+      default_value: "false"
+      usage: Run the agent in target mode
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona - Daytona is a Dev Environment Manager
+    - daytona agent logs - Output Daytona Agent logs

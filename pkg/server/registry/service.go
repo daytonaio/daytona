@@ -12,9 +12,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/frpc"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
@@ -29,7 +29,7 @@ type LocalContainerRegistryConfig struct {
 	DataPath          string
 	Port              uint32
 	Image             string
-	ContainerRegistry *containerregistry.ContainerRegistry
+	ContainerRegistry *models.ContainerRegistry
 	Logger            io.Writer
 	Frps              *server.FRPSConfig
 	ServerId          string
@@ -51,7 +51,7 @@ type LocalContainerRegistry struct {
 	dataPath          string
 	port              uint32
 	image             string
-	containerRegistry *containerregistry.ContainerRegistry
+	containerRegistry *models.ContainerRegistry
 	logger            io.Writer
 	frps              *server.FRPSConfig
 	serverId          string
@@ -85,7 +85,7 @@ func (s *LocalContainerRegistry) Start() error {
 
 	//	we want to always create a new container
 	//	to avoid conflicts with configuration changes
-	if err := RemoveRegistryContainer(); err != nil {
+	if err := DeleteRegistryContainer(); err != nil {
 		return err
 	}
 
@@ -170,19 +170,14 @@ func (s *LocalContainerRegistry) Start() error {
 }
 
 func (s *LocalContainerRegistry) Stop() error {
-	return RemoveRegistryContainer()
+	return DeleteRegistryContainer()
 }
 
 func (s *LocalContainerRegistry) Purge() error {
-	err := s.Stop()
-	if err != nil {
-		return err
-	}
-
 	return os.RemoveAll(s.dataPath)
 }
 
-func RemoveRegistryContainer() error {
+func DeleteRegistryContainer() error {
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return err

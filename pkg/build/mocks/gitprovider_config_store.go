@@ -4,7 +4,9 @@
 package build
 
 import (
-	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -12,7 +14,7 @@ type MockGitProviderConfigStore struct {
 	mock.Mock
 }
 
-func (s *MockGitProviderConfigStore) ListConfigsForUrl(url string) ([]*gitprovider.GitProviderConfig, error) {
-	args := s.Called(url)
-	return args.Get(0).([]*gitprovider.GitProviderConfig), args.Error(1)
+func (s *MockGitProviderConfigStore) ListConfigsForUrl(ctx context.Context, url string) ([]*models.GitProviderConfig, error) {
+	args := s.Called(ctx, url)
+	return args.Get(0).([]*models.GitProviderConfig), args.Error(1)
 }

@@ -4,9 +4,8 @@
 package provider
 
 import (
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/provider/util"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
 )
 
 type ProviderRPCServer struct {
@@ -18,7 +17,7 @@ func (m *ProviderRPCServer) Initialize(arg InitializeProviderRequest, resp *util
 	return err
 }
 
-func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *ProviderInfo) error {
+func (m *ProviderRPCServer) GetInfo(arg interface{}, resp *models.ProviderInfo) error {
 	info, err := m.Impl.GetInfo()
 	if err != nil {
 		return err
@@ -37,23 +36,43 @@ func (m *ProviderRPCServer) CheckRequirements(arg interface{}, resp *[]Requireme
 	return nil
 }
 
-func (m *ProviderRPCServer) GetTargetManifest(arg interface{}, resp *ProviderTargetManifest) error {
-	targetManifest, err := m.Impl.GetTargetManifest()
+func (m *ProviderRPCServer) GetPresetTargetConfigs(arg interface{}, resp *[]TargetConfig) error {
+	targetConfigs, err := m.Impl.GetPresetTargetConfigs()
 	if err != nil {
 		return err
 	}
 
-	*resp = *targetManifest
+	*resp = *targetConfigs
 	return nil
 }
 
-func (m *ProviderRPCServer) GetPresetTargets(arg interface{}, resp *[]ProviderTarget) error {
-	targets, err := m.Impl.GetPresetTargets()
+func (m *ProviderRPCServer) CreateTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.CreateTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) StartTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.StartTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) StopTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.StopTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) DestroyTarget(arg *TargetRequest, resp *util.Empty) error {
+	_, err := m.Impl.DestroyTarget(arg)
+	return err
+}
+
+func (m *ProviderRPCServer) GetTargetProviderMetadata(arg *TargetRequest, resp *string) error {
+	metadata, err := m.Impl.GetTargetProviderMetadata(arg)
 	if err != nil {
 		return err
 	}
 
-	*resp = *targets
+	*resp = metadata
 	return nil
 }
 
@@ -77,42 +96,12 @@ func (m *ProviderRPCServer) DestroyWorkspace(arg *WorkspaceRequest, resp *util.E
 	return err
 }
 
-func (m *ProviderRPCServer) GetWorkspaceInfo(arg *WorkspaceRequest, resp *workspace.WorkspaceInfo) error {
-	info, err := m.Impl.GetWorkspaceInfo(arg)
+func (m *ProviderRPCServer) GetWorkspaceProviderMetadata(arg *WorkspaceRequest, resp *string) error {
+	metadata, err := m.Impl.GetWorkspaceProviderMetadata(arg)
 	if err != nil {
 		return err
 	}
 
-	*resp = *info
-	return nil
-}
-
-func (m *ProviderRPCServer) CreateProject(arg *ProjectRequest, resp *util.Empty) error {
-	_, err := m.Impl.CreateProject(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) StartProject(arg *ProjectRequest, resp *util.Empty) error {
-	_, err := m.Impl.StartProject(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) StopProject(arg *ProjectRequest, resp *util.Empty) error {
-	_, err := m.Impl.StopProject(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) DestroyProject(arg *ProjectRequest, resp *util.Empty) error {
-	_, err := m.Impl.DestroyProject(arg)
-	return err
-}
-
-func (m *ProviderRPCServer) GetProjectInfo(arg *ProjectRequest, resp *project.ProjectInfo) error {
-	info, err := m.Impl.GetProjectInfo(arg)
-	if err != nil {
-		return err
-	}
-
-	*resp = *info
+	*resp = metadata
 	return nil
 }

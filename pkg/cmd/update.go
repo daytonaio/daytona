@@ -7,15 +7,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/daytonaio/daytona/internal"
-	"github.com/inconshreveable/go-update"
-	"github.com/spf13/cobra"
-	"golang.org/x/mod/semver"
 	"net/http"
 	"net/url"
 	"regexp"
 	"runtime"
 	"strings"
+
+	"github.com/daytonaio/daytona/internal"
+	"github.com/inconshreveable/go-update"
+	"github.com/spf13/cobra"
+	"golang.org/x/mod/semver"
 )
 
 const (
@@ -88,10 +89,8 @@ var updateCmd = &cobra.Command{
 		}
 
 		fmt.Println("Updating to version", version, "from", currentVersion)
-		fmt.Print("\nChangelog:\n\n")
-		fmt.Println(changelog)
 
-		return updateToVersion(version)
+		return updateToVersion(version, changelog)
 	},
 }
 
@@ -146,7 +145,7 @@ func fetchVersionRelease(version string) (*GitHubRelease, error) {
 	return nil, fmt.Errorf("version %s not found", version)
 }
 
-func updateToVersion(version string) error {
+func updateToVersion(version, changelog string) error {
 
 	url, err := getBinaryUrl(version)
 	if err != nil {
@@ -165,18 +164,25 @@ func updateToVersion(version string) error {
 	}
 
 	err = update.Apply(resp.Body, update.Options{})
-
 	if err != nil {
 		fmt.Println("Failed to update binary")
 		if rollbackErr := update.RollbackError(err); rollbackErr != nil {
 			return fmt.Errorf("failed to rollback: %w", rollbackErr)
 		}
 
-		return fmt.Errorf("failed to update binary: %w", err)
-	}
+		if strings.Contains(err.Error(), "permission") {
+			if runtime.GOOS == "windows" {
+				return fmt.Errorf("%w\nPlease run 'daytona update' as administrator", err)
+			}
 
+			return fmt.Errorf("%w\nPlease run the command with `sudo`", err)
+		}
+	}
+	fmt.Print("\nChangelog:\n\n")
+	fmt.Println(changelog)
 	fmt.Println("\nSuccessfully updated to version", version)
 	fmt.Println("If your Server is running, you need to restart it for the changes to take effect.")
+
 	return nil
 }
 

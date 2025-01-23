@@ -9,7 +9,7 @@ import (
 )
 
 func (s *Service) CreateBranch(name string) error {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return err
 	}
@@ -26,7 +26,7 @@ func (s *Service) CreateBranch(name string) error {
 }
 
 func (s *Service) ListBranches() ([]string, error) {
-	repo, err := git.PlainOpen(s.ProjectDir)
+	repo, err := git.PlainOpen(s.WorkspaceDir)
 	if err != nil {
 		return []string{}, err
 	}

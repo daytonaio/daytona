@@ -32,7 +32,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ApiKey"
+                                "$ref": "#/definitions/ApiKeyViewDTO"
                             }
                         }
                     }
@@ -41,15 +41,15 @@ const docTemplate = `{
         },
         "/apikey/{apiKeyName}": {
             "post": {
-                "description": "Generate an API key",
+                "description": "Create an API key",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "apiKey"
                 ],
-                "summary": "Generate an API key",
-                "operationId": "GenerateApiKey",
+                "summary": "Create an API key",
+                "operationId": "CreateApiKey",
                 "parameters": [
                     {
                         "type": "string",
@@ -69,12 +69,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Revoke API key",
+                "description": "Delete API key",
                 "tags": [
                     "apiKey"
                 ],
-                "summary": "Revoke API key",
-                "operationId": "RevokeApiKey",
+                "summary": "Delete API key",
+                "operationId": "DeleteApiKey",
                 "parameters": [
                     {
                         "type": "string",
@@ -108,7 +108,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Build"
+                                "$ref": "#/definitions/BuildDTO"
                             }
                         }
                     }
@@ -196,17 +196,50 @@ const docTemplate = `{
                 }
             }
         },
+        "/build/successful/{repoUrl}": {
+            "get": {
+                "description": "List successful builds for Git repository",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "build"
+                ],
+                "summary": "List successful builds for Git repository",
+                "operationId": "ListSuccessfulBuilds",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Repository URL",
+                        "name": "repoUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/BuildDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/build/{buildId}": {
             "get": {
-                "description": "Get build data",
+                "description": "Find build",
                 "consumes": [
                     "application/json"
                 ],
                 "tags": [
                     "build"
                 ],
-                "summary": "Get build data",
-                "operationId": "GetBuild",
+                "summary": "Find build",
+                "operationId": "FindBuild",
                 "parameters": [
                     {
                         "type": "string",
@@ -220,7 +253,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Build"
+                            "$ref": "#/definitions/BuildDTO"
                         }
                     }
                 }
@@ -254,81 +287,83 @@ const docTemplate = `{
                 }
             }
         },
-        "/container-registry": {
+        "/container-registry/{server}": {
             "get": {
-                "description": "List container registries",
+                "description": "Find container registry",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "container-registry"
+                    "container registry"
                 ],
-                "summary": "List container registries",
-                "operationId": "ListContainerRegistries",
+                "summary": "Find container registry",
+                "operationId": "FindContainerRegistry",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Container registry server",
+                        "name": "server",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ContainerRegistry"
+                        }
+                    }
+                }
+            }
+        },
+        "/env": {
+            "get": {
+                "description": "List environment variables",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "envVar"
+                ],
+                "summary": "List environment variables",
+                "operationId": "ListEnvironmentVariables",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ContainerRegistry"
+                                "$ref": "#/definitions/EnvironmentVariable"
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "/container-registry/{server}": {
-            "get": {
-                "description": "Get container registry credentials",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "container-registry"
-                ],
-                "summary": "Get container registry credentials",
-                "operationId": "GetContainerRegistry",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Container Registry server name",
-                        "name": "server",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ContainerRegistry"
                         }
                     }
                 }
             },
             "put": {
-                "description": "Set container registry credentials",
-                "tags": [
-                    "container-registry"
+                "description": "Save environment variable",
+                "consumes": [
+                    "application/json"
                 ],
-                "summary": "Set container registry credentials",
-                "operationId": "SetContainerRegistry",
+                "tags": [
+                    "envVar"
+                ],
+                "summary": "Save environment variable",
+                "operationId": "SaveEnvironmentVariable",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Container Registry server name",
-                        "name": "server",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Container Registry credentials to set",
-                        "name": "containerRegistry",
+                        "description": "Environment Variable",
+                        "name": "environmentVariable",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ContainerRegistry"
+                            "$ref": "#/definitions/EnvironmentVariable"
                         }
                     }
                 ],
@@ -337,19 +372,21 @@ const docTemplate = `{
                         "description": "Created"
                     }
                 }
-            },
+            }
+        },
+        "/env/{key}": {
             "delete": {
-                "description": "Remove a container registry credentials",
+                "description": "Delete environment variable",
                 "tags": [
-                    "container-registry"
+                    "envVar"
                 ],
-                "summary": "Remove a container registry credentials",
-                "operationId": "RemoveContainerRegistry",
+                "summary": "Delete environment variable",
+                "operationId": "DeleteEnvironmentVariable",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Container Registry server name",
-                        "name": "server",
+                        "description": "Environment Variable Key",
+                        "name": "key",
                         "in": "path",
                         "required": true
                     }
@@ -385,15 +422,15 @@ const docTemplate = `{
                 }
             },
             "put": {
-                "description": "Set Git provider",
+                "description": "Save Git provider",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Set Git provider",
-                "operationId": "SetGitProvider",
+                "summary": "Save Git provider",
+                "operationId": "SaveGitProvider",
                 "parameters": [
                     {
                         "description": "Git provider",
@@ -511,15 +548,15 @@ const docTemplate = `{
         },
         "/gitprovider/id-for-url/{url}": {
             "get": {
-                "description": "Get Git provider ID",
+                "description": "Find Git provider ID",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider ID",
-                "operationId": "GetGitProviderIdForUrl",
+                "summary": "Find Git provider ID",
+                "operationId": "FindGitProviderIdForUrl",
                 "parameters": [
                     {
                         "type": "string",
@@ -541,15 +578,15 @@ const docTemplate = `{
         },
         "/gitprovider/{gitProviderId}": {
             "get": {
-                "description": "Get Git provider",
+                "description": "Find Git provider",
                 "produces": [
                     "text/plain"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Get Git provider",
-                "operationId": "GetGitProvider",
+                "summary": "Find Git provider",
+                "operationId": "FindGitProvider",
                 "parameters": [
                     {
                         "type": "string",
@@ -569,15 +606,15 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove Git provider",
+                "description": "Delete Git provider",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "gitProvider"
                 ],
-                "summary": "Remove Git provider",
-                "operationId": "RemoveGitProvider",
+                "summary": "Delete Git provider",
+                "operationId": "DeleteGitProvider",
                 "parameters": [
                     {
                         "type": "string",
@@ -860,426 +897,119 @@ const docTemplate = `{
                 }
             }
         },
-        "/profile": {
+        "/job": {
             "get": {
-                "description": "Get profile data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Get profile data",
-                "operationId": "GetProfileData",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ProfileData"
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Set profile data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Set profile data",
-                "operationId": "SetProfileData",
-                "parameters": [
-                    {
-                        "description": "Profile data",
-                        "name": "profileData",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/ProfileData"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete profile data",
-                "tags": [
-                    "profile"
-                ],
-                "summary": "Delete profile data",
-                "operationId": "DeleteProfileData",
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/project-config": {
-            "get": {
-                "description": "List project configs",
+                "description": "List jobs",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "project-config"
+                    "job"
                 ],
-                "summary": "List project configs",
-                "operationId": "ListProjectConfigs",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/ProjectConfig"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Set project config data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project-config"
-                ],
-                "summary": "Set project config data",
-                "operationId": "SetProjectConfig",
+                "summary": "List jobs",
+                "operationId": "ListJobs",
                 "parameters": [
                     {
-                        "description": "Project config",
-                        "name": "projectConfig",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CreateProjectConfigDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created"
-                    }
-                }
-            }
-        },
-        "/project-config/default/{gitUrl}": {
-            "get": {
-                "description": "Get project configs by git url",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project-config"
-                ],
-                "summary": "Get project configs by git url",
-                "operationId": "GetDefaultProjectConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Git URL",
-                        "name": "gitUrl",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ProjectConfig"
-                        }
-                    }
-                }
-            }
-        },
-        "/project-config/prebuild": {
-            "get": {
-                "description": "List prebuilds",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "List prebuilds",
-                "operationId": "ListPrebuilds",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/PrebuildDTO"
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/project-config/prebuild/process-git-event": {
-            "post": {
-                "description": "ProcessGitEvent",
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "ProcessGitEvent",
-                "operationId": "ProcessGitEvent",
-                "parameters": [
-                    {
-                        "description": "Webhook event",
-                        "name": "workspace",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/project-config/{configName}": {
-            "get": {
-                "description": "Get project config data",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "project-config"
-                ],
-                "summary": "Get project config data",
-                "operationId": "GetProjectConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ProjectConfig"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "description": "Delete project config data",
-                "tags": [
-                    "project-config"
-                ],
-                "summary": "Delete project config data",
-                "operationId": "DeleteProjectConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Force",
-                        "name": "force",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/project-config/{configName}/prebuild": {
-            "get": {
-                "description": "List prebuilds for project config",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "List prebuilds for project config",
-                "operationId": "ListPrebuildsForProjectConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/PrebuildDTO"
-                            }
-                        }
-                    }
-                }
-            },
-            "put": {
-                "description": "Set prebuild",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "Set prebuild",
-                "operationId": "SetPrebuild",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Prebuild",
-                        "name": "prebuild",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CreatePrebuildDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
+                        "type": "array",
+                        "items": {
                             "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/project-config/{configName}/prebuild/{prebuildId}": {
-            "get": {
-                "description": "Get prebuild",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "prebuild"
-                ],
-                "summary": "Get prebuild",
-                "operationId": "GetPrebuild",
-                "parameters": [
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Job States",
+                        "name": "states",
+                        "in": "query"
+                    },
                     {
-                        "type": "string",
-                        "description": "Project config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "multi",
+                        "description": "Job Actions",
+                        "name": "actions",
+                        "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "Prebuild ID",
-                        "name": "prebuildId",
-                        "in": "path",
-                        "required": true
+                        "description": "Resource ID",
+                        "name": "resourceId",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Resource Type",
+                        "name": "resourceType",
+                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/PrebuildDTO"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Job"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner": {
+            "get": {
+                "description": "List runners",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "List runners",
+                "operationId": "ListRunners",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/RunnerDTO"
+                            }
                         }
                     }
                 }
             },
-            "delete": {
-                "description": "Delete prebuild",
-                "consumes": [
+            "post": {
+                "description": "Create a runner",
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "prebuild"
+                    "runner"
                 ],
-                "summary": "Delete prebuild",
-                "operationId": "DeletePrebuild",
+                "summary": "Create a runner",
+                "operationId": "CreateRunner",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Project config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Prebuild ID",
-                        "name": "prebuildId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Force",
-                        "name": "force",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No Content"
-                    }
-                }
-            }
-        },
-        "/project-config/{configName}/set-default": {
-            "patch": {
-                "description": "Set project config to default",
-                "tags": [
-                    "project-config"
-                ],
-                "summary": "Set project config to default",
-                "operationId": "SetDefaultProjectConfig",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Config name",
-                        "name": "configName",
-                        "in": "path",
-                        "required": true
+                        "description": "Runner",
+                        "name": "runner",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateRunnerDTO"
+                        }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/CreateRunnerResultDTO"
+                        }
                     }
                 }
             }
         },
-        "/provider": {
+        "/runner/provider": {
             "get": {
                 "description": "List providers",
                 "produces": [
@@ -1290,38 +1020,169 @@ const docTemplate = `{
                 ],
                 "summary": "List providers",
                 "operationId": "ListProviders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/Provider"
+                                "$ref": "#/definitions/ProviderInfo"
                             }
                         }
                     }
                 }
             }
         },
-        "/provider/install": {
-            "post": {
-                "description": "Install a provider",
-                "consumes": [
+        "/runner/provider/for-install": {
+            "get": {
+                "description": "List providers available for installation",
+                "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "provider"
                 ],
-                "summary": "Install a provider",
-                "operationId": "InstallProvider",
+                "summary": "List providers available for installation",
+                "operationId": "ListProvidersForInstall",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}": {
+            "get": {
+                "description": "Find a runner",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Find a runner",
+                "operationId": "FindRunner",
                 "parameters": [
                     {
-                        "description": "Provider to install",
-                        "name": "provider",
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/RunnerDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete runner",
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Delete runner",
+                "operationId": "DeleteRunner",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/jobs": {
+            "get": {
+                "description": "List runner jobs",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "List runner jobs",
+                "operationId": "ListRunnerJobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Job"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/jobs/{jobId}/state": {
+            "post": {
+                "description": "Update job state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "runner"
+                ],
+                "summary": "Update job state",
+                "operationId": "UpdateJobState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Job ID",
+                        "name": "jobId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Update job state",
+                        "name": "updateJobState",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/InstallProviderRequest"
+                            "$ref": "#/definitions/UpdateJobState"
                         }
                     }
                 ],
@@ -1332,19 +1193,55 @@ const docTemplate = `{
                 }
             }
         },
-        "/provider/{provider}/target-manifest": {
-            "get": {
-                "description": "Get provider target manifest",
+        "/runner/{runnerId}/metadata": {
+            "post": {
+                "description": "Update runner metadata",
                 "tags": [
-                    "provider"
+                    "runner"
                 ],
-                "summary": "Get provider target manifest",
-                "operationId": "GetTargetManifest",
+                "summary": "Update runner metadata",
+                "operationId": "UpdateRunnerMetadata",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Provider name",
-                        "name": "provider",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Runner Metadata",
+                        "name": "runnerMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateRunnerMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider": {
+            "get": {
+                "description": "Get runner providers",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Get runner providers",
+                "operationId": "GetRunnerProviders",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
                         "in": "path",
                         "required": true
                     }
@@ -1353,30 +1250,111 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ProviderTargetManifest"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/ProviderInfo"
+                            }
                         }
                     }
                 }
             }
         },
-        "/provider/{provider}/uninstall": {
+        "/runner/{runnerId}/provider/{providerName}/install": {
             "post": {
-                "description": "Uninstall a provider",
-                "consumes": [
-                    "application/json"
-                ],
+                "description": "Install provider",
                 "tags": [
                     "provider"
                 ],
-                "summary": "Uninstall a provider",
+                "summary": "Install provider",
+                "operationId": "InstallProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/{providerName}/uninstall": {
+            "post": {
+                "description": "Uninstall provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Uninstall provider",
                 "operationId": "UninstallProvider",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Provider to uninstall",
-                        "name": "provider",
+                        "description": "Runner ID",
+                        "name": "runnerId",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/runner/{runnerId}/provider/{providerName}/update": {
+            "post": {
+                "description": "Update provider",
+                "tags": [
+                    "provider"
+                ],
+                "summary": "Update provider",
+                "operationId": "UpdateProvider",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Runner ID",
+                        "name": "runnerId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider name",
+                        "name": "providerName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Provider version - defaults to 'latest'",
+                        "name": "providerVersion",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1430,8 +1408,8 @@ const docTemplate = `{
                     }
                 }
             },
-            "post": {
-                "description": "Set the server configuration",
+            "put": {
+                "description": "Save the server configuration",
                 "consumes": [
                     "application/json"
                 ],
@@ -1441,8 +1419,8 @@ const docTemplate = `{
                 "tags": [
                     "server"
                 ],
-                "summary": "Set the server configuration",
-                "operationId": "SetConfig",
+                "summary": "Save the server configuration",
+                "operationId": "SaveConfig",
                 "parameters": [
                     {
                         "description": "Server configuration",
@@ -1466,14 +1444,14 @@ const docTemplate = `{
         },
         "/server/logs": {
             "get": {
-                "description": "List server log files",
+                "description": "Get server log files",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "server"
                 ],
-                "summary": "List server log files",
+                "summary": "Get server log files",
                 "operationId": "GetServerLogFiles",
                 "responses": {
                     "200": {
@@ -1490,15 +1468,15 @@ const docTemplate = `{
         },
         "/server/network-key": {
             "post": {
-                "description": "Generate a new authentication key",
+                "description": "Create a new authentication key",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "server"
                 ],
-                "summary": "Generate a new authentication key",
-                "operationId": "GenerateNetworkKey",
+                "summary": "Create a new authentication key",
+                "operationId": "CreateNetworkKey",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1520,56 +1498,135 @@ const docTemplate = `{
                 ],
                 "summary": "List targets",
                 "operationId": "ListTargets",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/ProviderTarget"
+                                "$ref": "#/definitions/TargetDTO"
                             }
                         }
                     }
                 }
             },
-            "put": {
-                "description": "Set a target",
+            "post": {
+                "description": "Create a target",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "target"
                 ],
-                "summary": "Set a target",
-                "operationId": "SetTarget",
+                "summary": "Create a target",
+                "operationId": "CreateTarget",
                 "parameters": [
                     {
-                        "description": "Target to set",
+                        "description": "Create target",
                         "name": "target",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/CreateProviderTargetDTO"
+                            "$ref": "#/definitions/CreateTargetDTO"
                         }
                     }
                 ],
                 "responses": {
-                    "201": {
-                        "description": "Created"
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/Target"
+                        }
                     }
                 }
             }
         },
-        "/target/{target}": {
-            "delete": {
-                "description": "Remove a target",
-                "tags": [
-                    "target"
+        "/target-config": {
+            "get": {
+                "description": "List target configs",
+                "produces": [
+                    "application/json"
                 ],
-                "summary": "Remove a target",
-                "operationId": "RemoveTarget",
+                "tags": [
+                    "target-config"
+                ],
+                "summary": "List target configs",
+                "operationId": "ListTargetConfigs",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/TargetConfig"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create a target config",
+                "tags": [
+                    "target-config"
+                ],
+                "summary": "Create a target config",
+                "operationId": "CreateTargetConfig",
+                "parameters": [
+                    {
+                        "description": "Target config to create",
+                        "name": "targetConfig",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateTargetConfigDTO"
+                        }
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TargetConfig"
+                        }
+                    }
+                }
+            }
+        },
+        "/target-config/{configId}": {
+            "delete": {
+                "description": "Delete a target config",
+                "tags": [
+                    "target-config"
+                ],
+                "summary": "Delete a target config",
+                "operationId": "DeleteTargetConfig",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target name",
-                        "name": "target",
+                        "description": "Target Config Id",
+                        "name": "configId",
                         "in": "path",
                         "required": true
                     }
@@ -1581,19 +1638,275 @@ const docTemplate = `{
                 }
             }
         },
-        "/target/{target}/set-default": {
-            "patch": {
-                "description": "Set target to default",
+        "/target/{targetId}": {
+            "get": {
+                "description": "Find target",
+                "produces": [
+                    "application/json"
+                ],
                 "tags": [
                     "target"
                 ],
-                "summary": "Set target to default",
+                "summary": "Find target",
+                "operationId": "FindTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Show target config options",
+                        "name": "showOptions",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/TargetDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Delete target",
+                "operationId": "DeleteTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/handle-successful-creation": {
+            "post": {
+                "description": "Handles successful creation of the target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Handles successful creation of the target",
+                "operationId": "HandleSuccessfulCreation",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/metadata": {
+            "post": {
+                "description": "Update target metadata",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Update target metadata",
+                "operationId": "UpdateTargetMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Target Metadata",
+                        "name": "targetMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTargetMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/provider-metadata": {
+            "post": {
+                "description": "Update target provider metadata",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Update target provider metadata",
+                "operationId": "UpdateTargetProviderMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Provider metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateTargetProviderMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/restart": {
+            "post": {
+                "description": "Restart target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Restart target",
+                "operationId": "RestartTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/set-default": {
+            "patch": {
+                "description": "Set target to be used by default",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Set target to be used by default",
                 "operationId": "SetDefaultTarget",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Target name",
-                        "name": "target",
+                        "description": "Target ID or name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/start": {
+            "post": {
+                "description": "Start target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Start target",
+                "operationId": "StartTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/state": {
+            "get": {
+                "description": "Get target state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "target"
+                ],
+                "summary": "Get target state",
+                "operationId": "GetTargetState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceState"
+                        }
+                    }
+                }
+            }
+        },
+        "/target/{targetId}/stop": {
+            "post": {
+                "description": "Stop target",
+                "tags": [
+                    "target"
+                ],
+                "summary": "Stop target",
+                "operationId": "StopTarget",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Target ID or Name",
+                        "name": "targetId",
                         "in": "path",
                         "required": true
                     }
@@ -1618,9 +1931,9 @@ const docTemplate = `{
                 "operationId": "ListWorkspaces",
                 "parameters": [
                     {
-                        "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
+                        "type": "string",
+                        "description": "JSON encoded labels",
+                        "name": "labels",
                         "in": "query"
                     }
                 ],
@@ -1661,23 +1974,381 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/Workspace"
+                            "$ref": "#/definitions/WorkspaceDTO"
                         }
+                    }
+                }
+            }
+        },
+        "/workspace-template": {
+            "get": {
+                "description": "List workspace templates",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "List workspace templates",
+                "operationId": "ListWorkspaceTemplates",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/WorkspaceTemplate"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Set workspace template data",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "Set workspace template data",
+                "operationId": "SaveWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "description": "Workspace template",
+                        "name": "workspaceTemplate",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateWorkspaceTemplateDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/workspace-template/default/{gitUrl}": {
+            "get": {
+                "description": "Get default workspace templates by git url",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "Get default workspace templates by git url",
+                "operationId": "GetDefaultWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Git URL",
+                        "name": "gitUrl",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceTemplate"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace-template/prebuild": {
+            "get": {
+                "description": "List prebuilds",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds",
+                "operationId": "ListPrebuilds",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PrebuildDTO"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace-template/prebuild/process-git-event": {
+            "post": {
+                "description": "ProcessGitEvent",
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "ProcessGitEvent",
+                "operationId": "ProcessGitEvent",
+                "parameters": [
+                    {
+                        "description": "Webhook event",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace-template/{templateName}": {
+            "get": {
+                "description": "Find a workspace template",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "Find a workspace template",
+                "operationId": "FindWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceTemplate"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete workspace template data",
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "Delete workspace template data",
+                "operationId": "DeleteWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/workspace-template/{templateName}/prebuild": {
+            "get": {
+                "description": "List prebuilds for workspace template",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "List prebuilds for workspace template",
+                "operationId": "ListPrebuildsForWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/PrebuildDTO"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Save prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Save prebuild",
+                "operationId": "SavePrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Prebuild",
+                        "name": "prebuild",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreatePrebuildDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace-template/{templateName}/prebuild/{prebuildId}": {
+            "get": {
+                "description": "Find prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Find prebuild",
+                "operationId": "FindPrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Prebuild ID",
+                        "name": "prebuildId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/PrebuildDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete prebuild",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "prebuild"
+                ],
+                "summary": "Delete prebuild",
+                "operationId": "DeletePrebuild",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Prebuild ID",
+                        "name": "prebuildId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Force",
+                        "name": "force",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/workspace-template/{templateName}/set-default": {
+            "patch": {
+                "description": "Set workspace template to default",
+                "tags": [
+                    "workspace-template"
+                ],
+                "summary": "Set workspace template to default",
+                "operationId": "SetDefaultWorkspaceTemplate",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Template name",
+                        "name": "templateName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
                     }
                 }
             }
         },
         "/workspace/{workspaceId}": {
             "get": {
-                "description": "Get workspace info",
+                "description": "Find workspace",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace"
                 ],
-                "summary": "Get workspace info",
-                "operationId": "GetWorkspace",
+                "summary": "Find workspace",
+                "operationId": "FindWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -1685,12 +2356,6 @@ const docTemplate = `{
                         "name": "workspaceId",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Verbose",
-                        "name": "verbose",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1703,12 +2368,12 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Remove workspace",
+                "description": "Delete workspace",
                 "tags": [
                     "workspace"
                 ],
-                "summary": "Remove workspace",
-                "operationId": "RemoveWorkspace",
+                "summary": "Delete workspace",
+                "operationId": "DeleteWorkspace",
                 "parameters": [
                     {
                         "type": "string",
@@ -1722,6 +2387,135 @@ const docTemplate = `{
                         "description": "Force",
                         "name": "force",
                         "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/labels": {
+            "post": {
+                "description": "Update workspace labels",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Update workspace labels",
+                "operationId": "UpdateWorkspaceLabels",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Labels",
+                        "name": "labels",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/WorkspaceDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/metadata": {
+            "post": {
+                "description": "Update workspace metadata",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Update workspace metadata",
+                "operationId": "UpdateWorkspaceMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Workspace Metadata",
+                        "name": "workspaceMetadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateWorkspaceMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/provider-metadata": {
+            "post": {
+                "description": "Update workspace provider metadata",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Update workspace provider metadata",
+                "operationId": "UpdateWorkspaceProviderMetadata",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Provider metadata",
+                        "name": "metadata",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/UpdateWorkspaceProviderMetadataDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/restart": {
+            "post": {
+                "description": "Restart workspace",
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Restart workspace",
+                "operationId": "RestartWorkspace",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -1755,6 +2549,36 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspace/{workspaceId}/state": {
+            "get": {
+                "description": "Get workspace state",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace"
+                ],
+                "summary": "Get workspace state",
+                "operationId": "GetWorkspaceState",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ResourceState"
+                        }
+                    }
+                }
+            }
+        },
         "/workspace/{workspaceId}/stop": {
             "post": {
                 "description": "Stop workspace",
@@ -1779,111 +2603,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/start": {
-            "post": {
-                "description": "Start project",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Start project",
-                "operationId": "StartProject",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/workspace/{workspaceId}/{projectId}/state": {
-            "post": {
-                "description": "Set project state",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Set project state",
-                "operationId": "SetProjectState",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Set State",
-                        "name": "setState",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/SetProjectState"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/workspace/{workspaceId}/{projectId}/stop": {
-            "post": {
-                "description": "Stop project",
-                "tags": [
-                    "workspace"
-                ],
-                "summary": "Stop project",
-                "operationId": "StopProject",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Workspace ID or Name",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK"
-                    }
-                }
-            }
-        },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files": {
+        "/workspace/{workspaceId}/toolbox/files": {
             "get": {
-                "description": "List files inside workspace project",
+                "description": "List files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1897,13 +2619,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -1927,7 +2642,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Delete file inside workspace project",
+                "description": "Delete file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1946,13 +2661,6 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
                         "description": "Path",
                         "name": "path",
                         "in": "query",
@@ -1966,9 +2674,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/download": {
+        "/workspace/{workspaceId}/toolbox/files/download": {
             "get": {
-                "description": "Download file from workspace project",
+                "description": "Download file from a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -1982,13 +2690,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2010,9 +2711,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/find": {
+        "/workspace/{workspaceId}/toolbox/files/find": {
             "get": {
-                "description": "Search for text/pattern inside workspace project files",
+                "description": "Search for text/pattern inside a workspace files",
                 "produces": [
                     "application/json"
                 ],
@@ -2026,13 +2727,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2064,9 +2758,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/folder": {
+        "/workspace/{workspaceId}/toolbox/files/folder": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2080,13 +2774,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2112,9 +2799,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/info": {
+        "/workspace/{workspaceId}/toolbox/files/info": {
             "get": {
-                "description": "Get file info inside workspace project",
+                "description": "Get file info inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2128,13 +2815,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2156,9 +2836,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/move": {
+        "/workspace/{workspaceId}/toolbox/files/move": {
             "post": {
-                "description": "Create folder inside workspace project",
+                "description": "Create folder inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2172,13 +2852,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2204,9 +2877,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/permissions": {
+        "/workspace/{workspaceId}/toolbox/files/permissions": {
             "post": {
-                "description": "Set file owner/group/permissions inside workspace project",
+                "description": "Set file owner/group/permissions inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2220,13 +2893,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2263,9 +2929,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/replace": {
+        "/workspace/{workspaceId}/toolbox/files/replace": {
             "post": {
-                "description": "Repleace text/pattern in mutilple files inside workspace project",
+                "description": "Repleace text/pattern in mutilple files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2279,13 +2945,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2312,9 +2971,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/search": {
+        "/workspace/{workspaceId}/toolbox/files/search": {
             "get": {
-                "description": "Search for files inside workspace project",
+                "description": "Search for files inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2328,13 +2987,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2363,9 +3015,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/files/upload": {
+        "/workspace/{workspaceId}/toolbox/files/upload": {
             "post": {
-                "description": "Upload file inside workspace project",
+                "description": "Upload file inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2379,13 +3031,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2411,7 +3056,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/add": {
+        "/workspace/{workspaceId}/toolbox/git/add": {
             "post": {
                 "description": "Add files to git commit",
                 "produces": [
@@ -2427,13 +3072,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2454,9 +3092,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/branches": {
+        "/workspace/{workspaceId}/toolbox/git/branches": {
             "get": {
-                "description": "Get branch list from git repository inside workspace project",
+                "description": "Get branch list from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2470,13 +3108,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2498,7 +3129,7 @@ const docTemplate = `{
                 }
             },
             "post": {
-                "description": "Create branch on git repository inside workspace project",
+                "description": "Create branch on git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2512,13 +3143,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2539,9 +3163,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/clone": {
+        "/workspace/{workspaceId}/toolbox/git/clone": {
             "post": {
-                "description": "Clone git repository inside workspace project",
+                "description": "Clone git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2555,13 +3179,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2582,9 +3199,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/commit": {
+        "/workspace/{workspaceId}/toolbox/git/commit": {
             "post": {
-                "description": "Commit changes to git repository inside workspace project",
+                "description": "Commit changes to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2598,13 +3215,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2628,9 +3238,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/history": {
+        "/workspace/{workspaceId}/toolbox/git/history": {
             "get": {
-                "description": "Get commit history from git repository inside workspace project",
+                "description": "Get commit history from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2644,13 +3254,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2675,9 +3278,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/pull": {
+        "/workspace/{workspaceId}/toolbox/git/pull": {
             "post": {
-                "description": "Pull changes from remote to git repository inside workspace project",
+                "description": "Pull changes from remote to git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2691,13 +3294,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2718,9 +3314,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/push": {
+        "/workspace/{workspaceId}/toolbox/git/push": {
             "post": {
-                "description": "Push changes to remote from git repository inside workspace project",
+                "description": "Push changes to remote from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2734,13 +3330,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2761,9 +3350,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/git/status": {
+        "/workspace/{workspaceId}/toolbox/git/status": {
             "get": {
-                "description": "Get status from git repository inside workspace project",
+                "description": "Get status from git repository inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -2777,13 +3366,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2805,7 +3387,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/completions": {
+        "/workspace/{workspaceId}/toolbox/lsp/completions": {
             "post": {
                 "description": "The Completion request is sent from the client to the server to compute completion items at a given cursor position.",
                 "produces": [
@@ -2821,13 +3403,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2851,7 +3426,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-close": {
+        "/workspace/{workspaceId}/toolbox/lsp/did-close": {
             "post": {
                 "description": "The document close notification is sent from the client to the server when the document got closed in the client.",
                 "produces": [
@@ -2871,13 +3446,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspDocumentRequest",
                         "name": "params",
                         "in": "body",
@@ -2894,7 +3462,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/did-open": {
+        "/workspace/{workspaceId}/toolbox/lsp/did-open": {
             "post": {
                 "description": "The document open notification is sent from the client to the server to signal newly opened text documents.",
                 "produces": [
@@ -2914,13 +3482,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspDocumentRequest",
                         "name": "params",
                         "in": "body",
@@ -2937,7 +3498,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/document-symbols": {
+        "/workspace/{workspaceId}/toolbox/lsp/document-symbols": {
             "get": {
                 "description": "The document symbol request is sent from the client to the server.",
                 "produces": [
@@ -2953,13 +3514,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -2998,9 +3552,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/start": {
+        "/workspace/{workspaceId}/toolbox/lsp/start": {
             "post": {
-                "description": "Start Lsp server process inside workspace project",
+                "description": "Start Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3018,13 +3572,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspServerRequest",
                         "name": "params",
                         "in": "body",
@@ -3041,9 +3588,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/stop": {
+        "/workspace/{workspaceId}/toolbox/lsp/stop": {
             "post": {
-                "description": "Stop Lsp server process inside workspace project",
+                "description": "Stop Lsp server process inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3061,13 +3608,6 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
                         "description": "LspServerRequest",
                         "name": "params",
                         "in": "body",
@@ -3084,7 +3624,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/lsp/workspace-symbols": {
+        "/workspace/{workspaceId}/toolbox/lsp/workspace-symbols": {
             "get": {
                 "description": "The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.",
                 "produces": [
@@ -3100,13 +3640,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3145,9 +3678,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/process/execute": {
+        "/workspace/{workspaceId}/toolbox/process/execute": {
             "post": {
-                "description": "Execute command synchronously inside workspace project",
+                "description": "Execute command synchronously inside a workspace",
                 "produces": [
                     "application/json"
                 ],
@@ -3161,13 +3694,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Workspace ID or Name",
                         "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },
@@ -3191,17 +3717,84 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspace/{workspaceId}/{projectId}/toolbox/project-dir": {
+        "/workspace/{workspaceId}/toolbox/process/session": {
             "get": {
-                "description": "Get project directory",
+                "description": "List sessions inside workspace project",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "workspace toolbox"
                 ],
-                "summary": "Get project dir",
-                "operationId": "GetProjectDir",
+                "summary": "List sessions",
+                "operationId": "ListSessions",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/Session"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Create exec session inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Create exec session",
+                "operationId": "CreateSession",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Create session request",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateSessionRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/toolbox/process/session/{sessionId}": {
+            "delete": {
+                "description": "Delete a session inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Delete session",
+                "operationId": "DeleteSession",
                 "parameters": [
                     {
                         "type": "string",
@@ -3212,8 +3805,122 @@ const docTemplate = `{
                     },
                     {
                         "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs": {
+            "get": {
+                "description": "Get logs of a command inside a session inside workspace project\nConnect with websocket to get a stream of the logs",
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get session command logs",
+                "operationId": "GetSessionCommandLogs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Command ID",
+                        "name": "commandId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "command logs",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/toolbox/process/session/{sessionId}/exec": {
+            "post": {
+                "description": "Execute command inside a session inside workspace project",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Execute command in session",
+                "operationId": "SessionExecuteCommand",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Session ID",
+                        "name": "sessionId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Execute command request",
+                        "name": "params",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/SessionExecuteRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SessionExecuteResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/workspace/{workspaceId}/toolbox/workspace-dir": {
+            "get": {
+                "description": "Get workspace directory",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "workspace toolbox"
+                ],
+                "summary": "Get workspace dir",
+                "operationId": "GetWorkspaceDir",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Workspace ID or Name",
+                        "name": "workspaceId",
                         "in": "path",
                         "required": true
                     }
@@ -3222,7 +3929,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ProjectDirResponse"
+                            "$ref": "#/definitions/WorkspaceDirResponse"
                         }
                     }
                 }
@@ -3230,34 +3937,43 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "ApiKey": {
+        "ApiKeyViewDTO": {
             "type": "object",
             "required": [
-                "keyHash",
+                "current",
                 "name",
                 "type"
             ],
             "properties": {
-                "keyHash": {
-                    "type": "string"
+                "current": {
+                    "type": "boolean"
                 },
                 "name": {
-                    "description": "Project or client name",
                     "type": "string"
                 },
                 "type": {
-                    "$ref": "#/definitions/apikey.ApiKeyType"
+                    "$ref": "#/definitions/models.ApiKeyType"
                 }
             }
         },
-        "Build": {
+        "BuildConfig": {
+            "type": "object",
+            "properties": {
+                "cachedBuild": {
+                    "$ref": "#/definitions/CachedBuild"
+                },
+                "devcontainer": {
+                    "$ref": "#/definitions/DevcontainerConfig"
+                }
+            }
+        },
+        "BuildDTO": {
             "type": "object",
             "required": [
                 "containerConfig",
                 "createdAt",
                 "envVars",
                 "id",
-                "prebuildId",
                 "repository",
                 "state",
                 "updatedAt"
@@ -3284,6 +4000,12 @@ const docTemplate = `{
                 "image": {
                     "type": "string"
                 },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
+                },
                 "prebuildId": {
                     "type": "string"
                 },
@@ -3291,24 +4013,13 @@ const docTemplate = `{
                     "$ref": "#/definitions/GitRepository"
                 },
                 "state": {
-                    "$ref": "#/definitions/build.BuildState"
+                    "$ref": "#/definitions/ResourceState"
                 },
                 "updatedAt": {
                     "type": "string"
                 },
                 "user": {
                     "type": "string"
-                }
-            }
-        },
-        "BuildConfig": {
-            "type": "object",
-            "properties": {
-                "cachedBuild": {
-                    "$ref": "#/definitions/CachedBuild"
-                },
-                "devcontainer": {
-                    "$ref": "#/definitions/DevcontainerConfig"
                 }
             }
         },
@@ -3337,6 +4048,24 @@ const docTemplate = `{
                 "CloneTargetBranch",
                 "CloneTargetCommit"
             ]
+        },
+        "Command": {
+            "type": "object",
+            "required": [
+                "command",
+                "id"
+            ],
+            "properties": {
+                "command": {
+                    "type": "string"
+                },
+                "exitCode": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "string"
+                }
+            }
         },
         "CompletionContext": {
             "type": "object",
@@ -3436,7 +4165,7 @@ const docTemplate = `{
             "required": [
                 "branch",
                 "envVars",
-                "projectConfigName"
+                "workspaceTemplateName"
             ],
             "properties": {
                 "branch": {
@@ -3451,7 +4180,7 @@ const docTemplate = `{
                 "prebuildId": {
                     "type": "string"
                 },
-                "projectConfigName": {
+                "workspaceTemplateName": {
                     "type": "string"
                 }
             }
@@ -3482,7 +4211,153 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateProjectConfigDTO": {
+        "CreateRunnerDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateRunnerResultDTO": {
+            "type": "object",
+            "required": [
+                "apiKey",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateSessionRequest": {
+            "type": "object",
+            "required": [
+                "sessionId"
+            ],
+            "properties": {
+                "sessionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateTargetConfigDTO": {
+            "type": "object",
+            "required": [
+                "name",
+                "options",
+                "providerInfo"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "options": {
+                    "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/ProviderInfo"
+                }
+            }
+        },
+        "CreateTargetDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "targetConfigId"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "targetConfigId": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateWorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "envVars",
+                "id",
+                "labels",
+                "name",
+                "source",
+                "targetId"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "source": {
+                    "$ref": "#/definitions/CreateWorkspaceSourceDTO"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "CreateWorkspaceSourceDTO": {
+            "type": "object",
+            "required": [
+                "repository"
+            ],
+            "properties": {
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                }
+            }
+        },
+        "CreateWorkspaceTemplateDTO": {
             "type": "object",
             "required": [
                 "envVars",
@@ -3516,96 +4391,6 @@ const docTemplate = `{
                 }
             }
         },
-        "CreateProjectDTO": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "name",
-                "source"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "source": {
-                    "$ref": "#/definitions/CreateProjectSourceDTO"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
-        "CreateProjectSourceDTO": {
-            "type": "object",
-            "required": [
-                "repository"
-            ],
-            "properties": {
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                }
-            }
-        },
-        "CreateProviderTargetDTO": {
-            "type": "object",
-            "required": [
-                "name",
-                "options",
-                "providerInfo"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "options": {
-                    "type": "string"
-                },
-                "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
-                }
-            }
-        },
-        "CreateWorkspaceDTO": {
-            "type": "object",
-            "required": [
-                "id",
-                "name",
-                "projects",
-                "target"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/CreateProjectDTO"
-                    }
-                },
-                "target": {
-                    "type": "string"
-                }
-            }
-        },
         "DevcontainerConfig": {
             "type": "object",
             "required": [
@@ -3613,6 +4398,21 @@ const docTemplate = `{
             ],
             "properties": {
                 "filePath": {
+                    "type": "string"
+                }
+            }
+        },
+        "EnvironmentVariable": {
+            "type": "object",
+            "required": [
+                "key",
+                "value"
+            ],
+            "properties": {
+                "key": {
+                    "type": "string"
+                },
+                "value": {
                     "type": "string"
                 }
             }
@@ -4097,23 +4897,65 @@ const docTemplate = `{
                 }
             }
         },
-        "InstallProviderRequest": {
+        "Job": {
             "type": "object",
             "required": [
-                "downloadUrls",
-                "name"
+                "action",
+                "createdAt",
+                "id",
+                "resourceId",
+                "resourceType",
+                "state",
+                "updatedAt"
             ],
             "properties": {
-                "downloadUrls": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
+                "action": {
+                    "$ref": "#/definitions/models.JobAction"
                 },
-                "name": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "description": "JSON encoded metadata",
+                    "type": "string"
+                },
+                "resourceId": {
+                    "type": "string"
+                },
+                "resourceType": {
+                    "$ref": "#/definitions/ResourceType"
+                },
+                "runnerId": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/JobState"
+                },
+                "updatedAt": {
                     "type": "string"
                 }
             }
+        },
+        "JobState": {
+            "type": "string",
+            "enum": [
+                "pending",
+                "running",
+                "error",
+                "success"
+            ],
+            "x-enum-varnames": [
+                "JobStatePending",
+                "JobStateRunning",
+                "JobStateError",
+                "JobStateSuccess"
+            ]
         },
         "ListBranchResponse": {
             "type": "object",
@@ -4331,7 +5173,6 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "branch",
-                "commitInterval",
                 "id",
                 "retention",
                 "triggerFiles"
@@ -4362,8 +5203,8 @@ const docTemplate = `{
             "required": [
                 "branch",
                 "id",
-                "projectConfigName",
-                "retention"
+                "retention",
+                "workspaceTemplateName"
             ],
             "properties": {
                 "branch": {
@@ -4375,9 +5216,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "projectConfigName": {
-                    "type": "string"
-                },
                 "retention": {
                     "type": "integer"
                 },
@@ -4386,177 +5224,25 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "workspaceTemplateName": {
+                    "type": "string"
                 }
             }
         },
-        "ProfileData": {
+        "ProviderDTO": {
             "type": "object",
             "required": [
-                "envVars"
-            ],
-            "properties": {
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "Project": {
-            "type": "object",
-            "required": [
-                "envVars",
-                "image",
-                "name",
-                "repository",
-                "target",
-                "user",
-                "workspaceId"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "repository": {
-                    "$ref": "#/definitions/GitRepository"
-                },
-                "state": {
-                    "$ref": "#/definitions/ProjectState"
-                },
-                "target": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                },
-                "workspaceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProjectConfig": {
-            "type": "object",
-            "required": [
-                "default",
-                "envVars",
-                "image",
-                "name",
-                "repositoryUrl",
-                "user"
-            ],
-            "properties": {
-                "buildConfig": {
-                    "$ref": "#/definitions/BuildConfig"
-                },
-                "default": {
-                    "type": "boolean"
-                },
-                "envVars": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
-                    }
-                },
-                "gitProviderConfigId": {
-                    "type": "string"
-                },
-                "image": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "prebuilds": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/PrebuildConfig"
-                    }
-                },
-                "repositoryUrl": {
-                    "type": "string"
-                },
-                "user": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProjectDirResponse": {
-            "type": "object",
-            "properties": {
-                "dir": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProjectInfo": {
-            "type": "object",
-            "required": [
-                "created",
-                "isRunning",
-                "name",
-                "workspaceId"
-            ],
-            "properties": {
-                "created": {
-                    "type": "string"
-                },
-                "isRunning": {
-                    "type": "boolean"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "providerMetadata": {
-                    "type": "string"
-                },
-                "workspaceId": {
-                    "type": "string"
-                }
-            }
-        },
-        "ProjectState": {
-            "type": "object",
-            "required": [
-                "updatedAt",
-                "uptime"
-            ],
-            "properties": {
-                "gitStatus": {
-                    "$ref": "#/definitions/GitStatus"
-                },
-                "updatedAt": {
-                    "type": "string"
-                },
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
-        "Provider": {
-            "type": "object",
-            "required": [
+                "latest",
                 "name",
                 "version"
             ],
             "properties": {
                 "label": {
                     "type": "string"
+                },
+                "latest": {
+                    "type": "boolean"
                 },
                 "name": {
                     "type": "string"
@@ -4566,34 +5252,37 @@ const docTemplate = `{
                 }
             }
         },
-        "ProviderTarget": {
+        "ProviderInfo": {
             "type": "object",
             "required": [
-                "isDefault",
                 "name",
-                "options",
-                "providerInfo"
+                "runnerId",
+                "runnerName",
+                "targetConfigManifest",
+                "version"
             ],
             "properties": {
-                "isDefault": {
+                "agentlessTarget": {
                     "type": "boolean"
+                },
+                "label": {
+                    "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "options": {
-                    "description": "JSON encoded map of options",
+                "runnerId": {
                     "type": "string"
                 },
-                "providerInfo": {
-                    "$ref": "#/definitions/provider.ProviderInfo"
+                "runnerName": {
+                    "type": "string"
+                },
+                "targetConfigManifest": {
+                    "$ref": "#/definitions/TargetConfigManifest"
+                },
+                "version": {
+                    "type": "string"
                 }
-            }
-        },
-        "ProviderTargetManifest": {
-            "type": "object",
-            "additionalProperties": {
-                "$ref": "#/definitions/provider.ProviderTargetProperty"
             }
         },
         "ReplaceRequest": {
@@ -4643,6 +5332,90 @@ const docTemplate = `{
                 }
             }
         },
+        "ResourceState": {
+            "type": "object",
+            "required": [
+                "name",
+                "updatedAt"
+            ],
+            "properties": {
+                "error": {
+                    "type": "string"
+                },
+                "name": {
+                    "$ref": "#/definitions/models.ResourceStateName"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "ResourceType": {
+            "type": "string",
+            "enum": [
+                "workspace",
+                "target",
+                "build",
+                "runner"
+            ],
+            "x-enum-varnames": [
+                "ResourceTypeWorkspace",
+                "ResourceTypeTarget",
+                "ResourceTypeBuild",
+                "ResourceTypeRunner"
+            ]
+        },
+        "RunnerDTO": {
+            "type": "object",
+            "required": [
+                "id",
+                "name",
+                "state"
+            ],
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/RunnerMetadata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/ResourceState"
+                }
+            }
+        },
+        "RunnerMetadata": {
+            "type": "object",
+            "required": [
+                "providers",
+                "runnerId",
+                "updatedAt",
+                "uptime"
+            ],
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProviderInfo"
+                    }
+                },
+                "runnerId": {
+                    "type": "string"
+                },
+                "runningJobs": {
+                    "type": "integer"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
         "Sample": {
             "type": "object",
             "required": [
@@ -4683,14 +5456,13 @@ const docTemplate = `{
                 "binariesPath",
                 "builderImage",
                 "builderRegistryServer",
-                "defaultProjectImage",
-                "defaultProjectUser",
+                "defaultWorkspaceImage",
+                "defaultWorkspaceUser",
                 "headscalePort",
                 "id",
                 "localBuilderRegistryImage",
                 "localBuilderRegistryPort",
                 "logFile",
-                "providersDir",
                 "registryUrl",
                 "serverDownloadUrl"
             ],
@@ -4710,10 +5482,10 @@ const docTemplate = `{
                 "builderRegistryServer": {
                     "type": "string"
                 },
-                "defaultProjectImage": {
+                "defaultWorkspaceImage": {
                     "type": "string"
                 },
-                "defaultProjectUser": {
+                "defaultWorkspaceUser": {
                     "type": "string"
                 },
                 "frps": {
@@ -4731,11 +5503,11 @@ const docTemplate = `{
                 "localBuilderRegistryPort": {
                     "type": "integer"
                 },
+                "localRunnerDisabled": {
+                    "type": "boolean"
+                },
                 "logFile": {
                     "$ref": "#/definitions/LogFileConfig"
-                },
-                "providersDir": {
-                    "type": "string"
                 },
                 "registryUrl": {
                     "type": "string"
@@ -4744,6 +5516,52 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "serverDownloadUrl": {
+                    "type": "string"
+                }
+            }
+        },
+        "Session": {
+            "type": "object",
+            "required": [
+                "commands",
+                "sessionId"
+            ],
+            "properties": {
+                "commands": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Command"
+                    }
+                },
+                "sessionId": {
+                    "type": "string"
+                }
+            }
+        },
+        "SessionExecuteRequest": {
+            "type": "object",
+            "required": [
+                "command"
+            ],
+            "properties": {
+                "async": {
+                    "type": "boolean"
+                },
+                "command": {
+                    "type": "string"
+                }
+            }
+        },
+        "SessionExecuteResponse": {
+            "type": "object",
+            "properties": {
+                "cmdId": {
+                    "type": "string"
+                },
+                "exitCode": {
+                    "type": "integer"
+                },
+                "output": {
                     "type": "string"
                 }
             }
@@ -4781,20 +5599,6 @@ const docTemplate = `{
                 }
             }
         },
-        "SetProjectState": {
-            "type": "object",
-            "required": [
-                "uptime"
-            ],
-            "properties": {
-                "gitStatus": {
-                    "$ref": "#/definitions/GitStatus"
-                },
-                "uptime": {
-                    "type": "integer"
-                }
-            }
-        },
         "SigningMethod": {
             "type": "string",
             "enum": [
@@ -4829,137 +5633,94 @@ const docTemplate = `{
                 "UpdatedButUnmerged"
             ]
         },
-        "Workspace": {
+        "Target": {
             "type": "object",
             "required": [
+                "default",
+                "envVars",
                 "id",
                 "name",
-                "projects",
-                "target"
+                "targetConfig",
+                "targetConfigId",
+                "workspaces"
             ],
             "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
                 "id": {
                     "type": "string"
                 },
-                "name": {
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
                     "type": "string"
                 },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Project"
-                    }
-                },
-                "target": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceDTO": {
-            "type": "object",
-            "required": [
-                "id",
-                "name",
-                "projects",
-                "target"
-            ],
-            "properties": {
-                "id": {
-                    "type": "string"
-                },
-                "info": {
-                    "$ref": "#/definitions/WorkspaceInfo"
+                "metadata": {
+                    "$ref": "#/definitions/TargetMetadata"
                 },
                 "name": {
                     "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/Project"
-                    }
-                },
-                "target": {
-                    "type": "string"
-                }
-            }
-        },
-        "WorkspaceInfo": {
-            "type": "object",
-            "required": [
-                "name",
-                "projects"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "projects": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/ProjectInfo"
-                    }
                 },
                 "providerMetadata": {
                     "type": "string"
+                },
+                "targetConfig": {
+                    "$ref": "#/definitions/TargetConfig"
+                },
+                "targetConfigId": {
+                    "type": "string"
+                },
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
                 }
             }
         },
-        "apikey.ApiKeyType": {
-            "type": "string",
-            "enum": [
-                "client",
-                "project",
-                "workspace"
-            ],
-            "x-enum-varnames": [
-                "ApiKeyTypeClient",
-                "ApiKeyTypeProject",
-                "ApiKeyTypeWorkspace"
-            ]
-        },
-        "build.BuildState": {
-            "type": "string",
-            "enum": [
-                "pending-run",
-                "running",
-                "error",
-                "success",
-                "published",
-                "pending-delete",
-                "pending-forced-delete",
-                "deleting"
-            ],
-            "x-enum-varnames": [
-                "BuildStatePendingRun",
-                "BuildStateRunning",
-                "BuildStateError",
-                "BuildStateSuccess",
-                "BuildStatePublished",
-                "BuildStatePendingDelete",
-                "BuildStatePendingForcedDelete",
-                "BuildStateDeleting"
-            ]
-        },
-        "provider.ProviderInfo": {
+        "TargetConfig": {
             "type": "object",
             "required": [
+                "deleted",
+                "id",
                 "name",
-                "version"
+                "options",
+                "providerInfo"
             ],
             "properties": {
-                "label": {
+                "deleted": {
+                    "type": "boolean"
+                },
+                "id": {
                     "type": "string"
                 },
                 "name": {
                     "type": "string"
                 },
-                "version": {
+                "options": {
+                    "description": "JSON encoded map of options",
                     "type": "string"
+                },
+                "providerInfo": {
+                    "$ref": "#/definitions/ProviderInfo"
                 }
             }
         },
-        "provider.ProviderTargetProperty": {
+        "TargetConfigManifest": {
+            "type": "object",
+            "additionalProperties": {
+                "$ref": "#/definitions/TargetConfigProperty"
+            }
+        },
+        "TargetConfigProperty": {
             "type": "object",
             "properties": {
                 "defaultValue": {
@@ -4971,14 +5732,14 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "disabledPredicate": {
-                    "description": "A regex string matched with the name of the target to determine if the property should be disabled\nIf the regex matches the target name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
+                    "description": "A regex string matched with the name of the target config to determine if the property should be disabled\nIf the regex matches the target config name, the property will be disabled\nE.g. \"^local$\" will disable the property for the local target",
                     "type": "string"
                 },
                 "inputMasked": {
                     "type": "boolean"
                 },
                 "options": {
-                    "description": "Options is only used if the Type is ProviderTargetPropertyTypeOption",
+                    "description": "Options is only used if the Type is TargetConfigPropertyTypeOption",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -4992,11 +5753,485 @@ const docTemplate = `{
                     }
                 },
                 "type": {
-                    "$ref": "#/definitions/provider.ProviderTargetPropertyType"
+                    "$ref": "#/definitions/models.TargetConfigPropertyType"
                 }
             }
         },
-        "provider.ProviderTargetPropertyType": {
+        "TargetDTO": {
+            "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "id",
+                "name",
+                "state",
+                "targetConfig",
+                "targetConfigId",
+                "workspaces"
+            ],
+            "properties": {
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "id": {
+                    "type": "string"
+                },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/TargetMetadata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/ResourceState"
+                },
+                "targetConfig": {
+                    "$ref": "#/definitions/TargetConfig"
+                },
+                "targetConfigId": {
+                    "type": "string"
+                },
+                "workspaces": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Workspace"
+                    }
+                }
+            }
+        },
+        "TargetMetadata": {
+            "type": "object",
+            "required": [
+                "targetId",
+                "updatedAt",
+                "uptime"
+            ],
+            "properties": {
+                "targetId": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateJobState": {
+            "type": "object",
+            "required": [
+                "state"
+            ],
+            "properties": {
+                "errorMessage": {
+                    "type": "string"
+                },
+                "state": {
+                    "$ref": "#/definitions/JobState"
+                }
+            }
+        },
+        "UpdateRunnerMetadataDTO": {
+            "type": "object",
+            "required": [
+                "providers",
+                "uptime"
+            ],
+            "properties": {
+                "providers": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ProviderInfo"
+                    }
+                },
+                "runningJobs": {
+                    "type": "integer"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateTargetMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateTargetProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "UpdateWorkspaceMetadataDTO": {
+            "type": "object",
+            "required": [
+                "uptime"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "uptime": {
+                    "type": "integer"
+                }
+            }
+        },
+        "UpdateWorkspaceProviderMetadataDTO": {
+            "type": "object",
+            "required": [
+                "metadata"
+            ],
+            "properties": {
+                "metadata": {
+                    "type": "string"
+                }
+            }
+        },
+        "Workspace": {
+            "type": "object",
+            "required": [
+                "apiKey",
+                "envVars",
+                "id",
+                "image",
+                "labels",
+                "name",
+                "repository",
+                "target",
+                "targetId",
+                "user"
+            ],
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/WorkspaceMetadata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "target": {
+                    "$ref": "#/definitions/Target"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDTO": {
+            "type": "object",
+            "required": [
+                "apiKey",
+                "envVars",
+                "id",
+                "image",
+                "labels",
+                "name",
+                "repository",
+                "state",
+                "target",
+                "targetId",
+                "user"
+            ],
+            "properties": {
+                "apiKey": {
+                    "type": "string"
+                },
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "lastJob": {
+                    "$ref": "#/definitions/Job"
+                },
+                "lastJobId": {
+                    "type": "string"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/WorkspaceMetadata"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "providerMetadata": {
+                    "type": "string"
+                },
+                "repository": {
+                    "$ref": "#/definitions/GitRepository"
+                },
+                "state": {
+                    "$ref": "#/definitions/ResourceState"
+                },
+                "target": {
+                    "$ref": "#/definitions/Target"
+                },
+                "targetId": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceDirResponse": {
+            "type": "object",
+            "properties": {
+                "dir": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceMetadata": {
+            "type": "object",
+            "required": [
+                "updatedAt",
+                "uptime",
+                "workspaceId"
+            ],
+            "properties": {
+                "gitStatus": {
+                    "$ref": "#/definitions/GitStatus"
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "uptime": {
+                    "type": "integer"
+                },
+                "workspaceId": {
+                    "type": "string"
+                }
+            }
+        },
+        "WorkspaceTemplate": {
+            "type": "object",
+            "required": [
+                "default",
+                "envVars",
+                "image",
+                "labels",
+                "name",
+                "repositoryUrl",
+                "user"
+            ],
+            "properties": {
+                "buildConfig": {
+                    "$ref": "#/definitions/BuildConfig"
+                },
+                "default": {
+                    "type": "boolean"
+                },
+                "envVars": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "gitProviderConfigId": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "labels": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "prebuilds": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PrebuildConfig"
+                    }
+                },
+                "repositoryUrl": {
+                    "type": "string"
+                },
+                "user": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.ApiKeyType": {
+            "type": "string",
+            "enum": [
+                "client",
+                "workspace",
+                "target",
+                "runner"
+            ],
+            "x-enum-varnames": [
+                "ApiKeyTypeClient",
+                "ApiKeyTypeWorkspace",
+                "ApiKeyTypeTarget",
+                "ApiKeyTypeRunner"
+            ]
+        },
+        "models.JobAction": {
+            "type": "string",
+            "enum": [
+                "create",
+                "start",
+                "stop",
+                "restart",
+                "delete",
+                "force-delete",
+                "run",
+                "install-provider",
+                "uninstall-provider",
+                "update-provider"
+            ],
+            "x-enum-varnames": [
+                "JobActionCreate",
+                "JobActionStart",
+                "JobActionStop",
+                "JobActionRestart",
+                "JobActionDelete",
+                "JobActionForceDelete",
+                "JobActionRun",
+                "JobActionInstallProvider",
+                "JobActionUninstallProvider",
+                "JobActionUpdateProvider"
+            ]
+        },
+        "models.ResourceStateName": {
+            "type": "string",
+            "enum": [
+                "undefined",
+                "pending-run",
+                "running",
+                "run-successful",
+                "pending-create",
+                "creating",
+                "pending-start",
+                "starting",
+                "started",
+                "pending-stop",
+                "stopping",
+                "stopped",
+                "pending-restart",
+                "error",
+                "unresponsive",
+                "pending-delete",
+                "pending-forced-delete",
+                "deleting",
+                "deleted"
+            ],
+            "x-enum-varnames": [
+                "ResourceStateNameUndefined",
+                "ResourceStateNamePendingRun",
+                "ResourceStateNameRunning",
+                "ResourceStateNameRunSuccessful",
+                "ResourceStateNamePendingCreate",
+                "ResourceStateNameCreating",
+                "ResourceStateNamePendingStart",
+                "ResourceStateNameStarting",
+                "ResourceStateNameStarted",
+                "ResourceStateNamePendingStop",
+                "ResourceStateNameStopping",
+                "ResourceStateNameStopped",
+                "ResourceStateNamePendingRestart",
+                "ResourceStateNameError",
+                "ResourceStateNameUnresponsive",
+                "ResourceStateNamePendingDelete",
+                "ResourceStateNamePendingForcedDelete",
+                "ResourceStateNameDeleting",
+                "ResourceStateNameDeleted"
+            ]
+        },
+        "models.TargetConfigPropertyType": {
             "type": "string",
             "enum": [
                 "string",
@@ -5007,12 +6242,12 @@ const docTemplate = `{
                 "file-path"
             ],
             "x-enum-varnames": [
-                "ProviderTargetPropertyTypeString",
-                "ProviderTargetPropertyTypeOption",
-                "ProviderTargetPropertyTypeBoolean",
-                "ProviderTargetPropertyTypeInt",
-                "ProviderTargetPropertyTypeFloat",
-                "ProviderTargetPropertyTypeFilePath"
+                "TargetConfigPropertyTypeString",
+                "TargetConfigPropertyTypeOption",
+                "TargetConfigPropertyTypeBoolean",
+                "TargetConfigPropertyTypeInt",
+                "TargetConfigPropertyTypeFloat",
+                "TargetConfigPropertyTypeFilePath"
             ]
         }
     },

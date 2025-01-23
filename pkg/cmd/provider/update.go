@@ -8,28 +8,47 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/apiclient"
+	cmd_common "github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/common"
-	"github.com/daytonaio/daytona/pkg/provider/manager"
 	"github.com/daytonaio/daytona/pkg/views/provider"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var allFlag bool
 
-var providerUpdateCmd = &cobra.Command{
+var updateCmd = &cobra.Command{
 	Use:     "update",
 	Short:   "Update provider",
 	Args:    cobra.NoArgs,
-	Aliases: []string{"up"},
+	Aliases: cmd_common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var selectedRunnerId string
+
 		ctx := context.Background()
 
 		apiClient, err := apiclient_util.GetApiClient(nil)
 		if err != nil {
 			return err
+		}
+
+		if len(args) == 0 {
+			selectedRunner, err := cmd_common.GetRunnerFlow(apiClient, "Manage Providers")
+			if err != nil {
+				if common.IsCtrlCAbort(err) {
+					return nil
+				} else {
+					return err
+				}
+			}
+
+			if selectedRunner == nil {
+				return nil
+			}
+
+			selectedRunnerId = selectedRunner.Id
+		} else {
+			selectedRunnerId = args[0]
 		}
 
 		providerList, res, err := apiClient.ProviderAPI.ListProviders(ctx).Execute()
@@ -42,24 +61,12 @@ var providerUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		serverConfig, res, err := apiClient.ServerAPI.GetConfigExecute(apiclient.ApiGetConfigRequest{})
-		if err != nil {
-			return apiclient_util.HandleErrorResponse(res, err)
-		}
-
-		providerManager := manager.NewProviderManager(manager.ProviderManagerConfig{RegistryUrl: serverConfig.RegistryUrl})
-
-		providersManifest, err := providerManager.GetProvidersManifest()
-		if err != nil {
-			return err
-		}
-
 		if allFlag {
 			for _, provider := range providerList {
 				fmt.Printf("Updating provider %s\n", provider.Name)
-				err := updateProvider(provider.Name, providersManifest, apiClient)
+				res, err := apiClient.ProviderAPI.UpdateProvider(context.Background(), selectedRunnerId, provider.Name).Execute()
 				if err != nil {
-					log.Error(fmt.Sprintf("Failed to update provider %s: %s", provider.Name, err))
+					return apiclient_util.HandleErrorResponse(res, err)
 				} else {
 					fmt.Printf("Provider %s has been successfully updated\n", provider.Name)
 				}
@@ -80,41 +87,16 @@ var providerUpdateCmd = &cobra.Command{
 			return nil
 		}
 
-		err = updateProvider(providerToUpdate.Name, providersManifest, apiClient)
+		res, err = apiClient.ProviderAPI.UpdateProvider(context.Background(), selectedRunnerId, providerToUpdate.Name).ProviderVersion(providerToUpdate.Version).Execute()
 		if err != nil {
-			return err
+			return apiclient_util.HandleErrorResponse(res, err)
 		}
 
-		fmt.Printf("Provider %s has been successfully updated\n", providerToUpdate.Name)
+		fmt.Printf("Provider %s update is in progress\n", providerToUpdate.Name)
 		return nil
 	},
 }
 
-func updateProvider(providerName string, providersManifest *manager.ProvidersManifest, apiClient *apiclient.APIClient) error {
-	providerManifest, ok := (*providersManifest)[providerName]
-	if !ok {
-		return fmt.Errorf("provider %s not found in manifest", providerName)
-	}
-
-	version, ok := providerManifest.Versions["latest"]
-	if !ok {
-		_, latest := providerManifest.FindLatestVersion()
-		version = *latest
-	}
-
-	downloadUrls := ConvertOSToStringMap(version.DownloadUrls)
-
-	res, err := apiClient.ProviderAPI.InstallProviderExecute(apiclient.ApiInstallProviderRequest{}.Provider(apiclient.InstallProviderRequest{
-		Name:         providerName,
-		DownloadUrls: downloadUrls,
-	}))
-	if err != nil {
-		return apiclient_util.HandleErrorResponse(res, err)
-	}
-
-	return nil
-}
-
 func init() {
-	providerUpdateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
+	updateCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Update all providers")
 }

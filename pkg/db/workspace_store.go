@@ -4,55 +4,59 @@
 package db
 
 import (
-	"gorm.io/gorm"
+	"context"
 
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/workspace"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type WorkspaceStore struct {
-	db *gorm.DB
+	IStore
 }
 
-func NewWorkspaceStore(db *gorm.DB) (*WorkspaceStore, error) {
-	err := db.AutoMigrate(&WorkspaceDTO{})
+func NewWorkspaceStore(store IStore) (stores.WorkspaceStore, error) {
+	err := store.AutoMigrate(&models.Workspace{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &WorkspaceStore{db: db}, nil
+	return &WorkspaceStore{store}, nil
 }
 
-func (w *WorkspaceStore) List() ([]*workspace.Workspace, error) {
-	workspaceDTOs := []WorkspaceDTO{}
-	tx := w.db.Find(&workspaceDTOs)
+func (s *WorkspaceStore) List(ctx context.Context) ([]*models.Workspace, error) {
+	tx := s.GetTransaction(ctx)
+
+	workspaces := []*models.Workspace{}
+	tx = preloadWorkspaceEntities(tx).Find(&workspaces)
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	workspaces := []*workspace.Workspace{}
-	for _, workspaceDTO := range workspaceDTOs {
-		workspaces = append(workspaces, ToWorkspace(workspaceDTO))
 	}
 
 	return workspaces, nil
 }
 
-func (w *WorkspaceStore) Find(idOrName string) (*workspace.Workspace, error) {
-	workspaceDTO := WorkspaceDTO{}
-	tx := w.db.Where("id = ? OR name = ?", idOrName, idOrName).First(&workspaceDTO)
+func (s *WorkspaceStore) Find(ctx context.Context, idOrName string) (*models.Workspace, error) {
+	tx := s.GetTransaction(ctx)
+
+	workspace := &models.Workspace{}
+	tx = preloadWorkspaceEntities(tx).Where("id = ? OR name = ?", idOrName, idOrName).First(workspace)
 	if tx.Error != nil {
 		if IsRecordNotFound(tx.Error) {
-			return nil, workspace.ErrWorkspaceNotFound
+			return nil, stores.ErrWorkspaceNotFound
 		}
 		return nil, tx.Error
 	}
 
-	return ToWorkspace(workspaceDTO), nil
+	return workspace, nil
 }
 
-func (w *WorkspaceStore) Save(workspace *workspace.Workspace) error {
-	tx := w.db.Save(ToWorkspaceDTO(workspace))
+func (s *WorkspaceStore) Save(ctx context.Context, workspace *models.Workspace) error {
+	tx := s.GetTransaction(ctx)
+
+	tx = tx.Save(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -60,14 +64,20 @@ func (w *WorkspaceStore) Save(workspace *workspace.Workspace) error {
 	return nil
 }
 
-func (w *WorkspaceStore) Delete(ws *workspace.Workspace) error {
-	tx := w.db.Delete(ToWorkspaceDTO(ws))
+func (s *WorkspaceStore) Delete(ctx context.Context, workspace *models.Workspace) error {
+	tx := s.GetTransaction(ctx)
+
+	tx = tx.Delete(workspace)
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return workspace.ErrWorkspaceNotFound
+		return stores.ErrWorkspaceNotFound
 	}
 
 	return nil
+}
+
+func preloadWorkspaceEntities(tx *gorm.DB) *gorm.DB {
+	return tx.Preload(clause.Associations).Preload("Target.TargetConfig").Preload("LastJob")
 }

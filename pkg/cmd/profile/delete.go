@@ -7,17 +7,18 @@ import (
 	"errors"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views/profile"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var profileDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "Delete profile [PROFILE_NAME]",
+var deleteCmd = &cobra.Command{
+	Use:     "delete [PROFILE_NAME]",
+	Short:   "Delete a profile",
 	Args:    cobra.RangeArgs(0, 1),
-	Aliases: []string{"remove", "rm"},
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		c, err := config.GetConfig()
 		if err != nil {

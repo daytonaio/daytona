@@ -11,7 +11,8 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/daytonaio/daytona/cmd/daytona/config"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/logs"
 	"github.com/google/uuid"
 
 	log "github.com/sirupsen/logrus"
@@ -23,21 +24,13 @@ const defaultSamplesIndexUrl = "https://raw.githubusercontent.com/daytonaio/dayt
 const defaultHeadscalePort = 3987
 const defaultApiPort = 3986
 const defaultBuilderImage = "daytonaio/workspace-project:latest"
-const defaultProjectImage = "daytonaio/workspace-project:latest"
-const defaultProjectUser = "daytona"
+const defaultWorkspaceImage = "daytonaio/workspace-project:latest"
+const defaultWorkspaceUser = "daytona"
 
 const defaultLocalBuilderRegistryPort = 3988
 const defaultLocalBuilderRegistryImage = "registry:2.8.3"
 const defaultBuilderRegistryServer = "local"
 const defaultBuildImageNamespace = ""
-
-var defaultLogFileConfig = LogFileConfig{
-	MaxSize:    100, // megabytes
-	MaxBackups: 7,
-	MaxAge:     15, // days
-	LocalTime:  true,
-	Compress:   true,
-}
 
 var us_defaultFrpsConfig = FRPSConfig{
 	Domain:   "try-us.daytona.app",
@@ -94,100 +87,32 @@ func getDefaultFRPSConfig() *FRPSConfig {
 	}
 }
 
-func getDefaultLogFileConfig() *LogFileConfig {
-	logFilePath, err := getDefaultLogFilePath()
-	if err != nil {
-		log.Error("failed to get default log file path")
-	}
-
-	logFileConfig := LogFileConfig{
-		Path:       logFilePath,
-		MaxSize:    defaultLogFileConfig.MaxSize,
-		MaxBackups: defaultLogFileConfig.MaxBackups,
-		MaxAge:     defaultLogFileConfig.MaxAge,
-		LocalTime:  defaultLogFileConfig.LocalTime,
-		Compress:   defaultLogFileConfig.Compress,
-	}
-
-	logFileMaxSize := os.Getenv("DEFAULT_LOG_FILE_MAX_SIZE")
-	if logFileMaxSize != "" {
-		value, err := strconv.Atoi(logFileMaxSize)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max size.", err))
-		} else {
-			logFileConfig.MaxSize = value
-		}
-	}
-
-	logFileMaxBackups := os.Getenv("DEFAULT_LOG_FILE_MAX_BACKUPS")
-	if logFileMaxBackups != "" {
-		value, err := strconv.Atoi(logFileMaxBackups)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max backups.", err))
-		} else {
-			logFileConfig.MaxBackups = value
-		}
-	}
-
-	logFileMaxAge := os.Getenv("DEFAULT_LOG_FILE_MAX_AGE")
-	if logFileMaxAge != "" {
-		value, err := strconv.Atoi(logFileMaxAge)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file max age.", err))
-		} else {
-			logFileConfig.MaxAge = value
-		}
-	}
-
-	logFileLocalTime := os.Getenv("DEFAULT_LOG_FILE_LOCAL_TIME")
-	if logFileLocalTime != "" {
-		value, err := strconv.ParseBool(logFileLocalTime)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file local time.", err))
-		} else {
-			logFileConfig.LocalTime = value
-		}
-	}
-
-	logFileCompress := os.Getenv("DEFAULT_LOG_FILE_COMPRESS")
-	if logFileCompress != "" {
-		value, err := strconv.ParseBool(logFileCompress)
-		if err != nil {
-			log.Error(fmt.Printf("%s. Using default log file compress.", err))
-		} else {
-			logFileConfig.Compress = value
-		}
-	}
-
-	return &logFileConfig
-}
-
 func getDefaultConfig() (*Config, error) {
-	providersDir, err := getDefaultProvidersDir()
-	if err != nil {
-		return nil, errors.New("failed to get default providers dir")
-	}
-
 	binariesPath, err := getDefaultBinariesPath()
 	if err != nil {
 		return nil, errors.New("failed to get default binaries path")
 	}
 
+	logFilePath, err := getDefaultLogFilePath()
+	if err != nil {
+		log.Error("failed to get default log file path")
+	}
+
 	c := Config{
 		Id:                        uuid.NewString(),
 		RegistryUrl:               defaultRegistryUrl,
-		ProvidersDir:              providersDir,
 		ServerDownloadUrl:         defaultServerDownloadUrl,
 		ApiPort:                   defaultApiPort,
 		HeadscalePort:             defaultHeadscalePort,
 		BinariesPath:              binariesPath,
 		Frps:                      getDefaultFRPSConfig(),
-		LogFile:                   getDefaultLogFileConfig(),
-		DefaultProjectImage:       defaultProjectImage,
-		DefaultProjectUser:        defaultProjectUser,
+		LogFile:                   logs.GetDefaultLogFileConfig(logFilePath),
+		DefaultWorkspaceImage:     defaultWorkspaceImage,
+		DefaultWorkspaceUser:      defaultWorkspaceUser,
 		BuilderImage:              defaultBuilderImage,
 		LocalBuilderRegistryPort:  defaultLocalBuilderRegistryPort,
 		LocalBuilderRegistryImage: defaultLocalBuilderRegistryImage,
+		LocalRunnerDisabled:       util.Pointer(false),
 		BuilderRegistryServer:     defaultBuilderRegistryServer,
 		BuildImageNamespace:       defaultBuildImageNamespace,
 		SamplesIndexUrl:           defaultSamplesIndexUrl,
@@ -198,9 +123,6 @@ func getDefaultConfig() (*Config, error) {
 	}
 	if os.Getenv("DEFAULT_SERVER_DOWNLOAD_URL") != "" {
 		c.ServerDownloadUrl = os.Getenv("DEFAULT_SERVER_DOWNLOAD_URL")
-	}
-	if os.Getenv("DEFAULT_PROVIDERS_DIR") != "" {
-		c.ProvidersDir = os.Getenv("DEFAULT_PROVIDERS_DIR")
 	}
 	if os.Getenv("DEFAULT_BINARIES_PATH") != "" {
 		c.BinariesPath = os.Getenv("DEFAULT_BINARIES_PATH")
@@ -235,15 +157,6 @@ func parsePort(port string) (uint32, error) {
 	}
 
 	return uint32(p), nil
-}
-
-func getDefaultProvidersDir() (string, error) {
-	configDir, err := config.GetConfigDir()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(configDir, "providers"), nil
 }
 
 func getDefaultLogFilePath() (string, error) {

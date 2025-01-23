@@ -5,31 +5,32 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/pkg/cmd/bootstrap"
 	server_cmd "github.com/daytonaio/daytona/pkg/cmd/server"
+	"github.com/daytonaio/daytona/pkg/cmd/workspace/create"
 	"github.com/daytonaio/daytona/pkg/posthogservice"
 	"github.com/daytonaio/daytona/pkg/server"
+	"github.com/daytonaio/daytona/pkg/services"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
 	view "github.com/daytonaio/daytona/pkg/views/purge"
-	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
-var yesFlag bool
 var forceFlag bool
 
 var purgeCmd = &cobra.Command{
 	Use:   "purge",
 	Short: "Purges all Daytona data from the current device",
-	Long:  "Purges all Daytona data from the current device - including all workspaces, configuration files, and SSH files. This command is irreversible.",
+	Long:  "Purges all Daytona data from the current device - including all local runner providers, configuration files and SSH files. This command is irreversible.",
 	Args:  cobra.NoArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		var confirmCheck bool
@@ -51,13 +52,8 @@ var purgeCmd = &cobra.Command{
 			return err
 		}
 
-		buildRunnerConfig, err := build.GetConfig()
-		if err != nil {
-			return err
-		}
-
 		if c.ActiveProfileId != "default" {
-			if !yesFlag {
+			if !create.YesFlag {
 				view.DefaultProfileNoticePrompt(&defaultProfileNoticeConfirm)
 				if !defaultProfileNoticeConfirm {
 					fmt.Println("Operation cancelled.")
@@ -90,7 +86,7 @@ var purgeCmd = &cobra.Command{
 			}
 		}
 
-		if !yesFlag {
+		if !create.YesFlag {
 			view.ConfirmPrompt(&confirmCheck)
 			if !confirmCheck {
 				fmt.Println("Operation cancelled.")
@@ -102,16 +98,12 @@ var purgeCmd = &cobra.Command{
 			ApiKey:   internal.PosthogApiKey,
 			Endpoint: internal.PosthogEndpoint,
 			Version:  internal.Version,
+			Source:   telemetry.CLI_SOURCE,
 		})
 
 		defer telemetryService.Close()
 
-		fmt.Println("Purging the server")
-		server, err := server_cmd.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)
-		if err != nil {
-			return err
-		}
-		buildRunner, err := server_cmd.GetBuildRunner(serverConfig, buildRunnerConfig, telemetryService)
+		server, err := bootstrap.GetInstance(serverConfig, serverConfigDir, internal.Version, telemetryService)
 		if err != nil {
 			return err
 		}
@@ -120,71 +112,51 @@ var purgeCmd = &cobra.Command{
 		ctx = context.WithValue(ctx, telemetry.CLIENT_ID_CONTEXT_KEY, config.GetClientId())
 		ctx = context.WithValue(ctx, telemetry.ENABLED_CONTEXT_KEY, c.TelemetryEnabled)
 
-		errCh := make(chan error)
-
-		// Starting the build runner so it can be used to delete builds
-		err = buildRunner.Start()
+		// Get all targets, workspaces and builds to prompt user for resource purge
+		targets, err := server.TargetService.List(ctx, nil, services.TargetRetrievalParams{})
 		if err != nil {
 			if !forceFlag {
 				return err
+			} else {
+				fmt.Printf("Failed to get targets: %v\n", err)
 			}
 		}
 
-		go func() {
-			err := <-errCh
+		workspaces, err := server.WorkspaceService.List(ctx, services.WorkspaceRetrievalParams{})
+		if err != nil {
+			if !forceFlag {
+				return err
+			} else {
+				fmt.Printf("Failed to get workspaces: %v\n", err)
+			}
+		}
+
+		builds, err := server.BuildService.List(ctx, nil)
+		if err != nil {
+			if !forceFlag {
+				return err
+			} else {
+				fmt.Printf("Failed to get builds: %v\n", err)
+			}
+		}
+
+		if len(targets) != 0 || len(workspaces) != 0 || len(builds) != 0 {
+			var continuePurge bool
+			commands := view.PurgeResourcesPrompt(&continuePurge, len(targets), len(workspaces), len(builds))
 			if err != nil {
 				if !forceFlag {
-					buildRunner.Stop()
-					log.Fatal(err)
+					return err
+				} else {
+					fmt.Printf("Failed to prompt for resource purge: %v\n", err)
 				}
 			}
-		}()
-
-		headscaleServerStartedChan := make(chan struct{})
-		headscaleServerErrChan := make(chan error)
-
-		go func() {
-			err := server.TailscaleServer.Start(headscaleServerErrChan)
-			if err != nil {
-				headscaleServerErrChan <- err
-				return
+			if !continuePurge {
+				fmt.Printf("\nOperation cancelled.\nManually delete leftover resources for a complete purge by starting the server and running the following commands:\n\n%s\n", strings.Join(commands, "\n"))
+				return nil
 			}
-			headscaleServerStartedChan <- struct{}{}
-		}()
-
-		localContainerRegistryErrChan := make(chan error)
-
-		go func() {
-			if server.LocalContainerRegistry != nil {
-				localContainerRegistryErrChan <- server.LocalContainerRegistry.Start()
-			} else {
-				localContainerRegistryErrChan <- nil
-			}
-		}()
-
-		select {
-		case <-headscaleServerStartedChan:
-			go func() {
-				headscaleServerErrChan <- server.TailscaleServer.Connect()
-			}()
-		case err := <-headscaleServerErrChan:
-			return err
 		}
 
-		err = <-localContainerRegistryErrChan
-		if err != nil {
-			return err
-		}
-
-		errs := server.Purge(ctx, forceFlag)
-		if len(errs) > 0 {
-			errMessage := ""
-			for _, err := range errs {
-				errMessage += fmt.Sprintf("Failed to purge: %v\n", err)
-			}
-
-			return errors.New(errMessage)
-		}
+		fmt.Println("Purging the server")
 
 		if server.LocalContainerRegistry != nil {
 			fmt.Println("Purging local container registry...")
@@ -205,6 +177,34 @@ var purgeCmd = &cobra.Command{
 				return err
 			} else {
 				fmt.Printf("Failed to purge Tailscale server: %v\n", err)
+			}
+		}
+
+		localRunnerConfig := server_cmd.GetLocalRunnerConfig(filepath.Join(serverConfigDir, "local-runner"), c.TelemetryEnabled, c.Id)
+
+		params := bootstrap.LocalRunnerParams{
+			ServerConfig:     serverConfig,
+			RunnerConfig:     localRunnerConfig,
+			ConfigDir:        serverConfigDir,
+			TelemetryService: telemetryService,
+		}
+
+		localRunner, err := bootstrap.GetLocalRunner(params)
+		if err != nil {
+			return err
+		}
+
+		if localRunner != nil {
+			fmt.Println("Purging providers...")
+			err = localRunner.Purge(ctx)
+			if err != nil {
+				if !forceFlag {
+					return err
+				} else {
+					fmt.Printf("Failed to purge local runner providers: %v\n", err)
+				}
+			} else {
+				fmt.Println("Providers purged.")
 			}
 		}
 
@@ -240,6 +240,6 @@ var purgeCmd = &cobra.Command{
 }
 
 func init() {
-	purgeCmd.Flags().BoolVarP(&yesFlag, "yes", "y", false, "Execute purge without prompt")
-	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all workspaces by force")
+	purgeCmd.Flags().BoolVarP(&create.YesFlag, "yes", "y", false, "Execute purge without a prompt")
+	purgeCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Delete all targets by force")
 }

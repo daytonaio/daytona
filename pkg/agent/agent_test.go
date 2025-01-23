@@ -16,59 +16,65 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent"
 	"github.com/daytonaio/daytona/pkg/agent/config"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
-	"github.com/daytonaio/daytona/pkg/workspace"
-	"github.com/daytonaio/daytona/pkg/workspace/project"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
-var project1 = &project.Project{
+var workspace1 = &models.Workspace{
+	Id:   "123",
 	Name: "test",
 	Repository: &gitprovider.GitRepository{
 		Id:   "123",
 		Url:  "https://github.com/daytonaio/daytona",
 		Name: "daytona",
 	},
-	WorkspaceId: "123",
-	Target:      "local",
-	State: &project.ProjectState{
-		UpdatedAt: "123",
+	TargetId: "123",
+	Metadata: &models.WorkspaceMetadata{
 		Uptime:    148,
 		GitStatus: gitStatus1,
 	},
 }
 
-var workspace1 = &workspace.Workspace{
-	Id:     "123",
-	Name:   "test",
-	Target: "local",
-	Projects: []*project.Project{
-		project1,
+var targetConfig1 = &models.TargetConfig{
+	Name: "test",
+	ProviderInfo: models.ProviderInfo{
+		Name:    "test-provider",
+		Version: "test",
 	},
+	Options: "test-options",
+	Deleted: false,
 }
 
-var gitStatus1 = &project.GitStatus{
+var target1 = &models.Target{
+	Id:             "123",
+	Name:           "test",
+	TargetConfigId: targetConfig1.Id,
+	TargetConfig:   *targetConfig1,
+}
+
+var gitStatus1 = &models.GitStatus{
 	CurrentBranch: "main",
-	Files: []*project.FileStatus{{
+	Files: []*models.FileStatus{{
 		Name:     "File1",
 		Extra:    "",
-		Staging:  project.Modified,
-		Worktree: project.Modified,
+		Staging:  models.Modified,
+		Worktree: models.Modified,
 	}},
 }
 
 var mockConfig = &config.Config{
+	TargetId:    target1.Id,
 	WorkspaceId: workspace1.Id,
-	ProjectName: project1.Name,
 	Server: config.DaytonaServerConfig{
 		ApiKey: "test-api-key",
 	},
-	Mode: config.ModeProject,
+	Mode: config.ModeWorkspace,
 }
 
 func TestAgent(t *testing.T) {
 	buf := bytes.Buffer{}
 	log.SetOutput(&buf)
 
-	apiServer := mocks.NewMockRestServer(t, workspace1)
+	apiServer := mocks.NewMockRestServer(t)
 	defer apiServer.Close()
 
 	mockConfig.Server.ApiUrl = apiServer.URL
@@ -81,16 +87,19 @@ func TestAgent(t *testing.T) {
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 	mockToolboxServer := mocks.NewMockToolboxServer()
+	mockDockerCredHelper := mocks.NewMockDockerCredHelper()
 
-	mockConfig.ProjectDir = t.TempDir()
+	mockConfig.WorkspaceDir = t.TempDir()
 
 	// Create a new Agent instance
 	a := &agent.Agent{
-		Config:    mockConfig,
-		Git:       mockGitService,
-		Ssh:       mockSshServer,
-		Tailscale: mockTailscaleServer,
-		Toolbox:   mockToolboxServer,
+		Config:           mockConfig,
+		Git:              mockGitService,
+		Ssh:              mockSshServer,
+		Tailscale:        mockTailscaleServer,
+		Toolbox:          mockToolboxServer,
+		Workspace:        workspace1,
+		DockerCredHelper: mockDockerCredHelper,
 	}
 
 	t.Run("Start agent", func(t *testing.T) {
@@ -104,16 +113,17 @@ func TestAgent(t *testing.T) {
 		mockSshServer.AssertExpectations(t)
 		mockTailscaleServer.AssertExpectations(t)
 		mockToolboxServer.AssertExpectations(t)
+		mockDockerCredHelper.AssertExpectations(t)
 	})
 }
 
-func TestAgentHostMode(t *testing.T) {
+func TestAgentTargetMode(t *testing.T) {
 	mockGitService := mock_git.NewMockGitService()
 	mockSshServer := mocks.NewMockSshServer()
 	mockTailscaleServer := mocks.NewMockTailscaleServer()
 
 	mockConfig := *mockConfig
-	mockConfig.Mode = config.ModeHost
+	mockConfig.Mode = config.ModeTarget
 
 	// Create a new Agent instance
 	a := &agent.Agent{
@@ -123,8 +133,8 @@ func TestAgentHostMode(t *testing.T) {
 		Tailscale: mockTailscaleServer,
 	}
 
-	t.Run("Start agent in host mode", func(t *testing.T) {
-		mockConfig.Mode = config.ModeHost
+	t.Run("Start agent in target mode", func(t *testing.T) {
+		mockConfig.Mode = config.ModeTarget
 		err := a.Start()
 
 		require.Equal(t, err, mocks.SshServerStartError)

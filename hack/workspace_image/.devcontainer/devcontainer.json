@@ -1,0 +1,61 @@
+{
+  "name": "Daytona",
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:1": {
+      "installZsh": "true",
+      "username": "daytona",
+      "uid": "1000",
+      "gid": "1000",
+      "upgradePackages": "false"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2.11.0": {
+      "moby": true,
+      "version": "24.0.9"
+    },
+    "ghcr.io/devcontainers/features/go:1.3.1": {
+      "version": "1.23.1"
+    },
+    "ghcr.io/devcontainers/features/node:1.6.0": {
+      "version": "20.17.0"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2.1.1": {
+      "version": "lts",
+      "installUsingApt": false
+    },
+    "ghcr.io/devcontainers/features/ruby:1.2.3": {
+      "version": "3.3.0"
+    },
+    "ghcr.io/devcontainers/features/rust:1.3.1": {
+      "version": "1.81.0"
+    },
+    "ghcr.io/devcontainers/features/php:1.1.3": {
+      "version": "8.3.11"
+    },
+    "ghcr.io/devcontainers/features/python:1.6.4": {
+      "version": "3.12.6"
+    },
+    "ghcr.io/devcontainers/features/java:1.6.0": {
+      "version": "21.0.4-ms",
+      "installGradle": true,
+      "installMaven": true
+    },
+    "ghcr.io/devcontainers-contrib/features/typescript:2": {},
+    "ghcr.io/devcontainers/features/nix:1.2.0": {},
+    "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest": {
+      "command1": "npm install -g @devcontainers/cli"
+    }
+  },
+  "overrideFeatureInstallOrder": [
+    "ghcr.io/devcontainers/features/docker-in-docker:2",
+    "ghcr.io/devcontainers/features/go:1",
+    "ghcr.io/devcontainers/features/node:1",
+    "ghcr.io/devcontainers-contrib/features/typescript:2",
+    "ghcr.io/devcontainers/features/common-utils:1",
+    "ghcr.io/wxw-matt/devcontainer-features/command_runner:latest"
+  ],
+  "remoteUser": "daytona"
+}

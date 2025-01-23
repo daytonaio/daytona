@@ -4,75 +4,73 @@
 package db
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"sync"
 
-	"github.com/daytonaio/daytona/pkg/build"
-	. "github.com/daytonaio/daytona/pkg/db/dto"
-	"github.com/daytonaio/daytona/pkg/workspace/project/buildconfig"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 	"gorm.io/gorm"
 )
 
 type BuildStore struct {
-	db   *gorm.DB
+	IStore
 	Lock sync.Mutex
 }
 
-func NewBuildStore(db *gorm.DB) (*BuildStore, error) {
-	err := db.AutoMigrate(&BuildDTO{})
+func NewBuildStore(store IStore) (stores.BuildStore, error) {
+	err := store.AutoMigrate(&models.Build{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &BuildStore{db: db}, nil
+	return &BuildStore{store, sync.Mutex{}}, nil
 }
 
-func (b *BuildStore) Find(filter *build.Filter) (*build.Build, error) {
+func (b *BuildStore) Find(ctx context.Context, filter *stores.BuildFilter) (*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTO := BuildDTO{}
-	tx := processBuildFilters(b.db, filter).First(&buildDTO)
+	tx := b.GetTransaction(ctx)
+
+	build := &models.Build{}
+	tx = preloadBuildEntities(processBuildFilters(tx, filter)).First(build)
 
 	if tx.Error != nil {
 		if tx.Error == gorm.ErrRecordNotFound {
-			return nil, build.ErrBuildNotFound
+			return nil, stores.ErrBuildNotFound
 		}
 		return nil, tx.Error
 	}
 
-	build := ToBuild(buildDTO)
-
 	return build, nil
 }
 
-func (b *BuildStore) List(filter *build.Filter) ([]*build.Build, error) {
+func (b *BuildStore) List(ctx context.Context, filter *stores.BuildFilter) ([]*models.Build, error) {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTOs := []BuildDTO{}
-	tx := processBuildFilters(b.db, filter).Find(&buildDTOs)
+	tx := b.GetTransaction(ctx)
+
+	builds := []*models.Build{}
+	tx = preloadBuildEntities(processBuildFilters(tx, filter)).Find(&builds)
 
 	if tx.Error != nil {
 		return nil, tx.Error
-	}
-
-	builds := []*build.Build{}
-	for _, buildDTO := range buildDTOs {
-		builds = append(builds, ToBuild(buildDTO))
 	}
 
 	return builds, nil
 }
 
-func (b *BuildStore) Save(build *build.Build) error {
+func (b *BuildStore) Save(ctx context.Context, build *models.Build) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
 
-	buildDTO := ToBuildDTO(build)
-	tx := b.db.Save(&buildDTO)
+	tx := b.GetTransaction(ctx)
+
+	tx = tx.Save(build)
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -80,31 +78,30 @@ func (b *BuildStore) Save(build *build.Build) error {
 	return nil
 }
 
-func (b *BuildStore) Delete(id string) error {
+func (b *BuildStore) Delete(ctx context.Context, id string) error {
 	b.Lock.Lock()
 	defer b.Lock.Unlock()
+	tx := b.GetTransaction(ctx)
 
-	tx := b.db.Where("id = ?", id).Delete(&BuildDTO{})
+	tx = tx.Where("id = ?", id).Delete(&models.Build{})
 	if tx.Error != nil {
 		return tx.Error
 	}
 	if tx.RowsAffected == 0 {
-		return build.ErrBuildNotFound
+		return stores.ErrBuildNotFound
 	}
 
 	return nil
 }
 
-func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
+func preloadBuildEntities(tx *gorm.DB) *gorm.DB {
+	return tx.Preload("LastJob")
+}
+
+func processBuildFilters(tx *gorm.DB, filter *stores.BuildFilter) *gorm.DB {
 	if filter != nil {
 		if filter.Id != nil {
 			tx = tx.Where("id = ?", *filter.Id)
-		}
-		if filter.States != nil && len(*filter.States) > 0 {
-			placeholders := strings.Repeat("?,", len(*filter.States))
-			placeholders = placeholders[:len(placeholders)-1]
-
-			tx = tx.Where(fmt.Sprintf("state IN (%s)", placeholders), filter.StatesToInterface()...)
 		}
 		if filter.PrebuildIds != nil && len(*filter.PrebuildIds) > 0 {
 			placeholders := strings.Repeat("?,", len(*filter.PrebuildIds))
@@ -116,7 +113,7 @@ func processBuildFilters(tx *gorm.DB, filter *build.Filter) *gorm.DB {
 			tx = tx.Order("created_at desc").Limit(1)
 		}
 		// Skip filtering when an automatic build config is provided
-		if filter.BuildConfig != nil && *filter.BuildConfig != (buildconfig.BuildConfig{}) {
+		if filter.BuildConfig != nil && *filter.BuildConfig != (models.BuildConfig{}) {
 			buildConfigJSON, err := json.Marshal(filter.BuildConfig)
 			if err == nil {
 				tx = tx.Where("build_config = ?", string(buildConfigJSON))

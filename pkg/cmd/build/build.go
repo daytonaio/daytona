@@ -10,15 +10,16 @@ import (
 
 var BuildCmd = &cobra.Command{
 	Use:     "build",
-	Aliases: []string{"builds"},
 	Short:   "Manage builds",
-	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.NoArgs,
+	GroupID: util.TARGET_GROUP,
+	Aliases: []string{"builds"},
 }
 
 func init() {
-	BuildCmd.AddCommand(buildListCmd)
-	BuildCmd.AddCommand(buildInfoCmd)
-	BuildCmd.AddCommand(buildRunCmd)
-	BuildCmd.AddCommand(buildDeleteCmd)
-	BuildCmd.AddCommand(buildLogsCmd)
+	BuildCmd.AddCommand(listCmd)
+	BuildCmd.AddCommand(infoCmd)
+	BuildCmd.AddCommand(runCmd)
+	BuildCmd.AddCommand(deleteCmd)
+	BuildCmd.AddCommand(logsCmd)
 }

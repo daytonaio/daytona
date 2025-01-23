@@ -20,27 +20,27 @@ type MockLoggerFactory struct {
 	mock.Mock
 }
 
-func (f *MockLoggerFactory) CreateWorkspaceLogger(workspaceId string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateTargetLogger(targetId string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateProjectLogger(workspaceId, projectName string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateWorkspaceLogger(targetId, workspaceName string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateBuildLogger(projectName, hash string, source logs.LogSource) logs.Logger {
+func (f *MockLoggerFactory) CreateBuildLogger(workspaceName, hash string, source logs.LogSource) logs.Logger {
 	return &mockLogger{}
 }
 
-func (f *MockLoggerFactory) CreateWorkspaceLogReader(workspaceId string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateTargetLogReader(targetId string) (io.Reader, error) {
 	return nil, nil
 }
 
-func (f *MockLoggerFactory) CreateProjectLogReader(workspaceId, projectName string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateWorkspaceLogReader(targetId, workspaceName string) (io.Reader, error) {
 	return nil, nil
 }
 
-func (f *MockLoggerFactory) CreateBuildLogReader(projectName, hash string) (io.Reader, error) {
+func (f *MockLoggerFactory) CreateBuildLogReader(workspaceName, hash string) (io.Reader, error) {
 	return nil, nil
 }
 
@@ -51,6 +51,11 @@ type mockLogger struct {
 func (m *mockLogger) Write(p []byte) (n int, err error) {
 	args := m.Called(p)
 	return args.Int(0), args.Error(1)
+}
+
+func (m *mockLogger) ConstructJsonLogEntry(p []byte) ([]byte, error) {
+	args := m.Called(p)
+	return args.Get(0).([]byte), args.Error(1)
 }
 
 func (m *mockLogger) Close() error {

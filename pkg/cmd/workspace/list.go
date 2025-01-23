@@ -5,35 +5,45 @@ package workspace
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/util"
 	"github.com/daytonaio/daytona/internal/util/apiclient"
-	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
-	list_view "github.com/daytonaio/daytona/pkg/views/workspace/list"
+	"github.com/daytonaio/daytona/pkg/views/workspace/list"
 	"github.com/spf13/cobra"
 )
 
-var verbose bool
+var labelFilters []string
 
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List workspaces",
-	Args:    cobra.ExactArgs(0),
-	Aliases: []string{"ls"},
-	GroupID: util.WORKSPACE_GROUP,
+	Args:    cobra.NoArgs,
+	GroupID: util.TARGET_GROUP,
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var specifyGitProviders bool
 
-		apiClient, err := apiclient_util.GetApiClient(nil)
+		apiClient, err := apiclient.GetApiClient(nil)
 		if err != nil {
 			return err
 		}
 
-		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verbose).Execute()
+		labels, err := common.MapKeyValue(labelFilters)
+		if err != nil {
+			return err
+		}
 
+		encoded, err := json.Marshal(labels)
+		if err != nil {
+			return err
+		}
+
+		workspaceList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Labels(string(encoded)).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -63,13 +73,12 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		list_view.ListWorkspaces(workspaceList, specifyGitProviders, verbose, activeProfile.Name)
-
+		list.ListWorkspaces(workspaceList, specifyGitProviders, activeProfile.Name)
 		return nil
 	},
 }
 
 func init() {
-	ListCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output")
+	ListCmd.Flags().StringSliceVarP(&labelFilters, "label", "l", nil, "Filter by label")
 	format.RegisterFormatFlag(ListCmd)
 }

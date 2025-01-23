@@ -1,0 +1,17 @@
+name: daytona template export
+synopsis: Export a workspace template
+usage: daytona template export [flags]
+options:
+    - name: all
+      shorthand: a
+      default_value: "false"
+      usage: Export all workspace templates
+    - name: format
+      shorthand: f
+      usage: Output format. Must be one of (yaml, json)
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona template - Manage workspace templates

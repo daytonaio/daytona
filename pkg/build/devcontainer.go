@@ -11,6 +11,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/detect"
 	"github.com/daytonaio/daytona/pkg/docker"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -27,8 +28,8 @@ type DevcontainerBuilder struct {
 	builderDockerPort uint16
 }
 
-func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
-	builderType, err := detect.DetectProjectBuilderType(build.BuildConfig, b.projectDir, nil)
+func (b *DevcontainerBuilder) Build(build models.Build) (string, string, error) {
+	builderType, err := detect.DetectWorkspaceBuilderType(build.BuildConfig, b.workspaceDir, nil)
 	if err != nil {
 		return "", "", err
 	}
@@ -41,11 +42,14 @@ func (b *DevcontainerBuilder) Build(build Build) (string, string, error) {
 }
 
 func (b *DevcontainerBuilder) CleanUp() error {
-	return os.RemoveAll(b.projectDir)
+	return os.RemoveAll(b.workspaceDir)
 }
 
-func (b *DevcontainerBuilder) Publish(build Build) error {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+func (b *DevcontainerBuilder) Publish(build models.Build) error {
+	buildLogger, err := b.loggerFactory.CreateLogger(build.Id, build.Id, logs.LogSourceBuilder)
+	if err != nil {
+		return err
+	}
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
@@ -64,54 +68,57 @@ func (b *DevcontainerBuilder) Publish(build Build) error {
 	return dockerClient.PushImage(*build.Image, b.buildImageContainerRegistry, buildLogger)
 }
 
-func (b *DevcontainerBuilder) buildDevcontainer(build Build) (string, string, error) {
-	buildLogger := b.loggerFactory.CreateBuildLogger(build.Id, logs.LogSourceBuilder)
+func (b *DevcontainerBuilder) buildDevcontainer(build models.Build) (string, string, error) {
+	buildLogger, err := b.loggerFactory.CreateLogger(build.Id, build.Id, logs.LogSourceBuilder)
+	if err != nil {
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
+	}
 	defer buildLogger.Close()
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient: cli,
 	})
 
-	err = dockerClient.PullImage(b.image, b.containerRegistry, buildLogger)
+	cr := b.containerRegistries.FindContainerRegistryByImageName(b.image)
+	err = dockerClient.PullImage(b.image, cr, buildLogger)
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	containerId, remoteUser, err := dockerClient.CreateFromDevcontainer(docker.CreateDevcontainerOptions{
-		BuildConfig:              build.BuildConfig,
-		ProjectName:              build.Id,
-		ContainerRegistry:        b.buildImageContainerRegistry,
-		BuilderImage:             b.image,
-		BuilderContainerRegistry: b.containerRegistry,
-		Prebuild:                 true,
+		BuildConfig:         build.BuildConfig,
+		WorkspaceFolderName: build.Id,
+		ContainerRegistries: b.containerRegistries,
+		BuilderImage:        b.image,
+		Prebuild:            true,
 		IdLabels: map[string]string{
 			"daytona.build.id": build.Id,
 		},
-		ProjectDir: b.projectDir,
-		LogWriter:  buildLogger,
-		EnvVars:    build.EnvVars,
+		WorkspaceDir: b.workspaceDir,
+		LogWriter:    buildLogger,
+		EnvVars:      build.EnvVars,
 	})
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	defer dockerClient.RemoveContainer(containerId) // nolint: errcheck
 
 	imageName, err := b.GetImageName(build)
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	_, err = cli.ContainerCommit(context.Background(), containerId, container.CommitOptions{
 		Reference: imageName,
 	})
 	if err != nil {
-		return b.defaultProjectImage, b.defaultProjectUser, err
+		return b.defaultWorkspaceImage, b.defaultWorkspaceUser, err
 	}
 
 	return imageName, string(remoteUser), err

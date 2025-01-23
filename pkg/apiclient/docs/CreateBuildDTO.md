@@ -7,13 +7,13 @@ Name | Type | Description | Notes
 **Branch** | **string** |  | 
 **EnvVars** | **map[string]string** |  | 
 **PrebuildId** | Pointer to **string** |  | [optional] 
-**ProjectConfigName** | **string** |  | 
+**WorkspaceTemplateName** | **string** |  | 
 
 ## Methods
 
 ### NewCreateBuildDTO
 
-`func NewCreateBuildDTO(branch string, envVars map[string]string, projectConfigName string, ) *CreateBuildDTO`
+`func NewCreateBuildDTO(branch string, envVars map[string]string, workspaceTemplateName string, ) *CreateBuildDTO`
 
 NewCreateBuildDTO instantiates a new CreateBuildDTO object
 This constructor will assign default values to properties that have it defined,
@@ -93,24 +93,24 @@ SetPrebuildId sets PrebuildId field to given value.
 
 HasPrebuildId returns a boolean if a field has been set.
 
-### GetProjectConfigName
+### GetWorkspaceTemplateName
 
-`func (o *CreateBuildDTO) GetProjectConfigName() string`
+`func (o *CreateBuildDTO) GetWorkspaceTemplateName() string`
 
-GetProjectConfigName returns the ProjectConfigName field if non-nil, zero value otherwise.
+GetWorkspaceTemplateName returns the WorkspaceTemplateName field if non-nil, zero value otherwise.
 
-### GetProjectConfigNameOk
+### GetWorkspaceTemplateNameOk
 
-`func (o *CreateBuildDTO) GetProjectConfigNameOk() (*string, bool)`
+`func (o *CreateBuildDTO) GetWorkspaceTemplateNameOk() (*string, bool)`
 
-GetProjectConfigNameOk returns a tuple with the ProjectConfigName field if it's non-nil, zero value otherwise
+GetWorkspaceTemplateNameOk returns a tuple with the WorkspaceTemplateName field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetProjectConfigName
+### SetWorkspaceTemplateName
 
-`func (o *CreateBuildDTO) SetProjectConfigName(v string)`
+`func (o *CreateBuildDTO) SetWorkspaceTemplateName(v string)`
 
-SetProjectConfigName sets ProjectConfigName field to given value.
+SetWorkspaceTemplateName sets WorkspaceTemplateName field to given value.
 
 
 

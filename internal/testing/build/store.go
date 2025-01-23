@@ -6,34 +6,41 @@
 package build
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/build"
+	"github.com/daytonaio/daytona/internal/testing/common"
+	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/stores"
 )
 
 type InMemoryBuildStore struct {
-	builds map[string]*build.Build
+	common.InMemoryStore
+	builds   map[string]*models.Build
+	jobStore stores.JobStore
 }
 
-func NewInMemoryBuildStore() build.Store {
+func NewInMemoryBuildStore(jobStore stores.JobStore) stores.BuildStore {
 	return &InMemoryBuildStore{
-		builds: make(map[string]*build.Build),
+		builds:   make(map[string]*models.Build),
+		jobStore: jobStore,
 	}
 }
 
-func (s *InMemoryBuildStore) Find(filter *build.Filter) (*build.Build, error) {
-	builds, err := s.processFilters(filter)
+func (s *InMemoryBuildStore) Find(ctx context.Context, filter *stores.BuildFilter) (*models.Build, error) {
+	b, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
 	}
-	if len(builds) == 0 {
-		return nil, build.ErrBuildNotFound
+	if len(b) == 0 {
+		return nil, stores.ErrBuildNotFound
 	}
 
-	return builds[0], nil
+	return b[0], nil
 }
 
-func (s *InMemoryBuildStore) List(filter *build.Filter) ([]*build.Build, error) {
+func (s *InMemoryBuildStore) List(ctx context.Context, filter *stores.BuildFilter) ([]*models.Build, error) {
 	builds, err := s.processFilters(filter)
 	if err != nil {
 		return nil, err
@@ -42,51 +49,43 @@ func (s *InMemoryBuildStore) List(filter *build.Filter) ([]*build.Build, error) 
 	return builds, nil
 }
 
-func (s *InMemoryBuildStore) Save(result *build.Build) error {
+func (s *InMemoryBuildStore) Save(ctx context.Context, result *models.Build) error {
 	s.builds[result.Id] = result
 	return nil
 }
 
-func (s *InMemoryBuildStore) Delete(id string) error {
+func (s *InMemoryBuildStore) Delete(ctx context.Context, id string) error {
 	delete(s.builds, id)
 	return nil
 }
 
-func (s *InMemoryBuildStore) processFilters(filter *build.Filter) ([]*build.Build, error) {
-	var result []*build.Build
-	filteredBuilds := make(map[string]*build.Build)
+func (s *InMemoryBuildStore) processFilters(filter *stores.BuildFilter) ([]*models.Build, error) {
+	var result []*models.Build
+	filteredBuilds := make(map[string]*models.Build)
 	for k, v := range s.builds {
 		filteredBuilds[k] = v
+	}
+
+	jobs, err := s.jobMap(context.Background())
+	if err != nil {
+		return nil, err
 	}
 
 	if filter != nil {
 		if filter.Id != nil {
 			b, ok := s.builds[*filter.Id]
 			if ok {
-				return []*build.Build{b}, nil
+				b.LastJob = jobs[b.Id]
+				return []*models.Build{b}, nil
 			} else {
-				return []*build.Build{}, fmt.Errorf("build with id %s not found", *filter.Id)
-			}
-		}
-		if filter.States != nil {
-			for _, b := range filteredBuilds {
-				check := false
-				for _, state := range *filter.States {
-					if b.State == state {
-						check = true
-						break
-					}
-				}
-				if !check {
-					delete(filteredBuilds, b.Id)
-				}
+				return []*models.Build{}, fmt.Errorf("build with id %s not found", *filter.Id)
 			}
 		}
 		if filter.PrebuildIds != nil {
 			for _, b := range filteredBuilds {
 				check := false
 				for _, prebuildId := range *filter.PrebuildIds {
-					if b.PrebuildId == prebuildId {
+					if b.PrebuildId != nil && *b.PrebuildId == prebuildId {
 						check = true
 						break
 					}
@@ -97,7 +96,7 @@ func (s *InMemoryBuildStore) processFilters(filter *build.Filter) ([]*build.Buil
 			}
 		}
 		if filter.GetNewest != nil && *filter.GetNewest {
-			var newestBuild *build.Build
+			var newestBuild *models.Build
 			for _, b := range filteredBuilds {
 				if newestBuild == nil {
 					newestBuild = b
@@ -108,7 +107,8 @@ func (s *InMemoryBuildStore) processFilters(filter *build.Filter) ([]*build.Buil
 				}
 			}
 			if newestBuild != nil {
-				return []*build.Build{newestBuild}, nil
+				newestBuild.LastJob = jobs[newestBuild.Id]
+				return []*models.Build{newestBuild}, nil
 			}
 		}
 		if filter.BuildConfig != nil {
@@ -149,8 +149,25 @@ func (s *InMemoryBuildStore) processFilters(filter *build.Filter) ([]*build.Buil
 	}
 
 	for _, b := range filteredBuilds {
+		b.LastJob = jobs[b.Id]
 		result = append(result, b)
 	}
 
 	return result, nil
+}
+
+func (s *InMemoryBuildStore) jobMap(ctx context.Context) (map[string]*models.Job, error) {
+	jobs, err := s.jobStore.List(ctx, &stores.JobFilter{
+		ResourceType: util.Pointer(models.ResourceTypeWorkspace),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	jobMap := make(map[string]*models.Job)
+	for _, j := range jobs {
+		jobMap[j.ResourceId] = j
+	}
+
+	return jobMap, nil
 }

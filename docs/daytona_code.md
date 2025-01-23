@@ -3,13 +3,13 @@
 Open a workspace in your preferred IDE
 
 ```
-daytona code [WORKSPACE] [PROJECT] [flags]
+daytona code [WORKSPACE] [flags]
 ```
 
 ### Options
 
 ```
-  -i, --ide string   Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+  -i, --ide string   Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
   -y, --yes          Automatically confirm any prompts
 ```
 

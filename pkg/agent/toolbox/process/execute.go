@@ -14,63 +14,66 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func ExecuteCommand(c *gin.Context) {
-	var request ExecuteRequest
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.AbortWithError(400, errors.New("command is required"))
-		return
-	}
-
-	cmdParts := parseCommand(request.Command)
-	if len(cmdParts) == 0 {
-		c.AbortWithError(400, errors.New("empty command"))
-		return
-	}
-
-	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
-
-	// set maximum execution time
-	timeout := 10 * time.Second
-	if request.Timeout != nil && *request.Timeout > 0 {
-		timeout = time.Duration(*request.Timeout) * time.Second
-	}
-
-	timeoutReached := false
-	timer := time.AfterFunc(timeout, func() {
-		timeoutReached = true
-		if cmd.Process != nil {
-			// kill the process group
-			err := cmd.Process.Kill()
-			if err != nil {
-				log.Error(err)
-				return
-			}
-		}
-	})
-	defer timer.Stop()
-
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		if timeoutReached {
-			c.AbortWithError(408, errors.New("command execution timeout"))
+func ExecuteCommand(workspaceDir string) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		var request ExecuteRequest
+		if err := c.ShouldBindJSON(&request); err != nil {
+			c.AbortWithError(400, errors.New("command is required"))
 			return
 		}
-		c.AbortWithError(400, err)
-		return
-	}
 
-	if cmd.ProcessState == nil {
+		cmdParts := parseCommand(request.Command)
+		if len(cmdParts) == 0 {
+			c.AbortWithError(400, errors.New("empty command"))
+			return
+		}
+
+		cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
+		cmd.Dir = workspaceDir
+
+		// set maximum execution time
+		timeout := 10 * time.Second
+		if request.Timeout != nil && *request.Timeout > 0 {
+			timeout = time.Duration(*request.Timeout) * time.Second
+		}
+
+		timeoutReached := false
+		timer := time.AfterFunc(timeout, func() {
+			timeoutReached = true
+			if cmd.Process != nil {
+				// kill the process group
+				err := cmd.Process.Kill()
+				if err != nil {
+					log.Error(err)
+					return
+				}
+			}
+		})
+		defer timer.Stop()
+
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			if timeoutReached {
+				c.AbortWithError(408, errors.New("command execution timeout"))
+				return
+			}
+			c.AbortWithError(400, err)
+			return
+		}
+
+		if cmd.ProcessState == nil {
+			c.JSON(200, ExecuteResponse{
+				Code:   -1,
+				Result: string(output),
+			})
+			return
+		}
+
 		c.JSON(200, ExecuteResponse{
-			Code:   -1,
+			Code:   cmd.ProcessState.ExitCode(),
 			Result: string(output),
 		})
-		return
 	}
-
-	c.JSON(200, ExecuteResponse{
-		Code:   cmd.ProcessState.ExitCode(),
-		Result: string(output),
-	})
 }
 
 // parseCommand splits a command string properly handling quotes

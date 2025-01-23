@@ -21,10 +21,22 @@ var _ MappedNullable = &Workspace{}
 
 // Workspace struct for Workspace
 type Workspace struct {
-	Id       string    `json:"id"`
-	Name     string    `json:"name"`
-	Projects []Project `json:"projects"`
-	Target   string    `json:"target"`
+	ApiKey              string             `json:"apiKey"`
+	BuildConfig         *BuildConfig       `json:"buildConfig,omitempty"`
+	EnvVars             map[string]string  `json:"envVars"`
+	GitProviderConfigId *string            `json:"gitProviderConfigId,omitempty"`
+	Id                  string             `json:"id"`
+	Image               string             `json:"image"`
+	Labels              map[string]string  `json:"labels"`
+	LastJob             *Job               `json:"lastJob,omitempty"`
+	LastJobId           *string            `json:"lastJobId,omitempty"`
+	Metadata            *WorkspaceMetadata `json:"metadata,omitempty"`
+	Name                string             `json:"name"`
+	ProviderMetadata    *string            `json:"providerMetadata,omitempty"`
+	Repository          GitRepository      `json:"repository"`
+	Target              Target             `json:"target"`
+	TargetId            string             `json:"targetId"`
+	User                string             `json:"user"`
 }
 
 type _Workspace Workspace
@@ -33,12 +45,18 @@ type _Workspace Workspace
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewWorkspace(id string, name string, projects []Project, target string) *Workspace {
+func NewWorkspace(apiKey string, envVars map[string]string, id string, image string, labels map[string]string, name string, repository GitRepository, target Target, targetId string, user string) *Workspace {
 	this := Workspace{}
+	this.ApiKey = apiKey
+	this.EnvVars = envVars
 	this.Id = id
+	this.Image = image
+	this.Labels = labels
 	this.Name = name
-	this.Projects = projects
+	this.Repository = repository
 	this.Target = target
+	this.TargetId = targetId
+	this.User = user
 	return &this
 }
 
@@ -48,6 +66,118 @@ func NewWorkspace(id string, name string, projects []Project, target string) *Wo
 func NewWorkspaceWithDefaults() *Workspace {
 	this := Workspace{}
 	return &this
+}
+
+// GetApiKey returns the ApiKey field value
+func (o *Workspace) GetApiKey() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ApiKey
+}
+
+// GetApiKeyOk returns a tuple with the ApiKey field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetApiKeyOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ApiKey, true
+}
+
+// SetApiKey sets field value
+func (o *Workspace) SetApiKey(v string) {
+	o.ApiKey = v
+}
+
+// GetBuildConfig returns the BuildConfig field value if set, zero value otherwise.
+func (o *Workspace) GetBuildConfig() BuildConfig {
+	if o == nil || IsNil(o.BuildConfig) {
+		var ret BuildConfig
+		return ret
+	}
+	return *o.BuildConfig
+}
+
+// GetBuildConfigOk returns a tuple with the BuildConfig field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetBuildConfigOk() (*BuildConfig, bool) {
+	if o == nil || IsNil(o.BuildConfig) {
+		return nil, false
+	}
+	return o.BuildConfig, true
+}
+
+// HasBuildConfig returns a boolean if a field has been set.
+func (o *Workspace) HasBuildConfig() bool {
+	if o != nil && !IsNil(o.BuildConfig) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildConfig gets a reference to the given BuildConfig and assigns it to the BuildConfig field.
+func (o *Workspace) SetBuildConfig(v BuildConfig) {
+	o.BuildConfig = &v
+}
+
+// GetEnvVars returns the EnvVars field value
+func (o *Workspace) GetEnvVars() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.EnvVars
+}
+
+// GetEnvVarsOk returns a tuple with the EnvVars field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetEnvVarsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.EnvVars, true
+}
+
+// SetEnvVars sets field value
+func (o *Workspace) SetEnvVars(v map[string]string) {
+	o.EnvVars = v
+}
+
+// GetGitProviderConfigId returns the GitProviderConfigId field value if set, zero value otherwise.
+func (o *Workspace) GetGitProviderConfigId() string {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		var ret string
+		return ret
+	}
+	return *o.GitProviderConfigId
+}
+
+// GetGitProviderConfigIdOk returns a tuple with the GitProviderConfigId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetGitProviderConfigIdOk() (*string, bool) {
+	if o == nil || IsNil(o.GitProviderConfigId) {
+		return nil, false
+	}
+	return o.GitProviderConfigId, true
+}
+
+// HasGitProviderConfigId returns a boolean if a field has been set.
+func (o *Workspace) HasGitProviderConfigId() bool {
+	if o != nil && !IsNil(o.GitProviderConfigId) {
+		return true
+	}
+
+	return false
+}
+
+// SetGitProviderConfigId gets a reference to the given string and assigns it to the GitProviderConfigId field.
+func (o *Workspace) SetGitProviderConfigId(v string) {
+	o.GitProviderConfigId = &v
 }
 
 // GetId returns the Id field value
@@ -74,6 +204,150 @@ func (o *Workspace) SetId(v string) {
 	o.Id = v
 }
 
+// GetImage returns the Image field value
+func (o *Workspace) GetImage() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.Image
+}
+
+// GetImageOk returns a tuple with the Image field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetImageOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Image, true
+}
+
+// SetImage sets field value
+func (o *Workspace) SetImage(v string) {
+	o.Image = v
+}
+
+// GetLabels returns the Labels field value
+func (o *Workspace) GetLabels() map[string]string {
+	if o == nil {
+		var ret map[string]string
+		return ret
+	}
+
+	return o.Labels
+}
+
+// GetLabelsOk returns a tuple with the Labels field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLabelsOk() (*map[string]string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Labels, true
+}
+
+// SetLabels sets field value
+func (o *Workspace) SetLabels(v map[string]string) {
+	o.Labels = v
+}
+
+// GetLastJob returns the LastJob field value if set, zero value otherwise.
+func (o *Workspace) GetLastJob() Job {
+	if o == nil || IsNil(o.LastJob) {
+		var ret Job
+		return ret
+	}
+	return *o.LastJob
+}
+
+// GetLastJobOk returns a tuple with the LastJob field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLastJobOk() (*Job, bool) {
+	if o == nil || IsNil(o.LastJob) {
+		return nil, false
+	}
+	return o.LastJob, true
+}
+
+// HasLastJob returns a boolean if a field has been set.
+func (o *Workspace) HasLastJob() bool {
+	if o != nil && !IsNil(o.LastJob) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJob gets a reference to the given Job and assigns it to the LastJob field.
+func (o *Workspace) SetLastJob(v Job) {
+	o.LastJob = &v
+}
+
+// GetLastJobId returns the LastJobId field value if set, zero value otherwise.
+func (o *Workspace) GetLastJobId() string {
+	if o == nil || IsNil(o.LastJobId) {
+		var ret string
+		return ret
+	}
+	return *o.LastJobId
+}
+
+// GetLastJobIdOk returns a tuple with the LastJobId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetLastJobIdOk() (*string, bool) {
+	if o == nil || IsNil(o.LastJobId) {
+		return nil, false
+	}
+	return o.LastJobId, true
+}
+
+// HasLastJobId returns a boolean if a field has been set.
+func (o *Workspace) HasLastJobId() bool {
+	if o != nil && !IsNil(o.LastJobId) {
+		return true
+	}
+
+	return false
+}
+
+// SetLastJobId gets a reference to the given string and assigns it to the LastJobId field.
+func (o *Workspace) SetLastJobId(v string) {
+	o.LastJobId = &v
+}
+
+// GetMetadata returns the Metadata field value if set, zero value otherwise.
+func (o *Workspace) GetMetadata() WorkspaceMetadata {
+	if o == nil || IsNil(o.Metadata) {
+		var ret WorkspaceMetadata
+		return ret
+	}
+	return *o.Metadata
+}
+
+// GetMetadataOk returns a tuple with the Metadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetMetadataOk() (*WorkspaceMetadata, bool) {
+	if o == nil || IsNil(o.Metadata) {
+		return nil, false
+	}
+	return o.Metadata, true
+}
+
+// HasMetadata returns a boolean if a field has been set.
+func (o *Workspace) HasMetadata() bool {
+	if o != nil && !IsNil(o.Metadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetMetadata gets a reference to the given WorkspaceMetadata and assigns it to the Metadata field.
+func (o *Workspace) SetMetadata(v WorkspaceMetadata) {
+	o.Metadata = &v
+}
+
 // GetName returns the Name field value
 func (o *Workspace) GetName() string {
 	if o == nil {
@@ -98,34 +372,66 @@ func (o *Workspace) SetName(v string) {
 	o.Name = v
 }
 
-// GetProjects returns the Projects field value
-func (o *Workspace) GetProjects() []Project {
+// GetProviderMetadata returns the ProviderMetadata field value if set, zero value otherwise.
+func (o *Workspace) GetProviderMetadata() string {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		var ret string
+		return ret
+	}
+	return *o.ProviderMetadata
+}
+
+// GetProviderMetadataOk returns a tuple with the ProviderMetadata field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetProviderMetadataOk() (*string, bool) {
+	if o == nil || IsNil(o.ProviderMetadata) {
+		return nil, false
+	}
+	return o.ProviderMetadata, true
+}
+
+// HasProviderMetadata returns a boolean if a field has been set.
+func (o *Workspace) HasProviderMetadata() bool {
+	if o != nil && !IsNil(o.ProviderMetadata) {
+		return true
+	}
+
+	return false
+}
+
+// SetProviderMetadata gets a reference to the given string and assigns it to the ProviderMetadata field.
+func (o *Workspace) SetProviderMetadata(v string) {
+	o.ProviderMetadata = &v
+}
+
+// GetRepository returns the Repository field value
+func (o *Workspace) GetRepository() GitRepository {
 	if o == nil {
-		var ret []Project
+		var ret GitRepository
 		return ret
 	}
 
-	return o.Projects
+	return o.Repository
 }
 
-// GetProjectsOk returns a tuple with the Projects field value
+// GetRepositoryOk returns a tuple with the Repository field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetProjectsOk() ([]Project, bool) {
+func (o *Workspace) GetRepositoryOk() (*GitRepository, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.Projects, true
+	return &o.Repository, true
 }
 
-// SetProjects sets field value
-func (o *Workspace) SetProjects(v []Project) {
-	o.Projects = v
+// SetRepository sets field value
+func (o *Workspace) SetRepository(v GitRepository) {
+	o.Repository = v
 }
 
 // GetTarget returns the Target field value
-func (o *Workspace) GetTarget() string {
+func (o *Workspace) GetTarget() Target {
 	if o == nil {
-		var ret string
+		var ret Target
 		return ret
 	}
 
@@ -134,7 +440,7 @@ func (o *Workspace) GetTarget() string {
 
 // GetTargetOk returns a tuple with the Target field value
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetTargetOk() (*string, bool) {
+func (o *Workspace) GetTargetOk() (*Target, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -142,8 +448,56 @@ func (o *Workspace) GetTargetOk() (*string, bool) {
 }
 
 // SetTarget sets field value
-func (o *Workspace) SetTarget(v string) {
+func (o *Workspace) SetTarget(v Target) {
 	o.Target = v
+}
+
+// GetTargetId returns the TargetId field value
+func (o *Workspace) GetTargetId() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.TargetId
+}
+
+// GetTargetIdOk returns a tuple with the TargetId field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetTargetIdOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.TargetId, true
+}
+
+// SetTargetId sets field value
+func (o *Workspace) SetTargetId(v string) {
+	o.TargetId = v
+}
+
+// GetUser returns the User field value
+func (o *Workspace) GetUser() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.User
+}
+
+// GetUserOk returns a tuple with the User field value
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetUserOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.User, true
+}
+
+// SetUser sets field value
+func (o *Workspace) SetUser(v string) {
+	o.User = v
 }
 
 func (o Workspace) MarshalJSON() ([]byte, error) {
@@ -156,10 +510,34 @@ func (o Workspace) MarshalJSON() ([]byte, error) {
 
 func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	toSerialize["apiKey"] = o.ApiKey
+	if !IsNil(o.BuildConfig) {
+		toSerialize["buildConfig"] = o.BuildConfig
+	}
+	toSerialize["envVars"] = o.EnvVars
+	if !IsNil(o.GitProviderConfigId) {
+		toSerialize["gitProviderConfigId"] = o.GitProviderConfigId
+	}
 	toSerialize["id"] = o.Id
+	toSerialize["image"] = o.Image
+	toSerialize["labels"] = o.Labels
+	if !IsNil(o.LastJob) {
+		toSerialize["lastJob"] = o.LastJob
+	}
+	if !IsNil(o.LastJobId) {
+		toSerialize["lastJobId"] = o.LastJobId
+	}
+	if !IsNil(o.Metadata) {
+		toSerialize["metadata"] = o.Metadata
+	}
 	toSerialize["name"] = o.Name
-	toSerialize["projects"] = o.Projects
+	if !IsNil(o.ProviderMetadata) {
+		toSerialize["providerMetadata"] = o.ProviderMetadata
+	}
+	toSerialize["repository"] = o.Repository
 	toSerialize["target"] = o.Target
+	toSerialize["targetId"] = o.TargetId
+	toSerialize["user"] = o.User
 	return toSerialize, nil
 }
 
@@ -168,10 +546,16 @@ func (o *Workspace) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
+		"apiKey",
+		"envVars",
 		"id",
+		"image",
+		"labels",
 		"name",
-		"projects",
+		"repository",
 		"target",
+		"targetId",
+		"user",
 	}
 
 	allProperties := make(map[string]interface{})

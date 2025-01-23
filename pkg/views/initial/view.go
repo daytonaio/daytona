@@ -68,8 +68,8 @@ var commandViews []CommandView = []CommandView{
 	{Command: "server", Name: "daytona server", Desc: "(start the Daytona Server daemon)"},
 	{Command: "create", Name: "daytona create", Desc: "(create a new workspace)"},
 	{Command: "code", Name: "daytona code", Desc: "(open a workspace in your preferred IDE)"},
-	{Command: "git-provider add", Name: "daytona git-provider add", Desc: "(register a Git provider account)"},
-	{Command: "target set", Name: "daytona target set", Desc: "(run workspaces on a remote machine)"},
+	{Command: "git-provider create", Name: "daytona git-provider create", Desc: "(register a Git provider account)"},
+	{Command: "target-config create", Name: "daytona target-config create", Desc: "(run workspaces on a remote machine)"},
 	{Command: "docs", Name: "daytona docs", Desc: "(open Daytona docs in default browser)\n"},
 	{Command: "help", Name: "view all commands", Desc: ""},
 }

@@ -8,17 +8,18 @@ import (
 	"fmt"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var buildDeleteCmd = &cobra.Command{
+var deleteCmd = &cobra.Command{
 	Use:     "delete [BUILD]",
 	Short:   "Delete a build",
-	Aliases: []string{"remove", "rm"},
 	Args:    cobra.RangeArgs(0, 1),
+	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 		var buildId string
@@ -82,7 +83,7 @@ var forceFlag bool
 var prebuildIdFlag string
 
 func init() {
-	buildDeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
-	buildDeleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
-	buildDeleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
+	deleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete ALL builds")
+	deleteCmd.Flags().BoolVarP(&forceFlag, "force", "f", false, "Force delete build")
+	deleteCmd.Flags().StringVar(&prebuildIdFlag, "prebuild-id", "", "Delete ALL builds from prebuild")
 }

@@ -1,0 +1,23 @@
+name: daytona runner configure
+synopsis: Configure Daytona Runner
+usage: daytona runner configure [flags]
+options:
+    - name: api-key
+      usage: Runner API Key
+    - name: api-url
+      usage: Daytona Server API URL
+    - name: client-id
+      usage: Client ID
+    - name: disable-telemetry
+      default_value: "false"
+      usage: Disable telemetry
+    - name: id
+      usage: Runner ID
+    - name: name
+      usage: Runner Name
+inherited_options:
+    - name: help
+      default_value: "false"
+      usage: help for daytona
+see_also:
+    - daytona runner - Manage the runner

@@ -7,16 +7,17 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/cmd/format"
 	view "github.com/daytonaio/daytona/pkg/views/prebuild/list"
 	"github.com/spf13/cobra"
 )
 
-var prebuildListCmd = &cobra.Command{
+var listCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List prebuild configurations",
-	Aliases: []string{"ls"},
 	Args:    cobra.NoArgs,
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -42,5 +43,5 @@ var prebuildListCmd = &cobra.Command{
 }
 
 func init() {
-	format.RegisterFormatFlag(prebuildListCmd)
+	format.RegisterFormatFlag(listCmd)
 }

@@ -13,10 +13,11 @@ var ApiKeyCmd = &cobra.Command{
 	Short:   "Api Key commands",
 	Args:    cobra.NoArgs,
 	GroupID: util.SERVER_GROUP,
+	Aliases: []string{"api-keys"},
 }
 
 func init() {
-	ApiKeyCmd.AddCommand(GenerateCmd)
-	ApiKeyCmd.AddCommand(revokeCmd)
+	ApiKeyCmd.AddCommand(createCmd)
+	ApiKeyCmd.AddCommand(deleteCmd)
 	ApiKeyCmd.AddCommand(listCmd)
 }

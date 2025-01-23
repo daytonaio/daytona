@@ -25,33 +25,33 @@ import (
 
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
-// OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote workspace.
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId, projectName, projectProviderMetadata string, yesFlag bool, gpgKey string) error {
+// OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote target.
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, workspaceProviderMetadata string, yesFlag bool, gpgKey *string) error {
 	// Ensure SSH config entry is added
-	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, projectName, gpgKey)
+	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
 
-	projectHostname := config.GetProjectHostname(activeProfile.Id, workspaceId, projectName)
+	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
 	// Check and install Python if necessary
-	if err := ensurePythonInstalled(projectHostname, yesFlag); err != nil {
+	if err := ensurePythonInstalled(workspaceHostname, yesFlag); err != nil {
 		return err
 	}
 
 	// Check and install pip if necessary
-	if err := ensurePipInstalled(projectHostname, yesFlag); err != nil {
+	if err := ensurePipInstalled(workspaceHostname, yesFlag); err != nil {
 		return err
 	}
 
 	// Check and install Jupyter Notebook if necessary
-	if err := ensureJupyterInstalled(projectHostname); err != nil {
+	if err := ensureJupyterInstalled(workspaceHostname); err != nil {
 		return err
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(projectHostname, activeProfile, workspaceId, projectName, gpgKey); err != nil {
+	if err := startJupyterServer(workspaceHostname, activeProfile, workspaceId, gpgKey); err != nil {
 		return err
 	}
 
@@ -215,9 +215,9 @@ func ensureJupyterInstalled(hostname string) error {
 	return runRemoteCommand(hostname, installCmd)
 }
 
-// startJupyterServer starts the Jupyter Notebook server on the remote workspace.
-func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId, projectName string, gpgKey string) error {
-	projectDir, err := util.GetProjectDir(activeProfile, workspaceId, projectName, gpgKey)
+// startJupyterServer starts the Jupyter Notebook server on the remote target.
+func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId string, gpgKey *string) error {
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
 	if err != nil {
 		return err
 	}
@@ -226,7 +226,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, workspace
 
 	// Start Jupyter Notebook server in the background
 	go func() {
-		cmd := exec.CommandContext(context.Background(), "ssh", hostname, fmt.Sprintf(". ~/.jupyter_venv/bin/activate && cd %s && jupyter %s", projectDir, startJupyterCommand))
+		cmd := exec.CommandContext(context.Background(), "ssh", hostname, fmt.Sprintf(". ~/.jupyter_venv/bin/activate && cd %s && jupyter %s", workspaceDir, startJupyterCommand))
 		cmd.Stdout = io.Writer(&util.DebugLogWriter{})
 		cmd.Stderr = io.Writer(&util.DebugLogWriter{})
 		if err := cmd.Run(); err != nil {
@@ -235,7 +235,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, workspace
 	}()
 
 	// Forward the IDE port
-	browserPort, errChan := tailscale.ForwardPort(workspaceId, projectName, 8888, activeProfile)
+	browserPort, errChan := tailscale.ForwardPort(workspaceId, 8888, activeProfile)
 	if browserPort == nil {
 		if err := <-errChan; err != nil {
 			return err
@@ -246,7 +246,7 @@ func startJupyterServer(hostname string, activeProfile config.Profile, workspace
 	ideURL := fmt.Sprintf("http://localhost:%d", *browserPort)
 	waitForPort(*browserPort)
 
-	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", projectName, ideURL))
+	views.RenderInfoMessageBold(fmt.Sprintf("Forwarded %s Jupyter Notebook port to %s.\nOpening browser...\n", workspaceId, ideURL))
 
 	if err := browser.OpenURL(ideURL); err != nil {
 		log.Error("Error opening URL: " + err.Error())

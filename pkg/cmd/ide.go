@@ -9,6 +9,7 @@ import (
 	"github.com/daytonaio/daytona/cmd/daytona/config"
 	"github.com/daytonaio/daytona/internal/jetbrains"
 	"github.com/daytonaio/daytona/internal/util"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	ide_util "github.com/daytonaio/daytona/pkg/ide"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 	"github.com/daytonaio/daytona/pkg/views"
@@ -46,6 +47,21 @@ var ideCmd = &cobra.Command{
 		switch chosenIde.Id {
 		case "vscode":
 			ide_util.CheckAndAlertVSCodeInstalled()
+		case "codium":
+			_, err := ide_util.GetCodiumBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
+		case "code-insiders":
+			_, err := ide_util.GetVSCodeInsidersBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
+		case "codium-insiders":
+			_, err := ide_util.GetCodiumInsidersBinaryPath()
+			if err != nil {
+				log.Error(err)
+			}
 		case "cursor":
 			_, err := ide_util.GetCursorBinaryPath()
 			if err != nil {
@@ -53,6 +69,11 @@ var ideCmd = &cobra.Command{
 			}
 		case "fleet":
 			if err := ide_util.CheckFleetInstallation(); err != nil {
+				log.Error(err)
+			}
+		case "positron":
+			_, err := ide_util.GetPositronBinaryPath()
+			if err != nil {
 				log.Error(err)
 			}
 		case "zed":
@@ -76,7 +97,11 @@ var ideCmd = &cobra.Command{
 
 		c.DefaultIdeId = chosenIde.Id
 
-		telemetry.AdditionalData["ide"] = chosenIde.Id
+		event := telemetry.NewCliEvent(telemetry.CliEventDefaultIdeSet, nil, []string{}, nil, map[string]interface{}{"ide": chosenIde.Id})
+		telemetryErr := common.TrackTelemetryEvent(event, config.GetClientId())
+		if telemetryErr != nil {
+			log.Trace(telemetryErr)
+		}
 
 		err = c.Save()
 		if err != nil {

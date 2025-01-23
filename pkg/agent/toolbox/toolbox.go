@@ -13,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/git"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/lsp"
 	"github.com/daytonaio/daytona/pkg/agent/toolbox/process"
+	"github.com/daytonaio/daytona/pkg/agent/toolbox/process/session"
 	"github.com/daytonaio/daytona/pkg/api"
 	"github.com/daytonaio/daytona/pkg/api/middlewares"
 	"github.com/gin-gonic/gin"
@@ -20,19 +21,20 @@ import (
 )
 
 type Server struct {
-	ProjectDir string
+	ConfigDir    string
+	WorkspaceDir string
 }
 
-type ProjectDirResponse struct {
+type WorkspaceDirResponse struct {
 	Dir string `json:"dir"`
-} // @name ProjectDirResponse
+} // @name WorkspaceDirResponse
 
-func (s *Server) GetProjectDir(ctx *gin.Context) {
-	projectDir := ProjectDirResponse{
-		Dir: s.ProjectDir,
+func (s *Server) GetWorkspaceDir(ctx *gin.Context) {
+	workspaceDir := WorkspaceDirResponse{
+		Dir: s.WorkspaceDir,
 	}
 
-	ctx.JSON(200, projectDir)
+	ctx.JSON(200, workspaceDir)
 }
 
 func (s *Server) Start() error {
@@ -41,12 +43,12 @@ func (s *Server) Start() error {
 	r.Use(middlewares.LoggingMiddleware())
 	binding.Validator = new(api.DefaultValidator)
 
-	r.GET("/project-dir", s.GetProjectDir)
+	r.GET("/workspace-dir", s.GetWorkspaceDir)
 
 	fsController := r.Group("/files")
 	{
 		// read operations
-		fsController.GET("/", fs.ListFiles)
+		fsController.GET("", fs.ListFiles)
 		fsController.GET("/download", fs.DownloadFile)
 		fsController.GET("/find", fs.FindInFiles)
 		fsController.GET("/info", fs.GetFileInfo)
@@ -60,12 +62,21 @@ func (s *Server) Start() error {
 		fsController.POST("/upload", fs.UploadFile)
 
 		// delete operations
-		fsController.DELETE("/", fs.DeleteFile)
+		fsController.DELETE("", fs.DeleteFile)
 	}
 
 	processController := r.Group("/process")
 	{
-		processController.POST("/execute", process.ExecuteCommand)
+		processController.POST("/execute", process.ExecuteCommand(s.WorkspaceDir))
+
+		sessionController := processController.Group("/session")
+		{
+			sessionController.GET("", session.ListSessions)
+			sessionController.POST("", session.CreateSession(s.WorkspaceDir, s.ConfigDir))
+			sessionController.POST("/:sessionId/exec", session.SessionExecuteCommand(s.ConfigDir))
+			sessionController.DELETE("/:sessionId", session.DeleteSession(s.ConfigDir))
+			sessionController.GET("/:sessionId/command/:commandId/logs", session.GetSessionCommandLogs(s.ConfigDir))
+		}
 	}
 
 	gitController := r.Group("/git")

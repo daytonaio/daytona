@@ -1,9 +1,9 @@
 ## daytona target set-default
 
-Set target to be used by default
+Set default target
 
 ```
-daytona target set-default [TARGET_NAME] [flags]
+daytona target set-default [TARGET] [flags]
 ```
 
 ### Options inherited from parent commands
@@ -14,5 +14,5 @@ daytona target set-default [TARGET_NAME] [flags]
 
 ### SEE ALSO
 
-* [daytona target](daytona_target.md)	 - Manage provider targets
+* [daytona target](daytona_target.md)	 - Manage targets
 

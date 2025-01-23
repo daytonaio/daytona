@@ -8,31 +8,32 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/daytonaio/daytona/pkg/containerregistry"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/logs"
+	"github.com/daytonaio/daytona/pkg/models"
 )
 
 type IBuilder interface {
-	Build(build Build) (string, string, error)
+	Build(build models.Build) (string, string, error)
 	CleanUp() error
-	Publish(build Build) error
-	GetImageName(build Build) (string, error)
+	Publish(build models.Build) error
+	GetImageName(build models.Build) (string, error)
 }
 
 type Builder struct {
 	id                          string
-	projectDir                  string
+	workspaceDir                string
 	image                       string
-	containerRegistry           *containerregistry.ContainerRegistry
-	buildImageContainerRegistry *containerregistry.ContainerRegistry
-	buildStore                  Store
-	buildImageNamespace         string
-	loggerFactory               logs.LoggerFactory
-	defaultProjectImage         string
-	defaultProjectUser          string
+	containerRegistries         common.ContainerRegistries
+	buildImageContainerRegistry *models.ContainerRegistry
+
+	buildImageNamespace   string
+	loggerFactory         logs.ILoggerFactory
+	defaultWorkspaceImage string
+	defaultWorkspaceUser  string
 }
 
-func (b *Builder) GetImageName(build Build) (string, error) {
+func (b *Builder) GetImageName(build models.Build) (string, error) {
 	hash, err := build.GetBuildHash()
 	if err != nil {
 		return "", err
@@ -44,7 +45,7 @@ func (b *Builder) GetImageName(build Build) (string, error) {
 	name := hex.EncodeToString(nameBytes[:])[:16]
 
 	namespace := b.buildImageNamespace
-	imageName := fmt.Sprintf("%s%s/p-%s:%s", b.buildImageContainerRegistry.Server, namespace, name, tag)
+	imageName := fmt.Sprintf("%s%s/w-%s:%s", b.buildImageContainerRegistry.Server, namespace, name, tag)
 
 	return imageName, nil
 }

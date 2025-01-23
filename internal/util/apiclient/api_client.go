@@ -5,7 +5,6 @@ package apiclient
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -14,6 +13,7 @@ import (
 	"github.com/daytonaio/daytona/internal"
 	"github.com/daytonaio/daytona/internal/constants"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/daytonaio/daytona/pkg/telemetry"
 )
 
@@ -61,8 +61,9 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
 		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
 		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, config.GetClientId())
-		if internal.WorkspaceMode() {
-			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_PROJECT_SOURCE))
+
+		if common.AgentMode() {
+			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_AGENT_MODE_SOURCE))
 		} else {
 			clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.CLI_SOURCE))
 		}
@@ -85,6 +86,33 @@ func GetApiClient(profile *config.Profile) (*apiclient.APIClient, error) {
 	}
 
 	apiClient = newApiClient
+	return apiClient, nil
+}
+
+func GetRunnerApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (*apiclient.APIClient, error) {
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
+		{
+			URL: apiUrl,
+		},
+	}
+
+	clientConfig.AddDefaultHeader("Authorization", fmt.Sprintf("Bearer %s", apiKey))
+	clientConfig.AddDefaultHeader(CLIENT_VERSION_HEADER, internal.Version)
+
+	if telemetryEnabled {
+		clientConfig.AddDefaultHeader(telemetry.ENABLED_HEADER, "true")
+		clientConfig.AddDefaultHeader(telemetry.SESSION_ID_HEADER, internal.SESSION_ID)
+		clientConfig.AddDefaultHeader(telemetry.CLIENT_ID_HEADER, clientId)
+		clientConfig.AddDefaultHeader(telemetry.SOURCE_HEADER, string(telemetry.RUNNER_SOURCE))
+	}
+
+	apiClient = apiclient.NewAPIClient(clientConfig)
+
+	apiClient.GetConfig().HTTPClient = &http.Client{
+		Transport: http.DefaultTransport,
+	}
+
 	return apiClient, nil
 }
 
@@ -115,48 +143,34 @@ func GetAgentApiClient(apiUrl, apiKey, clientId string, telemetryEnabled bool) (
 	return apiClient, nil
 }
 
-func GetWorkspace(workspaceNameOrId string, verbose bool) (*apiclient.WorkspaceDTO, error) {
+func GetTarget(targetNameOrId string) (*apiclient.TargetDTO, int, error) {
 	ctx := context.Background()
 
 	apiClient, err := GetApiClient(nil)
 	if err != nil {
-		return nil, err
+		return nil, -1, err
 	}
 
-	workspace, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceNameOrId).Verbose(verbose).Execute()
+	target, res, err := apiClient.TargetAPI.FindTarget(ctx, targetNameOrId).Execute()
 	if err != nil {
-		return nil, HandleErrorResponse(res, err)
+		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
 
-	return workspace, nil
+	return target, res.StatusCode, nil
 }
 
-func GetFirstWorkspaceProjectName(workspaceId string, projectName string, profile *config.Profile) (string, error) {
+func GetWorkspace(workspaceNameOrId string) (*apiclient.WorkspaceDTO, int, error) {
 	ctx := context.Background()
 
-	apiClient, err := GetApiClient(profile)
+	apiClient, err := GetApiClient(nil)
 	if err != nil {
-		return "", err
+		return nil, -1, err
 	}
 
-	wsInfo, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, workspaceId).Execute()
+	workspace, res, err := apiClient.WorkspaceAPI.FindWorkspace(ctx, workspaceNameOrId).Execute()
 	if err != nil {
-		return "", HandleErrorResponse(res, err)
+		return nil, res.StatusCode, HandleErrorResponse(res, err)
 	}
 
-	if projectName == "" {
-		if len(wsInfo.Projects) == 0 {
-			return "", errors.New("no projects found in workspace")
-		}
-
-		return wsInfo.Projects[0].Name, nil
-	}
-
-	for _, project := range wsInfo.Projects {
-		if project.Name == projectName {
-			return project.Name, nil
-		}
-	}
-
-	return "", errors.New("project not found in workspace")
+	return workspace, res.StatusCode, nil
 }

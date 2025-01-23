@@ -13,8 +13,8 @@ import (
 
 	"github.com/daytonaio/daytona/pkg/api/controllers"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider/dto"
-	"github.com/daytonaio/daytona/pkg/apikey"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
+	"github.com/daytonaio/daytona/pkg/models"
 	"github.com/daytonaio/daytona/pkg/server"
 	"github.com/gin-gonic/gin"
 )
@@ -25,16 +25,16 @@ import (
 //	@Summary		List Git providers
 //	@Description	List Git providers
 //	@Produce		json
-//	@Success		200	{array}	gitprovider.GitProviderConfig
+//	@Success		200	{array}	models.GitProviderConfig
 //	@Router			/gitprovider [get]
 //
 //	@id				ListGitProviders
 func ListGitProviders(ctx *gin.Context) {
-	var response []*gitprovider.GitProviderConfig
+	var response []*models.GitProviderConfig
 
 	server := server.GetInstance(nil)
 
-	response, err := server.GitProviderService.ListConfigs()
+	response, err := server.GitProviderService.ListConfigs(ctx.Request.Context())
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to list git providers: %w", err))
 		return
@@ -55,7 +55,7 @@ func ListGitProviders(ctx *gin.Context) {
 //	@Description	List Git providers for url
 //	@Produce		json
 //	@Param			url	path	string	true	"Url"
-//	@Success		200	{array}	gitprovider.GitProviderConfig
+//	@Success		200	{array}	models.GitProviderConfig
 //	@Router			/gitprovider/for-url/{url} [get]
 //
 //	@id				ListGitProvidersForUrl
@@ -70,14 +70,14 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	gitProviders, err := server.GitProviderService.ListConfigsForUrl(decodedUrl)
+	gitProviders, err := server.GitProviderService.ListConfigsForUrl(ctx.Request.Context(), decodedUrl)
 	if err != nil {
 		ctx.AbortWithError(http.StatusInternalServerError, fmt.Errorf("failed to get git provider for url: %w", err))
 		return
 	}
 
 	apiKeyType, ok := ctx.Get("apiKeyType")
-	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
 		for _, gitProvider := range gitProviders {
 			gitProvider.Token = ""
 		}
@@ -86,23 +86,23 @@ func ListGitProvidersForUrl(ctx *gin.Context) {
 	ctx.JSON(200, gitProviders)
 }
 
-// GetGitProvider 			godoc
+// FindGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git provider
-//	@Description	Get Git provider
+//	@Summary		Find Git provider
+//	@Description	Find Git provider
 //	@Produce		plain
 //	@Param			gitProviderId	path		string	true	"ID"
-//	@Success		200				{object}	gitprovider.GitProviderConfig
+//	@Success		200				{object}	models.GitProviderConfig
 //	@Router			/gitprovider/{gitProviderId} [get]
 //
-//	@id				GetGitProvider
-func GetGitProvider(ctx *gin.Context) {
+//	@id				FindGitProvider
+func FindGitProvider(ctx *gin.Context) {
 	id := ctx.Param("gitProviderId")
 
 	server := server.GetInstance(nil)
 
-	gitProvider, err := server.GitProviderService.GetConfig(id)
+	gitProvider, err := server.GitProviderService.FindConfig(ctx.Request.Context(), id)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -113,25 +113,25 @@ func GetGitProvider(ctx *gin.Context) {
 	}
 
 	apiKeyType, ok := ctx.Get("apiKeyType")
-	if !ok || apiKeyType == apikey.ApiKeyTypeClient {
+	if !ok || apiKeyType == models.ApiKeyTypeClient {
 		gitProvider.Token = ""
 	}
 
 	ctx.JSON(200, gitProvider)
 }
 
-// GetGitProviderIdForUrl 			godoc
+// FindGitProviderIdForUrl 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Get Git provider ID
-//	@Description	Get Git provider ID
+//	@Summary		Find Git provider ID
+//	@Description	Find Git provider ID
 //	@Produce		plain
 //	@Param			url	path		string	true	"Url"
 //	@Success		200	{string}	providerId
 //	@Router			/gitprovider/id-for-url/{url} [get]
 //
-//	@id				GetGitProviderIdForUrl
-func GetGitProviderIdForUrl(ctx *gin.Context) {
+//	@id				FindGitProviderIdForUrl
+func FindGitProviderIdForUrl(ctx *gin.Context) {
 	urlParam := ctx.Param("url")
 
 	decodedUrl, err := url.QueryUnescape(urlParam)
@@ -142,7 +142,7 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(decodedUrl)
+	_, providerId, err := server.GitProviderService.GetGitProviderForUrl(ctx.Request.Context(), decodedUrl)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -155,18 +155,18 @@ func GetGitProviderIdForUrl(ctx *gin.Context) {
 	ctx.String(200, providerId)
 }
 
-// SetGitProvider 			godoc
+// SaveGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Set Git provider
-//	@Description	Set Git provider
+//	@Summary		Save Git provider
+//	@Description	Save Git provider
 //	@Param			gitProviderConfig	body	SetGitProviderConfig	true	"Git provider"
 //	@Produce		json
 //	@Success		200
 //	@Router			/gitprovider [put]
 //
-//	@id				SetGitProvider
-func SetGitProvider(ctx *gin.Context) {
+//	@id				SaveGitProvider
+func SaveGitProvider(ctx *gin.Context) {
 	var setConfigDto dto.SetGitProviderConfig
 
 	err := ctx.BindJSON(&setConfigDto)
@@ -175,7 +175,7 @@ func SetGitProvider(ctx *gin.Context) {
 		return
 	}
 
-	gitProviderConfig := gitprovider.GitProviderConfig{
+	gitProviderConfig := models.GitProviderConfig{
 		Id:            setConfigDto.Id,
 		ProviderId:    setConfigDto.ProviderId,
 		Token:         setConfigDto.Token,
@@ -194,7 +194,7 @@ func SetGitProvider(ctx *gin.Context) {
 
 	server := server.GetInstance(nil)
 
-	err = server.GitProviderService.SetGitProviderConfig(&gitProviderConfig)
+	err = server.GitProviderService.SaveConfig(ctx.Request.Context(), &gitProviderConfig)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {
@@ -207,23 +207,23 @@ func SetGitProvider(ctx *gin.Context) {
 	ctx.JSON(200, nil)
 }
 
-// RemoveGitProvider 			godoc
+// DeleteGitProvider 			godoc
 //
 //	@Tags			gitProvider
-//	@Summary		Remove Git provider
-//	@Description	Remove Git provider
+//	@Summary		Delete Git provider
+//	@Description	Delete Git provider
 //	@Param			gitProviderId	path	string	true	"Git provider"
 //	@Produce		json
 //	@Success		200
 //	@Router			/gitprovider/{gitProviderId} [delete]
 //
-//	@id				RemoveGitProvider
-func RemoveGitProvider(ctx *gin.Context) {
+//	@id				DeleteGitProvider
+func DeleteGitProvider(ctx *gin.Context) {
 	gitProviderId := ctx.Param("gitProviderId")
 
 	server := server.GetInstance(nil)
 
-	err := server.GitProviderService.RemoveGitProvider(gitProviderId)
+	err := server.GitProviderService.DeleteConfig(ctx.Request.Context(), gitProviderId)
 	if err != nil {
 		statusCode, message, codeErr := controllers.GetHTTPStatusCodeAndMessageFromError(err)
 		if codeErr != nil {

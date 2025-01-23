@@ -12,8 +12,8 @@
       "program": "${workspaceFolder}/cmd/daytona",
       "console": "integratedTerminal",
       "env": {
-        "DAYTONA_WS_ID": "WS_ID",
-        "DAYTONA_WS_PROJECT_NAME": "PROJECT_NAME",
+        "DAYTONA_TARGET_ID": "TARGET_ID",
+        "DAYTONA_WORKSPACE_ID": "WORKSPACE_ID",
         "DAYTONA_SERVER_URL": "http://localhost:3986",
         "DAYTONA_SERVER_API_KEY": "1234567890",
       },
@@ -49,6 +49,22 @@
       "env": {
         "DAYTONA_DEV": "1",
         "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
+      }
+    },
+    {
+      "name": "Runner",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/cmd/daytona",
+      "console": "integratedTerminal",
+      "args": [
+        "runner",
+        "serve"
+      ],
+      "env": {
+        "DAYTONA_DEV": "1",
+        "DAYTONA_RUNNER_CONFIG_DIR": "/home/daytona/.config/daytona-runner",
       }
     }
   ]

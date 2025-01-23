@@ -7,14 +7,15 @@ import (
 	"context"
 
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views/server"
 	"github.com/spf13/cobra"
 )
 
 var listCmd = &cobra.Command{
 	Use:     "list",
-	Aliases: []string{"ls"},
 	Short:   "Lists Daytona Server Log Files",
+	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 

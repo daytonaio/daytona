@@ -36,18 +36,21 @@ import (
 	"github.com/daytonaio/daytona/pkg/api/controllers/binary"
 	"github.com/daytonaio/daytona/pkg/api/controllers/build"
 	"github.com/daytonaio/daytona/pkg/api/controllers/containerregistry"
+	"github.com/daytonaio/daytona/pkg/api/controllers/env"
 	"github.com/daytonaio/daytona/pkg/api/controllers/gitprovider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/health"
+	"github.com/daytonaio/daytona/pkg/api/controllers/job"
 	log_controller "github.com/daytonaio/daytona/pkg/api/controllers/log"
-	"github.com/daytonaio/daytona/pkg/api/controllers/profiledata"
-	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig"
-	"github.com/daytonaio/daytona/pkg/api/controllers/projectconfig/prebuild"
-	"github.com/daytonaio/daytona/pkg/api/controllers/provider"
+	"github.com/daytonaio/daytona/pkg/api/controllers/runner"
+	"github.com/daytonaio/daytona/pkg/api/controllers/runner/provider"
 	"github.com/daytonaio/daytona/pkg/api/controllers/sample"
 	"github.com/daytonaio/daytona/pkg/api/controllers/server"
 	"github.com/daytonaio/daytona/pkg/api/controllers/target"
+	"github.com/daytonaio/daytona/pkg/api/controllers/targetconfig"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace"
 	"github.com/daytonaio/daytona/pkg/api/controllers/workspace/toolbox"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspacetemplate"
+	"github.com/daytonaio/daytona/pkg/api/controllers/workspacetemplate/prebuild"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -100,15 +103,14 @@ func (a *ApiServer) Start() error {
 
 	binding.Validator = new(DefaultValidator)
 
+	a.router = gin.New()
+	a.router.Use(gin.Recovery())
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
-		a.router = gin.Default()
 		a.router.Use(cors.New(cors.Config{
 			AllowAllOrigins: true,
 		}))
 	} else {
 		gin.SetMode(gin.ReleaseMode)
-		a.router = gin.New()
-		a.router.Use(gin.Recovery())
 	}
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
@@ -120,7 +122,7 @@ func (a *ApiServer) Start() error {
 
 	healthController := public.Group(constants.HEALTH_CHECK_ROUTE)
 	{
-		healthController.GET("/", health.HealthCheck)
+		healthController.GET("", health.HealthCheck)
 	}
 
 	protected := a.router.Group("/")
@@ -129,8 +131,8 @@ func (a *ApiServer) Start() error {
 	serverController := protected.Group("/server")
 	{
 		serverController.GET("/config", server.GetConfig)
-		serverController.POST("/config", server.SetConfig)
-		serverController.POST("/network-key", server.GenerateNetworkKey)
+		serverController.PUT("/config", server.SaveConfig)
+		serverController.POST("/network-key", server.CreateNetworkKey)
 		serverController.GET("/logs", server.GetServerLogFiles)
 	}
 
@@ -140,28 +142,46 @@ func (a *ApiServer) Start() error {
 		binaryController.GET("/:version/:binaryName", binary.GetBinary)
 	}
 
+	targetController := protected.Group("/target")
+	{
+		targetController.GET("/:targetId", target.FindTarget)
+		targetController.GET("/:targetId/state", target.GetTargetState)
+		targetController.GET("", target.ListTargets)
+		targetController.POST("", target.CreateTarget)
+		targetController.POST("/:targetId/start", target.StartTarget)
+		targetController.POST("/:targetId/stop", target.StopTarget)
+		targetController.POST("/:targetId/restart", target.RestartTarget)
+		targetController.PATCH("/:targetId/set-default", target.SetDefaultTarget)
+		targetController.POST("/:targetId/handle-successful-creation", target.HandleSuccessfulCreation)
+		targetController.POST("/:targetId/provider-metadata", target.UpdateTargetProviderMetadata)
+		targetController.DELETE("/:targetId", target.DeleteTarget)
+	}
+
 	workspaceController := protected.Group("/workspace")
 	{
-		workspaceController.GET("/:workspaceId", workspace.GetWorkspace)
-		workspaceController.GET("/", workspace.ListWorkspaces)
-		workspaceController.POST("/", workspace.CreateWorkspace)
-		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
-		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
-		workspaceController.DELETE("/:workspaceId", workspace.RemoveWorkspace)
-		workspaceController.POST("/:workspaceId/:projectId/start", workspace.StartProject)
-		workspaceController.POST("/:workspaceId/:projectId/stop", workspace.StopProject)
-
-		toolboxController := workspaceController.Group("/:workspaceId/:projectId/toolbox")
+		toolboxController := workspaceController.Group("/:workspaceId/toolbox")
 		{
-			toolboxController.GET("/project-dir", toolbox.GetProjectDir)
+			toolboxController.GET("/workspace-dir", toolbox.GetWorkspaceDir)
 
-			toolboxController.POST("/process/execute", toolbox.ProcessExecuteCommand)
+			processController := toolboxController.Group("/process")
+			{
+				processController.POST("/execute", toolbox.ProcessExecuteCommand)
+
+				sessionController := processController.Group("/session")
+				{
+					sessionController.GET("", toolbox.ListSessions)
+					sessionController.POST("", toolbox.CreateSession)
+					sessionController.POST("/:sessionId/exec", toolbox.SessionExecuteCommand)
+					sessionController.DELETE("/:sessionId", toolbox.DeleteSession)
+					sessionController.GET("/:sessionId/command/:commandId/logs", toolbox.GetSessionCommandLogs)
+				}
+			}
 
 			fsController := toolboxController.Group("/files")
 			{
-				fsController.DELETE("/", toolbox.FsDeleteFile)
+				fsController.DELETE("", toolbox.FsDeleteFile)
 
-				fsController.GET("/", toolbox.FsListFiles)
+				fsController.GET("", toolbox.FsListFiles)
 				fsController.GET("/download", toolbox.FsDownloadFile)
 				fsController.GET("/find", toolbox.FsFindInFiles)
 				fsController.GET("/info", toolbox.FsGetFileDetails)
@@ -200,83 +220,92 @@ func (a *ApiServer) Start() error {
 				lspController.POST("/stop", toolbox.LspStop)
 			}
 		}
+
+		workspaceController.GET("/:workspaceId", workspace.FindWorkspace)
+		workspaceController.GET("/:workspaceId/state", workspace.GetWorkspaceState)
+		workspaceController.GET("", workspace.ListWorkspaces)
+		workspaceController.POST("", workspace.CreateWorkspace)
+		workspaceController.DELETE("/:workspaceId", workspace.DeleteWorkspace)
+
+		workspaceController.POST("/:workspaceId/start", workspace.StartWorkspace)
+		workspaceController.POST("/:workspaceId/stop", workspace.StopWorkspace)
+		workspaceController.POST("/:workspaceId/restart", workspace.RestartWorkspace)
+		workspaceController.POST("/:workspaceId/provider-metadata", workspace.UpdateWorkspaceProviderMetadata)
+		workspaceController.POST("/:workspaceId/labels", workspace.UpdateWorkspaceLabels)
 	}
 
-	projectConfigController := protected.Group("/project-config")
+	workspaceTemplateController := protected.Group("/workspace-template")
 	{
-		// Defining the prebuild routes first to avoid conflicts with the project config routes
+		// Defining the prebuild routes first to avoid conflicts with the workspace template routes
 		prebuildRoutePath := "/prebuild"
-		projectConfigPrebuildsGroup := projectConfigController.Group(prebuildRoutePath)
+		workspaceTemplatePrebuildsGroup := workspaceTemplateController.Group(prebuildRoutePath)
 		{
-			projectConfigPrebuildsGroup.GET("/", prebuild.ListPrebuilds)
+			workspaceTemplatePrebuildsGroup.GET("", prebuild.ListPrebuilds)
 		}
 
-		projectConfigNameGroup := projectConfigController.Group(":configName")
+		workspaceTemplateNameGroup := workspaceTemplateController.Group(":templateName")
 		{
-			projectConfigNameGroup.PUT(prebuildRoutePath+"/", prebuild.SetPrebuild)
-			projectConfigNameGroup.GET(prebuildRoutePath+"/", prebuild.ListPrebuildsForProjectConfig)
-			projectConfigNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.GetPrebuild)
-			projectConfigNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
+			workspaceTemplateNameGroup.PUT(prebuildRoutePath, prebuild.SavePrebuild)
+			workspaceTemplateNameGroup.GET(prebuildRoutePath, prebuild.ListPrebuildsForWorkspaceTemplate)
+			workspaceTemplateNameGroup.GET(prebuildRoutePath+"/:prebuildId", prebuild.FindPrebuild)
+			workspaceTemplateNameGroup.DELETE(prebuildRoutePath+"/:prebuildId", prebuild.DeletePrebuild)
 
-			projectConfigNameGroup.GET("/", projectconfig.GetProjectConfig)
-			projectConfigNameGroup.PATCH("/set-default", projectconfig.SetDefaultProjectConfig)
-			projectConfigNameGroup.DELETE("/", projectconfig.DeleteProjectConfig)
+			workspaceTemplateNameGroup.GET("", workspacetemplate.FindWorkspaceTemplate)
+			workspaceTemplateNameGroup.PATCH("/set-default", workspacetemplate.SetDefaultWorkspaceTemplate)
+			workspaceTemplateNameGroup.DELETE("", workspacetemplate.DeleteWorkspaceTemplate)
 		}
 
-		projectConfigController.GET("/", projectconfig.ListProjectConfigs)
-		projectConfigController.PUT("/", projectconfig.SetProjectConfig)
-		projectConfigController.GET("/default/:gitUrl", projectconfig.GetDefaultProjectConfig)
+		workspaceTemplateController.GET("", workspacetemplate.ListWorkspaceTemplates)
+		workspaceTemplateController.PUT("", workspacetemplate.SaveWorkspaceTemplate)
+		workspaceTemplateController.GET("/default/:gitUrl", workspacetemplate.GetDefaultWorkspaceTemplate)
 	}
 
 	public.POST(constants.WEBHOOK_EVENT_ROUTE, prebuild.ProcessGitEvent)
 
-	providerController := protected.Group("/provider")
-	{
-		providerController.POST("/install", provider.InstallProvider)
-		providerController.GET("/", provider.ListProviders)
-		providerController.POST("/:provider/uninstall", provider.UninstallProvider)
-		providerController.GET("/:provider/target-manifest", provider.GetTargetManifest)
-	}
-
-	containerRegistryController := protected.Group("/container-registry")
-	{
-		containerRegistryController.GET("/", containerregistry.ListContainerRegistries)
-		containerRegistryController.GET("/:server", containerregistry.GetContainerRegistry)
-		containerRegistryController.PUT("/:server", containerregistry.SetContainerRegistry)
-		containerRegistryController.DELETE("/:server", containerregistry.RemoveContainerRegistry)
-	}
-
 	buildController := protected.Group("/build")
 	{
-		buildController.POST("/", build.CreateBuild)
-		buildController.GET("/:buildId", build.GetBuild)
-		buildController.GET("/", build.ListBuilds)
-		buildController.DELETE("/", build.DeleteAllBuilds)
+		buildController.POST("", build.CreateBuild)
+		buildController.GET("/:buildId", build.FindBuild)
+		buildController.GET("", build.ListBuilds)
+		buildController.GET("/successful/:repoUrl", build.ListSuccessfulBuilds)
+		buildController.DELETE("", build.DeleteAllBuilds)
 		buildController.DELETE("/:buildId", build.DeleteBuild)
 		buildController.DELETE("/prebuild/:prebuildId", build.DeleteBuildsFromPrebuild)
 	}
 
-	targetController := protected.Group("/target")
+	targetConfigController := protected.Group("/target-config")
 	{
-		targetController.GET("/", target.ListTargets)
-		targetController.PUT("/", target.SetTarget)
-		targetController.PATCH("/:target/set-default", target.SetDefaultTarget)
-		targetController.DELETE("/:target", target.RemoveTarget)
+		targetConfigController.GET("", targetconfig.ListTargetConfigs)
+		targetConfigController.POST("", targetconfig.CreateTargetConfig)
+		targetConfigController.DELETE("/:configId", targetconfig.DeleteTargetConfig)
 	}
 
 	logController := protected.Group("/log")
 	{
 		logController.GET("/server", log_controller.ReadServerLog)
+
+		logController.GET("/target/:targetId", log_controller.ReadTargetLog)
+		logController.GET("/target/:targetId/write", log_controller.WriteTargetLog)
+
 		logController.GET("/workspace/:workspaceId", log_controller.ReadWorkspaceLog)
-		logController.GET("/workspace/:workspaceId/:projectName", log_controller.ReadProjectLog)
+		logController.GET("/workspace/:workspaceId/write", log_controller.WriteWorkspaceLog)
+
 		logController.GET("/build/:buildId", log_controller.ReadBuildLog)
+		logController.GET("/build/:buildId/write", log_controller.WriteBuildLog)
+
+		logController.GET("/runner/:runnerId", log_controller.ReadRunnerLog)
+		logController.GET("/runner/:runnerId/write", log_controller.WriteRunnerLog)
 	}
 
 	gitProviderController := protected.Group("/gitprovider")
 	{
-		gitProviderController.GET("/", gitprovider.ListGitProviders)
-		gitProviderController.PUT("/", gitprovider.SetGitProvider)
-		gitProviderController.DELETE("/:gitProviderId", gitprovider.RemoveGitProvider)
+		gitProviderController.GET("", gitprovider.ListGitProviders)
+		gitProviderController.PUT("", gitprovider.SaveGitProvider)
+		gitProviderController.DELETE("/:gitProviderId", gitprovider.DeleteGitProvider)
+		gitProviderController.GET("/for-url/:url", gitprovider.ListGitProvidersForUrl)
+		gitProviderController.GET("/id-for-url/:url", gitprovider.FindGitProviderIdForUrl)
+		gitProviderController.GET("/:gitProviderId", gitprovider.FindGitProvider)
+
 		gitProviderController.GET("/:gitProviderId/user", gitprovider.GetGitUser)
 		gitProviderController.GET("/:gitProviderId/namespaces", gitprovider.GetNamespaces)
 		gitProviderController.GET("/:gitProviderId/:namespaceId/repositories", gitprovider.GetRepositories)
@@ -284,34 +313,78 @@ func (a *ApiServer) Start() error {
 		gitProviderController.GET("/:gitProviderId/:namespaceId/:repositoryId/pull-requests", gitprovider.GetRepoPRs)
 		gitProviderController.POST("/context", gitprovider.GetGitContext)
 		gitProviderController.POST("/context/url", gitprovider.GetUrlFromRepository)
-		gitProviderController.GET("/for-url/:url", gitprovider.ListGitProvidersForUrl)
-		gitProviderController.GET("/id-for-url/:url", gitprovider.GetGitProviderIdForUrl)
-		gitProviderController.GET("/:gitProviderId", gitprovider.GetGitProvider)
 	}
 
 	apiKeyController := protected.Group("/apikey")
 	{
-		apiKeyController.GET("/", apikey.ListClientApiKeys)
-		apiKeyController.POST("/:apiKeyName", apikey.GenerateApiKey)
-		apiKeyController.DELETE("/:apiKeyName", apikey.RevokeApiKey)
+		apiKeyController.GET("", apikey.ListClientApiKeys)
+		apiKeyController.POST("/:apiKeyName", apikey.CreateApiKey)
+		apiKeyController.DELETE("/:apiKeyName", apikey.DeleteApiKey)
 	}
 
-	profileDataController := protected.Group("/profile")
+	envVarController := protected.Group("/env")
 	{
-		profileDataController.GET("/", profiledata.GetProfileData)
-		profileDataController.PUT("/", profiledata.SetProfileData)
-		profileDataController.DELETE("/", profiledata.DeleteProfileData)
+		envVarController.GET("", env.ListEnvironmentVariables)
+		envVarController.PUT("", env.SaveEnvironmentVariable)
+		envVarController.DELETE("/:key", env.DeleteEnvironmentVariable)
+	}
+
+	containerRegistryController := protected.Group("/container-registry")
+	{
+		containerRegistryController.GET("/:server", containerregistry.FindContainerRegistry)
+	}
+
+	jobController := protected.Group("/job")
+	{
+		jobController.GET("", job.ListJobs)
 	}
 
 	samplesController := protected.Group("/sample")
 	{
-		samplesController.GET("/", sample.ListSamples)
+		samplesController.GET("", sample.ListSamples)
 	}
 
-	projectGroup := protected.Group("/")
-	projectGroup.Use(middlewares.ProjectAuthMiddleware())
+	runnerController := protected.Group("/runner")
 	{
-		projectGroup.POST(workspaceController.BasePath()+"/:workspaceId/:projectId/state", workspace.SetProjectState)
+		// Defining the provider routes first to avoid conflicts with the runner routes
+		providerRoutePath := "/provider"
+		providersGroup := runnerController.Group(providerRoutePath)
+		{
+			providersGroup.GET("", provider.ListProviders)
+			providersGroup.GET("/for-install", provider.ListProvidersForInstall)
+		}
+
+		runnerIdGroup := runnerController.Group(":runnerId")
+		{
+			runnerIdProviderGroup := runnerIdGroup.Group(providerRoutePath)
+			{
+				runnerIdProviderGroup.GET("", provider.GetRunnerProviders)
+				runnerIdProviderGroup.POST("/:providerName/install", provider.InstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/uninstall", provider.UninstallProvider)
+				runnerIdProviderGroup.POST("/:providerName/update", provider.UpdateProvider)
+			}
+
+			runnerIdGroup.GET("", runner.FindRunner)
+			runnerIdGroup.DELETE("", runner.DeleteRunner)
+		}
+
+		runnerController.GET("", runner.ListRunners)
+		runnerController.POST("", runner.CreateRunner)
+	}
+
+	workspaceGroup := protected.Group("/")
+	workspaceGroup.Use(middlewares.WorkspaceAuthMiddleware())
+	{
+		workspaceGroup.POST(workspaceController.BasePath()+"/:workspaceId/metadata", workspace.UpdateWorkspaceMetadata)
+		workspaceGroup.POST(targetController.BasePath()+"/:targetId/metadata", target.UpdateTargetMetadata)
+	}
+
+	runnerGroup := protected.Group("/")
+	runnerGroup.Use(middlewares.RunnerAuthMiddleware())
+	{
+		runnerGroup.POST(runnerController.BasePath()+"/:runnerId/metadata", runner.UpdateRunnerMetadata)
+		runnerGroup.GET(runnerController.BasePath()+"/:runnerId/jobs", runner.ListRunnerJobs)
+		runnerGroup.POST(runnerController.BasePath()+"/:runnerId/jobs/:jobId/state", runner.UpdateJobState)
 	}
 
 	a.httpServer = &http.Server{

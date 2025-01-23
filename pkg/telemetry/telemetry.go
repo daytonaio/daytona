@@ -7,6 +7,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net/http"
+	"runtime"
+	"strings"
+	"time"
 
 	"github.com/daytonaio/daytona/internal"
 	"github.com/google/uuid"
@@ -14,10 +18,7 @@ import (
 
 type TelemetryService interface {
 	io.Closer
-	TrackCliEvent(event CliEvent, clientId string, properties map[string]interface{}) error
-	TrackServerEvent(event ServerEvent, clientId string, properties map[string]interface{}) error
-	TrackBuildRunnerEvent(event BuildRunnerEvent, clientId string, properties map[string]interface{}) error
-	SetCommonProps(properties map[string]interface{})
+	Track(event Event, clientId string) error
 }
 
 func TelemetryEnabled(ctx context.Context) bool {
@@ -58,17 +59,28 @@ func ServerId(ctx context.Context) string {
 	return id
 }
 
-type AbstractTelemetryService struct {
-	daytonaVersion string
-	TelemetryService
+func SetCommonProps(version string, source TelemetrySource, properties map[string]interface{}) {
+	properties["daytona_version"] = version
+	properties["source"] = source
+	properties["os"] = runtime.GOOS
+	properties["arch"] = runtime.GOARCH
 }
 
-func NewAbstractTelemetryService(version string) *AbstractTelemetryService {
-	return &AbstractTelemetryService{
-		daytonaVersion: version,
+func isImagePublic(imageName string) bool {
+	if strings.Count(imageName, "/") < 2 {
+		if strings.Count(imageName, "/") == 0 {
+			return isPublic("https://hub.docker.com/_/" + imageName)
+		}
+
+		return isPublic("https://hub.docker.com/r/" + imageName)
 	}
+
+	return isPublic(imageName)
 }
 
-func (t *AbstractTelemetryService) SetCommonProps(properties map[string]interface{}) {
-	properties["daytona_version"] = t.daytonaVersion
+func isPublic(url string) bool {
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	_, err := http.NewRequestWithContext(ctx, "HEAD", url, nil)
+	cancel()
+	return err == nil
 }

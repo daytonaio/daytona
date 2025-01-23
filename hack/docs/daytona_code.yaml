@@ -1,11 +1,11 @@
 name: daytona code
 synopsis: Open a workspace in your preferred IDE
-usage: daytona code [WORKSPACE] [PROJECT] [flags]
+usage: daytona code [WORKSPACE] [flags]
 options:
     - name: ide
       shorthand: i
       usage: |
-        Specify the IDE (vscode, browser, cursor, ssh, jupyter, fleet, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
+        Specify the IDE (vscode, code-insiders, browser, cursor, codium, codium-insiders, ssh, jupyter, fleet, positron, zed, windsurf, clion, goland, intellij, phpstorm, pycharm, rider, rubymine, webstorm)
     - name: "yes"
       shorthand: "y"
       default_value: "false"

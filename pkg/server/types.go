@@ -4,14 +4,19 @@
 package server
 
 import (
+	"context"
+	"net"
 	"net/http"
+
+	"github.com/daytonaio/daytona/pkg/logs"
 )
 
 type TailscaleServer interface {
-	Connect() error
-	CreateAuthKey() (string, error)
-	CreateUser() error
+	Connect(username string) error
+	CreateAuthKey(username string) (string, error)
+	CreateUser(username string) error
 	HTTPClient() *http.Client
+	Dial(ctx context.Context, network, address string) (net.Conn, error)
 	Start(errChan chan error) error
 	Stop() error
 	Purge() error
@@ -34,30 +39,21 @@ type NetworkKey struct {
 } // @name NetworkKey
 
 type Config struct {
-	ProvidersDir              string         `json:"providersDir" validate:"required"`
-	RegistryUrl               string         `json:"registryUrl" validate:"required"`
-	Id                        string         `json:"id" validate:"required"`
-	ServerDownloadUrl         string         `json:"serverDownloadUrl" validate:"required"`
-	Frps                      *FRPSConfig    `json:"frps,omitempty" validate:"optional"`
-	ApiPort                   uint32         `json:"apiPort" validate:"required"`
-	HeadscalePort             uint32         `json:"headscalePort" validate:"required"`
-	BinariesPath              string         `json:"binariesPath" validate:"required"`
-	LogFile                   *LogFileConfig `json:"logFile" validate:"required"`
-	DefaultProjectImage       string         `json:"defaultProjectImage" validate:"required"`
-	DefaultProjectUser        string         `json:"defaultProjectUser" validate:"required"`
-	BuilderImage              string         `json:"builderImage" validate:"required"`
-	LocalBuilderRegistryPort  uint32         `json:"localBuilderRegistryPort" validate:"required"`
-	LocalBuilderRegistryImage string         `json:"localBuilderRegistryImage" validate:"required"`
-	BuilderRegistryServer     string         `json:"builderRegistryServer" validate:"required"`
-	BuildImageNamespace       string         `json:"buildImageNamespace" validate:"optional"`
-	SamplesIndexUrl           string         `json:"samplesIndexUrl" validate:"optional"`
+	RegistryUrl               string              `json:"registryUrl" validate:"required"`
+	Id                        string              `json:"id" validate:"required"`
+	ServerDownloadUrl         string              `json:"serverDownloadUrl" validate:"required"`
+	Frps                      *FRPSConfig         `json:"frps,omitempty" validate:"optional"`
+	ApiPort                   uint32              `json:"apiPort" validate:"required"`
+	HeadscalePort             uint32              `json:"headscalePort" validate:"required"`
+	BinariesPath              string              `json:"binariesPath" validate:"required"`
+	LogFile                   *logs.LogFileConfig `json:"logFile" validate:"required"`
+	BuilderImage              string              `json:"builderImage" validate:"required"`
+	DefaultWorkspaceImage     string              `json:"defaultWorkspaceImage" validate:"required"`
+	DefaultWorkspaceUser      string              `json:"defaultWorkspaceUser" validate:"required"`
+	LocalBuilderRegistryPort  uint32              `json:"localBuilderRegistryPort" validate:"required"`
+	LocalBuilderRegistryImage string              `json:"localBuilderRegistryImage" validate:"required"`
+	BuilderRegistryServer     string              `json:"builderRegistryServer" validate:"required"`
+	BuildImageNamespace       string              `json:"buildImageNamespace" validate:"optional"`
+	LocalRunnerDisabled       *bool               `json:"localRunnerDisabled" validate:"optional"`
+	SamplesIndexUrl           string              `json:"samplesIndexUrl" validate:"optional"`
 } // @name ServerConfig
-
-type LogFileConfig struct {
-	Path       string `json:"path" validate:"required"`
-	MaxSize    int    `json:"maxSize" validate:"required"`
-	MaxBackups int    `json:"maxBackups" validate:"required"`
-	MaxAge     int    `json:"maxAge" validate:"required"`
-	LocalTime  bool   `json:"localTime" validate:"optional"`
-	Compress   bool   `json:"compress" validate:"optional"`
-} // @name LogFileConfig

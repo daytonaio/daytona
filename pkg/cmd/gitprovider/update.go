@@ -9,16 +9,18 @@ import (
 	"github.com/daytonaio/daytona/internal/util"
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/pkg/apiclient"
+	"github.com/daytonaio/daytona/pkg/cmd/common"
 	"github.com/daytonaio/daytona/pkg/views"
 	gitprovider_view "github.com/daytonaio/daytona/pkg/views/gitprovider"
+	"github.com/daytonaio/daytona/pkg/views/selection"
 	views_util "github.com/daytonaio/daytona/pkg/views/util"
-	"github.com/daytonaio/daytona/pkg/views/workspace/selection"
 	"github.com/spf13/cobra"
 )
 
-var gitProviderUpdateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Update a Git provider",
+var updateCmd = &cobra.Command{
+	Use:     "update",
+	Short:   "Update a Git provider",
+	Aliases: common.GetAliases("update"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
 
@@ -67,7 +69,7 @@ var gitProviderUpdateCmd = &cobra.Command{
 			return err
 		}
 
-		res, err = apiClient.GitProviderAPI.SetGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
+		res, err = apiClient.GitProviderAPI.SaveGitProvider(ctx).GitProviderConfig(setGitProviderConfig).Execute()
 		if err != nil {
 			return apiclient_util.HandleErrorResponse(res, err)
 		}

@@ -23,9 +23,9 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %d", views.GetPropertyKey("API Port: "), config.ApiPort) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project Image: "), config.DefaultProjectImage) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Workspace Image: "), config.DefaultWorkspaceImage) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Project User: "), config.DefaultProjectUser) + "\n\n"
+	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Default Workspace User: "), config.DefaultWorkspaceUser) + "\n\n"
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("FRPS Domain: "), config.Frps.Domain) + "\n\n"
 
@@ -61,7 +61,9 @@ func RenderConfig(config *server.Config) {
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Build Image Namespace: "), config.BuildImageNamespace) + "\n\n"
 
-	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Providers Dir: "), config.ProvidersDir) + "\n\n"
+	if config.LocalRunnerDisabled != nil && *config.LocalRunnerDisabled {
+		output += fmt.Sprintf("%s %s", views.GetPropertyKey("Local Runner Disabled: "), "Yes") + "\n\n"
+	}
 
 	output += fmt.Sprintf("%s %s", views.GetPropertyKey("Registry URL: "), config.RegistryUrl) + "\n\n"
 
@@ -76,9 +78,9 @@ func RenderConfig(config *server.Config) {
 	output += "If you want to connect to the server remotely:\n\n"
 
 	output += "1. Create an API key on this machine: "
-	output += lipgloss.NewStyle().Foreground(views.Green).Render("daytona api-key new") + "\n"
+	output += lipgloss.NewStyle().Foreground(views.Green).Render("daytona api-key create") + "\n"
 	output += "2. Add a profile on the client machine: \n\t"
-	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile add -a %s -k API_KEY", apiUrl))
+	output += lipgloss.NewStyle().Foreground(views.Green).Render(fmt.Sprintf("daytona profile create -a %s -k API_KEY", apiUrl))
 
 	views.RenderContainerLayout(views.GetInfoMessage(output))
 }

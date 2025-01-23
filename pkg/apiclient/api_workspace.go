@@ -34,7 +34,7 @@ func (r ApiCreateWorkspaceRequest) Workspace(workspace CreateWorkspaceDTO) ApiCr
 	return r
 }
 
-func (r ApiCreateWorkspaceRequest) Execute() (*Workspace, *http.Response, error) {
+func (r ApiCreateWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
 	return r.ApiService.CreateWorkspaceExecute(r)
 }
 
@@ -55,13 +55,13 @@ func (a *WorkspaceAPIService) CreateWorkspace(ctx context.Context) ApiCreateWork
 
 // Execute executes the request
 //
-//	@return Workspace
-func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*Workspace, *http.Response, error) {
+//	@return WorkspaceDTO
+func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest) (*WorkspaceDTO, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Workspace
+		localVarReturnValue *WorkspaceDTO
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateWorkspace")
@@ -148,259 +148,7 @@ func (a *WorkspaceAPIService) CreateWorkspaceExecute(r ApiCreateWorkspaceRequest
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiGetWorkspaceRequest struct {
-	ctx         context.Context
-	ApiService  *WorkspaceAPIService
-	workspaceId string
-	verbose     *bool
-}
-
-// Verbose
-func (r ApiGetWorkspaceRequest) Verbose(verbose bool) ApiGetWorkspaceRequest {
-	r.verbose = &verbose
-	return r
-}
-
-func (r ApiGetWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
-	return r.ApiService.GetWorkspaceExecute(r)
-}
-
-/*
-GetWorkspace Get workspace info
-
-Get workspace info
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId Workspace ID or Name
-	@return ApiGetWorkspaceRequest
-*/
-func (a *WorkspaceAPIService) GetWorkspace(ctx context.Context, workspaceId string) ApiGetWorkspaceRequest {
-	return ApiGetWorkspaceRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
-	}
-}
-
-// Execute executes the request
-//
-//	@return WorkspaceDTO
-func (a *WorkspaceAPIService) GetWorkspaceExecute(r ApiGetWorkspaceRequest) (*WorkspaceDTO, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *WorkspaceDTO
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspace")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/workspace/{workspaceId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "")
-	}
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type ApiListWorkspacesRequest struct {
-	ctx        context.Context
-	ApiService *WorkspaceAPIService
-	verbose    *bool
-}
-
-// Verbose
-func (r ApiListWorkspacesRequest) Verbose(verbose bool) ApiListWorkspacesRequest {
-	r.verbose = &verbose
-	return r
-}
-
-func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceDTO, *http.Response, error) {
-	return r.ApiService.ListWorkspacesExecute(r)
-}
-
-/*
-ListWorkspaces List workspaces
-
-List workspaces
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ApiListWorkspacesRequest
-*/
-func (a *WorkspaceAPIService) ListWorkspaces(ctx context.Context) ApiListWorkspacesRequest {
-	return ApiListWorkspacesRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return []WorkspaceDTO
-func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]WorkspaceDTO, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []WorkspaceDTO
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspaces")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/workspace"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	if r.verbose != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "verbose", r.verbose, "")
-	}
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type ApiRemoveWorkspaceRequest struct {
+type ApiDeleteWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
@@ -408,26 +156,26 @@ type ApiRemoveWorkspaceRequest struct {
 }
 
 // Force
-func (r ApiRemoveWorkspaceRequest) Force(force bool) ApiRemoveWorkspaceRequest {
+func (r ApiDeleteWorkspaceRequest) Force(force bool) ApiDeleteWorkspaceRequest {
 	r.force = &force
 	return r
 }
 
-func (r ApiRemoveWorkspaceRequest) Execute() (*http.Response, error) {
-	return r.ApiService.RemoveWorkspaceExecute(r)
+func (r ApiDeleteWorkspaceRequest) Execute() (*http.Response, error) {
+	return r.ApiService.DeleteWorkspaceExecute(r)
 }
 
 /*
-RemoveWorkspace Remove workspace
+DeleteWorkspace Delete workspace
 
-Remove workspace
+Delete workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID
-	@return ApiRemoveWorkspaceRequest
+	@return ApiDeleteWorkspaceRequest
 */
-func (a *WorkspaceAPIService) RemoveWorkspace(ctx context.Context, workspaceId string) ApiRemoveWorkspaceRequest {
-	return ApiRemoveWorkspaceRequest{
+func (a *WorkspaceAPIService) DeleteWorkspace(ctx context.Context, workspaceId string) ApiDeleteWorkspaceRequest {
+	return ApiDeleteWorkspaceRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
@@ -435,14 +183,14 @@ func (a *WorkspaceAPIService) RemoveWorkspace(ctx context.Context, workspaceId s
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest) (*http.Response, error) {
+func (a *WorkspaceAPIService) DeleteWorkspaceExecute(r ApiDeleteWorkspaceRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodDelete
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.RemoveWorkspace")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.DeleteWorkspace")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -516,66 +264,55 @@ func (a *WorkspaceAPIService) RemoveWorkspaceExecute(r ApiRemoveWorkspaceRequest
 	return localVarHTTPResponse, nil
 }
 
-type ApiSetProjectStateRequest struct {
+type ApiFindWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
-	projectId   string
-	setState    *SetProjectState
 }
 
-// Set State
-func (r ApiSetProjectStateRequest) SetState(setState SetProjectState) ApiSetProjectStateRequest {
-	r.setState = &setState
-	return r
-}
-
-func (r ApiSetProjectStateRequest) Execute() (*http.Response, error) {
-	return r.ApiService.SetProjectStateExecute(r)
+func (r ApiFindWorkspaceRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
+	return r.ApiService.FindWorkspaceExecute(r)
 }
 
 /*
-SetProjectState Set project state
+FindWorkspace Find workspace
 
-Set project state
+Find workspace
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
-	@return ApiSetProjectStateRequest
+	@return ApiFindWorkspaceRequest
 */
-func (a *WorkspaceAPIService) SetProjectState(ctx context.Context, workspaceId string, projectId string) ApiSetProjectStateRequest {
-	return ApiSetProjectStateRequest{
+func (a *WorkspaceAPIService) FindWorkspace(ctx context.Context, workspaceId string) ApiFindWorkspaceRequest {
+	return ApiFindWorkspaceRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) SetProjectStateExecute(r ApiSetProjectStateRequest) (*http.Response, error) {
+//
+//	@return WorkspaceDTO
+func (a *WorkspaceAPIService) FindWorkspaceExecute(r ApiFindWorkspaceRequest) (*WorkspaceDTO, *http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspaceDTO
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetProjectState")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.FindWorkspace")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/state"
+	localVarPath := localBasePath + "/workspace/{workspaceId}"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.setState == nil {
-		return nil, reportError("setState is required and must be specified")
-	}
 
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -587,15 +324,13 @@ func (a *WorkspaceAPIService) SetProjectStateExecute(r ApiSetProjectStateRequest
 	}
 
 	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
+	localVarHTTPHeaderAccepts := []string{"application/json"}
 
 	// set Accept header
 	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
-	// body params
-	localVarPostBody = r.setState
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
@@ -612,19 +347,19 @@ func (a *WorkspaceAPIService) SetProjectStateExecute(r ApiSetProjectStateRequest
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -632,58 +367,305 @@ func (a *WorkspaceAPIService) SetProjectStateExecute(r ApiSetProjectStateRequest
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ApiStartProjectRequest struct {
+type ApiGetWorkspaceStateRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
 	workspaceId string
-	projectId   string
 }
 
-func (r ApiStartProjectRequest) Execute() (*http.Response, error) {
-	return r.ApiService.StartProjectExecute(r)
+func (r ApiGetWorkspaceStateRequest) Execute() (*ResourceState, *http.Response, error) {
+	return r.ApiService.GetWorkspaceStateExecute(r)
 }
 
 /*
-StartProject Start project
+GetWorkspaceState Get workspace state
 
-Start project
+Get workspace state
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
-	@return ApiStartProjectRequest
+	@return ApiGetWorkspaceStateRequest
 */
-func (a *WorkspaceAPIService) StartProject(ctx context.Context, workspaceId string, projectId string) ApiStartProjectRequest {
-	return ApiStartProjectRequest{
+func (a *WorkspaceAPIService) GetWorkspaceState(ctx context.Context, workspaceId string) ApiGetWorkspaceStateRequest {
+	return ApiGetWorkspaceStateRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
-		projectId:   projectId,
 	}
 }
 
 // Execute executes the request
-func (a *WorkspaceAPIService) StartProjectExecute(r ApiStartProjectRequest) (*http.Response, error) {
+//
+//	@return ResourceState
+func (a *WorkspaceAPIService) GetWorkspaceStateExecute(r ApiGetWorkspaceStateRequest) (*ResourceState, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ResourceState
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspaceState")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/state"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiListWorkspacesRequest struct {
+	ctx        context.Context
+	ApiService *WorkspaceAPIService
+	labels     *string
+}
+
+// JSON encoded labels
+func (r ApiListWorkspacesRequest) Labels(labels string) ApiListWorkspacesRequest {
+	r.labels = &labels
+	return r
+}
+
+func (r ApiListWorkspacesRequest) Execute() ([]WorkspaceDTO, *http.Response, error) {
+	return r.ApiService.ListWorkspacesExecute(r)
+}
+
+/*
+ListWorkspaces List workspaces
+
+List workspaces
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiListWorkspacesRequest
+*/
+func (a *WorkspaceAPIService) ListWorkspaces(ctx context.Context) ApiListWorkspacesRequest {
+	return ApiListWorkspacesRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []WorkspaceDTO
+func (a *WorkspaceAPIService) ListWorkspacesExecute(r ApiListWorkspacesRequest) ([]WorkspaceDTO, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []WorkspaceDTO
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspaces")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.labels != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "labels", r.labels, "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiRestartWorkspaceRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceAPIService
+	workspaceId string
+}
+
+func (r ApiRestartWorkspaceRequest) Execute() (*http.Response, error) {
+	return r.ApiService.RestartWorkspaceExecute(r)
+}
+
+/*
+RestartWorkspace Restart workspace
+
+Restart workspace
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID or Name
+	@return ApiRestartWorkspaceRequest
+*/
+func (a *WorkspaceAPIService) RestartWorkspace(ctx context.Context, workspaceId string) ApiRestartWorkspaceRequest {
+	return ApiRestartWorkspaceRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) RestartWorkspaceExecute(r ApiRestartWorkspaceRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPost
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.StartProject")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.RestartWorkspace")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/start"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/restart"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -854,116 +836,6 @@ func (a *WorkspaceAPIService) StartWorkspaceExecute(r ApiStartWorkspaceRequest) 
 	return localVarHTTPResponse, nil
 }
 
-type ApiStopProjectRequest struct {
-	ctx         context.Context
-	ApiService  *WorkspaceAPIService
-	workspaceId string
-	projectId   string
-}
-
-func (r ApiStopProjectRequest) Execute() (*http.Response, error) {
-	return r.ApiService.StopProjectExecute(r)
-}
-
-/*
-StopProject Stop project
-
-Stop project
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId Workspace ID or Name
-	@param projectId Project ID
-	@return ApiStopProjectRequest
-*/
-func (a *WorkspaceAPIService) StopProject(ctx context.Context, workspaceId string, projectId string) ApiStopProjectRequest {
-	return ApiStopProjectRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
-		projectId:   projectId,
-	}
-}
-
-// Execute executes the request
-func (a *WorkspaceAPIService) StopProjectExecute(r ApiStopProjectRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.StopProject")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/workspace/{workspaceId}/{projectId}/stop"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"projectId"+"}", url.PathEscape(parameterValueToString(r.projectId, "projectId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.ctx != nil {
-		// API Key Authentication
-		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
-			if apiKey, ok := auth["Bearer"]; ok {
-				var key string
-				if apiKey.Prefix != "" {
-					key = apiKey.Prefix + " " + apiKey.Key
-				} else {
-					key = apiKey.Key
-				}
-				localVarHeaderParams["Authorization"] = key
-			}
-		}
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
-}
-
 type ApiStopWorkspaceRequest struct {
 	ctx         context.Context
 	ApiService  *WorkspaceAPIService
@@ -1028,6 +900,372 @@ func (a *WorkspaceAPIService) StopWorkspaceExecute(r ApiStopWorkspaceRequest) (*
 	if localVarHTTPHeaderAccept != "" {
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiUpdateWorkspaceLabelsRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceAPIService
+	workspaceId string
+	labels      *map[string]string
+}
+
+// Labels
+func (r ApiUpdateWorkspaceLabelsRequest) Labels(labels map[string]string) ApiUpdateWorkspaceLabelsRequest {
+	r.labels = &labels
+	return r
+}
+
+func (r ApiUpdateWorkspaceLabelsRequest) Execute() (*WorkspaceDTO, *http.Response, error) {
+	return r.ApiService.UpdateWorkspaceLabelsExecute(r)
+}
+
+/*
+UpdateWorkspaceLabels Update workspace labels
+
+Update workspace labels
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID or Name
+	@return ApiUpdateWorkspaceLabelsRequest
+*/
+func (a *WorkspaceAPIService) UpdateWorkspaceLabels(ctx context.Context, workspaceId string) ApiUpdateWorkspaceLabelsRequest {
+	return ApiUpdateWorkspaceLabelsRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return WorkspaceDTO
+func (a *WorkspaceAPIService) UpdateWorkspaceLabelsExecute(r ApiUpdateWorkspaceLabelsRequest) (*WorkspaceDTO, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkspaceDTO
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.UpdateWorkspaceLabels")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/labels"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.labels == nil {
+		return localVarReturnValue, nil, reportError("labels is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"*/*"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.labels
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiUpdateWorkspaceMetadataRequest struct {
+	ctx               context.Context
+	ApiService        *WorkspaceAPIService
+	workspaceId       string
+	workspaceMetadata *UpdateWorkspaceMetadataDTO
+}
+
+// Workspace Metadata
+func (r ApiUpdateWorkspaceMetadataRequest) WorkspaceMetadata(workspaceMetadata UpdateWorkspaceMetadataDTO) ApiUpdateWorkspaceMetadataRequest {
+	r.workspaceMetadata = &workspaceMetadata
+	return r
+}
+
+func (r ApiUpdateWorkspaceMetadataRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateWorkspaceMetadataExecute(r)
+}
+
+/*
+UpdateWorkspaceMetadata Update workspace metadata
+
+Update workspace metadata
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID
+	@return ApiUpdateWorkspaceMetadataRequest
+*/
+func (a *WorkspaceAPIService) UpdateWorkspaceMetadata(ctx context.Context, workspaceId string) ApiUpdateWorkspaceMetadataRequest {
+	return ApiUpdateWorkspaceMetadataRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) UpdateWorkspaceMetadataExecute(r ApiUpdateWorkspaceMetadataRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.UpdateWorkspaceMetadata")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/metadata"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.workspaceMetadata == nil {
+		return nil, reportError("workspaceMetadata is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.workspaceMetadata
+	if r.ctx != nil {
+		// API Key Authentication
+		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {
+			if apiKey, ok := auth["Bearer"]; ok {
+				var key string
+				if apiKey.Prefix != "" {
+					key = apiKey.Prefix + " " + apiKey.Key
+				} else {
+					key = apiKey.Key
+				}
+				localVarHeaderParams["Authorization"] = key
+			}
+		}
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ApiUpdateWorkspaceProviderMetadataRequest struct {
+	ctx         context.Context
+	ApiService  *WorkspaceAPIService
+	workspaceId string
+	metadata    *UpdateWorkspaceProviderMetadataDTO
+}
+
+// Provider metadata
+func (r ApiUpdateWorkspaceProviderMetadataRequest) Metadata(metadata UpdateWorkspaceProviderMetadataDTO) ApiUpdateWorkspaceProviderMetadataRequest {
+	r.metadata = &metadata
+	return r
+}
+
+func (r ApiUpdateWorkspaceProviderMetadataRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateWorkspaceProviderMetadataExecute(r)
+}
+
+/*
+UpdateWorkspaceProviderMetadata Update workspace provider metadata
+
+Update workspace provider metadata
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId Workspace ID
+	@return ApiUpdateWorkspaceProviderMetadataRequest
+*/
+func (a *WorkspaceAPIService) UpdateWorkspaceProviderMetadata(ctx context.Context, workspaceId string) ApiUpdateWorkspaceProviderMetadataRequest {
+	return ApiUpdateWorkspaceProviderMetadataRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) UpdateWorkspaceProviderMetadataExecute(r ApiUpdateWorkspaceProviderMetadataRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.UpdateWorkspaceProviderMetadata")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/provider-metadata"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.metadata == nil {
+		return nil, reportError("metadata is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.metadata
 	if r.ctx != nil {
 		// API Key Authentication
 		if auth, ok := r.ctx.Value(ContextAPIKeys).(map[string]APIKey); ok {

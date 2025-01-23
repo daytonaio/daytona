@@ -11,7 +11,9 @@ import (
 	"runtime"
 	"strings"
 
+
 	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
+	"github.com/daytonaio/daytona/pkg/common"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
 
@@ -19,8 +21,8 @@ import (
 )
 
 type Server struct {
-	ProjectDir        string
-	DefaultProjectDir string
+	WorkspaceDir        string
+	DefaultWorkspaceDir string
 }
 
 func (s *Server) Start() error {
@@ -78,13 +80,13 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh.Window) {
-	shell := s.getShell()
+	shell := common.GetShell()
 	cmd := exec.Command(shell)
 
-	cmd.Dir = s.ProjectDir
+	cmd.Dir = s.WorkspaceDir
 
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultProjectDir
+	if _, err := os.Stat(s.WorkspaceDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultWorkspaceDir
 	}
 
 	if ssh.AgentRequested(session) {
@@ -148,9 +150,9 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", "SSH_AUTH_SOCK", l.Addr().String()))
 	}
 
-	cmd.Dir = s.ProjectDir
-	if _, err := os.Stat(s.ProjectDir); os.IsNotExist(err) {
-		cmd.Dir = s.DefaultProjectDir
+	cmd.Dir = s.WorkspaceDir
+	if _, err := os.Stat(s.WorkspaceDir); os.IsNotExist(err) {
+		cmd.Dir = s.DefaultWorkspaceDir
 	}
 
 	cmd.Stdout = session
@@ -203,35 +205,39 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	}
 }
 
-func (s *Server) getShell() string {
-	out, err := exec.Command("sh", "-c", "grep '^[^#]' /etc/shells").Output()
-	if err != nil {
-		return "sh"
+func (s *Server) osSignalFrom(sig ssh.Signal) os.Signal {
+	switch sig {
+	case ssh.SIGABRT:
+		return unix.SIGABRT
+	case ssh.SIGALRM:
+		return unix.SIGALRM
+	case ssh.SIGFPE:
+		return unix.SIGFPE
+	case ssh.SIGHUP:
+		return unix.SIGHUP
+	case ssh.SIGILL:
+		return unix.SIGILL
+	case ssh.SIGINT:
+		return unix.SIGINT
+	case ssh.SIGKILL:
+		return unix.SIGKILL
+	case ssh.SIGPIPE:
+		return unix.SIGPIPE
+	case ssh.SIGQUIT:
+		return unix.SIGQUIT
+	case ssh.SIGSEGV:
+		return unix.SIGSEGV
+	case ssh.SIGTERM:
+		return unix.SIGTERM
+	case ssh.SIGUSR1:
+		return unix.SIGUSR1
+	case ssh.SIGUSR2:
+		return unix.SIGUSR2
+
+	// Unhandled, use sane fallback.
+	default:
+		return unix.SIGKILL
 	}
-
-	if strings.Contains(string(out), "/usr/bin/zsh") {
-		return "/usr/bin/zsh"
-	}
-
-	if strings.Contains(string(out), "/bin/zsh") {
-		return "/bin/zsh"
-	}
-
-	if strings.Contains(string(out), "/usr/bin/bash") {
-		return "/usr/bin/bash"
-	}
-
-	if strings.Contains(string(out), "/bin/bash") {
-		return "/bin/bash"
-	}
-
-	shellEnv, shellSet := os.LookupEnv("SHELL")
-
-	if shellSet {
-		return shellEnv
-	}
-
-	return "sh"
 }
 
 func (s *Server) sftpHandler(session ssh.Session) {

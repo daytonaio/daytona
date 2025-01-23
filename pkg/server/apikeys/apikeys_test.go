@@ -3,55 +3,63 @@
 
 package apikeys_test
 
-import "github.com/daytonaio/daytona/pkg/apikey"
+import (
+	"context"
+
+	"github.com/daytonaio/daytona/pkg/models"
+	"github.com/daytonaio/daytona/pkg/services"
+)
 
 func (s *ApiKeyServiceTestSuite) TestListClientKeys() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*services.ApiKeyDTO{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
-		expectedKeys = append(expectedKeys, apiKey)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
+		expectedKeys = append(expectedKeys, &services.ApiKeyDTO{
+			Type: apiKey.Type,
+			Name: apiKey.Name,
+		})
 	}
 
 	require := s.Require()
 
-	keys, err := s.apiKeyService.ListClientKeys()
+	keys, err := s.apiKeyService.ListClientKeys(context.TODO())
 
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, keys)
 }
 
 func (s *ApiKeyServiceTestSuite) TestRevoke() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*models.ApiKey{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames[1:]...)
-	keyNames = append(keyNames, projectKeyNames...)
+	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
 		expectedKeys = append(expectedKeys, apiKey)
 	}
 
 	require := s.Require()
 
-	err := s.apiKeyService.Revoke(clientKeyNames[0])
+	err := s.apiKeyService.Delete(context.TODO(), clientKeyNames[0])
 	require.Nil(err)
 
-	keys, err := s.apiKeyStore.List()
+	keys, err := s.apiKeyStore.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, keys)
 }
 
 func (s *ApiKeyServiceTestSuite) TestGenerate() {
-	expectedKeys := []*apikey.ApiKey{}
+	expectedKeys := []*models.ApiKey{}
 	keyNames := []string{}
 
 	keyNames = append(keyNames, clientKeyNames...)
-	keyNames = append(keyNames, projectKeyNames...)
+	keyNames = append(keyNames, workspaceKeyNames...)
 	for _, keyName := range keyNames {
-		apiKey, _ := s.apiKeyStore.FindByName(keyName)
+		apiKey, _ := s.apiKeyStore.FindByName(context.TODO(), keyName)
 		expectedKeys = append(expectedKeys, apiKey)
 	}
 
@@ -59,14 +67,14 @@ func (s *ApiKeyServiceTestSuite) TestGenerate() {
 
 	require := s.Require()
 
-	_, err := s.apiKeyService.Generate(apikey.ApiKeyTypeClient, keyName)
+	_, err := s.apiKeyService.Create(context.TODO(), models.ApiKeyTypeClient, keyName)
 	require.Nil(err)
 
-	apiKey, err := s.apiKeyStore.FindByName(keyName)
+	apiKey, err := s.apiKeyStore.FindByName(context.TODO(), keyName)
 	require.Nil(err)
 	expectedKeys = append(expectedKeys, apiKey)
 
-	apiKeys, err := s.apiKeyStore.List()
+	apiKeys, err := s.apiKeyStore.List(context.TODO())
 	require.Nil(err)
 	require.ElementsMatch(expectedKeys, apiKeys)
 }

@@ -1,5 +1,10 @@
 [
   {
+    "name": "Ada",
+    "description": "Develop Ada based applications. Includes appropriate runtime args, Ada, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-ada"
+  },
+  {
     "name": "Alpine",
     "description": "Simple Alpine container with Git installed.",
     "gitUrl": "https://github.com/daytonaio/sample-alpine"
@@ -30,9 +35,24 @@
     "gitUrl": "https://github.com/daytonaio/sample-debian"
   },
   {
+    "name": "Deno",
+    "description": "Develop Deno based web applications. Includes appropriate runtime args, Deno, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-deno"
+  },
+  {
     "name": "target",
     "description": "It is a sample institute website featuring dynamic content such as courses, achievers, and a director's column.",
     "gitUrl": "https://github.com/Prince94201/target"
+  },
+  {
+    "name": "COBOL",
+    "description": "Develop COBOL based applications. Includes appropriate runtime args, COBOL, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-cobol"
+  },
+  {
+    "name": "Fortran",
+    "description": "Develop Fortran based applications. Includes appropriate runtime args, Fortran, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-fortran"
   },
   {
     "name": "Cricket Quira",
@@ -141,6 +161,11 @@
     "gitUrl": "https://github.com/BigBang001/EchoBrain-Daytona"
   },
   {
+    "name": "Prolog",
+    "description": "Develop Prolog based applications. Includes appropriate runtime args, GNU Prolog, SWI-Prolog, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-prolog"
+  },
+  {
     "name": "Python",
     "description": "Develop Python applications.",
     "gitUrl": "https://github.com/daytonaio/sample-python"
@@ -174,6 +199,11 @@
     "name": "Python - FastAPI",
     "description": "FastAPI starter based on copier-pdm and daytona",
     "gitUrl": "https://github.com/daytonaio/sample-python-discord-image-generator"
+  },
+  {
+    "name": "Racket",
+    "description": "Develop Racket based applications. Includes appropriate runtime args, Racket and its IDE named DrRacket available through VNC, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-racket"
   },
   {
     "name": "Ruby",
@@ -230,6 +260,11 @@
     "name": "Next.js - Cal Buddy",
     "description": "Cal Buddy, is a smart calendar assistant that helps you schedule, manage, and chat with your calendar. It helps you boost your productivity with AI-powered task management.",
     "gitUrl": "https://github.com/daytonaio/sample-calendar-buddy"
+  },
+  {
+      "name": "R",
+      "description": "Develop R based applications. Includes appropriate runtime args, R, common tools, extensions, and dependencies.",
+      "gitUrl": "https://github.com/daytonaio/sample-r"
   },
   {
     "name": "React.js - TerraGrow",
@@ -700,5 +735,10 @@
     "name": "An Web site Builder with prompt",
     "description": "A simple typescript project that generates a website based on the user's prompts that is build on top of claude ai api.",
     "gitUrl": "https://github.com/saurabh007007/Dev-Vashudev"
+  },
+  {
+    "name": "Zig",
+    "description": "Develop Zig based applications. Includes appropriate runtime args, Zig, common tools, extensions, and dependencies.",
+    "gitUrl": "https://github.com/daytonaio/sample-zig"
   }
 ]
