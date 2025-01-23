@@ -8,9 +8,9 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
-	"github.com/creack/pty"
 	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/gliderlabs/ssh"
 	"github.com/pkg/sftp"
@@ -101,11 +101,20 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("SHELL=%s", shell))
-	f, err := pty.Start(cmd)
-	if err != nil {
-		log.Errorf("Unable to start command: %v", err)
-		return
+	var f io.ReadWriteCloser
+
+	if runtime.GOOS == "windows" {
+		output := Start(shell)
+		if output != nil {
+			f = output
+		}
+	} else {
+		output := Start(cmd)
+		if output != nil {
+			f = output
+		}
 	}
+	defer f.Close()
 
 	go func() {
 		for win := range winCh {

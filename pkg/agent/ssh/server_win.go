@@ -8,9 +8,10 @@ package ssh
 import (
 	"os"
 	"syscall"
-	"unsafe"
 
+	"github.com/UserExistsError/conpty"
 	"github.com/gliderlabs/ssh"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -18,15 +19,24 @@ var (
 	setConsoleWindowInfo = kernel32.NewProc("SetConsoleWindowInfo")
 )
 
-func SetPtySize(f *os.File, win ssh.Window) {
-	handle := f.Fd()
-	var rect struct {
-		Left, Top, Right, Bottom int16
+func Start(cmd interface{}) *conpty.ConPty {
+	if shell, ok := cmd.(string); ok {
+		f, err := conpty.Start(shell)
+		if err != nil {
+			log.Errorf("Unable to start ConPTY: %v", err)
+			return nil
+		}
+		return f
 	}
-	rect.Right = int16(win.Width - 1)
-	rect.Bottom = int16(win.Height - 1)
+	return nil
+}
 
-	setConsoleWindowInfo.Call(uintptr(handle), uintptr(1), uintptr(unsafe.Pointer(&rect)))
+func SetPtySize(f interface{}, win ssh.Window) {
+	if cpty, ok := f.(*conpty.ConPty); ok {
+		cpty.Resize(win.Width, win.Height)
+	} else {
+		log.Errorf("Unable to resize ConPTY")
+	}
 }
 
 func OsSignalFrom(sig ssh.Signal) os.Signal {
