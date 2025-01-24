@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/apiclient"
 )
 
-func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceStateName) error {
+func AwaitWorkspaceState(workspaceId string, expectedStateName apiclient.ModelsResourceStateName) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -22,11 +22,14 @@ func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceS
 	}
 
 	for {
-		state, _, err := apiClient.WorkspaceAPI.GetWorkspaceState(ctx, workspaceId).Execute()
+		state, res, err := apiClient.WorkspaceAPI.GetWorkspaceState(ctx, workspaceId).Execute()
 		if err != nil {
+			if expectedStateName == apiclient.ResourceStateNameDeleted && res != nil && res.StatusCode == http.StatusNotFound {
+				return nil
+			}
 			return err
 		}
-		if state.Name == stateName {
+		if state.Name == expectedStateName {
 			return nil
 		}
 		if state.Name == apiclient.ResourceStateNameError {
@@ -40,7 +43,7 @@ func AwaitWorkspaceState(workspaceId string, stateName apiclient.ModelsResourceS
 	}
 }
 
-func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateName) error {
+func AwaitTargetState(targetId string, expectedStateName apiclient.ModelsResourceStateName) error {
 	ctx := context.Background()
 
 	apiClient, err := apiclient_util.GetApiClient(nil)
@@ -49,12 +52,15 @@ func AwaitTargetState(targetId string, stateName apiclient.ModelsResourceStateNa
 	}
 
 	for {
-		state, _, err := apiClient.TargetAPI.GetTargetState(ctx, targetId).Execute()
+		state, res, err := apiClient.TargetAPI.GetTargetState(ctx, targetId).Execute()
 		if err != nil {
+			if res != nil && res.StatusCode == http.StatusNotFound && expectedStateName == apiclient.ResourceStateNameDeleted {
+				return nil
+			}
 			return err
 		}
 
-		if state.Name == stateName || state.Name == apiclient.ResourceStateNameUndefined {
+		if state.Name == expectedStateName || state.Name == apiclient.ResourceStateNameUndefined {
 			return nil
 		}
 
@@ -93,46 +99,6 @@ func AwaitProviderInstalled(runnerId, providerName, version string) error {
 			}
 		}
 
-		time.Sleep(100 * time.Millisecond)
-	}
-}
-
-func AwaitWorkspaceDeleted(workspaceId string) error {
-	ctx := context.Background()
-
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return err
-	}
-
-	for {
-		_, res, err := apiClient.WorkspaceAPI.GetWorkspaceState(ctx, workspaceId).Execute()
-		if err != nil {
-			if res != nil && res.StatusCode == http.StatusNotFound {
-				return nil
-			}
-			return err
-		}
-		time.Sleep(100 * time.Millisecond)
-	}
-}
-
-func AwaitTargetDeleted(workspaceId string) error {
-	ctx := context.Background()
-
-	apiClient, err := apiclient_util.GetApiClient(nil)
-	if err != nil {
-		return err
-	}
-
-	for {
-		_, res, err := apiClient.TargetAPI.GetTargetState(ctx, workspaceId).Execute()
-		if err != nil {
-			if res != nil && res.StatusCode == http.StatusNotFound {
-				return nil
-			}
-			return err
-		}
 		time.Sleep(100 * time.Millisecond)
 	}
 }
