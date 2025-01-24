@@ -9,8 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
-	"strings"
-
 
 	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -202,41 +200,6 @@ func (s *Server) handleNonPty(session ssh.Session) {
 	err = session.Exit(0)
 	if err != nil {
 		log.Warnf("Unable to exit session: %v", err)
-	}
-}
-
-func (s *Server) osSignalFrom(sig ssh.Signal) os.Signal {
-	switch sig {
-	case ssh.SIGABRT:
-		return unix.SIGABRT
-	case ssh.SIGALRM:
-		return unix.SIGALRM
-	case ssh.SIGFPE:
-		return unix.SIGFPE
-	case ssh.SIGHUP:
-		return unix.SIGHUP
-	case ssh.SIGILL:
-		return unix.SIGILL
-	case ssh.SIGINT:
-		return unix.SIGINT
-	case ssh.SIGKILL:
-		return unix.SIGKILL
-	case ssh.SIGPIPE:
-		return unix.SIGPIPE
-	case ssh.SIGQUIT:
-		return unix.SIGQUIT
-	case ssh.SIGSEGV:
-		return unix.SIGSEGV
-	case ssh.SIGTERM:
-		return unix.SIGTERM
-	case ssh.SIGUSR1:
-		return unix.SIGUSR1
-	case ssh.SIGUSR2:
-		return unix.SIGUSR2
-
-	// Unhandled, use sane fallback.
-	default:
-		return unix.SIGKILL
 	}
 }
 

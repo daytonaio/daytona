@@ -112,11 +112,11 @@ func (a *Agent) startWorkspaceMode() error {
 			if exists {
 				log.Info("Repository already exists. Skipping clone...")
 			} else {
-        if stat, err := os. Stat(a.Config.WorkspaceDir); err == nil {
-          ownerVid, err := fs.GetFileUid(stat)
-          if err != nil {
-            log.Error(err)
-          }
+				if stat, err := os.Stat(a.Config.WorkspaceDir); err == nil {
+					ownerUid, err := fs.GetFileUid(stat)
+					if err != nil {
+						log.Error(err)
+					}
 					if ownerUid != uint32(os.Getuid()) {
 						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", a.Workspace.User, a.Workspace.User), a.Config.WorkspaceDir)
 						err = chownCmd.Run()
