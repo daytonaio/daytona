@@ -35,7 +35,7 @@ func DeleteWorkspace(ctx context.Context, apiClient *apiclient.APIClient, worksp
 			return err
 		}
 
-		err = AwaitWorkspaceDeleted(workspaceId)
+		err = AwaitWorkspaceState(workspaceId, apiclient.ResourceStateNameDeleted)
 		if err != nil {
 			return err
 		}
