@@ -18,7 +18,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.1.0
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/lipgloss v0.13.0
-	github.com/compose-spec/compose-go/v2 v2.1.3
+	github.com/compose-spec/compose-go/v2 v2.4.1
 	github.com/creack/pty v1.1.23
 	github.com/docker/docker v27.2.0+incompatible
 	github.com/docker/go-connections v0.5.0
