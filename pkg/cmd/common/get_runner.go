@@ -37,6 +37,13 @@ func GetRunnerFlow(apiClient *apiclient.APIClient, action string) (*runner.Runne
 		return nil, nil
 	}
 
+	if len(runners) == 1 {
+		return &runner.RunnerView{
+			Id:   runners[0].Id,
+			Name: runners[0].Name,
+		}, nil
+	}
+
 	selectedRunner, err := runner.GetRunnerFromPrompt(runners, activeProfile.Name, action)
 	if err != nil {
 		if common.IsCtrlCAbort(err) {

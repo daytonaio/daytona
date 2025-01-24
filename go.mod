@@ -18,7 +18,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.1.0
 	github.com/charmbracelet/huh v0.6.0
 	github.com/charmbracelet/lipgloss v0.13.0
-	github.com/compose-spec/compose-go/v2 v2.1.3
+	github.com/compose-spec/compose-go/v2 v2.4.1
 	github.com/creack/pty v1.1.23
 	github.com/docker/docker v27.2.0+incompatible
 	github.com/docker/go-connections v0.5.0
@@ -27,8 +27,8 @@ require (
 	github.com/gin-contrib/cors v1.6.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/glebarez/sqlite v1.11.0
-	github.com/gliderlabs/ssh v0.3.7
-	github.com/go-git/go-git/v5 v5.12.1-0.20240617075238-c127d1b35535
+	github.com/gliderlabs/ssh v0.3.8
+	github.com/go-git/go-git/v5 v5.13.0
 	github.com/go-playground/validator/v10 v10.19.0
 	github.com/go-playground/webhooks/v6 v6.4.0
 	github.com/goccy/go-json v0.10.2
@@ -53,7 +53,7 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/sourcegraph/jsonrpc2 v0.2.0
 	github.com/spf13/cobra v1.8.1
-	github.com/stretchr/testify v1.9.0
+	github.com/stretchr/testify v1.10.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0
 	github.com/swaggo/swag v1.16.3
@@ -114,7 +114,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.11.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/creachadair/mds v0.14.5 // indirect
-	github.com/cyphar/filepath-securejoin v0.2.4 // indirect
+	github.com/cyphar/filepath-securejoin v0.2.5 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/davidmz/go-pageant v1.0.2 // indirect
 	github.com/dblohm7/wingoes v0.0.0-20240123200102-b75a8a7d7eb0 // indirect
@@ -136,7 +136,7 @@ require (
 	github.com/glebarez/go-sqlite v1.22.0 // indirect
 	github.com/go-fed/httpsig v1.1.0 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
-	github.com/go-git/go-billy/v5 v5.5.1-0.20240427054813-8453aa90c6ec // indirect
+	github.com/go-git/go-billy/v5 v5.6.0 // indirect
 	github.com/go-gormigrate/gormigrate/v2 v2.1.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.2 // indirect
 	github.com/go-json-experiment/json v0.0.0-20231102232822-2e55bd4e08b0 // indirect
@@ -241,7 +241,7 @@ require (
 	github.com/samber/lo v1.47.0 // indirect
 	github.com/sasha-s/go-deadlock v0.3.5 // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
-	github.com/skeema/knownhosts v1.2.2 // indirect
+	github.com/skeema/knownhosts v1.3.0 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
