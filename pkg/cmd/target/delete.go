@@ -198,7 +198,7 @@ func deleteTarget(ctx context.Context, activeProfileId string, apiClient *apicli
 			return err
 		}
 
-		err = common.AwaitTargetDeleted(target.Id)
+		err = common.AwaitTargetState(target.Id, apiclient.ResourceStateNameDeleted)
 		if err != nil {
 			return err
 		}
