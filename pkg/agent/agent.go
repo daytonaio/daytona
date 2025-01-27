@@ -10,6 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
+	"runtime"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -118,10 +119,26 @@ func (a *Agent) startWorkspaceMode() error {
 						log.Error(err)
 					}
 					if ownerUid != uint32(os.Getuid()) {
-						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", a.Workspace.User, a.Workspace.User), a.Config.WorkspaceDir)
-						err = chownCmd.Run()
-						if err != nil {
-							log.Error(err)
+						user := a.Workspace.User
+						directory := a.Config.WorkspaceDir
+						if runtime.GOOS == "windows" {
+							takeownCmd := exec.Command("takeown", "/F", directory, "/R", "/D", "Y")
+							err := takeownCmd.Run()
+							if err != nil {
+								log.Errorf("Failed to take ownership: %v", err)
+							}
+
+							icaclsCmd := exec.Command("icacls", directory, "/grant", fmt.Sprintf("%s:F", user), "/T")
+							err = icaclsCmd.Run()
+							if err != nil {
+								log.Errorf("Failed to grant permissions: %v", err)
+							}
+						} else {
+							chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", user, user), directory)
+							err = chownCmd.Run()
+							if err != nil {
+								log.Error(err)
+							}
 						}
 					}
 				}
