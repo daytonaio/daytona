@@ -103,14 +103,15 @@ func (a *ApiServer) Start() error {
 
 	binding.Validator = new(DefaultValidator)
 
+	gin.SetMode(gin.ReleaseMode)
+
 	a.router = gin.New()
 	a.router.Use(gin.Recovery())
 	if mode, ok := os.LookupEnv("DAYTONA_SERVER_MODE"); ok && mode == "development" {
 		a.router.Use(cors.New(cors.Config{
 			AllowAllOrigins: true,
 		}))
-	} else {
-		gin.SetMode(gin.ReleaseMode)
+		gin.SetMode(gin.DebugMode)
 	}
 
 	a.router.Use(middlewares.TelemetryMiddleware(a.telemetryService))
