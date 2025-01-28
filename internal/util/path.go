@@ -27,7 +27,7 @@ func GetHomeDir(activeProfile config.Profile, workspaceId string, gpgKey *string
 	return strings.TrimRight(string(homeDir), "\n"), nil
 }
 
-func GetWorkspaceDir(activeProfile config.Profile, workspaceId string, gpgKey *string) (string, error) {
+func GetWorkspaceDir(activeProfile config.Profile, workspaceId, repoName string, gpgKey *string) (string, error) {
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
 		return "", err
@@ -49,5 +49,5 @@ func GetWorkspaceDir(activeProfile config.Profile, workspaceId string, gpgKey *s
 		return "", err
 	}
 
-	return path.Join(homeDir, workspaceId), nil
+	return path.Join(homeDir, repoName), nil
 }

@@ -102,7 +102,7 @@ var CodeCmd = &cobra.Command{
 		yesFlag, _ := cmd.Flags().GetBool("yes")
 		ideList := config.GetIdeList()
 		ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-		return common.OpenIDE(ideId, activeProfile, ws.Id, providerMetadata, yesFlag, gpgKey)
+		return common.OpenIDE(ideId, activeProfile, ws.Id, ws.Repository.Name, providerMetadata, yesFlag, gpgKey)
 	},
 	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return common.GetWorkspaceNameCompletions()

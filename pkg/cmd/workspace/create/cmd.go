@@ -272,7 +272,7 @@ var CreateCmd = &cobra.Command{
 
 		views.RenderCreationInfoMessage(fmt.Sprintf("Opening the workspace in %s ...", chosenIde.Name))
 
-		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Name, *createdWorkspaces[0].ProviderMetadata, YesFlag, gpgKey)
+		return cmd_common.OpenIDE(chosenIdeId, activeProfile, createWorkspaceDtos[0].Id, createWorkspaceDtos[0].Source.Repository.Name, *createdWorkspaces[0].ProviderMetadata, YesFlag, gpgKey)
 	},
 }
 

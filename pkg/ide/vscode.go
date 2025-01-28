@@ -19,7 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func OpenVSCode(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey *string) error {
+func OpenVSCode(activeProfile config.Profile, workspaceId, repoName string, workspaceProviderMetadata string, gpgKey *string) error {
 	CheckAndAlertVSCodeInstalled()
 	err := installRemoteSSHExtension("code")
 	if err != nil {
@@ -28,7 +28,7 @@ func OpenVSCode(activeProfile config.Profile, workspaceId string, workspaceProvi
 
 	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgKey)
 	if err != nil {
 		return err
 	}

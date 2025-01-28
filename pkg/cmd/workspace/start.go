@@ -112,7 +112,7 @@ var StartCmd = &cobra.Command{
 
 			if codeFlag {
 				ide_views.RenderIdeOpeningMessage(ws.TargetId, ws.Name, ideId, ideList)
-				err = common.OpenIDE(ideId, activeProfile, ws.Id, workspaceProviderMetadata, yesFlag, gpgKey)
+				err = common.OpenIDE(ideId, activeProfile, ws.Id, ws.Repository.Name, workspaceProviderMetadata, yesFlag, gpgKey)
 				if err != nil {
 					return err
 				}

@@ -23,13 +23,13 @@ import (
 	"github.com/pkg/browser"
 )
 
-func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId string, gpgKey *string) error {
+func OpenJetbrainsIDE(activeProfile config.Profile, ide, workspaceId, repoName string, gpgKey *string) error {
 	err := IsJetBrainsGatewayInstalled()
 	if err != nil {
 		return err
 	}
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgKey)
 	if err != nil {
 		return err
 	}
