@@ -6,7 +6,9 @@
 package ssh
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 	"syscall"
 
 	"github.com/UserExistsError/conpty"
@@ -19,16 +21,15 @@ var (
 	setConsoleWindowInfo = kernel32.NewProc("SetConsoleWindowInfo")
 )
 
-func Start(cmd interface{}) *conpty.ConPty {
-	if shell, ok := cmd.(string); ok {
-		f, err := conpty.Start(shell)
+func Start(cmd interface{}) (*conpty.ConPty, error) {
+	if shell, ok := cmd.(*exec.Cmd); ok {
+		f, err := conpty.Start(`c:\windows\system32\cmd.exe`, conpty.ConPtyEnv(shell.Env), conpty.ConPtyWorkDir(shell.Dir))
 		if err != nil {
-			log.Errorf("Unable to start ConPTY: %v", err)
-			return nil
+			return nil, fmt.Errorf("Unable to start ConPTY: %v", err)
 		}
-		return f
+		return f, nil
 	}
-	return nil
+	return nil, fmt.Errorf("Unable to start ConPTY")
 }
 
 func SetPtySize(f interface{}, win ssh.Window) {

@@ -6,6 +6,7 @@
 package ssh
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"syscall"
@@ -18,16 +19,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func Start(cmd interface{}) *os.File {
+func Start(cmd interface{}) (*os.File, error) {
 	if command, ok := cmd.(*exec.Cmd); ok {
 		f, err := pty.Start(command)
 		if err != nil {
-			log.Errorf("Unable to start PTY: %v", err)
-			return nil
+			return nil, fmt.Errorf("Unable to start PTY: %v", err)
 		}
-		return f
+		return f, nil
 	}
-	return nil
+	return nil, fmt.Errorf("Unable to start PTY")
 }
 
 func SetPtySize(f interface{}, win ssh.Window) {

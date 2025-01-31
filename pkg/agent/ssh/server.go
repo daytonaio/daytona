@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"runtime"
 
 	"github.com/daytonaio/daytona/pkg/agent/ssh/config"
 	"github.com/daytonaio/daytona/pkg/common"
@@ -101,18 +100,11 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TERM=%s", ptyReq.Term))
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("SHELL=%s", shell))
-	var f io.ReadWriteCloser
 
-	if runtime.GOOS == "windows" {
-		output := Start(cmd)
-		if output != nil {
-			f = output
-		}
-	} else {
-		output := Start(cmd)
-		if output != nil {
-			f = output
-		}
+	f, err := Start(cmd)
+	if err != nil {
+		log.Errorf("Unable to start PTY: %v", err)
+		return
 	}
 	defer f.Close()
 
