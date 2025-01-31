@@ -104,7 +104,7 @@ func (s *Server) handlePty(session ssh.Session, ptyReq ssh.Pty, winCh <-chan ssh
 	var f io.ReadWriteCloser
 
 	if runtime.GOOS == "windows" {
-		output := Start(shell)
+		output := Start(cmd)
 		if output != nil {
 			f = output
 		}
