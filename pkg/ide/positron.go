@@ -15,7 +15,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/views"
 )
 
-func OpenPositron(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey *string) error {
+func OpenPositron(activeProfile config.Profile, workspaceId, repoName string, workspaceProviderMetadata string, gpgkey *string) error {
 	path, err := GetPositronBinaryPath()
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func OpenPositron(activeProfile config.Profile, workspaceId string, workspacePro
 
 	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgkey)
 	if err != nil {
 		return err
 	}

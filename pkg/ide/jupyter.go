@@ -26,7 +26,7 @@ import (
 const startJupyterCommand = "notebook --no-browser --port=8888 --ip=0.0.0.0 --NotebookApp.token='' --NotebookApp.password=''"
 
 // OpenJupyterIDE manages the installation and startup of a Jupyter IDE on a remote target.
-func OpenJupyterIDE(activeProfile config.Profile, workspaceId, workspaceProviderMetadata string, yesFlag bool, gpgKey *string) error {
+func OpenJupyterIDE(activeProfile config.Profile, workspaceId, repoName, workspaceProviderMetadata string, yesFlag bool, gpgKey *string) error {
 	// Ensure SSH config entry is added
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
@@ -51,7 +51,7 @@ func OpenJupyterIDE(activeProfile config.Profile, workspaceId, workspaceProvider
 	}
 
 	// Start Jupyter Notebook server
-	if err := startJupyterServer(workspaceHostname, activeProfile, workspaceId, gpgKey); err != nil {
+	if err := startJupyterServer(workspaceHostname, activeProfile, workspaceId, repoName, gpgKey); err != nil {
 		return err
 	}
 
@@ -216,8 +216,8 @@ func ensureJupyterInstalled(hostname string) error {
 }
 
 // startJupyterServer starts the Jupyter Notebook server on the remote target.
-func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId string, gpgKey *string) error {
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
+func startJupyterServer(hostname string, activeProfile config.Profile, workspaceId, repoName string, gpgKey *string) error {
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgKey)
 	if err != nil {
 		return err
 	}

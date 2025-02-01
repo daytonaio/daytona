@@ -23,7 +23,7 @@ import (
 
 const startVSCodeServerCommand = "$HOME/vscode-server/bin/openvscode-server --start-server --port=63000 --host=0.0.0.0 --without-connection-token --disable-workspace-trust --default-folder="
 
-func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgKey *string) error {
+func OpenBrowserIDE(activeProfile config.Profile, workspaceId, repoName string, workspaceProviderMetadata string, gpgKey *string) error {
 	// Download and start IDE
 	err := config.EnsureSshConfigEntryAdded(activeProfile.Id, workspaceId, gpgKey)
 	if err != nil {
@@ -42,7 +42,7 @@ func OpenBrowserIDE(activeProfile config.Profile, workspaceId string, workspaceP
 		return err
 	}
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgKey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgKey)
 	if err != nil {
 		return err
 	}

@@ -38,6 +38,7 @@ func (s *Server) GetWorkspaceDir(ctx *gin.Context) {
 }
 
 func (s *Server) Start() error {
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	r.Use(gin.Recovery())
 	r.Use(middlewares.LoggingMiddleware())

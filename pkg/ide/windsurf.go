@@ -13,7 +13,7 @@ import (
 	"github.com/daytonaio/daytona/pkg/build/devcontainer"
 )
 
-func OpenWindsurf(activeProfile config.Profile, workspaceId string, workspaceProviderMetadata string, gpgkey *string) error {
+func OpenWindsurf(activeProfile config.Profile, workspaceId, repoName string, workspaceProviderMetadata string, gpgkey *string) error {
 	path, err := GetWindsurfBinaryPath()
 	if err != nil {
 		return err
@@ -21,7 +21,7 @@ func OpenWindsurf(activeProfile config.Profile, workspaceId string, workspacePro
 
 	workspaceHostname := config.GetHostname(activeProfile.Id, workspaceId)
 
-	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, gpgkey)
+	workspaceDir, err := util.GetWorkspaceDir(activeProfile, workspaceId, repoName, gpgkey)
 	if err != nil {
 		return err
 	}
