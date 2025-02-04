@@ -51,7 +51,12 @@ func OpenVSCode(activeProfile config.Profile, workspaceId, repoName string, work
 
 func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
 	// Check if customizations are already set up
-	err := exec.Command("ssh", workspaceHostname, "test", "-f", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
+	lockFileNamePath := fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))
+	if runtime.GOOS == "windows" {
+		lockFileNamePath = fmt.Sprintf("$HOME\\%s-%s", lockFileName, string(tool))
+	}
+
+	err := exec.Command("ssh", workspaceHostname, "test", "-f", lockFileNamePath).Run()
 	if err == nil {
 		return nil
 	}
@@ -129,7 +134,7 @@ func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetada
 	}
 
 	// Create lock file to indicate that customizations are set up
-	err = exec.Command("ssh", workspaceHostname, "touch", fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))).Run()
+	err = exec.Command("ssh", workspaceHostname, "touch", lockFileNamePath).Run()
 	if err != nil {
 		return err
 	}

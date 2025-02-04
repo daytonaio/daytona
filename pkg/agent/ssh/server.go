@@ -125,7 +125,7 @@ func (s *Server) handleNonPty(session ssh.Session) {
 		args = append([]string{"-c"}, session.RawCommand())
 	}
 
-	cmd := exec.Command("/bin/sh", args...)
+	cmd := exec.Command("sh", args...)
 
 	cmd.Env = append(cmd.Env, os.Environ()...)
 
