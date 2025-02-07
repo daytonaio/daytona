@@ -50,9 +50,14 @@ func OpenVSCode(activeProfile config.Profile, workspaceId, repoName string, work
 }
 
 func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetadata string, tool devcontainer.Tool, codeServerPath string, settingsPath string, lockFileName string) error {
+	var metadata map[string]interface{}
+	if err := json.Unmarshal([]byte(workspaceProviderMetadata), &metadata); err != nil {
+		return err
+	}
+	
 	// Check if customizations are already set up
 	lockFileNamePath := fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))
-	if runtime.GOOS == "windows" {
+	if metadata["remote-os"] == "windows" {
 		lockFileNamePath = fmt.Sprintf("$HOME\\%s-%s", lockFileName, string(tool))
 	}
 
@@ -63,10 +68,6 @@ func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetada
 
 	fmt.Println("Setting up IDE customizations...")
 
-	var metadata map[string]interface{}
-	if err := json.Unmarshal([]byte(workspaceProviderMetadata), &metadata); err != nil {
-		return err
-	}
 
 	if devcontainerMetadata, ok := metadata["devcontainer.metadata"]; ok {
 		var configs []devcontainer.Configuration
