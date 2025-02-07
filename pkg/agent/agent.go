@@ -10,7 +10,7 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"syscall"
+	"runtime"
 	"time"
 
 	"github.com/daytonaio/daytona/cmd/daytona/config"
@@ -18,6 +18,7 @@ import (
 	apiclient_util "github.com/daytonaio/daytona/internal/util/apiclient"
 	"github.com/daytonaio/daytona/internal/util/apiclient/conversion"
 	agent_config "github.com/daytonaio/daytona/pkg/agent/config"
+	"github.com/daytonaio/daytona/pkg/agent/toolbox/fs"
 	"github.com/daytonaio/daytona/pkg/apiclient"
 	"github.com/daytonaio/daytona/pkg/gitprovider"
 	"github.com/daytonaio/daytona/pkg/models"
@@ -113,12 +114,31 @@ func (a *Agent) startWorkspaceMode() error {
 				log.Info("Repository already exists. Skipping clone...")
 			} else {
 				if stat, err := os.Stat(a.Config.WorkspaceDir); err == nil {
-					ownerUid := stat.Sys().(*syscall.Stat_t).Uid
+					ownerUid, err := fs.GetFileUid(stat)
+					if err != nil {
+						log.Error(err)
+					}
 					if ownerUid != uint32(os.Getuid()) {
-						chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", a.Workspace.User, a.Workspace.User), a.Config.WorkspaceDir)
-						err = chownCmd.Run()
-						if err != nil {
-							log.Error(err)
+						user := a.Workspace.User
+						directory := a.Config.WorkspaceDir
+						if runtime.GOOS == "windows" {
+							takeownCmd := exec.Command("takeown", "/F", directory, "/R", "/D", "Y")
+							err := takeownCmd.Run()
+							if err != nil {
+								log.Errorf("Failed to take ownership: %v", err)
+							}
+
+							icaclsCmd := exec.Command("icacls", directory, "/grant", fmt.Sprintf("%s:F", user), "/T")
+							err = icaclsCmd.Run()
+							if err != nil {
+								log.Errorf("Failed to grant permissions: %v", err)
+							}
+						} else {
+							chownCmd := exec.Command("sudo", "chown", "-R", fmt.Sprintf("%s:%s", user, user), directory)
+							err = chownCmd.Run()
+							if err != nil {
+								log.Error(err)
+							}
 						}
 					}
 				}
