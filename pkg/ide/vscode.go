@@ -54,7 +54,7 @@ func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetada
 	if err := json.Unmarshal([]byte(workspaceProviderMetadata), &metadata); err != nil {
 		return err
 	}
-	
+
 	// Check if customizations are already set up
 	lockFileNamePath := fmt.Sprintf("$HOME/%s-%s", lockFileName, string(tool))
 	if metadata["remote-os"] == "windows" {
@@ -67,7 +67,6 @@ func setupVSCodeCustomizations(workspaceHostname string, workspaceProviderMetada
 	}
 
 	fmt.Println("Setting up IDE customizations...")
-
 
 	if devcontainerMetadata, ok := metadata["devcontainer.metadata"]; ok {
 		var configs []devcontainer.Configuration
