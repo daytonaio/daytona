@@ -4,3 +4,8 @@ DEV_WORKSPACES
 .DS_Store
 
 tmp
+
+
+*.exe 
+
+main
