@@ -162,7 +162,7 @@ require (
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/nftables v0.2.1-0.20240414091927-5e242ec57806 // indirect
 	github.com/google/pprof v0.0.0-20240829160300-da1f7e9f2b25 // indirect
-	github.com/gorilla/csrf v1.7.2 // indirect
+	github.com/gorilla/csrf v1.7.3 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware v1.4.0 // indirect
