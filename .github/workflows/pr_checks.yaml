@@ -1,0 +1,96 @@
+name: '[PR] Validate code'
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  # New commit on branch cancels running workflows of the same branch
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  golangci:
+    name: Go lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        working-directory: [apps/daemon, apps/runner, apps/cli]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: false
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v4
+        with:
+          version: latest
+          working-directory: ${{ matrix.working-directory }}
+          args: --timeout=5m ./...
+      - name: format
+        run: |
+          cd ${{ matrix.working-directory }}
+          go fmt ./...
+          git diff --exit-code '**/*.go' || (echo "Code is not formatted! Please run 'go fmt ./...' and commit" && exit 1)
+
+  format-lint-api-clients:
+    name: Format, lint and generate API clients
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - run: corepack enable
+      - name: generate-api-clients
+        run: |
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+          echo -e 'NX_PACKAGE_PUBLISH_VERSION=0.0.0-dev' > .env
+          yarn
+          mkdir -p dist/apps/api
+          yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
+          yarn lint:fix
+          yarn format
+          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix' and commit" && exit 1)
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: corepack enable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build all
+        run: |
+          python3 -m pip install build twine
+          yarn
+          yarn build
+
+  license-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check License Header
+        uses: apache/skywalking-eyes/header@main
+        with:
+          token: ${{ github.token }}
+          mode: 'check'

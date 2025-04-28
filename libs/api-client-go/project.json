@@ -1,0 +1,37 @@
+{
+  "name": "api-client-go",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/api-client-go",
+  "tags": [],
+  "targets": {
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "./{projectRoot}",
+        "outputPath": "dist/libs/api-client-go"
+      }
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn run openapi-generator-cli generate --git-repo-id=sdk --git-user-id=daytonaio -i dist/apps/api/openapi.json -g go --additional-properties=packageName=daytonaapiclient,moduleVersion=$NX_PACKAGE_PUBLISH_VERSION,generateInterfaces=true,enumClassPrefix=true,structPrefix=true -o libs/api-client-go"
+      }
+    },
+    "tidy": {
+      "executor": "@nx-go/nx-go:tidy"
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.yaml\""
+      }
+    }
+  }
+}

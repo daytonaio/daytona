@@ -85,9 +85,7 @@ While working on a PR, if you see something that can be refactored to comply, go
 API and service method conventions:
 
 1. Avoid using model names in service methods
-   - e.g. `Create` instead of `CreateTarget`, `Find` instead of `FindWorkspace`
-1. Use model names in service methods for "sub-models"
-   - e.g. `ListPrebuilds` in `WorkspaceTemplateService`
+   - e.g. `Create` instead of `CreateWorkspace`, `Find` instead of `FindWorkspace`
 1. Use appropriate verbs in the UI
    - e.g. `Create API Key` instead of `Generate API Key` since the method is called `Create`
 1. Refer to the table below for a connection between API and service methods

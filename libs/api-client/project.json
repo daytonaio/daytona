@@ -1,0 +1,55 @@
+{
+  "name": "api-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api-client",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/api-client",
+        "tsConfig": "libs/api-client/tsconfig.lib.json",
+        "packageJson": "libs/api-client/package.json",
+        "main": "libs/api-client/index.ts",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "yarn run openapi-generator-cli generate --git-repo-id=sdk --git-user-id=daytonaio -i dist/apps/api/openapi.json -g typescript-axios --additional-properties=supportsES6=true,typescriptThreePlus=true,withSeparateModelsAndApi=true,apiPackage=api,modelPackage=models,useTags=true,enumPropertyNaming=UPPERCASE --type-mappings=DateTime=Date -o libs/api-client/src",
+          "yarn nx format api-client"
+        ],
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "openapi",
+          "projects": "api"
+        }
+      ]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && prettier --write \"**/*.{ts,json}\" --config ../../.prettierrc"
+      }
+    },
+    "publish": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": ["npm version $NX_PACKAGE_PUBLISH_VERSION", "npm publish"],
+        "cwd": "dist/libs/api-client",
+        "parallel": false
+      },
+      "dependsOn": [
+        {
+          "target": "build"
+        }
+      ]
+    }
+  },
+  "tags": []
+}

@@ -1,0 +1,15 @@
+name: daytona sandbox
+synopsis: Manage Daytona sandboxes
+description: Commands for managing Daytona sandboxes
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI
+  - daytona sandbox create - Create a new sandbox
+  - daytona sandbox delete - Delete a sandbox
+  - daytona sandbox info - Get sandbox info
+  - daytona sandbox list - List sandboxes
+  - daytona sandbox start - Start a sandbox
+  - daytona sandbox stop - Stop a sandbox

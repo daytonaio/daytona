@@ -1,0 +1,17 @@
+name: daytona sandbox info
+synopsis: Get sandbox info
+usage: daytona sandbox info [SANDBOX_ID] [flags]
+options:
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+  - name: verbose
+    shorthand: v
+    default_value: 'false'
+    usage: Include verbose output
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona sandbox - Manage Daytona sandboxes

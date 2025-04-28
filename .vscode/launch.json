@@ -5,67 +5,35 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "agent",
-      "type": "go",
+      "command": "yarn serve",
+      "name": "Debug",
       "request": "launch",
-      "mode": "debug",
-      "program": "${workspaceFolder}/cmd/daytona",
-      "console": "integratedTerminal",
-      "env": {
-        "DAYTONA_TARGET_ID": "TARGET_ID",
-        "DAYTONA_WORKSPACE_ID": "WORKSPACE_ID",
-        "DAYTONA_SERVER_URL": "http://localhost:3986",
-        "DAYTONA_SERVER_API_KEY": "1234567890",
-      },
-      "args": [
-        "agent"
-      ]
+      "type": "node-terminal"
     },
     {
-      "name": "Server",
-      "type": "go",
+      "command": "yarn serve:skip-runner",
+      "name": "Debug - Skip Runner",
       "request": "launch",
-      "mode": "debug",
-      "program": "${workspaceFolder}/cmd/daytona",
-      "console": "integratedTerminal",
-      "args": [
-        "serve"
-      ],
-      "env": {
-        "DAYTONA_DEV": "1",
-        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
-      }
-    },
-    {
-      "name": "CLI Create",
-      "type": "go",
-      "request": "launch",
-      "mode": "debug",
-      "program": "${workspaceFolder}/cmd/daytona",
-      "console": "integratedTerminal",
-      "args": [
-        "create"
-      ],
-      "env": {
-        "DAYTONA_DEV": "1",
-        "DAYTONA_CONFIG_DIR": "/home/daytona/.config/daytona-dev",
-      }
+      "type": "node-terminal"
     },
     {
       "name": "Runner",
       "type": "go",
       "request": "launch",
       "mode": "debug",
-      "program": "${workspaceFolder}/cmd/daytona",
+      "program": "${workspaceFolder}/apps/runner/cmd/runner",
       "console": "integratedTerminal",
-      "args": [
-        "runner",
-        "serve"
-      ],
-      "env": {
-        "DAYTONA_DEV": "1",
-        "DAYTONA_RUNNER_CONFIG_DIR": "/home/daytona/.config/daytona-runner",
-      }
+      "envFile": "${workspaceFolder}/apps/runner/.env",
+      "output": "${workspaceFolder}/dist/apps/runner"
+    },
+    {
+      "name": "Daemon",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/apps/daemon/cmd/daemon",
+      "console": "integratedTerminal",
+      "output": "${workspaceFolder}/dist/apps/daemon"
     }
   ]
 }

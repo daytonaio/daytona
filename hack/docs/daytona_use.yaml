@@ -1,9 +1,0 @@
-name: daytona use
-synopsis: Use profile [PROFILE_NAME]
-usage: daytona use [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona - Daytona is a Dev Environment Manager
