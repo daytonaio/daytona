@@ -1,0 +1,52 @@
+name: daytona sandbox create
+synopsis: Create a new sandbox
+usage: daytona sandbox create [flags]
+options:
+  - name: auto-stop
+    default_value: '0'
+    usage: Auto-stop interval in minutes (0 means disabled)
+  - name: class
+    usage: Workspace class type (small, medium, large)
+  - name: context
+    shorthand: c
+    default_value: '[]'
+    usage: |
+      Files or directories to include in the build context (can be specified multiple times)
+  - name: cpu
+    default_value: '0'
+    usage: CPU cores allocated to the sandbox
+  - name: disk
+    default_value: '0'
+    usage: Disk space allocated to the sandbox in GB
+  - name: dockerfile
+    shorthand: f
+    usage: Path to Dockerfile for Sandbox image
+  - name: env
+    shorthand: e
+    default_value: '[]'
+    usage: 'Environment variables (format: KEY=VALUE)'
+  - name: gpu
+    default_value: '0'
+    usage: GPU units allocated to the sandbox
+  - name: image
+    usage: Image to use for the sandbox
+  - name: label
+    shorthand: l
+    default_value: '[]'
+    usage: 'Labels (format: KEY=VALUE)'
+  - name: memory
+    default_value: '0'
+    usage: Memory allocated to the sandbox in MB
+  - name: public
+    default_value: 'false'
+    usage: Make sandbox publicly accessible
+  - name: target
+    usage: Target region (eu, us, asia)
+  - name: user
+    usage: User associated with the sandbox
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona sandbox - Manage Daytona sandboxes

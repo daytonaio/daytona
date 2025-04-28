@@ -1,0 +1,767 @@
+definitions:
+  BuildImageRequestDTO:
+    properties:
+      context:
+        items:
+          type: string
+        type: array
+      dockerfile:
+        type: string
+      image:
+        description: Image ID and tag or the build's hash
+        type: string
+      organizationId:
+        type: string
+      pushToInternalRegistry:
+        type: boolean
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - dockerfile
+      - organizationId
+    type: object
+  CreateSandboxDTO:
+    properties:
+      cpuQuota:
+        minimum: 1
+        type: integer
+      entrypoint:
+        items:
+          type: string
+        type: array
+      env:
+        additionalProperties:
+          type: string
+        type: object
+      fromVolumeId:
+        type: string
+      gpuQuota:
+        minimum: 0
+        type: integer
+      id:
+        type: string
+      image:
+        type: string
+      memoryQuota:
+        minimum: 1
+        type: integer
+      osUser:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+      storageQuota:
+        minimum: 1
+        type: integer
+      userId:
+        type: string
+      volumes:
+        items:
+          $ref: '#/definitions/dto.VolumeDTO'
+        type: array
+    required:
+      - id
+      - image
+      - osUser
+      - userId
+    type: object
+  CreateSnapshotDTO:
+    properties:
+      image:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - image
+      - registry
+    type: object
+  ErrorResponse:
+    description: Error response
+    properties:
+      code:
+        example: BAD_REQUEST
+        type: string
+      message:
+        example: Bad request
+        type: string
+      method:
+        example: GET
+        type: string
+      path:
+        example: /api/resource
+        type: string
+      statusCode:
+        example: 400
+        type: integer
+      timestamp:
+        example: '2023-01-01T12:00:00Z'
+        type: string
+    required:
+      - code
+      - message
+      - method
+      - path
+      - statusCode
+      - timestamp
+    type: object
+  ImageExistsResponse:
+    properties:
+      exists:
+        example: true
+        type: boolean
+    type: object
+  PullImageRequestDTO:
+    properties:
+      image:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - image
+    type: object
+  RegistryDTO:
+    properties:
+      password:
+        type: string
+      url:
+        type: string
+      username:
+        type: string
+    required:
+      - password
+      - url
+      - username
+    type: object
+  ResizeSandboxDTO:
+    properties:
+      cpu:
+        minimum: 1
+        type: integer
+      gpu:
+        minimum: 0
+        type: integer
+      memory:
+        minimum: 1
+        type: integer
+    type: object
+  SandboxInfoResponse:
+    properties:
+      snapshotState:
+        $ref: '#/definitions/enums.SnapshotState'
+      state:
+        $ref: '#/definitions/enums.SandboxState'
+    type: object
+  dto.VolumeDTO:
+    properties:
+      mountPath:
+        type: string
+      volumeId:
+        type: string
+    type: object
+  enums.SandboxState:
+    enum:
+      - creating
+      - restoring
+      - destroyed
+      - destroying
+      - started
+      - stopped
+      - starting
+      - stopping
+      - resizing
+      - error
+      - unknown
+      - pulling_image
+    type: string
+    x-enum-varnames:
+      - SandboxStateCreating
+      - SandboxStateRestoring
+      - SandboxStateDestroyed
+      - SandboxStateDestroying
+      - SandboxStateStarted
+      - SandboxStateStopped
+      - SandboxStateStarting
+      - SandboxStateStopping
+      - SandboxStateResizing
+      - SandboxStateError
+      - SandboxStateUnknown
+      - SandboxStatePullingImage
+  enums.SnapshotState:
+    enum:
+      - NONE
+      - PENDING
+      - IN_PROGRESS
+      - COMPLETED
+      - FAILED
+    type: string
+    x-enum-varnames:
+      - SnapshotStateNone
+      - SnapshotStatePending
+      - SnapshotStateInProgress
+      - SnapshotStateCompleted
+      - SnapshotStateFailed
+info:
+  contact: {}
+  description: Daytona Runner API
+  title: Daytona Runner API
+  version: v0.0.0-dev
+paths:
+  /:
+    get:
+      description: Health check
+      operationId: HealthCheck
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Health check
+  /images/build:
+    post:
+      description: Build a Docker image from a Dockerfile and context hashes
+      operationId: BuildImage
+      parameters:
+        - description: Build image request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/BuildImageRequestDTO'
+      responses:
+        '200':
+          description: Image successfully built
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Build a Docker image
+      tags:
+        - images
+  /images/exists:
+    get:
+      description: Check if a specified Docker image exists locally
+      operationId: ImageExists
+      parameters:
+        - description: Image name and tag
+          in: query
+          name: image
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/ImageExistsResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Check if a Docker image exists
+      tags:
+        - images
+  /images/pull:
+    post:
+      description: Pull a Docker image from a registry
+      operationId: PullImage
+      parameters:
+        - description: Pull image
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PullImageRequestDTO'
+      responses:
+        '200':
+          description: Image successfully pulled
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Pull a Docker image
+      tags:
+        - images
+  /images/remove:
+    post:
+      description: Remove a specified Docker image from the local system
+      operationId: RemoveImage
+      parameters:
+        - description: Image name and tag
+          in: query
+          name: image
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Image successfully removed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Remove a Docker image
+      tags:
+        - images
+  /workspaces:
+    post:
+      description: Create a sandbox
+      operationId: Create
+      parameters:
+        - description: Create sandbox
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a sandbox
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}:
+    delete:
+      description: Remove a sandbox that has been previously destroyed
+      operationId: RemoveDestroyed
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox removed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Remove a destroyed sandbox
+      tags:
+        - sandbox
+    get:
+      description: Get sandbox info
+      operationId: Info
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox info
+          schema:
+            $ref: '#/definitions/SandboxInfoResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get sandbox info
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}/{projectId}/toolbox/{path}:
+    get:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+        - description: Project ID
+          in: path
+          name: projectId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema:
+            type: string
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+  /workspaces/{workspaceId}/destroy:
+    post:
+      description: Destroy sandbox
+      operationId: Destroy
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox destroyed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Destroy sandbox
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}/resize:
+    post:
+      description: Resize sandbox
+      operationId: Resize
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+        - description: Resize sandbox
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/ResizeSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox resized
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Resize sandbox
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}/snapshot:
+    post:
+      description: Create sandbox snapshot
+      operationId: CreateSnapshot
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+        - description: Create snapshot
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSnapshotDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Snapshot created
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create sandbox snapshot
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}/start:
+    post:
+      description: Start sandbox
+      operationId: Start
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox started
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Start sandbox
+      tags:
+        - sandbox
+  /workspaces/{workspaceId}/stop:
+    post:
+      description: Stop sandbox
+      operationId: Stop
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox stopped
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Stop sandbox
+      tags:
+        - sandbox
+security:
+  - Bearer: []
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and an API token.
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: '2.0'

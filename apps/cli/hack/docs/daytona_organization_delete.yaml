@@ -1,0 +1,9 @@
+name: daytona organization delete
+synopsis: Delete an organization
+usage: daytona organization delete [ORGANIZATION] [flags]
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona organization - Manage Daytona organizations

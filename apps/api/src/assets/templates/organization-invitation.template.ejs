@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      color: #000;
+      max-width: 980px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .container {
+      border: 1px solid #e1e4e8;
+      border-radius: 6px;
+      padding: 40px 20px;
+      margin: 20px;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .invitation-text {
+      margin: 20px 0;
+    }
+    .org-link {
+      color: #0080ff;
+      text-decoration: none;
+    }
+    .button {
+      display: inline-block;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      color: white;
+      background-color: #08ae78;
+      border-radius: 6px;
+      text-decoration: none;
+      margin: 20px 0;
+    }
+    .expiration {
+      margin: 20px 0;
+    }
+    .alternate-link {
+      margin: 20px 0;
+    }
+    .footer {
+      clear: both;
+      margin-top: 10px;
+      text-align: center;
+      width: 100%;
+    }
+    .footer p {
+      color: #9a9ea6;
+      font-size: 12px;
+      text-align: center;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="daytona-logo">
+      <img src="https://www.daytona.io/brand/social-daytona-icon-light.png" width="72" height="72" alt="Daytona logo">
+    </div>
+    
+    <h1><% if (invitedBy) { %><%= invitedBy %> has invited you to join the <%= organizationName %> organization<% } else { %>You have been invited to join the <%= organizationName %> organization<% } %></h1>
+    
+    <div class="invitation-text">            
+      <p class="expiration">This invitation expires on <%= expiresAt %></p>
+      
+      <a href="<%= invitationLink %>" class="button">Join <%= organizationName %></a>
+      
+      <p class="alternate-link">Button not working? Paste the following link into your browser:<br>
+        <a href="<%= invitationLink %>" class="org-link"><%= invitationLink %></a>
+      </p>
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>* If you were not expecting this invitation, please disregard this email.</p>
+    <p>Copyright © <%= new Date().getFullYear() %> Daytona Platforms, Inc. All Rights Reserved</p>
+  </div>
+</body>
+</html>

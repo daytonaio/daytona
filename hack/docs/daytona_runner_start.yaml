@@ -1,9 +1,0 @@
-name: daytona runner start
-synopsis: Starts the runner
-usage: daytona runner start [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona runner - Manage the runner

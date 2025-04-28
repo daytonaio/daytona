@@ -1,0 +1,22 @@
+{
+  "name": "api-client-python",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/api-client-python/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "python3 -m build"
+      }
+    },
+    "generate:api-client": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "yarn run openapi-generator-cli generate --git-repo-id=sdk --git-user-id=daytonaio -i dist/apps/api/openapi.json -g python --additional-properties=packageName=daytona_api_client,projectName=daytona_api_client,packageVersion=$NX_PACKAGE_PUBLISH_VERSION,pythonPackageName=daytona_api_client,disallowAdditionalPropertiesIfNotPresent=false -o libs/api-client-python"
+      }
+    }
+  },
+  "tags": []
+}

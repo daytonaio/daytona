@@ -1,9 +1,0 @@
-name: daytona server start
-synopsis: Start the Daytona Server daemon
-usage: daytona server start [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona server - Start the server process in daemon mode
