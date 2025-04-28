@@ -1,0 +1,49 @@
+{
+  "name": "runner",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/runner/main.go",
+        "outputPath": "dist/apps/runner"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "cwd": ".",
+        "main": "{projectRoot}/cmd/runner/main.go"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    },
+    "openapi": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}/pkg/api",
+        "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
+      }
+    }
+  }
+}

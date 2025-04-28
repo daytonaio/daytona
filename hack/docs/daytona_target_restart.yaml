@@ -1,9 +1,0 @@
-name: daytona target restart
-synopsis: Restart a target
-usage: daytona target restart [TARGET] [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona target - Manage targets

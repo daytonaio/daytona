@@ -1,0 +1,96 @@
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
+import { useApi } from '@/hooks/useApi'
+import {
+  ApiKeyList,
+  ApiKeyResponse,
+  CreateApiKeyPermissionsEnum,
+  OrganizationUserRoleEnum,
+} from '@daytonaio/api-client'
+import { ApiKeyTable } from '../components/ApiKeyTable'
+import { toast } from 'sonner'
+import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { CreateApiKeyDialog } from '@/components/CreateApiKeyDialog'
+import { handleApiError } from '@/lib/error-handling'
+
+const Keys: React.FC = () => {
+  const { apiKeyApi } = useApi()
+  const [keys, setKeys] = useState<ApiKeyList[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+
+  const availablePermissions = useMemo<CreateApiKeyPermissionsEnum[]>(() => {
+    if (!authenticatedUserOrganizationMember) {
+      return []
+    }
+    if (authenticatedUserOrganizationMember.role === OrganizationUserRoleEnum.OWNER) {
+      return Object.values(CreateApiKeyPermissionsEnum)
+    }
+    return Array.from(new Set(authenticatedUserOrganizationMember.assignedRoles.flatMap((role) => role.permissions)))
+  }, [authenticatedUserOrganizationMember])
+
+  const fetchKeys = useCallback(
+    async (showTableLoadingState = true) => {
+      if (!selectedOrganization) {
+        return
+      }
+      if (showTableLoadingState) {
+        setLoading(true)
+      }
+      try {
+        const response = await apiKeyApi.listApiKeys(selectedOrganization.id)
+        setKeys(response.data)
+      } catch (error) {
+        handleApiError(error, 'Failed to fetch API keys')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [apiKeyApi, selectedOrganization],
+  )
+
+  useEffect(() => {
+    fetchKeys()
+  }, [fetchKeys])
+
+  const handleRevoke = async (keyName: string) => {
+    setLoading(true)
+    try {
+      await apiKeyApi.deleteApiKey(keyName, selectedOrganization?.id)
+      toast.success('API key revoked successfully')
+      await fetchKeys(false)
+    } catch (error) {
+      handleApiError(error, 'Failed to revoke API key')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCreateKey = async (
+    name: string,
+    permissions: CreateApiKeyPermissionsEnum[],
+  ): Promise<ApiKeyResponse | null> => {
+    try {
+      const key = (await apiKeyApi.createApiKey({ name, permissions }, selectedOrganization?.id)).data
+      toast.success('API key created successfully')
+      await fetchKeys(false)
+      return key
+    } catch (error) {
+      handleApiError(error, 'Failed to create API key')
+      return null
+    }
+  }
+
+  return (
+    <div className="p-6">
+      <div className="mb-6 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">API Keys</h1>
+        <CreateApiKeyDialog availablePermissions={availablePermissions} onCreateApiKey={handleCreateKey} />
+      </div>
+
+      <ApiKeyTable data={keys} loading={loading} onRevoke={handleRevoke} />
+    </div>
+  )
+}
+
+export default Keys

@@ -1,9 +1,0 @@
-name: daytona server logs list
-synopsis: Lists Daytona Server Log Files
-usage: daytona server logs list [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona server logs - Output Daytona Server logs

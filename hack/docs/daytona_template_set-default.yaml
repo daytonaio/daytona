@@ -1,9 +1,0 @@
-name: daytona template set-default
-synopsis: Set workspace template info
-usage: daytona template set-default [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona template - Manage workspace templates

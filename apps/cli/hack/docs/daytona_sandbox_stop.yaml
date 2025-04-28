@@ -1,0 +1,14 @@
+name: daytona sandbox stop
+synopsis: Stop a sandbox
+usage: daytona sandbox stop [SANDBOX_ID] [flags]
+options:
+  - name: all
+    shorthand: a
+    default_value: 'false'
+    usage: Stop all sandboxes
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona sandbox - Manage Daytona sandboxes

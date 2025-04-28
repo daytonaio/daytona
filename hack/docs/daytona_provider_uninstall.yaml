@@ -1,9 +1,0 @@
-name: daytona provider uninstall
-synopsis: Uninstall provider
-usage: daytona provider uninstall [flags]
-inherited_options:
-    - name: help
-      default_value: "false"
-      usage: help for daytona
-see_also:
-    - daytona provider - Manage providers

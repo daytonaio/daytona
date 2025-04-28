@@ -1,0 +1,6236 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: support@daytona.com
+    name: Daytona Platforms Inc.
+    url: https://www.daytona.io
+  description: Daytona AI platform API Docs
+  title: Daytona
+  version: '1.0'
+servers:
+  - url: http://localhost:3000
+paths:
+  /api-keys:
+    get:
+      operationId: listApiKeys
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ApiKeyList'
+                type: array
+          description: API keys retrieved successfully.
+        '500':
+          description: Error fetching API keys.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List API keys
+      tags:
+        - api-keys
+    post:
+      operationId: createApiKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateApiKey'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+          description: API key created successfully.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create API key
+      tags:
+        - api-keys
+  /api-keys/{name}:
+    delete:
+      operationId: deleteApiKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: API key deleted successfully.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete API key
+      tags:
+        - api-keys
+    get:
+      operationId: getApiKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyList'
+          description: API key retrieved successfully.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get API key
+      tags:
+        - api-keys
+  /organizations/invitations:
+    get:
+      operationId: listOrganizationInvitationsForAuthenticatedUser
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrganizationInvitation'
+                type: array
+          description: List of organization invitations
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List organization invitations for authenticated user
+      tags:
+        - organizations
+  /organizations/invitations/count:
+    get:
+      operationId: getOrganizationInvitationsCountForAuthenticatedUser
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: number
+          description: Count of organization invitations
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get count of organization invitations for authenticated user
+      tags:
+        - organizations
+  /organizations/invitations/{invitationId}/accept:
+    post:
+      operationId: acceptOrganizationInvitation
+      parameters:
+        - description: Invitation ID
+          explode: false
+          in: path
+          name: invitationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Organization invitation accepted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Accept organization invitation
+      tags:
+        - organizations
+  /organizations/invitations/{invitationId}/decline:
+    post:
+      operationId: declineOrganizationInvitation
+      parameters:
+        - description: Invitation ID
+          explode: false
+          in: path
+          name: invitationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Organization invitation declined successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Decline organization invitation
+      tags:
+        - organizations
+  /organizations:
+    get:
+      operationId: listOrganizations
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Organization'
+                type: array
+          description: List of organizations
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List organizations
+      tags:
+        - organizations
+    post:
+      operationId: createOrganization
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganization'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create organization
+      tags:
+        - organizations
+  /organizations/{organizationId}:
+    delete:
+      operationId: deleteOrganization
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: Organization deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete organization
+      tags:
+        - organizations
+    get:
+      operationId: getOrganization
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get organization by ID
+      tags:
+        - organizations
+  /organizations/{organizationId}/usage:
+    get:
+      operationId: getOrganizationUsageOverview
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsageOverview'
+          description: Current usage overview
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get organization current usage overview
+      tags:
+        - organizations
+  /organizations/{organizationId}/quota:
+    put:
+      operationId: updateOrganizationQuota
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationQuota'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organization'
+          description: Organization details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update organization quota
+      tags:
+        - organizations
+  /organizations/{organizationId}/leave:
+    post:
+      operationId: leaveOrganization
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: Organization left successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Leave organization
+      tags:
+        - organizations
+  /organizations/{organizationId}/suspend:
+    post:
+      operationId: suspendOrganization
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationSuspension'
+        required: false
+      responses:
+        '204':
+          description: Organization suspended successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Suspend organization
+      tags:
+        - organizations
+  /organizations/{organizationId}/unsuspend:
+    post:
+      operationId: unsuspendOrganization
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: Organization unsuspended successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Unsuspend organization
+      tags:
+        - organizations
+  /organizations/{organizationId}/roles:
+    get:
+      operationId: listOrganizationRoles
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrganizationRole'
+                type: array
+          description: List of organization roles
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List organization roles
+      tags:
+        - organizations
+    post:
+      operationId: createOrganizationRole
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationRole'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRole'
+          description: Organization role created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create organization role
+      tags:
+        - organizations
+  /organizations/{organizationId}/roles/{roleId}:
+    delete:
+      operationId: deleteOrganizationRole
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Role ID
+          explode: false
+          in: path
+          name: roleId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: Organization role deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete organization role
+      tags:
+        - organizations
+    put:
+      operationId: updateOrganizationRole
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Role ID
+          explode: false
+          in: path
+          name: roleId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationRole'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationRole'
+          description: Role updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update organization role
+      tags:
+        - organizations
+  /organizations/{organizationId}/users:
+    get:
+      operationId: listOrganizationMembers
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrganizationUser'
+                type: array
+          description: List of organization members
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List organization members
+      tags:
+        - organizations
+  /organizations/{organizationId}/users/{userId}/role:
+    post:
+      operationId: updateRoleForOrganizationMember
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: User ID
+          explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationMemberRole'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUser'
+          description: Role updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update role for organization member
+      tags:
+        - organizations
+  /organizations/{organizationId}/users/{userId}/assigned-roles:
+    post:
+      operationId: updateAssignedOrganizationRoles
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: User ID
+          explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAssignedOrganizationRoles'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationUser'
+          description: Assigned roles updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update assigned roles to organization member
+      tags:
+        - organizations
+  /organizations/{organizationId}/users/{userId}:
+    delete:
+      operationId: deleteOrganizationMember
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: User ID
+          explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: User removed from organization successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete organization member
+      tags:
+        - organizations
+  /organizations/{organizationId}/invitations:
+    get:
+      operationId: listOrganizationInvitations
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/OrganizationInvitation'
+                type: array
+          description: List of pending organization invitations
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List pending organization invitations
+      tags:
+        - organizations
+    post:
+      operationId: createOrganizationInvitation
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrganizationInvitation'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInvitation'
+          description: Organization invitation created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create organization invitation
+      tags:
+        - organizations
+  /organizations/{organizationId}/invitations/{invitationId}:
+    put:
+      operationId: updateOrganizationInvitation
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Invitation ID
+          explode: false
+          in: path
+          name: invitationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateOrganizationInvitation'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationInvitation'
+          description: Organization invitation updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update organization invitation
+      tags:
+        - organizations
+  /organizations/{organizationId}/invitations/{invitationId}/cancel:
+    post:
+      operationId: cancelOrganizationInvitation
+      parameters:
+        - description: Organization ID
+          explode: false
+          in: path
+          name: organizationId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Invitation ID
+          explode: false
+          in: path
+          name: invitationId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: Organization invitation cancelled successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Cancel organization invitation
+      tags:
+        - organizations
+  /users/me:
+    get:
+      operationId: getAuthenticatedUser
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User details
+      security:
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get authenticated user
+      tags:
+        - users
+  /users:
+    get:
+      operationId: listUsers
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      security:
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all users
+      tags:
+        - users
+    post:
+      operationId: createUser
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUser'
+        required: true
+      responses:
+        '201':
+          description: ''
+      security:
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create user
+      tags:
+        - users
+  /users/{id}/regenerate-key-pair:
+    post:
+      operationId: regenerateKeyPair
+      parameters:
+        - explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '201':
+          description: ''
+      security:
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Regenerate user key pair
+      tags:
+        - users
+  /workspace:
+    get:
+      operationId: listWorkspaces
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: JSON encoded labels to filter by
+          explode: true
+          in: query
+          name: labels
+          required: false
+          schema:
+            example: '{"label1": "value1", "label2": "value2"}'
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Workspace'
+                type: array
+          description: List of all workspaces
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all workspaces
+      tags:
+        - workspace
+    post:
+      operationId: createWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspace'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+          description: The workspace has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new workspace
+      tags:
+        - workspace
+  /workspace/{workspaceId}:
+    delete:
+      operationId: deleteWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: force
+          required: true
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          description: Workspace has been deleted
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete workspace
+      tags:
+        - workspace
+    get:
+      operationId: getWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+          description: Workspace details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get workspace details
+      tags:
+        - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      operationId: startWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been started
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Start workspace
+      tags:
+        - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      operationId: stopWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been stopped
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Stop workspace
+      tags:
+        - workspace
+  /workspace/{workspaceId}/labels:
+    put:
+      operationId: replaceLabels
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceLabels'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceLabels'
+          description: Labels have been successfully replaced
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Replace workspace labels
+      tags:
+        - workspace
+  /workspace/{workspaceId}/snapshot:
+    post:
+      operationId: createSnapshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workspace'
+          description: Workspace snapshot has been initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create workspace snapshot
+      tags:
+        - workspace
+  /workspace/{workspaceId}/public/{isPublic}:
+    post:
+      operationId: updatePublicStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Public status to set
+          explode: false
+          in: path
+          name: isPublic
+          required: true
+          schema:
+            type: boolean
+          style: simple
+      responses:
+        '201':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update public status
+      tags:
+        - workspace
+  /workspace/{workspaceId}/resize:
+    post:
+      operationId: resizeWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResizeQuota'
+        required: true
+      responses:
+        '201':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Resize workspace
+      tags:
+        - workspace
+  /workspace/{workspaceId}/autostop/{interval}:
+    post:
+      operationId: setAutostopInterval
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auto-stop interval in minutes (0 to disable)
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-stop interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set workspace auto-stop interval
+      tags:
+        - workspace
+  /workspace/{workspaceId}/archive:
+    post:
+      operationId: archiveWorkspace
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been archived
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Archive workspace
+      tags:
+        - workspace
+  /workspace/{workspaceId}/ports/{port}/preview-url:
+    get:
+      operationId: getPortPreviewUrl
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Port number to get preview URL for
+          explode: false
+          in: path
+          name: port
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortPreviewUrl'
+          description: Preview URL for the specified port
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get preview URL for a workspace port
+      tags:
+        - workspace
+  /nodes:
+    get:
+      operationId: listNodes
+      parameters: []
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all nodes
+      tags:
+        - nodes
+    post:
+      operationId: createNode
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNode'
+        required: true
+      responses:
+        '201':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create node
+      tags:
+        - nodes
+  /nodes/{id}/scheduling:
+    patch:
+      operationId: updateNodeScheduling
+      parameters:
+        - explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update node scheduling status
+      tags:
+        - nodes
+  /toolbox/{workspaceId}/toolbox/project-dir:
+    get:
+      operationId: getProjectDir
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDirResponse'
+          description: Project directory retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get workspace project dir
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files:
+    delete:
+      description: Delete file inside workspace
+      operationId: deleteFile
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          description: File deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete file
+      tags:
+        - toolbox
+    get:
+      operationId: listFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/FileInfo'
+                type: array
+          description: Files listed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List files
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/download:
+    get:
+      description: Download file from workspace
+      operationId: downloadFile
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                format: binary
+                type: string
+          description: File downloaded successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Download file
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/find:
+    get:
+      description: Search for text/pattern inside workspace files
+      operationId: findInFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: pattern
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Match'
+                type: array
+          description: Search completed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Search for text/pattern in files
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/folder:
+    post:
+      description: Create folder inside workspace
+      operationId: createFolder
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: mode
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          description: Folder created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create folder
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/info:
+    get:
+      description: Get file info inside workspace
+      operationId: getFileInfo
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FileInfo'
+          description: File info retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get file info
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/move:
+    post:
+      description: Move file inside workspace
+      operationId: moveFile
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: source
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: destination
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          description: File moved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Move file
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/permissions:
+    post:
+      description: Set file owner/group/permissions inside workspace
+      operationId: setFilePermissions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: owner
+          required: false
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: group
+          required: false
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: mode
+          required: false
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          description: File permissions updated successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set file permissions
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/replace:
+    post:
+      description: Replace text/pattern in multiple files inside workspace
+      operationId: replaceInFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReplaceRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ReplaceResult'
+                type: array
+          description: Text replaced successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Replace in files
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/search:
+    get:
+      description: Search for files inside workspace
+      operationId: searchFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: pattern
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchFilesResponse'
+          description: Search completed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Search files
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/upload:
+    post:
+      description: Upload file inside workspace
+      operationId: uploadFile
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/uploadFile_request'
+        required: true
+      responses:
+        '200':
+          description: File uploaded successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Upload file
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/add:
+    post:
+      description: Add files to git commit
+      operationId: gitAddFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitAddRequest'
+        required: true
+      responses:
+        '200':
+          description: Files added to git successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Add files
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/branches:
+    get:
+      description: Get branch list from git repository
+      operationId: gitListBranches
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListBranchResponse'
+          description: Branch list retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get branch list
+      tags:
+        - toolbox
+    post:
+      description: Create branch on git repository
+      operationId: gitCreateBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitBranchRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch created successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create branch
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/clone:
+    post:
+      description: Clone git repository
+      operationId: gitCloneRepository
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitCloneRequest'
+        required: true
+      responses:
+        '200':
+          description: Repository cloned successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Clone repository
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/commit:
+    post:
+      description: Commit changes to git repository
+      operationId: gitCommitChanges
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitCommitRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitCommitResponse'
+          description: Changes committed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Commit changes
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/history:
+    get:
+      description: Get commit history from git repository
+      operationId: gitGetHistory
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/GitCommitInfo'
+                type: array
+          description: Commit history retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get commit history
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/pull:
+    post:
+      description: Pull changes from remote
+      operationId: gitPullChanges
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitRepoRequest'
+        required: true
+      responses:
+        '200':
+          description: Changes pulled successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Pull changes
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/push:
+    post:
+      description: Push changes to remote
+      operationId: gitPushChanges
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitRepoRequest'
+        required: true
+      responses:
+        '200':
+          description: Changes pushed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Push changes
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/status:
+    get:
+      description: Get status from git repository
+      operationId: gitGetStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: path
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GitStatus'
+          description: Git status retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get git status
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/execute:
+    post:
+      description: Execute command synchronously inside workspace
+      operationId: executeCommand
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExecuteRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecuteResponse'
+          description: Command executed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Execute command
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/session:
+    get:
+      description: List all active sessions in the workspace
+      operationId: listSessions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Session'
+                type: array
+          description: Sessions retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List sessions
+      tags:
+        - toolbox
+    post:
+      description: Create a new session in the workspace
+      operationId: createSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionRequest'
+        required: true
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create session
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/session/{sessionId}:
+    delete:
+      description: Delete a specific session
+      operationId: deleteSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Session deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete session
+      tags:
+        - toolbox
+    get:
+      description: Get session by ID
+      operationId: getSession
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+          description: Session retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get session
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec:
+    post:
+      description: Execute a command in a specific session
+      operationId: executeSessionCommand
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SessionExecuteRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionExecuteResponse'
+          description: Command executed successfully
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SessionExecuteResponse'
+          description: Command accepted and is being processed
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Execute command in session
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}:
+    get:
+      description: Get session command by ID
+      operationId: getSessionCommand
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: commandId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Command'
+          description: Session command retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get session command
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs:
+    get:
+      description: Get logs for a specific command in a session
+      operationId: getSessionCommandLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sessionId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: commandId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: follow
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Command log stream
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get command logs
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/completions:
+    post:
+      description: The Completion request is sent from the client to the server to
+        compute completion items at a given cursor position.
+      operationId: LspCompletions
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LspCompletionParams'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompletionList'
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get Lsp Completions
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/did-close:
+    post:
+      description: The document close notification is sent from the client to the
+        server when the document got closed in the client.
+      operationId: LspDidClose
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LspDocumentRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Call Lsp DidClose
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/did-open:
+    post:
+      description: The document open notification is sent from the client to the server
+        to signal newly opened text documents.
+      operationId: LspDidOpen
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LspDocumentRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Call Lsp DidOpen
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/document-symbols:
+    get:
+      description: The document symbol request is sent from the client to the server.
+      operationId: LspDocumentSymbols
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: languageId
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: pathToProject
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: uri
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LspSymbol'
+                type: array
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Call Lsp DocumentSymbols
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/start:
+    post:
+      description: Start Lsp server process inside workspace project
+      operationId: LspStart
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LspServerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Start Lsp server
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/stop:
+    post:
+      description: Stop Lsp server process inside workspace project
+      operationId: LspStop
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LspServerRequest'
+        required: true
+      responses:
+        '200':
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Stop Lsp server
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/lsp/workspace-symbols:
+    get:
+      description: The workspace symbol request is sent from the client to the server
+        to list project-wide symbols matching the query string.
+      operationId: LspWorkspaceSymbols
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: languageId
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: pathToProject
+          required: true
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: query
+          required: true
+          schema:
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/LspSymbol'
+                type: array
+          description: OK
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Call Lsp WorkspaceSymbols
+      tags:
+        - toolbox
+  /images:
+    get:
+      operationId: getAllImages
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Number of items per page
+          explode: true
+          in: query
+          name: limit
+          required: false
+          schema:
+            type: number
+          style: form
+        - description: Page number
+          explode: true
+          in: query
+          name: page
+          required: false
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedImagesDto'
+          description: List of all images with pagination
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all images
+      tags:
+        - images
+    post:
+      operationId: createImage
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateImage'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+          description: The image has been successfully created.
+        '400':
+          description: Bad request - Images with tag ":latest" are not allowed
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new image
+      tags:
+        - images
+  /images/{id}:
+    delete:
+      operationId: removeImage
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Image has been deleted
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete image
+      tags:
+        - images
+    get:
+      operationId: getImage
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+          description: The image
+        '404':
+          description: Image not found
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get image by ID
+      tags:
+        - images
+  /images/build:
+    post:
+      operationId: buildImage
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BuildImage'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+          description: The image has been successfully built.
+        '400':
+          description: Bad request - Invalid build parameters
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Build a Docker image
+      tags:
+        - images
+  /images/{id}/toggle:
+    patch:
+      operationId: toggleImageState
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ToggleState'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+          description: Image state has been toggled
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Toggle image state
+      tags:
+        - images
+  /images/{id}/general:
+    patch:
+      operationId: setImageGeneralStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetImageGeneralStatus'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ImageDto'
+          description: Image general status has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set image general status
+      tags:
+        - images
+  /preview/{workspaceId}/public:
+    get:
+      operationId: isWorkspacePublic
+      parameters:
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Public status of the workspace
+      summary: Check if workspace is public
+      tags:
+        - preview
+  /preview/{workspaceId}/validate/{authToken}:
+    get:
+      operationId: isValidAuthToken
+      parameters:
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auth token of the workspace
+          explode: false
+          in: path
+          name: authToken
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: boolean
+          description: Workspace auth token validation status
+      summary: Check if workspace auth token is valid
+      tags:
+        - preview
+  /preview/{workspaceId}/access:
+    get:
+      operationId: hasWorkspaceAccess
+      parameters:
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Check if user has access to the workspace
+      tags:
+        - preview
+  /volumes:
+    get:
+      operationId: listVolumes
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include deleted volumes in the response
+          explode: true
+          in: query
+          name: includeDeleted
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/VolumeDto'
+                type: array
+          description: List of all volumes
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List all volumes
+      tags:
+        - volumes
+    post:
+      operationId: createVolume
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVolume'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeDto'
+          description: The volume has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create a new volume
+      tags:
+        - volumes
+  /volumes/{volumeId}:
+    delete:
+      operationId: deleteVolume
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the volume
+          explode: false
+          in: path
+          name: volumeId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Volume has been marked for deletion
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete volume
+      tags:
+        - volumes
+    get:
+      operationId: getVolume
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the volume
+          explode: false
+          in: path
+          name: volumeId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeDto'
+          description: Volume details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get volume details
+      tags:
+        - volumes
+  /volumes/by-name/{name}:
+    get:
+      operationId: getVolumeByName
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Name of the volume
+          explode: false
+          in: path
+          name: name
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VolumeDto'
+          description: Volume details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get volume details by name
+      tags:
+        - volumes
+  /docker-registry:
+    get:
+      operationId: listRegistries
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/DockerRegistry'
+                type: array
+          description: List of all docker registries
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: List registries
+      tags:
+        - docker-registry
+    post:
+      operationId: createRegistry
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDockerRegistry'
+        required: true
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: The docker registry has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Create registry
+      tags:
+        - docker-registry
+  /docker-registry/registry-push-access:
+    get:
+      operationId: getTransientPushAccess
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistryPushAccessDto'
+          description: Temporary registry access has been generated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get temporary registry access for pushing images
+      tags:
+        - docker-registry
+  /docker-registry/{id}:
+    delete:
+      operationId: deleteRegistry
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the docker registry
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '204':
+          description: The docker registry has been successfully deleted.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete registry
+      tags:
+        - docker-registry
+    get:
+      operationId: getRegistry
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the docker registry
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: The docker registry
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get registry
+      tags:
+        - docker-registry
+    patch:
+      operationId: updateRegistry
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the docker registry
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDockerRegistry'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: The docker registry has been successfully updated.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Update registry
+      tags:
+        - docker-registry
+  /docker-registry/{id}/set-default:
+    post:
+      operationId: setDefaultRegistry
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the docker registry
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockerRegistry'
+          description: The docker registry has been set as default.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set default registry
+      tags:
+        - docker-registry
+  /object-storage/push-access:
+    get:
+      operationId: getPushAccess
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StorageAccessDto'
+          description: Temporary storage access has been generated
+      security:
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get temporary storage access for pushing objects
+      tags:
+        - object-storage
+components:
+  schemas:
+    CreateApiKey:
+      example:
+        permissions:
+          - write:registries
+          - write:registries
+        name: My API Key
+      properties:
+        name:
+          description: The name of the API key
+          example: My API Key
+          type: string
+        permissions:
+          description: The list of organization resource permissions assigned to the
+            API key
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+      required:
+        - name
+        - permissions
+      type: object
+    ApiKeyResponse:
+      example:
+        createdAt: 2024-03-14T12:00:00Z
+        permissions:
+          - write:registries
+          - write:registries
+        name: My API Key
+        value: bb_sk_1234567890abcdef
+      properties:
+        name:
+          description: The name of the API key
+          example: My API Key
+          type: string
+        value:
+          description: The API key value
+          example: bb_sk_1234567890abcdef
+          type: string
+        createdAt:
+          description: When the API key was created
+          example: 2024-03-14T12:00:00Z
+          format: date-time
+          type: string
+        permissions:
+          description: The list of organization resource permissions assigned to the
+            API key
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+      required:
+        - createdAt
+        - name
+        - permissions
+        - value
+      type: object
+    ApiKeyList:
+      example:
+        createdAt: 2024-03-14T12:00:00Z
+        permissions:
+          - write:registries
+          - write:registries
+        name: My API Key
+        value: bb_********************def
+      properties:
+        name:
+          description: The name of the API key
+          example: My API Key
+          type: string
+        value:
+          description: The masked API key value
+          example: bb_********************def
+          type: string
+        createdAt:
+          description: When the API key was created
+          example: 2024-03-14T12:00:00Z
+          format: date-time
+          type: string
+        permissions:
+          description: The list of organization resource permissions assigned to the
+            API key
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+      required:
+        - createdAt
+        - name
+        - permissions
+        - value
+      type: object
+    OrganizationRole:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        permissions:
+          - write:registries
+          - write:registries
+        name: name
+        isGlobal: true
+        description: description
+        id: id
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Role ID
+          type: string
+        name:
+          description: Role name
+          type: string
+        description:
+          description: Role description
+          type: string
+        permissions:
+          description: Roles assigned to the user
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+        isGlobal:
+          description: Global role flag
+          type: boolean
+        createdAt:
+          description: Creation timestamp
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          format: date-time
+          type: string
+      required:
+        - createdAt
+        - description
+        - id
+        - isGlobal
+        - name
+        - permissions
+        - updatedAt
+      type: object
+    OrganizationInvitation:
+      example:
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        invitedBy: invitedBy
+        role: owner
+        organizationName: organizationName
+        assignedRoles:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            permissions:
+              - write:registries
+              - write:registries
+            name: name
+            isGlobal: true
+            description: description
+            id: id
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            permissions:
+              - write:registries
+              - write:registries
+            name: name
+            isGlobal: true
+            description: description
+            id: id
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+        id: id
+        email: email
+        expiresAt: 2000-01-23T04:56:07.000+00:00
+        status: pending
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Invitation ID
+          type: string
+        email:
+          description: Email address of the invitee
+          type: string
+        invitedBy:
+          description: Email address of the inviter
+          type: string
+        organizationId:
+          description: Organization ID
+          type: string
+        organizationName:
+          description: Organization name
+          type: string
+        expiresAt:
+          description: Expiration date of the invitation
+          format: date-time
+          type: string
+        status:
+          description: Invitation status
+          enum:
+            - pending
+            - accepted
+            - declined
+            - cancelled
+          type: string
+        role:
+          description: Member role
+          enum:
+            - owner
+            - member
+          type: string
+        assignedRoles:
+          description: Assigned roles
+          items:
+            $ref: '#/components/schemas/OrganizationRole'
+          type: array
+        createdAt:
+          description: Creation timestamp
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          format: date-time
+          type: string
+      required:
+        - assignedRoles
+        - createdAt
+        - email
+        - expiresAt
+        - id
+        - invitedBy
+        - organizationId
+        - organizationName
+        - role
+        - status
+        - updatedAt
+      type: object
+    CreateOrganization:
+      example:
+        name: My Organization
+      properties:
+        name:
+          description: The name of organization
+          example: My Organization
+          type: string
+      required:
+        - name
+      type: object
+    Organization:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        suspendedUntil: 2000-01-23T04:56:07.000+00:00
+        createdBy: createdBy
+        suspensionReason: suspensionReason
+        suspendedAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        personal: true
+        id: id
+        suspended: true
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: Organization ID
+          type: string
+        name:
+          description: Organization name
+          type: string
+        createdBy:
+          description: User ID of the organization creator
+          type: string
+        personal:
+          description: Personal organization flag
+          type: boolean
+        createdAt:
+          description: Creation timestamp
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          format: date-time
+          type: string
+        suspended:
+          description: Suspended flag
+          type: boolean
+        suspendedAt:
+          description: Suspended at
+          format: date-time
+          type: string
+        suspensionReason:
+          description: Suspended reason
+          type: string
+        suspendedUntil:
+          description: Suspended until
+          format: date-time
+          type: string
+      required:
+        - createdAt
+        - createdBy
+        - id
+        - name
+        - personal
+        - suspended
+        - suspendedAt
+        - suspendedUntil
+        - suspensionReason
+        - updatedAt
+      type: object
+    UsageOverview:
+      example:
+        totalCpuQuota: 0.8008281904610115
+        imageQuota: 1.2315135367772556
+        totalImageSizeQuota: 1.0246457001441578
+        currentWorkspaces: 2.027123023002322
+        totalGpuQuota: 6.027456183070403
+        totalImageSizeUsed: 1.4894159098541704
+        concurrentWorkspaces: 4.145608029883936
+        concurrentWorkspaceQuota: 2.3021358869347655
+        currentImageNumber: 7.386281948385884
+        totalWorkspaceQuota: 5.637376656633329
+        currentDiskUsage: 3.616076749251911
+        currentMemoryUsage: 9.301444243932576
+        currentCpuUsage: 7.061401241503109
+        totalMemoryQuota: 1.4658129805029452
+        totalDiskQuota: 5.962133916683182
+      properties:
+        totalCpuQuota:
+          type: number
+        totalGpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+        totalWorkspaceQuota:
+          type: number
+        concurrentWorkspaceQuota:
+          type: number
+        currentCpuUsage:
+          type: number
+        currentMemoryUsage:
+          type: number
+        currentDiskUsage:
+          type: number
+        currentWorkspaces:
+          type: number
+        concurrentWorkspaces:
+          type: number
+        currentImageNumber:
+          type: number
+        imageQuota:
+          type: number
+        totalImageSizeQuota:
+          type: number
+        totalImageSizeUsed:
+          type: number
+      required:
+        - concurrentWorkspaceQuota
+        - concurrentWorkspaces
+        - currentCpuUsage
+        - currentDiskUsage
+        - currentImageNumber
+        - currentMemoryUsage
+        - currentWorkspaces
+        - imageQuota
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalGpuQuota
+        - totalImageSizeQuota
+        - totalImageSizeUsed
+        - totalMemoryQuota
+        - totalWorkspaceQuota
+      type: object
+    UpdateOrganizationQuota:
+      example:
+        totalCpuQuota: 0.8008281904610115
+        imageQuota: 3.616076749251911
+        maxCpuPerWorkspace: 5.962133916683182
+        maxConcurrentWorkspaces: 7.061401241503109
+        totalImageSize: 4.145608029883936
+        maxDiskPerWorkspace: 2.3021358869347655
+        workspaceQuota: 9.301444243932576
+        maxImageSize: 2.027123023002322
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+        maxMemoryPerWorkspace: 5.637376656633329
+      properties:
+        totalCpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+        maxCpuPerWorkspace:
+          type: number
+        maxMemoryPerWorkspace:
+          type: number
+        maxDiskPerWorkspace:
+          type: number
+        maxConcurrentWorkspaces:
+          type: number
+        workspaceQuota:
+          type: number
+        imageQuota:
+          type: number
+        maxImageSize:
+          type: number
+        totalImageSize:
+          type: number
+      required:
+        - imageQuota
+        - maxConcurrentWorkspaces
+        - maxCpuPerWorkspace
+        - maxDiskPerWorkspace
+        - maxImageSize
+        - maxMemoryPerWorkspace
+        - totalCpuQuota
+        - totalDiskQuota
+        - totalImageSize
+        - totalMemoryQuota
+        - workspaceQuota
+      type: object
+    OrganizationSuspension:
+      example:
+        reason: reason
+        until: 2000-01-23T04:56:07.000+00:00
+      properties:
+        reason:
+          description: Suspension reason
+          type: string
+        until:
+          description: Suspension until
+          format: date-time
+          type: string
+      required:
+        - reason
+        - until
+      type: object
+    CreateOrganizationRole:
+      example:
+        permissions:
+          - write:registries
+          - write:registries
+        name: Maintainer
+        description: Can manage all resources
+      properties:
+        name:
+          description: The name of the role
+          example: Maintainer
+          type: string
+        description:
+          description: The description of the role
+          example: Can manage all resources
+          type: string
+        permissions:
+          description: The list of permissions assigned to the role
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+      required:
+        - description
+        - name
+        - permissions
+      type: object
+    UpdateOrganizationRole:
+      example:
+        permissions:
+          - write:registries
+          - write:registries
+        name: Maintainer
+        description: Can manage all resources
+      properties:
+        name:
+          description: The name of the role
+          example: Maintainer
+          type: string
+        description:
+          description: The description of the role
+          example: Can manage all resources
+          type: string
+        permissions:
+          description: The list of permissions assigned to the role
+          items:
+            enum:
+              - write:registries
+              - delete:registries
+              - write:images
+              - delete:images
+              - write:sandboxes
+              - delete:sandboxes
+              - read:volumes
+              - write:volumes
+              - delete:volumes
+            type: string
+          type: array
+      required:
+        - description
+        - name
+        - permissions
+      type: object
+    OrganizationUser:
+      example:
+        organizationId: organizationId
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        role: owner
+        assignedRoles:
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            permissions:
+              - write:registries
+              - write:registries
+            name: name
+            isGlobal: true
+            description: description
+            id: id
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - createdAt: 2000-01-23T04:56:07.000+00:00
+            permissions:
+              - write:registries
+              - write:registries
+            name: name
+            isGlobal: true
+            description: description
+            id: id
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+        name: name
+        userId: userId
+        email: email
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        userId:
+          description: User ID
+          type: string
+        organizationId:
+          description: Organization ID
+          type: string
+        name:
+          description: User name
+          type: string
+        email:
+          description: User email
+          type: string
+        role:
+          description: Member role
+          enum:
+            - owner
+            - member
+          type: string
+        assignedRoles:
+          description: Roles assigned to the user
+          items:
+            $ref: '#/components/schemas/OrganizationRole'
+          type: array
+        createdAt:
+          description: Creation timestamp
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          format: date-time
+          type: string
+      required:
+        - assignedRoles
+        - createdAt
+        - email
+        - name
+        - organizationId
+        - role
+        - updatedAt
+        - userId
+      type: object
+    UpdateOrganizationMemberRole:
+      example:
+        role: owner
+      properties:
+        role:
+          description: Organization member role
+          enum:
+            - owner
+            - member
+          type: string
+      required:
+        - role
+      type: object
+    UpdateAssignedOrganizationRoles:
+      example:
+        roleIds:
+          - roleIds
+          - roleIds
+      properties:
+        roleIds:
+          description: Array of role IDs
+          items:
+            type: string
+          type: array
+      required:
+        - roleIds
+      type: object
+    CreateOrganizationInvitation:
+      example:
+        role: member
+        assignedRoleIds:
+          - assignedRoleIds
+          - assignedRoleIds
+        email: mail@example.com
+        expiresAt: 2021-12-31T23:59:59Z
+      properties:
+        email:
+          description: Email address of the invitee
+          example: mail@example.com
+          type: string
+        role:
+          default: member
+          description: Organization member role for the invitee
+          enum:
+            - owner
+            - member
+          type: string
+        assignedRoleIds:
+          default:
+            - 00000000-0000-0000-0000-000000000001
+          description: Array of assigned role IDs for the invitee
+          items:
+            type: string
+          type: array
+        expiresAt:
+          description: Expiration date of the invitation
+          example: 2021-12-31T23:59:59Z
+          format: date-time
+          type: string
+      required:
+        - assignedRoleIds
+        - email
+        - role
+      type: object
+    UpdateOrganizationInvitation:
+      example:
+        role: owner
+        assignedRoleIds:
+          - assignedRoleIds
+          - assignedRoleIds
+        expiresAt: 2021-12-31T23:59:59Z
+      properties:
+        role:
+          description: Organization member role
+          enum:
+            - owner
+            - member
+          type: string
+        assignedRoleIds:
+          description: Array of role IDs
+          items:
+            type: string
+          type: array
+        expiresAt:
+          description: Expiration date of the invitation
+          example: 2021-12-31T23:59:59Z
+          format: date-time
+          type: string
+      required:
+        - assignedRoleIds
+        - role
+      type: object
+    UserPublicKey:
+      example:
+        name: name
+        key: key
+      properties:
+        key:
+          description: Public key
+          type: string
+        name:
+          description: Key name
+          type: string
+      required:
+        - key
+        - name
+      type: object
+    User:
+      example:
+        publicKeys:
+          - name: name
+            key: key
+          - name: name
+            key: key
+        name: name
+        id: id
+        email: email
+      properties:
+        id:
+          description: User ID
+          type: string
+        name:
+          description: User name
+          type: string
+        email:
+          description: User email
+          type: string
+        publicKeys:
+          description: User public keys
+          items:
+            $ref: '#/components/schemas/UserPublicKey'
+          type: array
+      required:
+        - email
+        - id
+        - name
+        - publicKeys
+      type: object
+    CreateOrganizationQuota:
+      example:
+        totalCpuQuota: 0.8008281904610115
+        imageQuota: 3.616076749251911
+        maxCpuPerWorkspace: 5.962133916683182
+        maxConcurrentWorkspaces: 7.061401241503109
+        totalImageSize: 4.145608029883936
+        maxDiskPerWorkspace: 2.3021358869347655
+        workspaceQuota: 9.301444243932576
+        maxImageSize: 2.027123023002322
+        totalMemoryQuota: 6.027456183070403
+        totalDiskQuota: 1.4658129805029452
+        maxMemoryPerWorkspace: 5.637376656633329
+      properties:
+        totalCpuQuota:
+          type: number
+        totalMemoryQuota:
+          type: number
+        totalDiskQuota:
+          type: number
+        maxCpuPerWorkspace:
+          type: number
+        maxMemoryPerWorkspace:
+          type: number
+        maxDiskPerWorkspace:
+          type: number
+        maxConcurrentWorkspaces:
+          type: number
+        workspaceQuota:
+          type: number
+        imageQuota:
+          type: number
+        maxImageSize:
+          type: number
+        totalImageSize:
+          type: number
+      type: object
+    CreateUser:
+      example:
+        emailVerified: true
+        role: admin
+        name: name
+        id: id
+        personalOrganizationQuota:
+          totalCpuQuota: 0.8008281904610115
+          imageQuota: 3.616076749251911
+          maxCpuPerWorkspace: 5.962133916683182
+          maxConcurrentWorkspaces: 7.061401241503109
+          totalImageSize: 4.145608029883936
+          maxDiskPerWorkspace: 2.3021358869347655
+          workspaceQuota: 9.301444243932576
+          maxImageSize: 2.027123023002322
+          totalMemoryQuota: 6.027456183070403
+          totalDiskQuota: 1.4658129805029452
+          maxMemoryPerWorkspace: 5.637376656633329
+        email: email
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        personalOrganizationQuota:
+          $ref: '#/components/schemas/CreateOrganizationQuota'
+        role:
+          enum:
+            - admin
+            - user
+          type: string
+        emailVerified:
+          type: boolean
+      required:
+        - id
+        - name
+      type: object
+    WorkspaceInfo:
+      properties:
+        created:
+          description: The creation timestamp of the project
+          example: 2023-10-01T12:00:00Z
+          type: string
+        name:
+          default: ''
+          deprecated: true
+          description: 'Deprecated: The name of the workspace'
+          example: MyWorkspace
+          type: string
+        providerMetadata:
+          description: Additional metadata provided by the provider
+          example: '{"key": "value"}'
+          type: string
+      required:
+        - created
+        - name
+      type: object
+    WorkspaceState:
+      description: The state of the workspace
+      enum:
+        - creating
+        - restoring
+        - destroyed
+        - destroying
+        - started
+        - stopped
+        - starting
+        - stopping
+        - resizing
+        - error
+        - pending_build
+        - building_image
+        - unknown
+        - pulling_image
+        - archiving
+        - archived
+      type: string
+    WorkspaceVolume:
+      example:
+        mountPath: /data
+        volumeId: volume123
+      properties:
+        volumeId:
+          description: The ID of the volume
+          example: volume123
+          type: string
+        mountPath:
+          description: The mount path for the volume
+          example: /data
+          type: string
+      required:
+        - mountPath
+        - volumeId
+      type: object
+    Workspace:
+      example:
+        image: daytonaio/workspace:latest
+        memory: 4
+        volumes:
+          - mountPath: /data
+            volumeId: volume123
+          - mountPath: /data
+            volumeId: volume123
+        cpu: 2
+        env:
+          NODE_ENV: production
+        snapshotCreatedAt: 2024-10-01T12:00:00Z
+        gpu: 0
+        autoStopInterval: 30
+        labels:
+          daytona.io/public: 'true'
+        target: local
+        organizationId: organization123
+        disk: 10
+        snapshotState: None
+        public: false
+        errorReason: The workspace is not running
+        name: MyWorkspace
+        id: workspace123
+        state: creating
+        user: daytona
+        info: ''
+      properties:
+        id:
+          description: The ID of the workspace
+          example: workspace123
+          type: string
+        name:
+          default: ''
+          deprecated: true
+          description: The name of the workspace
+          example: MyWorkspace
+          type: string
+        organizationId:
+          description: The organization ID of the workspace
+          example: organization123
+          type: string
+        image:
+          description: The image used for the workspace
+          example: daytonaio/workspace:latest
+          type: string
+        user:
+          description: The user associated with the project
+          example: daytona
+          type: string
+        env:
+          additionalProperties:
+            type: string
+          description: Environment variables for the workspace
+          example:
+            NODE_ENV: production
+          type: object
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels for the workspace
+          example:
+            daytona.io/public: 'true'
+          type: object
+        public:
+          description: Whether the workspace http preview is public
+          example: false
+          type: boolean
+        target:
+          description: The target environment for the workspace
+          example: local
+          type: string
+        info:
+          allOf:
+            - $ref: '#/components/schemas/WorkspaceInfo'
+          description: Additional information about the workspace
+        cpu:
+          description: The CPU quota for the workspace
+          example: 2
+          type: number
+        gpu:
+          description: The GPU quota for the workspace
+          example: 0
+          type: number
+        memory:
+          description: The memory quota for the workspace
+          example: 4
+          type: number
+        disk:
+          description: The disk quota for the workspace
+          example: 10
+          type: number
+        state:
+          allOf:
+            - $ref: '#/components/schemas/WorkspaceState'
+          description: The state of the workspace
+          example: creating
+        errorReason:
+          description: The error reason of the workspace
+          example: The workspace is not running
+          type: string
+        snapshotState:
+          description: The state of the snapshot
+          enum:
+            - None
+            - Pending
+            - InProgress
+            - Completed
+            - Error
+          example: None
+          type: string
+        snapshotCreatedAt:
+          description: The creation timestamp of the last snapshot
+          example: 2024-10-01T12:00:00Z
+          type: string
+        autoStopInterval:
+          description: Auto-stop interval in minutes (0 means disabled)
+          example: 30
+          type: number
+        volumes:
+          description: Array of volumes attached to the workspace
+          items:
+            $ref: '#/components/schemas/WorkspaceVolume'
+          type: array
+      required:
+        - env
+        - id
+        - labels
+        - name
+        - organizationId
+        - public
+        - target
+        - user
+      type: object
+    CreateBuildInfo:
+      properties:
+        dockerfileContent:
+          description: The Dockerfile content used for the build
+          example: |-
+            FROM node:14
+            WORKDIR /app
+            COPY . .
+            RUN npm install
+            CMD ["npm", "start"]
+          type: string
+        contextHashes:
+          description: The context hashes used for the build
+          example:
+            - hash1
+            - hash2
+          items:
+            type: string
+          type: array
+      required:
+        - dockerfileContent
+      type: object
+    CreateWorkspace:
+      example:
+        image: daytonaio/workspace:latest
+        memory: 4096
+        buildInfo: ''
+        volumes:
+          - mountPath: /data
+            volumeId: volume123
+          - mountPath: /data
+            volumeId: volume123
+        cpu: 2
+        env:
+          NODE_ENV: production
+        gpu: 1
+        autoStopInterval: 30
+        labels:
+          daytona.io/public: 'true'
+        target: eu
+        disk: 20
+        public: false
+        user: daytona
+        class: small
+      properties:
+        image:
+          description: The image used for the workspace
+          example: daytonaio/workspace:latest
+          type: string
+        user:
+          description: The user associated with the project
+          example: daytona
+          type: string
+        env:
+          additionalProperties:
+            type: string
+          description: Environment variables for the workspace
+          example:
+            NODE_ENV: production
+          type: object
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels for the workspace
+          example:
+            daytona.io/public: 'true'
+          type: object
+        public:
+          description: Whether the workspace http preview is publicly accessible
+          example: false
+          type: boolean
+        class:
+          description: The workspace class type
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        target:
+          description: The target (region) where the workspace will be created
+          enum:
+            - eu
+            - us
+            - asia
+          example: eu
+          type: string
+        cpu:
+          description: CPU cores allocated to the workspace
+          example: 2
+          type: integer
+        gpu:
+          description: GPU units allocated to the workspace
+          example: 1
+          type: integer
+        memory:
+          description: Memory allocated to the workspace in MB
+          example: 4096
+          type: integer
+        disk:
+          description: Disk space allocated to the workspace in GB
+          example: 20
+          type: integer
+        autoStopInterval:
+          description: Auto-stop interval in minutes (0 means disabled)
+          example: 30
+          type: integer
+        volumes:
+          description: Array of volumes to attach to the workspace
+          items:
+            $ref: '#/components/schemas/WorkspaceVolume'
+          type: array
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the workspace
+      type: object
+    WorkspaceLabels:
+      example:
+        labels:
+          environment: dev
+          team: backend
+      properties:
+        labels:
+          additionalProperties:
+            type: string
+          description: Key-value pairs of labels
+          example:
+            environment: dev
+            team: backend
+          type: object
+      required:
+        - labels
+      type: object
+    ResizeQuota:
+      properties: {}
+      type: object
+    PortPreviewUrl:
+      example:
+        url: https://123456-myworkspace.node.com
+        token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
+      properties:
+        url:
+          description: Preview url
+          example: https://123456-myworkspace.node.com
+          type: string
+        token:
+          description: Access token
+          example: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
+          type: string
+      required:
+        - token
+        - url
+      type: object
+    CreateNode:
+      example:
+        disk: 1.4658129805029452
+        memory: 6.027456183070403
+        apiUrl: apiUrl
+        apiKey: apiKey
+        domain: domain
+        cpu: 0.8008281904610115
+        region: eu
+        gpu: 5.962133916683182
+        class: small
+        gpuType: gpuType
+        capacity: 5.637376656633329
+      properties:
+        domain:
+          type: string
+        apiUrl:
+          type: string
+        apiKey:
+          type: string
+        cpu:
+          type: number
+        memory:
+          type: number
+        disk:
+          type: number
+        gpu:
+          type: number
+        gpuType:
+          type: string
+        class:
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        capacity:
+          type: number
+        region:
+          enum:
+            - eu
+            - us
+            - asia
+          example: eu
+          type: string
+      required:
+        - apiKey
+        - apiUrl
+        - capacity
+        - class
+        - cpu
+        - disk
+        - domain
+        - gpu
+        - gpuType
+        - memory
+        - region
+      type: object
+    ProjectDirResponse:
+      example:
+        dir: dir
+      properties:
+        dir:
+          type: string
+      type: object
+    FileInfo:
+      example:
+        mode: mode
+        owner: owner
+        size: 0.8008281904610115
+        modTime: modTime
+        permissions: permissions
+        name: name
+        isDir: true
+        group: group
+      properties:
+        name:
+          type: string
+        isDir:
+          type: boolean
+        size:
+          type: number
+        modTime:
+          type: string
+        mode:
+          type: string
+        permissions:
+          type: string
+        owner:
+          type: string
+        group:
+          type: string
+      required:
+        - group
+        - isDir
+        - modTime
+        - mode
+        - name
+        - owner
+        - permissions
+        - size
+      type: object
+    Match:
+      example:
+        file: file
+        line: 0.8008281904610115
+        content: content
+      properties:
+        file:
+          type: string
+        line:
+          type: number
+        content:
+          type: string
+      required:
+        - content
+        - file
+        - line
+      type: object
+    ReplaceRequest:
+      example:
+        newValue: newValue
+        pattern: pattern
+        files:
+          - files
+          - files
+      properties:
+        files:
+          items:
+            type: string
+          type: array
+        pattern:
+          type: string
+        newValue:
+          type: string
+      required:
+        - files
+        - newValue
+        - pattern
+      type: object
+    ReplaceResult:
+      example:
+        file: file
+        success: true
+        error: error
+      properties:
+        file:
+          type: string
+        success:
+          type: boolean
+        error:
+          type: string
+      type: object
+    SearchFilesResponse:
+      example:
+        files:
+          - files
+          - files
+      properties:
+        files:
+          items:
+            type: string
+          type: array
+      required:
+        - files
+      type: object
+    GitAddRequest:
+      example:
+        path: path
+        files:
+          - files
+          - files
+      properties:
+        path:
+          type: string
+        files:
+          description: files to add (use . for all files)
+          items:
+            type: string
+          type: array
+      required:
+        - files
+        - path
+      type: object
+    ListBranchResponse:
+      example:
+        branches:
+          - branches
+          - branches
+      properties:
+        branches:
+          items:
+            type: string
+          type: array
+      required:
+        - branches
+      type: object
+    GitBranchRequest:
+      example:
+        path: path
+        name: name
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - path
+      type: object
+    GitCloneRequest:
+      example:
+        path: path
+        password: password
+        branch: branch
+        commit_id: commit_id
+        url: url
+        username: username
+      properties:
+        url:
+          type: string
+        path:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        branch:
+          type: string
+        commit_id:
+          type: string
+      required:
+        - path
+        - url
+      type: object
+    GitCommitRequest:
+      example:
+        path: path
+        author: author
+        message: message
+        email: email
+      properties:
+        path:
+          type: string
+        message:
+          type: string
+        author:
+          type: string
+        email:
+          type: string
+      required:
+        - author
+        - email
+        - message
+        - path
+      type: object
+    GitCommitResponse:
+      example:
+        hash: hash
+      properties:
+        hash:
+          type: string
+      required:
+        - hash
+      type: object
+    GitCommitInfo:
+      example:
+        author: author
+        message: message
+        hash: hash
+        email: email
+        timestamp: timestamp
+      properties:
+        hash:
+          type: string
+        message:
+          type: string
+        author:
+          type: string
+        email:
+          type: string
+        timestamp:
+          type: string
+      required:
+        - author
+        - email
+        - hash
+        - message
+        - timestamp
+      type: object
+    GitRepoRequest:
+      example:
+        path: path
+        password: password
+        username: username
+      properties:
+        path:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - path
+      type: object
+    FileStatus:
+      example:
+        extra: extra
+        name: name
+        staging: staging
+        worktree: worktree
+      properties:
+        name:
+          type: string
+        staging:
+          type: string
+        worktree:
+          type: string
+        extra:
+          type: string
+      required:
+        - extra
+        - name
+        - staging
+        - worktree
+      type: object
+    GitStatus:
+      example:
+        FileStatus[]:
+          - extra: extra
+            name: name
+            staging: staging
+            worktree: worktree
+          - extra: extra
+            name: name
+            staging: staging
+            worktree: worktree
+        behind: 6.027456183070403
+        ahead: 0.8008281904610115
+        branchPublished: true
+        currentBranch: currentBranch
+      properties:
+        currentBranch:
+          type: string
+        FileStatus[]:
+          items:
+            $ref: '#/components/schemas/FileStatus'
+          type: array
+        ahead:
+          type: number
+        behind:
+          type: number
+        branchPublished:
+          type: boolean
+      required:
+        - 'FileStatus[]'
+        - currentBranch
+      type: object
+    ExecuteRequest:
+      example:
+        cwd: cwd
+        command: command
+        timeout: 0.8008281904610115
+      properties:
+        command:
+          type: string
+        cwd:
+          description: Current working directory
+          type: string
+        timeout:
+          description: 'Timeout in seconds, defaults to 10 seconds'
+          type: number
+      required:
+        - command
+      type: object
+    ExecuteResponse:
+      example:
+        result: Command output here
+        exitCode: 0
+      properties:
+        exitCode:
+          description: Exit code
+          example: 0
+          type: number
+        result:
+          description: Command output
+          example: Command output here
+          type: string
+      required:
+        - exitCode
+        - result
+      type: object
+    Command:
+      example:
+        exitCode: 0
+        id: cmd-123
+        command: ls -la
+      properties:
+        id:
+          description: The ID of the command
+          example: cmd-123
+          type: string
+        command:
+          description: The command that was executed
+          example: ls -la
+          type: string
+        exitCode:
+          description: The exit code of the command
+          example: 0
+          type: number
+      required:
+        - command
+        - id
+      type: object
+    Session:
+      example:
+        sessionId: session-123
+        commands:
+          - exitCode: 0
+            id: cmd-123
+            command: ls -la
+          - exitCode: 0
+            id: cmd-123
+            command: ls -la
+      properties:
+        sessionId:
+          description: The ID of the session
+          example: session-123
+          type: string
+        commands:
+          description: The list of commands executed in this session
+          items:
+            $ref: '#/components/schemas/Command'
+          nullable: true
+          type: array
+      required:
+        - commands
+        - sessionId
+      type: object
+    CreateSessionRequest:
+      example:
+        sessionId: session-123
+      properties:
+        sessionId:
+          description: The ID of the session
+          example: session-123
+          type: string
+      required:
+        - sessionId
+      type: object
+    SessionExecuteRequest:
+      example:
+        async: false
+        command: ls -la
+        runAsync: false
+      properties:
+        command:
+          description: The command to execute
+          example: ls -la
+          type: string
+        runAsync:
+          description: Whether to execute the command asynchronously
+          example: false
+          type: boolean
+        async:
+          deprecated: true
+          description: "Deprecated: Use runAsync instead. Whether to execute the command\
+            \ asynchronously"
+          example: false
+          type: boolean
+      required:
+        - command
+      type: object
+    SessionExecuteResponse:
+      example:
+        output: |-
+          total 20
+          drwxr-xr-x  4 user group  128 Mar 15 10:30 .
+        cmdId: cmd-123
+        exitCode: 0
+      properties:
+        cmdId:
+          description: The ID of the executed command
+          example: cmd-123
+          type: string
+        output:
+          description: The output of the executed command
+          example: |-
+            total 20
+            drwxr-xr-x  4 user group  128 Mar 15 10:30 .
+          type: string
+        exitCode:
+          description: The exit code of the executed command
+          example: 0
+          type: number
+      type: object
+    Position:
+      example:
+        character: 6.027456183070403
+        line: 0.8008281904610115
+      properties:
+        line:
+          type: number
+        character:
+          type: number
+      required:
+        - character
+        - line
+      type: object
+    CompletionContext:
+      example:
+        triggerCharacter: triggerCharacter
+        triggerKind: 1.4658129805029452
+      properties:
+        triggerKind:
+          type: number
+        triggerCharacter:
+          type: string
+      required:
+        - triggerKind
+      type: object
+    LspCompletionParams:
+      example:
+        pathToProject: pathToProject
+        languageId: languageId
+        context:
+          triggerCharacter: triggerCharacter
+          triggerKind: 1.4658129805029452
+        position:
+          character: 6.027456183070403
+          line: 0.8008281904610115
+        uri: uri
+      properties:
+        languageId:
+          description: Language identifier
+          type: string
+        pathToProject:
+          description: Path to the project
+          type: string
+        uri:
+          description: Document URI
+          type: string
+        position:
+          $ref: '#/components/schemas/Position'
+        context:
+          $ref: '#/components/schemas/CompletionContext'
+      required:
+        - languageId
+        - pathToProject
+        - position
+        - uri
+      type: object
+    CompletionItem:
+      example:
+        insertText: insertText
+        kind: 0.8008281904610115
+        sortText: sortText
+        documentation: '{}'
+        label: label
+        detail: detail
+        filterText: filterText
+      properties:
+        label:
+          type: string
+        kind:
+          type: number
+        detail:
+          type: string
+        documentation:
+          type: object
+        sortText:
+          type: string
+        filterText:
+          type: string
+        insertText:
+          type: string
+      required:
+        - label
+      type: object
+    CompletionList:
+      example:
+        items:
+          - insertText: insertText
+            kind: 0.8008281904610115
+            sortText: sortText
+            documentation: '{}'
+            label: label
+            detail: detail
+            filterText: filterText
+          - insertText: insertText
+            kind: 0.8008281904610115
+            sortText: sortText
+            documentation: '{}'
+            label: label
+            detail: detail
+            filterText: filterText
+        isIncomplete: true
+      properties:
+        isIncomplete:
+          type: boolean
+        items:
+          items:
+            $ref: '#/components/schemas/CompletionItem'
+          type: array
+      required:
+        - isIncomplete
+        - items
+      type: object
+    LspDocumentRequest:
+      example:
+        pathToProject: pathToProject
+        languageId: languageId
+        uri: uri
+      properties:
+        languageId:
+          description: Language identifier
+          type: string
+        pathToProject:
+          description: Path to the project
+          type: string
+        uri:
+          description: Document URI
+          type: string
+      required:
+        - languageId
+        - pathToProject
+        - uri
+      type: object
+    Range:
+      example:
+        start:
+          character: 6.027456183070403
+          line: 0.8008281904610115
+        end:
+          character: 6.027456183070403
+          line: 0.8008281904610115
+      properties:
+        start:
+          $ref: '#/components/schemas/Position'
+        end:
+          $ref: '#/components/schemas/Position'
+      required:
+        - end
+        - start
+      type: object
+    LspLocation:
+      example:
+        range:
+          start:
+            character: 6.027456183070403
+            line: 0.8008281904610115
+          end:
+            character: 6.027456183070403
+            line: 0.8008281904610115
+        uri: uri
+      properties:
+        range:
+          $ref: '#/components/schemas/Range'
+        uri:
+          type: string
+      required:
+        - range
+        - uri
+      type: object
+    LspSymbol:
+      example:
+        kind: 0.8008281904610115
+        name: name
+        location:
+          range:
+            start:
+              character: 6.027456183070403
+              line: 0.8008281904610115
+            end:
+              character: 6.027456183070403
+              line: 0.8008281904610115
+          uri: uri
+      properties:
+        kind:
+          type: number
+        location:
+          $ref: '#/components/schemas/LspLocation'
+        name:
+          type: string
+      required:
+        - kind
+        - location
+        - name
+      type: object
+    LspServerRequest:
+      example:
+        pathToProject: pathToProject
+        languageId: languageId
+      properties:
+        languageId:
+          description: Language identifier
+          type: string
+        pathToProject:
+          description: Path to the project
+          type: string
+      required:
+        - languageId
+        - pathToProject
+      type: object
+    CreateImage:
+      example:
+        general: true
+        entrypoint: sleep infinity
+        name: my-docker-image:8.0.1-alpha
+      properties:
+        name:
+          description: The name of the image
+          example: my-docker-image:8.0.1-alpha
+          type: string
+        entrypoint:
+          description: The entrypoint command for the image
+          example: sleep infinity
+          items:
+            type: string
+          type: array
+        general:
+          description: Whether the image is general
+          type: boolean
+      required:
+        - name
+      type: object
+    ImageState:
+      enum:
+        - build_pending
+        - building
+        - pending
+        - pulling_image
+        - pending_validation
+        - validating
+        - active
+        - error
+        - removing
+      type: string
+    ImageDto:
+      example:
+        organizationId: organizationId
+        general: true
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        size: 0.8008281904610115
+        lastUsedAt: 2000-01-23T04:56:07.000+00:00
+        entrypoint:
+          - entrypoint
+          - entrypoint
+        errorReason: errorReason
+        name: name
+        id: id
+        state: ''
+        enabled: true
+        updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        organizationId:
+          type: string
+        general:
+          type: boolean
+        name:
+          type: string
+        enabled:
+          type: boolean
+        state:
+          allOf:
+            - $ref: '#/components/schemas/ImageState'
+        size:
+          nullable: true
+          type: number
+        entrypoint:
+          items:
+            type: string
+          nullable: true
+          type: array
+        errorReason:
+          nullable: true
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+        updatedAt:
+          format: date-time
+          type: string
+        lastUsedAt:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+        - createdAt
+        - enabled
+        - entrypoint
+        - errorReason
+        - general
+        - id
+        - lastUsedAt
+        - name
+        - size
+        - state
+        - updatedAt
+      type: object
+    BuildImage:
+      example:
+        buildInfo: ''
+        name: my-custom-image:1.0.0
+      properties:
+        name:
+          description: The name of the image to build
+          example: my-custom-image:1.0.0
+          type: string
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the image
+      required:
+        - buildInfo
+        - name
+      type: object
+    ToggleState:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          description: Enable or disable the image/tag
+          example: true
+          type: boolean
+      required:
+        - enabled
+      type: object
+    PaginatedImagesDto:
+      example:
+        total: 6.027456183070403
+        totalPages: 5.962133916683182
+        page: 1.4658129805029452
+        items:
+          - organizationId: organizationId
+            general: true
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            size: 0.8008281904610115
+            lastUsedAt: 2000-01-23T04:56:07.000+00:00
+            entrypoint:
+              - entrypoint
+              - entrypoint
+            errorReason: errorReason
+            name: name
+            id: id
+            state: ''
+            enabled: true
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+          - organizationId: organizationId
+            general: true
+            createdAt: 2000-01-23T04:56:07.000+00:00
+            size: 0.8008281904610115
+            lastUsedAt: 2000-01-23T04:56:07.000+00:00
+            entrypoint:
+              - entrypoint
+              - entrypoint
+            errorReason: errorReason
+            name: name
+            id: id
+            state: ''
+            enabled: true
+            updatedAt: 2000-01-23T04:56:07.000+00:00
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ImageDto'
+          type: array
+        total:
+          type: number
+        page:
+          type: number
+        totalPages:
+          type: number
+      required:
+        - items
+        - page
+        - total
+        - totalPages
+      type: object
+    SetImageGeneralStatus:
+      example:
+        general: true
+      properties:
+        general:
+          description: Whether the image is general
+          example: true
+          type: boolean
+      required:
+        - general
+      type: object
+    VolumeDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        createdAt: 2023-01-01T00:00:00.000Z
+        lastUsedAt: 2023-01-01T00:00:00.000Z
+        name: my-volume
+        id: vol-12345678
+        state: ready
+        updatedAt: 2023-01-01T00:00:00.000Z
+      properties:
+        id:
+          description: Volume ID
+          example: vol-12345678
+          type: string
+        name:
+          description: Volume name
+          example: my-volume
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        state:
+          description: Volume state
+          enum:
+            - creating
+            - ready
+            - pending_create
+            - pending_delete
+            - deleting
+            - deleted
+            - error
+          example: ready
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+        lastUsedAt:
+          description: Last used timestamp
+          example: 2023-01-01T00:00:00.000Z
+          type: string
+      required:
+        - createdAt
+        - id
+        - lastUsedAt
+        - name
+        - organizationId
+        - state
+        - updatedAt
+      type: object
+    CreateVolume:
+      example:
+        name: name
+      properties:
+        name:
+          type: string
+      required:
+        - name
+      type: object
+    CreateDockerRegistry:
+      example:
+        registryType: internal
+        password: password
+        isDefault: false
+        name: name
+        project: project
+        url: url
+        username: username
+      properties:
+        name:
+          description: Registry name
+          type: string
+        url:
+          description: Registry URL
+          type: string
+        username:
+          description: Registry username
+          type: string
+        password:
+          description: Registry password
+          type: string
+        project:
+          description: Registry project
+          type: string
+        registryType:
+          default: internal
+          description: Registry type
+          enum:
+            - internal
+            - organization
+            - public
+            - transient
+          type: string
+        isDefault:
+          default: false
+          description: Set as default registry
+          type: boolean
+      required:
+        - isDefault
+        - name
+        - password
+        - project
+        - registryType
+        - url
+        - username
+      type: object
+    DockerRegistry:
+      example:
+        registryType: internal
+        createdAt: 2024-01-31T12:00:00Z
+        name: My Docker Hub
+        project: my-project
+        id: 123e4567-e89b-12d3-a456-426614174000
+        url: https://registry.hub.docker.com
+        username: username
+        updatedAt: 2024-01-31T12:00:00Z
+      properties:
+        id:
+          description: Registry ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        name:
+          description: Registry name
+          example: My Docker Hub
+          type: string
+        url:
+          description: Registry URL
+          example: https://registry.hub.docker.com
+          type: string
+        username:
+          description: Registry username
+          example: username
+          type: string
+        project:
+          description: Registry project
+          example: my-project
+          type: string
+        registryType:
+          description: Registry type
+          enum:
+            - internal
+            - organization
+            - public
+            - transient
+          example: internal
+          type: string
+        createdAt:
+          description: Creation timestamp
+          example: 2024-01-31T12:00:00Z
+          format: date-time
+          type: string
+        updatedAt:
+          description: Last update timestamp
+          example: 2024-01-31T12:00:00Z
+          format: date-time
+          type: string
+      required:
+        - createdAt
+        - id
+        - name
+        - project
+        - registryType
+        - updatedAt
+        - url
+        - username
+      type: object
+    RegistryPushAccessDto:
+      example:
+        registryUrl: registry.example.com
+        registryId: 123e4567-e89b-12d3-a456-426614174000
+        project: library
+        secret: eyJhbGciOiJIUzI1NiIs...
+        expiresAt: 2023-12-31T23:59:59Z
+        username: temp-user-123
+      properties:
+        username:
+          description: Temporary username for registry authentication
+          example: temp-user-123
+          type: string
+        secret:
+          description: Temporary secret for registry authentication
+          example: eyJhbGciOiJIUzI1NiIs...
+          type: string
+        registryUrl:
+          description: Registry URL
+          example: registry.example.com
+          type: string
+        registryId:
+          description: Registry ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        project:
+          description: Registry project ID
+          example: library
+          type: string
+        expiresAt:
+          description: Token expiration time in ISO format
+          example: 2023-12-31T23:59:59Z
+          type: string
+      required:
+        - expiresAt
+        - project
+        - registryId
+        - registryUrl
+        - secret
+        - username
+      type: object
+    UpdateDockerRegistry:
+      example:
+        password: password
+        name: name
+        username: username
+      properties:
+        name:
+          description: Registry name
+          type: string
+        username:
+          description: Registry username
+          type: string
+        password:
+          description: Registry password
+          type: string
+      required:
+        - name
+        - username
+      type: object
+    StorageAccessDto:
+      example:
+        organizationId: 123e4567-e89b-12d3-a456-426614174000
+        accessKey: temp-user-123
+        sessionToken: eyJhbGciOiJIUzI1NiIs...
+        registryId: 123e4567-e89b-12d3-a456-426614174000
+        secret: abchbGciOiJIUzI1NiIs...
+        storageUrl: storage.example.com
+      properties:
+        accessKey:
+          description: Access key for storage authentication
+          example: temp-user-123
+          type: string
+        secret:
+          description: Secret key for storage authentication
+          example: abchbGciOiJIUzI1NiIs...
+          type: string
+        sessionToken:
+          description: Session token for storage authentication
+          example: eyJhbGciOiJIUzI1NiIs...
+          type: string
+        storageUrl:
+          description: Storage URL
+          example: storage.example.com
+          type: string
+        registryId:
+          description: Registry ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+        organizationId:
+          description: Organization ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+          type: string
+      required:
+        - accessKey
+        - organizationId
+        - registryId
+        - secret
+        - sessionToken
+        - storageUrl
+      type: object
+    uploadFile_request:
+      properties:
+        file:
+          format: binary
+          type: string
+      type: object
+  securitySchemes:
+    bearer:
+      bearerFormat: JWT
+      description: API Key access
+      scheme: bearer
+      type: http
+    oauth2:
+      openIdConnectUrl: http://localhost:3000/.well-known/openid-configuration
+      type: openIdConnect

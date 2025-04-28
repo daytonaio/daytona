@@ -1,13 +1,65 @@
 {
-	"name": "Daytona",
-	"image": "ghcr.io/daytonaio/go-devcontainer:latest",
-	"containerEnv": {
-		"LOG_LEVEL": "debug",
-		"DAYTONA_SERVER_MODE": "development",
-		"CGO_ENABLED": "0",
-		"DAYTONA_TARGET_ID": ""
-	},
-	"postCreateCommand": ".devcontainer/postcreate.sh",
-	"postStartCommand": "git config --global --add safe.directory ${containerWorkspaceFolder}",
-	"remoteUser": "daytona"
+  "name": "Daytona",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/daytona",
+  // Configure tool-specific properties.
+  "containerEnv": {
+    "COREPACK_ENABLE_DOWNLOAD_PROMPT": "0"
+  },
+  "remoteEnv": {
+    "NX_DAEMON": "true",
+    "NODE_ENV": "development"
+  },
+  "customizations": {
+    // Configure properties specific to VS Code.
+    "vscode": {
+      // Add the IDs of extensions you want installed when the container is created.
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "nrwl.angular-console",
+        "astro-build.astro-vscode",
+        "unifiedjs.vscode-mdx",
+        "timonwong.shellcheck",
+        "foxundermoon.shell-format",
+        "cschlosser.doxdocgen"
+      ],
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2.5.3": {
+      "installZsh": "true",
+      "username": "daytona",
+      "uid": "1000",
+      "gid": "1000",
+      "upgradePackages": "false"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2.12.2": {
+      "version": "24.0.7",
+      "moby": false,
+      "dockerDashComposeVersion": "v2"
+    },
+    "ghcr.io/devcontainers/features/go:1.3.2": {
+      "version": "1.23.5",
+      "golangciLintVersion": "1.63.4"
+    },
+    "ghcr.io/devcontainers/features/node:1.6.2": {
+      "version": "22.14.0",
+      "installYarnUsingApt": false
+    },
+    "ghcr.io/devcontainers/features/python:1": {},
+    "./tools-feature": {
+      "pipPackages": ["build", "twine"],
+      "goTools": ["github.com/swaggo/swag/cmd/swag@v1.16.4", "github.com/mitranim/gow@latest"]
+    }
+  },
+  "postStartCommand": "yarn",
+  "postAttachCommand": "",
+  "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001"],
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "daytona"
 }

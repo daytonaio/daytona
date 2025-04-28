@@ -1,0 +1,13 @@
+name: daytona organization list
+synopsis: List all organizations
+usage: daytona organization list [flags]
+options:
+  - name: format
+    shorthand: f
+    usage: Output format. Must be one of (yaml, json)
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona organization - Manage Daytona organizations
