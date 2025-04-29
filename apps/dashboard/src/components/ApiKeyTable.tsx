@@ -23,16 +23,18 @@ import {
 } from './ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
+import { Loader2 } from 'lucide-react'
 
 interface DataTableProps {
   data: ApiKeyList[]
   loading: boolean
+  revokingKeys: string[]
   onRevoke: (keyName: string) => void
 }
 
-export function ApiKeyTable({ data, loading, onRevoke }: DataTableProps) {
+export function ApiKeyTable({ data, loading, revokingKeys, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns = getColumns({ onRevoke, loading })
+  const columns = getColumns({ onRevoke, revokingKeys })
   const table = useReactTable({
     data,
     columns,
@@ -96,10 +98,10 @@ export function ApiKeyTable({ data, loading, onRevoke }: DataTableProps) {
 
 const getColumns = ({
   onRevoke,
-  loading,
+  revokingKeys,
 }: {
   onRevoke: (keyName: string) => void
-  loading: boolean
+  revokingKeys: string[]
 }): ColumnDef<ApiKeyList>[] => {
   const columns: ColumnDef<ApiKeyList>[] = [
     {
@@ -146,11 +148,20 @@ const getColumns = ({
         return <div className="px-4">Actions</div>
       },
       cell: ({ row }) => {
+        const isRevoking = revokingKeys.includes(row.original.name)
+
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={loading} className="w-20" title="Revoke Key">
-                Revoke
+              <Button variant="ghost" size="icon" disabled={isRevoking} className="w-20" title="Revoke Key">
+                {isRevoking ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Revoking...
+                  </>
+                ) : (
+                  'Revoke'
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent>

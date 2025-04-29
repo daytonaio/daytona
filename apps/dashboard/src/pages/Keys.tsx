@@ -16,6 +16,7 @@ const Keys: React.FC = () => {
   const { apiKeyApi } = useApi()
   const [keys, setKeys] = useState<ApiKeyList[]>([])
   const [loading, setLoading] = useState(true)
+  const [revokingKeys, setRevokingKeys] = useState<string[]>([])
 
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
 
@@ -54,7 +55,7 @@ const Keys: React.FC = () => {
   }, [fetchKeys])
 
   const handleRevoke = async (keyName: string) => {
-    setLoading(true)
+    setRevokingKeys((prev) => [...prev, keyName])
     try {
       await apiKeyApi.deleteApiKey(keyName, selectedOrganization?.id)
       toast.success('API key revoked successfully')
@@ -62,7 +63,7 @@ const Keys: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to revoke API key')
     } finally {
-      setLoading(false)
+      setRevokingKeys((prev) => prev.filter((key) => key !== keyName))
     }
   }
 
@@ -88,7 +89,7 @@ const Keys: React.FC = () => {
         <CreateApiKeyDialog availablePermissions={availablePermissions} onCreateApiKey={handleCreateKey} />
       </div>
 
-      <ApiKeyTable data={keys} loading={loading} onRevoke={handleRevoke} />
+      <ApiKeyTable data={keys} loading={loading} revokingKeys={revokingKeys} onRevoke={handleRevoke} />
     </div>
   )
 }
