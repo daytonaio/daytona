@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import React, { useState, useEffect, useMemo } from 'react'
 import { Check, Copy, Plus } from 'lucide-react'
 import { CreateApiKeyPermissionsEnum, ApiKeyResponse } from '@daytonaio/api-client'

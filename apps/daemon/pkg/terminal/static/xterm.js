@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 !(function (e, t) {
   if ('object' == typeof exports && 'object' == typeof module) module.exports = t()
   else if ('function' == typeof define && define.amd) define([], t)
