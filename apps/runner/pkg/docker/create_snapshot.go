@@ -35,5 +35,10 @@ func (d *DockerClient) CreateSnapshot(ctx context.Context, containerId string, s
 
 	log.Infof("Snapshot (%s) for container %s created successfully", snapshotDto.Image, containerId)
 
+	err = d.RemoveImage(ctx, snapshotDto.Image, true)
+	if err != nil {
+		log.Errorf("Error removing image %s: %v", snapshotDto.Image, err)
+	}
+
 	return nil
 }
