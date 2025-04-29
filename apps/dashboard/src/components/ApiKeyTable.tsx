@@ -28,13 +28,13 @@ import { Loader2 } from 'lucide-react'
 interface DataTableProps {
   data: ApiKeyList[]
   loading: boolean
-  revokingKeys: string[]
+  loadingKeys: Record<string, boolean>
   onRevoke: (keyName: string) => void
 }
 
-export function ApiKeyTable({ data, loading, revokingKeys, onRevoke }: DataTableProps) {
+export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns = getColumns({ onRevoke, revokingKeys })
+  const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,
     columns,
@@ -73,7 +73,11 @@ export function ApiKeyTable({ data, loading, revokingKeys, onRevoke }: DataTable
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={`${loadingKeys[row.original.name] ? 'opacity-50 pointer-events-none' : ''}`}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
@@ -98,10 +102,10 @@ export function ApiKeyTable({ data, loading, revokingKeys, onRevoke }: DataTable
 
 const getColumns = ({
   onRevoke,
-  revokingKeys,
+  loadingKeys,
 }: {
   onRevoke: (keyName: string) => void
-  revokingKeys: string[]
+  loadingKeys: Record<string, boolean>
 }): ColumnDef<ApiKeyList>[] => {
   const columns: ColumnDef<ApiKeyList>[] = [
     {
@@ -148,20 +152,13 @@ const getColumns = ({
         return <div className="px-4">Actions</div>
       },
       cell: ({ row }) => {
-        const isRevoking = revokingKeys.includes(row.original.name)
+        const isLoading = loadingKeys[row.original.name]
 
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={isRevoking} className="w-20" title="Revoke Key">
-                {isRevoking ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Revoking...
-                  </>
-                ) : (
-                  'Revoke'
-                )}
+              <Button variant="ghost" size="icon" disabled={isLoading} className="w-20" title="Revoke Key">
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Revoke'}
               </Button>
             </DialogTrigger>
             <DialogContent>
