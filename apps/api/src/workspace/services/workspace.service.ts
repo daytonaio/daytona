@@ -187,7 +187,7 @@ export class WorkspaceService {
     return this.workspaceRepository.count({
       where: {
         organizationId,
-        state: Not(WorkspaceState.DESTROYED),
+        state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR])),
       },
     })
   }
