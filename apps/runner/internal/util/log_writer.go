@@ -27,3 +27,10 @@ func (w *TraceLogWriter) Write(p []byte) (n int, err error) {
 	log.Trace(string(p))
 	return len(p), nil
 }
+
+type ErrorLogWriter struct{}
+
+func (w *ErrorLogWriter) Write(p []byte) (n int, err error) {
+	log.Error(string(p))
+	return len(p), nil
+}

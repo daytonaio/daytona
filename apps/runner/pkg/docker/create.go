@@ -33,7 +33,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", err
 	}
 
-	if state == enums.SandboxStateStarted {
+	if state == enums.SandboxStateStarted || state == enums.SandboxStatePullingImage || state == enums.SandboxStateStarting {
 		return sandboxDto.Id, nil
 	}
 

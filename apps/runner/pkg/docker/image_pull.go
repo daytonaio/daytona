@@ -7,10 +7,11 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"os"
+	"io"
 	"strings"
 
 	"github.com/daytonaio/runner/internal/constants"
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/models/enums"
 
@@ -56,7 +57,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 	}
 	defer responseBody.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(responseBody, os.Stdout, 0, true, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&util.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
 		return err
 	}
