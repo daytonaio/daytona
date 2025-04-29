@@ -7,6 +7,8 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
+import { usePostHog } from 'posthog-js/react'
+import { RoutePath } from '@/enums/RoutePath'
 
 const LandingPage: React.FC = () => {
   const { signinRedirect, isAuthenticated, isLoading } = useAuth()
@@ -16,7 +18,7 @@ const LandingPage: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={RoutePath.DASHBOARD} replace />
   } else {
     void signinRedirect({
       state: {
