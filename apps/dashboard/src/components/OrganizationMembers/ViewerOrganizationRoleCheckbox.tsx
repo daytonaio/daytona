@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import React from 'react'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'

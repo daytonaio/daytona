@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type Theme = 'dark' | 'light'

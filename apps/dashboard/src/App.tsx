@@ -1,4 +1,8 @@
-// src/App.tsx
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import React, { Suspense, useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'

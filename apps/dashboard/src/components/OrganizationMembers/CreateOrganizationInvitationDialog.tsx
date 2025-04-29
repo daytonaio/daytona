@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import React, { useEffect, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { CreateOrganizationInvitationRoleEnum, OrganizationRole } from '@daytonaio/api-client'

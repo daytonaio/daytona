@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 const { createGlobPatternsForDependencies } = require('@nx/react/tailwind')
 const { join } = require('path')
 

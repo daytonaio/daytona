@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 const { composePlugins, withNx } = require('@nx/webpack')
 const path = require('path')
 const glob = require('glob')

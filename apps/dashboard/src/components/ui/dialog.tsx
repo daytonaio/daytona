@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import * as React from 'react'
 import * as DialogPrimitive from '@radix-ui/react-dialog'
 import { X } from 'lucide-react'

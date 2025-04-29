@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useAuth } from 'react-oidc-context'

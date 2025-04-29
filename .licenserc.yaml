@@ -8,7 +8,9 @@ header:
   paths:
     - '**/*.go'
     - '**/*.sh'
+    - '**/*.js'
     - '**/*.ts'
+    - '**/*.tsx'
     - '**/*.py'
 
   paths-ignore:
