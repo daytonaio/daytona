@@ -17,7 +17,7 @@ import (
 func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
 
-	c, err := d.apiClient.ContainerInspect(ctx, containerId)
+	c, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 		case <-timeoutCtx.Done():
 			return fmt.Errorf("timeout waiting for container %s to start", containerId)
 		case <-ticker.C:
-			c, err := d.apiClient.ContainerInspect(ctx, containerId)
+			c, err := d.ContainerInspect(ctx, containerId)
 			if err != nil {
 				return err
 			}
