@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
 )
@@ -19,7 +18,7 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 		return enums.SandboxStateUnknown, nil
 	}
 
-	container, err := d.apiClient.ContainerInspect(ctx, sandboxId)
+	container, err := d.ContainerInspect(ctx, sandboxId)
 	if err != nil {
 		if client.IsErrNotFound(err) {
 			return enums.SandboxStateDestroyed, nil
@@ -32,7 +31,7 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 		return enums.SandboxStateCreating, nil
 
 	case "running":
-		if d.isContainerPullingImage(container) {
+		if d.isContainerPullingImage(container.ID) {
 			return enums.SandboxStatePullingImage, nil
 		}
 		return enums.SandboxStateStarted, nil
@@ -50,7 +49,8 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 		if container.State.ExitCode == 0 || container.State.ExitCode == 137 || container.State.ExitCode == 143 {
 			return enums.SandboxStateStopped, nil
 		}
-		return enums.SandboxStateError, nil
+
+		return enums.SandboxStateError, fmt.Errorf("container exited with code %d, reason: %s", container.State.ExitCode, container.State.Error)
 
 	case "dead":
 		return enums.SandboxStateDestroyed, nil
@@ -61,14 +61,14 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 }
 
 // isContainerPullingImage checks if the container is still in image pulling phase
-func (d *DockerClient) isContainerPullingImage(c types.ContainerJSON) bool {
+func (d *DockerClient) isContainerPullingImage(containerId string) bool {
 	options := container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Tail:       "10", // Look at last 10 lines
 	}
 
-	logs, err := d.apiClient.ContainerLogs(context.Background(), c.ID, options)
+	logs, err := d.apiClient.ContainerLogs(context.Background(), containerId, options)
 	if err != nil {
 		return false
 	}

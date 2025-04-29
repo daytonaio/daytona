@@ -15,7 +15,6 @@ import (
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
-	"github.com/docker/docker/errdefs"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -29,19 +28,22 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		}
 	}()
 
-	ctr, err := d.apiClient.ContainerInspect(ctx, sandboxDto.Id)
-	if err != nil {
-		if !errdefs.IsNotFound(err) {
+	state, err := d.DeduceSandboxState(ctx, sandboxDto.Id)
+	if err != nil && state == enums.SandboxStateError {
+		return "", err
+	}
+
+	if state == enums.SandboxStateStarted {
+		return sandboxDto.Id, nil
+	}
+
+	if state == enums.SandboxStateStopped || state == enums.SandboxStateCreating {
+		err = d.Start(ctx, sandboxDto.Id)
+		if err != nil {
 			return "", err
 		}
-	} else {
-		data := d.cache.Get(ctx, sandboxDto.Id)
 
-		if data != nil && data.SandboxState == enums.SandboxStateError && ctr.State != nil && ctr.State.Error != "" {
-			return "", common.NewBadRequestError(errors.New(ctr.State.Error))
-		}
-
-		return "", common.NewConflictError(errors.New("container with id " + sandboxDto.Id + " already exists"))
+		return sandboxDto.Id, nil
 	}
 
 	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
@@ -96,7 +98,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	// wait for the daemon to start listening on port 2280
-	container, err := d.apiClient.ContainerInspect(ctx, c.ID)
+	container, err := d.ContainerInspect(ctx, c.ID)
 	if err != nil {
 		return "", common.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err))
 	}
