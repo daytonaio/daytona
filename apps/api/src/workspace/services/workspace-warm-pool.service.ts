@@ -6,7 +6,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, Not, Repository } from 'typeorm'
+import { In, MoreThan, Not, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { Workspace } from '../entities/workspace.entity'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
@@ -26,6 +26,7 @@ import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 
 export type FetchWarmPoolWorkspaceParams = {
   image: string
@@ -89,6 +90,7 @@ export class WorkspaceWarmPoolService {
         disk: params.disk,
         osUser: params.osUser,
         env: params.env,
+        pool: MoreThan(0),
       },
     })
     if (warmPoolItem) {
@@ -143,12 +145,11 @@ export class WorkspaceWarmPoolService {
     await Promise.all(
       warmPoolItems.map(async (warmPoolItem) => {
         const lockKey = `warm-pool-lock-${warmPoolItem.id}`
-        await this.redisLockProvider.unlock(lockKey)
         if (await this.redisLockProvider.lock(lockKey, 720)) {
           return
         }
 
-        const workspaces = await this.workspaceRepository.find({
+        const workspaceCount = await this.workspaceRepository.count({
           where: {
             image: warmPoolItem.image,
             organizationId: WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION,
@@ -160,15 +161,17 @@ export class WorkspaceWarmPoolService {
             gpu: warmPoolItem.gpu,
             mem: warmPoolItem.mem,
             disk: warmPoolItem.disk,
+            desiredState: WorkspaceDesiredState.STARTED,
+            state: Not(WorkspaceState.ERROR),
           },
         })
 
-        const missingCount = warmPoolItem.pool - workspaces.length
+        const missingCount = warmPoolItem.pool - workspaceCount
         if (missingCount > 0) {
           this.logger.debug(`Creating ${missingCount} workspaces for warm pool id ${warmPoolItem.id}`)
 
           for (let i = 0; i < missingCount; i++) {
-            await this.eventEmitter.emit(WarmPoolEvents.TOPUP_REQUESTED, new WarmPoolTopUpRequested(warmPoolItem))
+            this.eventEmitter.emit(WarmPoolEvents.TOPUP_REQUESTED, new WarmPoolTopUpRequested(warmPoolItem))
           }
         }
 
@@ -195,8 +198,30 @@ export class WorkspaceWarmPoolService {
         osUser: event.workspace.osUser,
       },
     })
+
+    const workspaceCount = await this.workspaceRepository.count({
+      where: {
+        image: warmPoolItem.image,
+        organizationId: WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION,
+        class: warmPoolItem.class,
+        osUser: warmPoolItem.osUser,
+        env: warmPoolItem.env,
+        region: warmPoolItem.target,
+        cpu: warmPoolItem.cpu,
+        gpu: warmPoolItem.gpu,
+        mem: warmPoolItem.mem,
+        disk: warmPoolItem.disk,
+        desiredState: WorkspaceDesiredState.STARTED,
+        state: Not(WorkspaceState.ERROR),
+      },
+    })
+
+    if (warmPoolItem.pool <= workspaceCount) {
+      return
+    }
+
     if (warmPoolItem) {
-      await this.eventEmitter.emit(WarmPoolEvents.TOPUP_REQUESTED, new WarmPoolTopUpRequested(warmPoolItem))
+      this.eventEmitter.emit(WarmPoolEvents.TOPUP_REQUESTED, new WarmPoolTopUpRequested(warmPoolItem))
     }
   }
 }

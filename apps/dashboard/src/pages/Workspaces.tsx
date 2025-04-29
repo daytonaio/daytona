@@ -65,7 +65,9 @@ const Workspaces: React.FC = () => {
 
   useEffect(() => {
     const handleWorkspaceCreatedEvent = (workspace: Workspace) => {
-      setWorkspaces((prev) => [workspace, ...prev])
+      if (!workspaces.some((w) => w.id === workspace.id)) {
+        setWorkspaces((prev) => [workspace, ...prev])
+      }
     }
 
     const handleWorkspaceStateUpdatedEvent = (data: {

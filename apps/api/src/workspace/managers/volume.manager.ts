@@ -24,8 +24,8 @@ import { TypedConfigService } from '../../config/typed-config.service'
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
 @Injectable()
-export class VolumeStateService implements OnModuleInit {
-  private readonly logger = new Logger(VolumeStateService.name)
+export class VolumeManager {
+  private readonly logger = new Logger(VolumeManager.name)
   private processingVolumes: Set<string> = new Set()
   private skipTestConnection: boolean
   private s3Client: S3Client
