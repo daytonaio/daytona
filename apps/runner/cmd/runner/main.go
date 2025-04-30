@@ -74,6 +74,8 @@ func main() {
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
 	})
 
+	dockerClient.RunMountCleanup(ctx)
+
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
