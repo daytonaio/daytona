@@ -29,6 +29,7 @@ import { NotificationSocketProvider } from '@/providers/NotificationSocketProvid
 import { ApiProvider } from './providers/ApiProvider'
 import LandingPage from './pages/LandingPage'
 import Logout from './pages/Logout'
+import { RoutePath } from './enums/RoutePath'
 
 // Docs redirect component
 const DocsRedirect = () => {
@@ -82,10 +83,10 @@ function App() {
         </DialogContent>
       </Dialog>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/logout" element={<Logout />} />
+        <Route path={RoutePath.LandingPage} element={<LandingPage />} />
+        <Route path={RoutePath.Logout} element={<Logout />} />
         <Route
-          path="/dashboard"
+          path={RoutePath.Dashboard}
           element={
             <Suspense fallback={<LoadingFallback />}>
               <ApiProvider>
@@ -103,14 +104,14 @@ function App() {
           }
         >
           <Route index element={<Navigate to="sandboxes" replace />} />
-          <Route path="keys" element={<Keys />} />
-          <Route path="sandboxes" element={<Workspaces />} />
-          <Route path="images" element={<Images />} />
-          <Route path="registries" element={<Registries />} />
-          <Route path="usage" element={<Usage />} />
+          <Route path={RoutePath.Keys} element={<Keys />} />
+          <Route path={RoutePath.Workspaces} element={<Workspaces />} />
+          <Route path={RoutePath.Images} element={<Images />} />
+          <Route path={RoutePath.Registries} element={<Registries />} />
+          <Route path={RoutePath.Usage} element={<Usage />} />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
-              path="billing"
+              path={RoutePath.Billing}
               element={
                 <OwnerAccessOrganizationPageWrapper>
                   <Billing />
@@ -119,7 +120,7 @@ function App() {
             />
           )}
           <Route
-            path="members"
+            path={RoutePath.Members}
             element={
               <NonPersonalOrganizationPageWrapper>
                 <OrganizationMembers />
@@ -139,10 +140,10 @@ function App() {
             }
           /> */
           }
-          <Route path="settings" element={<OrganizationSettings />} />
-          <Route path="user/invitations" element={<UserOrganizationInvitations />} />
+          <Route path={RoutePath.Settings} element={<OrganizationSettings />} />
+          <Route path={RoutePath.UserInvitations} element={<UserOrganizationInvitations />} />
         </Route>
-        <Route path="/docs" element={<DocsRedirect />} />
+        <Route path={RoutePath.Docs} element={<DocsRedirect />} />
         {/* Add other routes as needed */}
       </Routes>
     </ThemeProvider>
