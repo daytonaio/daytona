@@ -142,20 +142,22 @@ export class ImageService {
   }
 
   async getAllImages(organizationId: string, page = 1, limit = 10) {
+    const pageNum = Number(page)
+    const limitNum = Number(limit)
     const [items, total] = await this.imageRepository.findAndCount({
       where: { organizationId },
       order: {
         createdAt: 'DESC',
       },
-      skip: (page - 1) * limit,
-      take: limit,
+      skip: (pageNum - 1) * limitNum,
+      take: limitNum,
     })
 
     return {
       items,
       total,
-      page,
-      totalPages: Math.ceil(total / limit),
+      page: pageNum,
+      totalPages: Math.ceil(total / limitNum),
     }
   }
 
