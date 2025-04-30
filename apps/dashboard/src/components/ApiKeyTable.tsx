@@ -28,16 +28,18 @@ import {
 } from './ui/dialog'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
+import { Loader2 } from 'lucide-react'
 
 interface DataTableProps {
   data: ApiKeyList[]
   loading: boolean
+  loadingKeys: Record<string, boolean>
   onRevoke: (keyName: string) => void
 }
 
-export function ApiKeyTable({ data, loading, onRevoke }: DataTableProps) {
+export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const columns = getColumns({ onRevoke, loading })
+  const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,
     columns,
@@ -76,7 +78,11 @@ export function ApiKeyTable({ data, loading, onRevoke }: DataTableProps) {
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && 'selected'}>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className={`${loadingKeys[row.original.name] ? 'opacity-50 pointer-events-none' : ''}`}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                   ))}
@@ -101,10 +107,10 @@ export function ApiKeyTable({ data, loading, onRevoke }: DataTableProps) {
 
 const getColumns = ({
   onRevoke,
-  loading,
+  loadingKeys,
 }: {
   onRevoke: (keyName: string) => void
-  loading: boolean
+  loadingKeys: Record<string, boolean>
 }): ColumnDef<ApiKeyList>[] => {
   const columns: ColumnDef<ApiKeyList>[] = [
     {
@@ -151,11 +157,13 @@ const getColumns = ({
         return <div className="px-4">Actions</div>
       },
       cell: ({ row }) => {
+        const isLoading = loadingKeys[row.original.name]
+
         return (
           <Dialog>
             <DialogTrigger asChild>
-              <Button variant="ghost" size="icon" disabled={loading} className="w-20" title="Revoke Key">
-                Revoke
+              <Button variant="ghost" size="icon" disabled={isLoading} className="w-20" title="Revoke Key">
+                {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Revoke'}
               </Button>
             </DialogTrigger>
             <DialogContent>
