@@ -199,6 +199,10 @@ export class WorkspaceWarmPoolService {
       },
     })
 
+    if (!warmPoolItem) {
+      return
+    }
+
     const workspaceCount = await this.workspaceRepository.count({
       where: {
         image: warmPoolItem.image,
