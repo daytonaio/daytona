@@ -33,6 +33,8 @@ import { CreateOrganizationInvitationDto } from '../organization/dto/create-orga
 import { UpdateOrganizationInvitationDto } from '../organization/dto/update-organization-invitation.dto'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { BuildImageDto } from '../workspace/dto/build-image.dto'
+import { CreateVolumeDto } from '../workspace/dto/create-volume.dto'
+import { VolumeDto } from '../workspace/dto/volume.dto'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -139,9 +141,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/workspace/:workspaceId/snapshot':
             this.captureCreateSnapshot(props, request.params.workspaceId)
             break
-          case '/api/workspace/:workspaceId/resize':
-            this.captureResizeWorkspace(props, request.params.workspaceId, request.body)
-            break
           case '/api/workspace/:workspaceId/public/:isPublic':
             this.captureUpdatePublicStatus(props, request.params.workspaceId, request.params.isPublic === 'true')
             break
@@ -185,6 +184,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/organizations/:organizationId/invitations/:invitationId/cancel':
             this.captureCancelOrganizationInvitation(props, request.params.organizationId, request.params.invitationId)
             break
+          case '/api/volumes':
+            this.captureCreateVolume(props, request.body, response)
+            break
         }
         break
       case 'DELETE':
@@ -203,6 +205,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             break
           case '/api/organizations/:organizationId/roles/:roleId':
             this.captureDeleteOrganizationRole(props, request.params.organizationId, request.params.roleId)
+            break
+          case '/api/volumes/:volumeId':
+            this.captureDeleteVolume(props, request.params.volumeId)
             break
         }
         break
@@ -468,6 +473,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       sandbox_labels_request: request.labels,
       sandbox_labels: response.labels,
       sandbox_env_vars_length_request: envVarsLength,
+      sandbox_volumes_length_request: request.volumes?.length,
     }
 
     if (request.buildInfo) {
@@ -499,15 +505,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
   private captureCreateSnapshot(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_snapshot_created', props, 'api_sandbox_snapshot_creation_failed', {
       sandbox_id: sandboxId,
-    })
-  }
-
-  private captureResizeWorkspace(props: CommonCaptureProps, sandboxId: string, request: ResizeDto) {
-    this.capture('api_sandbox_resized', props, 'api_sandbox_resize_failed', {
-      sandbox_id: sandboxId,
-      sandbox_cpu: request.cpu,
-      sandbox_gpu: request.gpu,
-      sandbox_memory_mb: request.memory * 1024,
     })
   }
 
@@ -706,6 +703,19 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_organization_invitation_canceled', props, 'api_organization_invitation_cancel_failed', {
       organization_id: organizationId,
       organization_invitation_id: invitationId,
+    })
+  }
+
+  private captureCreateVolume(props: CommonCaptureProps, request: CreateVolumeDto, response: VolumeDto) {
+    this.capture('api_volume_created', props, 'api_volume_creation_failed', {
+      volume_id: response.id,
+      volume_name_request_set: !!request.name,
+    })
+  }
+
+  private captureDeleteVolume(props: CommonCaptureProps, volumeId: string) {
+    this.capture('api_volume_deleted', props, 'api_volume_deletion_failed', {
+      volume_id: volumeId,
     })
   }
 
