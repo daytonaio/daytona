@@ -9,17 +9,12 @@ import { Repository, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import {
-  S3Client,
-  CreateBucketCommand,
-  DeleteBucketCommand,
-  ListBucketsCommand,
-  PutBucketTaggingCommand,
-} from '@aws-sdk/client-s3'
+import { S3Client, CreateBucketCommand, ListBucketsCommand, PutBucketTaggingCommand } from '@aws-sdk/client-s3'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { TypedConfigService } from '../../config/typed-config.service'
+import { deleteS3Bucket } from '../../common/utils/delete-s3-bucket'
 
 const VOLUME_STATE_LOCK_KEY = 'volume-state-'
 
@@ -206,11 +201,7 @@ export class VolumeManager {
       await this.redis.setex(lockKey, 30, '1')
 
       // Delete bucket from Minio/S3
-      const deleteBucketCommand = new DeleteBucketCommand({
-        Bucket: volume.getBucketName(),
-      })
-
-      await this.s3Client.send(deleteBucketCommand)
+      await deleteS3Bucket(this.s3Client, volume.getBucketName())
 
       // Refresh lock before final state update
       await this.redis.setex(lockKey, 30, '1')
