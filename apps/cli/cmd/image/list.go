@@ -26,7 +26,7 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		images, res, err := apiClient.ImagesAPI.GetAllImages(ctx).Execute()
+		images, res, err := apiClient.ImagesAPI.GetAllImages(ctx).Limit(float32(limitFlag)).Page(float32(pageFlag)).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -52,6 +52,12 @@ var ListCmd = &cobra.Command{
 	},
 }
 
+var limitFlag int
+var pageFlag int
+
 func init() {
+	ListCmd.Flags().IntVarP(&limitFlag, "limit", "l", 10, "Number of images to list per page")
+	ListCmd.Flags().IntVarP(&pageFlag, "page", "p", 1, "Page number to retrive the data")
 	common.RegisterFormatFlag(ListCmd)
+
 }

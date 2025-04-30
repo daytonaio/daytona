@@ -13,6 +13,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func paginate[T any](items []T, page, limit int) []T {
+	start := (page - 1) * limit
+	if start > len(items) {
+		return []T{}
+	}
+
+	end := start + limit
+	if end > len(items) {
+		end = len(items)
+	}
+
+	return items[start:end]
+}
+
 var ListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "List sandboxes",
@@ -46,15 +60,20 @@ var ListCmd = &cobra.Command{
 			}
 			activeOrganizationName = &name
 		}
+		paginatedSandBox := paginate(sandboxList, pageFlag, limitFlag)
 
-		sandbox.ListSandboxes(sandboxList, activeOrganizationName)
+		sandbox.ListSandboxes(paginatedSandBox, activeOrganizationName)
 		return nil
 	},
 }
 
 var verboseFlag bool
+var pageFlag int
+var limitFlag int
 
 func init() {
 	ListCmd.Flags().BoolVarP(&verboseFlag, "verbose", "v", false, "Include verbose output")
+	ListCmd.Flags().IntVarP(&limitFlag, "limit", "l", 10, "Number of images to list per page")
+	ListCmd.Flags().IntVarP(&pageFlag, "page", "p", 1, "Page number to retrive the data")
 	common.RegisterFormatFlag(ListCmd)
 }
