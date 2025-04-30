@@ -460,61 +460,6 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Resize workspace
-     * @param {string} workspaceId ID of the workspace
-     * @param {object} body
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    resizeWorkspace: async (
-      workspaceId: string,
-      body: object,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('resizeWorkspace', 'workspaceId', workspaceId)
-      // verify required parameter 'body' is not null or undefined
-      assertParamExists('resizeWorkspace', 'body', body)
-      const localVarPath = `/workspace/{workspaceId}/resize`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(body, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     *
      * @summary Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
@@ -970,38 +915,6 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Resize workspace
-     * @param {string} workspaceId ID of the workspace
-     * @param {object} body
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async resizeWorkspace(
-      workspaceId: string,
-      body: object,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.resizeWorkspace(
-        workspaceId,
-        body,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.resizeWorkspace']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
      * @summary Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
@@ -1280,25 +1193,6 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
-     * @summary Resize workspace
-     * @param {string} workspaceId ID of the workspace
-     * @param {object} body
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    resizeWorkspace(
-      workspaceId: string,
-      body: object,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .resizeWorkspace(workspaceId, body, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     *
      * @summary Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
@@ -1530,27 +1424,6 @@ export class WorkspaceApi extends BaseAPI {
   ) {
     return WorkspaceApiFp(this.configuration)
       .replaceLabels(workspaceId, workspaceLabels, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   *
-   * @summary Resize workspace
-   * @param {string} workspaceId ID of the workspace
-   * @param {object} body
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof WorkspaceApi
-   */
-  public resizeWorkspace(
-    workspaceId: string,
-    body: object,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return WorkspaceApiFp(this.configuration)
-      .resizeWorkspace(workspaceId, body, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

@@ -21,7 +21,7 @@ import { WorkspaceState } from './../../workspace/enums/workspace-state.enum'
 import { Workspace } from './../../workspace/entities/workspace.entity'
 import { ImageNode } from './../../workspace/entities/image-node.entity'
 import { ImageNodeState } from './../../workspace/enums/image-node-state.enum'
-import { ImageStateService } from './image-state.service'
+import { ImageManager } from '../managers/image.manager'
 
 @Injectable()
 export class NodeService {
@@ -36,7 +36,7 @@ export class NodeService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(ImageNode)
     private readonly imageNodeRepository: Repository<ImageNode>,
-    private readonly imageStateService: ImageStateService,
+    private readonly imageStateManager: ImageManager,
   ) {}
 
   async create(createNodeDto: CreateNodeDto): Promise<Node> {
@@ -232,7 +232,7 @@ export class NodeService {
     }
     await this.imageNodeRepository.save(imageNode)
     if (state != ImageNodeState.ERROR) {
-      this.imageStateService.syncNodeImageState(imageNode)
+      this.imageStateManager.syncNodeImageState(imageNode)
     }
   }
 }

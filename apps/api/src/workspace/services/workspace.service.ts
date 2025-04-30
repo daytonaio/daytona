@@ -12,11 +12,9 @@ import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { NodeRegion } from '../enums/node-region.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
 import { NodeService } from './node.service'
 import { WorkspaceError } from '../../exceptions/workspace-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { WorkspaceStateService } from './workspace-state.service'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { NodeState } from '../enums/node-state.enum'
 import { SnapshotState } from '../enums/snapshot-state.enum'
@@ -25,7 +23,6 @@ import { ImageState } from '../enums/image-state.enum'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { ConfigService } from '@nestjs/config'
 import { OrganizationService } from '../../organization/services/organization.service'
-import { ResizeDto } from '../../workspace/dto/resize.dto'
 import { WorkspaceWarmPoolService } from './workspace-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
@@ -37,7 +34,17 @@ import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceStateUpdatedEvent } from '../events/workspace-state-updated.event'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
+import { WorkspaceSnapshotCreatedEvent } from '../events/workspace-snapshot-created.event'
+import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
+import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
+import { WorkspaceStartedEvent } from '../events/workspace-started.event'
+import { WorkspaceStoppedEvent } from '../events/workspace-stopped.event'
+import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 
+const DEFAULT_CPU = 2
+const DEFAULT_MEMORY = 4
+const DEFAULT_DISK = 10
+const DEFAULT_GPU = 0
 @Injectable()
 export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name)
@@ -52,8 +59,6 @@ export class WorkspaceService {
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly nodeService: NodeService,
-    private readonly workspaceStateService: WorkspaceStateService,
-    private readonly nodeApiFactory: NodeApiFactory,
     private readonly configService: ConfigService,
     private readonly warmPoolService: WorkspaceWarmPoolService,
     private readonly organizationService: OrganizationService,
@@ -170,29 +175,30 @@ export class WorkspaceService {
       throw new WorkspaceError('Workspace is not stopped')
     }
 
-    if (workspace.snapshotState !== SnapshotState.COMPLETED) {
-      throw new WorkspaceError('Workspace snapshot is not completed')
-    }
-
     if (workspace.pending) {
       throw new WorkspaceError('Workspace state change in progress')
     }
     workspace.pending = true
     workspace.desiredState = WorkspaceDesiredState.ARCHIVED
     await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(workspace.id).catch((err) => this.logger.error(err))
+
+    this.eventEmitter.emit(WorkspaceEvents.ARCHIVED, new WorkspaceArchivedEvent(workspace))
   }
 
   async count(organizationId: string): Promise<number> {
     return this.workspaceRepository.count({
       where: {
         organizationId,
-        state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR])),
+        state: Not(WorkspaceState.DESTROYED),
       },
     })
   }
 
   async create(organizationId: string | null, createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
+    const cpu = createWorkspaceDto.cpu || DEFAULT_CPU
+    const mem = createWorkspaceDto.memory || DEFAULT_MEMORY
+    const disk = createWorkspaceDto.disk || DEFAULT_DISK
+    const gpu = createWorkspaceDto.gpu || DEFAULT_GPU
     // Validate region and class
     const region = createWorkspaceDto.target || NodeRegion.EU
     if (!this.isValidRegion(region)) {
@@ -205,12 +211,7 @@ export class WorkspaceService {
 
     // Validate organization quotas before creating workspace
     if (organizationId !== WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION) {
-      await this.validateOrganizationQuotas(
-        organizationId,
-        createWorkspaceDto.cpu || 2,
-        createWorkspaceDto.memory || 4,
-        createWorkspaceDto.disk || 10,
-      )
+      await this.validateOrganizationQuotas(organizationId, cpu, mem, disk)
     }
 
     //  validate image
@@ -227,7 +228,7 @@ export class WorkspaceService {
       ],
     })
 
-    if (!createWorkspaceDto.buildInfo) {
+    if (!createWorkspaceDto.buildInfo && (createWorkspaceDto.volumes || []).length === 0) {
       if (!image) {
         throw new BadRequestError(`Image ${workspaceImage} not found or not accessible`)
       }
@@ -238,9 +239,9 @@ export class WorkspaceService {
           image: workspaceImage,
           target: createWorkspaceDto.target,
           class: createWorkspaceDto.class,
-          cpu: createWorkspaceDto.cpu,
-          mem: createWorkspaceDto.memory,
-          disk: createWorkspaceDto.disk,
+          cpu,
+          mem,
+          disk,
           osUser: createWorkspaceDto.user,
           env: createWorkspaceDto.env,
           state: WorkspaceState.STARTED,
@@ -280,10 +281,10 @@ export class WorkspaceService {
     workspace.labels = createWorkspaceDto.labels || {}
     workspace.volumes = createWorkspaceDto.volumes || []
 
-    workspace.cpu = createWorkspaceDto.cpu || 2
-    workspace.gpu = createWorkspaceDto.gpu || 0
-    workspace.mem = createWorkspaceDto.memory || 4
-    workspace.disk = createWorkspaceDto.disk || 10
+    workspace.cpu = cpu
+    workspace.gpu = gpu
+    workspace.mem = mem
+    workspace.disk = disk
 
     workspace.public = createWorkspaceDto.public || false
 
@@ -325,9 +326,8 @@ export class WorkspaceService {
       workspace.state = WorkspaceState.PENDING_BUILD
     }
 
-    const response = await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(response.id).catch((err) => this.logger.error(err))
-    return response
+    await this.workspaceRepository.insert(workspace)
+    return workspace
   }
 
   async createSnapshot(workspaceId: string): Promise<void> {
@@ -341,7 +341,15 @@ export class WorkspaceService {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    await this.workspaceStateService.startSnapshotCreate(workspace.id)
+    if (![SnapshotState.COMPLETED, SnapshotState.NONE].includes(workspace.snapshotState)) {
+      throw new WorkspaceError('Workspace snapshot is already in progress')
+    }
+
+    await this.workspaceRepository.update(workspaceId, {
+      snapshotState: SnapshotState.PENDING,
+    })
+
+    this.eventEmitter.emit(WorkspaceEvents.SNAPSHOT_CREATED, new WorkspaceSnapshotCreatedEvent(workspace))
   }
 
   async findAll(organizationId: string, labels?: { [key: string]: string }): Promise<Workspace[]> {
@@ -420,7 +428,8 @@ export class WorkspaceService {
     workspace.pending = true
     workspace.desiredState = WorkspaceDesiredState.DESTROYED
     await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(workspace.id).catch((err) => this.logger.error(err))
+
+    this.eventEmitter.emit(WorkspaceEvents.DESTROYED, new WorkspaceDestroyedEvent(workspace))
   }
 
   async start(workspaceId: string): Promise<void> {
@@ -492,7 +501,8 @@ export class WorkspaceService {
     workspace.pending = true
     workspace.desiredState = WorkspaceDesiredState.STARTED
     await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(workspace.id).catch((err) => this.logger.error(err))
+
+    this.eventEmitter.emit(WorkspaceEvents.STARTED, new WorkspaceStartedEvent(workspace))
   }
 
   async stop(workspaceId: string): Promise<void> {
@@ -520,51 +530,8 @@ export class WorkspaceService {
     workspace.pending = true
     workspace.desiredState = WorkspaceDesiredState.STOPPED
     await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(workspace.id).catch((err) => this.logger.error(err))
-  }
 
-  async resize(workspaceId: string, resizeDto: ResizeDto): Promise<void> {
-    const workspace = await this.workspaceRepository.findOne({
-      where: { id: workspaceId },
-    })
-
-    if (!workspace) {
-      throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
-    }
-
-    if (resizeDto.gpu != 0) {
-      throw new ForbiddenException('GPU resize is not supported')
-    }
-
-    if (String(workspace.state) !== String(workspace.desiredState)) {
-      throw new WorkspaceError('State change in progress')
-    }
-
-    if (![WorkspaceState.STARTED, WorkspaceState.STOPPED].includes(workspace.state)) {
-      throw new WorkspaceError('Workspace must be in started or stopped state')
-    }
-
-    if (workspace.pending) {
-      throw new WorkspaceError('Workspace state change in progress')
-    }
-
-    //  check for quotas
-    await this.validateOrganizationQuotas(
-      workspace.organizationId,
-      resizeDto.cpu,
-      resizeDto.memory,
-      workspace.disk,
-      workspaceId,
-    )
-
-    workspace.cpu = resizeDto.cpu
-    workspace.gpu = resizeDto.gpu
-    workspace.mem = resizeDto.memory
-
-    workspace.pending = true
-    workspace.desiredState = WorkspaceDesiredState.RESIZED
-    await this.workspaceRepository.save(workspace)
-    this.workspaceStateService.syncInstanceState(workspace.id).catch((err) => this.logger.error(err))
+    this.eventEmitter.emit(WorkspaceEvents.STOPPED, new WorkspaceStoppedEvent(workspace))
   }
 
   async updatePublicStatus(workspaceId: string, isPublic: boolean): Promise<void> {

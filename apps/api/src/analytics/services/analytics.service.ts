@@ -10,7 +10,6 @@ import { WorkspaceCreatedEvent } from '../../workspace/events/workspace-create.e
 import { WorkspaceDesiredStateUpdatedEvent } from '../../workspace/events/workspace-desired-state-updated.event'
 import { WorkspaceDestroyedEvent } from '../../workspace/events/workspace-destroyed.event'
 import { WorkspacePublicStatusUpdatedEvent } from '../../workspace/events/workspace-public-status-updated.event'
-import { WorkspaceResizedEvent } from '../../workspace/events/workspace-resized.event'
 import { WorkspaceStartedEvent } from '../../workspace/events/workspace-started.event'
 import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
 import { WorkspaceStoppedEvent } from '../../workspace/events/workspace-stopped.event'
@@ -58,11 +57,6 @@ export class AnalyticsService {
   @OnEvent(WorkspaceEvents.DESTROYED)
   async handleWorkspaceDestroyedEvent(event: WorkspaceDestroyedEvent) {
     this.logger.debug(`Workspace destroyed: ${JSON.stringify(event)}`)
-  }
-
-  @OnEvent(WorkspaceEvents.RESIZED)
-  async handleWorkspaceResizedEvent(event: WorkspaceResizedEvent) {
-    this.logger.debug(`Workspace resized: ${JSON.stringify(event)}`)
   }
 
   @OnEvent(WorkspaceEvents.PUBLIC_STATUS_UPDATED)
