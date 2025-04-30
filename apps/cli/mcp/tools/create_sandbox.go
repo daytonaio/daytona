@@ -23,21 +23,18 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	// Check for existing sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err == nil && sandboxID != "" {
-		// Try to get existing sandbox
-		sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxID).Execute()
-		if err == nil && sandbox != nil {
-			if sandbox.State != nil && *sandbox.State == daytonaapiclient.WORKSPACESTATE_STARTED {
-				log.Infof("Reusing existing sandbox: %s", sandbox.Id)
-
-				return mcp.NewToolResultText(fmt.Sprintf("Reusing existing sandbox %s", sandboxID)), nil
-			}
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
 		}
+	}
 
-		// Sandbox not found or error, clear tracking
-		_ = clearActiveSandbox()
+	if sandboxId != "" {
+		sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxId).Execute()
+		if err == nil && sandbox.State != nil && *sandbox.State == daytonaapiclient.WORKSPACESTATE_STARTED {
+			return mcp.NewToolResultText(fmt.Sprintf("Reusing existing sandbox %s", sandboxId)), nil
+		}
 	}
 
 	createSandbox := daytonaapiclient.NewCreateWorkspace()
@@ -86,12 +83,6 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 			time.Sleep(retryDelay)
 			retryDelay = retryDelay * 3 / 2 // Exponential backoff
 			continue
-		}
-
-		// Save sandbox ID to tracking file
-		err = setActiveSandbox(sandbox.Id)
-		if err != nil {
-			log.Infof("Failed to save sandbox ID: %s; %v", sandbox.Id, err)
 		}
 
 		log.Infof("Created new sandbox: %s", sandbox.Id)

@@ -27,20 +27,25 @@ func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
+	}
+
 	// Get file path from request arguments
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
 	// Check if file exists using execute command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxID).
+	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
 		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("test -f %s && echo 'exists' || echo 'not exists'", filePath))).
 		Execute()
 	if err != nil {
@@ -52,7 +57,7 @@ func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	// Download the file
-	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, sandboxID).Path(filePath).Execute()
+	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, sandboxId).Path(filePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error downloading file: %v", err)
 	}
