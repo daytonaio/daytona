@@ -53,7 +53,7 @@ export function ImageTable({ data, loading, loadingImages, onDelete, onBulkDelet
   )
 
   const [sorting, setSorting] = useState<SortingState>([])
-  const [filterValue, setFilterValue] = useState('')
+  const [filterValue, setFilterValue] = useState<string | number>('')
   const [bulkDeleteDialog, setBulkDeleteDialog] = useState(false)
 
   const columns = useMemo(
