@@ -180,9 +180,9 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 ${color}`}>
-            {getStateIcon(image.state)}
-            {getStateLabel(image.state)}
+          <div className={`flex gap-2 ${color}`}>
+            <div className="flex-shrink-0 w-5 h-5">{getStateIcon(image.state)}</div>
+            <span className="whitespace-nowrap text-sm">{getStateLabel(image.state)}</span>
           </div>
         )
       },
@@ -263,6 +263,8 @@ const getStateIcon = (state: ImageState) => {
       return <CheckCircle className="w-4 h-4" />
     case ImageState.ERROR:
       return <AlertTriangle className="w-4 h-4" />
+    case ImageState.PULLING_IMAGE:
+      return <CheckCircle className="w-4 h-4" />
     default:
       return <Timer className="w-4 h-4" />
   }
