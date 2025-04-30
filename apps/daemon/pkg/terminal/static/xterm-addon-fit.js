@@ -14,10 +14,10 @@
 })(self, () =>
   (() => {
     'use strict'
-    var e = {}
+    const e = {}
     return (
       (() => {
-        var t = e
+        const t = e
         Object.defineProperty(t, '__esModule', { value: !0 }),
           (t.FitAddon = void 0),
           (t.FitAddon = class {

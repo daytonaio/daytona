@@ -7,24 +7,24 @@
   if ('object' == typeof exports && 'object' == typeof module) module.exports = t()
   else if ('function' == typeof define && define.amd) define([], t)
   else {
-    var i = t()
-    for (var s in i) ('object' == typeof exports ? exports : e)[s] = i[s]
+    const i = t()
+    for (const s in i) ('object' == typeof exports ? exports : e)[s] = i[s]
   }
 })(self, () =>
   (() => {
     'use strict'
-    var e = {
+    const e = {
         4567: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -293,16 +293,16 @@
             })
         },
         6465: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -395,7 +395,7 @@
                 (this._clearCurrentLink(), this._askForLink(e, !0))
             }
             _askForLink(e, t) {
-              var i, s
+              let i, s
               ;(this._activeProviderReplies && t) ||
                 (null === (i = this._activeProviderReplies) ||
                   void 0 === i ||
@@ -413,7 +413,7 @@
                   ? (null === (s = this._activeProviderReplies) || void 0 === s ? void 0 : s.get(i)) &&
                     (r = this._checkLinkProviderResult(i, e, r))
                   : n.provideLinks(e.y, (t) => {
-                      var s, n
+                      let s, n
                       if (this._isMouseOut) return
                       const o = null == t ? void 0 : t.map((e) => ({ link: e }))
                       null === (s = this._activeProviderReplies) || void 0 === s || s.set(i, o),
@@ -442,7 +442,7 @@
               }
             }
             _checkLinkProviderResult(e, t, i) {
-              var s
+              let s
               if (!this._activeProviderReplies) return i
               const r = this._activeProviderReplies.get(e)
               let n = !1
@@ -503,14 +503,14 @@
                 Object.defineProperties(e.link.decorations, {
                   pointerCursor: {
                     get: () => {
-                      var e, t
+                      let e, t
                       return null === (t = null === (e = this._currentLink) || void 0 === e ? void 0 : e.state) ||
                         void 0 === t
                         ? void 0
                         : t.decorations.pointerCursor
                     },
                     set: (e) => {
-                      var t, i
+                      let t, i
                       ;(null === (t = this._currentLink) || void 0 === t ? void 0 : t.state) &&
                         this._currentLink.state.decorations.pointerCursor !== e &&
                         ((this._currentLink.state.decorations.pointerCursor = e),
@@ -522,14 +522,14 @@
                   },
                   underline: {
                     get: () => {
-                      var e, t
+                      let e, t
                       return null === (t = null === (e = this._currentLink) || void 0 === e ? void 0 : e.state) ||
                         void 0 === t
                         ? void 0
                         : t.decorations.underline
                     },
                     set: (t) => {
-                      var i, s, r
+                      let i, s, r
                       ;(null === (i = this._currentLink) || void 0 === i ? void 0 : i.state) &&
                         (null === (r = null === (s = this._currentLink) || void 0 === s ? void 0 : s.state) ||
                         void 0 === r
@@ -558,7 +558,7 @@
                   ))
             }
             _linkHover(e, t, i) {
-              var s
+              let s
               ;(null === (s = this._currentLink) || void 0 === s ? void 0 : s.state) &&
                 ((this._currentLink.state.isHovered = !0),
                 this._currentLink.state.decorations.underline && this._fireUnderlineEvent(t, !0),
@@ -572,7 +572,7 @@
               ;(t ? this._onShowLinkUnderline : this._onHideLinkUnderline).fire(r)
             }
             _linkLeave(e, t, i) {
-              var s
+              let s
               ;(null === (s = this._currentLink) || void 0 === s ? void 0 : s.state) &&
                 ((this._currentLink.state.isHovered = !1),
                 this._currentLink.state.decorations.underline && this._fireUnderlineEvent(t, !1),
@@ -602,16 +602,16 @@
             (t.tooMuchOutput = 'Too much output to announce, navigate to rows manually to read')
         },
         3730: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -630,7 +630,7 @@
               ;(this._bufferService = e), (this._optionsService = t), (this._oscLinkService = i)
             }
             provideLinks(e, t) {
-              var i
+              let i
               const s = this._bufferService.buffer.lines.get(e - 1)
               if (!s) return void t(void 0)
               const r = [],
@@ -667,13 +667,13 @@
                           range: i,
                           activate: (e, t) => (o ? o.activate(e, t, i) : h(0, t)),
                           hover: (e, t) => {
-                            var s
+                            let s
                             return null === (s = null == o ? void 0 : o.hover) || void 0 === s
                               ? void 0
                               : s.call(o, e, t, i)
                           },
                           leave: (e, t) => {
-                            var s
+                            let s
                             return null === (s = null == o ? void 0 : o.leave) || void 0 === s
                               ? void 0
                               : s.call(o, e, t, i)
@@ -774,7 +774,7 @@
                 this._updateDpr()
             }
             _updateDpr() {
-              var e
+              let e
               this._outerListener &&
                 (null === (e = this._resolutionMediaMatchList) || void 0 === e || e.removeListener(this._outerListener),
                 (this._currentDevicePixelRatio = this._parentWindow.devicePixelRatio),
@@ -888,7 +888,7 @@
                 this.register(this._bufferService.onResize((e) => this._afterResize(e.cols, e.rows))),
                 this.register(
                   (0, E.toDisposable)(() => {
-                    var e, t
+                    let e, t
                     ;(this._customKeyEventHandler = void 0),
                       null === (t = null === (e = this.element) || void 0 === e ? void 0 : e.parentNode) ||
                         void 0 === t ||
@@ -961,7 +961,7 @@
                 this._onFocus.fire()
             }
             blur() {
-              var e
+              let e
               return null === (e = this.textarea) || void 0 === e ? void 0 : e.blur()
             }
             _handleTextAreaBlur() {
@@ -1059,7 +1059,7 @@
                 this.register(this.onRender(() => this._compositionHelper.updateCompositionElements()))
             }
             open(e) {
-              var t
+              let t
               if (!e) throw new Error('Terminal requires a parent element.')
               e.isConnected ||
                 this._logService.debug('Terminal.open was called on an element that was not attached to the DOM'),
@@ -1387,11 +1387,11 @@
                 )
             }
             refresh(e, t) {
-              var i
+              let i
               null === (i = this._renderService) || void 0 === i || i.refreshRows(e, t)
             }
             updateCursorStyle(e) {
-              var t
+              let t
               ;(null === (t = this._selectionService) || void 0 === t ? void 0 : t.shouldColumnSelect(e))
                 ? this.element.classList.add('column-select')
                 : this.element.classList.remove('column-select')
@@ -1401,7 +1401,7 @@
                 ((this.coreService.isCursorInitialized = !0), this.refresh(this.buffer.y, this.buffer.y))
             }
             scrollLines(e, t, i = 0) {
-              var s
+              let s
               1 === i
                 ? (super.scrollLines(e, t, i), this.refresh(0, this.rows - 1))
                 : null === (s = this.viewport) || void 0 === s || s.scrollLines(e)
@@ -1450,15 +1450,15 @@
                 }
             }
             clearSelection() {
-              var e
+              let e
               null === (e = this._selectionService) || void 0 === e || e.clearSelection()
             }
             selectAll() {
-              var e
+              let e
               null === (e = this._selectionService) || void 0 === e || e.selectAll()
             }
             selectLines(e, t) {
-              var i
+              let i
               null === (i = this._selectionService) || void 0 === i || i.selectLines(e, t)
             }
             _keyDown(e) {
@@ -1567,12 +1567,12 @@
                 : this._charSizeService && !this._charSizeService.hasValidSize && this._charSizeService.measure()
             }
             _afterResize(e, t) {
-              var i, s
+              let i, s
               null === (i = this._charSizeService) || void 0 === i || i.measure(),
                 null === (s = this.viewport) || void 0 === s || s.syncScrollArea(!0)
             }
             clear() {
-              var e
+              let e
               if (0 !== this.buffer.ybase || 0 !== this.buffer.y) {
                 this.buffer.clearAllMarkers(),
                   this.buffer.lines.set(0, this.buffer.lines.get(this.buffer.ybase + this.buffer.y)),
@@ -1588,7 +1588,7 @@
               }
             }
             reset() {
-              var e, t
+              let e, t
               ;(this.options.rows = this.rows), (this.options.cols = this.cols)
               const i = this._customKeyEventHandler
               this._setup(),
@@ -1600,11 +1600,11 @@
                 this.refresh(0, this.rows - 1)
             }
             clearTextureAtlas() {
-              var e
+              let e
               null === (e = this._renderService) || void 0 === e || e.clearTextureAtlas()
             }
             _reportFocus() {
-              var e
+              let e
               ;(null === (e = this.element) || void 0 === e ? void 0 : e.classList.contains('focus'))
                 ? this.coreService.triggerDataEvent(D.C0.ESC + '[I')
                 : this.coreService.triggerDataEvent(D.C0.ESC + '[O')
@@ -1672,16 +1672,16 @@
             })
         },
         1680: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -1884,7 +1884,7 @@
               )
             }
             getBufferElements(e, t) {
-              var i
+              let i
               let s,
                 r = ''
               const n = [],
@@ -1946,16 +1946,16 @@
           )
         },
         3107: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -2018,7 +2018,7 @@
               this._refreshStyle(e), this._dimensionsChanged && this._refreshXPosition(e)
             }
             _createElement(e) {
-              var t, i
+              let t, i
               const s = document.createElement('div')
               s.classList.add('xterm-decoration'),
                 s.classList.toggle(
@@ -2055,7 +2055,7 @@
               }
             }
             _refreshXPosition(e, t = e.element) {
-              var i
+              let i
               if (!t) return
               const s = null !== (i = e.options.x) && void 0 !== i ? i : 0
               'right' === (e.options.anchor || 'left')
@@ -2063,7 +2063,7 @@
                 : (t.style.left = s ? s * this._renderService.dimensions.css.cell.width + 'px' : '')
             }
             _removeDecoration(e) {
-              var t
+              let t
               null === (t = this._decorationElements.get(e)) || void 0 === t || t.remove(),
                 this._decorationElements.delete(e),
                 e.dispose()
@@ -2137,16 +2137,16 @@
             })
         },
         5744: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -2171,7 +2171,7 @@
               return this._optionsService.options.overviewRulerWidth || 0
             }
             constructor(e, t, i, s, r, o, a) {
-              var c
+              let c
               super(),
                 (this._viewportElement = e),
                 (this._screenElement = t),
@@ -2198,7 +2198,7 @@
                 this._registerDimensionChangeListeners(),
                 this.register(
                   (0, h.toDisposable)(() => {
-                    var e
+                    let e
                     null === (e = this._canvas) || void 0 === e || e.remove()
                   }),
                 )
@@ -2331,16 +2331,16 @@
           )
         },
         2950: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -2578,16 +2578,16 @@
           }
         },
         1296: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -2905,16 +2905,16 @@
           )
         },
         3787: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -3376,16 +3376,16 @@
             })
         },
         428: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -3454,16 +3454,16 @@
           }
         },
         4269: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -3635,16 +3635,16 @@
             })
         },
         8934: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -3693,16 +3693,16 @@
           t.MouseService = a = s([r(0, n.IRenderService), r(1, n.ICharSizeService)], a)
         },
         3230: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -3756,7 +3756,7 @@
                 this.register(h.onResize(() => this._fullRefresh())),
                 this.register(
                   h.buffers.onBufferActivate(() => {
-                    var e
+                    let e
                     return null === (e = this._renderer.value) || void 0 === e ? void 0 : e.clear()
                   }),
                 ),
@@ -3857,7 +3857,7 @@
               this._isPaused ? (this._needsFullRefresh = !0) : this.refreshRows(0, this._rowCount - 1)
             }
             clearTextureAtlas() {
-              var e, t
+              let e, t
               this._renderer.value &&
                 (null === (t = (e = this._renderer.value).clearTextureAtlas) || void 0 === t || t.call(e),
                 this._fullRefresh())
@@ -3875,30 +3875,30 @@
                 this._fullRefresh())
             }
             handleCharSizeChanged() {
-              var e
+              let e
               null === (e = this._renderer.value) || void 0 === e || e.handleCharSizeChanged()
             }
             handleBlur() {
-              var e
+              let e
               null === (e = this._renderer.value) || void 0 === e || e.handleBlur()
             }
             handleFocus() {
-              var e
+              let e
               null === (e = this._renderer.value) || void 0 === e || e.handleFocus()
             }
             handleSelectionChanged(e, t, i) {
-              var s
+              let s
               ;(this._selectionState.start = e),
                 (this._selectionState.end = t),
                 (this._selectionState.columnSelectMode = i),
                 null === (s = this._renderer.value) || void 0 === s || s.handleSelectionChanged(e, t, i)
             }
             handleCursorMove() {
-              var e
+              let e
               null === (e = this._renderer.value) || void 0 === e || e.handleCursorMove()
             }
             clear() {
-              var e
+              let e
               null === (e = this._renderer.value) || void 0 === e || e.clear()
             }
           })
@@ -3915,16 +3915,16 @@
           )
         },
         9312: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -4082,7 +4082,7 @@
               )
             }
             _selectWordAtCursor(e, t) {
-              var i, s
+              let i, s
               const r =
                 null === (s = null === (i = this._linkifier.currentLink) || void 0 === i ? void 0 : i.link) ||
                 void 0 === s
@@ -4436,16 +4436,16 @@
             (t.IThemeService = (0, s.createDecorator)('ThemeService'))
         },
         6731: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -4758,7 +4758,7 @@
             n = 0,
             o = 0,
             a = 0
-          var h, c, l, d, _
+          let h, c, l, d, _
           function u(e) {
             const t = e.toString(16)
             return t.length < 2 ? '0' + t : t
@@ -4970,7 +4970,7 @@
                 this._onScrollApi ||
                   ((this._onScrollApi = this.register(new l.EventEmitter())),
                   this._onScroll.event((e) => {
-                    var t
+                    let t
                     null === (t = this._onScrollApi) || void 0 === t || t.fire(e.position)
                   })),
                 this._onScrollApi.event
@@ -5188,16 +5188,16 @@
             })
         },
         5435: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -5275,7 +5275,7 @@
             }
             return !1
           }
-          var y
+          let y
           !(function (e) {
             ;(e[(e.GET_WIN_SIZE_PIXELS = 0)] = 'GET_WIN_SIZE_PIXELS'),
               (e[(e.GET_CELL_SIZE_PIXELS = 1)] = 'GET_CELL_SIZE_PIXELS')
@@ -5652,7 +5652,7 @@
               return (this._activeBuffer.x = 0), !0
             }
             backspace() {
-              var e
+              let e
               if (!this._coreService.decPrivateModes.reverseWraparound)
                 return this._restrictCursor(), this._activeBuffer.x > 0 && this._activeBuffer.x--, !0
               if ((this._restrictCursor(this._bufferService.cols), this._activeBuffer.x > 0)) this._activeBuffer.x--
@@ -6327,7 +6327,7 @@
                 o.triggerDataEvent(`${n.C0.ESC}[${t ? '' : '?'}${f};${v}$y`),
                 !0
               )
-              var f, v
+              let f, v
             }
             _updateAttrColor(e, t, i, s, r) {
               return (
@@ -6841,7 +6841,7 @@
                 return this._isDisposed ? void 0 : this._value
               }
               set value(e) {
-                var t
+                let t
                 this._isDisposed ||
                   e === this._value ||
                   (null === (t = this._value) || void 0 === t || t.dispose(), (this._value = e))
@@ -6850,7 +6850,7 @@
                 this.value = void 0
               }
               dispose() {
-                var e
+                let e
                 ;(this._isDisposed = !0),
                   null === (e = this._value) || void 0 === e || e.dispose(),
                   (this._value = void 0)
@@ -6889,7 +6889,7 @@
                 this._data.get(e, t) || this._data.set(e, t, new i()), this._data.get(e, t).set(s, r, n)
               }
               get(e, t, i, s) {
-                var r
+                let r
                 return null === (r = this._data.get(e, t)) || void 0 === r ? void 0 : r.get(i, s)
               }
               clear() {
@@ -8307,7 +8307,7 @@
             })
         },
         2584: (e, t) => {
-          var i, s, r
+          let i, s, r
           Object.defineProperty(t, '__esModule', { value: !0 }),
             (t.C1_ESCAPED = t.C1 = t.C0 = void 0),
             (function (e) {
@@ -10032,16 +10032,16 @@
             })
         },
         744: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -10137,16 +10137,16 @@
             })
         },
         1753: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -10288,16 +10288,16 @@
           t.CoreMouseService = _ = s([r(0, n.IBufferService), r(1, n.ICoreService)], _)
         },
         6975: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -10403,7 +10403,7 @@
               this._decorations.clear()
             }
             *getDecorationsAtCell(e, t, i) {
-              var s, r, n
+              let s, r, n
               let o = 0,
                 a = 0
               for (const h of this._decorations.getKeyIterator(t))
@@ -10416,7 +10416,7 @@
             }
             forEachDecorationAtCell(e, t, i, s) {
               this._decorations.forEachByKey(t, (t) => {
-                var r, n, o
+                let r, n, o
                 ;(a = null !== (r = t.options.x) && void 0 !== r ? r : 0),
                   (h = a + (null !== (n = t.options.width) && void 0 !== n ? n : 1)),
                   e >= a &&
@@ -10520,16 +10520,16 @@
             })
         },
         7866: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -10576,7 +10576,7 @@
                   e.call(console, (this._optionsService.options.logger ? '' : 'xterm.js: ') + t, ...i)
               }
               trace(e, ...t) {
-                var i, s
+                let i, s
                 this._logLevel <= o.LogLevelEnum.TRACE &&
                   this._log(
                     null !==
@@ -10591,7 +10591,7 @@
                   )
               }
               debug(e, ...t) {
-                var i, s
+                let i, s
                 this._logLevel <= o.LogLevelEnum.DEBUG &&
                   this._log(
                     null !==
@@ -10606,7 +10606,7 @@
                   )
               }
               info(e, ...t) {
-                var i, s
+                let i, s
                 this._logLevel <= o.LogLevelEnum.INFO &&
                   this._log(
                     null !==
@@ -10621,7 +10621,7 @@
                   )
               }
               warn(e, ...t) {
-                var i, s
+                let i, s
                 this._logLevel <= o.LogLevelEnum.WARN &&
                   this._log(
                     null !==
@@ -10636,7 +10636,7 @@
                   )
               }
               error(e, ...t) {
-                var i, s
+                let i, s
                 this._logLevel <= o.LogLevelEnum.ERROR &&
                   this._log(
                     null !==
@@ -10806,16 +10806,16 @@
           t.OptionsService = a
         },
         2660: function (e, t, i) {
-          var s =
+          const s =
               (this && this.__decorate) ||
               function (e, t, i, s) {
-                var r,
+                let r,
                   n = arguments.length,
                   o = n < 3 ? t : null === s ? (s = Object.getOwnPropertyDescriptor(t, i)) : s
                 if ('object' == typeof Reflect && 'function' == typeof Reflect.decorate)
                   o = Reflect.decorate(e, t, i, s)
                 else
-                  for (var a = e.length - 1; a >= 0; a--)
+                  for (let a = e.length - 1; a >= 0; a--)
                     (r = e[a]) && (o = (n < 3 ? r(o) : n > 3 ? r(t, i, o) : r(t, i)) || o)
                 return n > 3 && o && Object.defineProperty(t, i, o), o
               },
@@ -10863,7 +10863,7 @@
               }
             }
             getLinkData(e) {
-              var t
+              let t
               return null === (t = this._dataByLinkId.get(e)) || void 0 === t ? void 0 : t.data
             }
             _getEntryIdKey(e) {
@@ -10915,7 +10915,7 @@
               t.IBufferService =
                 void 0)
           const s = i(8343)
-          var r
+          let r
           ;(t.IBufferService = (0, s.createDecorator)('BufferService')),
             (t.ICoreMouseService = (0, s.createDecorator)('CoreMouseService')),
             (t.ICoreService = (0, s.createDecorator)('CoreService')),
@@ -10986,15 +10986,15 @@
       },
       t = {}
     function i(s) {
-      var r = t[s]
+      const r = t[s]
       if (void 0 !== r) return r.exports
-      var n = (t[s] = { exports: {} })
+      const n = (t[s] = { exports: {} })
       return e[s].call(n.exports, n, n.exports, i), n.exports
     }
-    var s = {}
+    const s = {}
     return (
       (() => {
-        var e = s
+        const e = s
         Object.defineProperty(e, '__esModule', { value: !0 }), (e.Terminal = void 0)
         const t = i(9042),
           r = i(3236),
@@ -11148,7 +11148,7 @@
             return this._verifyIntegers(e), this._core.registerMarker(e)
           }
           registerDecoration(e) {
-            var t, i, s
+            let t, i, s
             return (
               this._checkProposedApi(),
               this._verifyPositiveIntegers(
