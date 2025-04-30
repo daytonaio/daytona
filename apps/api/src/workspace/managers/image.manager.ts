@@ -17,16 +17,16 @@ import { NodeState } from '../enums/node-state.enum'
 import { ImageNodeState } from '../enums/image-node-state.enum'
 import { NodeApiFactory } from '../runner-api/runnerApi'
 import { v4 as uuidv4 } from 'uuid'
-import { NodeNotReadyError } from './../../workspace/errors/node-not-ready.error'
-import { RegistryType } from './../../docker-registry/enums/registry-type.enum'
+import { NodeNotReadyError } from '../errors/node-not-ready.error'
+import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 @Injectable()
-export class ImageStateService {
-  private readonly logger = new Logger(ImageStateService.name)
+export class ImageManager {
+  private readonly logger = new Logger(ImageManager.name)
   //  generate a unique instance id used to ensure only one instance of the worker is handing the
   //  image activation
   private readonly instanceId = uuidv4()
@@ -766,10 +766,17 @@ export class ImageStateService {
     })
 
     const imageApi = this.nodeApiFactory.createImageApi(node)
+
+    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
     await imageApi.pullImage({
       image: imageNode.imageRef,
+      registry: {
+        url: dockerRegistry.url,
+        username: dockerRegistry.username,
+        password: dockerRegistry.password,
+      },
     })
   }
 

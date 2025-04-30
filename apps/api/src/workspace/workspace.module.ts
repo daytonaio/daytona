@@ -17,12 +17,12 @@ import { NodeApiFactory } from './runner-api/runnerApi'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
-import { WorkspaceStateService } from './services/workspace-state.service'
+import { WorkspaceManager } from './managers/workspace.manager'
 import { ToolboxController } from './controllers/toolbox.controller'
 import { Image } from './entities/image.entity'
 import { ImageController } from './controllers/image.controller'
 import { ImageService } from './services/image.service'
-import { ImageStateService } from './services/image-state.service'
+import { ImageManager } from './managers/image.manager'
 import { DockerProvider } from './docker/docker-provider'
 import { ImageNode } from './entities/image-node.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
@@ -35,9 +35,10 @@ import { PreviewController } from './controllers/preview.controller'
 import { ImageSubscriber } from './subscribers/image.subscriber'
 import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
-import { VolumeStateService } from './services/volume-state.service'
+import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
+import { SnapshotManager } from './managers/snapshot.manager'
 @Module({
   imports: [
     UserModule,
@@ -56,21 +57,22 @@ import { BuildInfo } from './entities/build-info.entity'
   ],
   providers: [
     WorkspaceService,
-    WorkspaceStateService,
+    WorkspaceManager,
+    SnapshotManager,
     WorkspaceWarmPoolService,
     NodeService,
     NodeApiFactory,
     ToolboxService,
     ImageService,
-    ImageStateService,
+    ImageManager,
     DockerProvider,
     WorkspaceSubscriber,
     RedisLockProvider,
     ImageSubscriber,
     VolumeService,
-    VolumeStateService,
+    VolumeManager,
   ],
-  exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeStateService],
+  exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
 })
 export class WorkspaceModule {
   configure(consumer: MiddlewareConsumer) {

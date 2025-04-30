@@ -4,6 +4,7 @@
  */
 
 export const WorkspaceEvents = {
+  ARCHIVED: 'workspace.archived',
   STATE_UPDATED: 'workspace.state.updated',
   DESIRED_STATE_UPDATED: 'workspace.desired-state.updated',
   CREATED: 'workspace.created',
@@ -13,4 +14,5 @@ export const WorkspaceEvents = {
   RESIZED: 'workspace.resized',
   PUBLIC_STATUS_UPDATED: 'workspace.public-status.updated',
   ORGANIZATION_UPDATED: 'workspace.organization.updated',
+  SNAPSHOT_CREATED: 'workspace.snapshot.created',
 } as const
