@@ -44,8 +44,17 @@ const DocsRedirect = () => {
 function App() {
   const location = useLocation()
   const posthog = usePostHog()
-  const { error } = useAuth()
+  const { error, isAuthenticated, user } = useAuth()
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+
+  useEffect(() => {
+    if (import.meta.env.PROD && isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
+      posthog?.identify(user.profile.sub, {
+        email: user.profile.email,
+        name: user.profile.name,
+      })
+    }
+  }, [isAuthenticated, user, posthog])
 
   // Hack for tracking PostHog pageviews in SPAs
   useEffect(() => {
