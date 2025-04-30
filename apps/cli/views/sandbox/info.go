@@ -119,8 +119,6 @@ func getStateLabel(state daytonaapiclient.WorkspaceState) string {
 		return common.StartingStyle.Render("STARTING")
 	case daytonaapiclient.WORKSPACESTATE_STOPPING:
 		return common.StoppingStyle.Render("STOPPING")
-	case daytonaapiclient.WORKSPACESTATE_RESIZING:
-		return common.CreatingStyle.Render("RESIZING")
 	case daytonaapiclient.WORKSPACESTATE_PULLING_IMAGE:
 		return common.CreatingStyle.Render("PULLING IMAGE")
 	case daytonaapiclient.WORKSPACESTATE_ARCHIVING:

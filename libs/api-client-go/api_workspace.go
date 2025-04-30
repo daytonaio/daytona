@@ -124,18 +124,6 @@ type WorkspaceAPI interface {
 	ReplaceLabelsExecute(r WorkspaceAPIReplaceLabelsRequest) (*WorkspaceLabels, *http.Response, error)
 
 	/*
-		ResizeWorkspace Resize workspace
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param workspaceId ID of the workspace
-		@return WorkspaceAPIResizeWorkspaceRequest
-	*/
-	ResizeWorkspace(ctx context.Context, workspaceId string) WorkspaceAPIResizeWorkspaceRequest
-
-	// ResizeWorkspaceExecute executes the request
-	ResizeWorkspaceExecute(r WorkspaceAPIResizeWorkspaceRequest) (*http.Response, error)
-
-	/*
 		SetAutostopInterval Set workspace auto-stop interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1117,117 +1105,6 @@ func (a *WorkspaceAPIService) ReplaceLabelsExecute(r WorkspaceAPIReplaceLabelsRe
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
-type WorkspaceAPIResizeWorkspaceRequest struct {
-	ctx                    context.Context
-	ApiService             WorkspaceAPI
-	workspaceId            string
-	body                   *map[string]interface{}
-	xDaytonaOrganizationID *string
-}
-
-func (r WorkspaceAPIResizeWorkspaceRequest) Body(body map[string]interface{}) WorkspaceAPIResizeWorkspaceRequest {
-	r.body = &body
-	return r
-}
-
-// Use with JWT to specify the organization ID
-func (r WorkspaceAPIResizeWorkspaceRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPIResizeWorkspaceRequest {
-	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-func (r WorkspaceAPIResizeWorkspaceRequest) Execute() (*http.Response, error) {
-	return r.ApiService.ResizeWorkspaceExecute(r)
-}
-
-/*
-ResizeWorkspace Resize workspace
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return WorkspaceAPIResizeWorkspaceRequest
-*/
-func (a *WorkspaceAPIService) ResizeWorkspace(ctx context.Context, workspaceId string) WorkspaceAPIResizeWorkspaceRequest {
-	return WorkspaceAPIResizeWorkspaceRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
-	}
-}
-
-// Execute executes the request
-func (a *WorkspaceAPIService) ResizeWorkspaceExecute(r WorkspaceAPIResizeWorkspaceRequest) (*http.Response, error) {
-	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ResizeWorkspace")
-	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/workspace/{workspaceId}/resize"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.body == nil {
-		return nil, reportError("body is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.xDaytonaOrganizationID != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
-	}
-	// body params
-	localVarPostBody = r.body
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarHTTPResponse, newErr
-	}
-
-	return localVarHTTPResponse, nil
 }
 
 type WorkspaceAPISetAutostopIntervalRequest struct {
