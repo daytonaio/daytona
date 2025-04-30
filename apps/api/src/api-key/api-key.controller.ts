@@ -12,6 +12,7 @@ import { ApiKeyListDto } from './dto/api-key-list.dto'
 import { CombinedAuthGuard } from '../auth/combined-auth.guard'
 import { CustomHeaders } from '../common/constants/header.constants'
 import { AuthContext } from '../common/decorators/auth-context.decorator'
+import { AuthContext as IAuthContext } from '../common/interfaces/auth-context.interface'
 import { OrganizationAuthContext } from '../common/interfaces/auth-context.interface'
 import { OrganizationMemberRole } from '../organization/enums/organization-member-role.enum'
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
@@ -67,6 +68,24 @@ export class ApiKeyController {
   async getApiKeys(@AuthContext() authContext: OrganizationAuthContext): Promise<ApiKeyListDto[]> {
     const apiKeys = await this.apiKeyService.getApiKeys(authContext.organizationId, authContext.userId)
     return apiKeys.map((apiKey) => ApiKeyListDto.fromApiKey(apiKey))
+  }
+
+  @Get('current')
+  @ApiOperation({
+    summary: "Get current API key's details",
+    operationId: 'getCurrentApiKey',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'API key retrieved successfully.',
+    type: ApiKeyListDto,
+  })
+  async getCurrentApiKey(@AuthContext() authContext: IAuthContext): Promise<ApiKeyListDto> {
+    if (!authContext.apiKey) {
+      throw new ForbiddenException('Authenticate with an API key to use this endpoint')
+    }
+
+    return ApiKeyListDto.fromApiKey(authContext.apiKey)
   }
 
   @Get(':name')
