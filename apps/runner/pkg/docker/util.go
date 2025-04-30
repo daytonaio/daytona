@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/daytonaio/runner/cmd/runner/config"
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/docker/docker/errdefs"
 
@@ -115,7 +116,7 @@ func (d *DockerClient) isDirectoryMounted(path string) (bool, error) {
 }
 
 func (d *DockerClient) getMountCmd(ctx context.Context, volume, path string) *exec.Cmd {
-	cmd := exec.CommandContext(ctx, "mount-s3", "--allow-other", "--allow-delete", "--file-mode", "0666", "--dir-mode", "0777", volume, path)
+	cmd := exec.CommandContext(ctx, "mount-s3", "--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777", volume, path)
 
 	if d.awsEndpointUrl != "" {
 		cmd.Env = append(cmd.Env, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)
@@ -132,6 +133,9 @@ func (d *DockerClient) getMountCmd(ctx context.Context, volume, path string) *ex
 	if d.awsRegion != "" {
 		cmd.Env = append(cmd.Env, "AWS_REGION="+d.awsRegion)
 	}
+
+	cmd.Stderr = io.Writer(&util.ErrorLogWriter{})
+	cmd.Stdout = io.Writer(&util.InfoLogWriter{})
 
 	return cmd
 }

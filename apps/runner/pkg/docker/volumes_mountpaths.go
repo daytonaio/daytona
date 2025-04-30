@@ -29,18 +29,9 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 			continue
 		}
 
-		_, err = os.Stat(nodeVolumeMountPath)
+		err = os.MkdirAll(nodeVolumeMountPath, 0755)
 		if err != nil {
-			if os.IsNotExist(err) {
-				err = os.MkdirAll(nodeVolumeMountPath, 0755)
-				if err != nil {
-					return nil, fmt.Errorf("failed to create mount directory %s: %s", nodeVolumeMountPath, err)
-				}
-
-				log.Infof("created mount directory %s", nodeVolumeMountPath)
-			} else {
-				return nil, fmt.Errorf("failed to check mount directory %s: %s", nodeVolumeMountPath, err)
-			}
+			return nil, fmt.Errorf("failed to create mount directory %s: %s", nodeVolumeMountPath, err)
 		}
 
 		log.Infof("mounting S3 volume %s to %s", volumeIdPrefixed, nodeVolumeMountPath)
