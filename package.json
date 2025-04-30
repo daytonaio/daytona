@@ -26,7 +26,7 @@
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/cache-manager": "^3.0.0",
-    "@nestjs/common": "^11.0.8",
+    "@nestjs/common": "^11.0.20",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.8",
     "@nestjs/event-emitter": "^3.0.1",
