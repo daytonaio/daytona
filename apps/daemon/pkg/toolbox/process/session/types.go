@@ -19,6 +19,7 @@ type CreateSessionRequest struct {
 type SessionExecuteRequest struct {
 	Command  string `json:"command" validate:"required"`
 	RunAsync bool   `json:"runAsync" validate:"optional"`
+	Async    bool   `json:"async" validate:"optional"`
 } // @name SessionExecuteRequest
 
 type SessionExecuteResponse struct {
