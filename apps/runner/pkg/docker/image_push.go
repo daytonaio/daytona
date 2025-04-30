@@ -5,7 +5,9 @@ package docker
 
 import (
 	"context"
+	"io"
 
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 
 	"github.com/docker/docker/api/types/image"
@@ -25,7 +27,7 @@ func (d *DockerClient) PushImage(ctx context.Context, imageName string, reg *dto
 	}
 	defer responseBody.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(responseBody, d.logWriter, 0, true, nil)
+	err = jsonmessage.DisplayJSONMessagesStream(responseBody, io.Writer(&util.DebugLogWriter{}), 0, true, nil)
 	if err != nil {
 		return err
 	}
