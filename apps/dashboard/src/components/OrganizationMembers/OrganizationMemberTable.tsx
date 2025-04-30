@@ -23,6 +23,7 @@ import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers
 import { UpdateOrganizationMemberRoleDialog } from '@/components/OrganizationMembers/UpdateOrganizationMemberRoleDialog'
 import { UpdateAssignedOrganizationRolesDialog } from '@/components/OrganizationMembers/UpdateAssignedOrganizationRolesDialog.tsx'
 import { capitalize } from '@/lib/utils'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: OrganizationUser[]
@@ -79,6 +80,11 @@ export function OrganizationMemberTable({
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
     },
   })
 

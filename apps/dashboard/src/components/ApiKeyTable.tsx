@@ -29,6 +29,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
 import { Loader2 } from 'lucide-react'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -49,6 +50,11 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
     },
   })
 
