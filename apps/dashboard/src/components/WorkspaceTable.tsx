@@ -340,22 +340,31 @@ const getColumns = ({
   const columns: ColumnDef<Workspace>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingWorkspaces[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
+      header: ({ table }) => {
+        const allRows = table.getFilteredRowModel().rows
+        const isAllSelected = table.getIsAllRowsSelected()
+
+        return (
+          <Checkbox
+            checked={isAllSelected}
+            onCheckedChange={(value) => {
+              if (value && allRows.length > 10) {
+                const confirmed = window.confirm(`Select ALL ${allRows.length} Sandboxes?`)
+                if (!confirmed) return
               }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
+              for (const row of allRows) {
+                if (loadingWorkspaces[row.original.id]) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(!!value)
+                }
+              }
+            }}
+            aria-label="Select all"
+            className="translate-y-[2px]"
+          />
+        )
+      },
       cell: ({ row }) => {
         if (loadingWorkspaces[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
