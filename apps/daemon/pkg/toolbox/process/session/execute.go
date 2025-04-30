@@ -38,6 +38,10 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 			return
 		}
 
+		if request.Async {
+			request.RunAsync = true
+		}
+
 		// Validate command is not empty (if not already handled by binding)
 		if strings.TrimSpace(request.Command) == "" {
 			c.AbortWithError(http.StatusBadRequest, errors.New("command cannot be empty"))
