@@ -46,7 +46,7 @@ func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId str
 func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, sandboxId string) error {
 	info := s.GetSandboxStatesInfo(ctx, sandboxId)
 
-	if info != nil && info.SandboxState != enums.SandboxStateDestroyed {
+	if info != nil && info.SandboxState != enums.SandboxStateDestroyed && info.SandboxState != enums.SandboxStateDestroying {
 		err := s.docker.Destroy(ctx, sandboxId)
 		if err != nil {
 			return err
