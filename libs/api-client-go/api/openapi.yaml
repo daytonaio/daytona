@@ -1307,44 +1307,6 @@ paths:
       summary: Update public status
       tags:
         - workspace
-  /workspace/{workspaceId}/resize:
-    post:
-      operationId: resizeWorkspace
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-        - description: ID of the workspace
-          explode: false
-          in: path
-          name: workspaceId
-          required: true
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ResizeQuota'
-        required: true
-      responses:
-        '201':
-          description: ''
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Resize workspace
-      tags:
-        - workspace
   /workspace/{workspaceId}/autostop/{interval}:
     post:
       operationId: setAutostopInterval
@@ -4739,7 +4701,6 @@ components:
         - stopped
         - starting
         - stopping
-        - resizing
         - error
         - pending_build
         - building_image
@@ -5033,9 +4994,6 @@ components:
           type: object
       required:
         - labels
-      type: object
-    ResizeQuota:
-      properties: {}
       type: object
     PortPreviewUrl:
       example:

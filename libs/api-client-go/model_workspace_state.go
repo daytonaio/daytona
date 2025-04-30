@@ -29,7 +29,6 @@ const (
 	WORKSPACESTATE_STOPPED        WorkspaceState = "stopped"
 	WORKSPACESTATE_STARTING       WorkspaceState = "starting"
 	WORKSPACESTATE_STOPPING       WorkspaceState = "stopping"
-	WORKSPACESTATE_RESIZING       WorkspaceState = "resizing"
 	WORKSPACESTATE_ERROR          WorkspaceState = "error"
 	WORKSPACESTATE_PENDING_BUILD  WorkspaceState = "pending_build"
 	WORKSPACESTATE_BUILDING_IMAGE WorkspaceState = "building_image"
@@ -49,7 +48,6 @@ var AllowedWorkspaceStateEnumValues = []WorkspaceState{
 	"stopped",
 	"starting",
 	"stopping",
-	"resizing",
 	"error",
 	"pending_build",
 	"building_image",

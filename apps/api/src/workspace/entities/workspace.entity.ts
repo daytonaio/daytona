@@ -181,6 +181,63 @@ export class Workspace {
   }
 
   @BeforeUpdate()
+  validateDesiredState() {
+    switch (this.desiredState) {
+      case WorkspaceDesiredState.STARTED:
+        if (
+          [
+            WorkspaceState.STARTED,
+            WorkspaceState.STOPPED,
+            WorkspaceState.STARTING,
+            WorkspaceState.ARCHIVED,
+            WorkspaceState.CREATING,
+            WorkspaceState.UNKNOWN,
+            WorkspaceState.RESTORING,
+            WorkspaceState.PENDING_BUILD,
+            WorkspaceState.BUILDING_IMAGE,
+            WorkspaceState.PULLING_IMAGE,
+            WorkspaceState.ERROR,
+          ].includes(this.state)
+        ) {
+          break
+        }
+        throw new Error(`Workspace ${this.id} is not in a valid state to be started. State: ${this.state}`)
+      case WorkspaceDesiredState.STOPPED:
+        if (
+          [WorkspaceState.STARTED, WorkspaceState.STOPPING, WorkspaceState.STOPPED, WorkspaceState.ERROR].includes(
+            this.state,
+          )
+        ) {
+          break
+        }
+        throw new Error(`Workspace ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
+      case WorkspaceDesiredState.ARCHIVED:
+        if (
+          [WorkspaceState.ARCHIVED, WorkspaceState.ARCHIVING, WorkspaceState.STOPPED, WorkspaceState.ERROR].includes(
+            this.state,
+          )
+        ) {
+          break
+        }
+        throw new Error(`Workspace ${this.id} is not in a valid state to be archived. State: ${this.state}`)
+      case WorkspaceDesiredState.DESTROYED:
+        if (
+          [
+            WorkspaceState.DESTROYED,
+            WorkspaceState.DESTROYING,
+            WorkspaceState.STOPPED,
+            WorkspaceState.STARTED,
+            WorkspaceState.ARCHIVED,
+            WorkspaceState.ERROR,
+          ].includes(this.state)
+        ) {
+          break
+        }
+        throw new Error(`Workspace ${this.id} is not in a valid state to be destroyed. State: ${this.state}`)
+    }
+  }
+
+  @BeforeUpdate()
   updatePendingFlag() {
     if (String(this.state) === String(this.desiredState)) {
       this.pending = false

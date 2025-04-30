@@ -27,7 +27,6 @@ export const WorkspaceState = {
   STOPPED: 'stopped',
   STARTING: 'starting',
   STOPPING: 'stopping',
-  RESIZING: 'resizing',
   ERROR: 'error',
   PENDING_BUILD: 'pending_build',
   BUILDING_IMAGE: 'building_image',
