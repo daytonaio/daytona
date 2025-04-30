@@ -87,7 +87,7 @@ func (a *ApiServer) Start() error {
 	public.GET("", controllers.HealthCheck)
 	public.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	if config.GetNodeEnv() != "production" {
+	if config.GetNodeEnv() == "development" {
 		public.GET("/api/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
