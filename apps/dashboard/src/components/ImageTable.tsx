@@ -67,6 +67,11 @@ export function ImageTable({ data, loading, loadingImages, onDelete, onToggleEna
       sorting,
     },
     getRowId: (row) => row.id,
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   })
 
   return (

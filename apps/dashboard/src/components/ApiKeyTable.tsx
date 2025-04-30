@@ -50,6 +50,11 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
     state: {
       sorting,
     },
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   })
 
   return (

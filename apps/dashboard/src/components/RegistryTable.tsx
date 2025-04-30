@@ -61,6 +61,11 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     state: {
       sorting,
     },
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   })
 
   return (
