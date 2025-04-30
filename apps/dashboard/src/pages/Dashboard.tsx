@@ -11,10 +11,12 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
+import { useDashboardStore } from '@/components/dashboardStore'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const { sortingStates, updateSortingState } = useDashboardStore()
 
   useEffect(() => {
     if (
@@ -31,7 +33,7 @@ const Dashboard: React.FC = () => {
         <Sidebar />
         <SidebarTrigger className="md:hidden" />
         <div className="w-full">
-          <Outlet />
+          <Outlet context={{ sortingStates, updateSortingState }} />
         </div>
         <Toaster />
         <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
