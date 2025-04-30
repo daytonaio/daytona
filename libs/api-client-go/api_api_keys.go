@@ -60,6 +60,18 @@ type ApiKeysAPI interface {
 	GetApiKeyExecute(r ApiKeysAPIGetApiKeyRequest) (*ApiKeyList, *http.Response, error)
 
 	/*
+		GetCurrentApiKey Get current API key's details
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiKeysAPIGetCurrentApiKeyRequest
+	*/
+	GetCurrentApiKey(ctx context.Context) ApiKeysAPIGetCurrentApiKeyRequest
+
+	// GetCurrentApiKeyExecute executes the request
+	//  @return ApiKeyList
+	GetCurrentApiKeyExecute(r ApiKeysAPIGetCurrentApiKeyRequest) (*ApiKeyList, *http.Response, error)
+
+	/*
 		ListApiKeys List API keys
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -344,6 +356,114 @@ func (a *ApiKeysAPIService) GetApiKeyExecute(r ApiKeysAPIGetApiKeyRequest) (*Api
 
 	localVarPath := localBasePath + "/api-keys/{name}"
 	localVarPath = strings.Replace(localVarPath, "{"+"name"+"}", url.PathEscape(parameterValueToString(r.name, "name")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiKeysAPIGetCurrentApiKeyRequest struct {
+	ctx                    context.Context
+	ApiService             ApiKeysAPI
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ApiKeysAPIGetCurrentApiKeyRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ApiKeysAPIGetCurrentApiKeyRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ApiKeysAPIGetCurrentApiKeyRequest) Execute() (*ApiKeyList, *http.Response, error) {
+	return r.ApiService.GetCurrentApiKeyExecute(r)
+}
+
+/*
+GetCurrentApiKey Get current API key's details
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiKeysAPIGetCurrentApiKeyRequest
+*/
+func (a *ApiKeysAPIService) GetCurrentApiKey(ctx context.Context) ApiKeysAPIGetCurrentApiKeyRequest {
+	return ApiKeysAPIGetCurrentApiKeyRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return ApiKeyList
+func (a *ApiKeysAPIService) GetCurrentApiKeyExecute(r ApiKeysAPIGetCurrentApiKeyRequest) (*ApiKeyList, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ApiKeyList
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ApiKeysAPIService.GetCurrentApiKey")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api-keys/current"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
