@@ -8,6 +8,7 @@ import { Tabs, TabsList, TabsTrigger } from './ui/tabs'
 import pythonIcon from '../assets/python.svg'
 import typescriptIcon from '../assets/typescript.svg'
 import CodeBlock from './CodeBlock'
+import { RoutePath } from '@/enums/RoutePath'
 
 const GettingStarted: React.FC = () => {
   const [language, setLanguage] = useState<'typescript' | 'python'>('python')
@@ -76,7 +77,7 @@ const GettingStarted: React.FC = () => {
               <h2 className="text-xl font-semibold mb-4">That's it</h2>
               <p className="text-muted-foreground">
                 It's as easy as that. For more examples check out the{' '}
-                <a href="https://daytona.io/docs" target="_blank" rel="noopener noreferrer" className="text-primary">
+                <a href={RoutePath.DaytonaDocs} target="_blank" rel="noopener noreferrer" className="text-primary">
                   Docs
                 </a>
                 .
