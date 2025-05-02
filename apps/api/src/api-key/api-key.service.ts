@@ -112,7 +112,7 @@ export class ApiKeyService {
     })
 
     if (!apiKey) {
-      throw new NotFoundException('API key not found')
+      throw new NotFoundException('401 Unauthorized')
     }
 
     const organizationUser = await this.organizationUserService.findOne(apiKey.organizationId, apiKey.userId)
@@ -128,7 +128,7 @@ export class ApiKeyService {
     const apiKey = await this.apiKeyRepository.findOne({ where: { organizationId, userId, name } })
 
     if (!apiKey) {
-      throw new NotFoundException('API key not found')
+      throw new NotFoundException('401 Unauthorized')
     }
 
     await this.apiKeyRepository.remove(apiKey)
