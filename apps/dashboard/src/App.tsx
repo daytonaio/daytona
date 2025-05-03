@@ -29,6 +29,7 @@ import { NotificationSocketProvider } from '@/providers/NotificationSocketProvid
 import { ApiProvider } from './providers/ApiProvider'
 import LandingPage from './pages/LandingPage'
 import Logout from './pages/Logout'
+import { Routing } from './enums/Routing'
 
 // Docs redirect component
 const DocsRedirect = () => {
@@ -91,10 +92,10 @@ function App() {
         </DialogContent>
       </Dialog>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/logout" element={<Logout />} />
+        <Route path={Routing.LandingPage} element={<LandingPage />} />
+        <Route path={Routing.Logout} element={<Logout />} />
         <Route
-          path="/dashboard"
+          path={Routing.Dashboard}
           element={
             <Suspense fallback={<LoadingFallback />}>
               <ApiProvider>
@@ -111,15 +112,15 @@ function App() {
             </Suspense>
           }
         >
-          <Route index element={<Navigate to="sandboxes" replace />} />
-          <Route path="keys" element={<Keys />} />
-          <Route path="sandboxes" element={<Workspaces />} />
-          <Route path="images" element={<Images />} />
-          <Route path="registries" element={<Registries />} />
-          <Route path="usage" element={<Usage />} />
+          <Route index element={<Navigate to={Routing.Sandboxes} replace />} />
+          <Route path={Routing.Keys} element={<Keys />} />
+          <Route path={Routing.Workspaces} element={<Workspaces />} />
+          <Route path={Routing.Images} element={<Images />} />
+          <Route path={Routing.Registries} element={<Registries />} />
+          <Route path={Routing.Usage} element={<Usage />} />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
-              path="billing"
+              path={Routing.Billing}
               element={
                 <OwnerAccessOrganizationPageWrapper>
                   <Billing />
@@ -128,7 +129,7 @@ function App() {
             />
           )}
           <Route
-            path="members"
+            path={Routing.Organizations}
             element={
               <NonPersonalOrganizationPageWrapper>
                 <OrganizationMembers />
@@ -148,10 +149,10 @@ function App() {
             }
           /> */
           }
-          <Route path="settings" element={<OrganizationSettings />} />
-          <Route path="user/invitations" element={<UserOrganizationInvitations />} />
+          <Route path={Routing.Settings} element={<OrganizationSettings />} />
+          <Route path={Routing.UserOrganizationInvitations} element={<UserOrganizationInvitations />} />
         </Route>
-        <Route path="/docs" element={<DocsRedirect />} />
+        <Route path={Routing.DocsRedirect} element={<DocsRedirect />} />
         {/* Add other routes as needed */}
       </Routes>
     </ThemeProvider>
@@ -162,7 +163,7 @@ function NonPersonalOrganizationPageWrapper({ children }: { children: React.Reac
   const { selectedOrganization } = useSelectedOrganization()
 
   if (selectedOrganization?.personal) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={Routing.Dashboard} replace />
   }
 
   return <>{children}</>
@@ -172,7 +173,7 @@ function OwnerAccessOrganizationPageWrapper({ children }: { children: React.Reac
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   if (authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={Routing.Dashboard} replace />
   }
 
   return <>{children}</>

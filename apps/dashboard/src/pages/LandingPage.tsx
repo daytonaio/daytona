@@ -7,6 +7,7 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
+import { Routing } from '../enums/Routing'
 
 const LandingPage: React.FC = () => {
   const { signinRedirect, isAuthenticated, isLoading } = useAuth()
@@ -16,7 +17,7 @@ const LandingPage: React.FC = () => {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={Routing.Dashboard} replace />
   } else {
     void signinRedirect({
       state: {

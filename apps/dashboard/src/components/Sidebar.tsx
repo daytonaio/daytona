@@ -50,6 +50,7 @@ import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { addHours, formatRelative } from 'date-fns'
+import { Routing } from '../enums/Routing'
 
 export function Sidebar() {
   const { theme, setTheme } = useTheme()
@@ -180,7 +181,7 @@ export function Sidebar() {
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
               <a
-                href="https://go.daytona.io/slack"
+                href={Routing.DaytonaSlack}
                 className="text-xs h-8 py-0"
                 target="_blank"
                 rel="noopener noreferrer"
