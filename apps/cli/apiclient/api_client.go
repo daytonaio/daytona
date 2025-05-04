@@ -7,9 +7,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/auth"
-	"github.com/daytonaio/daytona-ai-saas/cli/config"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/auth"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 var apiClient *daytonaapiclient.APIClient

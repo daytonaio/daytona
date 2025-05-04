@@ -10,9 +10,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	"github.com/daytonaio/daytona-ai-saas/cli/pkg/minio"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/pkg/minio"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 // Create MinIO client from access parameters

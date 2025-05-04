@@ -10,7 +10,7 @@ import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
+	"github.com/daytonaio/daytona/cli/views/common"
 	log "github.com/sirupsen/logrus"
 )
 
