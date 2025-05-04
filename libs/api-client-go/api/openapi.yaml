@@ -1450,6 +1450,38 @@ paths:
       summary: Get preview URL for a workspace port
       tags:
         - workspace
+  /workspace/{workspaceId}/build-logs:
+    get:
+      operationId: getBuildLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Build logs stream
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get build logs
+      tags:
+        - workspace
   /nodes:
     get:
       operationId: listNodes
@@ -3361,6 +3393,38 @@ paths:
             - profile
             - email
       summary: Set image general status
+      tags:
+        - images
+  /images/{id}/build-logs:
+    get:
+      operationId: getImageBuildLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get image build logs
       tags:
         - images
   /preview/{workspaceId}/public:
@@ -6167,9 +6231,9 @@ components:
     StorageAccessDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
+        bucket: daytona
         accessKey: temp-user-123
         sessionToken: eyJhbGciOiJIUzI1NiIs...
-        registryId: 123e4567-e89b-12d3-a456-426614174000
         secret: abchbGciOiJIUzI1NiIs...
         storageUrl: storage.example.com
       properties:
@@ -6189,18 +6253,18 @@ components:
           description: Storage URL
           example: storage.example.com
           type: string
-        registryId:
-          description: Registry ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
         organizationId:
           description: Organization ID
           example: 123e4567-e89b-12d3-a456-426614174000
           type: string
+        bucket:
+          description: S3 bucket name
+          example: daytona
+          type: string
       required:
         - accessKey
+        - bucket
         - organizationId
-        - registryId
         - secret
         - sessionToken
         - storageUrl

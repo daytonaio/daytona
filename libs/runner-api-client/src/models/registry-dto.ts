@@ -29,6 +29,12 @@ export interface RegistryDTO {
    * @type {string}
    * @memberof RegistryDTO
    */
+  project?: string
+  /**
+   *
+   * @type {string}
+   * @memberof RegistryDTO
+   */
   url: string
   /**
    *

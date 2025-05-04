@@ -15,8 +15,18 @@ import {
   UseGuards,
   HttpCode,
   ForbiddenException,
+  Logger,
+  NotFoundException,
+  Res,
+  Request,
+  RawBodyRequest,
+  Next,
 } from '@nestjs/common'
+import { IncomingMessage, ServerResponse } from 'http'
+import { NextFunction } from 'express'
 import { ImageService } from '../services/image.service'
+import { NodeService } from '../services/node.service'
+import { ProxyService } from '../../common/services/proxy.service'
 import {
   ApiOAuth2,
   ApiTags,
@@ -52,7 +62,13 @@ import { BuildImageDto } from '../dto/build-image.dto'
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class ImageController {
-  constructor(private readonly imageService: ImageService) {}
+  private readonly logger = new Logger(ImageController.name)
+
+  constructor(
+    private readonly imageService: ImageService,
+    private readonly nodeService: NodeService,
+    private readonly proxyService: ProxyService,
+  ) {}
 
   @Post()
   @HttpCode(200)
@@ -234,5 +250,55 @@ export class ImageController {
   async setImageGeneralStatus(@Param('id') imageId: string, @Body() dto: SetImageGeneralStatusDto): Promise<ImageDto> {
     const image = await this.imageService.setImageGeneralStatus(imageId, dto.general)
     return ImageDto.fromImage(image)
+  }
+
+  @Get(':id/build-logs')
+  @ApiOperation({
+    summary: 'Get image build logs',
+    operationId: 'getImageBuildLogs',
+  })
+  @ApiParam({
+    name: 'id',
+    description: 'Image ID',
+  })
+  @UseGuards(ImageAccessGuard)
+  async getImageBuildLogs(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+    @Param('id') imageId: string,
+  ): Promise<void> {
+    let image = await this.imageService.getImage(imageId)
+
+    // Check if the image has build info
+    if (!image.buildInfo) {
+      throw new NotFoundException(`Image with ID ${imageId} has no build info`)
+    }
+
+    // Retry until a node is assigned or timeout after 30 seconds
+    const startTime = Date.now()
+    const timeoutMs = 30 * 1000
+
+    while (!image.buildNodeId) {
+      if (Date.now() - startTime > timeoutMs) {
+        throw new NotFoundException(`Timeout waiting for build node assignment for image ${imageId}`)
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      image = await this.imageService.getImage(imageId)
+    }
+
+    const node = await this.nodeService.findOne(image.buildNodeId)
+    if (!node) {
+      throw new NotFoundException(`Build node for image ${imageId} not found`)
+    }
+
+    return this.proxyService.createLogProxy({
+      targetUrl: node.apiUrl,
+      imageRef: image.id,
+      authToken: node.apiKey,
+      req,
+      res,
+      next,
+    })
   }
 }

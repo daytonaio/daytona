@@ -521,6 +521,10 @@ export class ImageManager {
         return
       }
 
+      // Assign the node ID to the image for tracking build progress
+      image.buildNodeId = node.id
+      await this.imageRepository.save(image)
+
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
       const nodeImageApi = this.nodeApiFactory.createImageApi(node)
@@ -532,6 +536,7 @@ export class ImageManager {
         image: imageIdWithTag, // Name doesn't matter for runner, it uses the image ID when pushing to internal registry
         registry: {
           url: registry.url,
+          project: registry.project,
           username: registry.username,
           password: registry.password,
         },
