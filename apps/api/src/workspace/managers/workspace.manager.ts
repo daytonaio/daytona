@@ -335,11 +335,6 @@ export class WorkspaceManager {
     })
     switch (workspace.state) {
       case WorkspaceState.STOPPED: {
-        if (workspace.snapshotState === SnapshotState.COMPLETED) {
-          await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVED)
-          break
-        }
-
         await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVING)
         //  fallthrough to archiving state
       }
