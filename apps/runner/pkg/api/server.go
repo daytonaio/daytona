@@ -116,6 +116,7 @@ func (a *ApiServer) Start() error {
 		imageController.POST("/build", controllers.BuildImage)
 		imageController.GET("/exists", controllers.ImageExists)
 		imageController.POST("/remove", controllers.RemoveImage)
+		imageController.GET("/logs", controllers.GetBuildLogs)
 	}
 
 	a.httpServer = &http.Server{

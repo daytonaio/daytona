@@ -155,6 +155,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/images/logs": {
+            "get": {
+                "description": "Stream build logs via websocket",
+                "tags": [
+                    "images"
+                ],
+                "summary": "Get build logs",
+                "operationId": "GetBuildLogs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Image ID or image ref without the tag",
+                        "name": "imageRef",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Build logs stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/images/pull": {
             "post": {
                 "description": "Pull a Docker image from a registry",
@@ -1023,6 +1074,9 @@ const docTemplate = `{
             ],
             "properties": {
                 "password": {
+                    "type": "string"
+                },
+                "project": {
                     "type": "string"
                 },
                 "url": {

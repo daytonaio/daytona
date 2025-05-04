@@ -7,13 +7,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"strings"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/util"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
-	"github.com/daytonaio/daytona/cli/views/util"
 	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
@@ -115,17 +115,37 @@ var CreateCmd = &cobra.Command{
 
 		var workspace *daytonaapiclient.Workspace
 
-		err = util.WithInlineSpinner("Creating Sandbox", func() error {
-			var res *http.Response
-			var err error
-			workspace, res, err = apiClient.WorkspaceAPI.CreateWorkspace(ctx).CreateWorkspace(*createWorkspace).Execute()
-			if err != nil {
-				return apiclient.HandleErrorResponse(res, err)
-			}
-			return nil
-		})
+		workspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).CreateWorkspace(*createWorkspace).Execute()
 		if err != nil {
-			return err
+			return apiclient.HandleErrorResponse(res, err)
+		}
+
+		if workspace.State != nil && *workspace.State == daytonaapiclient.WORKSPACESTATE_PENDING_BUILD {
+			c, err := config.GetConfig()
+			if err != nil {
+				return err
+			}
+
+			activeProfile, err := c.GetActiveProfile()
+			if err != nil {
+				return err
+			}
+
+			logsContext, stopLogs := context.WithCancel(context.Background())
+			defer stopLogs()
+
+			go common.ReadBuildLogs(logsContext, common.ReadLogParams{
+				Id:           workspace.Id,
+				ServerUrl:    activeProfile.Api.Url,
+				ServerApi:    activeProfile.Api,
+				Follow:       util.Pointer(true),
+				ResourceType: common.ResourceTypeWorkspace,
+			})
+
+			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_STARTED)
+			if err != nil {
+				return err
+			}
 		}
 
 		var nodeDomain string
@@ -170,7 +190,7 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
 	CreateCmd.Flags().BoolVar(&publicFlag, "public", false, "Make sandbox publicly accessible")
 	CreateCmd.Flags().StringVar(&classFlag, "class", "", "Workspace class type (small, medium, large)")
-	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us, asia)")
+	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us)")
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&gpuFlag, "gpu", 0, "GPU units allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory allocated to the sandbox in MB")
