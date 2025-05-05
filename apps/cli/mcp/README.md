@@ -84,7 +84,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
 - `create_sandbox`: Create a new sandbox with Daytona
 
   - Parameters:
-    - `id` (optional): Sandbox ID - if provided, an existing container will be used, new one will be created otherwise
+    - `id` (optional): Sandbox ID - if provided, an existing sandbox will be used, new one will be created otherwise
     - `target` (default: "us"): Target region of the sandbox
     - `image`: Image of the sandbox (optional)
     - `auto_stop_interval` (default: "15"): Auto-stop interval in minutes (0 means disabled)
