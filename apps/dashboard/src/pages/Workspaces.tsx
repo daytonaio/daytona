@@ -24,6 +24,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNavigate } from 'react-router-dom'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { handleApiError } from '@/lib/error-handling'
+import { RoutePath } from '@/enums/RoutePath'
 
 const Workspaces: React.FC = () => {
   const { workspaceApi } = useApi()
@@ -105,7 +106,7 @@ const Workspaces: React.FC = () => {
         error instanceof OrganizationSuspendedError &&
           import.meta.env.VITE_BILLING_API_URL &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
-          <Button variant="secondary" onClick={() => navigate('/dashboard/billing')}>
+          <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING)}>
             Go to billing
           </Button>
         ) : undefined,
