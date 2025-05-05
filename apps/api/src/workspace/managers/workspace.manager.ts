@@ -125,6 +125,9 @@ export class WorkspaceManager {
         desiredState: Raw(() => '"Workspace"."desiredState"::text != "Workspace"."state"::text'),
       },
       take: 100,
+      order: {
+        lastActivityAt: 'DESC',
+      },
     })
 
     await Promise.all(
