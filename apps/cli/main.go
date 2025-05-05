@@ -8,14 +8,14 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/auth"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/image"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/mcp"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/organization"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/sandbox"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/volume"
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
+	"github.com/daytonaio/daytona/cli/cmd"
+	"github.com/daytonaio/daytona/cli/cmd/auth"
+	"github.com/daytonaio/daytona/cli/cmd/image"
+	"github.com/daytonaio/daytona/cli/cmd/mcp"
+	"github.com/daytonaio/daytona/cli/cmd/organization"
+	"github.com/daytonaio/daytona/cli/cmd/sandbox"
+	"github.com/daytonaio/daytona/cli/cmd/volume"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
