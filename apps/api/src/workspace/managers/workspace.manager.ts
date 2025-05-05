@@ -333,6 +333,21 @@ export class WorkspaceManager {
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
     })
+
+    const inProgressOnNode = await this.workspaceRepository.count({
+      where: {
+        nodeId: workspace.nodeId,
+        state: In([WorkspaceState.ARCHIVING]),
+        id: Not(workspaceId),
+      },
+    })
+
+    //  max 3 workspaces can be archived at the same time on the same node
+    //  this is to prevent the node from being overloaded
+    if (inProgressOnNode > 2) {
+      return
+    }
+
     switch (workspace.state) {
       case WorkspaceState.STOPPED: {
         await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVING)
