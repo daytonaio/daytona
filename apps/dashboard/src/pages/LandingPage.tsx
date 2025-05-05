@@ -7,7 +7,6 @@ import React from 'react'
 import { Navigate } from 'react-router-dom'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
-import { usePostHog } from 'posthog-js/react'
 import { RoutePath } from '@/enums/RoutePath'
 
 const LandingPage: React.FC = () => {
