@@ -82,7 +82,16 @@ export function WorkspaceTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useState<SortingState>([
+    {
+      id: 'state',
+      desc: false,
+    },
+    {
+      id: 'lastEvent',
+      desc: true,
+    },
+  ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
@@ -448,6 +457,34 @@ const getColumns = ({
         )
       },
       accessorKey: 'state',
+      sortingFn: (rowA, rowB) => {
+        const statePriorityOrder = {
+          [WorkspaceState.STARTED]: 1,
+          [WorkspaceState.BUILDING_IMAGE]: 2,
+          [WorkspaceState.PENDING_BUILD]: 2,
+          [WorkspaceState.RESTORING]: 3,
+          [WorkspaceState.ERROR]: 4,
+          [WorkspaceState.STOPPED]: 5,
+          [WorkspaceState.ARCHIVING]: 6,
+          [WorkspaceState.ARCHIVED]: 6,
+          [WorkspaceState.CREATING]: 7,
+          [WorkspaceState.STARTING]: 7,
+          [WorkspaceState.STOPPING]: 7,
+          [WorkspaceState.DESTROYING]: 7,
+          [WorkspaceState.DESTROYED]: 7,
+          [WorkspaceState.PULLING_IMAGE]: 7,
+          [WorkspaceState.UNKNOWN]: 7,
+        }
+
+        const stateA = rowA.original.state || WorkspaceState.UNKNOWN
+        const stateB = rowB.original.state || WorkspaceState.UNKNOWN
+
+        if (stateA === stateB) {
+          return 0
+        }
+
+        return statePriorityOrder[stateA] - statePriorityOrder[stateB]
+      },
       filterFn: (row, id, value) => {
         return value.includes(row.getValue(id))
       },
