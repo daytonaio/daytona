@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 func AwaitImageActive(ctx context.Context, apiClient *daytonaapiclient.APIClient, targetImage string) error {
