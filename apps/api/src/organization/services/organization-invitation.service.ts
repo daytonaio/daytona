@@ -68,6 +68,7 @@ export class OrganizationInvitationService {
         organizationId,
         email: createOrganizationInvitationDto.email,
         status: OrganizationInvitationStatus.PENDING,
+        expiresAt: MoreThan(new Date()),
       },
     })
     if (existingInvitation) {
@@ -146,7 +147,11 @@ export class OrganizationInvitationService {
 
   async findPending(organizationId: string): Promise<OrganizationInvitation[]> {
     return this.organizationInvitationRepository.find({
-      where: { organizationId, status: OrganizationInvitationStatus.PENDING },
+      where: {
+        organizationId,
+        status: OrganizationInvitationStatus.PENDING,
+        expiresAt: MoreThan(new Date()),
+      },
       relations: {
         organization: true,
         assignedRoles: true,
