@@ -83,7 +83,9 @@ services:
       - MINIO_IDENTITY_STS_EXPIRY="24h"
     volumes:
       - minio_data:/data
-    command: server /data --console-address ":9001"
+      - ./minio/init.sh:/usr/bin/init.sh
+      - ./minio/lifecycle:/etc/minio/lifecycle
+    entrypoint: ['/bin/sh', '-c', '/usr/bin/init.sh']
     container_name: minio
 
 volumes:

@@ -1,0 +1,14 @@
+{
+  "Rules": [
+    {
+      "ID": "expire-old-objects",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": ""
+      },
+      "Expiration": {
+        "Days": 7
+      }
+    }
+  ]
+}
