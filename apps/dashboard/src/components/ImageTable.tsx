@@ -260,11 +260,11 @@ const getColumns = ({
 const getStateIcon = (state: ImageState) => {
   switch (state) {
     case ImageState.ACTIVE:
-      return <CheckCircle className="w-4 h-4" />
+      return <CheckCircle className="w-4 h-4 flex-shrink-0" />
     case ImageState.ERROR:
-      return <AlertTriangle className="w-4 h-4" />
+      return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
     default:
-      return <Timer className="w-4 h-4" />
+      return <Timer className="w-4 h-4 flex-shrink-0" />
   }
 }
 
