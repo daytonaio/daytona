@@ -84,6 +84,11 @@ export function WorkspaceTable({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [columnVisibility, setColumnVisibility] = useState({})
+  const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
+  const [selectAllPromptOpen, setSelectAllPromptOpen] = useState(false)
+  const totalSandboxes = data.length
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -103,11 +108,16 @@ export function WorkspaceTable({
     loadingWorkspaces,
     writePermitted,
     deletePermitted,
+    totalSandboxes,
+    selectAllPromptOpen,
+    setSelectAllPromptOpen,
   })
+
   const table = useReactTable({
     data,
     columns,
     onColumnFiltersChange: setColumnFilters,
+    onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
@@ -115,14 +125,16 @@ export function WorkspaceTable({
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
+      columnVisibility,
+      rowSelection,
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
   })
-  const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 
   return (
     <div>
@@ -203,18 +215,29 @@ export function WorkspaceTable({
                 </PopoverTrigger>
                 <PopoverContent side="top">
                   <div className="flex flex-col gap-4">
-                    <p>Are you sure you want to delete these workspaces?</p>
+                    {(() => {
+                      const selectedCount = table.getRowModel().rows.filter((row) => row.getIsSelected()).length
+                      return (
+                        <p>
+                          Are you sure you want to delete {selectedCount} selected sandbox
+                          {selectedCount !== 1 ? 'es' : ''}?
+                        </p>
+                      )
+                    })()}
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
+                          const selectedIds = table
+                            .getRowModel()
+                            .rows.filter((row) => row.getIsSelected())
+                            .map((row) => row.original.id)
+
+                          handleBulkDelete(selectedIds)
                           setBulkDeleteConfirmationOpen(false)
+
+                          // Deselect all rows after deletion
+                          table.toggleAllRowsSelected(false)
                         }}
                       >
                         Delete
@@ -328,6 +351,9 @@ const getColumns = ({
   loadingWorkspaces,
   writePermitted,
   deletePermitted,
+  totalSandboxes,
+  selectAllPromptOpen,
+  setSelectAllPromptOpen,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -336,25 +362,83 @@ const getColumns = ({
   loadingWorkspaces: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  totalSandboxes: number
+  selectAllPromptOpen: boolean
+  setSelectAllPromptOpen: React.Dispatch<React.SetStateAction<boolean>>
 }): ColumnDef<Workspace>[] => {
   const columns: ColumnDef<Workspace>[] = [
     {
       id: 'select',
       header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingWorkspaces[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Popover open={selectAllPromptOpen && totalSandboxes > 15} onOpenChange={setSelectAllPromptOpen}>
+                  <PopoverTrigger asChild>
+                    <Checkbox
+                      checked={
+                        table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+                      }
+                      onCheckedChange={(value) => {
+                        if (value && totalSandboxes > 15) {
+                          setSelectAllPromptOpen(true)
+                        } else {
+                          // Toggle selection for all rows that are not loading
+                          for (const row of table.getRowModel().rows) {
+                            if (loadingWorkspaces[row.original.id]) {
+                              row.toggleSelected(false)
+                            } else {
+                              row.toggleSelected(!!value)
+                            }
+                          }
+                        }
+                      }}
+                      aria-label="Select all"
+                      className="translate-y-[2px]"
+                    />
+                  </PopoverTrigger>
+                  <PopoverContent side="right" className="w-auto">
+                    <div className="flex flex-col gap-4">
+                      <p>Select ALL {totalSandboxes} Sandboxes?</p>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="default"
+                          onClick={() => {
+                            // Select all rows in the table that are not loading
+                            for (const row of table.getRowModel().rows) {
+                              if (!loadingWorkspaces[row.original.id]) {
+                                row.toggleSelected(true)
+                              }
+                            }
+                            setSelectAllPromptOpen(false)
+                          }}
+                        >
+                          Yes
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setSelectAllPromptOpen(false)
+                            // Ensure the checkbox is unchecked
+                            for (const row of table.getRowModel().rows) {
+                              row.toggleSelected(false)
+                            }
+                          }}
+                        >
+                          No
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Select all sandboxes</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       ),
       cell: ({ row }) => {
         if (loadingWorkspaces[row.original.id]) {

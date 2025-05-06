@@ -143,26 +143,55 @@ const Workspaces: React.FC = () => {
   }
 
   const handleBulkDelete = async (ids: string[]) => {
+    if (ids.length === 0) return
+
+    // Mark all selected sandboxes as loading
     setLoadingWorkspaces((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+
+    // Show a toast notification for bulk deletion
+    toast.info(`Deleting ${ids.length} sandbox${ids.length > 1 ? 'es' : ''}...`)
+
+    let successCount = 0
+    let failureCount = 0
 
     for (const id of ids) {
       try {
         await workspaceApi.deleteWorkspace(id, true, selectedOrganization?.id)
-        toast.success(`Deleting sandbox with ID: ${id}`)
+        successCount++
+
+        // Update workspaces state to remove the deleted sandbox
+        setWorkspaces((prev) => prev.filter((w) => w.id !== id))
       } catch (error) {
-        handleApiError(error, 'Failed to delete sandbox')
+        failureCount++
+        handleApiError(error, `Failed to delete sandbox with ID: ${id}`)
 
-        // Wait for user decision
-        const shouldContinue = window.confirm(
-          `Failed to delete sandbox with ID: ${id}. Do you want to continue with the remaining sandboxes?`,
-        )
+        // If more than 3 failures, ask if user wants to continue
+        if (failureCount > 3) {
+          const remainingCount = ids.length - (successCount + failureCount)
+          if (remainingCount > 0) {
+            const shouldContinue = window.confirm(
+              `Failed to delete ${failureCount} sandbox${failureCount > 1 ? 'es' : ''}. Do you want to continue with the remaining ${remainingCount} sandbox${remainingCount > 1 ? 'es' : ''}?`,
+            )
 
-        if (!shouldContinue) {
-          break
+            if (!shouldContinue) {
+              break
+            }
+          }
         }
       } finally {
-        setLoadingWorkspaces((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: false }), {}) }))
+        // Mark this sandbox as not loading anymore
+        setLoadingWorkspaces((prev) => ({ ...prev, [id]: false }))
       }
+    }
+
+    // Show final result toast
+    if (successCount > 0) {
+      toast.success(`Successfully deleted ${successCount} sandbox${successCount > 1 ? 'es' : ''}`)
+    }
+
+    // If there were failures but we didn't show the confirmation dialog
+    if (failureCount > 0 && failureCount <= 3) {
+      toast.error(`Failed to delete ${failureCount} sandbox${failureCount > 1 ? 'es' : ''}`)
     }
   }
 
