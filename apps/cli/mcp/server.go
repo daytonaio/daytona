@@ -34,7 +34,7 @@ func (s *DaytonaMCPServer) Start() error {
 func (s *DaytonaMCPServer) addTools() {
 	createSandboxTool := mcp.NewTool("create_sandbox",
 		mcp.WithDescription("Create a new sandbox with Daytona"),
-		mcp.WithString("id", mcp.Description("ID of the sandbox. If none is specified, new container will be created, otherwise the existing container will be used.")),
+		mcp.WithString("id", mcp.Description("If sandbox ID is provided it is first checked if it exists and is running, if so the existing sandbox will be used. However, model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if a new sandbox wants to be created.")),
 		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
 		mcp.WithString("image", mcp.Description("Image of the sandbox (don't specify any if not explicitly instructed from user).")),
 		mcp.WithString("auto_stop_interval", mcp.DefaultString("15"), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
