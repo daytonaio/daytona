@@ -35,6 +35,8 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		if err == nil && sandbox.State != nil && *sandbox.State == daytonaapiclient.WORKSPACESTATE_STARTED {
 			return mcp.NewToolResultText(fmt.Sprintf("Reusing existing sandbox %s", sandboxId)), nil
 		}
+
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
 	createSandbox := daytonaapiclient.NewCreateWorkspace()
