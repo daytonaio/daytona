@@ -121,7 +121,10 @@ function App() {
             </Suspense>
           }
         >
-          <Route index element={<Navigate to={getRouteSubPath(RoutePath.SANDBOXES)} replace />} />
+          <Route
+            index
+            element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
+          />
           <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Workspaces />} />
           <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />
