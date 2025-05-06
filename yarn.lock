@@ -12493,7 +12493,6 @@ __metadata:
     lint-staged: "npm:^15.5.0"
     lucide-react: "npm:^0.487.0"
     markdownlint-cli2: "npm:^0.17.2"
-    next-themes: "npm:^0.4.4"
     nodemailer: "npm:^6.9.1"
     nx: "npm:20.6.2"
     oidc-client-ts: "npm:^3.2.0"
@@ -19513,16 +19512,6 @@ __metadata:
   version: 2.0.2
   resolution: "netmask@npm:2.0.2"
   checksum: 10c0/cafd28388e698e1138ace947929f842944d0f1c0b87d3fa2601a61b38dc89397d33c0ce2c8e7b99e968584b91d15f6810b91bef3f3826adf71b1833b61d4bf4f
-  languageName: node
-  linkType: hard
-
-"next-themes@npm:^0.4.4":
-  version: 0.4.6
-  resolution: "next-themes@npm:0.4.6"
-  peerDependencies:
-    react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-    react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-  checksum: 10c0/83590c11d359ce7e4ced14f6ea9dd7a691d5ce6843fe2dc520fc27e29ae1c535118478d03e7f172609c41b1ef1b8da6b8dd2d2acd6cd79cac1abbdbd5b99f2c4
   languageName: node
   linkType: hard
 

@@ -71,7 +71,6 @@
     "jose": "~5.10.0",
     "jwks-rsa": "^3.1.0",
     "lucide-react": "^0.487.0",
-    "next-themes": "^0.4.4",
     "nodemailer": "^6.9.1",
     "oidc-client-ts": "^3.2.0",
     "passport": "^0.7.0",
