@@ -26,8 +26,8 @@
           "projects": "daemon"
         },
         {
-          "target": "build",
-          "projects": "daemon-amd64"
+          "target": "build-amd64",
+          "projects": "daemon"
         },
         "copy-daemon-bin"
       ]
