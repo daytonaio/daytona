@@ -32,7 +32,7 @@ import {
 } from 'lucide-react'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Checkbox } from './ui/checkbox'
 import {
   DropdownMenu,
@@ -121,8 +121,47 @@ export function WorkspaceTable({
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
+    onRowSelectionChange: (updater) => {
+      // Since table is defined after this function, we need to access it via function
+      // to avoid the circular reference
+      const getTableState = () => table.getState()
+      const getFilteredRowModel = () => table.getFilteredRowModel()
+
+      // Check if any rows are selected
+      const currentState = getTableState().rowSelection
+      const newState = typeof updater === 'function' ? updater(currentState) : updater
+
+      // If we're selecting rows and we have a reasonable number of rows, show the banner
+      const selectedCount = Object.keys(newState).length
+      const totalFilteredCount = getFilteredRowModel().rows.length
+
+      if (selectedCount > 0 && selectedCount < totalFilteredCount) {
+        setShowSelectAllBanner(true)
+      } else {
+        setShowSelectAllBanner(false)
+      }
+
+      // Don't call table.setRowSelection here, as the table will handle it internally
+      return newState
+    },
   })
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
+  const [showSelectAllBanner, setShowSelectAllBanner] = useState(false)
+
+  const handleSelectAll = () => {
+    const allFilteredRows = table.getFilteredRowModel().rows
+    const newSelection: Record<string, boolean> = {}
+
+    allFilteredRows.forEach((row) => {
+      newSelection[row.id] = true
+    })
+
+    table.setRowSelection(newSelection)
+    setShowSelectAllBanner(false)
+  }
+
+  const selectedCount = Object.keys(table.getState().rowSelection).length
+  const totalFilteredCount = table.getFilteredRowModel().rows.length
 
   return (
     <div>
@@ -145,7 +184,25 @@ export function WorkspaceTable({
           />
         )}
       </div>
-      <div className="rounded-md border">
+
+      {/* Selection banner */}
+      {showSelectAllBanner && (
+        <div className="flex items-center justify-between bg-muted p-2 rounded-t-md border border-b-0">
+          <div className="flex items-center">
+            <span className="font-medium">
+              {selectedCount} {selectedCount === 1 ? 'Sandbox' : 'Sandboxes'} selected
+            </span>
+            <button className="ml-4 text-primary hover:underline text-sm font-medium" onClick={handleSelectAll}>
+              Select all {totalFilteredCount} Sandboxes
+            </button>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => table.resetRowSelection()} className="h-8">
+            Clear selection
+          </Button>
+        </div>
+      )}
+
+      <div className={`rounded-md border ${showSelectAllBanner ? 'rounded-t-none' : ''}`}>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -193,12 +250,12 @@ export function WorkspaceTable({
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
+          {selectedCount > 0 && (
             <div className="flex items-center space-x-2">
               <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
                 <PopoverTrigger>
                   <Button variant="destructive" size="sm" className="h-8">
-                    Bulk Delete
+                    Bulk Delete ({selectedCount})
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent side="top">
@@ -208,13 +265,9 @@ export function WorkspaceTable({
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
+                          handleBulkDelete(Object.keys(table.getState().rowSelection))
                           setBulkDeleteConfirmationOpen(false)
+                          table.resetRowSelection()
                         }}
                       >
                         Delete
@@ -340,31 +393,22 @@ const getColumns = ({
   const columns: ColumnDef<Workspace>[] = [
     {
       id: 'select',
-      header: ({ table }) => {
-        const allRows = table.getFilteredRowModel().rows
-        const isAllSelected = table.getIsAllRowsSelected()
-
-        return (
-          <Checkbox
-            checked={isAllSelected}
-            onCheckedChange={(value) => {
-              if (value && allRows.length > 10) {
-                const confirmed = window.confirm(`Select ALL ${allRows.length} Sandboxes?`)
-                if (!confirmed) return
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(value) => {
+            for (const row of table.getRowModel().rows) {
+              if (loadingWorkspaces[row.original.id]) {
+                row.toggleSelected(false)
+              } else {
+                row.toggleSelected(!!value)
               }
-              for (const row of allRows) {
-                if (loadingWorkspaces[row.original.id]) {
-                  row.toggleSelected(false)
-                } else {
-                  row.toggleSelected(!!value)
-                }
-              }
-            }}
-            aria-label="Select all"
-            className="translate-y-[2px]"
-          />
-        )
-      },
+            }
+          }}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      ),
       cell: ({ row }) => {
         if (loadingWorkspaces[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
