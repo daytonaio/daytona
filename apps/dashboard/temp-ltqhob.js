@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -104,7 +105,7 @@ export function ImageTable({ data, loading, loadingImages, onDelete, onToggleEna
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingImages[row.original.id] || row.original.state === ImageState.REMOVING ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={\`${loadingImages[row.original.id] || row.original.state === ImageState.REMOVING ? 'opacity-50 pointer-events-none' : ''}\`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -153,7 +154,7 @@ const getColumns = ({
         const color = image.enabled ? 'text-green-500' : 'text-red-500'
 
         return (
-          <div className={`flex items-center gap-2 ${color}`}>
+          <div className={\`flex items-center gap-2 ${color}\`}>
             {image.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
             {image.enabled ? 'Enabled' : 'Disabled'}
           </div>
@@ -172,7 +173,7 @@ const getColumns = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className={`flex items-center gap-2 ${color}`}>
+                  <div className={\`flex items-center gap-2 ${color}\`}>
                     {getStateIcon(image.state)}
                     {getStateLabel(image.state)}
                   </div>
@@ -186,7 +187,7 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 ${color}`}>
+          <div className={\`flex items-center gap-2 ${color}\`}>
             {getStateIcon(image.state)}
             {getStateLabel(image.state)}
           </div>
@@ -198,7 +199,7 @@ const getColumns = ({
       header: 'Size',
       cell: ({ row }) => {
         const size = row.original.size
-        return size ? `${(size * 1024).toFixed(2)} MB` : '-'
+        return size ? \`${(size * 1024).toFixed(2)} MB\` : '-'
       },
     },
     {
@@ -295,3 +296,12 @@ const getStateLabel = (state: ImageState) => {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ')
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      

@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -87,7 +88,7 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingKeys[row.original.name] ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={\`${loadingKeys[row.original.name] ? 'opacity-50 pointer-events-none' : ''}\`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -200,3 +201,12 @@ const getColumns = ({
 
   return columns
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      

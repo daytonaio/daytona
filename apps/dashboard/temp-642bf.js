@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -14,79 +15,52 @@ import {
   SortingState,
   useReactTable,
 } from '@tanstack/react-table'
-import { OrganizationInvitation, OrganizationRole, UpdateOrganizationInvitationRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
-import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
-import { UpdateOrganizationInvitationDialog } from './UpdateOrganizationInvitationDialog'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
+import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
 import { DEFAULT_PAGE_SIZE } from '@/lib/table-utils'
 
 interface DataTableProps {
-  data: OrganizationInvitation[]
+  data: OrganizationRole[]
   loadingData: boolean
-  availableRoles: OrganizationRole[]
-  loadingAvailableRoles: boolean
-  onCancelInvitation: (invitationId: string) => Promise<boolean>
-  onUpdateInvitation: (
-    invitationId: string,
-    role: UpdateOrganizationInvitationRoleEnum,
-    assignedRoleIds: string[],
+  onUpdateRole: (
+    roleId: string,
+    name: string,
+    description: string,
+    permissions: OrganizationRolePermissionsEnum[],
   ) => Promise<boolean>
-  loadingInvitationAction: Record<string, boolean>
+  onDeleteRole: (roleId: string) => Promise<boolean>
+  loadingRoleAction: Record<string, boolean>
 }
 
-export function OrganizationInvitationTable({
+export function OrganizationRoleTable({
   data,
   loadingData,
-  availableRoles,
-  loadingAvailableRoles,
-  onCancelInvitation,
-  onUpdateInvitation,
-  loadingInvitationAction,
+  onUpdateRole,
+  onDeleteRole,
+  loadingRoleAction,
 }: DataTableProps) {
   const [sorting, setSorting] = useState<SortingState>([])
-  const [invitationToCancel, setInvitationToCancel] = useState<string | null>(null)
-  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
-  const [invitationToUpdate, setInvitationToUpdate] = useState<OrganizationInvitation | null>(null)
+  const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false)
 
-  const handleCancel = (invitationId: string) => {
-    setInvitationToCancel(invitationId)
-    setIsCancelDialogOpen(true)
-  }
-
-  const handleUpdate = (invitation: OrganizationInvitation) => {
-    setInvitationToUpdate(invitation)
-    setIsUpdateDialogOpen(true)
-  }
-
-  const handleConfirmCancel = async () => {
-    if (invitationToCancel) {
-      const success = await onCancelInvitation(invitationToCancel)
-      if (success) {
-        setInvitationToCancel(null)
-        setIsCancelDialogOpen(false)
-      }
-      return success
-    }
-    return false
-  }
-
-  const handleConfirmUpdate = async (role: UpdateOrganizationInvitationRoleEnum, assignedRoleIds: string[]) => {
-    if (invitationToUpdate) {
-      const success = await onUpdateInvitation(invitationToUpdate.id, role, assignedRoleIds)
-      if (success) {
-        setInvitationToUpdate(null)
-        setIsUpdateDialogOpen(false)
-      }
-      return success
-    }
-    return false
-  }
-
-  const columns = getColumns({ onCancel: handleCancel, onUpdate: handleUpdate })
+  const columns = getColumns({
+    onUpdate: (role) => {
+      setRoleToUpdate(role)
+      setIsUpdateDialogOpen(true)
+    },
+    onDelete: (userId: string) => {
+      setRoleToDelete(userId)
+      setIsDeleteDialogOpen(true)
+    },
+  })
 
   const table = useReactTable({
     data,
@@ -104,6 +78,34 @@ export function OrganizationInvitationTable({
       },
     },
   })
+
+  const handleUpdateRole = async (
+    name: string,
+    description: string,
+    permissions: OrganizationRolePermissionsEnum[],
+  ) => {
+    if (roleToUpdate) {
+      const success = await onUpdateRole(roleToUpdate.id, name, description, permissions)
+      if (success) {
+        setRoleToUpdate(null)
+        setIsUpdateDialogOpen(false)
+      }
+      return success
+    }
+    return false
+  }
+
+  const handleConfirmDeleteRole = async () => {
+    if (roleToDelete) {
+      const success = await onDeleteRole(roleToDelete)
+      if (success) {
+        setRoleToDelete(null)
+        setIsDeleteDialogOpen(false)
+      }
+      return success
+    }
+    return false
+  }
 
   return (
     <>
@@ -135,7 +137,7 @@ export function OrganizationInvitationTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`h-14 ${loadingInvitationAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={loadingRoleAction[row.original.id] ? 'opacity-50 pointer-events-none' : ''}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -155,33 +157,31 @@ export function OrganizationInvitationTable({
         <Pagination table={table} className="mt-4" />
       </div>
 
-      {invitationToUpdate && (
-        <UpdateOrganizationInvitationDialog
+      {roleToUpdate && (
+        <UpdateOrganizationRoleDialog
           open={isUpdateDialogOpen}
           onOpenChange={(open) => {
             setIsUpdateDialogOpen(open)
             if (!open) {
-              setInvitationToUpdate(null)
+              setRoleToUpdate(null)
             }
           }}
-          invitation={invitationToUpdate}
-          availableRoles={availableRoles}
-          loadingAvailableRoles={loadingAvailableRoles}
-          onUpdateInvitation={handleConfirmUpdate}
+          initialData={roleToUpdate}
+          onUpdateRole={handleUpdateRole}
         />
       )}
 
-      {invitationToCancel && (
-        <CancelOrganizationInvitationDialog
-          open={isCancelDialogOpen}
+      {roleToDelete && (
+        <DeleteOrganizationRoleDialog
+          open={isDeleteDialogOpen}
           onOpenChange={(open) => {
-            setIsCancelDialogOpen(open)
+            setIsDeleteDialogOpen(open)
             if (!open) {
-              setInvitationToCancel(null)
+              setRoleToDelete(null)
             }
           }}
-          onCancelInvitation={handleConfirmCancel}
-          loading={loadingInvitationAction[invitationToCancel]}
+          onDeleteRole={handleConfirmDeleteRole}
+          loading={loadingRoleAction[roleToDelete]}
         />
       )}
     </>
@@ -189,41 +189,65 @@ export function OrganizationInvitationTable({
 }
 
 const getColumns = ({
-  onCancel,
   onUpdate,
+  onDelete,
 }: {
-  onCancel: (invitationId: string) => void
-  onUpdate: (invitation: OrganizationInvitation) => void
-}): ColumnDef<OrganizationInvitation>[] => {
-  const columns: ColumnDef<OrganizationInvitation>[] = [
+  onUpdate: (role: OrganizationRole) => void
+  onDelete: (roleId: string) => void
+}): ColumnDef<OrganizationRole>[] => {
+  const columns: ColumnDef<OrganizationRole>[] = [
     {
-      accessorKey: 'email',
-      header: 'Email',
-    },
-    {
-      accessorKey: 'invitedBy',
-      header: 'Invited by',
-    },
-    {
-      accessorKey: 'expiresAt',
-      header: 'Expires',
+      accessorKey: 'name',
+      header: 'Name',
       cell: ({ row }) => {
-        return new Date(row.original.expiresAt).toLocaleDateString()
+        return <div className="min-w-48">{row.original.name}</div>
       },
     },
     {
-      accessorKey: 'status',
-      header: 'Status',
+      accessorKey: 'description',
+      header: 'Description',
       cell: ({ row }) => {
-        const isExpired = new Date(row.original.expiresAt) < new Date()
-        return isExpired ? <span className="text-red-600 dark:text-red-400">Expired</span> : 'Pending'
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="truncate max-w-md cursor-text">{row.original.description}</div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="max-w-[300px]">{row.original.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      },
+    },
+    {
+      accessorKey: 'permissions',
+      header: () => {
+        return <div className="max-w-md px-3">Permissions</div>
+      },
+      cell: ({ row }) => {
+        const permissions = row.original.permissions.join(', ')
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
+              </TooltipTrigger>
+              {permissions && (
+                <TooltipContent>
+                  <p className="max-w-[300px]">{permissions}</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+        )
       },
     },
     {
       id: 'actions',
       cell: ({ row }) => {
-        const isExpired = new Date(row.original.expiresAt) < new Date()
-        if (isExpired) {
+        if (row.original.isGlobal) {
           return null
         }
         return (
@@ -242,9 +266,9 @@ const getColumns = ({
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 dark:text-red-400"
-                  onClick={() => onCancel(row.original.id)}
+                  onClick={() => onDelete(row.original.id)}
                 >
-                  Cancel
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -256,3 +280,12 @@ const getColumns = ({
 
   return columns
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      

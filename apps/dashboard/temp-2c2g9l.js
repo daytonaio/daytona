@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -154,7 +155,7 @@ export function OrganizationMemberTable({
                   <TableRow
                     key={row.id}
                     data-state={row.getIsSelected() && 'selected'}
-                    className={`h-14 ${loadingMemberAction[row.original.userId] ? 'opacity-50 pointer-events-none' : ''}`}
+                    className={\`h-14 ${loadingMemberAction[row.original.userId] ? 'opacity-50 pointer-events-none' : ''}\`}
                   >
                     {row.getVisibleCells().map((cell) => (
                       <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -273,7 +274,7 @@ const getColumns = ({
           }
 
           const roleCount = row.original.assignedRoles?.length || 0
-          const roleText = roleCount === 1 ? '1 role' : `${roleCount} roles`
+          const roleText = roleCount === 1 ? '1 role' : \`${roleCount} roles\`
 
           return (
             <Button variant="ghost" className="w-auto px-3" onClick={() => onUpdateAssignedRoles(row.original)}>
@@ -322,3 +323,12 @@ const getColumns = ({
 
   return columns
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      

@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -16,7 +17,7 @@ interface PaginationProps<TData> {
 
 export function Pagination<TData>({ table, selectionEnabled, className }: PaginationProps<TData>) {
   return (
-    <div className={`flex items-center justify-between px-2 w-full ${className}`}>
+    <div className={\`flex items-center justify-between px-2 w-full ${className}\`}>
       {selectionEnabled ? (
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
@@ -29,7 +30,7 @@ export function Pagination<TData>({ table, selectionEnabled, className }: Pagina
         <div className="flex items-center space-x-2">
           <p className="text-sm font-medium">Rows per page</p>
           <Select
-            value={`${table.getState().pagination.pageSize}`}
+            value={\`${table.getState().pagination.pageSize}\`}
             onValueChange={(value) => {
               table.setPageSize(Number(value))
             }}
@@ -39,7 +40,7 @@ export function Pagination<TData>({ table, selectionEnabled, className }: Pagina
             </SelectTrigger>
             <SelectContent side="top">
               {[10, 25, 50, 100].map((pageSize) => (
-                <SelectItem key={pageSize} value={`${pageSize}`}>
+                <SelectItem key={pageSize} value={\`${pageSize}\`}>
                   {pageSize}
                 </SelectItem>
               ))}
@@ -91,3 +92,12 @@ export function Pagination<TData>({ table, selectionEnabled, className }: Pagina
     </div>
   )
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      

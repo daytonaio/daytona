@@ -1,4 +1,5 @@
-/*
+
+        const content = `/*
  * Copyright 2025 Daytona Platforms Inc.
  * SPDX-License-Identifier: AGPL-3.0
  */
@@ -90,7 +91,7 @@ export function WorkspaceTable({
     const labels = new Set<string>()
     data.forEach((workspace) => {
       Object.entries(workspace.labels ?? {}).forEach(([key, value]) => {
-        labels.add(`${key}: ${value}`)
+        labels.add(\`${key}: ${value}\`)
       })
     })
     return Array.from(labels).map((label) => ({ label, value: label }))
@@ -178,7 +179,7 @@ export function WorkspaceTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingWorkspaces[row.original.id] || row.original.state === WorkspaceState.DESTROYING ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={\`${loadingWorkspaces[row.original.id] || row.original.state === WorkspaceState.DESTROYING ? 'opacity-50 pointer-events-none' : ''}\`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -433,7 +434,7 @@ const getColumns = ({
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <div className={`flex items-center gap-2 px-2 ${color}`}>
+                  <div className={\`flex items-center gap-2 px-2 ${color}\`}>
                     {getStateIcon(state)}
                     {getStateLabel(state)}
                   </div>
@@ -447,7 +448,7 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 px-2 ${color}`}>
+          <div className={\`flex items-center gap-2 px-2 ${color}\`}>
             {getStateIcon(state)}
             <span>{getStateLabel(state)}</span>
           </div>
@@ -515,7 +516,7 @@ const getColumns = ({
       },
       cell: ({ row }) => {
         const labels = Object.entries(row.original.labels ?? {})
-          .map(([key, value]) => `${key}: ${value}`)
+          .map(([key, value]) => \`${key}: ${value}\`)
           .join(', ')
         return (
           <TooltipProvider>
@@ -532,7 +533,7 @@ const getColumns = ({
           </TooltipProvider>
         )
       },
-      accessorFn: (row) => Object.entries(row.labels ?? {}).map(([key, value]) => `${key}: ${value}`),
+      accessorFn: (row) => Object.entries(row.labels ?? {}).map(([key, value]) => \`${key}: ${value}\`),
       filterFn: (row, id, value) => {
         return value.some((label: string) => (row.getValue(id) as string).includes(label))
       },
@@ -594,7 +595,7 @@ const getColumns = ({
         const nodeDomain = getNodeDomain(row.original.info?.providerMetadata)
         if (!nodeDomain || row.original.state !== WorkspaceState.STARTED) return ''
         return (
-          <a href={`https://22222-${row.original.id}.${nodeDomain}`} target="_blank" rel="noopener noreferrer">
+          <a href={\`https://22222-${row.original.id}.${nodeDomain}\`} target="_blank" rel="noopener noreferrer">
             <Terminal className="w-4 h-4" />
           </a>
         )
@@ -673,3 +674,12 @@ const getColumns = ({
 
   return columns
 }
+`;
+        try {
+          new Function(content);
+          process.exit(0);
+        } catch (error) {
+          console.error(error);
+          process.exit(1);
+        }
+      
