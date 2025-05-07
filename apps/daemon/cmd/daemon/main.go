@@ -15,7 +15,6 @@ import (
 	golog "log"
 
 	"github.com/daytonaio/daemon/cmd/daemon/config"
-	"github.com/daytonaio/daemon/pkg/ssh"
 	"github.com/daytonaio/daemon/pkg/terminal"
 	"github.com/daytonaio/daemon/pkg/toolbox"
 	log "github.com/sirupsen/logrus"
@@ -65,21 +64,21 @@ func main() {
 		}
 	}()
 
-	sshServer := &ssh.Server{
-		ProjectDir: c.ProjectDir,
-	}
+	// sshServer := &ssh.Server{
+	// 	ProjectDir: c.ProjectDir,
+	// }
 
-	// Start the SSH server in a go routine
-	go func() {
-		err = sshServer.Start()
-		if err != nil {
-			errChan <- err
-		}
-	}()
+	// // Start the SSH server in a go routine
+	// go func() {
+	// 	err = sshServer.Start()
+	// 	if err != nil {
+	// 		errChan <- err
+	// 	}
+	// }()
 
 	// Start terminal server
 	go func() {
-		if err := terminal.StartTerminalServer(2223); err != nil {
+		if err := terminal.StartTerminalServer(2222); err != nil {
 			errChan <- err
 		}
 	}()

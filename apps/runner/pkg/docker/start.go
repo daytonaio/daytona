@@ -42,22 +42,11 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 
 	processesCtx := context.Background()
 
-	// Start Daytona daemon and terminal process
-	if d.daytonaBinaryURL != "" {
-		go func() {
-			if err := d.startDaytonaDaemon(processesCtx, containerId); err != nil {
-				log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
-			}
-		}()
-	}
-
-	if d.terminalBinaryURL != "" {
-		go func() {
-			if err := d.startTerminalProcess(processesCtx, containerId, 22222); err != nil {
-				log.Errorf("Failed to start terminal process: %s\n", err.Error())
-			}
-		}()
-	}
+	go func() {
+		if err := d.startDaytonaDaemon(processesCtx, containerId); err != nil {
+			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
+		}
+	}()
 
 	return nil
 }

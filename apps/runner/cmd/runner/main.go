@@ -17,6 +17,7 @@ import (
 	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api"
 	"github.com/daytonaio/runner/pkg/cache"
+	"github.com/daytonaio/runner/pkg/daemon"
 	"github.com/daytonaio/runner/pkg/docker"
 	"github.com/daytonaio/runner/pkg/models"
 	"github.com/daytonaio/runner/pkg/runner"
@@ -60,18 +61,21 @@ func main() {
 
 	runnerCache.Cleanup(ctx)
 
+	daemonPath, err := daemon.WriteDaemonBinary()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:          cli,
 		Cache:              runnerCache,
-		DaytonaBinaryUrl:   cfg.DaytonaBinaryUrl,
-		TerminalBinaryUrl:  cfg.TerminalBinaryUrl,
-		DaytonaBinaryPath:  cfg.DaytonaBinaryPath,
-		TerminalBinaryPath: cfg.TerminalBinaryPath,
 		LogWriter:          os.Stdout,
 		AWSRegion:          cfg.AWSRegion,
 		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 		AWSAccessKeyId:     cfg.AWSAccessKeyId,
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
+		DaemonPath:         daemonPath,
 	})
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)

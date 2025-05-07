@@ -13,43 +13,34 @@ import (
 type DockerClientConfig struct {
 	ApiClient          client.APIClient
 	Cache              cache.IRunnerCache
-	DaytonaBinaryUrl   string
-	TerminalBinaryUrl  string
-	DaytonaBinaryPath  string
-	TerminalBinaryPath string
 	LogWriter          io.Writer
 	AWSRegion          string
 	AWSEndpointUrl     string
 	AWSAccessKeyId     string
 	AWSSecretAccessKey string
+	DaemonPath         string
 }
 
 func NewDockerClient(config DockerClientConfig) *DockerClient {
 	return &DockerClient{
 		apiClient:          config.ApiClient,
 		cache:              config.Cache,
-		daytonaBinaryURL:   config.DaytonaBinaryUrl,
-		daytonaBinaryPath:  config.DaytonaBinaryPath,
-		terminalBinaryURL:  config.TerminalBinaryUrl,
-		terminalBinaryPath: config.TerminalBinaryPath,
 		logWriter:          config.LogWriter,
 		awsRegion:          config.AWSRegion,
 		awsEndpointUrl:     config.AWSEndpointUrl,
 		awsAccessKeyId:     config.AWSAccessKeyId,
 		awsSecretAccessKey: config.AWSSecretAccessKey,
+		daemonPath:         config.DaemonPath,
 	}
 }
 
 type DockerClient struct {
 	apiClient          client.APIClient
 	cache              cache.IRunnerCache
-	daytonaBinaryPath  string
-	daytonaBinaryURL   string
-	terminalBinaryPath string
-	terminalBinaryURL  string
 	logWriter          io.Writer
 	awsRegion          string
 	awsEndpointUrl     string
 	awsAccessKeyId     string
 	awsSecretAccessKey string
+	daemonPath         string
 }
