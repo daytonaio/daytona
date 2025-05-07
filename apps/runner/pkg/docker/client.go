@@ -5,6 +5,7 @@ package docker
 
 import (
 	"io"
+	"sync"
 
 	"github.com/daytonaio/runner/pkg/cache"
 	"github.com/docker/docker/client"
@@ -37,6 +38,7 @@ func NewDockerClient(config DockerClientConfig) *DockerClient {
 		awsEndpointUrl:     config.AWSEndpointUrl,
 		awsAccessKeyId:     config.AWSAccessKeyId,
 		awsSecretAccessKey: config.AWSSecretAccessKey,
+		volumeMutexes:      make(map[string]*sync.Mutex),
 	}
 }
 
@@ -52,4 +54,6 @@ type DockerClient struct {
 	awsEndpointUrl     string
 	awsAccessKeyId     string
 	awsSecretAccessKey string
+	volumeMutexes      map[string]*sync.Mutex
+	volumeMutexesMutex sync.Mutex
 }
