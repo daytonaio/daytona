@@ -20,6 +20,7 @@ import { OrganizationInvitationService } from './services/organization-invitatio
 import { UserModule } from '../user/user.module'
 import { Workspace } from '../workspace/entities/workspace.entity'
 import { Image } from '../workspace/entities/image.entity'
+import { Volume } from '../workspace/entities/volume.entity'
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { Image } from '../workspace/entities/image.entity'
       OrganizationInvitation,
       Workspace,
       Image,
+      Volume,
     ]),
   ],
   controllers: [

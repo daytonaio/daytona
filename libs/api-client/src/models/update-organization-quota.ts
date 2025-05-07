@@ -84,4 +84,10 @@ export interface UpdateOrganizationQuota {
    * @memberof UpdateOrganizationQuota
    */
   totalImageSize: number
+  /**
+   *
+   * @type {number}
+   * @memberof UpdateOrganizationQuota
+   */
+  volumeQuota: number
 }
