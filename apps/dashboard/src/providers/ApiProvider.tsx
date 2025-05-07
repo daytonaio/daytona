@@ -8,9 +8,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from '@/components/LoadingFallback'
 import { ApiClient } from '@/api/apiClient'
+import { useLocation } from 'react-router-dom'
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading, signinRedirect } = useAuth()
+  const location = useLocation()
 
   const apiRef = useRef<ApiClient | null>(null)
   const [isApiReady, setIsApiReady] = useState(false)
@@ -33,11 +35,11 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (!isLoading && !isAuthenticated) {
       void signinRedirect({
         state: {
-          returnTo: window.location.pathname,
+          returnTo: location.pathname + location.search,
         },
       })
     }
-  }, [isLoading, isAuthenticated, signinRedirect])
+  }, [isLoading, isAuthenticated, signinRedirect, location])
 
   if (isLoading || !isApiReady) {
     return <LoadingFallback />

@@ -10,7 +10,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal"
 
 	log "github.com/sirupsen/logrus"
 )

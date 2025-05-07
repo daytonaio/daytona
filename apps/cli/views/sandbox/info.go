@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/util"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/views/common"
+	"github.com/daytonaio/daytona/cli/views/util"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 
@@ -119,8 +119,6 @@ func getStateLabel(state daytonaapiclient.WorkspaceState) string {
 		return common.StartingStyle.Render("STARTING")
 	case daytonaapiclient.WORKSPACESTATE_STOPPING:
 		return common.StoppingStyle.Render("STOPPING")
-	case daytonaapiclient.WORKSPACESTATE_RESIZING:
-		return common.CreatingStyle.Render("RESIZING")
 	case daytonaapiclient.WORKSPACESTATE_PULLING_IMAGE:
 		return common.CreatingStyle.Render("PULLING IMAGE")
 	case daytonaapiclient.WORKSPACESTATE_ARCHIVING:

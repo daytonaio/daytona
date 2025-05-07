@@ -19,9 +19,7 @@ func (d *DockerClient) CreateSnapshot(ctx context.Context, containerId string, s
 
 	d.cache.SetSnapshotState(ctx, containerId, enums.SnapshotStateInProgress)
 
-	containerName := containerId
-
-	err := d.commitContainer(ctx, containerName, snapshotDto.Image)
+	err := d.commitContainer(ctx, containerId, snapshotDto.Image)
 	if err != nil {
 		return err
 	}

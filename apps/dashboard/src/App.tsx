@@ -29,23 +29,40 @@ import { NotificationSocketProvider } from '@/providers/NotificationSocketProvid
 import { ApiProvider } from './providers/ApiProvider'
 import LandingPage from './pages/LandingPage'
 import Logout from './pages/Logout'
+import { RoutePath, getRouteSubPath } from './enums/RoutePath'
+import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 
-// Docs redirect component
+// Simple redirection components for external URLs
 const DocsRedirect = () => {
   React.useEffect(() => {
-    window.open('https://www.daytona.io/docs/', '_blank')
-    // Navigate back to dashboard after opening docs
-    window.location.href = '/dashboard'
+    window.open(DAYTONA_DOCS_URL, '_blank')
+    window.location.href = RoutePath.DASHBOARD
   }, [])
+  return null
+}
 
+const SlackRedirect = () => {
+  React.useEffect(() => {
+    window.open(DAYTONA_SLACK_URL, '_blank')
+    window.location.href = RoutePath.DASHBOARD
+  }, [])
   return null
 }
 
 function App() {
   const location = useLocation()
   const posthog = usePostHog()
-  const { error } = useAuth()
+  const { error, isAuthenticated, user } = useAuth()
   const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+
+  useEffect(() => {
+    if (import.meta.env.PROD && isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
+      posthog?.identify(user.profile.sub, {
+        email: user.profile.email,
+        name: user.profile.name,
+      })
+    }
+  }, [isAuthenticated, user, posthog])
 
   // Hack for tracking PostHog pageviews in SPAs
   useEffect(() => {
@@ -82,10 +99,12 @@ function App() {
         </DialogContent>
       </Dialog>
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/logout" element={<Logout />} />
+        <Route path={RoutePath.LANDING} element={<LandingPage />} />
+        <Route path={RoutePath.LOGOUT} element={<Logout />} />
+        <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
+        <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
         <Route
-          path="/dashboard"
+          path={RoutePath.DASHBOARD}
           element={
             <Suspense fallback={<LoadingFallback />}>
               <ApiProvider>
@@ -102,15 +121,18 @@ function App() {
             </Suspense>
           }
         >
-          <Route index element={<Navigate to="sandboxes" replace />} />
-          <Route path="keys" element={<Keys />} />
-          <Route path="sandboxes" element={<Workspaces />} />
-          <Route path="images" element={<Images />} />
-          <Route path="registries" element={<Registries />} />
-          <Route path="usage" element={<Usage />} />
+          <Route
+            index
+            element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
+          />
+          <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
+          <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Workspaces />} />
+          <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />
+          <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
+          <Route path={getRouteSubPath(RoutePath.USAGE)} element={<Usage />} />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
-              path="billing"
+              path={getRouteSubPath(RoutePath.BILLING)}
               element={
                 <OwnerAccessOrganizationPageWrapper>
                   <Billing />
@@ -119,7 +141,7 @@ function App() {
             />
           )}
           <Route
-            path="members"
+            path={getRouteSubPath(RoutePath.MEMBERS)}
             element={
               <NonPersonalOrganizationPageWrapper>
                 <OrganizationMembers />
@@ -129,7 +151,7 @@ function App() {
           {
             // TODO: uncomment when we allow creating custom roles
             /* <Route
-            path="roles"
+            path={getRouteSubPath(RoutePath.ROLES)}
             element={
               <NonPersonalOrganizationPageWrapper>
                 <OwnerAccessOrganizationPageWrapper>
@@ -139,10 +161,9 @@ function App() {
             }
           /> */
           }
-          <Route path="settings" element={<OrganizationSettings />} />
-          <Route path="user/invitations" element={<UserOrganizationInvitations />} />
+          <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+          <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
         </Route>
-        <Route path="/docs" element={<DocsRedirect />} />
         {/* Add other routes as needed */}
       </Routes>
     </ThemeProvider>
@@ -153,7 +174,7 @@ function NonPersonalOrganizationPageWrapper({ children }: { children: React.Reac
   const { selectedOrganization } = useSelectedOrganization()
 
   if (selectedOrganization?.personal) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={RoutePath.DASHBOARD} replace />
   }
 
   return <>{children}</>
@@ -163,7 +184,7 @@ function OwnerAccessOrganizationPageWrapper({ children }: { children: React.Reac
   const { authenticatedUserOrganizationMember } = useSelectedOrganization()
 
   if (authenticatedUserOrganizationMember?.role !== OrganizationUserRoleEnum.OWNER) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to={RoutePath.DASHBOARD} replace />
   }
 
   return <>{children}</>

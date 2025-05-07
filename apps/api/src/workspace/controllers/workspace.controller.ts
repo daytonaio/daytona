@@ -338,22 +338,6 @@ export class WorkspaceController {
     await this.workspaceService.updatePublicStatus(workspaceId, isPublic)
   }
 
-  @Post(':workspaceId/resize')
-  @ApiOperation({
-    summary: 'Resize workspace',
-    operationId: 'resizeWorkspace',
-  })
-  @ApiParam({
-    name: 'workspaceId',
-    description: 'ID of the workspace',
-    type: 'string',
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
-  @UseGuards(WorkspaceAccessGuard)
-  async resizeWorkspace(@Param('workspaceId') workspaceId: string, @Body() resizeDto: ResizeDto): Promise<void> {
-    await this.workspaceService.resize(workspaceId, resizeDto)
-  }
-
   @Post(':workspaceId/autostop/:interval')
   @ApiOperation({
     summary: 'Set workspace auto-stop interval',

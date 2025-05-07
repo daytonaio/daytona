@@ -183,6 +183,47 @@ export const ApiKeysApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
+     * @summary Get current API key\'s details
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCurrentApiKey: async (
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      const localVarPath = `/api-keys/current`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary List API keys
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -310,6 +351,29 @@ export const ApiKeysApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get current API key\'s details
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getCurrentApiKey(
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ApiKeyList>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getCurrentApiKey(xDaytonaOrganizationID, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ApiKeysApi.getCurrentApiKey']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary List API keys
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -386,6 +450,16 @@ export const ApiKeysApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Get current API key\'s details
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getCurrentApiKey(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig): AxiosPromise<ApiKeyList> {
+      return localVarFp.getCurrentApiKey(xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary List API keys
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
@@ -446,6 +520,20 @@ export class ApiKeysApi extends BaseAPI {
   public getApiKey(name: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ApiKeysApiFp(this.configuration)
       .getApiKey(name, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get current API key\'s details
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ApiKeysApi
+   */
+  public getCurrentApiKey(xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ApiKeysApiFp(this.configuration)
+      .getCurrentApiKey(xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

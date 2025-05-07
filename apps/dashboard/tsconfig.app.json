@@ -4,6 +4,7 @@
     "outDir": "../../dist/out-tsc",
     "module": "ES2022",
     "allowImportingTsExtensions": true,
+    "noEmit": true,
     "types": ["node", "@nx/react/typings/cssmodule.d.ts", "@nx/react/typings/image.d.ts", "vite/client"],
     "baseUrl": ".",
     "paths": {

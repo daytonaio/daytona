@@ -4,7 +4,7 @@
 package mcp
 
 import (
-	"github.com/daytonaio/daytona-ai-saas/cli/mcp/tools"
+	"github.com/daytonaio/daytona/cli/mcp/tools"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )

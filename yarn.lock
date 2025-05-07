@@ -4509,12 +4509,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@nestjs/common@npm:^11.0.8":
-  version: 11.0.19
-  resolution: "@nestjs/common@npm:11.0.19"
+"@nestjs/common@npm:^11.0.20":
+  version: 11.1.0
+  resolution: "@nestjs/common@npm:11.1.0"
   dependencies:
     file-type: "npm:20.4.1"
     iterare: "npm:1.2.1"
+    load-esm: "npm:1.0.2"
     tslib: "npm:2.8.1"
     uid: "npm:2.0.2"
   peerDependencies:
@@ -4527,7 +4528,7 @@ __metadata:
       optional: true
     class-validator:
       optional: true
-  checksum: 10c0/1f1efe46577579fd01ed2a271338b3a4d0aa7c06fb1bab2f8cf1f3f0412377ac268ed6d1e49843b9220fe66fa5afff985a7a9da5176166ad2765e0715e68f2ed
+  checksum: 10c0/828665a91d75aa237e871173e9ec70a9a331839fef85d1c1c009c16bc2e94a627ee39f65fe0e560db043345293122657b86a66236459ed219ebcd96ebe14b7e0
   languageName: node
   linkType: hard
 
@@ -12399,7 +12400,7 @@ __metadata:
     "@nestjs-modules/ioredis": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.0"
     "@nestjs/cache-manager": "npm:^3.0.0"
-    "@nestjs/common": "npm:^11.0.8"
+    "@nestjs/common": "npm:^11.0.20"
     "@nestjs/config": "npm:^4.0.0"
     "@nestjs/core": "npm:^11.0.8"
     "@nestjs/event-emitter": "npm:^3.0.1"
@@ -12492,7 +12493,6 @@ __metadata:
     lint-staged: "npm:^15.5.0"
     lucide-react: "npm:^0.487.0"
     markdownlint-cli2: "npm:^0.17.2"
-    next-themes: "npm:^0.4.4"
     nodemailer: "npm:^6.9.1"
     nx: "npm:20.6.2"
     oidc-client-ts: "npm:^3.2.0"
@@ -12530,7 +12530,7 @@ __metadata:
     typescript: "npm:~5.7.2"
     typescript-eslint: "npm:^8.19.0"
     verdaccio: "npm:6.0.5"
-    vite: "npm:6.2.2"
+    vite: "npm:6.2.7"
     vite-plugin-checker: "npm:^0.8.0"
     vitest: "npm:^1.3.1"
     webpack-cli: "npm:^5.1.4"
@@ -18007,6 +18007,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"load-esm@npm:1.0.2":
+  version: 1.0.2
+  resolution: "load-esm@npm:1.0.2"
+  checksum: 10c0/1d66736d97f8005102dfdd03a77f5b99aa34aa934c7a5de345d0a455b4bfe9cb07bb32802b82777b4c48c217a92f4484681cc3971e6c7d73b39ba967f955f501
+  languageName: node
+  linkType: hard
+
 "loader-runner@npm:^4.2.0":
   version: 4.3.0
   resolution: "loader-runner@npm:4.3.0"
@@ -19505,16 +19512,6 @@ __metadata:
   version: 2.0.2
   resolution: "netmask@npm:2.0.2"
   checksum: 10c0/cafd28388e698e1138ace947929f842944d0f1c0b87d3fa2601a61b38dc89397d33c0ce2c8e7b99e968584b91d15f6810b91bef3f3826adf71b1833b61d4bf4f
-  languageName: node
-  linkType: hard
-
-"next-themes@npm:^0.4.4":
-  version: 0.4.6
-  resolution: "next-themes@npm:0.4.6"
-  peerDependencies:
-    react: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-    react-dom: ^16.8 || ^17 || ^18 || ^19 || ^19.0.0-rc
-  checksum: 10c0/83590c11d359ce7e4ced14f6ea9dd7a691d5ce6843fe2dc520fc27e29ae1c535118478d03e7f172609c41b1ef1b8da6b8dd2d2acd6cd79cac1abbdbd5b99f2c4
   languageName: node
   linkType: hard
 
@@ -26053,9 +26050,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vite@npm:6.2.2":
-  version: 6.2.2
-  resolution: "vite@npm:6.2.2"
+"vite@npm:6.2.7":
+  version: 6.2.7
+  resolution: "vite@npm:6.2.7"
   dependencies:
     esbuild: "npm:^0.25.0"
     fsevents: "npm:~2.3.3"
@@ -26101,7 +26098,7 @@ __metadata:
       optional: true
   bin:
     vite: bin/vite.js
-  checksum: 10c0/52f5b1c10cfe5e3b6382c6de1811ebbf76df9b5a8bab3d65169446c6b54a5f1528f775b1548009a6d8aad11def20fba046bb3e9abb10c0c2c9ccd78118623bb8
+  checksum: 10c0/2da5df6bfdc386a3b24d7350c508e075a49a5b5c33eb4a327203eb175398a1da99d185c68bd2287be897032810700d95ea7ce72d1113d86f43de61f0ce4435da
   languageName: node
   linkType: hard
 
