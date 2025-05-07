@@ -7,6 +7,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/daytonaio/runner/pkg/api/dto"
 	log "github.com/sirupsen/logrus"
@@ -14,22 +15,31 @@ import (
 
 func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []dto.VolumeDTO) ([]string, error) {
 	volumeMountPathBinds := make([]string, 0)
+
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("daytona-volume-%s", vol.VolumeId)
 		nodeVolumeMountPath := d.getNodeVolumeMountPath(volumeIdPrefixed)
 
-		mounted, err := d.isDirectoryMounted(nodeVolumeMountPath)
-		if err != nil {
-			log.Errorf("failed to check if volume %s is already mounted to %s: %s", volumeIdPrefixed, nodeVolumeMountPath, err)
+		// Get or create mutex for this volume
+		d.volumeMutexesMutex.Lock()
+		volumeMutex, exists := d.volumeMutexes[volumeIdPrefixed]
+		if !exists {
+			volumeMutex = &sync.Mutex{}
+			d.volumeMutexes[volumeIdPrefixed] = volumeMutex
 		}
+		d.volumeMutexesMutex.Unlock()
 
-		if mounted {
+		// Lock this specific volume's mutex
+		volumeMutex.Lock()
+		defer volumeMutex.Unlock()
+
+		if d.isDirectoryMounted(nodeVolumeMountPath) {
 			log.Infof("volume %s is already mounted to %s", volumeIdPrefixed, nodeVolumeMountPath)
 			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", nodeVolumeMountPath, vol.MountPath))
 			continue
 		}
 
-		err = os.MkdirAll(nodeVolumeMountPath, 0755)
+		err := os.MkdirAll(nodeVolumeMountPath, 0755)
 		if err != nil {
 			return nil, fmt.Errorf("failed to create mount directory %s: %s", nodeVolumeMountPath, err)
 		}
