@@ -39,7 +39,6 @@ import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
-import { ProxyService } from '../common/services/proxy.service'
 
 @Module({
   imports: [
@@ -73,7 +72,6 @@ import { ProxyService } from '../common/services/proxy.service'
     ImageSubscriber,
     VolumeService,
     VolumeManager,
-    ProxyService,
   ],
   exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
 })
