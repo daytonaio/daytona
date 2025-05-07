@@ -3,38 +3,37 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { createProxyMiddleware, fixRequestBody, Options } from 'http-proxy-middleware'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
 
-@Injectable()
-export class ProxyService {
-  private readonly logger = new Logger(ProxyService.name)
+export class LogProxy {
+  private readonly logger = new Logger(LogProxy.name)
 
-  createLogProxy(options: {
-    targetUrl: string
-    imageRef: string
-    authToken: string
-    req: IncomingMessage
-    res: ServerResponse<IncomingMessage>
-    next: NextFunction
-  }) {
-    const { targetUrl, imageRef, authToken, req, res, next } = options
+  constructor(
+    private readonly targetUrl: string,
+    private readonly imageRef: string,
+    private readonly authToken: string,
+    private readonly req: IncomingMessage,
+    private readonly res: ServerResponse<IncomingMessage>,
+    private readonly next: NextFunction,
+  ) {}
 
+  create() {
     const proxyOptions: Options = {
-      target: targetUrl,
+      target: this.targetUrl,
       ws: true,
       secure: false,
       changeOrigin: true,
       autoRewrite: true,
-      pathRewrite: () => `/images/logs?imageRef=${imageRef}`,
+      pathRewrite: () => `/images/logs?imageRef=${this.imageRef}`,
       headers: {
-        Authorization: `Bearer ${authToken}`,
+        Authorization: `Bearer ${this.authToken}`,
       },
       on: {
         proxyReq: (proxyReq: any, req: any) => {
-          proxyReq.setHeader('Authorization', `Bearer ${authToken}`)
+          proxyReq.setHeader('Authorization', `Bearer ${this.authToken}`)
           fixRequestBody(proxyReq, req)
         },
         proxyRes: (proxyRes: any, req: any, res: any) => {
@@ -84,13 +83,13 @@ export class ProxyService {
 
     try {
       const proxy = createProxyMiddleware(proxyOptions)
-      return proxy(req, res, next)
+      return proxy(this.req, this.res, this.next)
     } catch (error) {
       this.logger.error(`Failed to create proxy: ${error.message}`, error.stack)
-      if (!res.headersSent) {
+      if (!this.res.headersSent) {
         try {
-          res.writeHead(500, { 'Content-Type': 'text/plain' })
-          res.end(`Failed to create proxy: ${error.message}`)
+          this.res.writeHead(500, { 'Content-Type': 'text/plain' })
+          this.res.end(`Failed to create proxy: ${error.message}`)
         } catch (writeErr) {
           this.logger.error(`Failed to write error response: ${writeErr.message}`)
         }

@@ -57,7 +57,7 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
-import { ProxyService } from '../../common/services/proxy.service'
+import { LogProxy } from '../proxy/log-proxy'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -73,7 +73,6 @@ export class WorkspaceController {
     private readonly nodeService: NodeService,
     private readonly workspaceService: WorkspaceService,
     private readonly organizationService: OrganizationService,
-    private readonly proxyService: ProxyService,
   ) {}
 
   @Get()
@@ -456,15 +455,8 @@ export class WorkspaceController {
       throw new NotFoundException(`Node for workspace ${workspaceId} not found`)
     }
 
-    return this.proxyService.createLogProxy({
-      targetUrl: node.apiUrl,
-      // The imageRef is sent without the tag
-      imageRef: workspace.buildInfo.imageRef.split(':')[0],
-      authToken: node.apiKey,
-      req,
-      res,
-      next,
-    })
+    const logProxy = new LogProxy(node.apiUrl, workspace.buildInfo.imageRef.split(':')[0], node.apiKey, req, res, next)
+    return logProxy.create()
   }
 
   private async waitForWorkspaceState(

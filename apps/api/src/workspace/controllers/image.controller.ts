@@ -26,7 +26,6 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
 import { ImageService } from '../services/image.service'
 import { NodeService } from '../services/node.service'
-import { ProxyService } from '../../common/services/proxy.service'
 import {
   ApiOAuth2,
   ApiTags,
@@ -54,6 +53,7 @@ import { RequiredSystemRole } from '../../common/decorators/required-system-role
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetImageGeneralStatusDto } from '../dto/update-image.dto'
 import { BuildImageDto } from '../dto/build-image.dto'
+import { LogProxy } from '../proxy/log-proxy'
 
 @ApiTags('images')
 @Controller('images')
@@ -67,7 +67,6 @@ export class ImageController {
   constructor(
     private readonly imageService: ImageService,
     private readonly nodeService: NodeService,
-    private readonly proxyService: ProxyService,
   ) {}
 
   @Post()
@@ -292,13 +291,7 @@ export class ImageController {
       throw new NotFoundException(`Build node for image ${imageId} not found`)
     }
 
-    return this.proxyService.createLogProxy({
-      targetUrl: node.apiUrl,
-      imageRef: image.id,
-      authToken: node.apiKey,
-      req,
-      res,
-      next,
-    })
+    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, req, res, next)
+    return logProxy.create()
   }
 }
