@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { Plus } from 'lucide-react'
-import { ImageDto, ImageState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { ImageDto, ImageState, OrganizationRolePermissionsEnum, PaginatedImagesDto } from '@daytonaio/api-client'
 import { ImageTable } from '@/components/ImageTable'
 import {
   Dialog,
@@ -30,7 +30,12 @@ const Images: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
   const { imageApi } = useApi()
-  const [images, setImages] = useState<ImageDto[]>([])
+  const [imagesData, setImagesData] = useState<PaginatedImagesDto>({
+    items: [],
+    total: 0,
+    page: 1,
+    totalPages: 0,
+  })
   const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({})
   const [loadingTable, setLoadingTable] = useState(true)
   const [imageToDelete, setImageToDelete] = useState<ImageDto | null>(null)
@@ -42,6 +47,11 @@ const Images: React.FC = () => {
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
+  const [paginationParams, setPaginationParams] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
   const fetchImages = useCallback(
     async (showTableLoadingState = true) => {
       if (!selectedOrganization) {
@@ -51,16 +61,26 @@ const Images: React.FC = () => {
         setLoadingTable(true)
       }
       try {
-        const response = (await imageApi.getAllImages(selectedOrganization.id)).data
-        setImages(response.items)
+        const response = (
+          await imageApi.getAllImages(
+            selectedOrganization.id,
+            paginationParams.pageSize,
+            paginationParams.pageIndex + 1,
+          )
+        ).data
+        setImagesData(response)
       } catch (error) {
         handleApiError(error, 'Failed to fetch images')
       } finally {
         setLoadingTable(false)
       }
     },
-    [imageApi, selectedOrganization],
+    [imageApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
   )
+
+  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
+    setPaginationParams({ pageIndex, pageSize })
+  }, [])
 
   useEffect(() => {
     fetchImages()
@@ -68,19 +88,49 @@ const Images: React.FC = () => {
 
   useEffect(() => {
     const handleImageCreatedEvent = (image: ImageDto) => {
-      setImages((prev) => [image, ...prev])
+      if (paginationParams.pageIndex === 0) {
+        setImagesData((prev) => {
+          if (prev.items.some((i) => i.id === image.id)) {
+            return prev
+          }
+          const newImages = [image, ...prev.items]
+          const newTotal = prev.total + 1
+          return {
+            ...prev,
+            items: newImages.slice(0, paginationParams.pageSize),
+            total: newTotal,
+            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+          }
+        })
+      }
     }
 
     const handleImageStateUpdatedEvent = (data: { image: ImageDto; oldState: ImageState; newState: ImageState }) => {
-      setImages((prev) => prev.map((i) => (i.id === data.image.id ? data.image : i)))
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === data.image.id ? data.image : i)),
+      }))
     }
 
     const handleImageEnabledToggledEvent = (image: ImageDto) => {
-      setImages((prev) => prev.map((i) => (i.id === image.id ? image : i)))
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? image : i)),
+      }))
     }
 
     const handleImageRemovedEvent = (imageId: string) => {
-      setImages((prev) => prev.filter((i) => i.id !== imageId))
+      setImagesData((prev) => {
+        const newTotal = Math.max(0, prev.total - 1)
+        const newItems = prev.items.filter((i) => i.id !== imageId)
+
+        return {
+          ...prev,
+          items: newItems,
+          total: newTotal,
+          totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+        }
+      })
     }
 
     notificationSocket.on('image.created', handleImageCreatedEvent)
@@ -94,7 +144,16 @@ const Images: React.FC = () => {
       notificationSocket.off('image.enabled.toggled', handleImageEnabledToggledEvent)
       notificationSocket.off('image.removed', handleImageRemovedEvent)
     }
-  }, [notificationSocket])
+  }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
+
+  useEffect(() => {
+    if (imagesData.items.length === 0 && paginationParams.pageIndex > 0) {
+      setPaginationParams((prev) => ({
+        ...prev,
+        pageIndex: prev.pageIndex - 1,
+      }))
+    }
+  }, [imagesData.items.length, paginationParams.pageIndex])
 
   const validateImageName = (name: string): string | null => {
     // Basic format check
@@ -136,6 +195,13 @@ const Images: React.FC = () => {
       setNewImageName('')
       setNewEntrypoint('')
       toast.success(`Creating image ${newImageName}`)
+
+      if (paginationParams.pageIndex !== 0) {
+        setPaginationParams((prev) => ({
+          ...prev,
+          pageIndex: 0,
+        }))
+      }
     } catch (error) {
       handleApiError(error, 'Failed to create image')
     } finally {
@@ -269,7 +335,7 @@ const Images: React.FC = () => {
         </div>
 
         <ImageTable
-          data={images}
+          data={imagesData.items}
           loading={loadingTable}
           loadingImages={loadingImages}
           onDelete={(image) => {
@@ -277,6 +343,12 @@ const Images: React.FC = () => {
             setShowDeleteDialog(true)
           }}
           onToggleEnabled={handleToggleEnabled}
+          pageCount={imagesData.totalPages}
+          onPaginationChange={handlePaginationChange}
+          pagination={{
+            pageIndex: paginationParams.pageIndex,
+            pageSize: paginationParams.pageSize,
+          }}
         />
       </Dialog>
 
