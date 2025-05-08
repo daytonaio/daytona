@@ -7,8 +7,9 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"os"
+	"strings"
 
+	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 )
@@ -27,29 +28,35 @@ func GetObjectStorageClient() (ObjectStorageClient, error) {
 		return instance, nil
 	}
 
-	// TODO: fix to use env vars
-	// endpoint := os.Getenv("S3_ENDPOINT")
-	// accessKey := os.Getenv("S3_ACCESS_KEY")
-	// secretKey := os.Getenv("S3_SECRET_KEY")
-	// bucketName := os.Getenv("S3_DEFAULT_BUCKET")
-	endpoint := "minio:9000"
-	accessKey := "minioadmin"
-	secretKey := "minioadmin"
-	bucketName := "daytona"
-	useSSL := os.Getenv("MINIO_USE_SSL") == "true"
-
-	// Set defaults if not provided
-	if endpoint == "" || accessKey == "" || secretKey == "" || bucketName == "" {
-		return nil, fmt.Errorf("missing Minio configuration - endpoint, access key, secret key, or bucket name not provided")
+	runnerConfig, err := config.GetConfig()
+	if err != nil {
+		return nil, err
 	}
 
-	// Initialize Minio client
+	endpoint := runnerConfig.AWSEndpointUrl
+	accessKeyId := runnerConfig.AWSAccessKeyId
+	secretKey := runnerConfig.AWSSecretAccessKey
+	bucketName := runnerConfig.AWSDefaultBucket
+	region := runnerConfig.AWSRegion
+
+	endpoint = strings.TrimPrefix(endpoint, "http://")
+	endpoint = strings.TrimPrefix(endpoint, "https://")
+
+	useSSL := strings.Contains(endpoint, "https")
+
+	// Set defaults if not provided
+	if endpoint == "" || accessKeyId == "" || secretKey == "" || bucketName == "" || region == "" {
+		return nil, fmt.Errorf("missing S3 configuration - endpoint, access key, secret key, region, or bucket name not provided")
+	}
+
+	// Initialize S3 client (works for both MinIO and AWS S3)
 	client, err := minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKey, secretKey, ""),
+		Creds:  credentials.NewStaticV4(accessKeyId, secretKey, ""),
 		Secure: useSSL,
+		Region: region,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Minio client: %w", err)
+		return nil, fmt.Errorf("failed to create S3 client: %w", err)
 	}
 
 	instance = &minioClient{

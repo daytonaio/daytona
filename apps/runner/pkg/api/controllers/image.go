@@ -279,7 +279,7 @@ func GetBuildLogs(ctx *gin.Context) {
 				time.Sleep(500 * time.Millisecond)
 
 				// Check if the build is complete
-				exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkImageRef, true)
+				exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkImageRef, false)
 				if err != nil {
 					log.Errorf("Error checking build status: %v", err)
 				}
