@@ -34,6 +34,7 @@ type Config struct {
 	AWSEndpointUrl     string `envconfig:"AWS_ENDPOINT_URL"`
 	AWSAccessKeyId     string `envconfig:"AWS_ACCESS_KEY_ID"`
 	AWSSecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket   string `envconfig:"AWS_DEFAULT_BUCKET"`
 }
 
 var DEFAULT_API_PORT int = 8080
