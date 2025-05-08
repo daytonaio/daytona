@@ -18,7 +18,6 @@ import (
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -199,8 +198,9 @@ type ImageExistsResponse struct {
 //
 //	@Tags			images
 //	@Summary		Get build logs
-//	@Description	Stream build logs via websocket
+//	@Description	Stream build logs
 //	@Param			imageRef	query		string	true	"Image ID or image ref without the tag"
+//	@Param			follow		query		boolean	false	"Whether to follow the log output"
 //	@Success		200			{string}	string	"Build logs stream"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
@@ -217,6 +217,8 @@ func GetBuildLogs(ctx *gin.Context) {
 		return
 	}
 
+	follow := ctx.Query("follow") == "true"
+
 	logFilePath, err := config.GetBuildLogFilePath(imageRef)
 	if err != nil {
 		ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
@@ -228,39 +230,41 @@ func GetBuildLogs(ctx *gin.Context) {
 		return
 	}
 
-	// If it's a websocket request, stream the logs
-	if ctx.Request.Header.Get("Upgrade") == "websocket" {
-		var upgrader = websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
-		}
+	ctx.Header("Content-Type", "application/octet-stream")
 
-		conn, err := upgrader.Upgrade(ctx.Writer, ctx.Request, nil)
+	file, err := os.Open(logFilePath)
+	if err != nil {
+		ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
+		return
+	}
+	defer file.Close()
+
+	// If not following, just return the entire file content
+	if !follow {
+		_, err = io.Copy(ctx.Writer, file)
 		if err != nil {
 			ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
-			return
 		}
-		defer conn.Close()
+		return
+	}
 
-		file, err := os.Open(logFilePath)
-		if err != nil {
-			ctx.Error(common.NewCustomError(http.StatusInternalServerError, err.Error(), "INTERNAL_SERVER_ERROR"))
-			return
-		}
-		defer file.Close()
+	reader := bufio.NewReader(file)
+	runner := runner.GetInstance(nil)
 
-		reader := bufio.NewReader(file)
+	checkImageRef := imageRef
 
-		runner := runner.GetInstance(nil)
+	// Fixed tag for instances where we are not looking for an entry with image ID
+	if strings.HasPrefix(imageRef, "daytona") {
+		checkImageRef = imageRef + ":daytona"
+	}
 
-		checkImageRef := imageRef
+	flusher, ok := ctx.Writer.(http.Flusher)
+	if !ok {
+		ctx.Error(common.NewCustomError(http.StatusInternalServerError, "Streaming not supported", "STREAMING_NOT_SUPPORTED"))
+		return
+	}
 
-		// Fixed tag for instances where we are not looking for an entry with image ID
-		if strings.HasPrefix(imageRef, "daytona") {
-			checkImageRef = imageRef + ":daytona"
-		}
-
+	go func() {
 		for {
 			line, err := reader.ReadBytes('\n')
 			if err != nil && err != io.EOF {
@@ -269,29 +273,29 @@ func GetBuildLogs(ctx *gin.Context) {
 			}
 
 			if len(line) > 0 {
-				if err := conn.WriteMessage(websocket.TextMessage, line); err != nil {
-					log.Errorf("Error writing to websocket: %v", err)
+				_, writeErr := ctx.Writer.Write(line)
+				if writeErr != nil {
+					log.Errorf("Error writing to response: %v", writeErr)
 					break
 				}
-			}
-
-			if err == io.EOF {
-				time.Sleep(500 * time.Millisecond)
-
-				// Check if the build is complete
-				exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkImageRef, false)
-				if err != nil {
-					log.Errorf("Error checking build status: %v", err)
-				}
-
-				if exists {
-					// If image exists, build is complete, break the loop
-					break
-				}
+				flusher.Flush()
 			}
 		}
-	} else {
-		// For non-websocket requests, return the logs as a file
-		ctx.File(logFilePath)
+	}()
+
+	for {
+		exists, err := runner.Docker.ImageExists(ctx.Request.Context(), checkImageRef, false)
+		if err != nil {
+			log.Errorf("Error checking build status: %v", err)
+			break
+		}
+
+		if exists {
+			// If image exists, build is complete, allow time for the last logs to be written and break the loop
+			time.Sleep(1 * time.Second)
+			break
+		}
+
+		time.Sleep(250 * time.Millisecond)
 	}
 }

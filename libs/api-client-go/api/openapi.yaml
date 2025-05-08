@@ -1470,6 +1470,13 @@ paths:
           schema:
             type: string
           style: simple
+        - explode: true
+          in: query
+          name: follow
+          required: true
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           description: Build logs stream
@@ -3415,6 +3422,13 @@ paths:
           schema:
             type: string
           style: simple
+        - explode: true
+          in: query
+          name: follow
+          required: true
+          schema:
+            type: string
+          style: form
       responses:
         '200':
           description: ''

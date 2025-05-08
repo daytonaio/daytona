@@ -44,12 +44,10 @@ func GetObjectStorageClient() (ObjectStorageClient, error) {
 
 	useSSL := strings.Contains(endpoint, "https")
 
-	// Set defaults if not provided
 	if endpoint == "" || accessKeyId == "" || secretKey == "" || bucketName == "" || region == "" {
 		return nil, fmt.Errorf("missing S3 configuration - endpoint, access key, secret key, region, or bucket name not provided")
 	}
 
-	// Initialize S3 client (works for both MinIO and AWS S3)
 	client, err := minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyId, secretKey, ""),
 		Secure: useSSL,

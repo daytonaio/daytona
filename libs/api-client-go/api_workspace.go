@@ -634,7 +634,13 @@ type WorkspaceAPIGetBuildLogsRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
 	workspaceId            string
+	follow                 *string
 	xDaytonaOrganizationID *string
+}
+
+func (r WorkspaceAPIGetBuildLogsRequest) Follow(follow string) WorkspaceAPIGetBuildLogsRequest {
+	r.follow = &follow
+	return r
 }
 
 // Use with JWT to specify the organization ID
@@ -681,7 +687,11 @@ func (a *WorkspaceAPIService) GetBuildLogsExecute(r WorkspaceAPIGetBuildLogsRequ
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.follow == nil {
+		return nil, reportError("follow is required and must be specified")
+	}
 
+	parameterAddToHeaderOrQuery(localVarQueryParams, "follow", r.follow, "form", "")
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

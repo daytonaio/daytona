@@ -266,6 +266,7 @@ export class ImageController {
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
     @Param('id') imageId: string,
+    @Query('follow') follow?: string,
   ): Promise<void> {
     let image = await this.imageService.getImage(imageId)
 
@@ -291,7 +292,7 @@ export class ImageController {
       throw new NotFoundException(`Build node for image ${imageId} not found`)
     }
 
-    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, req, res, next)
+    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, follow === 'true', req, res, next)
     return logProxy.create()
   }
 }

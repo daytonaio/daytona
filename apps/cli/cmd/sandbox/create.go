@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -146,6 +147,10 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
+
+			// Wait for the last logs to be read
+			time.Sleep(250 * time.Millisecond)
+			stopLogs()
 		}
 
 		var nodeDomain string
