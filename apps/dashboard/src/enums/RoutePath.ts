@@ -12,6 +12,8 @@ export enum RoutePath {
   LANDING = '/',
   LOGOUT = '/logout',
   DASHBOARD = '/dashboard',
+  DOCS = '/docs',
+  SLACK = '/slack',
 
   // Dashboard sub-routes
   KEYS = '/dashboard/keys',
@@ -23,8 +25,7 @@ export enum RoutePath {
   MEMBERS = '/dashboard/members',
   ROLES = '/dashboard/roles',
   SETTINGS = '/dashboard/settings',
-  DOCS = '/docs',
-  SLACK = '/slack',
+  ONBOARDING = '/dashboard/onboarding',
 
   // User routes
   USER_INVITATIONS = '/dashboard/user/invitations',

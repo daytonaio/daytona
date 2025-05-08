@@ -31,6 +31,7 @@ import LandingPage from './pages/LandingPage'
 import Logout from './pages/Logout'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
+import Onboarding from '@/pages/Onboarding'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -163,6 +164,7 @@ function App() {
           }
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
+          <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
         </Route>
         {/* Add other routes as needed */}
       </Routes>
