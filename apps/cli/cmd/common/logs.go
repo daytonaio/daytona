@@ -6,14 +6,14 @@
 package common
 
 import (
+	"bufio"
 	"context"
 	"fmt"
+	"io"
+	"net/http"
 	"time"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/config"
-	"github.com/daytonaio/daytona/cli/internal/util"
-	"github.com/gorilla/websocket"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -33,61 +33,60 @@ const (
 )
 
 func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
-	query := ""
+	url := fmt.Sprintf("%s/%s/%s/build-logs", params.ServerUrl, params.ResourceType, params.Id)
 	if params.Follow != nil && *params.Follow {
-		query = "follow=true"
+		url = fmt.Sprintf("%s?follow=true", url)
 	}
 
-	for {
-		ws, res, err := util.GetWebsocketConn(ctx, fmt.Sprintf("/%s/%s/build-logs", params.ResourceType, params.Id), params.ServerUrl, params.ServerApi, &query)
-		// We want to retry getting the logs if it fails
-		if err != nil {
-			log.Trace(apiclient.HandleErrorResponse(res, err))
-			time.Sleep(250 * time.Millisecond)
-			continue
-		}
-
-		readPlainTextLog(ctx, ws)
-		ws.Close()
-		break
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		log.Errorf("Failed to create request: %v", err)
+		return
 	}
-}
 
-func readPlainTextLog(ctx context.Context, ws *websocket.Conn) {
-	messagesChan := make(chan string)
-	readErr := make(chan error)
+	if params.ServerApi.Key != nil {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *params.ServerApi.Key))
+	} else if params.ServerApi.Token != nil {
+		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.ServerApi.Token.AccessToken))
+	}
 
-	go func() {
-		for {
-			_, message, err := ws.ReadMessage()
+	req.Header.Add("Accept", "application/octet-stream")
 
-			if len(message) > 0 {
-				messagesChan <- string(message)
-			}
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Errorf("Failed to connect to server: %v", err)
+		return
+	}
+	defer resp.Body.Close()
 
-			if err != nil {
-				if websocket.IsUnexpectedCloseError(err, websocket.CloseNormalClosure) {
-					log.Error(err)
-				}
-				readErr <- err
-				return
-			}
-		}
-	}()
+	if resp.StatusCode != http.StatusOK {
+		log.Errorf("Server returned non-OK status: %d", resp.StatusCode)
+		return
+	}
+
+	reader := bufio.NewReader(resp.Body)
+	buffer := make([]byte, 4096)
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case message := <-messagesChan:
-			fmt.Println(message)
-		case err := <-readErr:
+		default:
+			n, err := reader.Read(buffer)
+			if n > 0 {
+				fmt.Print(string(buffer[:n]))
+			}
+
 			if err != nil {
-				err := ws.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
-				if err != nil {
-					log.Trace(err)
+				if err == io.EOF {
+					if params.Follow != nil && *params.Follow {
+						time.Sleep(500 * time.Millisecond)
+						continue
+					}
+					return
 				}
-				ws.Close()
+				log.Errorf("Error reading from stream: %v", err)
 				return
 			}
 		}

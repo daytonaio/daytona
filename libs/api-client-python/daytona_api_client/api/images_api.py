@@ -1199,6 +1199,7 @@ class ImagesApi:
     def get_image_build_logs(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1218,6 +1219,8 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1244,6 +1247,7 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1269,6 +1273,7 @@ class ImagesApi:
     def get_image_build_logs_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1288,6 +1293,8 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1314,6 +1321,7 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1339,6 +1347,7 @@ class ImagesApi:
     def get_image_build_logs_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1358,6 +1367,8 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1384,6 +1395,7 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1404,6 +1416,7 @@ class ImagesApi:
     def _get_image_build_logs_serialize(
         self,
         id,
+        follow,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1429,6 +1442,10 @@ class ImagesApi:
         if id is not None:
             _path_params['id'] = id
         # process the query parameters
+        if follow is not None:
+            
+            _query_params.append(('follow', follow))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

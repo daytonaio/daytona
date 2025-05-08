@@ -157,7 +157,7 @@ const docTemplate = `{
         },
         "/images/logs": {
             "get": {
-                "description": "Stream build logs via websocket",
+                "description": "Stream build logs",
                 "tags": [
                     "images"
                 ],
@@ -170,6 +170,12 @@ const docTemplate = `{
                         "name": "imageRef",
                         "in": "query",
                         "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether to follow the log output",
+                        "name": "follow",
+                        "in": "query"
                     }
                 ],
                 "responses": {

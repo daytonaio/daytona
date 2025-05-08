@@ -1159,6 +1159,7 @@ class WorkspaceApi:
     def get_build_logs(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1178,6 +1179,8 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1204,6 +1207,7 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1229,6 +1233,7 @@ class WorkspaceApi:
     def get_build_logs_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1248,6 +1253,8 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1274,6 +1281,7 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1299,6 +1307,7 @@ class WorkspaceApi:
     def get_build_logs_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
+        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -1318,6 +1327,8 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
+        :param follow: (required)
+        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -1344,6 +1355,7 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
+            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1364,6 +1376,7 @@ class WorkspaceApi:
     def _get_build_logs_serialize(
         self,
         workspace_id,
+        follow,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -1389,6 +1402,10 @@ class WorkspaceApi:
         if workspace_id is not None:
             _path_params['workspaceId'] = workspace_id
         # process the query parameters
+        if follow is not None:
+            
+            _query_params.append(('follow', follow))
+            
         # process the header parameters
         if x_daytona_organization_id is not None:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id

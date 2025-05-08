@@ -440,6 +440,7 @@ export class WorkspaceController {
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
     @Param('workspaceId') workspaceId: string,
+    @Query('follow') follow?: string,
   ): Promise<void> {
     const workspace = await this.workspaceService.findOne(workspaceId)
     if (!workspace || !workspace.nodeId) {
@@ -455,7 +456,15 @@ export class WorkspaceController {
       throw new NotFoundException(`Node for workspace ${workspaceId} not found`)
     }
 
-    const logProxy = new LogProxy(node.apiUrl, workspace.buildInfo.imageRef.split(':')[0], node.apiKey, req, res, next)
+    const logProxy = new LogProxy(
+      node.apiUrl,
+      workspace.buildInfo.imageRef.split(':')[0],
+      node.apiKey,
+      follow === 'true',
+      req,
+      res,
+      next,
+    )
     return logProxy.create()
   }
 

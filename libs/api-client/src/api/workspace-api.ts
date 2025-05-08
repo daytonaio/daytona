@@ -249,17 +249,21 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
+     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs: async (
       workspaceId: string,
+      follow: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
       assertParamExists('getBuildLogs', 'workspaceId', workspaceId)
+      // verify required parameter 'follow' is not null or undefined
+      assertParamExists('getBuildLogs', 'follow', follow)
       const localVarPath = `/workspace/{workspaceId}/build-logs`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -280,6 +284,10 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
       await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
+
+      if (follow !== undefined) {
+        localVarQueryParameter['follow'] = follow
+      }
 
       if (xDaytonaOrganizationID != null) {
         localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
@@ -837,17 +845,20 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
+     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getBuildLogs(
       workspaceId: string,
+      follow: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(
         workspaceId,
+        follow,
         xDaytonaOrganizationID,
         options,
       )
@@ -1196,17 +1207,19 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
+     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs(
       workspaceId: string,
+      follow: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .getBuildLogs(workspaceId, xDaytonaOrganizationID, options)
+        .getBuildLogs(workspaceId, follow, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1441,14 +1454,20 @@ export class WorkspaceApi extends BaseAPI {
    *
    * @summary Get build logs
    * @param {string} workspaceId ID of the workspace
+   * @param {string} follow
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public getBuildLogs(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getBuildLogs(
+    workspaceId: string,
+    follow: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return WorkspaceApiFp(this.configuration)
-      .getBuildLogs(workspaceId, xDaytonaOrganizationID, options)
+      .getBuildLogs(workspaceId, follow, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

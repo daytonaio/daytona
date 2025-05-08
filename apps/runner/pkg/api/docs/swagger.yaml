@@ -302,7 +302,7 @@ paths:
         - images
   /images/logs:
     get:
-      description: Stream build logs via websocket
+      description: Stream build logs
       operationId: GetBuildLogs
       parameters:
         - description: Image ID or image ref without the tag
@@ -310,6 +310,10 @@ paths:
           name: imageRef
           required: true
           type: string
+        - description: Whether to follow the log output
+          in: query
+          name: follow
+          type: boolean
       responses:
         '200':
           description: Build logs stream

@@ -6,6 +6,7 @@ package image
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
@@ -78,6 +79,10 @@ var BuildCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
+
+		// Wait for the last logs to be read
+		time.Sleep(250 * time.Millisecond)
+		stopLogs()
 
 		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
 			return common.AwaitImageState(ctx, apiClient, imageName, daytonaapiclient.IMAGESTATE_ACTIVE)

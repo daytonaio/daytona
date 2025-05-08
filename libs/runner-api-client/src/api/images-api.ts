@@ -83,13 +83,18 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
       }
     },
     /**
-     * Stream build logs via websocket
+     * Stream build logs
      * @summary Get build logs
      * @param {string} imageRef Image ID or image ref without the tag
+     * @param {boolean} [follow] Whether to follow the log output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getBuildLogs: async (imageRef: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    getBuildLogs: async (
+      imageRef: string,
+      follow?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
       // verify required parameter 'imageRef' is not null or undefined
       assertParamExists('getBuildLogs', 'imageRef', imageRef)
       const localVarPath = `/images/logs`
@@ -109,6 +114,10 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
 
       if (imageRef !== undefined) {
         localVarQueryParameter['imageRef'] = imageRef
+      }
+
+      if (follow !== undefined) {
+        localVarQueryParameter['follow'] = follow
       }
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
@@ -267,17 +276,19 @@ export const ImagesApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Stream build logs via websocket
+     * Stream build logs
      * @summary Get build logs
      * @param {string} imageRef Image ID or image ref without the tag
+     * @param {boolean} [follow] Whether to follow the log output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getBuildLogs(
       imageRef: string,
+      follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(imageRef, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(imageRef, follow, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ImagesApi.getBuildLogs']?.[localVarOperationServerIndex]?.url
@@ -379,14 +390,15 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
       return localVarFp.buildImage(request, options).then((request) => request(axios, basePath))
     },
     /**
-     * Stream build logs via websocket
+     * Stream build logs
      * @summary Get build logs
      * @param {string} imageRef Image ID or image ref without the tag
+     * @param {boolean} [follow] Whether to follow the log output
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    getBuildLogs(imageRef: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.getBuildLogs(imageRef, options).then((request) => request(axios, basePath))
+    getBuildLogs(imageRef: string, follow?: boolean, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.getBuildLogs(imageRef, follow, options).then((request) => request(axios, basePath))
     },
     /**
      * Check if a specified Docker image exists locally
@@ -443,16 +455,17 @@ export class ImagesApi extends BaseAPI {
   }
 
   /**
-   * Stream build logs via websocket
+   * Stream build logs
    * @summary Get build logs
    * @param {string} imageRef Image ID or image ref without the tag
+   * @param {boolean} [follow] Whether to follow the log output
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ImagesApi
    */
-  public getBuildLogs(imageRef: string, options?: RawAxiosRequestConfig) {
+  public getBuildLogs(imageRef: string, follow?: boolean, options?: RawAxiosRequestConfig) {
     return ImagesApiFp(this.configuration)
-      .getBuildLogs(imageRef, options)
+      .getBuildLogs(imageRef, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
