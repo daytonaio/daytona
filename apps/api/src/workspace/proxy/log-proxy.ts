@@ -28,13 +28,14 @@ export class LogProxy {
       changeOrigin: true,
       autoRewrite: true,
       pathRewrite: () => `/images/logs?imageRef=${this.imageRef}`,
-      headers: {
-        Authorization: `Bearer ${this.authToken}`,
-      },
       on: {
         proxyReq: (proxyReq: any, req: any) => {
           proxyReq.setHeader('Authorization', `Bearer ${this.authToken}`)
           fixRequestBody(proxyReq, req)
+        },
+        proxyReqWs: (proxyReq: any, req: any, socket: any, options: any, head: any) => {
+          this.logger.debug('WebSocket connection upgrading')
+          proxyReq.setHeader('Authorization', `Bearer ${this.authToken}`)
         },
         proxyRes: (proxyRes: any, req: any, res: any) => {
           Object.keys(proxyRes.headers).forEach((key) => {
@@ -46,34 +47,33 @@ export class LogProxy {
           })
         },
         open: (proxySocket: any) => {
-          const pingInterval = setInterval(() => {
-            if (proxySocket.readyState === proxySocket.OPEN) {
-              proxySocket.ping()
-            } else {
-              clearInterval(pingInterval)
-            }
-          }, 5000)
+          this.logger.debug('WebSocket connection opened')
 
-          proxySocket.on('error', (err: Error) => {
-            this.logger.error(`Proxy WebSocket error: ${err.message}`, err.stack)
-            clearInterval(pingInterval)
-          })
+          // Set socket timeout
+          proxySocket.setTimeout(60000)
 
+          // Track active connections if needed
+          // this.activeConnections.add(proxySocket)
+
+          // Listen for socket-specific events
           proxySocket.on('close', () => {
-            this.logger.debug('Proxy WebSocket connection closed')
-            clearInterval(pingInterval)
+            this.logger.debug('WebSocket connection closed')
+            // this.activeConnections.delete(proxySocket)
           })
         },
         error: (err: Error, req: any, res: any) => {
           this.logger.error(`Proxy error: ${err.message}`, err.stack)
 
-          if (!res.headersSent) {
+          // Check if res is a valid HTTP response object before using writeHead
+          if (!res.headersSent && typeof res.writeHead === 'function') {
             try {
               res.writeHead(500, { 'Content-Type': 'text/plain' })
               res.end(`Proxy error: ${err.message}`)
             } catch (writeErr) {
               this.logger.error(`Failed to write error response: ${writeErr.message}`)
             }
+          } else {
+            this.logger.error(`Proxy WebSocket error: ${err.message}`)
           }
         },
       },
