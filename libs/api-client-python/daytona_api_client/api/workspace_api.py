@@ -1159,8 +1159,8 @@ class WorkspaceApi:
     def get_build_logs(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1179,10 +1179,10 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1207,8 +1207,8 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1233,8 +1233,8 @@ class WorkspaceApi:
     def get_build_logs_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1253,10 +1253,10 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1281,8 +1281,8 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1307,8 +1307,8 @@ class WorkspaceApi:
     def get_build_logs_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1327,10 +1327,10 @@ class WorkspaceApi:
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1355,8 +1355,8 @@ class WorkspaceApi:
 
         _param = self._get_build_logs_serialize(
             workspace_id=workspace_id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1376,8 +1376,8 @@ class WorkspaceApi:
     def _get_build_logs_serialize(
         self,
         workspace_id,
-        follow,
         x_daytona_organization_id,
+        follow,
         _request_auth,
         _content_type,
         _headers,

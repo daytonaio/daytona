@@ -1470,12 +1470,13 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Whether to follow the logs stream
+          explode: true
           in: query
           name: follow
-          required: true
+          required: false
           schema:
-            type: string
+            type: boolean
           style: form
       responses:
         '200':
@@ -3422,12 +3423,13 @@ paths:
           schema:
             type: string
           style: simple
-        - explode: true
+        - description: Whether to follow the logs stream
+          explode: true
           in: query
           name: follow
-          required: true
+          required: false
           schema:
-            type: string
+            type: boolean
           style: form
       responses:
         '200':

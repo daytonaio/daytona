@@ -17,7 +17,7 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictFloat, StrictInt, StrictStr
+from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.build_image import BuildImage
@@ -1199,8 +1199,8 @@ class ImagesApi:
     def get_image_build_logs(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1219,10 +1219,10 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1247,8 +1247,8 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1273,8 +1273,8 @@ class ImagesApi:
     def get_image_build_logs_with_http_info(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1293,10 +1293,10 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1321,8 +1321,8 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1347,8 +1347,8 @@ class ImagesApi:
     def get_image_build_logs_without_preload_content(
         self,
         id: Annotated[StrictStr, Field(description="Image ID")],
-        follow: StrictStr,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        follow: Annotated[Optional[StrictBool], Field(description="Whether to follow the logs stream")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1367,10 +1367,10 @@ class ImagesApi:
 
         :param id: Image ID (required)
         :type id: str
-        :param follow: (required)
-        :type follow: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
+        :param follow: Whether to follow the logs stream
+        :type follow: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1395,8 +1395,8 @@ class ImagesApi:
 
         _param = self._get_image_build_logs_serialize(
             id=id,
-            follow=follow,
             x_daytona_organization_id=x_daytona_organization_id,
+            follow=follow,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1416,8 +1416,8 @@ class ImagesApi:
     def _get_image_build_logs_serialize(
         self,
         id,
-        follow,
         x_daytona_organization_id,
+        follow,
         _request_auth,
         _content_type,
         _headers,

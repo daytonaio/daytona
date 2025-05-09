@@ -22,6 +22,7 @@ import {
   Request,
   RawBodyRequest,
   Next,
+  ParseBoolPipe,
 } from '@nestjs/common'
 import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -434,13 +435,19 @@ export class WorkspaceController {
     status: 200,
     description: 'Build logs stream',
   })
+  @ApiQuery({
+    name: 'follow',
+    required: false,
+    type: Boolean,
+    description: 'Whether to follow the logs stream',
+  })
   @UseGuards(WorkspaceAccessGuard)
   async getBuildLogs(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
     @Param('workspaceId') workspaceId: string,
-    @Query('follow') follow?: string,
+    @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
   ): Promise<void> {
     const workspace = await this.workspaceService.findOne(workspaceId)
     if (!workspace || !workspace.nodeId) {
@@ -460,7 +467,7 @@ export class WorkspaceController {
       node.apiUrl,
       workspace.buildInfo.imageRef.split(':')[0],
       node.apiKey,
-      follow === 'true',
+      follow === true,
       req,
       res,
       next,

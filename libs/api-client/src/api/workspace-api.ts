@@ -249,21 +249,19 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
-     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs: async (
       workspaceId: string,
-      follow: string,
       xDaytonaOrganizationID?: string,
+      follow?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
       assertParamExists('getBuildLogs', 'workspaceId', workspaceId)
-      // verify required parameter 'follow' is not null or undefined
-      assertParamExists('getBuildLogs', 'follow', follow)
       const localVarPath = `/workspace/{workspaceId}/build-logs`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -845,21 +843,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
-     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getBuildLogs(
       workspaceId: string,
-      follow: string,
       xDaytonaOrganizationID?: string,
+      follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(
         workspaceId,
-        follow,
         xDaytonaOrganizationID,
+        follow,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
@@ -1207,19 +1205,19 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
      *
      * @summary Get build logs
      * @param {string} workspaceId ID of the workspace
-     * @param {string} follow
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getBuildLogs(
       workspaceId: string,
-      follow: string,
       xDaytonaOrganizationID?: string,
+      follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .getBuildLogs(workspaceId, follow, xDaytonaOrganizationID, options)
+        .getBuildLogs(workspaceId, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1454,20 +1452,20 @@ export class WorkspaceApi extends BaseAPI {
    *
    * @summary Get build logs
    * @param {string} workspaceId ID of the workspace
-   * @param {string} follow
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [follow] Whether to follow the logs stream
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
   public getBuildLogs(
     workspaceId: string,
-    follow: string,
     xDaytonaOrganizationID?: string,
+    follow?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .getBuildLogs(workspaceId, follow, xDaytonaOrganizationID, options)
+      .getBuildLogs(workspaceId, xDaytonaOrganizationID, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
