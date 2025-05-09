@@ -18,16 +18,20 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import GettingStarted from '@/components/GettingStarted'
 import { toast } from 'sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNavigate } from 'react-router-dom'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { handleApiError } from '@/lib/error-handling'
 import { RoutePath } from '@/enums/RoutePath'
+import { useAuth } from 'react-oidc-context'
+import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
+import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 
 const Workspaces: React.FC = () => {
-  const { workspaceApi } = useApi()
+  const { workspaceApi, apiKeyApi } = useApi()
+  const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
 
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
@@ -178,28 +182,69 @@ const Workspaces: React.FC = () => {
     }
   }
 
+  // Redirect user to the onboarding page if they haven't created an api key yet
+  // Perform only once per user
+  useEffect(() => {
+    const onboardIfNeeded = async () => {
+      if (!selectedOrganization) {
+        return
+      }
+
+      const skipOnboardingKey = `${LocalStorageKey.SkipOnboardingPrefix}${user?.profile.sub}`
+      const shouldSkipOnboarding = getLocalStorageItem(skipOnboardingKey) === 'true'
+
+      if (shouldSkipOnboarding) {
+        return
+      }
+
+      try {
+        const keys = (await apiKeyApi.listApiKeys(selectedOrganization.id)).data
+        if (keys.length === 0) {
+          setLocalStorageItem(skipOnboardingKey, 'true')
+          navigate(RoutePath.ONBOARDING)
+        } else {
+          // Future onboarding checks can be skipped for this user because they already created an api key
+          setLocalStorageItem(skipOnboardingKey, 'true')
+        }
+      } catch (error) {
+        console.error('Failed to check if user needs onboarding', error)
+      }
+    }
+
+    onboardIfNeeded()
+  }, [navigate, user, selectedOrganization, apiKeyApi])
+
   return (
     <div className="p-6">
       <div className="mb-6">
-        {(workspaces.length > 0 || loadingTable) && <h1 className="text-2xl font-bold">Sandboxes</h1>}
+        <h1 className="text-2xl font-bold">Sandboxes</h1>
+        {!loadingTable && workspaces.length === 0 && (
+          <p className="text-sm text-muted-foreground mt-1">
+            To get started, check out the{' '}
+            <button className="text-primary" onClick={() => navigate(RoutePath.ONBOARDING)}>
+              Onboarding
+            </button>{' '}
+            guide. For more examples, check out the{' '}
+            <a href={DAYTONA_DOCS_URL} target="_blank" rel="noopener noreferrer" className="text-primary">
+              Docs
+            </a>
+            .
+          </p>
+        )}
       </div>
-      {workspaces.length === 0 && !loadingTable ? (
-        <GettingStarted />
-      ) : (
-        <WorkspaceTable
-          loadingWorkspaces={loadingWorkspaces}
-          handleStart={handleStart}
-          handleStop={handleStop}
-          handleDelete={(id) => {
-            setWorkspaceToDelete(id)
-            setShowDeleteDialog(true)
-          }}
-          handleBulkDelete={handleBulkDelete}
-          handleArchive={handleArchive}
-          data={workspaces}
-          loading={loadingTable}
-        />
-      )}
+      <WorkspaceTable
+        loadingWorkspaces={loadingWorkspaces}
+        handleStart={handleStart}
+        handleStop={handleStop}
+        handleDelete={(id) => {
+          setWorkspaceToDelete(id)
+          setShowDeleteDialog(true)
+        }}
+        handleBulkDelete={handleBulkDelete}
+        handleArchive={handleArchive}
+        data={workspaces}
+        loading={loadingTable}
+      />
 
       {workspaceToDelete && (
         <Dialog
