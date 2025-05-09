@@ -100,6 +100,14 @@ const Workspaces: React.FC = () => {
 
   const handleStart = async (id: string) => {
     setLoadingWorkspaces((prev) => ({ ...prev, [id]: true }))
+
+    // Save the current state
+    const workspaceToStart = workspaces.find((w) => w.id === id)
+    const previousState = workspaceToStart?.state
+
+    // Optimistically update the workspace state
+    setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: WorkspaceState.STARTING } : w)))
+
     try {
       await workspaceApi.startWorkspace(id, selectedOrganization?.id)
       toast.success(`Starting sandbox with ID: ${id}`)
@@ -115,6 +123,8 @@ const Workspaces: React.FC = () => {
           </Button>
         ) : undefined,
       )
+      // Revert the optimistic update
+      setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
     } finally {
       setLoadingWorkspaces((prev) => ({ ...prev, [id]: false }))
     }
@@ -122,11 +132,21 @@ const Workspaces: React.FC = () => {
 
   const handleStop = async (id: string) => {
     setLoadingWorkspaces((prev) => ({ ...prev, [id]: true }))
+
+    // Save the current state
+    const workspaceToStop = workspaces.find((w) => w.id === id)
+    const previousState = workspaceToStop?.state
+
+    // Optimistically update the workspace state
+    setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: WorkspaceState.STOPPING } : w)))
+
     try {
       await workspaceApi.stopWorkspace(id, selectedOrganization?.id)
       toast.success(`Stopping sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
+      // Revert the optimistic update
+      setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
     } finally {
       setLoadingWorkspaces((prev) => ({ ...prev, [id]: false }))
     }
@@ -134,6 +154,14 @@ const Workspaces: React.FC = () => {
 
   const handleDelete = async (id: string) => {
     setLoadingWorkspaces((prev) => ({ ...prev, [id]: true }))
+
+    // Save the current state
+    const workspaceToDelete = workspaces.find((w) => w.id === id)
+    const previousState = workspaceToDelete?.state
+
+    // Optimistically update the workspace state
+    setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: WorkspaceState.DESTROYING } : w)))
+
     try {
       await workspaceApi.deleteWorkspace(id, true, selectedOrganization?.id)
       setWorkspaceToDelete(null)
@@ -141,6 +169,8 @@ const Workspaces: React.FC = () => {
       toast.success(`Deleting sandbox with ID:  ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete sandbox')
+      // Revert the optimistic update
+      setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
     } finally {
       setLoadingWorkspaces((prev) => ({ ...prev, [id]: false }))
     }
@@ -150,11 +180,21 @@ const Workspaces: React.FC = () => {
     setLoadingWorkspaces((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
 
     for (const id of ids) {
+      // Save the current state
+      const workspaceToDelete = workspaces.find((w) => w.id === id)
+      const previousState = workspaceToDelete?.state
+
+      // Optimistically update the workspace state
+      setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: WorkspaceState.DESTROYING } : w)))
+
       try {
         await workspaceApi.deleteWorkspace(id, true, selectedOrganization?.id)
         toast.success(`Deleting sandbox with ID: ${id}`)
       } catch (error) {
         handleApiError(error, 'Failed to delete sandbox')
+
+        // Revert the optimistic update
+        setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
 
         // Wait for user decision
         const shouldContinue = window.confirm(
@@ -172,11 +212,21 @@ const Workspaces: React.FC = () => {
 
   const handleArchive = async (id: string) => {
     setLoadingWorkspaces((prev) => ({ ...prev, [id]: true }))
+
+    // Save the current state
+    const workspaceToArchive = workspaces.find((w) => w.id === id)
+    const previousState = workspaceToArchive?.state
+
+    // Optimistically update the workspace state
+    setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: WorkspaceState.ARCHIVING } : w)))
+
     try {
       await workspaceApi.archiveWorkspace(id, selectedOrganization?.id)
       toast.success(`Archiving sandbox with ID: ${id}`)
     } catch (error) {
       handleApiError(error, 'Failed to archive sandbox')
+      // Revert the optimistic update
+      setWorkspaces((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
     } finally {
       setLoadingWorkspaces((prev) => ({ ...prev, [id]: false }))
     }

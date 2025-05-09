@@ -211,6 +211,13 @@ const Images: React.FC = () => {
 
   const handleDelete = async (image: ImageDto) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+
+    // Optimistically update the image state
+    setImagesData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
+    }))
+
     try {
       await imageApi.removeImage(image.id, selectedOrganization?.id)
       setImageToDelete(null)
@@ -218,6 +225,11 @@ const Images: React.FC = () => {
       toast.success(`Deleting image ${image.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete image')
+      // Revert the optimistic update
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
+      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
     }
@@ -225,11 +237,23 @@ const Images: React.FC = () => {
 
   const handleToggleEnabled = async (image: ImageDto, enabled: boolean) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+
+    // Optimistically update the image enabled flag
+    setImagesData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled } : i)),
+    }))
+
     try {
       await imageApi.toggleImageState(image.id, { enabled }, selectedOrganization?.id)
       toast.success(`${enabled ? 'Enabling' : 'Disabling'} image ${image.name}`)
     } catch (error) {
       handleApiError(error, enabled ? 'Failed to enable image' : 'Failed to disable image')
+      // Revert the optimistic update
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled: image.enabled } : i)),
+      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
     }
