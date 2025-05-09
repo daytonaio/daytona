@@ -11,6 +11,7 @@ import {
   Container,
   CreditCard,
   KeyRound,
+  ListChecks,
   LogOut,
   Mail,
   Moon,
@@ -239,6 +240,16 @@ export function Sidebar() {
                   >
                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                  </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full cursor-pointer justify-start"
+                    onClick={() => navigate(RoutePath.ONBOARDING)}
+                  >
+                    <ListChecks className="w-4 h-4" />
+                    Onboarding
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

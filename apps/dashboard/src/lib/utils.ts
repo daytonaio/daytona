@@ -49,3 +49,7 @@ export function getRelativeTimeString(timestamp?: string, fallback = '-'): { dat
 export function capitalize(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
+
+export function getMaskedApiKey(key: string) {
+  return `${key.substring(0, 3)}********************${key.slice(-3)}`
+}
