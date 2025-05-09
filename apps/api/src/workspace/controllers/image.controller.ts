@@ -21,6 +21,7 @@ import {
   Request,
   RawBodyRequest,
   Next,
+  ParseBoolPipe,
 } from '@nestjs/common'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
@@ -260,13 +261,19 @@ export class ImageController {
     name: 'id',
     description: 'Image ID',
   })
+  @ApiQuery({
+    name: 'follow',
+    required: false,
+    type: Boolean,
+    description: 'Whether to follow the logs stream',
+  })
   @UseGuards(ImageAccessGuard)
   async getImageBuildLogs(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
     @Param('id') imageId: string,
-    @Query('follow') follow?: string,
+    @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
   ): Promise<void> {
     let image = await this.imageService.getImage(imageId)
 
@@ -292,7 +299,7 @@ export class ImageController {
       throw new NotFoundException(`Build node for image ${imageId} not found`)
     }
 
-    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, follow === 'true', req, res, next)
+    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, follow === true, req, res, next)
     return logProxy.create()
   }
 }

@@ -607,18 +607,19 @@ type ImagesAPIGetImageBuildLogsRequest struct {
 	ctx                    context.Context
 	ApiService             ImagesAPI
 	id                     string
-	follow                 *string
 	xDaytonaOrganizationID *string
-}
-
-func (r ImagesAPIGetImageBuildLogsRequest) Follow(follow string) ImagesAPIGetImageBuildLogsRequest {
-	r.follow = &follow
-	return r
+	follow                 *bool
 }
 
 // Use with JWT to specify the organization ID
 func (r ImagesAPIGetImageBuildLogsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ImagesAPIGetImageBuildLogsRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Whether to follow the logs stream
+func (r ImagesAPIGetImageBuildLogsRequest) Follow(follow bool) ImagesAPIGetImageBuildLogsRequest {
+	r.follow = &follow
 	return r
 }
 
@@ -660,11 +661,10 @@ func (a *ImagesAPIService) GetImageBuildLogsExecute(r ImagesAPIGetImageBuildLogs
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.follow == nil {
-		return nil, reportError("follow is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "follow", r.follow, "form", "")
+	if r.follow != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "follow", r.follow, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 
