@@ -43,15 +43,15 @@ export interface StorageAccessDto {
    */
   storageUrl: string
   /**
-   * Registry ID
-   * @type {string}
-   * @memberof StorageAccessDto
-   */
-  registryId: string
-  /**
    * Organization ID
    * @type {string}
    * @memberof StorageAccessDto
    */
   organizationId: string
+  /**
+   * S3 bucket name
+   * @type {string}
+   * @memberof StorageAccessDto
+   */
+  bucket: string
 }

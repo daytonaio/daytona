@@ -9,8 +9,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
+	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/storage"
 
@@ -152,7 +154,23 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildIm
 	}
 	defer resp.Body.Close()
 
-	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, d.logWriter, 0, true, nil)
+	// Extract image name without tag
+	filePath := buildImageDto.Image[:strings.LastIndex(buildImageDto.Image, ":")]
+
+	logFilePath, err := config.GetBuildLogFilePath(filePath)
+	if err != nil {
+		return err
+	}
+
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("Failed to open log file:", err)
+	}
+	defer logFile.Close()
+
+	multiWriter := io.MultiWriter(d.logWriter, logFile)
+
+	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, multiWriter, 0, true, nil)
 	if err != nil {
 		return fmt.Errorf("failed to stream build output: %w", err)
 	}

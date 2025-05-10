@@ -245,6 +245,57 @@ export const ImagesApiAxiosParamCreator = function (configuration?: Configuratio
     },
     /**
      *
+     * @summary Get image build logs
+     * @param {string} id Image ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getImageBuildLogs: async (
+      id: string,
+      xDaytonaOrganizationID?: string,
+      follow?: boolean,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('getImageBuildLogs', 'id', id)
+      const localVarPath = `/images/{id}/build-logs`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (follow !== undefined) {
+        localVarQueryParameter['follow'] = follow
+      }
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
      * @summary Delete image
      * @param {string} id Image ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -515,6 +566,38 @@ export const ImagesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get image build logs
+     * @param {string} id Image ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getImageBuildLogs(
+      id: string,
+      xDaytonaOrganizationID?: string,
+      follow?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getImageBuildLogs(
+        id,
+        xDaytonaOrganizationID,
+        follow,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ImagesApi.getImageBuildLogs']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary Delete image
      * @param {string} id Image ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -678,6 +761,25 @@ export const ImagesApiFactory = function (configuration?: Configuration, basePat
     },
     /**
      *
+     * @summary Get image build logs
+     * @param {string} id Image ID
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {boolean} [follow] Whether to follow the logs stream
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getImageBuildLogs(
+      id: string,
+      xDaytonaOrganizationID?: string,
+      follow?: boolean,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .getImageBuildLogs(id, xDaytonaOrganizationID, follow, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary Delete image
      * @param {string} id Image ID
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -793,6 +895,27 @@ export class ImagesApi extends BaseAPI {
   public getImage(id: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ImagesApiFp(this.configuration)
       .getImage(id, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get image build logs
+   * @param {string} id Image ID
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {boolean} [follow] Whether to follow the logs stream
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ImagesApi
+   */
+  public getImageBuildLogs(
+    id: string,
+    xDaytonaOrganizationID?: string,
+    follow?: boolean,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ImagesApiFp(this.configuration)
+      .getImageBuildLogs(id, xDaytonaOrganizationID, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

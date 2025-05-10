@@ -4,9 +4,12 @@
 package config
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/joho/godotenv"
@@ -31,6 +34,7 @@ type Config struct {
 	AWSEndpointUrl     string `envconfig:"AWS_ENDPOINT_URL"`
 	AWSAccessKeyId     string `envconfig:"AWS_ACCESS_KEY_ID"`
 	AWSSecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY"`
+	AWSDefaultBucket   string `envconfig:"AWS_DEFAULT_BUCKET"`
 }
 
 var DEFAULT_API_PORT int = 8080
@@ -88,4 +92,28 @@ func GetContainerRuntime() string {
 
 func GetNodeEnv() string {
 	return config.NodeEnv
+}
+
+func GetBuildLogFilePath(imageRef string) (string, error) {
+	buildId := imageRef
+	if colonIndex := strings.Index(imageRef, ":"); colonIndex != -1 {
+		buildId = imageRef[:colonIndex]
+	}
+
+	c, err := GetConfig()
+	if err != nil {
+		return "", err
+	}
+
+	logPath := filepath.Join(filepath.Dir(c.LogFilePath), "builds", buildId)
+
+	if err := os.MkdirAll(filepath.Dir(logPath), 0755); err != nil {
+		return "", fmt.Errorf("failed to create log directory: %w", err)
+	}
+
+	if _, err := os.OpenFile(logPath, os.O_CREATE, 0644); err != nil {
+		return "", fmt.Errorf("failed to create log file: %w", err)
+	}
+
+	return logPath, nil
 }

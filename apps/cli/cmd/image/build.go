@@ -6,9 +6,12 @@ package image
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/util"
 	views_common "github.com/daytonaio/daytona/cli/views/common"
 	views_util "github.com/daytonaio/daytona/cli/views/util"
 	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
@@ -43,7 +46,7 @@ var BuildCmd = &cobra.Command{
 		}
 
 		// Send build request
-		_, res, err := apiClient.ImagesAPI.BuildImage(ctx).BuildImage(daytonaapiclient.BuildImage{
+		image, res, err := apiClient.ImagesAPI.BuildImage(ctx).BuildImage(daytonaapiclient.BuildImage{
 			Name:      imageName,
 			BuildInfo: *createBuildInfoDto,
 		}).Execute()
@@ -51,8 +54,38 @@ var BuildCmd = &cobra.Command{
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		err = views_util.WithInlineSpinner("Waiting for the image to build", func() error {
-			return common.AwaitImageActive(ctx, apiClient, imageName)
+		c, err := config.GetConfig()
+		if err != nil {
+			return err
+		}
+
+		activeProfile, err := c.GetActiveProfile()
+		if err != nil {
+			return err
+		}
+
+		logsContext, stopLogs := context.WithCancel(context.Background())
+		defer stopLogs()
+
+		go common.ReadBuildLogs(logsContext, common.ReadLogParams{
+			Id:           image.Id,
+			ServerUrl:    activeProfile.Api.Url,
+			ServerApi:    activeProfile.Api,
+			Follow:       util.Pointer(true),
+			ResourceType: common.ResourceTypeImage,
+		})
+
+		err = common.AwaitImageState(ctx, apiClient, imageName, daytonaapiclient.IMAGESTATE_PENDING)
+		if err != nil {
+			return err
+		}
+
+		// Wait for the last logs to be read
+		time.Sleep(250 * time.Millisecond)
+		stopLogs()
+
+		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
+			return common.AwaitImageState(ctx, apiClient, imageName, daytonaapiclient.IMAGESTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

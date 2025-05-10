@@ -31,14 +31,14 @@ export class StorageAccessDto {
   storageUrl: string
 
   @ApiProperty({
-    description: 'Registry ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  registryId: string
-
-  @ApiProperty({
     description: 'Organization ID',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   organizationId: string
+
+  @ApiProperty({
+    description: 'S3 bucket name',
+    example: 'daytona',
+  })
+  bucket: string
 }
