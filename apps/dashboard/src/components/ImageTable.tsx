@@ -90,6 +90,11 @@ export function ImageTable({
       },
     },
     getRowId: (row) => row.id,
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   })
 
   return (

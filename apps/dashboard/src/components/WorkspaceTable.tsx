@@ -121,6 +121,11 @@ export function WorkspaceTable({
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
+    initialState: {
+      pagination: {
+        pageSize: 25,
+      },
+    },
   })
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 
