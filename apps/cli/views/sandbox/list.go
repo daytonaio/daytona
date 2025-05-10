@@ -27,8 +27,6 @@ func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationN
 		return
 	}
 
-	SortSandboxes(&sandboxList)
-
 	headers := []string{"Sandbox", "State", "Region", "Class", "Last Event"}
 
 	data := [][]string{}
