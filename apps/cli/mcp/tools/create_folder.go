@@ -19,6 +19,17 @@ func CreateFolder(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
+	}
+
 	// Get folder path from request arguments
 	folderPath, ok := request.Params.Arguments["folder_path"].(string)
 	if !ok {
@@ -31,14 +42,8 @@ func CreateFolder(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTo
 		mode = modeArg
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
 	// Create the folder
-	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, sandboxID).Path(folderPath).Mode(mode).Execute()
+	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, sandboxId).Path(folderPath).Mode(mode).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error creating folder: %v", err)
 	}
