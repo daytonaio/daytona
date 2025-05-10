@@ -166,8 +166,27 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, string, error) {
 		return nil, "", errors.New("container has no IP address, it might not be running")
 	}
 
+	targetHost := fmt.Sprintf("%s:2280", containerIP)
+
+	var conn net.Conn
+	conn, err = net.DialTimeout("tcp", targetHost, 1*time.Second)
+	if err != nil {
+		startErr := runner.Docker.StartDaytonaDaemon(ctx.Request.Context(), sandboxId)
+		if startErr != nil {
+			ctx.Error(startErr)
+			return nil, "", startErr
+		}
+
+		conn, err = net.DialTimeout("tcp", targetHost, 1*time.Second)
+		if err != nil {
+			ctx.Error(err)
+			return nil, "", err
+		}
+	}
+	defer conn.Close()
+
 	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
+	targetURL := fmt.Sprintf("http://%s", targetHost)
 	target, err := url.Parse(targetURL)
 	if err != nil {
 		ctx.Error(common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))

@@ -11,7 +11,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) startDaytonaDaemon(ctx context.Context, containerId string) error {
+func (d *DockerClient) StartDaytonaDaemon(ctx context.Context, containerId string) error {
 	execOptions := container.ExecOptions{
 		Cmd:          []string{"sh", "-c", "daytona"},
 		AttachStdout: true,
