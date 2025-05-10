@@ -138,7 +138,15 @@ export function Sidebar() {
                     <Card className="w-full m-0 p-0 mb-4 cursor-pointer border-red-600 bg-red-100/80 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       <CardHeader className="py-2 pl-2">
                         <CardTitle className="text-sm flex items-center gap-2">
-                          <TriangleAlert className="w-4 h-4" /> Organization suspended
+                          <TriangleAlert className="w-4 h-4 flex-shrink-0" />
+                          <div className="overflow-hidden">
+                            Organization suspended
+                            {selectedOrganization.suspensionReason && (
+                              <div className="text-xs text-muted-foreground text-ellipsis overflow-hidden">
+                                ({selectedOrganization.suspensionReason})
+                              </div>
+                            )}
+                          </div>
                         </CardTitle>
                       </CardHeader>
                     </Card>
