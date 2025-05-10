@@ -10,45 +10,19 @@ import (
 
 	"github.com/daytonaio/runner/cmd/runner/config"
 	"github.com/daytonaio/runner/pkg/api/dto"
-	"github.com/daytonaio/runner/pkg/ports"
 
 	"github.com/docker/docker/api/types/container"
-	"github.com/docker/go-connections/nat"
 )
 
 func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.Config, *container.HostConfig, error) {
-	portBindings, err := d.managePortBindings()
-	if err != nil {
-		return nil, nil, err
-	}
-
 	containerConfig := d.getContainerCreateConfig(sandboxDto)
 
-	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, portBindings, volumeMountPathBinds)
+	hostConfig, err := d.getContainerHostConfig(ctx, sandboxDto, volumeMountPathBinds)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	return containerConfig, hostConfig, nil
-}
-
-func (d *DockerClient) managePortBindings() (map[nat.Port][]nat.PortBinding, error) {
-	var portBindings map[nat.Port][]nat.PortBinding
-
-	availablePort, err := ports.GetAvailableEphemeralPort()
-	if err != nil {
-		return nil, err
-	}
-
-	portBindings = make(map[nat.Port][]nat.PortBinding)
-	portBindings["2280/tcp"] = []nat.PortBinding{
-		{
-			HostIP:   "0.0.0.0",
-			HostPort: fmt.Sprintf("%d", availablePort),
-		},
-	}
-
-	return portBindings, nil
 }
 
 func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) *container.Config {
@@ -62,10 +36,6 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 		envVars = append(envVars, fmt.Sprintf("%s=%s", key, value))
 	}
 
-	exposedPorts := nat.PortSet{
-		"2280/tcp": struct{}{},
-	}
-
 	return &container.Config{
 		Hostname: sandboxDto.Id,
 		Image:    sandboxDto.Image,
@@ -74,11 +44,10 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 		Entrypoint:   sandboxDto.Entrypoint,
 		AttachStdout: true,
 		AttachStderr: true,
-		ExposedPorts: exposedPorts,
 	}
 }
 
-func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, portBindings map[nat.Port][]nat.PortBinding, volumeMountPathBinds []string) (*container.HostConfig, error) {
+func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
 	var binds []string
 
 	if d.daytonaBinaryURL != "" {
@@ -94,9 +63,8 @@ func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dt
 	}
 
 	hostConfig := &container.HostConfig{
-		Privileged:   true,
-		ExtraHosts:   []string{"host.docker.internal:host-gateway"},
-		PortBindings: portBindings,
+		Privileged: true,
+		ExtraHosts: []string{"host.docker.internal:host-gateway"},
 		Resources: container.Resources{
 			CPUPeriod:  100000,
 			CPUQuota:   sandboxDto.CpuQuota * 100000,

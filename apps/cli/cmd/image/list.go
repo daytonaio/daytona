@@ -5,12 +5,18 @@ package image
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
 	"github.com/daytonaio/daytona/cli/views/image"
 	"github.com/spf13/cobra"
+)
+
+var (
+	pageFlag  int
+	limitFlag int
 )
 
 var ListCmd = &cobra.Command{
@@ -26,8 +32,20 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		images, res, err := apiClient.ImagesAPI.GetAllImages(ctx).Execute()
+		page := float32(1.0)
+		limit := float32(100.0)
+
+		if cmd.Flags().Changed("page") {
+			page = float32(pageFlag)
+		}
+
+		if cmd.Flags().Changed("limit") {
+			limit = float32(limitFlag)
+		}
+
+		images, res, err := apiClient.ImagesAPI.GetAllImages(ctx).Page(page).Limit(limit).Execute()
 		if err != nil {
+			fmt.Printf("Error: %v\n", err)
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
@@ -54,4 +72,6 @@ var ListCmd = &cobra.Command{
 
 func init() {
 	common.RegisterFormatFlag(ListCmd)
+	ListCmd.Flags().IntVarP(&pageFlag, "page", "p", 1, "Page number for pagination (starting from 1)")
+	ListCmd.Flags().IntVarP(&limitFlag, "limit", "l", 100, "Maximum number of items per page")
 }

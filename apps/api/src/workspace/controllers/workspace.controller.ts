@@ -143,7 +143,7 @@ export class WorkspaceController {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    if (workspaceCount + workspaceQuota >= organization.workspaceQuota) {
+    if (workspaceCount + workspaceQuota > organization.workspaceQuota) {
       throw new ForbiddenException(`Workspace quota exceeded. Maximum allowed: ${organization.workspaceQuota}`)
     }
 

@@ -61,7 +61,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, showCopy = true }
       {showCopy && (
         <button
           onClick={copyToClipboard}
-          className="absolute right-2 top-2 p-2 text-gray-400 hover:text-white transition-colors"
+          className="absolute right-2 top-2.5 p-2 text-gray-400 hover:text-white transition-colors"
           aria-label="Copy code"
         >
           {copied ? <CheckIcon className="h-4 w-4 text-green-500" /> : <ClipboardIcon className="h-4 w-4" />}

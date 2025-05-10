@@ -31,7 +31,6 @@ export class EmailService {
       port,
       auth: user && password ? { user, pass: password } : undefined,
       secure,
-      from,
     })
   }
 
@@ -46,6 +45,7 @@ export class EmailService {
 
     try {
       await this.transporter.sendMail({
+        from: this.options.from,
         to: payload.inviteeEmail,
         subject: 'Invitation to join a Daytona organization',
         html: await renderFile(path.join(__dirname, 'assets/templates/organization-invitation.template.ejs'), {

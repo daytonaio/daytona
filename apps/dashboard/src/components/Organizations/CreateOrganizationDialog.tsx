@@ -19,6 +19,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Link } from 'react-router-dom'
 import { Label } from '@/components/ui/label'
+import { RoutePath } from '@/enums/RoutePath'
 
 interface CreateOrganizationDialogProps {
   open: boolean
@@ -99,7 +100,7 @@ export const CreateOrganizationDialog: React.FC<CreateOrganizationDialogProps> =
                   <>
                     To get started, add a payment method on the{' '}
                     <Link
-                      to="/dashboard/billing"
+                      to={RoutePath.BILLING}
                       className="text-blue-500 hover:underline"
                       onClick={(e) => {
                         onOpenChange(false)

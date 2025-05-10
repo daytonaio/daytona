@@ -22,6 +22,7 @@ import { Input } from '@/components/ui/input'
 import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermissionsGroups'
 import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
 import { Label } from '@/components/ui/label'
+import { getMaskedApiKey } from '@/lib/utils'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
@@ -110,13 +111,6 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
     }
   }
 
-  const getMaskedKey = () => {
-    if (!createdKey) {
-      return ''
-    }
-    return `${createdKey.value.substring(0, 3)}********************${createdKey.value.slice(-3)}`
-  }
-
   return (
     <Dialog
       open={open}
@@ -152,7 +146,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
                   onMouseEnter={() => setIsCreatedKeyRevealed(true)}
                   onMouseLeave={() => setIsCreatedKeyRevealed(false)}
                 >
-                  {isCreatedKeyRevealed ? createdKey.value : getMaskedKey()}
+                  {isCreatedKeyRevealed ? createdKey.value : getMaskedApiKey(createdKey.value)}
                 </span>
                 {(copied === 'API Key' && <Check className="w-4 h-4" />) || (
                   <Copy

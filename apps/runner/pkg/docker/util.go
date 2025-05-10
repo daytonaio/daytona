@@ -4,7 +4,6 @@
 package docker
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -89,30 +88,11 @@ func (d *DockerClient) getNodeVolumeMountPath(volumeId string) string {
 	return volumePath
 }
 
-func (d *DockerClient) isDirectoryMounted(path string) (bool, error) {
-	cmd := exec.Command("mount")
+func (d *DockerClient) isDirectoryMounted(path string) bool {
+	cmd := exec.Command("mountpoint", path)
+	_, err := cmd.Output()
 
-	var out bytes.Buffer
-	cmd.Stdout = &out
-
-	err := cmd.Run()
-	if err != nil {
-		return false, fmt.Errorf("failed to execute mount command: %w", err)
-	}
-
-	mounts := strings.Split(out.String(), "\n")
-	for _, mount := range mounts {
-		mountFields := strings.Fields(mount)
-		if len(mountFields) >= 3 {
-			// The mount point is typically the third field
-			// Check if it matches the exact path we're looking for
-			if mountFields[2] == path {
-				return true, nil
-			}
-		}
-	}
-
-	return false, nil
+	return err == nil
 }
 
 func (d *DockerClient) getMountCmd(ctx context.Context, volume, path string) *exec.Cmd {
