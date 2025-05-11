@@ -11,6 +11,7 @@ import {
   Container,
   CreditCard,
   KeyRound,
+  ListChecks,
   LogOut,
   Mail,
   Moon,
@@ -50,6 +51,8 @@ import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { addHours, formatRelative } from 'date-fns'
+import { RoutePath } from '@/enums/RoutePath'
+import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 
 export function Sidebar() {
   const { theme, setTheme } = useTheme()
@@ -61,33 +64,33 @@ export function Sidebar() {
 
   const sidebarItems = useMemo(() => {
     const arr = [
-      { icon: <Container className="w-5 h-5" />, label: 'Sandboxes', path: '/dashboard/sandboxes' },
-      { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: '/dashboard/keys' },
+      { icon: <Container className="w-5 h-5" />, label: 'Sandboxes', path: RoutePath.SANDBOXES },
+      { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: RoutePath.KEYS },
       {
         icon: <Box className="w-5 h-5" />,
         label: 'Images',
-        path: '/dashboard/images',
+        path: RoutePath.IMAGES,
       },
-      { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: '/dashboard/registries' },
-      { icon: <ChartColumn className="w-5 h-5" />, label: 'Usage', path: '/dashboard/usage' },
+      { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
+      { icon: <ChartColumn className="w-5 h-5" />, label: 'Usage', path: RoutePath.USAGE },
     ]
 
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
     ) {
-      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: '/dashboard/billing' })
+      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
     }
 
     if (!selectedOrganization?.personal) {
-      arr.push({ icon: <Users className="w-5 h-5" />, label: 'Members', path: '/dashboard/members' })
+      arr.push({ icon: <Users className="w-5 h-5" />, label: 'Members', path: RoutePath.MEMBERS })
 
       // TODO: uncomment when we allow creating custom roles
       // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
-      //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: '/dashboard/roles' })
+      //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
-    arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: '/dashboard/settings' })
+    arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
     return arr
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
 
@@ -135,7 +138,15 @@ export function Sidebar() {
                     <Card className="w-full m-0 p-0 mb-4 cursor-pointer border-red-600 bg-red-100/80 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
                       <CardHeader className="py-2 pl-2">
                         <CardTitle className="text-sm flex items-center gap-2">
-                          <TriangleAlert className="w-4 h-4" /> Organization suspended
+                          <TriangleAlert className="w-4 h-4 flex-shrink-0" />
+                          <div className="overflow-hidden">
+                            Organization suspended
+                            {selectedOrganization.suspensionReason && (
+                              <div className="text-xs text-muted-foreground text-ellipsis overflow-hidden">
+                                ({selectedOrganization.suspensionReason})
+                              </div>
+                            )}
+                          </div>
                         </CardTitle>
                       </CardHeader>
                     </Card>
@@ -179,12 +190,7 @@ export function Sidebar() {
           )}
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
-              <a
-                href="https://go.daytona.io/slack"
-                className="text-xs h-8 py-0"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <a href={DAYTONA_SLACK_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <Slack className="!w-4 !h-4 fill-foreground" />
                 <span>Slack</span>
               </a>
@@ -192,7 +198,7 @@ export function Sidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem key="docs">
             <SidebarMenuButton asChild>
-              <a href="https://daytona.io/docs" className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
+              <a href={DAYTONA_DOCS_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
                 <BookOpen className="!w-4 !h-4" />
                 <span>Docs</span>
               </a>
@@ -223,7 +229,7 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     className="w-full cursor-pointer justify-start"
-                    onClick={() => navigate('/dashboard/user/invitations')}
+                    onClick={() => navigate(RoutePath.USER_INVITATIONS)}
                   >
                     <Mail className="w-4 h-4" />
                     Invitations
@@ -242,6 +248,16 @@ export function Sidebar() {
                   >
                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     {theme === 'dark' ? 'Light mode' : 'Dark mode'}
+                  </Button>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Button
+                    variant="ghost"
+                    className="w-full cursor-pointer justify-start"
+                    onClick={() => navigate(RoutePath.ONBOARDING)}
+                  >
+                    <ListChecks className="w-4 h-4" />
+                    Onboarding
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

@@ -7,7 +7,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
   SortingState,
@@ -38,9 +37,27 @@ interface ImageTableProps {
   onDelete: (image: ImageDto) => void
   onBulkDelete: (ids: string[]) => void
   onToggleEnabled: (image: ImageDto, enabled: boolean) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-export function ImageTable({ data, loading, loadingImages, onDelete, onBulkDelete, onToggleEnabled }: ImageTableProps) {
+
+export function ImageTable({
+  data,
+  loading,
+  loadingImages,
+  onDelete,
+  onBulkDelete,
+  onToggleEnabled,
+  pagination,
+  pageCount,
+  onPaginationChange,
+}: DataTableProps) {
+
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
@@ -65,11 +82,25 @@ export function ImageTable({ data, loading, loadingImages, onDelete, onBulkDelet
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    enableRowSelection: true,
-    state: { sorting },
+
     onSortingChange: setSorting,
+    getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
+    pageCount: pageCount || 1,
+    onPaginationChange: pagination
+      ? (updater) => {
+          const newPagination = typeof updater === 'function' ? updater(table.getState().pagination) : updater
+          onPaginationChange(newPagination)
+        }
+      : undefined,
+    state: {
+      sorting,
+      pagination: {
+        pageIndex: pagination?.pageIndex || 0,
+        pageSize: pagination?.pageSize || 10,
+      },
+    },
+
     getRowId: (row) => row.id,
   })
 
@@ -301,11 +332,11 @@ const SortableHeader = ({ column, title }: { column: any; title: string }) => (
 const getStateIcon = (state: ImageState) => {
   switch (state) {
     case ImageState.ACTIVE:
-      return <CheckCircle className="w-4 h-4" />
+      return <CheckCircle className="w-4 h-4 flex-shrink-0" />
     case ImageState.ERROR:
-      return <AlertTriangle className="w-4 h-4" />
+      return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
     default:
-      return <Timer className="w-4 h-4" />
+      return <Timer className="w-4 h-4 flex-shrink-0" />
   }
 }
 

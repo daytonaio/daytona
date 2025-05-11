@@ -404,7 +404,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 w-24 justify-start"
           >
             State
             {column.getIsSorted() === 'asc' ? (
@@ -441,7 +441,7 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 px-2 ${color}`}>
+          <div className={`flex items-center gap-2 px-2 w-24 ${color}`}>
             {getStateIcon(state)}
             <span>{getStateLabel(state)}</span>
           </div>

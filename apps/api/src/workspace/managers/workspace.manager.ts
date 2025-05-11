@@ -125,6 +125,9 @@ export class WorkspaceManager {
         desiredState: Raw(() => '"Workspace"."desiredState"::text != "Workspace"."state"::text'),
       },
       take: 100,
+      order: {
+        lastActivityAt: 'DESC',
+      },
     })
 
     await Promise.all(
@@ -333,18 +336,72 @@ export class WorkspaceManager {
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
     })
+
+    const lockKey = 'archive-lock-' + workspace.nodeId
+    if (await this.redisLockProvider.lock(lockKey, 10)) {
+      return
+    }
+
+    const inProgressOnNode = await this.workspaceRepository.find({
+      where: {
+        nodeId: workspace.nodeId,
+        state: In([WorkspaceState.ARCHIVING]),
+      },
+      order: {
+        lastActivityAt: 'DESC',
+      },
+      take: 100,
+    })
+
+    //  if the workspace is already in progress, continue
+    if (!inProgressOnNode.find((w) => w.id === workspace.id)) {
+      //  max 3 workspaces can be archived at the same time on the same node
+      //  this is to prevent the node from being overloaded
+      if (inProgressOnNode.length > 2) {
+        await this.redisLockProvider.unlock(lockKey)
+        return
+      }
+    }
+
     switch (workspace.state) {
       case WorkspaceState.STOPPED: {
-        if (workspace.snapshotState === SnapshotState.COMPLETED) {
-          await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVED)
-          break
-        }
-
         await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVING)
         //  fallthrough to archiving state
       }
       case WorkspaceState.ARCHIVING: {
-        //  TODO: timeout logic
+        await this.redisLockProvider.unlock(lockKey)
+
+        //  if the snapshot state is error, we need to retry the snapshot
+        if (workspace.snapshotState === SnapshotState.ERROR) {
+          const archiveErrorRetryKey = 'archive-error-retry-' + workspace.id
+          const archiveErrorRetryCountRaw = await this.redis.get(archiveErrorRetryKey)
+          const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
+          //  if the archive error retry count is greater than 3, we need to mark the workspace as error
+          if (archiveErrorRetryCount > 3) {
+            await this.updateWorkspaceErrorState(workspace.id, 'Failed to archive workspace')
+            await this.redis.del(archiveErrorRetryKey)
+            await this.redis.del(workspace.id)
+            break
+          }
+          await this.redis.setex('archive-error-retry-' + workspace.id, 720, String(archiveErrorRetryCount + 1))
+
+          //  reset the snapshot state to pending to retry the snapshot
+          await this.workspaceRepository.update(workspace.id, {
+            snapshotState: SnapshotState.PENDING,
+          })
+
+          await this.redis.del(workspace.id)
+          break
+        }
+
+        // Check for timeout - if more than 30 minutes since last activity
+        const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
+        if (workspace.lastActivityAt < thirtyMinutesAgo) {
+          await this.updateWorkspaceErrorState(workspace.id, 'Archiving operation timed out')
+          await this.redis.del(workspace.id)
+          break
+        }
+
         if (workspace.snapshotState !== SnapshotState.COMPLETED) {
           await this.redis.del(workspace.id)
           break
@@ -369,6 +426,8 @@ export class WorkspaceManager {
               break
             default:
               await nodeWorkspaceApi.destroy(workspace.id)
+              await this.redis.del(workspace.id)
+              this.syncInstanceState(workspace.id)
               break
           }
         } catch (error) {

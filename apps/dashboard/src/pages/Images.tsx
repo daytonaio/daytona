@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { Plus } from 'lucide-react'
-import { ImageDto, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { ImageDto, ImageState, OrganizationRolePermissionsEnum, PaginatedImagesDto } from '@daytonaio/api-client'
 import { ImageTable } from '@/components/ImageTable'
 import {
   Dialog,
@@ -30,7 +30,14 @@ const Images: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
-  const [images, setImages] = useState<ImageDto[]>([])
+
+  const { imageApi } = useApi()
+  const [imagesData, setImagesData] = useState<PaginatedImagesDto>({
+    items: [],
+    total: 0,
+    page: 1,
+    totalPages: 0,
+  })
   const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({})
   const [loadingTable, setLoadingTable] = useState(true)
 
@@ -42,36 +49,94 @@ const Images: React.FC = () => {
   const [entrypoint, setEntrypoint] = useState('')
   const [loadingCreate, setLoadingCreate] = useState(false)
 
+  const [paginationParams, setPaginationParams] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  })
+
   const fetchImages = useCallback(
     async (showTableLoading = true) => {
       if (!selectedOrganization) return
       if (showTableLoading) setLoadingTable(true)
       try {
-        const response = (await imageApi.getAllImages(selectedOrganization.id)).data
-        setImages(response.items)
+        const response = (
+          await imageApi.getAllImages(
+            selectedOrganization.id,
+            paginationParams.pageSize,
+            paginationParams.pageIndex + 1,
+          )
+        ).data
+        setImagesData(response)
       } catch (error) {
         handleApiError(error, 'Failed to fetch images')
       } finally {
         setLoadingTable(false)
       }
     },
-    [imageApi, selectedOrganization],
+    [imageApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
   )
+
+  const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
+    setPaginationParams({ pageIndex, pageSize })
+  }, [])
 
   useEffect(() => {
     fetchImages()
   }, [fetchImages])
 
   useEffect(() => {
-    const onCreate = (image: ImageDto) => setImages((prev) => [image, ...prev])
-    const onUpdate = (data: { image: ImageDto }) =>
-      setImages((prev) => prev.map((i) => (i.id === data.image.id ? data.image : i)))
-    const onRemove = (id: string) => setImages((prev) => prev.filter((i) => i.id !== id))
 
-    notificationSocket.on('image.created', onCreate)
-    notificationSocket.on('image.state.updated', onUpdate)
-    notificationSocket.on('image.enabled.toggled', onUpdate)
-    notificationSocket.on('image.removed', onRemove)
+    const handleImageCreatedEvent = (image: ImageDto) => {
+      if (paginationParams.pageIndex === 0) {
+        setImagesData((prev) => {
+          if (prev.items.some((i) => i.id === image.id)) {
+            return prev
+          }
+          const newImages = [image, ...prev.items]
+          const newTotal = prev.total + 1
+          return {
+            ...prev,
+            items: newImages.slice(0, paginationParams.pageSize),
+            total: newTotal,
+            totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+          }
+        })
+      }
+    }
+
+    const handleImageStateUpdatedEvent = (data: { image: ImageDto; oldState: ImageState; newState: ImageState }) => {
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === data.image.id ? data.image : i)),
+      }))
+    }
+
+    const handleImageEnabledToggledEvent = (image: ImageDto) => {
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? image : i)),
+      }))
+    }
+
+    const handleImageRemovedEvent = (imageId: string) => {
+      setImagesData((prev) => {
+        const newTotal = Math.max(0, prev.total - 1)
+        const newItems = prev.items.filter((i) => i.id !== imageId)
+
+        return {
+          ...prev,
+          items: newItems,
+          total: newTotal,
+          totalPages: Math.ceil(newTotal / paginationParams.pageSize),
+        }
+      })
+    }
+
+    notificationSocket.on('image.created', handleImageCreatedEvent)
+    notificationSocket.on('image.state.updated', handleImageStateUpdatedEvent)
+    notificationSocket.on('image.enabled.toggled', handleImageEnabledToggledEvent)
+    notificationSocket.on('image.removed', handleImageRemovedEvent)
+
 
     return () => {
       notificationSocket.off('image.created', onCreate)
@@ -79,7 +144,16 @@ const Images: React.FC = () => {
       notificationSocket.off('image.enabled.toggled', onUpdate)
       notificationSocket.off('image.removed', onRemove)
     }
-  }, [notificationSocket])
+  }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
+
+  useEffect(() => {
+    if (imagesData.items.length === 0 && paginationParams.pageIndex > 0) {
+      setPaginationParams((prev) => ({
+        ...prev,
+        pageIndex: prev.pageIndex - 1,
+      }))
+    }
+  }, [imagesData.items.length, paginationParams.pageIndex])
 
   const validateImageName = (name: string): string | null => {
     const regex = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
@@ -107,8 +181,16 @@ const Images: React.FC = () => {
       )
       toast.success(`Creating image ${imageName}`)
       setShowCreateDialog(false)
-      setImageName('')
-      setEntrypoint('')
+      setNewImageName('')
+      setNewEntrypoint('')
+      toast.success(`Creating image ${newImageName}`)
+
+      if (paginationParams.pageIndex !== 0) {
+        setPaginationParams((prev) => ({
+          ...prev,
+          pageIndex: 0,
+        }))
+      }
     } catch (error) {
       handleApiError(error, 'Failed to create image')
     } finally {
@@ -116,22 +198,7 @@ const Images: React.FC = () => {
     }
   }, [imageApi, imageName, entrypoint, selectedOrganization])
 
-  const handleDelete = useCallback(
-    async (image: ImageDto) => {
-      setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
-      try {
-        await imageApi.removeImage(image.id, selectedOrganization?.id)
-        toast.success(`Deleted image ${image.name}`)
-        setImageToDelete(null)
-        setShowDeleteDialog(false)
-      } catch (error) {
-        handleApiError(error, 'Failed to delete image')
-      } finally {
-        setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
-      }
-    },
-    [imageApi, selectedOrganization],
-  )
+
 
   const handleBulkDelete = async (ids: string[]) => {
     setLoadingImages((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
@@ -148,16 +215,53 @@ const Images: React.FC = () => {
       } finally {
         setLoadingImages((prev) => ({ ...prev, [id]: false }))
       }
+
+  const handleDelete = async (image: ImageDto) => {
+    setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+
+    // Optimistically update the image state
+    setImagesData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
+    }))
+
+    try {
+      await imageApi.removeImage(image.id, selectedOrganization?.id)
+      setImageToDelete(null)
+      setShowDeleteDialog(false)
+      toast.success(`Deleting image ${image.name}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to delete image')
+      // Revert the optimistic update
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
+      }))
+    } finally {
+      setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+
     }
   }
 
   const handleToggleEnabled = async (image: ImageDto, enabled: boolean) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+
+    // Optimistically update the image enabled flag
+    setImagesData((prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled } : i)),
+    }))
+
     try {
       await imageApi.toggleImageState(image.id, { enabled }, selectedOrganization?.id)
       toast.success(`${enabled ? 'Enabled' : 'Disabled'} image ${image.name}`)
     } catch (error) {
       handleApiError(error, enabled ? 'Failed to enable image' : 'Failed to disable image')
+      // Revert the optimistic update
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled: image.enabled } : i)),
+      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
     }
@@ -256,10 +360,75 @@ const Images: React.FC = () => {
               variant="default"
               disabled={!imageName.trim() || !!validateImageName(imageName) || loadingCreate}
             >
-              {loadingCreate ? 'Creating...' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
+
+              <div className="space-y-3">
+                <Label htmlFor="name">Image Name</Label>
+                <Input
+                  id="name"
+                  value={newImageName}
+                  onChange={(e) => setNewImageName(e.target.value)}
+                  placeholder="ubuntu:22.04"
+                />
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  Must include a tag (e.g., ubuntu:22.04). The tag "latest" is not allowed.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
+                <Input
+                  id="entrypoint"
+                  value={newEntrypoint}
+                  onChange={(e) => setNewEntrypoint(e.target.value)}
+                  placeholder="sleep infinity"
+                />
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  Ensure that the entrypoint is a long running command. If not provided, or if the image does not have
+                  an entrypoint, 'sleep infinity' will be used as the default.
+                </p>
+              </div>
+            </form>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="secondary">
+                  Cancel
+                </Button>
+              </DialogClose>
+              {loadingCreate ? (
+                <Button type="button" variant="default" disabled>
+                  Creating...
+                </Button>
+              ) : (
+                <Button
+                  type="submit"
+                  form="create-image-form"
+                  variant="default"
+                  disabled={!newImageName.trim() || validateImageName(newImageName) !== null}
+                >
+                  Create
+                </Button>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </div>
+
+        <ImageTable
+          data={imagesData.items}
+          loading={loadingTable}
+          loadingImages={loadingImages}
+          onDelete={(image) => {
+            setImageToDelete(image)
+            setShowDeleteDialog(true)
+          }}
+          onBulkDelete={handleBulkDelete}
+          onToggleEnabled={handleToggleEnabled}
+          pageCount={imagesData.totalPages}
+          onPaginationChange={handlePaginationChange}
+          pagination={{
+            pageIndex: paginationParams.pageIndex,
+            pageSize: paginationParams.pageSize,
+          }}
+        />
+
       </Dialog>
 
       {/* DELETE DIALOG */}

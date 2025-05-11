@@ -10,8 +10,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
