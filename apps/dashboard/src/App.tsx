@@ -32,6 +32,7 @@ import Logout from './pages/Logout'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
+import Playground from './pages/Playground'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -126,6 +127,7 @@ function App() {
             index
             element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
           />
+          <Route path={getRouteSubPath(RoutePath.PLAYGROUND)} element={<Playground />} />
           <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Workspaces />} />
           <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />

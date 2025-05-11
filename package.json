@@ -22,7 +22,9 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",
+    "@daytonaio/sdk": "^0.17.0",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
+    "@monaco-editor/react": "^4.7.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",
     "@nestjs/cache-manager": "^3.0.0",
@@ -71,6 +73,7 @@
     "jose": "~5.10.0",
     "jwks-rsa": "^3.1.0",
     "lucide-react": "^0.487.0",
+    "monaco-editor": "^0.52.2",
     "nodemailer": "^6.9.1",
     "oidc-client-ts": "^3.2.0",
     "passport": "^0.7.0",
@@ -98,6 +101,8 @@
     "xml2js": "^0.6.2"
   },
   "devDependencies": {
+    "@esbuild-plugins/node-globals-polyfill": "^0.2.3",
+    "@esbuild-plugins/node-modules-polyfill": "^0.2.2",
     "@eslint/js": "^9.8.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.8",
@@ -162,6 +167,7 @@
     "verdaccio": "6.0.5",
     "vite": "6.3.4",
     "vite-plugin-checker": "^0.8.0",
+    "vite-plugin-node-polyfills": "^0.23.0",
     "vitest": "^1.3.1",
     "webpack-cli": "^5.1.4"
   },

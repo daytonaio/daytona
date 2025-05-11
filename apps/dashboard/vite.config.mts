@@ -5,6 +5,7 @@ import checker from 'vite-plugin-checker'
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin'
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin'
 import path from 'path'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 export default defineConfig((mode) => ({
   root: __dirname,
@@ -23,6 +24,10 @@ export default defineConfig((mode) => ({
   },
   plugins: [
     react(),
+    // Required for @daytonaio/sdk
+    nodePolyfills({
+      globals: { global: true, process: true },
+    }),
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
     // enforce typechecking for build mode
@@ -35,6 +40,7 @@ export default defineConfig((mode) => ({
   ],
   resolve: {
     alias: {
+      '@daytonaio/sdk': path.resolve(__dirname, '../../node_modules/@daytonaio/sdk/dist'),
       '@': path.resolve(__dirname, './src'), // Make sure this points to dashboard's src
     },
   },
