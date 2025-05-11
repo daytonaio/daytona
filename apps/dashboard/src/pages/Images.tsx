@@ -16,6 +16,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -26,10 +27,7 @@ import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 
 const Images: React.FC = () => {
-  const { imageApi } = useApi()
   const { notificationSocket } = useNotificationSocket()
-  const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
-
 
   const { imageApi } = useApi()
   const [imagesData, setImagesData] = useState<PaginatedImagesDto>({
@@ -40,14 +38,14 @@ const Images: React.FC = () => {
   })
   const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({})
   const [loadingTable, setLoadingTable] = useState(true)
-
   const [imageToDelete, setImageToDelete] = useState<ImageDto | null>(null)
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [newImageName, setNewImageName] = useState('')
+  const [newEntrypoint, setNewEntrypoint] = useState('')
+  const [loadingCreate, setLoadingCreate] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
-  const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [imageName, setImageName] = useState('')
-  const [entrypoint, setEntrypoint] = useState('')
-  const [loadingCreate, setLoadingCreate] = useState(false)
+  const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
   const [paginationParams, setPaginationParams] = useState({
     pageIndex: 0,
@@ -55,9 +53,13 @@ const Images: React.FC = () => {
   })
 
   const fetchImages = useCallback(
-    async (showTableLoading = true) => {
-      if (!selectedOrganization) return
-      if (showTableLoading) setLoadingTable(true)
+    async (showTableLoadingState = true) => {
+      if (!selectedOrganization) {
+        return
+      }
+      if (showTableLoadingState) {
+        setLoadingTable(true)
+      }
       try {
         const response = (
           await imageApi.getAllImages(
@@ -85,7 +87,6 @@ const Images: React.FC = () => {
   }, [fetchImages])
 
   useEffect(() => {
-
     const handleImageCreatedEvent = (image: ImageDto) => {
       if (paginationParams.pageIndex === 0) {
         setImagesData((prev) => {
@@ -137,12 +138,11 @@ const Images: React.FC = () => {
     notificationSocket.on('image.enabled.toggled', handleImageEnabledToggledEvent)
     notificationSocket.on('image.removed', handleImageRemovedEvent)
 
-
     return () => {
-      notificationSocket.off('image.created', onCreate)
-      notificationSocket.off('image.state.updated', onUpdate)
-      notificationSocket.off('image.enabled.toggled', onUpdate)
-      notificationSocket.off('image.removed', onRemove)
+      notificationSocket.off('image.created', handleImageCreatedEvent)
+      notificationSocket.off('image.state.updated', handleImageStateUpdatedEvent)
+      notificationSocket.off('image.enabled.toggled', handleImageEnabledToggledEvent)
+      notificationSocket.off('image.removed', handleImageRemovedEvent)
     }
   }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
 
@@ -156,17 +156,29 @@ const Images: React.FC = () => {
   }, [imagesData.items.length, paginationParams.pageIndex])
 
   const validateImageName = (name: string): string | null => {
-    const regex = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
-    if (!name.includes(':') || name.endsWith(':')) return 'Image name must include a tag (e.g., ubuntu:22.04)'
-    if (name.endsWith(':latest')) return 'Images with tag ":latest" are not allowed'
-    if (!regex.test(name)) return 'Invalid image format. Must be lowercase with tag.'
+    // Basic format check
+    const imageNameRegex =
+      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
+
+    if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
+      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+    }
+
+    if (name.endsWith(':latest')) {
+      return 'Images with tag ":latest" are not allowed'
+    }
+
+    if (!imageNameRegex.test(name)) {
+      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+    }
+
     return null
   }
 
-  const handleCreate = useCallback(async () => {
-    const error = validateImageName(imageName)
-    if (error) {
-      toast.warning(error)
+  const handleCreate = async () => {
+    const validationError = validateImageName(newImageName)
+    if (validationError) {
+      toast.warning(validationError)
       return
     }
 
@@ -174,12 +186,11 @@ const Images: React.FC = () => {
     try {
       await imageApi.createImage(
         {
-          name: imageName,
-          entrypoint: entrypoint.trim() ? entrypoint.trim().split(' ') : undefined,
+          name: newImageName,
+          entrypoint: newEntrypoint.trim() ? newEntrypoint.trim().split(' ') : undefined,
         },
         selectedOrganization?.id,
       )
-      toast.success(`Creating image ${imageName}`)
       setShowCreateDialog(false)
       setNewImageName('')
       setNewEntrypoint('')
@@ -196,10 +207,21 @@ const Images: React.FC = () => {
     } finally {
       setLoadingCreate(false)
     }
-  }, [imageApi, imageName, entrypoint, selectedOrganization])
+  }
 
-
-
+  const handleDelete = async (image: ImageDto) => {
+    setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+    try {
+      await imageApi.removeImage(image.id, selectedOrganization?.id)
+      setImageToDelete(null)
+      setShowDeleteDialog(false)
+      toast.success(`Deleting image ${image.name}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to delete image')
+    } finally {
+      setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+    }
+  }
   const handleBulkDelete = async (ids: string[]) => {
     setLoadingImages((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
     for (const id of ids) {
@@ -215,53 +237,16 @@ const Images: React.FC = () => {
       } finally {
         setLoadingImages((prev) => ({ ...prev, [id]: false }))
       }
-
-  const handleDelete = async (image: ImageDto) => {
-    setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
-
-    // Optimistically update the image state
-    setImagesData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
-    }))
-
-    try {
-      await imageApi.removeImage(image.id, selectedOrganization?.id)
-      setImageToDelete(null)
-      setShowDeleteDialog(false)
-      toast.success(`Deleting image ${image.name}`)
-    } catch (error) {
-      handleApiError(error, 'Failed to delete image')
-      // Revert the optimistic update
-      setImagesData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
-      }))
-    } finally {
-      setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
-
     }
   }
 
   const handleToggleEnabled = async (image: ImageDto, enabled: boolean) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
-
-    // Optimistically update the image enabled flag
-    setImagesData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled } : i)),
-    }))
-
     try {
       await imageApi.toggleImageState(image.id, { enabled }, selectedOrganization?.id)
-      toast.success(`${enabled ? 'Enabled' : 'Disabled'} image ${image.name}`)
+      toast.success(`${enabled ? 'Enabling' : 'Disabling'} image ${image.name}`)
     } catch (error) {
       handleApiError(error, enabled ? 'Failed to enable image' : 'Failed to disable image')
-      // Revert the optimistic update
-      setImagesData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled: image.enabled } : i)),
-      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
     }
@@ -274,93 +259,48 @@ const Images: React.FC = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Images</h1>
-        {writePermitted && (
-          <Button
-            variant="default"
-            size="icon"
-            disabled={loadingTable}
-            className="w-auto px-4"
-            title="Create Image"
-            onClick={() => setShowCreateDialog(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Image
-          </Button>
-        )}
-      </div>
-
-      <ImageTable
-        data={images}
-        loading={loadingTable}
-        loadingImages={loadingImages}
-        onDelete={(image) => {
-          setImageToDelete(image)
-          setShowDeleteDialog(true)
-        }}
-        onBulkDelete={handleBulkDelete}
-        onToggleEnabled={handleToggleEnabled}
-      />
-
-      {/* CREATE DIALOG */}
       <Dialog
         open={showCreateDialog}
-        onOpenChange={(v) => {
-          setShowCreateDialog(v)
-          if (!v) {
-            setImageName('')
-            setEntrypoint('')
+        onOpenChange={(isOpen) => {
+          setShowCreateDialog(isOpen)
+          if (isOpen) {
+            return
           }
+          setNewImageName('')
+          setNewEntrypoint('')
         }}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Image</DialogTitle>
-            <DialogDescription>Register a new image to be used for sandboxes.</DialogDescription>
-          </DialogHeader>
-          <form
-            id="create-image-form"
-            className="space-y-6"
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleCreate()
-            }}
-          >
-            <div>
-              <Label htmlFor="image-name">Image Name</Label>
-              <Input
-                id="image-name"
-                value={imageName}
-                onChange={(e) => setImageName(e.target.value)}
-                placeholder="ubuntu:22.04"
-              />
-              <p className="text-sm text-muted-foreground mt-1 pl-1">
-                Must include a tag (e.g., ubuntu:22.04). Tag "latest" is not allowed.
-              </p>
-            </div>
-            <div>
-              <Label htmlFor="entrypoint">Entrypoint (optional)</Label>
-              <Input
-                id="entrypoint"
-                value={entrypoint}
-                onChange={(e) => setEntrypoint(e.target.value)}
-                placeholder="sleep infinity"
-              />
-              <p className="text-sm text-muted-foreground mt-1 pl-1">Will default to 'sleep infinity' if left blank.</p>
-            </div>
-          </form>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button variant="secondary">Cancel</Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              form="create-image-form"
-              variant="default"
-              disabled={!imageName.trim() || !!validateImageName(imageName) || loadingCreate}
+        <div className="mb-6 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Images</h1>
+          {writePermitted && (
+            <DialogTrigger asChild>
+              <Button
+                variant="default"
+                size="icon"
+                disabled={loadingTable}
+                className="w-auto px-4"
+                title="Create Image"
+              >
+                <Plus className="w-4 h-4" />
+                Create Image
+              </Button>
+            </DialogTrigger>
+          )}
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Create New Image</DialogTitle>
+              <DialogDescription>
+                Register a new image to be used for spinning up sandboxes in your organization.
+              </DialogDescription>
+            </DialogHeader>
+            <form
+              id="create-image-form"
+              className="space-y-6 overflow-y-auto px-1 pb-1"
+              onSubmit={async (e) => {
+                e.preventDefault()
+                await handleCreate()
+              }}
             >
-
               <div className="space-y-3">
                 <Label htmlFor="name">Image Name</Label>
                 <Input
@@ -428,28 +368,30 @@ const Images: React.FC = () => {
             pageSize: paginationParams.pageSize,
           }}
         />
-
       </Dialog>
 
-      {/* DELETE DIALOG */}
       {imageToDelete && (
         <Dialog
           open={showDeleteDialog}
-          onOpenChange={(v) => {
-            setShowDeleteDialog(v)
-            if (!v) setImageToDelete(null)
+          onOpenChange={(isOpen) => {
+            setShowDeleteDialog(isOpen)
+            if (!isOpen) {
+              setImageToDelete(null)
+            }
           }}
         >
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Confirm Image Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete <strong>{imageToDelete.name}</strong>? This action cannot be undone.
+                Are you sure you want to delete this image? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="secondary">Cancel</Button>
+                <Button type="button" variant="secondary">
+                  Cancel
+                </Button>
               </DialogClose>
               <Button
                 variant="destructive"

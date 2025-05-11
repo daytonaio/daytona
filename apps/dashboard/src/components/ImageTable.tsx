@@ -45,7 +45,6 @@ interface ImageTableProps {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-
 export function ImageTable({
   data,
   loading,
@@ -56,8 +55,7 @@ export function ImageTable({
   pagination,
   pageCount,
   onPaginationChange,
-}: DataTableProps) {
-
+}: ImageTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
