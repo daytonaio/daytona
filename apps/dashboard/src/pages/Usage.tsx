@@ -119,6 +119,14 @@ const Usage: React.FC = () => {
                 </div>
                 <QuotaLine current={usageOverview.totalImageSizeUsed} total={usageOverview.totalImageSizeQuota} />
               </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1 mt-3">
+                  <span>Volumes:</span>
+                  {getUsageDisplay(usageOverview.usedVolumes, usageOverview.maxVolumes)}
+                </div>
+                <QuotaLine current={usageOverview.usedVolumes} total={usageOverview.maxVolumes} />
+              </div>
             </div>
           </CardContent>
         </Card>

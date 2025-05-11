@@ -3,14 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Repository, Not } from 'typeorm'
+import { Repository, Not, In } from 'typeorm'
 import { Volume } from '../entities/volume.entity'
 import { VolumeState } from '../enums/volume-state.enum'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { v4 as uuidv4 } from 'uuid'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { Organization } from '../../organization/entities/organization.entity'
 
 @Injectable()
 export class VolumeService {
@@ -21,7 +22,14 @@ export class VolumeService {
     private readonly volumeRepository: Repository<Volume>,
   ) {}
 
-  async create(organizationId: string, createVolumeDto: CreateVolumeDto): Promise<Volume> {
+  async create(organization: Organization, createVolumeDto: CreateVolumeDto): Promise<Volume> {
+    // Validate quota
+    const activeVolumeCount = await this.countActive(organization.id)
+
+    if (activeVolumeCount >= organization.volumeQuota) {
+      throw new ForbiddenException(`Volume quota limit (${organization.volumeQuota}) reached`)
+    }
+
     const volume = new Volume()
 
     // Generate ID
@@ -33,7 +41,7 @@ export class VolumeService {
     // Check if volume with same name already exists for organization
     const existingVolume = await this.volumeRepository.findOne({
       where: {
-        organizationId,
+        organizationId: organization.id,
         name: volume.name,
         state: Not(VolumeState.DELETED),
       },
@@ -43,12 +51,12 @@ export class VolumeService {
       throw new BadRequestError(`Volume with name ${volume.name} already exists`)
     }
 
-    volume.organizationId = organizationId
+    volume.organizationId = organization.id
     volume.state = VolumeState.PENDING_CREATE
     volume.lastUsedAt = new Date()
 
     const savedVolume = await this.volumeRepository.save(volume)
-    this.logger.debug(`Created volume ${savedVolume.id} for organization ${organizationId}`)
+    this.logger.debug(`Created volume ${savedVolume.id} for organization ${organization.id}`)
     return savedVolume
   }
 
@@ -108,5 +116,14 @@ export class VolumeService {
     }
 
     return volume
+  }
+
+  async countActive(organizationId: string): Promise<number> {
+    return this.volumeRepository.count({
+      where: {
+        organizationId,
+        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
+      },
+    })
   }
 }

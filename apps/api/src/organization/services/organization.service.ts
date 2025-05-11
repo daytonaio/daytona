@@ -25,6 +25,8 @@ import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto
 import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
 import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
+import { Volume } from '../../workspace/entities/volume.entity'
+import { VolumeState } from '../../workspace/enums/volume-state.enum'
 
 @Injectable()
 export class OrganizationService {
@@ -35,6 +37,8 @@ export class OrganizationService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Volume)
+    private readonly volumeRepository: Repository<Volume>,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
   ) {}
@@ -127,6 +131,13 @@ export class OrganizationService {
         organizationId,
       })) || 0
 
+    const activeVolumesCount = await this.volumeRepository.count({
+      where: {
+        organizationId,
+        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
+      },
+    })
+
     return {
       totalCpuQuota: organization.totalCpuQuota,
       totalGpuQuota: 0,
@@ -143,6 +154,8 @@ export class OrganizationService {
       imageQuota: organization.imageQuota,
       totalImageSizeQuota: organization.totalImageSize,
       totalImageSizeUsed,
+      maxVolumes: organization.volumeQuota,
+      usedVolumes: activeVolumesCount,
     }
   }
 
@@ -166,6 +179,7 @@ export class OrganizationService {
     organization.imageQuota = updateOrganizationQuotaDto.imageQuota
     organization.maxImageSize = updateOrganizationQuotaDto.maxImageSize
     organization.totalImageSize = updateOrganizationQuotaDto.totalImageSize
+    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota
 
     return this.organizationRepository.save(organization)
   }
@@ -239,6 +253,7 @@ export class OrganizationService {
     organization.imageQuota = quota.imageQuota
     organization.maxImageSize = quota.maxImageSize
     organization.totalImageSize = quota.totalImageSize
+    organization.volumeQuota = quota.volumeQuota
 
     if (!creatorEmailVerified) {
       organization.suspended = true
