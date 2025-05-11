@@ -9,7 +9,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@daytonaio/*": ["../../libs/*"] // Re-declare the monorepo library paths
+      "@daytonaio/api-client": ["../../libs/api-client/src/index.ts"]
     }
   },
   "exclude": [
