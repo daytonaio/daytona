@@ -170,7 +170,7 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
 	CreateCmd.Flags().BoolVar(&publicFlag, "public", false, "Make sandbox publicly accessible")
 	CreateCmd.Flags().StringVar(&classFlag, "class", "", "Workspace class type (small, medium, large)")
-	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us, asia)")
+	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us)")
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&gpuFlag, "gpu", 0, "GPU units allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory allocated to the sandbox in MB")
