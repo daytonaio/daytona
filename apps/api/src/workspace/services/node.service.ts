@@ -196,8 +196,8 @@ export class NodeService {
     }
 
     availableNodes.sort((a, b) => a.capacity - a.used - (b.capacity - b.used))
-    //  use the first 3 nodes
-    const optimalNodes = availableNodes.slice(0, 3)
+    //  use the first 10 nodes
+    const optimalNodes = availableNodes.slice(0, 10)
 
     // Get random node from available nodes using inclusive bounds
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
