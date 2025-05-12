@@ -195,10 +195,14 @@ export class NodeService {
       throw new BadRequestError('No available nodes')
     }
 
+    availableNodes.sort((a, b) => a.capacity - a.used - (b.capacity - b.used))
+    //  use the first 3 nodes
+    const optimalNodes = availableNodes.slice(0, 3)
+
     // Get random node from available nodes using inclusive bounds
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
-    return availableNodes[randomIntFromInterval(0, availableNodes.length - 1)].id
+    return optimalNodes[randomIntFromInterval(0, optimalNodes.length - 1)].id
   }
 
   async getImageNode(nodeId, imageRef: string): Promise<ImageNode> {
