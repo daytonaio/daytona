@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import './tracing'
 import { readFileSync } from 'node:fs'
 import { NestFactory } from '@nestjs/core'
 import { NestExpressApplication } from '@nestjs/platform-express'
@@ -79,7 +80,18 @@ async function bootstrap() {
   app.setGlobalPrefix(globalPrefix)
 
   const documentFactory = () => SwaggerModule.createDocument(app, getOpenApiConfig(configService.get('oidc.issuer')))
-  SwaggerModule.setup('api', app, documentFactory)
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions: {
+      initOAuth: {
+        clientId: configService.get('oidc.clientId'),
+        appName: 'Daytona AI',
+        scopes: ['openid', 'profile', 'email'],
+        additionalQueryStringParams: {
+          audience: configService.get('oidc.audience'),
+        },
+      },
+    },
+  })
 
   // Auto create nodes only in local development environment
   if (!configService.get('production')) {
