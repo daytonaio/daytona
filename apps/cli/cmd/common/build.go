@@ -26,7 +26,7 @@ func CreateMinioClient(accessParams *daytonaapiclient.StorageAccessDto) (*minio.
 		storageURL.Host,
 		accessParams.AccessKey,
 		accessParams.Secret,
-		"daytona", // bucket name
+		accessParams.Bucket,
 		storageURL.Scheme == "https",
 		accessParams.SessionToken,
 	)

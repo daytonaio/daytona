@@ -18,23 +18,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-class StorageAccessDto(BaseModel):
+class GetBuildLogs400Response(BaseModel):
     """
-    StorageAccessDto
+    GetBuildLogs400Response
     """ # noqa: E501
-    access_key: StrictStr = Field(description="Access key for storage authentication", alias="accessKey")
-    secret: StrictStr = Field(description="Secret key for storage authentication")
-    session_token: StrictStr = Field(description="Session token for storage authentication", alias="sessionToken")
-    storage_url: StrictStr = Field(description="Storage URL", alias="storageUrl")
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
-    bucket: StrictStr = Field(description="S3 bucket name")
+    message: Optional[StrictStr] = None
+    status_code: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="statusCode")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["accessKey", "secret", "sessionToken", "storageUrl", "organizationId", "bucket"]
+    __properties: ClassVar[List[str]] = ["message", "statusCode"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +50,7 @@ class StorageAccessDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of StorageAccessDto from a JSON string"""
+        """Create an instance of GetBuildLogs400Response from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -86,7 +82,7 @@ class StorageAccessDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of StorageAccessDto from a dict"""
+        """Create an instance of GetBuildLogs400Response from a dict"""
         if obj is None:
             return None
 
@@ -94,12 +90,8 @@ class StorageAccessDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "accessKey": obj.get("accessKey"),
-            "secret": obj.get("secret"),
-            "sessionToken": obj.get("sessionToken"),
-            "storageUrl": obj.get("storageUrl"),
-            "organizationId": obj.get("organizationId"),
-            "bucket": obj.get("bucket")
+            "message": obj.get("message"),
+            "statusCode": obj.get("statusCode")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
