@@ -18,23 +18,23 @@ import pprint
 import re  # noqa: F401
 import json
 
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class StorageAccessDto(BaseModel):
+class BuildInfo(BaseModel):
     """
-    StorageAccessDto
+    BuildInfo
     """ # noqa: E501
-    access_key: StrictStr = Field(description="Access key for storage authentication", alias="accessKey")
-    secret: StrictStr = Field(description="Secret key for storage authentication")
-    session_token: StrictStr = Field(description="Session token for storage authentication", alias="sessionToken")
-    storage_url: StrictStr = Field(description="Storage URL", alias="storageUrl")
-    organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
-    bucket: StrictStr = Field(description="S3 bucket name")
+    image_ref: StrictStr = Field(description="The unique identifier for the build info", alias="imageRef")
+    dockerfile_content: Optional[StrictStr] = Field(default=None, description="The Dockerfile content used for the build", alias="dockerfileContent")
+    context_hashes: Optional[List[StrictStr]] = Field(default=None, description="The context hashes used for the build", alias="contextHashes")
+    created_at: datetime = Field(description="The creation timestamp", alias="createdAt")
+    updated_at: datetime = Field(description="The last update timestamp", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["accessKey", "secret", "sessionToken", "storageUrl", "organizationId", "bucket"]
+    __properties: ClassVar[List[str]] = ["imageRef", "dockerfileContent", "contextHashes", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,7 +54,7 @@ class StorageAccessDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of StorageAccessDto from a JSON string"""
+        """Create an instance of BuildInfo from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -86,7 +86,7 @@ class StorageAccessDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of StorageAccessDto from a dict"""
+        """Create an instance of BuildInfo from a dict"""
         if obj is None:
             return None
 
@@ -94,12 +94,11 @@ class StorageAccessDto(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "accessKey": obj.get("accessKey"),
-            "secret": obj.get("secret"),
-            "sessionToken": obj.get("sessionToken"),
-            "storageUrl": obj.get("storageUrl"),
-            "organizationId": obj.get("organizationId"),
-            "bucket": obj.get("bucket")
+            "imageRef": obj.get("imageRef"),
+            "dockerfileContent": obj.get("dockerfileContent"),
+            "contextHashes": obj.get("contextHashes"),
+            "createdAt": obj.get("createdAt"),
+            "updatedAt": obj.get("updatedAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
