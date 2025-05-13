@@ -18,7 +18,8 @@ import (
 const API_VERSION_HEADER = "X-Daytona-Api-Version"
 
 type ApiErrorResponse struct {
-	Error string `json:"error"`
+	Error   string `json:"error"`
+	Message any    `json:"message,omitempty"`
 }
 
 func HandleErrorResponse(res *http.Response, requestErr error) error {
@@ -45,6 +46,19 @@ func HandleErrorResponse(res *http.Response, requestErr error) error {
 	if errMessage == "" {
 		// Fall back to raw body if error field is empty
 		errMessage = string(body)
+	} else {
+		if errResponse.Message != nil {
+			// Message field could be a string or an array
+			switch msg := errResponse.Message.(type) {
+			case string:
+				errMessage += ": " + msg
+			case []any:
+				if len(msg) > 0 {
+					msgStr := fmt.Sprintf("%v", msg)
+					errMessage += ": " + msgStr
+				}
+			}
+		}
 	}
 
 	if res.StatusCode == http.StatusUnauthorized {
