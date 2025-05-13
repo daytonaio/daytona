@@ -64,21 +64,9 @@ func main() {
 		}
 	}()
 
-	// sshServer := &ssh.Server{
-	// 	ProjectDir: c.ProjectDir,
-	// }
-
-	// // Start the SSH server in a go routine
-	// go func() {
-	// 	err = sshServer.Start()
-	// 	if err != nil {
-	// 		errChan <- err
-	// 	}
-	// }()
-
 	// Start terminal server
 	go func() {
-		if err := terminal.StartTerminalServer(2222); err != nil {
+		if err := terminal.StartTerminalServer(22222); err != nil {
 			errChan <- err
 		}
 	}()

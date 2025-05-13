@@ -9,7 +9,13 @@
       "executor": "nx:run-commands",
       "options": {
         "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static"
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        }
+      ]
     },
     "build": {
       "executor": "@nx-go/nx-go:build",
