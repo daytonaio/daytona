@@ -50,7 +50,7 @@ export class ImageSubscriber implements EntitySubscriberInterface<Image> {
     })
   }
 
-  afterRemove(event: RemoveEvent<Image>) {
+  beforeRemove(event: RemoveEvent<Image>) {
     this.eventEmitter.emit(ImageEvents.REMOVED, new ImageRemovedEvent(event.databaseEntity as Image))
   }
 }

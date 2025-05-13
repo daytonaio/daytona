@@ -529,73 +529,39 @@ export class DockerProvider implements OnModuleInit {
 
   async pullImage(image: string, registry?: { url: string; username: string; password: string }): Promise<void> {
     await this.retryWithExponentialBackoff(async () => {
-      return new Promise((resolve, reject) => {
-        const options: any = {
-          platform: 'linux/amd64',
+      const options: any = {
+        platform: 'linux/amd64',
+      }
+
+      if (registry) {
+        options.authconfig = {
+          username: registry.username,
+          password: registry.password,
+          serveraddress: registry.url,
+          auth: '',
         }
+      }
 
-        if (registry) {
-          options.authconfig = {
-            username: registry.username,
-            password: registry.password,
-            serveraddress: registry.url,
-            auth: '',
-          }
+      try {
+        const stream = await this.docker.pull(image, options)
+        const err = await new Promise<Error | null>((resolve) => this.docker.modem.followProgress(stream, resolve))
+        if (err) {
+          throw err
         }
-
-        let done = false
-
-        this.docker.pull(image, options, async (err, stream) => {
-          if (err) {
-            if (err.statusCode === 404) {
-              if (err.message?.includes('pull access denied') || err.message?.includes('no basic auth credentials')) {
-                err = new Error('Repository does not exist or may require container registry login credentials.')
-              }
-              reject({
-                fatal: true,
-                err,
-              })
-            } else {
-              reject(err)
-            }
+      } catch (err) {
+        if (err.statusCode === 404) {
+          let returnErr = err
+          if (err.message?.includes('pull access denied') || err.message?.includes('no basic auth credentials')) {
+            returnErr = new Error('Repository does not exist or may require container registry login credentials.')
           }
-          try {
-            this.docker.modem.followProgress(stream, async (err, output) => {
-              if (done) {
-                return
-              }
-              done = true
-
-              if (err) {
-                this.logger.error('Error following Docker pull progress:', err)
-                reject(err)
-              }
-
-              const startTime = Date.now()
-              const TIMEOUT = 60000 // 1 minute timeout
-
-              // Loop until image exists
-              const checkImage = async () => {
-                if (Date.now() - startTime > TIMEOUT) {
-                  reject(new Error('Timeout waiting for image to exist'))
-                  return
-                }
-
-                const imageExists = await this.imageExists(image)
-                if (imageExists) {
-                  resolve(output)
-                } else {
-                  setTimeout(checkImage, 1000) // Check every second
-                }
-              }
-
-              checkImage()
-            })
-          } catch (err) {
-            reject(err)
+          throw {
+            fatal: true,
+            err: returnErr,
           }
-        })
-      })
+        } else {
+          throw err
+        }
+      }
     })
 
     // Validate architecture after pulling
