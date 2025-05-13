@@ -9,4 +9,5 @@ export const OrganizationEvents = {
   INVITATION_DECLINED: 'invitation.declined',
   INVITATION_CANCELLED: 'invitation.cancelled',
   CREATED: 'organization.created',
+  SUSPENDED_WORKSPACE_STOPPED: 'organization.suspended-workspace-stopped',
 } as const

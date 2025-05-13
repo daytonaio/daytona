@@ -22,7 +22,6 @@ import { ImageService } from '../services/image.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { DockerProvider } from '../docker/docker-provider'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { ImageNodeState } from '../enums/image-node-state.enum'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
@@ -52,7 +51,6 @@ export class WorkspaceManager {
     private readonly imageService: ImageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerProvider: DockerProvider,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
@@ -142,57 +140,6 @@ export class WorkspaceManager {
       }),
     )
     await this.redisLockProvider.unlock(lockKey)
-  }
-
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'stop-suspended-organization-workspaces' })
-  async stopSuspendedOrganizationWorkspaces(): Promise<void> {
-    //  lock the sync to only run one instance at a time
-    const lockKey = 'stop-suspended-organization-workspaces'
-    const hasLock = await this.redis.get(lockKey)
-    if (hasLock) {
-      return
-    }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex(lockKey, 60, '1')
-
-    const suspendedOrganizations = await this.organizationService.findSuspended(
-      // Find organization suspended more than 24 hours ago
-      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
-    )
-
-    const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
-
-    const workspaces = await this.workspaceRepository.find({
-      where: {
-        organizationId: In(suspendedOrganizationIds),
-        state: WorkspaceState.STARTED,
-      },
-    })
-
-    await Promise.allSettled(
-      workspaces.map(async (workspace) => {
-        //  if the workspace is already being processed, skip it
-        const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-        const hasLock = await this.redisLockProvider.lock(lockKey, 30)
-        if (!hasLock) {
-          return
-        }
-
-        try {
-          await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
-          await this.handleWorkspaceDesiredStateStopped(workspace.id)
-        } catch (error) {
-          this.logger.error(
-            `Error stopping workspace from suspended organization. WorkspaceId: ${workspace.id}: `,
-            fromAxiosError(error),
-          )
-        } finally {
-          await this.redis.del(lockKey)
-        }
-      }),
-    )
-
-    await this.redis.del(lockKey)
   }
 
   async syncInstanceState(workspaceId: string): Promise<void> {

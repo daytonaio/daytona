@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Module, MiddlewareConsumer, RequestMethod } from '@nestjs/common'
+import { Module, MiddlewareConsumer, RequestMethod, forwardRef } from '@nestjs/common'
 import { RequestLoggerMiddleware } from './middleware/request-logger.middleware'
 import { WorkspaceController } from './controllers/workspace.controller'
 import { WorkspaceService } from './services/workspace.service'
@@ -28,7 +28,6 @@ import { ImageNode } from './entities/image-node.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { WorkspaceSubscriber } from './subscribers/workspace.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
-import { OrganizationModule } from '../organization/organization.module'
 import { WorkspaceWarmPoolService } from './services/workspace-warm-pool.service'
 import { WarmPool } from './entities/warm-pool.entity'
 import { PreviewController } from './controllers/preview.controller'
@@ -39,14 +38,27 @@ import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
-
+import { OrganizationModule } from '../organization/organization.module'
+import { Organization } from '../organization/entities/organization.entity'
+import { OrganizationUser } from '../organization/entities/organization-user.entity'
 @Module({
   imports: [
     UserModule,
     AuthModule,
     DockerRegistryModule,
-    OrganizationModule,
-    TypeOrmModule.forFeature([Workspace, Node, Image, BuildInfo, ImageNode, DockerRegistry, WarmPool, Volume]),
+    forwardRef(() => OrganizationModule),
+    TypeOrmModule.forFeature([
+      Workspace,
+      Node,
+      Image,
+      BuildInfo,
+      ImageNode,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+      Organization,
+      OrganizationUser,
+    ]),
   ],
   controllers: [
     WorkspaceController,

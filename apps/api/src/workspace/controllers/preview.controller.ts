@@ -8,9 +8,10 @@ import { Controller, Get, Param, Logger, NotFoundException, UseGuards, Req } fro
 import { WorkspaceService } from '../services/workspace.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
-import { WorkspaceAccessGuard } from '../guards/workspace-access.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
-import { OrganizationService } from '../../organization/services/organization.service'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Repository } from 'typeorm'
+import { OrganizationUser } from '../../organization/entities/organization-user.entity'
 
 @ApiTags('preview')
 @Controller('preview')
@@ -20,7 +21,8 @@ export class PreviewController {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly workspaceService: WorkspaceService,
-    private readonly organizationService: OrganizationService,
+    @InjectRepository(OrganizationUser)
+    private readonly organizationUserRepository: Repository<OrganizationUser>,
   ) {}
 
   @Get(':workspaceId/public')
@@ -136,9 +138,14 @@ export class PreviewController {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    const organizations = await this.organizationService.findByUser(userId)
+    const organizationUsers = await this.organizationUserRepository.find({
+      where: {
+        userId,
+      },
+    })
+
     const workspace = await this.workspaceService.findOne(workspaceId)
-    const hasAccess = organizations.find((org) => org.id === workspace.organizationId)
+    const hasAccess = organizationUsers.find((org) => org.organizationId === workspace.organizationId)
     if (!hasAccess) {
       await this.redis.setex(`preview:token:${workspaceId}:${userId}`, 3, '0')
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)

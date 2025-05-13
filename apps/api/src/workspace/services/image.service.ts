@@ -14,11 +14,11 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { CreateImageDto } from '../../workspace/dto/create-image.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateBuildInfoDto } from '../dto/create-build-info.dto'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
+import { OrganizationService } from '../../organization/services/organization.service'
 
 @Injectable()
 export class ImageService {
