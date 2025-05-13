@@ -24,6 +24,8 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)
@@ -32,6 +34,7 @@ export class ImageManager {
   private readonly instanceId = uuidv4()
 
   constructor(
+    @InjectRedis() private readonly redis: Redis,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
     @InjectRepository(ImageNode)
@@ -47,58 +50,58 @@ export class ImageManager {
     private readonly organizationService: OrganizationService,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
+  @Cron(CronExpression.EVERY_5_SECONDS)
   async syncNodeImages() {
     const lockKey = 'sync-node-images-lock'
     if (await this.redisLockProvider.lock(lockKey, 30)) {
       return
     }
 
-    const query = `
-      WITH node_count AS (
-        SELECT COUNT(*) AS total_nodes 
-        FROM node
-      )
-      SELECT 
-        i.id,
-        i."internalName",
-        i.name,
-        i.state,
-        COUNT(DISTINCT img_node."nodeId") AS node_presence_count,
-        (SELECT total_nodes FROM node_count) AS total_nodes,
-        ((SELECT total_nodes FROM node_count) - COUNT(DISTINCT img_node."nodeId")) AS missing_from_nodes
-      FROM 
-        image i
-      LEFT JOIN 
-        image_node img_node ON i."internalName" = img_node."imageRef"
-      WHERE
-        i.state = 'active'
-      GROUP BY 
-        i.id, i."internalName", i.name, i.state
-      HAVING 
-        COUNT(DISTINCT img_node."nodeId") < (SELECT total_nodes FROM node_count)
-      ORDER BY 
-        ((SELECT total_nodes FROM node_count) - COUNT(DISTINCT img_node."nodeId")) DESC, 
-        i."internalName";
-    `
+    const skip = (await this.redis.get('sync-node-images-skip')) || 0
 
-    try {
-      const results = await this.imageRepository.query(query)
+    const totalNodes = await this.nodeRepository.count({
+      where: {
+        state: NodeState.READY,
+        unschedulable: false,
+      },
+    })
 
-      await Promise.all(
-        results.map(async (result) => {
-          const image = await this.imageRepository.findOne({
-            where: { id: result.id },
-          })
+    const images = await this.imageRepository.find({
+      where: {
+        state: ImageState.ACTIVE,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+      take: 100,
+      skip: Number(skip),
+    })
 
-          if (image) {
-            await this.propagateImageToNodes(image.id)
-          }
-        }),
-      )
-    } catch (err) {
-      this.logger.error('Error syncing node images:', fromAxiosError(err))
+    if (images.length === 0) {
+      await this.redis.set('sync-node-images-skip', 0)
+      return
     }
+
+    await this.redis.set('sync-node-images-skip', Number(skip) + images.length)
+
+    const imageNodes = await this.imageNodeRepository.count({
+      where: {
+        imageRef: In(images.map((image) => image.internalName)),
+        state: ImageNodeState.READY,
+      },
+    })
+
+    if (imageNodes === totalNodes) {
+      return
+    }
+
+    await Promise.all(
+      images.map((image) => {
+        this.propagateImageToNodes(image.internalName).catch((err) => {
+          this.logger.error(`Error propagating image ${image.id} to nodes: ${err}`)
+        })
+      }),
+    )
 
     await this.redisLockProvider.unlock(lockKey)
   }
@@ -123,13 +126,19 @@ export class ImageManager {
       .take(100)
       .getMany()
 
-    try {
-      await Promise.all(nodeImages.map((imageNode) => this.syncNodeImageState(imageNode)))
-    } catch (err) {
-      if (err.code !== 'ECONNRESET') {
-        this.logger.error('Error syncing node image states:', fromAxiosError(err))
-      }
-    }
+    await Promise.allSettled(
+      nodeImages.map((imageNode) => {
+        return this.syncNodeImageState(imageNode).catch((err) => {
+          if (err.code !== 'ECONNRESET') {
+            this.logger.error(`Error syncing node image state ${imageNode.id}: ${fromAxiosError(err)}`)
+            this.imageNodeRepository.update(imageNode.id, {
+              state: ImageNodeState.ERROR,
+              errorReason: fromAxiosError(err).message,
+            })
+          }
+        })
+      }),
+    )
 
     await this.redisLockProvider.unlock(lockKey)
   }
@@ -170,15 +179,9 @@ export class ImageManager {
     }
   }
 
-  async propagateImageToNodes(imageId: string) {
+  async propagateImageToNodes(internalImageName: string) {
     //  todo: remove try catch block and implement error handling
     try {
-      const image = await this.imageRepository.findOneOrFail({
-        where: {
-          id: imageId,
-        },
-      })
-
       const nodes = await this.nodeRepository.find({
         where: {
           state: NodeState.READY,
@@ -190,7 +193,7 @@ export class ImageManager {
         nodes.map(async (node) => {
           let imageNode = await this.imageNodeRepository.findOne({
             where: {
-              imageRef: image.internalName,
+              imageRef: internalImageName,
               nodeId: node.id,
             },
           })
@@ -204,11 +207,11 @@ export class ImageManager {
 
             if (!imageNode) {
               imageNode = new ImageNode()
-              imageNode.imageRef = image.internalName
+              imageNode.imageRef = internalImageName
               imageNode.nodeId = node.id
               imageNode.state = ImageNodeState.PULLING_IMAGE
               await this.imageNodeRepository.save(imageNode)
-              await this.propagateImageToNode(image, node)
+              await this.propagateImageToNode(internalImageName, node)
             } else if (imageNode.state === ImageNodeState.PULLING_IMAGE) {
               await this.handleImageNodeStatePullingImage(imageNode)
             }
@@ -231,7 +234,7 @@ export class ImageManager {
     }
   }
 
-  async propagateImageToNode(image: Image, node: Node) {
+  async propagateImageToNode(internalImageName: string, node: Node) {
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
     const imageApi = this.nodeApiFactory.createImageApi(node)
@@ -240,7 +243,7 @@ export class ImageManager {
     while (retries < 10) {
       try {
         await imageApi.pullImage({
-          image: image.internalName,
+          image: internalImageName,
           registry: {
             url: dockerRegistry.url,
             username: dockerRegistry.username,
@@ -372,6 +375,12 @@ export class ImageManager {
               await this.handleImageTagStatePullingImage(image)
               break
             case ImageState.PENDING_VALIDATION:
+              //  temp workaround to avoid race condition between api instances
+              if (!(await this.dockerProvider.imageExists(image.name))) {
+                await this.redisLockProvider.unlock(lockKey)
+                return
+              }
+
               await this.handleImageTagStatePendingValidation(image)
               break
             case ImageState.VALIDATING:
@@ -656,7 +665,7 @@ export class ImageManager {
         // Imanges that went through the build process are already in the internal registry
         await this.pushImageToInternalRegistry(image.id)
       }
-      await this.propagateImageToNodes(image.id)
+      await this.propagateImageToNodes(image.internalName)
       await this.updateImageState(image.id, ImageState.ACTIVE)
 
       // Best effort removal of old image from transient registry
