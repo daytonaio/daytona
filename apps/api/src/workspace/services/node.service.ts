@@ -195,7 +195,7 @@ export class NodeService {
       throw new BadRequestError('No available nodes')
     }
 
-    availableNodes.sort((a, b) => a.capacity - a.used - (b.capacity - b.used))
+    availableNodes.sort((a, b) => a.used / a.capacity - b.used / b.capacity)
     //  use the first 10 nodes
     const optimalNodes = availableNodes.slice(0, 10)
 
