@@ -20,20 +20,25 @@ func DeleteFile(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
+	}
+
 	// Get file path from request arguments
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
 	// Execute delete command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxID).
+	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
 		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("rm -rf %s", filePath))).
 		Execute()
 	if err != nil {
