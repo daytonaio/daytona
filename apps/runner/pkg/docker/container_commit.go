@@ -12,23 +12,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageName string) error {
+func (d *DockerClient) commitContainer(ctx context.Context, containerName, imageName string) error {
 	const maxRetries = 3
 
 	for attempt := 1; attempt <= maxRetries; attempt++ {
-		log.Infof("Committing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
+		log.Infof("Committing container %s (attempt %d/%d)...", containerName, attempt, maxRetries)
 
-		commitResp, err := d.apiClient.ContainerCommit(ctx, containerId, container.CommitOptions{
+		commitResp, err := d.apiClient.ContainerCommit(ctx, containerName, container.CommitOptions{
 			Reference: imageName,
 			Pause:     false,
 		})
 		if err == nil {
-			log.Infof("Container %s committed successfully with image ID: %s", containerId, commitResp.ID)
+			log.Infof("Container %s committed successfully with image ID: %s", containerName, commitResp.ID)
 			return nil
 		}
 
 		if attempt < maxRetries {
-			log.Warnf("Failed to commit container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			log.Warnf("Failed to commit container %s (attempt %d/%d): %v", containerName, attempt, maxRetries, err)
 			continue
 		}
 

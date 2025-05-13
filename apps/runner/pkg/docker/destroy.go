@@ -16,7 +16,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
+func (d *DockerClient) Destroy(ctx context.Context, containerName string) error {
 	startTime := time.Now()
 	defer func() {
 		obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("destroy")
@@ -25,7 +25,7 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
-	state, err := d.DeduceSandboxState(ctx, containerId)
+	state, err := d.DeduceSandboxState(ctx, containerName)
 	if err != nil && state == enums.SandboxStateError {
 		return err
 	}
@@ -34,45 +34,45 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		return nil
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateDestroying)
 
-	_, err = d.ContainerInspect(ctx, containerId)
+	_, err = d.ContainerInspect(ctx, containerName)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateDestroyed)
 		}
 		return err
 	}
 
-	err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+	err = d.apiClient.ContainerRemove(ctx, containerName, container.RemoveOptions{
 		Force: true,
 	})
 	if err != nil {
 		if errdefs.IsNotFound(err) {
-			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+			d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateDestroyed)
 		}
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateDestroyed)
 
 	return nil
 }
 
-func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) error {
+func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerName string) error {
 
 	// Check if container exists and is in destroyed state
-	state, err := d.DeduceSandboxState(ctx, containerId)
+	state, err := d.DeduceSandboxState(ctx, containerName)
 	if err != nil {
 		return err
 	}
 
 	if state != enums.SandboxStateDestroyed {
-		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerId))
+		return common.NewBadRequestError(fmt.Errorf("container %s is not in destroyed state", containerName))
 	}
 
 	// Remove the container
-	err = d.apiClient.ContainerRemove(ctx, containerId, container.RemoveOptions{
+	err = d.apiClient.ContainerRemove(ctx, containerName, container.RemoveOptions{
 		Force: true,
 	})
 	if err != nil {
@@ -82,7 +82,7 @@ func (d *DockerClient) RemoveDestroyed(ctx context.Context, containerId string) 
 		return err
 	}
 
-	log.Infof("Destroyed container %s removed successfully", containerId)
+	log.Infof("Destroyed container %s removed successfully", containerName)
 
 	return nil
 }

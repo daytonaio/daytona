@@ -14,44 +14,54 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) Start(ctx context.Context, containerId string) error {
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarting)
+func (d *DockerClient) Start(ctx context.Context, containerName string) error {
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStarting)
 
-	c, err := d.ContainerInspect(ctx, containerId)
+	c, err := d.ContainerInspect(ctx, containerName)
 	if err != nil {
 		return err
 	}
 
 	if c.State.Running {
-		d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
+		d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStarted)
 		return nil
 	}
 
-	err = d.apiClient.ContainerStart(ctx, containerId, container.StartOptions{})
+	err = d.apiClient.ContainerStart(ctx, containerName, container.StartOptions{})
 	if err != nil {
 		return err
 	}
 
 	// make sure container is running
-	err = d.waitForContainerRunning(ctx, containerId, 10*time.Second)
+	err = d.waitForContainerRunning(ctx, containerName, 10*time.Second)
 	if err != nil {
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-
-	processesCtx := context.Background()
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStarted)
 
 	go func() {
-		if err := d.startDaytonaDaemon(processesCtx, containerId); err != nil {
+		if err := d.StartDaytonaDaemon(context.Background(), containerName); err != nil {
 			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
 		}
 	}()
 
+	targetURL, err := d.GetContainerTargetURL(ctx, containerName)
+	if err != nil {
+		return err
+	}
+
+	err = d.DaemonStartedCheck(ctx, targetURL, 10, 1*time.Second, 50*time.Millisecond)
+	if err != nil {
+		return err
+	}
+
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStarted)
+
 	return nil
 }
 
-func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId string, timeout time.Duration) error {
+func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerName string, timeout time.Duration) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -61,9 +71,9 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for container %s to start", containerId)
+			return fmt.Errorf("timeout waiting for container %s to start", containerName)
 		case <-ticker.C:
-			c, err := d.ContainerInspect(ctx, containerId)
+			c, err := d.ContainerInspect(ctx, containerName)
 			if err != nil {
 				return err
 			}

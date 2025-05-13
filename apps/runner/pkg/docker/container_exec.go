@@ -19,10 +19,10 @@ type ExecResult struct {
 }
 
 // todo send stdout for writer os.STD_OUT
-func (d *DockerClient) execSync(ctx context.Context, containerId string, execOptions container.ExecOptions, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
+func (d *DockerClient) execSync(ctx context.Context, containerName string, execOptions container.ExecOptions, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
 	execOptions.Env = append([]string{"DEBIAN_FRONTEND=noninteractive"}, execOptions.Env...)
 
-	response, err := d.apiClient.ContainerExecCreate(ctx, containerId, execOptions)
+	response, err := d.apiClient.ContainerExecCreate(ctx, containerName, execOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +35,8 @@ func (d *DockerClient) execSync(ctx context.Context, containerId string, execOpt
 	return result, nil
 }
 
-func (d *DockerClient) inspectExecResp(ctx context.Context, containerId string, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
-	resp, err := d.apiClient.ContainerExecAttach(ctx, containerId, execStartOptions)
+func (d *DockerClient) inspectExecResp(ctx context.Context, execId string, execStartOptions container.ExecStartOptions) (*ExecResult, error) {
+	resp, err := d.apiClient.ContainerExecAttach(ctx, execId, execStartOptions)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (d *DockerClient) inspectExecResp(ctx context.Context, containerId string, 
 		return nil, err
 	}
 
-	res, err := d.apiClient.ContainerExecInspect(ctx, containerId)
+	res, err := d.apiClient.ContainerExecInspect(ctx, execId)
 	if err != nil {
 		return nil, err
 	}

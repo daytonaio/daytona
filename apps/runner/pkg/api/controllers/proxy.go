@@ -148,26 +148,28 @@ func getProxyTarget(ctx *gin.Context) (*url.URL, string, error) {
 		return nil, "", errors.New("sandbox ID is required")
 	}
 
-	// Get container details
-	container, err := runner.Docker.ContainerInspect(ctx.Request.Context(), sandboxId)
+	targetURL, err := runner.Docker.GetContainerTargetURL(ctx.Request.Context(), sandboxId)
 	if err != nil {
-		ctx.Error(common.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err)))
-		return nil, "", fmt.Errorf("sandbox container not found: %w", err)
+		ctx.Error(err)
+		return nil, "", err
 	}
 
-	var containerIP string
-	for _, network := range container.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
-	}
+	err = runner.Docker.DaemonStartedCheck(ctx.Request.Context(), targetURL, 1, 1*time.Second, 0*time.Millisecond)
+	if err != nil {
+		startErr := runner.Docker.StartDaytonaDaemon(ctx.Request.Context(), sandboxId)
+		if startErr != nil {
+			ctx.Error(startErr)
+			return nil, "", startErr
+		}
 
-	if containerIP == "" {
-		ctx.Error(errors.New("container has no IP address, it might not be running"))
-		return nil, "", errors.New("container has no IP address, it might not be running")
+		err = runner.Docker.DaemonStartedCheck(ctx.Request.Context(), targetURL, 10, 1*time.Second, 50*time.Millisecond)
+		if err != nil {
+			ctx.Error(err)
+			return nil, "", err
+		}
 	}
 
 	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
 	target, err := url.Parse(targetURL)
 	if err != nil {
 		ctx.Error(common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err)))
