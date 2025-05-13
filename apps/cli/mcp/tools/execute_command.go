@@ -29,17 +29,22 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return returnCommandError("No sandbox ID found in tracking file", "SandboxError")
+	}
+
 	cmd := request.Params.Arguments["command"].(string)
 
 	// Validate command input
 	if cmd == "" {
 		return returnCommandError("Command must be a non-empty string", "ValueError")
-	}
-
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return returnCommandError("No sandbox ID found in tracking file", "SandboxError")
 	}
 
 	// Process the command
@@ -52,7 +57,7 @@ func ExecuteCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 	log.Infof("Executing command: %s", command)
 
 	// Execute the command
-	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxID).
+	result, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
 		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(command)).
 		Execute()
 

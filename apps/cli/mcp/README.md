@@ -84,6 +84,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
 - `create_sandbox`: Create a new sandbox with Daytona
 
   - Parameters:
+    - `id` (optional): Sandbox ID - if provided, an existing sandbox will be used, new one will be created otherwise
     - `target` (default: "us"): Target region of the sandbox
     - `image`: Image of the sandbox (optional)
     - `auto_stop_interval` (default: "15"): Auto-stop interval in minutes (0 means disabled)
@@ -99,6 +100,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
   - Files persist during the session and have appropriate permissions
   - Supports overwrite controls and maintains original files formats
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `file_path`: Path to the file to upload
     - `content`: Content of the file to upload
     - `encoding`: Encoding of the file to upload
@@ -109,33 +111,39 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
   - Returns file content as text or base64 encoded image
   - Handles special cases like matplotlib plots stored as JSON
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `file_path`: Path to the file to download
 
 - `create_folder`: Create a new folder in the Daytona sandbox
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `folder_path`: Path to the folder to create
     - `mode`: Mode of the folder to create (defaults to 0755)
 
 - `get_file_info`: Get information about a file in the Daytona workspace
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `file_path`: Path to the file to get information about
 
 - `list_files`: List files in a directory in the Daytona workspace
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `path`: Path to the directory to list files from (defaults to current directory)
 
 - `move_file`: Move or rename a file in the Daytona workspace
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `source_path`: Source path of the file to move
     - `dest_path`: Destination path where to move the file
 
 - `delete_file`: Delete a file or directory in the Daytona workspace
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `file_path`: Path to the file or directory to delete
 
 ### Git Operations
@@ -143,6 +151,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
 - `git_clone`: Clone a Git repository into the Daytona workspace
 
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `url`: URL of the Git repository to clone
     - `path`: Directory to clone the repository into (defaults to current directory)
     - `branch`: Branch to clone
@@ -157,6 +166,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
   - Returns full stdout and stderr output with exit codes
   - Commands have sandbox user permissions
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `command`: Command to execute
 
 ### Preview
@@ -168,6 +178,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
   - Provides diagnostic information for troubleshooting
   - Supports custom descriptions and metadata for better organization of multiple services
   - Parameters:
+    - `id` (optional): Sandbox ID
     - `port`: Port to expose
     - `description`: Description of the service
     - `check_server`: Check if a server is running
