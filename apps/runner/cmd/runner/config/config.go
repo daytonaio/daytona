@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -18,14 +17,10 @@ import (
 
 type Config struct {
 	ApiToken           string `envconfig:"API_TOKEN" validate:"required"`
-	DaytonaBinaryUrl   string `envconfig:"DAYTONA_BINARY_URL" validate:"required"`
-	TerminalBinaryUrl  string `envconfig:"TERMINAL_BINARY_URL" validate:"required"`
 	ApiPort            int    `envconfig:"API_PORT"`
 	TLSCertFile        string `envconfig:"TLS_CERT_FILE"`
 	TLSKeyFile         string `envconfig:"TLS_KEY_FILE"`
 	EnableTLS          bool   `envconfig:"ENABLE_TLS"`
-	DaytonaBinaryPath  string `envconfig:"DAYTONA_BINARY_PATH"`
-	TerminalBinaryPath string `envconfig:"TERMINAL_BINARY_PATH"`
 	CacheRetentionDays int    `envconfig:"CACHE_RETENTION_DAYS"`
 	NodeEnv            string `envconfig:"NODE_ENV"`
 	ContainerRuntime   string `envconfig:"CONTAINER_RUNTIME"`
@@ -68,19 +63,6 @@ func GetConfig() (*Config, error) {
 
 	if config.ApiPort == 0 {
 		config.ApiPort = DEFAULT_API_PORT
-	}
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-
-	if config.DaytonaBinaryPath == "" {
-		config.DaytonaBinaryPath = path.Join(pwd, ".tmp", "binaries", "daytona")
-	}
-
-	if config.TerminalBinaryPath == "" {
-		config.TerminalBinaryPath = path.Join(pwd, ".tmp", "binaries", "terminal")
 	}
 
 	return config, nil

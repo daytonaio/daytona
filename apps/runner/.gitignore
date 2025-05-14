@@ -1,0 +1,2 @@
+pkg/daemon/static/*
+!*.gitkeep
