@@ -50,13 +50,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 func (d *DockerClient) getContainerHostConfig(ctx context.Context, sandboxDto dto.CreateSandboxDTO, volumeMountPathBinds []string) (*container.HostConfig, error) {
 	var binds []string
 
-	if d.daytonaBinaryURL != "" {
-		binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/daytona:ro", d.daytonaBinaryPath))
-	}
-
-	if d.terminalBinaryURL != "" {
-		binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/terminal:ro", d.terminalBinaryPath))
-	}
+	binds = append(binds, fmt.Sprintf("%s:/usr/local/bin/daytona:ro", d.daemonPath))
 
 	if len(volumeMountPathBinds) > 0 {
 		binds = append(binds, volumeMountPathBinds...)
