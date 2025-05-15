@@ -36,6 +36,7 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
     if (isDebugEnabled) {
@@ -51,6 +52,7 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
     if (isDebugEnabled) {
@@ -66,6 +68,7 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
     if (isDebugEnabled) {
