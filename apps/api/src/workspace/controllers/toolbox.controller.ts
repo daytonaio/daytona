@@ -47,6 +47,7 @@ import {
   GitStatusDto,
   ListBranchResponseDto,
   GitCommitInfoDto,
+  GitCheckoutRequestDto,
   ExecuteRequestDto,
   ExecuteResponseDto,
   ProjectDirResponseDto,
@@ -591,6 +592,30 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'workspaceId', type: String, required: true })
   async gitPushChanges(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':workspaceId/toolbox/git/checkout')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Checkout branch',
+    description: 'Checkout branch or commit in git repository',
+    operationId: 'gitCheckoutBranch',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Branch checked out successfully',
+  })
+  @ApiBody({
+    type: GitCheckoutRequestDto,
+  })
+  @ApiParam({ name: 'workspaceId', type: String, required: true })
+  async gitCheckoutBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,

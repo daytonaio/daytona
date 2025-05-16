@@ -2416,6 +2416,44 @@ paths:
       summary: Push changes
       tags:
         - toolbox
+  /toolbox/{workspaceId}/toolbox/git/checkout:
+    post:
+      description: Checkout branch or commit in git repository
+      operationId: gitCheckoutBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitCheckoutRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch checked out successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Checkout branch
+      tags:
+        - toolbox
   /toolbox/{workspaceId}/toolbox/git/status:
     get:
       description: Get status from git repository
@@ -5424,6 +5462,19 @@ components:
         password:
           type: string
       required:
+        - path
+      type: object
+    GitCheckoutRequest:
+      example:
+        path: path
+        branch: branch
+      properties:
+        path:
+          type: string
+        branch:
+          type: string
+      required:
+        - branch
         - path
       type: object
     FileStatus:

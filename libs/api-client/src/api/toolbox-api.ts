@@ -48,6 +48,8 @@ import type { GitAddRequest } from '../models'
 // @ts-ignore
 import type { GitBranchRequest } from '../models'
 // @ts-ignore
+import type { GitCheckoutRequest } from '../models'
+// @ts-ignore
 import type { GitCloneRequest } from '../models'
 // @ts-ignore
 import type { GitCommitInfo } from '../models'
@@ -872,6 +874,61 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(gitAddRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Checkout branch or commit in git repository
+     * @summary Checkout branch
+     * @param {string} workspaceId
+     * @param {GitCheckoutRequest} gitCheckoutRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    gitCheckoutBranch: async (
+      workspaceId: string,
+      gitCheckoutRequest: GitCheckoutRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'workspaceId' is not null or undefined
+      assertParamExists('gitCheckoutBranch', 'workspaceId', workspaceId)
+      // verify required parameter 'gitCheckoutRequest' is not null or undefined
+      assertParamExists('gitCheckoutBranch', 'gitCheckoutRequest', gitCheckoutRequest)
+      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/checkout`.replace(
+        `{${'workspaceId'}}`,
+        encodeURIComponent(String(workspaceId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(gitCheckoutRequest, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -2639,6 +2696,38 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Checkout branch or commit in git repository
+     * @summary Checkout branch
+     * @param {string} workspaceId
+     * @param {GitCheckoutRequest} gitCheckoutRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async gitCheckoutBranch(
+      workspaceId: string,
+      gitCheckoutRequest: GitCheckoutRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitCheckoutBranch(
+        workspaceId,
+        gitCheckoutRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.gitCheckoutBranch']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Clone git repository
      * @summary Clone repository
      * @param {string} workspaceId
@@ -3656,6 +3745,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Checkout branch or commit in git repository
+     * @summary Checkout branch
+     * @param {string} workspaceId
+     * @param {GitCheckoutRequest} gitCheckoutRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    gitCheckoutBranch(
+      workspaceId: string,
+      gitCheckoutRequest: GitCheckoutRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .gitCheckoutBranch(workspaceId, gitCheckoutRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Clone git repository
      * @summary Clone repository
      * @param {string} workspaceId
@@ -4398,6 +4506,27 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .gitAddFiles(workspaceId, gitAddRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Checkout branch or commit in git repository
+   * @summary Checkout branch
+   * @param {string} workspaceId
+   * @param {GitCheckoutRequest} gitCheckoutRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public gitCheckoutBranch(
+    workspaceId: string,
+    gitCheckoutRequest: GitCheckoutRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .gitCheckoutBranch(workspaceId, gitCheckoutRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
