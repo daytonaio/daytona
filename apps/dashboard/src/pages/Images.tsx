@@ -25,6 +25,7 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useNotificationSocket } from '@/hooks/useNotificationSocket'
 import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 const Images: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
@@ -49,7 +50,7 @@ const Images: React.FC = () => {
 
   const [paginationParams, setPaginationParams] = useState({
     pageIndex: 0,
-    pageSize: 10,
+    pageSize: DEFAULT_PAGE_SIZE,
   })
 
   const fetchImages = useCallback(
