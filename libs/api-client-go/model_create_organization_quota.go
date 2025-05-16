@@ -31,6 +31,7 @@ type CreateOrganizationQuota struct {
 	ImageQuota              *float32 `json:"imageQuota,omitempty"`
 	MaxImageSize            *float32 `json:"maxImageSize,omitempty"`
 	TotalImageSize          *float32 `json:"totalImageSize,omitempty"`
+	VolumeQuota             *float32 `json:"volumeQuota,omitempty"`
 }
 
 // NewCreateOrganizationQuota instantiates a new CreateOrganizationQuota object
@@ -402,6 +403,38 @@ func (o *CreateOrganizationQuota) SetTotalImageSize(v float32) {
 	o.TotalImageSize = &v
 }
 
+// GetVolumeQuota returns the VolumeQuota field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetVolumeQuota() float32 {
+	if o == nil || IsNil(o.VolumeQuota) {
+		var ret float32
+		return ret
+	}
+	return *o.VolumeQuota
+}
+
+// GetVolumeQuotaOk returns a tuple with the VolumeQuota field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateOrganizationQuota) GetVolumeQuotaOk() (*float32, bool) {
+	if o == nil || IsNil(o.VolumeQuota) {
+		return nil, false
+	}
+	return o.VolumeQuota, true
+}
+
+// HasVolumeQuota returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasVolumeQuota() bool {
+	if o != nil && !IsNil(o.VolumeQuota) {
+		return true
+	}
+
+	return false
+}
+
+// SetVolumeQuota gets a reference to the given float32 and assigns it to the VolumeQuota field.
+func (o *CreateOrganizationQuota) SetVolumeQuota(v float32) {
+	o.VolumeQuota = &v
+}
+
 func (o CreateOrganizationQuota) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -444,6 +477,9 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.TotalImageSize) {
 		toSerialize["totalImageSize"] = o.TotalImageSize
+	}
+	if !IsNil(o.VolumeQuota) {
+		toSerialize["volumeQuota"] = o.VolumeQuota
 	}
 	return toSerialize, nil
 }

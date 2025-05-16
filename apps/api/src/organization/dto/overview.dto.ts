@@ -37,4 +37,8 @@ export class OverviewDto {
   totalImageSizeQuota: number
   @ApiProperty()
   totalImageSizeUsed: number
+  @ApiProperty()
+  maxVolumes: number
+  @ApiProperty()
+  usedVolumes: number
 }
