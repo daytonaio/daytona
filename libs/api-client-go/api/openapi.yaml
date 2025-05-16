@@ -4309,6 +4309,8 @@ components:
         currentCpuUsage: 7.061401241503109
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.962133916683182
+        maxVolumes: 6.84685269835264
+        usedVolumes: 7.457744773683766
       properties:
         totalCpuQuota:
           type: number
@@ -4340,6 +4342,10 @@ components:
           type: number
         totalImageSizeUsed:
           type: number
+        maxVolumes:
+          type: number
+        usedVolumes:
+          type: number
       required:
         - concurrentWorkspaceQuota
         - concurrentWorkspaces
@@ -4349,6 +4355,7 @@ components:
         - currentMemoryUsage
         - currentWorkspaces
         - imageQuota
+        - maxVolumes
         - totalCpuQuota
         - totalDiskQuota
         - totalGpuQuota
@@ -4356,6 +4363,7 @@ components:
         - totalImageSizeUsed
         - totalMemoryQuota
         - totalWorkspaceQuota
+        - usedVolumes
       type: object
     UpdateOrganizationQuota:
       example:
@@ -4365,6 +4373,7 @@ components:
         maxConcurrentWorkspaces: 7.061401241503109
         totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
+        volumeQuota: 7.386281948385884
         workspaceQuota: 9.301444243932576
         maxImageSize: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
@@ -4393,6 +4402,8 @@ components:
           type: number
         totalImageSize:
           type: number
+        volumeQuota:
+          type: number
       required:
         - imageQuota
         - maxConcurrentWorkspaces
@@ -4404,6 +4415,7 @@ components:
         - totalDiskQuota
         - totalImageSize
         - totalMemoryQuota
+        - volumeQuota
         - workspaceQuota
       type: object
     OrganizationSuspension:
@@ -4710,6 +4722,7 @@ components:
         maxConcurrentWorkspaces: 7.061401241503109
         totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
+        volumeQuota: 7.386281948385884
         workspaceQuota: 9.301444243932576
         maxImageSize: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
@@ -4738,6 +4751,8 @@ components:
           type: number
         totalImageSize:
           type: number
+        volumeQuota:
+          type: number
       type: object
     CreateUser:
       example:
@@ -4752,6 +4767,7 @@ components:
           maxConcurrentWorkspaces: 7.061401241503109
           totalImageSize: 4.145608029883936
           maxDiskPerWorkspace: 2.3021358869347655
+          volumeQuota: 7.386281948385884
           workspaceQuota: 9.301444243932576
           maxImageSize: 2.027123023002322
           totalMemoryQuota: 6.027456183070403

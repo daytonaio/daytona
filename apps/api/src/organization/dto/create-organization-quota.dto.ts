@@ -62,4 +62,9 @@ export class CreateOrganizationQuotaDto {
   @IsNumber()
   @IsOptional()
   totalImageSize?: number
+
+  @ApiPropertyOptional()
+  @IsNumber()
+  @IsOptional()
+  volumeQuota?: number
 }

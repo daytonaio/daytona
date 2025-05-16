@@ -38,8 +38,9 @@ class UpdateOrganizationQuota(BaseModel):
     image_quota: Union[StrictFloat, StrictInt] = Field(alias="imageQuota")
     max_image_size: Union[StrictFloat, StrictInt] = Field(alias="maxImageSize")
     total_image_size: Union[StrictFloat, StrictInt] = Field(alias="totalImageSize")
+    volume_quota: Union[StrictFloat, StrictInt] = Field(alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "maxConcurrentWorkspaces", "workspaceQuota", "imageQuota", "maxImageSize", "totalImageSize"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "maxConcurrentWorkspaces", "workspaceQuota", "imageQuota", "maxImageSize", "totalImageSize", "volumeQuota"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -109,7 +110,8 @@ class UpdateOrganizationQuota(BaseModel):
             "workspaceQuota": obj.get("workspaceQuota"),
             "imageQuota": obj.get("imageQuota"),
             "maxImageSize": obj.get("maxImageSize"),
-            "totalImageSize": obj.get("totalImageSize")
+            "totalImageSize": obj.get("totalImageSize"),
+            "volumeQuota": obj.get("volumeQuota")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
