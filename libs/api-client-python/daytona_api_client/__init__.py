@@ -69,6 +69,7 @@ from daytona_api_client.models.file_info import FileInfo
 from daytona_api_client.models.file_status import FileStatus
 from daytona_api_client.models.git_add_request import GitAddRequest
 from daytona_api_client.models.git_branch_request import GitBranchRequest
+from daytona_api_client.models.git_checkout_request import GitCheckoutRequest
 from daytona_api_client.models.git_clone_request import GitCloneRequest
 from daytona_api_client.models.git_commit_info import GitCommitInfo
 from daytona_api_client.models.git_commit_request import GitCommitRequest
