@@ -265,6 +265,17 @@ const Images: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
+  const handleBulkDelete = async (images: ImageDto[]) => {
+    if (!images.length) return
+
+    try {
+      await Promise.all(images.map((image) => imageApi.removeImage(image.id, selectedOrganization?.id)))
+      toast.success(`Deleting ${images.length} ${images.length === 1 ? 'image' : 'images'}`)
+    } catch (error) {
+      handleApiError(error, 'Failed to delete selected images')
+    }
+  }
+
   return (
     <div className="p-6">
       <Dialog
@@ -367,6 +378,7 @@ const Images: React.FC = () => {
             setImageToDelete(image)
             setShowDeleteDialog(true)
           }}
+          onBulkDelete={handleBulkDelete}
           onToggleEnabled={handleToggleEnabled}
           pageCount={imagesData.totalPages}
           onPaginationChange={handlePaginationChange}
