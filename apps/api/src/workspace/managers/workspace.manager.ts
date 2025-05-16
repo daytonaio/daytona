@@ -878,17 +878,6 @@ export class WorkspaceManager {
 
       const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
 
-      // const availableNodes = await this.nodeService.findAvailableNodes(
-      //   workspace.region,
-      //   workspace.class,
-      //   image.internalName,
-      // )
-
-      // //  if there are available nodes with the workspace base image,
-      // //  search for available nodes with the base image cached on the node
-      // //  otherwise, search all available nodes
-      // const includeImage = availableNodes.length > 0 ? image.internalName : undefined
-
       //  exclude the node that the last node workspace was on
       const availableNodes = (
         await this.nodeService.findAvailableNodes(workspace.region, workspace.class, image.internalName)
