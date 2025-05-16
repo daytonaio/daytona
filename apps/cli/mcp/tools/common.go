@@ -3,6 +3,8 @@
 
 package tools
 
+import "github.com/daytonaio/daytona/cli/apiclient"
+
 var daytonaMCPHeaders map[string]string = map[string]string{
-	"X-Daytona-Source": "daytona-mcp",
+	apiclient.DaytonaSourceHeader: "daytona-mcp",
 }

@@ -14,6 +14,8 @@ import (
 
 var apiClient *daytonaapiclient.APIClient
 
+const DaytonaSourceHeader = "X-Daytona-Source"
+
 func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*daytonaapiclient.APIClient, error) {
 	c, err := config.GetConfig()
 	if err != nil {
@@ -60,6 +62,8 @@ func GetApiClient(profile *config.Profile, defaultHeaders map[string]string) (*d
 			clientConfig.AddDefaultHeader("X-Daytona-Organization-ID", *activeProfile.ActiveOrganizationId)
 		}
 	}
+
+	clientConfig.AddDefaultHeader(DaytonaSourceHeader, "cli")
 
 	for headerKey, headerValue := range defaultHeaders {
 		clientConfig.AddDefaultHeader(headerKey, headerValue)
