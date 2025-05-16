@@ -4,18 +4,10 @@ Push local image
 
 ### Synopsis
 
-Push local image or build and push from Dockerfile. If building locally, the image will be built with an AMD architecture.
+Push a local image image to Daytona. To securely build it on our infastructure, use 'daytona image build'
 
 ```
 daytona image push [IMAGE] [flags]
-```
-
-### Options
-
-```
-  -c, --context string      Build context directory (defaults to Dockerfile directory)
-  -f, --dockerfile string   Path to Dockerfile to build before pushing
-  -e, --entrypoint string   The entrypoint command for the image
 ```
 
 ### Options inherited from parent commands
@@ -26,4 +18,4 @@ daytona image push [IMAGE] [flags]
 
 ### SEE ALSO
 
-- [daytona image](daytona_image.md) - Manage Daytona images
+* [daytona image](daytona_image.md)  - Manage Daytona images
