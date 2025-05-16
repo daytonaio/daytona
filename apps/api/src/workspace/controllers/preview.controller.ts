@@ -8,7 +8,6 @@ import { Controller, Get, Param, Logger, NotFoundException, UseGuards, Req } fro
 import { WorkspaceService } from '../services/workspace.service'
 import { ApiResponse, ApiOperation, ApiParam, ApiTags, ApiOAuth2, ApiBearerAuth } from '@nestjs/swagger'
 import { InjectRedis } from '@nestjs-modules/ioredis'
-import { WorkspaceAccessGuard } from '../guards/workspace-access.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { OrganizationService } from '../../organization/services/organization.service'
 
