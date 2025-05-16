@@ -26,8 +26,8 @@ import { catchError, map } from 'rxjs/operators'
     }),
     TypedConfigModule,
     UserModule,
-    HttpModule,
     ApiKeyModule,
+    HttpModule,
   ],
   providers: [
     ApiKeyStrategy,

@@ -20,13 +20,12 @@ import { v4 as uuidv4 } from 'uuid'
 import { NodeNotReadyError } from '../errors/node-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
+import { OrganizationService } from '../../organization/services/organization.service'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
-import { Organization } from '../../organization/entities/organization.entity'
-import { OrganizationService } from '../../organization/services/organization.service'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)
@@ -44,11 +43,11 @@ export class ImageManager {
     private readonly nodeRepository: Repository<Node>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
-    private readonly organizationService: OrganizationService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
     private readonly nodeApiFactory: NodeApiFactory,
     private readonly redisLockProvider: RedisLockProvider,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)

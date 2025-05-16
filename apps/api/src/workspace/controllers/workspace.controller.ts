@@ -54,13 +54,11 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { OrganizationService } from '../../organization/services/organization.service'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
-import { Organization } from '../../organization/entities/organization.entity'
-import { InjectRepository } from '@nestjs/typeorm'
-import { Repository } from 'typeorm'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -75,8 +73,7 @@ export class WorkspaceController {
     @InjectRedis() private readonly redis: Redis,
     private readonly nodeService: NodeService,
     private readonly workspaceService: WorkspaceService,
-    @InjectRepository(Organization)
-    private readonly organizationRepository: Repository<Organization>,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   @Get()
@@ -148,9 +145,7 @@ export class WorkspaceController {
     // Get current workspace count for organization
     const workspaceCount = await this.workspaceService.count(organizationId)
 
-    const organization = await this.organizationRepository.findOne({
-      where: { id: organizationId },
-    })
+    const organization = await this.organizationService.findOne(organizationId)
     if (!organization) {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }

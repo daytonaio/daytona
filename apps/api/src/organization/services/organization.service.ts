@@ -331,8 +331,7 @@ export class OrganizationService implements OnModuleInit {
   async stopSuspendedOrganizationWorkspaces(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-workspaces'
-    const hasLock = await this.redis.get(lockKey)
-    if (hasLock) {
+    if (await this.redis.get(lockKey)) {
       return
     }
     //  keep the worker selected for 1 minute
