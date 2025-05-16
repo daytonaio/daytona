@@ -787,6 +787,46 @@ export class WorkspaceManager {
           await this.workspaceRepository.save(workspaceToUpdate)
         }
       }
+
+      if (workspace.snapshotState === SnapshotState.COMPLETED) {
+        const usageThreshold = 35
+        const runningWorkspacesCount = await this.workspaceRepository.count({
+          where: {
+            nodeId: workspace.nodeId,
+            state: WorkspaceState.STARTED,
+          },
+        })
+        if (runningWorkspacesCount > usageThreshold) {
+          //  TODO: usage should be based on compute usage
+
+          const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
+          const availableNodes = await this.nodeService.findAvailableNodes(
+            workspace.region,
+            workspace.class,
+            image.internalName,
+          )
+          const lessUsedNodes = availableNodes.filter((node) => node.id !== workspace.nodeId)
+
+          //  temp workaround to move workspaces to less used node
+          if (lessUsedNodes.length > 0) {
+            await this.workspaceRepository.update(workspace.id, {
+              nodeId: null,
+              prevNodeId: workspace.nodeId,
+            })
+            try {
+              const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+              await nodeWorkspaceApi.removeDestroyed(workspace.id)
+            } catch (e) {
+              this.logger.error(
+                `Failed to cleanup workspace ${workspace.id} on previous node ${node.id}:`,
+                fromAxiosError(e),
+              )
+            }
+            workspace.prevNodeId = workspace.nodeId
+            workspace.nodeId = null
+          }
+        }
+      }
     }
 
     if (workspace.nodeId === null) {
@@ -838,23 +878,16 @@ export class WorkspaceManager {
 
       const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
 
-      const availableNodes = await this.nodeService.findAvailableNodes(
-        workspace.region,
-        workspace.class,
-        image.internalName,
-      )
+      //  exclude the node that the last node workspace was on
+      const availableNodes = (
+        await this.nodeService.findAvailableNodes(workspace.region, workspace.class, image.internalName)
+      ).filter((node) => node.id != workspace.prevNodeId)
 
-      //  if there are available nodes with the workspace base image,
-      //  search for available nodes with the base image cached on the node
-      //  otherwise, search all available nodes
-      const includeImage = availableNodes.length > 0 ? image.internalName : undefined
+      //  get random node from available nodes
+      const randomNodeIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
+      const nodeId = availableNodes[randomNodeIndex(0, availableNodes.length - 1)].id
 
-      const nodeId = await this.nodeService.getRandomAvailableNode(workspace.region, workspace.class, includeImage)
       const node = await this.nodeService.findOne(nodeId)
-      if (node.state !== NodeState.READY) {
-        //  console.debug(`Node ${node.id} is not ready`);
-        return
-      }
 
       const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
 
@@ -897,6 +930,11 @@ export class WorkspaceManager {
 
   //  used to check if workspace is pulling image on node and update workspace state accordingly
   private async handleNodeWorkspacePullingImageStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
+    //  edge case when workspace is being transferred to a new node
+    if (!workspace.nodeId) {
+      return true
+    }
+
     const node = await this.nodeService.findOne(workspace.nodeId)
     const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
     const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
