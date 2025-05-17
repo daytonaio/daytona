@@ -4,7 +4,7 @@
 package image
 
 import (
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/spf13/cobra"
 )
 

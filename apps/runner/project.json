@@ -5,6 +5,18 @@
   "sourceRoot": "apps/runner",
   "tags": [],
   "targets": {
+    "copy-daemon-bin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        }
+      ]
+    },
     "build": {
       "executor": "@nx-go/nx-go:build",
       "options": {
@@ -13,7 +25,18 @@
       },
       "configurations": {
         "production": {}
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        },
+        {
+          "target": "build-amd64",
+          "projects": "daemon"
+        },
+        "copy-daemon-bin"
+      ]
     },
     "serve": {
       "executor": "@nx-go/nx-go:serve",
@@ -24,7 +47,14 @@
       },
       "configurations": {
         "production": {}
-      }
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        },
+        "copy-daemon-bin"
+      ]
     },
     "format": {
       "executor": "nx:run-commands",

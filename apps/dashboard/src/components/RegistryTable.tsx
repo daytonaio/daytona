@@ -30,6 +30,7 @@ import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useTableSorting } from '@/hooks/useTableSorting'
 
+
 interface DataTableProps {
   data: DockerRegistry[]
   loading: boolean
@@ -61,6 +62,11 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
     },
   })
 

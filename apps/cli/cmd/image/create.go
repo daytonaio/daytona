@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/common"
-	view_common "github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	views_util "github.com/daytonaio/daytona-ai-saas/cli/views/util"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/cmd/common"
+	view_common "github.com/daytonaio/daytona/cli/views/common"
+	views_util "github.com/daytonaio/daytona/cli/views/util"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
 
@@ -48,7 +48,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
-			return common.AwaitImageActive(ctx, apiClient, image.Name)
+			return common.AwaitImageState(ctx, apiClient, image.Name, daytonaapiclient.IMAGESTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

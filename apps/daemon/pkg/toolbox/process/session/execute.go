@@ -78,7 +78,7 @@ func SessionExecuteCommand(configDir string) func(c *gin.Context) {
 			return
 		}
 
-		cmdToExec := fmt.Sprintf("(%s) > %s 2>&1 ; echo \"DTN_EXIT: $?\" >> %s\n", request.Command, logFile.Name(), logFile.Name())
+		cmdToExec := fmt.Sprintf("{ %s; } > %s 2>&1 ; echo \"DTN_EXIT: $?\" >> %s\n", request.Command, logFile.Name(), logFile.Name())
 
 		type execResult struct {
 			out      string

@@ -37,6 +37,8 @@ type UsageOverview struct {
 	ImageQuota               float32 `json:"imageQuota"`
 	TotalImageSizeQuota      float32 `json:"totalImageSizeQuota"`
 	TotalImageSizeUsed       float32 `json:"totalImageSizeUsed"`
+	MaxVolumes               float32 `json:"maxVolumes"`
+	UsedVolumes              float32 `json:"usedVolumes"`
 }
 
 type _UsageOverview UsageOverview
@@ -45,7 +47,7 @@ type _UsageOverview UsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, totalWorkspaceQuota float32, concurrentWorkspaceQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32, currentWorkspaces float32, concurrentWorkspaces float32, currentImageNumber float32, imageQuota float32, totalImageSizeQuota float32, totalImageSizeUsed float32) *UsageOverview {
+func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, totalWorkspaceQuota float32, concurrentWorkspaceQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32, currentWorkspaces float32, concurrentWorkspaces float32, currentImageNumber float32, imageQuota float32, totalImageSizeQuota float32, totalImageSizeUsed float32, maxVolumes float32, usedVolumes float32) *UsageOverview {
 	this := UsageOverview{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalGpuQuota = totalGpuQuota
@@ -62,6 +64,8 @@ func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQ
 	this.ImageQuota = imageQuota
 	this.TotalImageSizeQuota = totalImageSizeQuota
 	this.TotalImageSizeUsed = totalImageSizeUsed
+	this.MaxVolumes = maxVolumes
+	this.UsedVolumes = usedVolumes
 	return &this
 }
 
@@ -433,6 +437,54 @@ func (o *UsageOverview) SetTotalImageSizeUsed(v float32) {
 	o.TotalImageSizeUsed = v
 }
 
+// GetMaxVolumes returns the MaxVolumes field value
+func (o *UsageOverview) GetMaxVolumes() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.MaxVolumes
+}
+
+// GetMaxVolumesOk returns a tuple with the MaxVolumes field value
+// and a boolean to check if the value has been set.
+func (o *UsageOverview) GetMaxVolumesOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.MaxVolumes, true
+}
+
+// SetMaxVolumes sets field value
+func (o *UsageOverview) SetMaxVolumes(v float32) {
+	o.MaxVolumes = v
+}
+
+// GetUsedVolumes returns the UsedVolumes field value
+func (o *UsageOverview) GetUsedVolumes() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.UsedVolumes
+}
+
+// GetUsedVolumesOk returns a tuple with the UsedVolumes field value
+// and a boolean to check if the value has been set.
+func (o *UsageOverview) GetUsedVolumesOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.UsedVolumes, true
+}
+
+// SetUsedVolumes sets field value
+func (o *UsageOverview) SetUsedVolumes(v float32) {
+	o.UsedVolumes = v
+}
+
 func (o UsageOverview) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -458,6 +510,8 @@ func (o UsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize["imageQuota"] = o.ImageQuota
 	toSerialize["totalImageSizeQuota"] = o.TotalImageSizeQuota
 	toSerialize["totalImageSizeUsed"] = o.TotalImageSizeUsed
+	toSerialize["maxVolumes"] = o.MaxVolumes
+	toSerialize["usedVolumes"] = o.UsedVolumes
 	return toSerialize, nil
 }
 
@@ -481,6 +535,8 @@ func (o *UsageOverview) UnmarshalJSON(data []byte) (err error) {
 		"imageQuota",
 		"totalImageSizeQuota",
 		"totalImageSizeUsed",
+		"maxVolumes",
+		"usedVolumes",
 	}
 
 	allProperties := make(map[string]interface{})

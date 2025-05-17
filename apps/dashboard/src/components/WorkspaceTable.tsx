@@ -50,6 +50,7 @@ import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
 import { useTableSorting } from '@/hooks/useTableSorting'
 
+
 interface DataTableProps {
   data: Workspace[]
   loadingWorkspaces: Record<string, boolean>
@@ -122,6 +123,11 @@ export function WorkspaceTable({
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
+    },
   })
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 
@@ -405,7 +411,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 w-24 justify-start"
           >
             State
             {column.getIsSorted() === 'asc' ? (
@@ -442,7 +448,7 @@ const getColumns = ({
         }
 
         return (
-          <div className={`flex items-center gap-2 px-2 ${color}`}>
+          <div className={`flex items-center gap-2 px-2 w-24 ${color}`}>
             {getStateIcon(state)}
             <span>{getStateLabel(state)}</span>
           </div>

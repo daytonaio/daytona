@@ -72,6 +72,18 @@ type WorkspaceAPI interface {
 	DeleteWorkspaceExecute(r WorkspaceAPIDeleteWorkspaceRequest) (*http.Response, error)
 
 	/*
+		GetBuildLogs Get build logs
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return WorkspaceAPIGetBuildLogsRequest
+	*/
+	GetBuildLogs(ctx context.Context, workspaceId string) WorkspaceAPIGetBuildLogsRequest
+
+	// GetBuildLogsExecute executes the request
+	GetBuildLogsExecute(r WorkspaceAPIGetBuildLogsRequest) (*http.Response, error)
+
+	/*
 		GetPortPreviewUrl Get preview URL for a workspace port
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -570,6 +582,116 @@ func (a *WorkspaceAPIService) DeleteWorkspaceExecute(r WorkspaceAPIDeleteWorkspa
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "force", r.force, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type WorkspaceAPIGetBuildLogsRequest struct {
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	xDaytonaOrganizationID *string
+	follow                 *bool
+}
+
+// Use with JWT to specify the organization ID
+func (r WorkspaceAPIGetBuildLogsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPIGetBuildLogsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+// Whether to follow the logs stream
+func (r WorkspaceAPIGetBuildLogsRequest) Follow(follow bool) WorkspaceAPIGetBuildLogsRequest {
+	r.follow = &follow
+	return r
+}
+
+func (r WorkspaceAPIGetBuildLogsRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GetBuildLogsExecute(r)
+}
+
+/*
+GetBuildLogs Get build logs
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return WorkspaceAPIGetBuildLogsRequest
+*/
+func (a *WorkspaceAPIService) GetBuildLogs(ctx context.Context, workspaceId string) WorkspaceAPIGetBuildLogsRequest {
+	return WorkspaceAPIGetBuildLogsRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) GetBuildLogsExecute(r WorkspaceAPIGetBuildLogsRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetBuildLogs")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/build-logs"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.follow != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "follow", r.follow, "form", "")
+	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
 

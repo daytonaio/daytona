@@ -86,7 +86,7 @@ export class NodeService {
       where: whereCondition,
     })
 
-    const nodes = this.nodeRepository.find({
+    const nodes = await this.nodeRepository.find({
       where: {
         id: In(imageNodes.map((imageNode) => imageNode.nodeId)),
         state: NodeState.READY,
@@ -95,7 +95,10 @@ export class NodeService {
         unschedulable: Not(true),
       },
     })
-    return (await nodes).filter((node) => node.used < node.capacity)
+    return nodes
+      .filter((node) => node.used < node.capacity)
+      .sort((a, b) => a.used / a.capacity - b.used / b.capacity)
+      .slice(0, 10)
   }
 
   async remove(id: string): Promise<void> {

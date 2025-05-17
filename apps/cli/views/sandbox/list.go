@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/util"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/views/common"
+	"github.com/daytonaio/daytona/cli/views/util"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 type RowData struct {
@@ -26,8 +26,6 @@ func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationN
 		util.NotifyEmptySandboxList(true)
 		return
 	}
-
-	SortSandboxes(&sandboxList)
 
 	headers := []string{"Sandbox", "State", "Region", "Class", "Last Event"}
 

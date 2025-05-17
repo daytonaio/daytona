@@ -10,9 +10,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/util"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/views/common"
+	"github.com/daytonaio/daytona/cli/views/util"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 

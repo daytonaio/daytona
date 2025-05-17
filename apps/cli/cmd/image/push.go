@@ -11,12 +11,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd/common"
-	"github.com/daytonaio/daytona-ai-saas/cli/docker"
-	views_common "github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	views_util "github.com/daytonaio/daytona-ai-saas/cli/views/util"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/cmd/common"
+	"github.com/daytonaio/daytona/cli/docker"
+	views_common "github.com/daytonaio/daytona/cli/views/common"
+	views_util "github.com/daytonaio/daytona/cli/views/util"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/api/types/registry"
 	"github.com/docker/docker/client"
@@ -126,7 +126,7 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
-			return common.AwaitImageActive(ctx, apiClient, targetImage)
+			return common.AwaitImageState(ctx, apiClient, targetImage, daytonaapiclient.IMAGESTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

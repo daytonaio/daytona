@@ -4,9 +4,9 @@
 package auth
 
 import (
-	"github.com/daytonaio/daytona-ai-saas/cli/config"
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/internal"
+	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/spf13/cobra"
 )
 

@@ -7,7 +7,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
@@ -17,6 +17,17 @@ func MoveFile(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
+	}
+
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
 	// Get source and destination paths from request arguments
@@ -30,13 +41,7 @@ func MoveFile(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("dest_path parameter is required")
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
-	_, err = apiClient.ToolboxAPI.MoveFile(ctx, sandboxID).Source(sourcePath).Destination(destPath).Execute()
+	_, err = apiClient.ToolboxAPI.MoveFile(ctx, sandboxId).Source(sourcePath).Destination(destPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error moving file: %v", err)
 	}

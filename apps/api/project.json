@@ -15,7 +15,14 @@
         "target": "node",
         "compiler": "tsc",
         "sourceMap": true,
-        "webpackConfig": "apps/api/webpack.config.js"
+        "webpackConfig": "apps/api/webpack.config.js",
+        "assets": [
+          {
+            "input": "apps/api/src/assets",
+            "glob": "**/*",
+            "output": "./assets/"
+          }
+        ]
       },
       "configurations": {
         "production": {

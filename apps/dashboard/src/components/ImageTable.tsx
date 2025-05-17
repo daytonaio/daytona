@@ -8,7 +8,6 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   SortingState,
   useReactTable,
@@ -35,9 +34,24 @@ interface DataTableProps {
   loadingImages: Record<string, boolean>
   onDelete: (image: ImageDto) => void
   onToggleEnabled: (image: ImageDto, enabled: boolean) => void
+  pagination: {
+    pageIndex: number
+    pageSize: number
+  }
+  pageCount: number
+  onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-export function ImageTable({ data, loading, loadingImages, onDelete, onToggleEnabled }: DataTableProps) {
+export function ImageTable({
+  data,
+  loading,
+  loadingImages,
+  onDelete,
+  onToggleEnabled,
+  pagination,
+  pageCount,
+  onPaginationChange,
+}: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
@@ -59,13 +73,22 @@ export function ImageTable({ data, loading, loadingImages, onDelete, onToggleEna
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    autoResetPageIndex: false,
-    autoResetExpanded: false,
+    manualPagination: true,
+    pageCount: pageCount || 1,
+    onPaginationChange: pagination
+      ? (updater) => {
+          const newPagination = typeof updater === 'function' ? updater(table.getState().pagination) : updater
+          onPaginationChange(newPagination)
+        }
+      : undefined,
     state: {
       sorting,
+      pagination: {
+        pageIndex: pagination?.pageIndex || 0,
+        pageSize: pagination?.pageSize || 10,
+      },
     },
     getRowId: (row) => row.id,
   })
@@ -261,11 +284,11 @@ const getColumns = ({
 const getStateIcon = (state: ImageState) => {
   switch (state) {
     case ImageState.ACTIVE:
-      return <CheckCircle className="w-4 h-4" />
+      return <CheckCircle className="w-4 h-4 flex-shrink-0" />
     case ImageState.ERROR:
-      return <AlertTriangle className="w-4 h-4" />
+      return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
     default:
-      return <Timer className="w-4 h-4" />
+      return <Timer className="w-4 h-4 flex-shrink-0" />
   }
 }
 

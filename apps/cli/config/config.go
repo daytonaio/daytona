@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/cmd"
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
+	"github.com/daytonaio/daytona/cli/cmd"
+	"github.com/daytonaio/daytona/cli/internal"
 )
 
 type Config struct {

@@ -9,12 +9,14 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/runner/internal/constants"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
+	"github.com/docker/docker/errdefs"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -57,18 +59,6 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	d.cache.SetSandboxState(ctx, sandboxDto.Id, enums.SandboxStateCreating)
 
 	err = d.validateImageArchitecture(ctx, sandboxDto.Image)
-	if err != nil {
-		log.Errorf("ERROR: %s.\n", err.Error())
-		return "", err
-	}
-
-	err = d.ensureBinary(d.daytonaBinaryURL, d.daytonaBinaryPath, "Daytona")
-	if err != nil {
-		log.Errorf("ERROR: %s.\n", err.Error())
-		return "", err
-	}
-
-	err = d.ensureBinary(d.terminalBinaryURL, d.terminalBinaryPath, "Terminal")
 	if err != nil {
 		log.Errorf("ERROR: %s.\n", err.Error())
 		return "", err
@@ -131,4 +121,25 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	}
 
 	return c.ID, nil
+}
+
+func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {
+	inspect, _, err := p.apiClient.ImageInspectWithRaw(ctx, image)
+	if err != nil {
+		if errdefs.IsNotFound(err) {
+			return err
+		}
+		return fmt.Errorf("failed to inspect image: %w", err)
+	}
+
+	arch := strings.ToLower(inspect.Architecture)
+	validArchs := []string{"amd64", "x86_64"}
+
+	for _, validArch := range validArchs {
+		if arch == validArch {
+			return nil
+		}
+	}
+
+	return common.NewConflictError(fmt.Errorf("image %s architecture (%s) is not x64 compatible", image, inspect.Architecture))
 }

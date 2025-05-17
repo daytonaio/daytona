@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 
 	log "github.com/sirupsen/logrus"
@@ -21,9 +21,11 @@ func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 	}
 
 	// Check for existing sandbox from tracking file
-	sandboxId, err := getActiveSandbox()
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, err
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
 	}
 
 	if sandboxId == "" {
@@ -49,9 +51,6 @@ func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 		}
 
 		log.Infof("Destroyed sandbox with ID: %s", sandboxId)
-
-		// clear tracking
-		_ = clearActiveSandbox()
 
 		return mcp.NewToolResultText(fmt.Sprintf("Destroyed sandbox with ID %s", sandboxId)), nil
 	}

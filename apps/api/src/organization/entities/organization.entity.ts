@@ -106,6 +106,13 @@ export class Organization {
   })
   totalImageSize: number
 
+  @Column({
+    type: 'int',
+    default: 10,
+    name: 'volume_quota',
+  })
+  volumeQuota: number
+
   @OneToMany(() => OrganizationRole, (organizationRole) => organizationRole.organization, {
     cascade: true,
     onDelete: 'CASCADE',

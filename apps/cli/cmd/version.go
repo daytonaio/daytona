@@ -6,7 +6,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/internal"
+	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/spf13/cobra"
 )
 

@@ -176,6 +176,10 @@ export class SnapshotManager {
       throw new ResourceNotFoundError('Workspace not found')
     }
 
+    if (workspace.snapshotState === SnapshotState.COMPLETED) {
+      return
+    }
+
     // Allow snapshots for STARTED workspaces or STOPPED workspaces with nodeId
     if (
       !(

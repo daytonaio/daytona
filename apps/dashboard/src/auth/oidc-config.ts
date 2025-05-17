@@ -5,6 +5,7 @@
 
 import { InMemoryWebStorage, WebStorageStateStore } from 'oidc-client-ts'
 import { AuthProviderProps } from 'react-oidc-context'
+import { RoutePath } from '@/enums/RoutePath'
 
 export const oidcConfig: AuthProviderProps = {
   authority: import.meta.env.VITE_OIDC_DOMAIN,
@@ -19,7 +20,7 @@ export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({ store: new InMemoryWebStorage() }),
   onSigninCallback: (user) => {
     const state = user?.state as { returnTo?: string } | undefined
-    const targetUrl = state?.returnTo || '/dashboard'
+    const targetUrl = state?.returnTo || RoutePath.DASHBOARD
     window.history.replaceState({}, '', targetUrl)
     window.dispatchEvent(new PopStateEvent('popstate'))
   },

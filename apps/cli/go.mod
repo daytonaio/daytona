@@ -1,4 +1,4 @@
-module github.com/daytonaio/daytona-ai-saas/cli
+module github.com/daytonaio/daytona/cli
 
 go 1.23.0
 
@@ -6,7 +6,7 @@ toolchain go1.23.5
 
 require (
 	github.com/charmbracelet/bubbletea v1.1.0
-	github.com/daytonaio/daytona-ai-saas/daytonaapiclient v0.0.0-00010101000000-000000000000
+	github.com/daytonaio/daytona/daytonaapiclient v0.0.0-00010101000000-000000000000
 	github.com/docker/docker v27.5.1+incompatible
 	github.com/mark3labs/mcp-go v0.20.1
 	github.com/sirupsen/logrus v1.9.3
@@ -14,7 +14,7 @@ require (
 	golang.org/x/oauth2 v0.25.0
 )
 
-replace github.com/daytonaio/daytona-ai-saas/daytonaapiclient => ../../libs/api-client-go
+replace github.com/daytonaio/daytona/daytonaapiclient => ../../libs/api-client-go
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20250102033503-faa5f7b0171c // indirect

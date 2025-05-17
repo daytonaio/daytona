@@ -6,11 +6,11 @@ package organization
 import (
 	"context"
 
-	"github.com/daytonaio/daytona-ai-saas/cli/apiclient"
-	"github.com/daytonaio/daytona-ai-saas/cli/config"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/common"
-	"github.com/daytonaio/daytona-ai-saas/cli/views/organization"
-	"github.com/daytonaio/daytona-ai-saas/daytonaapiclient"
+	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/daytona/cli/config"
+	"github.com/daytonaio/daytona/cli/views/common"
+	"github.com/daytonaio/daytona/cli/views/organization"
+	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
 

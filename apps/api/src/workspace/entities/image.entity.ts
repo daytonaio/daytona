@@ -78,4 +78,7 @@ export class Image {
   })
   @JoinColumn()
   buildInfo?: BuildInfo
+
+  @Column({ nullable: true })
+  buildNodeId?: string
 }

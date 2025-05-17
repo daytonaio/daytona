@@ -17,4 +17,5 @@ export const DEFAULT_ORGANIZATION_QUOTA: CreateOrganizationQuotaDto = {
   imageQuota: 5,
   maxImageSize: 5,
   totalImageSize: 10,
+  volumeQuota: 10,
 }

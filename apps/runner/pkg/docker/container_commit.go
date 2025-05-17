@@ -5,6 +5,7 @@ package docker
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/docker/docker/api/types/container"
 
@@ -12,17 +13,27 @@ import (
 )
 
 func (d *DockerClient) commitContainer(ctx context.Context, containerId, imageName string) error {
-	log.Infof("Committing container %s...", containerId)
+	const maxRetries = 3
 
-	commitResp, err := d.apiClient.ContainerCommit(ctx, containerId, container.CommitOptions{
-		Reference: imageName,
-		Pause:     false,
-	})
-	if err != nil {
-		return err
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Infof("Committing container %s (attempt %d/%d)...", containerId, attempt, maxRetries)
+
+		commitResp, err := d.apiClient.ContainerCommit(ctx, containerId, container.CommitOptions{
+			Reference: imageName,
+			Pause:     false,
+		})
+		if err == nil {
+			log.Infof("Container %s committed successfully with image ID: %s", containerId, commitResp.ID)
+			return nil
+		}
+
+		if attempt < maxRetries {
+			log.Warnf("Failed to commit container %s (attempt %d/%d): %v", containerId, attempt, maxRetries, err)
+			continue
+		}
+
+		return fmt.Errorf("failed to commit container after %d attempts: %w", maxRetries, err)
 	}
-
-	log.Infof("Container %s committed successfully with image ID: %s", containerId, commitResp.ID)
 
 	return nil
 }

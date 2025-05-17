@@ -21,6 +21,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { useTableSorting } from '@/hooks/useTableSorting'
 
+
 interface DataTableProps {
   data: OrganizationInvitation[]
   loadingData: boolean
@@ -68,6 +69,11 @@ export function UserOrganizationInvitationTable({
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
     },
   })
 
