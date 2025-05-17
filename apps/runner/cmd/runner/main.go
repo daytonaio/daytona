@@ -78,6 +78,8 @@ func main() {
 		DaemonPath:         daemonPath,
 	})
 
+	dockerClient.RunMountCleanup(ctx)
+
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
 
 	_ = runner.GetInstance(&runner.RunnerInstanceConfig{
