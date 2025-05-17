@@ -12,27 +12,27 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-func (d *DockerClient) Stop(ctx context.Context, containerId string) error {
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStopping)
+func (d *DockerClient) Stop(ctx context.Context, containerName string) error {
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStopping)
 
-	err := d.apiClient.ContainerStop(ctx, containerId, container.StopOptions{
+	err := d.apiClient.ContainerStop(ctx, containerName, container.StopOptions{
 		Signal: "SIGKILL",
 	})
 	if err != nil {
 		return err
 	}
 
-	err = d.waitForContainerStopped(ctx, containerId, 10*time.Second)
+	err = d.waitForContainerStopped(ctx, containerName, 10*time.Second)
 	if err != nil {
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStopped)
+	d.cache.SetSandboxState(ctx, containerName, enums.SandboxStateStopped)
 
 	return nil
 }
 
-func (d *DockerClient) waitForContainerStopped(ctx context.Context, containerId string, timeout time.Duration) error {
+func (d *DockerClient) waitForContainerStopped(ctx context.Context, containerName string, timeout time.Duration) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -42,9 +42,9 @@ func (d *DockerClient) waitForContainerStopped(ctx context.Context, containerId 
 	for {
 		select {
 		case <-timeoutCtx.Done():
-			return fmt.Errorf("timeout waiting for container %s to stop", containerId)
+			return fmt.Errorf("timeout waiting for container %s to stop", containerName)
 		case <-ticker.C:
-			c, err := d.ContainerInspect(ctx, containerId)
+			c, err := d.ContainerInspect(ctx, containerName)
 			if err != nil {
 				return err
 			}

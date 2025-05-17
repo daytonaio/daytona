@@ -12,14 +12,14 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (d *DockerClient) CreateSnapshot(ctx context.Context, containerId string, snapshotDto dto.CreateSnapshotDTO) error {
-	d.cache.SetSnapshotState(ctx, containerId, enums.SnapshotStatePending)
+func (d *DockerClient) CreateSnapshot(ctx context.Context, containerName string, snapshotDto dto.CreateSnapshotDTO) error {
+	d.cache.SetSnapshotState(ctx, containerName, enums.SnapshotStatePending)
 
-	log.Infof("Creating snapshot for container %s...", containerId)
+	log.Infof("Creating snapshot for container %s...", containerName)
 
-	d.cache.SetSnapshotState(ctx, containerId, enums.SnapshotStateInProgress)
+	d.cache.SetSnapshotState(ctx, containerName, enums.SnapshotStateInProgress)
 
-	err := d.commitContainer(ctx, containerId, snapshotDto.Image)
+	err := d.commitContainer(ctx, containerName, snapshotDto.Image)
 	if err != nil {
 		return err
 	}
@@ -29,9 +29,9 @@ func (d *DockerClient) CreateSnapshot(ctx context.Context, containerId string, s
 		return err
 	}
 
-	d.cache.SetSnapshotState(ctx, containerId, enums.SnapshotStateCompleted)
+	d.cache.SetSnapshotState(ctx, containerName, enums.SnapshotStateCompleted)
 
-	log.Infof("Snapshot (%s) for container %s created successfully", snapshotDto.Image, containerId)
+	log.Infof("Snapshot (%s) for container %s created successfully", snapshotDto.Image, containerName)
 
 	err = d.RemoveImage(ctx, snapshotDto.Image, true)
 	if err != nil {
