@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/daytonaio/runner/pkg/common"
+	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
 
@@ -73,7 +74,21 @@ var proxyClient = &http.Client{
 //	@Failure		500			{object}	string	"Internal server error"
 //	@Router			/workspaces/{workspaceId}/{projectId}/toolbox/{path} [get]
 func ProxyRequest(ctx *gin.Context) {
-	target, fullTargetURL, err := getProxyTarget(ctx)
+	sandboxId := ctx.Param("workspaceId")
+	if sandboxId == "" {
+		ctx.Error(common.NewBadRequestError(errors.New("sandbox ID is required")))
+		return
+	}
+
+	runner := runner.GetInstance(nil)
+
+	data := runner.SandboxService.GetSandboxStatesInfo(ctx, sandboxId)
+	if data.SandboxState != enums.SandboxStateStarted {
+		ctx.Error(common.NewBadRequestError(errors.New("sandbox is not started")))
+		return
+	}
+
+	target, fullTargetURL, err := getProxyTarget(ctx, sandboxId)
 	if err != nil {
 		// Error already sent to the context
 		return
@@ -139,14 +154,8 @@ func ProxyRequest(ctx *gin.Context) {
 	}
 }
 
-func getProxyTarget(ctx *gin.Context) (*url.URL, string, error) {
+func getProxyTarget(ctx *gin.Context, sandboxId string) (*url.URL, string, error) {
 	runner := runner.GetInstance(nil)
-
-	sandboxId := ctx.Param("workspaceId")
-	if sandboxId == "" {
-		ctx.Error(common.NewBadRequestError(errors.New("sandbox ID is required")))
-		return nil, "", errors.New("sandbox ID is required")
-	}
 
 	targetURL, err := runner.Docker.GetContainerTargetURL(ctx.Request.Context(), sandboxId)
 	if err != nil {
