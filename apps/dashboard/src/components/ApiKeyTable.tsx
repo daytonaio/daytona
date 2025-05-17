@@ -29,7 +29,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
 import { Loader2 } from 'lucide-react'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useTableSorting } from '@/hooks/useTableSorting'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -39,7 +39,7 @@ interface DataTableProps {
 }
 
 export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('api-keys')
   const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,

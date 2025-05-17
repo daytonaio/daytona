@@ -48,7 +48,8 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useTableSorting } from '@/hooks/useTableSorting'
+
 
 interface DataTableProps {
   data: Workspace[]
@@ -83,7 +84,7 @@ export function WorkspaceTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('workspaces')
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
