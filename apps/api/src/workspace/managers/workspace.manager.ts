@@ -1019,9 +1019,11 @@ export class WorkspaceManager {
       return
     }
 
-    this.handleWorkspaceDesiredStateArchived(event.workspace.id)
-
-    await this.redisLockProvider.unlock(lockKey)
+    try {
+      await this.handleWorkspaceDesiredStateArchived(event.workspace.id)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @OnEvent(WorkspaceEvents.DESTROYED)
@@ -1032,9 +1034,11 @@ export class WorkspaceManager {
       return
     }
 
-    this.handleWorkspaceDesiredStateDestroyed(event.workspace.id)
-
-    await this.redisLockProvider.unlock(lockKey)
+    try {
+      await this.handleWorkspaceDesiredStateDestroyed(event.workspace.id)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @OnEvent(WorkspaceEvents.STARTED)
@@ -1045,9 +1049,11 @@ export class WorkspaceManager {
       return
     }
 
-    this.handleWorkspaceDesiredStateStarted(event.workspace.id)
-
-    await this.redisLockProvider.unlock(lockKey)
+    try {
+      await this.handleWorkspaceDesiredStateStarted(event.workspace.id)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @OnEvent(WorkspaceEvents.STOPPED)
@@ -1058,9 +1064,11 @@ export class WorkspaceManager {
       return
     }
 
-    this.handleWorkspaceDesiredStateStopped(event.workspace.id)
-
-    await this.redisLockProvider.unlock(lockKey)
+    try {
+      await this.handleWorkspaceDesiredStateStopped(event.workspace.id)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 
   @OnEvent(WorkspaceEvents.CREATED)
@@ -1071,8 +1079,10 @@ export class WorkspaceManager {
       return
     }
 
-    this.handleWorkspaceDesiredStateStarted(event.workspace.id)
-
-    await this.redisLockProvider.unlock(lockKey)
+    try {
+      await this.handleWorkspaceDesiredStateStarted(event.workspace.id)
+    } finally {
+      await this.redisLockProvider.unlock(lockKey)
+    }
   }
 }
