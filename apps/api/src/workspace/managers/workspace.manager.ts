@@ -321,7 +321,7 @@ export class WorkspaceManager {
           if (archiveErrorRetryCount > 3) {
             await this.updateWorkspaceErrorState(workspace.id, 'Failed to archive workspace')
             await this.redis.del(archiveErrorRetryKey)
-            await this.redis.del(workspace.id)
+            await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
             break
           }
           await this.redis.setex('archive-error-retry-' + workspace.id, 720, String(archiveErrorRetryCount + 1))
@@ -331,7 +331,7 @@ export class WorkspaceManager {
             snapshotState: SnapshotState.PENDING,
           })
 
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
@@ -339,12 +339,12 @@ export class WorkspaceManager {
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
         if (workspace.lastActivityAt < thirtyMinutesAgo) {
           await this.updateWorkspaceErrorState(workspace.id, 'Archiving operation timed out')
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
         if (workspace.snapshotState !== SnapshotState.COMPLETED) {
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
@@ -359,7 +359,7 @@ export class WorkspaceManager {
           switch (workspaceInfo.state) {
             case NodeWorkspaceState.SandboxStateDestroying:
               //  wait until workspace is destroyed on node
-              await this.redis.del(workspace.id)
+              await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
             case NodeWorkspaceState.SandboxStateDestroyed:
@@ -367,7 +367,7 @@ export class WorkspaceManager {
               break
             default:
               await nodeWorkspaceApi.destroy(workspace.id)
-              await this.redis.del(workspace.id)
+              await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
           }
@@ -534,7 +534,7 @@ export class WorkspaceManager {
         await nodeWorkspaceApi.stop(workspace.id)
         await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
         //  sync states again immediately for workspace
-        await this.redis.del(workspace.id)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -562,7 +562,7 @@ export class WorkspaceManager {
             break
         }
         //  sync states again immediately for workspace
-        await this.redis.del(workspace.id)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -862,7 +862,7 @@ export class WorkspaceManager {
 
       await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTING)
       //  sync states again immediately for workspace
-      await this.redis.del(workspace.id)
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return true
     }
@@ -884,7 +884,7 @@ export class WorkspaceManager {
     if (workspaceInfo.state === NodeWorkspaceState.SandboxStatePullingImage) {
       await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_IMAGE)
 
-      await this.redis.del(workspace.id)
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return true
     }
@@ -981,7 +981,7 @@ export class WorkspaceManager {
       }
     }
     //  sync states again immediately for workspace
-    await this.redis.del(workspace.id)
+    await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
