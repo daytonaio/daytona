@@ -130,12 +130,6 @@ export class WorkspaceManager {
 
     await Promise.all(
       workspaces.map(async (workspace) => {
-        //  if the workspace is already being processed, skip it
-        const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-        const hasLock = await this.redis.get(lockKey)
-        if (hasLock) {
-          return
-        }
         this.syncInstanceState(workspace.id)
       }),
     )
@@ -192,10 +186,7 @@ export class WorkspaceManager {
       await this.updateWorkspaceErrorState(workspace.id, error.message || String(error))
     }
 
-    //  unlock the workspace after 10 seconds
-    //  this will allow the syncState cron to run again, but will allow
-    //  the syncInstanceState to complete any pending state changes
-    await this.redis.setex(lockKey, 10, '1')
+    await this.redisLockProvider.unlock(lockKey)
   }
 
   private async handleUnassignedBuildWorkspace(workspace: Workspace): Promise<void> {
@@ -674,7 +665,7 @@ export class WorkspaceManager {
     await nodeWorkspaceApi.create(createWorkspaceDto)
     await this.updateWorkspaceState(workspace.id, WorkspaceState.CREATING)
     //  sync states again immediately for workspace
-    await this.redis.del(workspace.id)
+    await this.redisLockProvider.unlock(workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
