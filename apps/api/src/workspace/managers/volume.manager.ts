@@ -75,7 +75,7 @@ export class VolumeManager {
     try {
       // Lock the entire process
       const lockKey = 'process-pending-volumes'
-      if (await this.redisLockProvider.lock(lockKey, 30)) {
+      if (!(await this.redisLockProvider.lock(lockKey, 30))) {
         return
       }
 
@@ -93,18 +93,17 @@ export class VolumeManager {
 
           // Get lock for this specific volume
           const volumeLockKey = `${VOLUME_STATE_LOCK_KEY}${volume.id}`
-          const hasLock = await this.redis.get(volumeLockKey)
-          if (hasLock) {
+          const acquired = await this.redisLockProvider.lock(volumeLockKey, 30)
+          if (!acquired) {
             return
           }
 
           try {
             this.processingVolumes.add(volume.id)
-            await this.redis.setex(volumeLockKey, 30, '1')
             await this.processVolumeState(volume)
           } finally {
             this.processingVolumes.delete(volume.id)
-            await this.redis.del(volumeLockKey)
+            await this.redisLockProvider.unlock(volumeLockKey)
           }
         }),
       )

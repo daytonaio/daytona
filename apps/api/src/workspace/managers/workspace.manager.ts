@@ -88,15 +88,15 @@ export class WorkspaceManager {
         await Promise.all(
           workspaces.map(async (workspace) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-            const locked = await this.redisLockProvider.lock(lockKey, 30)
-            if (locked) {
+            const acquired = await this.redisLockProvider.lock(lockKey, 30)
+            if (!acquired) {
               return
             }
 
             try {
               workspace.desiredState = WorkspaceDesiredState.STOPPED
               await this.workspaceRepository.save(workspace)
-              await this.redis.del(lockKey)
+              await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(workspace.id)
             } catch (error) {
               this.logger.error(
@@ -113,7 +113,7 @@ export class WorkspaceManager {
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   async syncStates(): Promise<void> {
     const lockKey = 'sync-states'
-    if (await this.redisLockProvider.lock(lockKey, 30)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
@@ -145,7 +145,10 @@ export class WorkspaceManager {
   async syncInstanceState(workspaceId: string): Promise<void> {
     //  prevent syncState cron from running multiple instances of the same workspace
     const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspaceId
-    await this.redis.setex(lockKey, 360, '1')
+    const acquired = await this.redisLockProvider.lock(lockKey, 360)
+    if (!acquired) {
+      return
+    }
 
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
@@ -172,7 +175,7 @@ export class WorkspaceManager {
       }
     } catch (error) {
       if (error.code === 'ECONNRESET') {
-        await this.redis.del(lockKey)
+        await this.redisLockProvider.unlock(lockKey)
         this.syncInstanceState(workspaceId)
         return
       }
@@ -285,7 +288,7 @@ export class WorkspaceManager {
     })
 
     const lockKey = 'archive-lock-' + workspace.nodeId
-    if (await this.redisLockProvider.lock(lockKey, 10)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return
     }
 

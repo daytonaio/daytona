@@ -333,7 +333,7 @@ export class OrganizationService implements OnModuleInit {
   async stopSuspendedOrganizationWorkspaces(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-workspaces'
-    if (await this.redisLockProvider.lock(lockKey, 60)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 60))) {
       return
     }
 
