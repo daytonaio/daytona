@@ -665,7 +665,7 @@ export class WorkspaceManager {
     await nodeWorkspaceApi.create(createWorkspaceDto)
     await this.updateWorkspaceState(workspace.id, WorkspaceState.CREATING)
     //  sync states again immediately for workspace
-    await this.redisLockProvider.unlock(workspace.id)
+    await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
