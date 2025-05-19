@@ -26,6 +26,7 @@ import {
 import { Pagination } from './Pagination'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { getRelativeTimeString } from '@/lib/utils'
 
 interface DataTableProps {
   data: ImageDto[]
@@ -226,12 +227,12 @@ const getColumns = ({
     {
       accessorKey: 'createdAt',
       header: 'Created',
-      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+      cell: ({ row }) => getRelativeTimeString(row.original.createdAt).relativeTimeString,
     },
     {
       accessorKey: 'lastUsedAt',
       header: 'Last Used',
-      cell: ({ row }) => (row.original.lastUsedAt ? new Date(row.original.lastUsedAt).toLocaleDateString() : '-'),
+      cell: ({ row }) => getRelativeTimeString(row.original.lastUsedAt).relativeTimeString,
     },
     {
       id: 'actions',
