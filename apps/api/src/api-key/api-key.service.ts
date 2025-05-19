@@ -67,7 +67,16 @@ export class ApiKeyService {
   }
 
   async getApiKeys(organizationId: string, userId: string): Promise<ApiKey[]> {
-    const apiKeys = await this.apiKeyRepository.find({ where: { organizationId, userId } })
+    const apiKeys = await this.apiKeyRepository.find({
+      where: { organizationId, userId },
+      order: {
+        lastUsedAt: {
+          direction: 'DESC',
+          nulls: 'LAST',
+        },
+        createdAt: 'DESC',
+      },
+    })
 
     const organizationUser = await this.organizationUserService.findOne(organizationId, userId)
     if (!organizationUser) {
@@ -132,6 +141,17 @@ export class ApiKeyService {
     }
 
     await this.apiKeyRepository.remove(apiKey)
+  }
+
+  async updateLastUsedAt(organizationId: string, userId: string, name: string, lastUsedAt: Date): Promise<void> {
+    await this.apiKeyRepository.update(
+      {
+        organizationId,
+        userId,
+        name,
+      },
+      { lastUsedAt },
+    )
   }
 
   private getEffectivePermissions(

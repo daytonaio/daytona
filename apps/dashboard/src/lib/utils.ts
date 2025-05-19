@@ -10,7 +10,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function getRelativeTimeString(timestamp?: string, fallback = '-'): { date: Date; relativeTimeString: string } {
+export function getRelativeTimeString(
+  timestamp: string | Date | undefined | null,
+  fallback = '-',
+): { date: Date; relativeTimeString: string } {
   if (!timestamp) {
     return { date: new Date(), relativeTimeString: fallback }
   }
