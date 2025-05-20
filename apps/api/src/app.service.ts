@@ -148,7 +148,7 @@ export class AppService implements OnApplicationBootstrap {
     }
 
     await this.imageService.createImage(
-      adminPersonalOrg.id,
+      adminPersonalOrg,
       {
         name: this.configService.getOrThrow('defaultImage'),
       },

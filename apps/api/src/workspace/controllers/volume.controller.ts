@@ -40,8 +40,7 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { VolumeDto } from '../dto/volume.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
-import { OrganizationService } from '../../organization/services/organization.service'
-import { NotFoundException, ForbiddenException } from '@nestjs/common'
+import { ForbiddenException } from '@nestjs/common'
 
 @ApiTags('volumes')
 @Controller('volumes')
@@ -55,7 +54,6 @@ export class VolumeController {
   constructor(
     @InjectRedis() private readonly redis: Redis,
     private readonly volumeService: VolumeService,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Get()
@@ -100,10 +98,7 @@ export class VolumeController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
-    const organization = await this.organizationService.findOne(authContext.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${authContext.organizationId} not found`)
-    }
+    const organization = authContext.organization
 
     //  optimistic quota guard
     //  protect against race condition on volume create abuse

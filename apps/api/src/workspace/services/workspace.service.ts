@@ -46,6 +46,7 @@ const DEFAULT_CPU = 2
 const DEFAULT_MEMORY = 4
 const DEFAULT_DISK = 10
 const DEFAULT_GPU = 0
+
 @Injectable()
 export class WorkspaceService {
   private readonly logger = new Logger(WorkspaceService.name)
@@ -67,18 +68,12 @@ export class WorkspaceService {
   ) {}
 
   private async validateOrganizationQuotas(
-    organizationId: string,
+    organization: Organization,
     cpu: number,
     memory: number,
     disk: number,
     excludeWorkspaceId?: string,
   ): Promise<void> {
-    const organization = await this.organizationService.findOne(organizationId)
-
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-    }
-
     await this.assertOrganizationIsNotSuspended(organization)
 
     // Check per-workspace resource limits
@@ -117,7 +112,7 @@ export class WorkspaceService {
         'COUNT(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN 1 ELSE NULL END) as count_running',
         'COUNT(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN 1 ELSE NULL END) as count_total',
       ])
-      .where('workspace.organizationId = :organizationId', { organizationId })
+      .where('workspace.organizationId = :organizationId', { organizationId: organization.id })
       .andWhere(
         excludeWorkspaceId ? 'workspace.id != :excludeWorkspaceId' : '1=1',
         excludeWorkspaceId ? { excludeWorkspaceId } : {},
@@ -199,7 +194,11 @@ export class WorkspaceService {
     })
   }
 
-  async create(organizationId: string | null, createWorkspaceDto: CreateWorkspaceDto): Promise<Workspace> {
+  async create(
+    organizationId: string,
+    createWorkspaceDto: CreateWorkspaceDto,
+    organization?: Organization,
+  ): Promise<Workspace> {
     const cpu = createWorkspaceDto.cpu || DEFAULT_CPU
     const mem = createWorkspaceDto.memory || DEFAULT_MEMORY
     const disk = createWorkspaceDto.disk || DEFAULT_DISK
@@ -216,7 +215,14 @@ export class WorkspaceService {
 
     // Validate organization quotas before creating workspace
     if (organizationId !== WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION) {
-      await this.validateOrganizationQuotas(organizationId, cpu, mem, disk)
+      if (!organization) {
+        organization = await this.organizationService.findOne(organizationId)
+        if (!organization) {
+          throw new NotFoundException(`Organization with ID ${organizationId} not found`)
+        }
+      }
+
+      await this.validateOrganizationQuotas(organization, cpu, mem, disk)
     }
 
     //  validate image
@@ -433,7 +439,7 @@ export class WorkspaceService {
     this.eventEmitter.emit(WorkspaceEvents.DESTROYED, new WorkspaceDestroyedEvent(workspace))
   }
 
-  async start(workspaceId: string): Promise<void> {
+  async start(workspaceId: string, organization: Organization): Promise<void> {
     const workspace = await this.workspaceRepository.findOne({
       where: {
         id: workspaceId,
@@ -450,12 +456,6 @@ export class WorkspaceService {
 
     if (![WorkspaceState.STOPPED, WorkspaceState.ARCHIVED].includes(workspace.state)) {
       throw new WorkspaceError('Workspace is not in valid state')
-    }
-
-    // Check concurrent workspace limit before starting
-    const organization = await this.organizationService.findOne(workspace.organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${workspace.organizationId} not found`)
     }
 
     await this.assertOrganizationIsNotSuspended(organization)
@@ -486,13 +486,7 @@ export class WorkspaceService {
     } else {
       //  restore operation
       //  like a new workspace creation, we need to validate quotas
-      await this.validateOrganizationQuotas(
-        workspace.organizationId,
-        workspace.cpu,
-        workspace.mem,
-        workspace.disk,
-        workspace.id,
-      )
+      await this.validateOrganizationQuotas(organization, workspace.cpu, workspace.mem, workspace.disk, workspace.id)
     }
 
     if (workspace.pending) {
