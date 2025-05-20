@@ -97,61 +97,65 @@ export class WorkspaceService {
       )
     }
 
-    // Get total disk usage from all hot workspaces
-    const hotWorkspaces = await this.workspaceRepository.find({
-      where: {
-        organizationId: organization.id,
-        state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR])),
-        id: excludeWorkspaceId ? Not(excludeWorkspaceId) : undefined,
-      },
-    })
+    const ignoredStates = [WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR]
 
-    const currentDisk = hotWorkspaces.reduce((sum, ws) => sum + ws.disk, 0)
-    if (currentDisk + disk > organization.totalDiskQuota) {
+    const inactiveStates = [...ignoredStates, WorkspaceState.STOPPED, WorkspaceState.ARCHIVING]
+
+    const resourceMetrics: {
+      used_disk: number
+      used_cpu: number
+      used_mem: number
+      count_running: number
+      count_total: number
+    } = await this.workspaceRepository
+      .createQueryBuilder('workspace')
+      .select([
+        'SUM(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN workspace.disk ELSE 0 END) as used_disk',
+        'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.cpu ELSE 0 END) as used_cpu',
+        'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.mem ELSE 0 END) as used_mem',
+        'COUNT(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN 1 ELSE NULL END) as count_running',
+        'COUNT(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN 1 ELSE NULL END) as count_total',
+      ])
+      .where('workspace.organizationId = :organizationId', { organizationId })
+      .andWhere(
+        excludeWorkspaceId ? 'workspace.id != :excludeWorkspaceId' : '1=1',
+        excludeWorkspaceId ? { excludeWorkspaceId } : {},
+      )
+      .setParameter('ignoredStates', ignoredStates)
+      .setParameter('inactiveStates', inactiveStates)
+      .getRawOne()
+
+    const usedDisk = Number(resourceMetrics.used_disk) || 0
+    const usedCpu = Number(resourceMetrics.used_cpu) || 0
+    const usedMem = Number(resourceMetrics.used_mem) || 0
+    const countRunning = Number(resourceMetrics.count_running) || 0
+    const countTotal = Number(resourceMetrics.count_total) || 0
+
+    if (usedDisk + disk > organization.totalDiskQuota) {
       throw new ForbiddenException(
-        `Total disk quota exceeded (${currentDisk + disk}GB > ${organization.totalDiskQuota}GB)`,
+        `Total disk quota exceeded (${usedDisk + disk}GB > ${organization.totalDiskQuota}GB)`,
       )
     }
-
-    // Get current resource usage from active workspaces
-    const activeWorkspaces = await this.workspaceRepository.find({
-      where: {
-        organizationId,
-        state: In([
-          WorkspaceState.STARTED,
-          WorkspaceState.STARTING,
-          WorkspaceState.RESTORING,
-          WorkspaceState.PULLING_IMAGE,
-          WorkspaceState.CREATING,
-        ]),
-        id: excludeWorkspaceId ? Not(excludeWorkspaceId) : undefined,
-      },
-    })
-
-    const currentCpu = activeWorkspaces.reduce((sum, ws) => sum + ws.cpu, 0)
-    const currentMemory = activeWorkspaces.reduce((sum, ws) => sum + ws.mem, 0)
 
     // Check total resource quotas
-    if (currentCpu + cpu > organization.totalCpuQuota) {
-      throw new ForbiddenException(`Total CPU quota exceeded (${currentCpu + cpu} > ${organization.totalCpuQuota})`)
+    if (usedCpu + cpu > organization.totalCpuQuota) {
+      throw new ForbiddenException(`Total CPU quota exceeded (${usedCpu + cpu} > ${organization.totalCpuQuota})`)
     }
-    if (currentMemory + memory > organization.totalMemoryQuota) {
+
+    if (usedMem + memory > organization.totalMemoryQuota) {
       throw new ForbiddenException(
-        `Total memory quota exceeded (${currentMemory + memory}GB > ${organization.totalMemoryQuota}GB)`,
+        `Total memory quota exceeded (${usedMem + memory}GB > ${organization.totalMemoryQuota}GB)`,
       )
     }
 
-    // Check concurrent workspace limit
-    const startedWorkspaces = activeWorkspaces.filter((ws) => ws.state === WorkspaceState.STARTED).length
-
-    if (startedWorkspaces >= organization.maxConcurrentWorkspaces) {
+    if (countRunning >= organization.maxConcurrentWorkspaces) {
       throw new ForbiddenException(
         `Maximum number of concurrent workspaces (${organization.maxConcurrentWorkspaces}) reached`,
       )
     }
 
     // Check total workspace quota if set
-    if (organization.workspaceQuota > 0 && activeWorkspaces.length >= organization.workspaceQuota) {
+    if (organization.workspaceQuota > 0 && countTotal >= organization.workspaceQuota) {
       throw new ForbiddenException(`Workspace quota limit (${organization.workspaceQuota}) reached`)
     }
   }
