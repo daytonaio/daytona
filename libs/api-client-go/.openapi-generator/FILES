@@ -42,6 +42,7 @@ model_file_info.go
 model_file_status.go
 model_git_add_request.go
 model_git_branch_request.go
+model_git_checkout_request.go
 model_git_clone_request.go
 model_git_commit_info.go
 model_git_commit_request.go

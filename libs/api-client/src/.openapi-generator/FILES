@@ -44,6 +44,7 @@ models/file-info.ts
 models/file-status.ts
 models/git-add-request.ts
 models/git-branch-request.ts
+models/git-checkout-request.ts
 models/git-clone-request.ts
 models/git-commit-info.ts
 models/git-commit-request.ts
