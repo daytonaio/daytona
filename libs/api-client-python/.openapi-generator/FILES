@@ -50,6 +50,7 @@ daytona_api_client/models/git_clone_request.py
 daytona_api_client/models/git_commit_info.py
 daytona_api_client/models/git_commit_request.py
 daytona_api_client/models/git_commit_response.py
+daytona_api_client/models/git_delete_branch_request.py
 daytona_api_client/models/git_repo_request.py
 daytona_api_client/models/git_status.py
 daytona_api_client/models/image_dto.py

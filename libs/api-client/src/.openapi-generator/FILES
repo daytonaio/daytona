@@ -50,6 +50,7 @@ models/git-clone-request.ts
 models/git-commit-info.ts
 models/git-commit-request.ts
 models/git-commit-response.ts
+models/git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
 models/image-dto.ts
