@@ -634,6 +634,7 @@ export class WorkspaceService {
         nodeId: In(nodes.map((node) => node.id)),
         organizationId: '00000000-0000-0000-0000-000000000000',
         state: WorkspaceState.STARTED,
+        desiredState: Not(WorkspaceDesiredState.DESTROYED),
       },
     })
 
