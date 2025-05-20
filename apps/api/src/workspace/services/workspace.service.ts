@@ -418,10 +418,6 @@ export class WorkspaceService {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    if ([WorkspaceState.DESTROYED, WorkspaceState.UNKNOWN, WorkspaceState.CREATING].includes(workspace.state)) {
-      throw new WorkspaceError('Workspace can not be destroyed at this time')
-    }
-
     if (workspace.pending) {
       throw new WorkspaceError('Workspace state change in progress')
     }
