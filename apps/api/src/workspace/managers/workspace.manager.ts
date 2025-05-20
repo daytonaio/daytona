@@ -1013,26 +1013,26 @@ export class WorkspaceManager {
 
   @OnEvent(WorkspaceEvents.ARCHIVED)
   private async handleWorkspaceArchivedEvent(event: WorkspaceArchivedEvent) {
-    this.syncInstanceState(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.DESTROYED)
   private async handleWorkspaceDestroyedEvent(event: WorkspaceDestroyedEvent) {
-    this.syncInstanceState(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.STARTED)
   private async handleWorkspaceStartedEvent(event: WorkspaceStartedEvent) {
-    this.syncInstanceState(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.STOPPED)
   private async handleWorkspaceStoppedEvent(event: WorkspaceStoppedEvent) {
-    this.syncInstanceState(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.CREATED)
   private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
-    this.syncInstanceState(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 }
