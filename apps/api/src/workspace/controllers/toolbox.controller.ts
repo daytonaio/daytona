@@ -100,19 +100,24 @@ export class ToolboxController {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-        const node = await this.toolboxService.getNode(workspaceId)
+        try {
+          const node = await this.toolboxService.getNode(workspaceId)
+          // @ts-expect-error - used later to set request headers
+          req._nodeApiKey = node.apiKey
 
-        // @ts-expect-error - used later to set request headers
-        req._nodeApiKey = node.apiKey
+          return node.apiUrl
+        } catch (err) {
+          // @ts-expect-error - used later to throw error
+          req._err = err
+        }
 
-        return node.apiUrl
+        // Must return a valid url
+        return 'http://target-error'
       },
       pathRewrite: (path) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-
         const routePath = path.split(`/api/toolbox/${workspaceId}/toolbox`)[1]
-
         const newPath = `/workspaces/${workspaceId}/main/toolbox${routePath}`
 
         return newPath
@@ -122,8 +127,15 @@ export class ToolboxController {
       followRedirects: true,
       proxyTimeout: 5 * 60 * 1000,
       on: {
-        proxyReq: (proxyReq, req) => {
-          // console.log('headers', proxyReq.getHeaders())
+        proxyReq: (proxyReq, req, res) => {
+          // @ts-expect-error - set when routing
+          if (req._err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' })
+            // @ts-expect-error - set when routing
+            res.end(JSON.stringify(req._err))
+            return
+          }
+
           // @ts-expect-error - set when routing
           const nodeApiKey = req._nodeApiKey
 
