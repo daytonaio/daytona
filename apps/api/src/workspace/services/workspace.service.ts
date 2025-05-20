@@ -22,7 +22,6 @@ import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { ConfigService } from '@nestjs/config'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { WorkspaceWarmPoolService } from './workspace-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
@@ -35,11 +34,13 @@ import { WorkspaceStateUpdatedEvent } from '../events/workspace-state-updated.ev
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
 import { WorkspaceSnapshotCreatedEvent } from '../events/workspace-snapshot-created.event'
-import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceStartedEvent } from '../events/workspace-started.event'
 import { WorkspaceStoppedEvent } from '../events/workspace-stopped.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
+import { OrganizationService } from '../../organization/services/organization.service'
+import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
+import { OrganizationSuspendedWorkspaceStoppedEvent } from '../../organization/events/organization-suspended-workspace-stopped.event'
 
 const DEFAULT_CPU = 2
 const DEFAULT_MEMORY = 4
@@ -61,8 +62,8 @@ export class WorkspaceService {
     private readonly nodeService: NodeService,
     private readonly configService: ConfigService,
     private readonly warmPoolService: WorkspaceWarmPoolService,
-    private readonly organizationService: OrganizationService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly organizationService: OrganizationService,
   ) {}
 
   private async validateOrganizationQuotas(
@@ -675,5 +676,16 @@ export class WorkspaceService {
     }
 
     return workspace.public
+  }
+
+  @OnEvent(OrganizationEvents.SUSPENDED_WORKSPACE_STOPPED)
+  async handleSuspendedWorkspaceStopped(event: OrganizationSuspendedWorkspaceStoppedEvent) {
+    await this.stop(event.workspaceId).catch((error) => {
+      //  log the error for now, but don't throw it as it will be retried
+      this.logger.error(
+        `Error stopping workspace from suspended organization. WorkspaceId: ${event.workspaceId}: `,
+        error,
+      )
+    })
   }
 }
