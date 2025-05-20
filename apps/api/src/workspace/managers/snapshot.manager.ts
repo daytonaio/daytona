@@ -148,14 +148,13 @@ export class SnapshotManager {
             }
           }
         } catch (error) {
-          this.logger.error(`Error processing snapshot for workspace ${workspace.id}:`, fromAxiosError(error))
-
           //  if error, retry 10 times
           const errorRetryKey = `${lockKey}-error-retry`
           const errorRetryCount = await this.redis.get(errorRetryKey)
           if (!errorRetryCount) {
             await this.redis.setex(errorRetryKey, 300, '1')
           } else if (parseInt(errorRetryCount) > 10) {
+            this.logger.error(`Error processing snapshot for workspace ${workspace.id}:`, fromAxiosError(error))
             await this.updateWorkspaceSnapshotState(workspace.id, SnapshotState.ERROR)
           } else {
             await this.redis.setex(errorRetryKey, 300, errorRetryCount + 1)
