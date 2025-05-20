@@ -97,35 +97,37 @@ export class WorkspaceService {
       )
     }
 
+    const ignoredStates = [
+      WorkspaceState.DESTROYED,
+      WorkspaceState.ARCHIVED,
+      WorkspaceState.ERROR,
+    ];
+    
+    const inactiveStates = [...ignoredStates, WorkspaceState.STOPPED, WorkspaceState.ARCHIVING];
+    
     const resourceMetrics: {
-      used_disk: number
-      used_cpu: number
-      used_mem: number
-      count_running: number
-      count_total: number
-    } = await this.workspaceRepository
+          used_disk: number
+          used_cpu: number
+          used_mem: number
+          count_running: number
+          count_total: number
+        } = await this.workspaceRepository
       .createQueryBuilder('workspace')
       .select([
-        'SUM(CASE WHEN workspace.state NOT IN (:...stoppedStates) THEN workspace.disk ELSE 0 END) as used_disk',
-        'SUM(CASE WHEN workspace.state IN (:...runningStates) THEN workspace.cpu ELSE 0 END) as used_cpu',
-        'SUM(CASE WHEN workspace.state IN (:...runningStates) THEN workspace.mem ELSE 0 END) as used_mem',
-        'COUNT(CASE WHEN workspace.state IN (:...runningStates) THEN 1 ELSE NULL END) as count_running',
-        'COUNT(CASE WHEN workspace.state NOT IN (:...stoppedStates) THEN 1 ELSE NULL END) as count_total',
+        'SUM(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN workspace.disk ELSE 0 END) as used_disk',
+        'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.cpu ELSE 0 END) as used_cpu',
+        'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.mem ELSE 0 END) as used_mem',
+        'COUNT(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN 1 ELSE NULL END) as count_running',
+        'COUNT(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN 1 ELSE NULL END) as count_total',
       ])
       .where('workspace.organizationId = :organizationId', { organizationId })
       .andWhere(
         excludeWorkspaceId ? 'workspace.id != :excludeWorkspaceId' : '1=1',
-        excludeWorkspaceId ? { excludeWorkspaceId } : {},
+        excludeWorkspaceId ? { excludeWorkspaceId } : {}
       )
-      .setParameter('stoppedStates', [WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR])
-      .setParameter('runningStates', [
-        WorkspaceState.STARTED,
-        WorkspaceState.STARTING,
-        WorkspaceState.RESTORING,
-        WorkspaceState.PULLING_IMAGE,
-        WorkspaceState.CREATING,
-      ])
-      .getRawOne()
+      .setParameter('dormantStates', ignoredStates)
+      .setParameter('inactiveStates', inactiveStates)
+      .getRawOne();
 
     const usedDisk = resourceMetrics.used_disk || 0
     const usedCpu = resourceMetrics.used_cpu || 0
