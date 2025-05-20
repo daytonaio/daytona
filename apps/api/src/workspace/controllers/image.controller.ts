@@ -95,7 +95,7 @@ export class ImageController {
     }
 
     // TODO: consider - if using transient registry, prepend the image name with the username
-    const image = await this.imageService.createImage(authContext.organizationId, createImageDto)
+    const image = await this.imageService.createImage(authContext.organization, createImageDto)
     return ImageDto.fromImage(image)
   }
 
@@ -144,7 +144,7 @@ export class ImageController {
     @Body() buildImageDto: BuildImageDto,
   ): Promise<ImageDto> {
     const image = await this.imageService.createImage(
-      authContext.organizationId,
+      authContext.organization,
       {
         name: buildImageDto.name,
       },
