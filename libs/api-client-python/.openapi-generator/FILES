@@ -44,6 +44,7 @@ daytona_api_client/models/file_info.py
 daytona_api_client/models/file_status.py
 daytona_api_client/models/git_add_request.py
 daytona_api_client/models/git_branch_request.py
+daytona_api_client/models/git_checkout_request.py
 daytona_api_client/models/git_clone_request.py
 daytona_api_client/models/git_commit_info.py
 daytona_api_client/models/git_commit_request.py
