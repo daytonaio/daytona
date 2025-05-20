@@ -19,6 +19,9 @@ import { CreateImageDto } from '../../workspace/dto/create-image.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateBuildInfoDto } from '../dto/create-build-info.dto'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
+import { OnEvent } from '@nestjs/event-emitter'
+import { WorkspaceEvents } from '../constants/workspace-events.constants'
+import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 
 @Injectable()
 export class ImageService {
@@ -148,6 +151,10 @@ export class ImageService {
     const [items, total] = await this.imageRepository.findAndCount({
       where: { organizationId },
       order: {
+        lastUsedAt: {
+          direction: 'DESC',
+          nulls: 'LAST',
+        },
         createdAt: 'DESC',
       },
       skip: (pageNum - 1) * limitNum,
@@ -205,5 +212,16 @@ export class ImageService {
 
     image.general = general
     return await this.imageRepository.save(image)
+  }
+
+  @OnEvent(WorkspaceEvents.CREATED)
+  private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
+    if (!event.workspace.image) {
+      return
+    }
+
+    const image = await this.getImageByName(event.workspace.image, event.workspace.organizationId)
+    image.lastUsedAt = event.workspace.createdAt
+    await this.imageRepository.save(image)
   }
 }

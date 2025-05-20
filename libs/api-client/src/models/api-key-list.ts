@@ -42,6 +42,12 @@ export interface ApiKeyList {
    * @memberof ApiKeyList
    */
   permissions: Array<ApiKeyListPermissionsEnum>
+  /**
+   *
+   * @type {Date}
+   * @memberof ApiKeyList
+   */
+  lastUsedAt: Date | null
 }
 
 export const ApiKeyListPermissionsEnum = {

@@ -4072,6 +4072,7 @@ components:
     ApiKeyList:
       example:
         createdAt: 2024-03-14T12:00:00Z
+        lastUsedAt: 2000-01-23T04:56:07.000+00:00
         permissions:
           - write:registries
           - write:registries
@@ -4107,8 +4108,13 @@ components:
               - delete:volumes
             type: string
           type: array
+        lastUsedAt:
+          format: date-time
+          nullable: true
+          type: string
       required:
         - createdAt
+        - lastUsedAt
         - name
         - permissions
         - value
