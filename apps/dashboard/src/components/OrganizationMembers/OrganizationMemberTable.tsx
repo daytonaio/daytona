@@ -23,7 +23,8 @@ import { RemoveOrganizationMemberDialog } from '@/components/OrganizationMembers
 import { UpdateOrganizationMemberRoleDialog } from '@/components/OrganizationMembers/UpdateOrganizationMemberRoleDialog'
 import { UpdateAssignedOrganizationRolesDialog } from '@/components/OrganizationMembers/UpdateAssignedOrganizationRolesDialog.tsx'
 import { capitalize } from '@/lib/utils'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useTableSorting } from '@/hooks/useTableSorting'
+
 
 interface DataTableProps {
   data: OrganizationUser[]
@@ -48,7 +49,7 @@ export function OrganizationMemberTable({
   loadingMemberAction,
   ownerMode,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('organization-roles')
   const [memberToUpdate, setMemberToUpdate] = useState<OrganizationUser | null>(null)
   const [isUpdateMemberRoleDialogOpen, setIsUpdateMemberRoleDialogOpen] = useState(false)
   const [isUpdateAssignedRolesDialogOpen, setIsUpdateAssignedRolesDialogOpen] = useState(false)

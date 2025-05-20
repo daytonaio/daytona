@@ -28,7 +28,8 @@ import {
 import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useTableSorting } from '@/hooks/useTableSorting'
+
 
 interface DataTableProps {
   data: DockerRegistry[]
@@ -50,7 +51,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('registries')
   const columns = getColumns({ onDelete, onEdit, loading, writePermitted, deletePermitted })
   const table = useReactTable({
     data,

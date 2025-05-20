@@ -19,7 +19,8 @@ import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
-import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { useTableSorting } from '@/hooks/useTableSorting'
+
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -36,7 +37,7 @@ export function UserOrganizationInvitationTable({
   onDeclineInvitation,
   loadingInvitationAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('user-org-invitations')
   const [invitationToDecline, setInvitationToDecline] = useState<OrganizationInvitation | null>(null)
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false)
 
