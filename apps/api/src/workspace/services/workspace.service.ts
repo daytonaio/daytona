@@ -97,21 +97,17 @@ export class WorkspaceService {
       )
     }
 
-    const ignoredStates = [
-      WorkspaceState.DESTROYED,
-      WorkspaceState.ARCHIVED,
-      WorkspaceState.ERROR,
-    ];
-    
-    const inactiveStates = [...ignoredStates, WorkspaceState.STOPPED, WorkspaceState.ARCHIVING];
-    
+    const ignoredStates = [WorkspaceState.DESTROYED, WorkspaceState.ARCHIVED, WorkspaceState.ERROR]
+
+    const inactiveStates = [...ignoredStates, WorkspaceState.STOPPED, WorkspaceState.ARCHIVING]
+
     const resourceMetrics: {
-          used_disk: number
-          used_cpu: number
-          used_mem: number
-          count_running: number
-          count_total: number
-        } = await this.workspaceRepository
+      used_disk: number
+      used_cpu: number
+      used_mem: number
+      count_running: number
+      count_total: number
+    } = await this.workspaceRepository
       .createQueryBuilder('workspace')
       .select([
         'SUM(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN workspace.disk ELSE 0 END) as used_disk',
@@ -123,11 +119,11 @@ export class WorkspaceService {
       .where('workspace.organizationId = :organizationId', { organizationId })
       .andWhere(
         excludeWorkspaceId ? 'workspace.id != :excludeWorkspaceId' : '1=1',
-        excludeWorkspaceId ? { excludeWorkspaceId } : {}
+        excludeWorkspaceId ? { excludeWorkspaceId } : {},
       )
-      .setParameter('dormantStates', ignoredStates)
+      .setParameter('ignoredStates', ignoredStates)
       .setParameter('inactiveStates', inactiveStates)
-      .getRawOne();
+      .getRawOne()
 
     const usedDisk = resourceMetrics.used_disk || 0
     const usedCpu = resourceMetrics.used_cpu || 0
