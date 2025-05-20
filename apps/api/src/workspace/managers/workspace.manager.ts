@@ -1013,76 +1013,26 @@ export class WorkspaceManager {
 
   @OnEvent(WorkspaceEvents.ARCHIVED)
   private async handleWorkspaceArchivedEvent(event: WorkspaceArchivedEvent) {
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + event.workspace.id
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
-      return
-    }
-
-    try {
-      await this.handleWorkspaceDesiredStateArchived(event.workspace.id)
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    this.syncInstanceState(event.workspace.id)
   }
 
   @OnEvent(WorkspaceEvents.DESTROYED)
   private async handleWorkspaceDestroyedEvent(event: WorkspaceDestroyedEvent) {
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + event.workspace.id
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
-      return
-    }
-
-    try {
-      await this.handleWorkspaceDesiredStateDestroyed(event.workspace.id)
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    this.syncInstanceState(event.workspace.id)
   }
 
   @OnEvent(WorkspaceEvents.STARTED)
   private async handleWorkspaceStartedEvent(event: WorkspaceStartedEvent) {
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + event.workspace.id
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
-      return
-    }
-
-    try {
-      await this.handleWorkspaceDesiredStateStarted(event.workspace.id)
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    this.syncInstanceState(event.workspace.id)
   }
 
   @OnEvent(WorkspaceEvents.STOPPED)
   private async handleWorkspaceStoppedEvent(event: WorkspaceStoppedEvent) {
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + event.workspace.id
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
-      return
-    }
-
-    try {
-      await this.handleWorkspaceDesiredStateStopped(event.workspace.id)
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    this.syncInstanceState(event.workspace.id)
   }
 
   @OnEvent(WorkspaceEvents.CREATED)
   private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
-    const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + event.workspace.id
-    const acquired = await this.redisLockProvider.lock(lockKey, 360)
-    if (!acquired) {
-      return
-    }
-
-    try {
-      await this.handleWorkspaceDesiredStateStarted(event.workspace.id)
-    } finally {
-      await this.redisLockProvider.unlock(lockKey)
-    }
+    this.syncInstanceState(event.workspace.id)
   }
 }
