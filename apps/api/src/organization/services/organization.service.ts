@@ -30,6 +30,7 @@ import { VolumeState } from '../../workspace/enums/volume-state.enum'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { RedisLockProvider } from '../../workspace/common/redis-lock.provider'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -47,6 +48,7 @@ export class OrganizationService implements OnModuleInit {
     private readonly volumeRepository: Repository<Volume>,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -331,16 +333,14 @@ export class OrganizationService implements OnModuleInit {
   async stopSuspendedOrganizationWorkspaces(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const lockKey = 'stop-suspended-organization-workspaces'
-    if (await this.redis.get(lockKey)) {
+    if (await this.redisLockProvider.lock(lockKey, 60)) {
       return
     }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex(lockKey, 60, '1')
-
+    
     const suspendedOrganizations = await this.findSuspended(
       // Find organization suspended more than 24 hours ago
       new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
-      //  and after 7 days ago
+      //  and less than 7 days ago
       new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
     )
 
