@@ -342,8 +342,8 @@ export class SnapshotManager {
         .filter((workspace) => workspace.nodeId !== null)
         .map(async (workspace) => {
           const lockKey = `workspace-snapshot-${workspace.id}`
-          const thisLock = await this.redisLockProvider.lock(lockKey, 30)
-          if (!thisLock) {
+          const hasLock = await this.redisLockProvider.lock(lockKey, 30)
+          if (!hasLock) {
             return
           }
 
