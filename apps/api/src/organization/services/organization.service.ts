@@ -31,6 +31,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../../workspace/common/redis-lock.provider'
+import { OrganizationSuspendedWorkspaceStoppedEvent } from '../events/organization-suspended-workspace-stopped.event'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -354,7 +355,10 @@ export class OrganizationService implements OnModuleInit {
     })
 
     workspaces.map((workspace) =>
-      this.eventEmitter.emitAsync(OrganizationEvents.SUSPENDED_WORKSPACE_STOPPED, workspace.id),
+      this.eventEmitter.emitAsync(
+        OrganizationEvents.SUSPENDED_WORKSPACE_STOPPED,
+        new OrganizationSuspendedWorkspaceStoppedEvent(workspace.id),
+      ),
     )
 
     await this.redis.del(lockKey)
