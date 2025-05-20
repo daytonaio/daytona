@@ -336,7 +336,7 @@ export class OrganizationService implements OnModuleInit {
     if (await this.redisLockProvider.lock(lockKey, 60)) {
       return
     }
-    
+
     const suspendedOrganizations = await this.findSuspended(
       // Find organization suspended more than 24 hours ago
       new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
