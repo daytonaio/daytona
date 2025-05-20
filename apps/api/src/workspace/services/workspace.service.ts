@@ -125,11 +125,11 @@ export class WorkspaceService {
       .setParameter('inactiveStates', inactiveStates)
       .getRawOne()
 
-    const usedDisk = resourceMetrics.used_disk || 0
-    const usedCpu = resourceMetrics.used_cpu || 0
-    const usedMem = resourceMetrics.used_mem || 0
-    const countRunning = resourceMetrics.count_running || 0
-    const countTotal = resourceMetrics.count_total || 0
+    const usedDisk = Number(resourceMetrics.used_disk) || 0
+    const usedCpu = Number(resourceMetrics.used_cpu) || 0
+    const usedMem = Number(resourceMetrics.used_mem) || 0
+    const countRunning = Number(resourceMetrics.count_running) || 0
+    const countTotal = Number(resourceMetrics.count_total) || 0
 
     if (usedDisk + disk > organization.totalDiskQuota) {
       throw new ForbiddenException(
