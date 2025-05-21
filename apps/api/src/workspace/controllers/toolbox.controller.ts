@@ -76,6 +76,7 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
+import { UploadFileDto } from '../dto/upload-file.dto'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -94,9 +95,14 @@ export class ToolboxController {
     ServerResponse<IncomingMessage>,
     NextFunction
   >
+  private readonly toolboxStreamProxy: RequestHandler<
+    RawBodyRequest<IncomingMessage>,
+    ServerResponse<IncomingMessage>,
+    NextFunction
+  >
 
   constructor(private readonly toolboxService: ToolboxService) {
-    this.toolboxProxy = createProxyMiddleware({
+    const commonProxyOptions = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
@@ -124,7 +130,6 @@ export class ToolboxController {
       },
       changeOrigin: true,
       autoRewrite: true,
-      followRedirects: true,
       proxyTimeout: 5 * 60 * 1000,
       on: {
         proxyReq: (proxyReq, req, res) => {
@@ -143,6 +148,16 @@ export class ToolboxController {
           fixRequestBody(proxyReq, req)
         },
       },
+    }
+
+    this.toolboxProxy = createProxyMiddleware({
+      ...commonProxyOptions,
+      followRedirects: true,
+    })
+
+    this.toolboxStreamProxy = createProxyMiddleware({
+      ...commonProxyOptions,
+      followRedirects: false,
     })
   }
 
@@ -396,6 +411,7 @@ export class ToolboxController {
     summary: 'Upload file',
     description: 'Upload file inside workspace',
     operationId: 'uploadFile',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -421,6 +437,28 @@ export class ToolboxController {
     @Next() next: NextFunction,
   ): Promise<void> {
     return this.toolboxProxy(req, res, next)
+  }
+
+  @HttpCode(200)
+  @Post(':workspaceId/toolbox/files/bulk-upload')
+  @ApiOperation({
+    summary: 'Upload multiple files',
+    description: 'Upload multiple files inside workspace',
+    operationId: 'uploadFiles',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Files uploaded successfully',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: [UploadFileDto] })
+  @ApiParam({ name: 'workspaceId', type: String, required: true })
+  async uploadFiles(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return this.toolboxStreamProxy(req, res, next)
   }
 
   // Git operations

@@ -87,6 +87,7 @@ func (s *Server) Start() error {
 		fsController.POST("/permissions", fs.SetFilePermissions)
 		fsController.POST("/replace", fs.ReplaceInFiles)
 		fsController.POST("/upload", fs.UploadFile)
+		fsController.POST("/bulk-upload", fs.UploadFiles)
 
 		// delete operations
 		fsController.DELETE("/", fs.DeleteFile)

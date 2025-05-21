@@ -2054,6 +2054,7 @@ paths:
         - toolbox
   /toolbox/{workspaceId}/toolbox/files/upload:
     post:
+      deprecated: true
       description: Upload file inside workspace
       operationId: uploadFile
       parameters:
@@ -2095,6 +2096,46 @@ paths:
             - profile
             - email
       summary: Upload file
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/bulk-upload:
+    post:
+      description: Upload multiple files inside workspace
+      operationId: uploadFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              items:
+                $ref: '#/components/schemas/UploadFile'
+              type: array
+        required: true
+      responses:
+        '200':
+          description: Files uploaded successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Upload multiple files
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/add:
@@ -5346,6 +5387,17 @@ components:
           type: array
       required:
         - files
+      type: object
+    UploadFile:
+      properties:
+        file:
+          format: binary
+          type: string
+        path:
+          type: string
+      required:
+        - file
+        - path
       type: object
     GitAddRequest:
       example:

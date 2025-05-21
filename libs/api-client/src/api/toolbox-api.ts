@@ -2164,6 +2164,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     uploadFile: async (
@@ -2216,6 +2217,54 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = localVarFormParams
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Upload multiple files inside workspace
+     * @summary Upload multiple files
+     * @param {string} workspaceId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    uploadFiles: async (
+      workspaceId: string,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'workspaceId' is not null or undefined
+      assertParamExists('uploadFiles', 'workspaceId', workspaceId)
+      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/bulk-upload`.replace(
+        `{${'workspaceId'}}`,
+        encodeURIComponent(String(workspaceId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
       return {
         url: toPathString(localVarUrlObj),
@@ -3431,6 +3480,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     async uploadFile(
@@ -3450,6 +3500,35 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.uploadFile']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Upload multiple files inside workspace
+     * @summary Upload multiple files
+     * @param {string} workspaceId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async uploadFiles(
+      workspaceId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFiles(
+        workspaceId,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.uploadFiles']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -4186,6 +4265,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
     uploadFile(
@@ -4197,6 +4277,23 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
     ): AxiosPromise<void> {
       return localVarFp
         .uploadFile(workspaceId, path, xDaytonaOrganizationID, file, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Upload multiple files inside workspace
+     * @summary Upload multiple files
+     * @param {string} workspaceId
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    uploadFiles(
+      workspaceId: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .uploadFiles(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -4991,6 +5088,7 @@ export class ToolboxApi extends BaseAPI {
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {File} [file]
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
@@ -5003,6 +5101,21 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .uploadFile(workspaceId, path, xDaytonaOrganizationID, file, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Upload multiple files inside workspace
+   * @summary Upload multiple files
+   * @param {string} workspaceId
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public uploadFiles(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+    return ToolboxApiFp(this.configuration)
+      .uploadFiles(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }
