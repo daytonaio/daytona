@@ -364,7 +364,7 @@ const getColumns = ({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
+          onCheckedChange={(value: any) => {
             for (const row of table.getRowModel().rows) {
               if (loadingWorkspaces[row.original.id]) {
                 row.toggleSelected(false)
@@ -384,7 +384,7 @@ const getColumns = ({
         return (
           <Checkbox
             checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            onCheckedChange={(value: any) => row.toggleSelected(!!value)}
             aria-label="Select row"
             className="translate-y-[2px]"
           />
