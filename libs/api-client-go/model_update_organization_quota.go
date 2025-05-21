@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,18 +22,18 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota           float32 `json:"totalCpuQuota"`
-	TotalMemoryQuota        float32 `json:"totalMemoryQuota"`
-	TotalDiskQuota          float32 `json:"totalDiskQuota"`
-	MaxCpuPerWorkspace      float32 `json:"maxCpuPerWorkspace"`
-	MaxMemoryPerWorkspace   float32 `json:"maxMemoryPerWorkspace"`
-	MaxDiskPerWorkspace     float32 `json:"maxDiskPerWorkspace"`
+	TotalCpuQuota float32 `json:"totalCpuQuota"`
+	TotalMemoryQuota float32 `json:"totalMemoryQuota"`
+	TotalDiskQuota float32 `json:"totalDiskQuota"`
+	MaxCpuPerWorkspace float32 `json:"maxCpuPerWorkspace"`
+	MaxMemoryPerWorkspace float32 `json:"maxMemoryPerWorkspace"`
+	MaxDiskPerWorkspace float32 `json:"maxDiskPerWorkspace"`
 	MaxConcurrentWorkspaces float32 `json:"maxConcurrentWorkspaces"`
-	WorkspaceQuota          float32 `json:"workspaceQuota"`
-	ImageQuota              float32 `json:"imageQuota"`
-	MaxImageSize            float32 `json:"maxImageSize"`
-	TotalImageSize          float32 `json:"totalImageSize"`
-	VolumeQuota             float32 `json:"volumeQuota"`
+	WorkspaceQuota float32 `json:"workspaceQuota"`
+	ImageQuota float32 `json:"imageQuota"`
+	MaxImageSize float32 `json:"maxImageSize"`
+	TotalImageSize float32 `json:"totalImageSize"`
+	VolumeQuota float32 `json:"volumeQuota"`
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -356,7 +356,7 @@ func (o *UpdateOrganizationQuota) SetVolumeQuota(v float32) {
 }
 
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -404,10 +404,10 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -463,3 +463,5 @@ func (v *NullableUpdateOrganizationQuota) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

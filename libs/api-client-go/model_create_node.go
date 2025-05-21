@@ -12,8 +12,8 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
+	"bytes"
 	"fmt"
 )
 
@@ -22,17 +22,17 @@ var _ MappedNullable = &CreateNode{}
 
 // CreateNode struct for CreateNode
 type CreateNode struct {
-	Domain   string  `json:"domain"`
-	ApiUrl   string  `json:"apiUrl"`
-	ApiKey   string  `json:"apiKey"`
-	Cpu      float32 `json:"cpu"`
-	Memory   float32 `json:"memory"`
-	Disk     float32 `json:"disk"`
-	Gpu      float32 `json:"gpu"`
-	GpuType  string  `json:"gpuType"`
-	Class    string  `json:"class"`
+	Domain string `json:"domain"`
+	ApiUrl string `json:"apiUrl"`
+	ApiKey string `json:"apiKey"`
+	Cpu float32 `json:"cpu"`
+	Memory float32 `json:"memory"`
+	Disk float32 `json:"disk"`
+	Gpu float32 `json:"gpu"`
+	GpuType string `json:"gpuType"`
+	Class string `json:"class"`
 	Capacity float32 `json:"capacity"`
-	Region   string  `json:"region"`
+	Region string `json:"region"`
 }
 
 type _CreateNode CreateNode
@@ -330,7 +330,7 @@ func (o *CreateNode) SetRegion(v string) {
 }
 
 func (o CreateNode) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -376,10 +376,10 @@ func (o *CreateNode) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -435,3 +435,5 @@ func (v *NullableCreateNode) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

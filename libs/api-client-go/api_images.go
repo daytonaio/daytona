@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type ImagesAPI interface {
 
 	/*
-		BuildImage Build a Docker image
+	BuildImage Build a Docker image
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ImagesAPIBuildImageRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ImagesAPIBuildImageRequest
 	*/
 	BuildImage(ctx context.Context) ImagesAPIBuildImageRequest
 
@@ -35,10 +36,10 @@ type ImagesAPI interface {
 	BuildImageExecute(r ImagesAPIBuildImageRequest) (*ImageDto, *http.Response, error)
 
 	/*
-		CreateImage Create a new image
+	CreateImage Create a new image
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ImagesAPICreateImageRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ImagesAPICreateImageRequest
 	*/
 	CreateImage(ctx context.Context) ImagesAPICreateImageRequest
 
@@ -47,10 +48,10 @@ type ImagesAPI interface {
 	CreateImageExecute(r ImagesAPICreateImageRequest) (*ImageDto, *http.Response, error)
 
 	/*
-		GetAllImages List all images
+	GetAllImages List all images
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return ImagesAPIGetAllImagesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ImagesAPIGetAllImagesRequest
 	*/
 	GetAllImages(ctx context.Context) ImagesAPIGetAllImagesRequest
 
@@ -59,11 +60,11 @@ type ImagesAPI interface {
 	GetAllImagesExecute(r ImagesAPIGetAllImagesRequest) (*PaginatedImagesDto, *http.Response, error)
 
 	/*
-		GetImage Get image by ID
+	GetImage Get image by ID
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Image ID
-		@return ImagesAPIGetImageRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Image ID
+	@return ImagesAPIGetImageRequest
 	*/
 	GetImage(ctx context.Context, id string) ImagesAPIGetImageRequest
 
@@ -72,11 +73,11 @@ type ImagesAPI interface {
 	GetImageExecute(r ImagesAPIGetImageRequest) (*ImageDto, *http.Response, error)
 
 	/*
-		GetImageBuildLogs Get image build logs
+	GetImageBuildLogs Get image build logs
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Image ID
-		@return ImagesAPIGetImageBuildLogsRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Image ID
+	@return ImagesAPIGetImageBuildLogsRequest
 	*/
 	GetImageBuildLogs(ctx context.Context, id string) ImagesAPIGetImageBuildLogsRequest
 
@@ -84,11 +85,11 @@ type ImagesAPI interface {
 	GetImageBuildLogsExecute(r ImagesAPIGetImageBuildLogsRequest) (*http.Response, error)
 
 	/*
-		RemoveImage Delete image
+	RemoveImage Delete image
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Image ID
-		@return ImagesAPIRemoveImageRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Image ID
+	@return ImagesAPIRemoveImageRequest
 	*/
 	RemoveImage(ctx context.Context, id string) ImagesAPIRemoveImageRequest
 
@@ -96,11 +97,11 @@ type ImagesAPI interface {
 	RemoveImageExecute(r ImagesAPIRemoveImageRequest) (*http.Response, error)
 
 	/*
-		SetImageGeneralStatus Set image general status
+	SetImageGeneralStatus Set image general status
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Image ID
-		@return ImagesAPISetImageGeneralStatusRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Image ID
+	@return ImagesAPISetImageGeneralStatusRequest
 	*/
 	SetImageGeneralStatus(ctx context.Context, id string) ImagesAPISetImageGeneralStatusRequest
 
@@ -109,11 +110,11 @@ type ImagesAPI interface {
 	SetImageGeneralStatusExecute(r ImagesAPISetImageGeneralStatusRequest) (*ImageDto, *http.Response, error)
 
 	/*
-		ToggleImageState Toggle image state
+	ToggleImageState Toggle image state
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Image ID
-		@return ImagesAPIToggleImageStateRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id Image ID
+	@return ImagesAPIToggleImageStateRequest
 	*/
 	ToggleImageState(ctx context.Context, id string) ImagesAPIToggleImageStateRequest
 
@@ -126,9 +127,9 @@ type ImagesAPI interface {
 type ImagesAPIService service
 
 type ImagesAPIBuildImageRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	buildImage             *BuildImage
+	ctx context.Context
+	ApiService ImagesAPI
+	buildImage *BuildImage
 	xDaytonaOrganizationID *string
 }
 
@@ -150,25 +151,24 @@ func (r ImagesAPIBuildImageRequest) Execute() (*ImageDto, *http.Response, error)
 /*
 BuildImage Build a Docker image
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ImagesAPIBuildImageRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ImagesAPIBuildImageRequest
 */
 func (a *ImagesAPIService) BuildImage(ctx context.Context) ImagesAPIBuildImageRequest {
 	return ImagesAPIBuildImageRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ImageDto
+//  @return ImageDto
 func (a *ImagesAPIService) BuildImageExecute(r ImagesAPIBuildImageRequest) (*ImageDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ImageDto
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ImageDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.BuildImage")
@@ -245,9 +245,9 @@ func (a *ImagesAPIService) BuildImageExecute(r ImagesAPIBuildImageRequest) (*Ima
 }
 
 type ImagesAPICreateImageRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	createImage            *CreateImage
+	ctx context.Context
+	ApiService ImagesAPI
+	createImage *CreateImage
 	xDaytonaOrganizationID *string
 }
 
@@ -269,25 +269,24 @@ func (r ImagesAPICreateImageRequest) Execute() (*ImageDto, *http.Response, error
 /*
 CreateImage Create a new image
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ImagesAPICreateImageRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ImagesAPICreateImageRequest
 */
 func (a *ImagesAPIService) CreateImage(ctx context.Context) ImagesAPICreateImageRequest {
 	return ImagesAPICreateImageRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ImageDto
+//  @return ImageDto
 func (a *ImagesAPIService) CreateImageExecute(r ImagesAPICreateImageRequest) (*ImageDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ImageDto
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ImageDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.CreateImage")
@@ -364,11 +363,11 @@ func (a *ImagesAPIService) CreateImageExecute(r ImagesAPICreateImageRequest) (*I
 }
 
 type ImagesAPIGetAllImagesRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
+	ctx context.Context
+	ApiService ImagesAPI
 	xDaytonaOrganizationID *string
-	limit                  *float32
-	page                   *float32
+	limit *float32
+	page *float32
 }
 
 // Use with JWT to specify the organization ID
@@ -396,25 +395,24 @@ func (r ImagesAPIGetAllImagesRequest) Execute() (*PaginatedImagesDto, *http.Resp
 /*
 GetAllImages List all images
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return ImagesAPIGetAllImagesRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ImagesAPIGetAllImagesRequest
 */
 func (a *ImagesAPIService) GetAllImages(ctx context.Context) ImagesAPIGetAllImagesRequest {
 	return ImagesAPIGetAllImagesRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return PaginatedImagesDto
+//  @return PaginatedImagesDto
 func (a *ImagesAPIService) GetAllImagesExecute(r ImagesAPIGetAllImagesRequest) (*PaginatedImagesDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *PaginatedImagesDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PaginatedImagesDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.GetAllImages")
@@ -492,9 +490,9 @@ func (a *ImagesAPIService) GetAllImagesExecute(r ImagesAPIGetAllImagesRequest) (
 }
 
 type ImagesAPIGetImageRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	id                     string
+	ctx context.Context
+	ApiService ImagesAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -511,27 +509,26 @@ func (r ImagesAPIGetImageRequest) Execute() (*ImageDto, *http.Response, error) {
 /*
 GetImage Get image by ID
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Image ID
-	@return ImagesAPIGetImageRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Image ID
+ @return ImagesAPIGetImageRequest
 */
 func (a *ImagesAPIService) GetImage(ctx context.Context, id string) ImagesAPIGetImageRequest {
 	return ImagesAPIGetImageRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ImageDto
+//  @return ImageDto
 func (a *ImagesAPIService) GetImageExecute(r ImagesAPIGetImageRequest) (*ImageDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ImageDto
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ImageDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.GetImage")
@@ -604,11 +601,11 @@ func (a *ImagesAPIService) GetImageExecute(r ImagesAPIGetImageRequest) (*ImageDt
 }
 
 type ImagesAPIGetImageBuildLogsRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	id                     string
+	ctx context.Context
+	ApiService ImagesAPI
+	id string
 	xDaytonaOrganizationID *string
-	follow                 *bool
+	follow *bool
 }
 
 // Use with JWT to specify the organization ID
@@ -630,24 +627,24 @@ func (r ImagesAPIGetImageBuildLogsRequest) Execute() (*http.Response, error) {
 /*
 GetImageBuildLogs Get image build logs
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Image ID
-	@return ImagesAPIGetImageBuildLogsRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Image ID
+ @return ImagesAPIGetImageBuildLogsRequest
 */
 func (a *ImagesAPIService) GetImageBuildLogs(ctx context.Context, id string) ImagesAPIGetImageBuildLogsRequest {
 	return ImagesAPIGetImageBuildLogsRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *ImagesAPIService) GetImageBuildLogsExecute(r ImagesAPIGetImageBuildLogsRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.GetImageBuildLogs")
@@ -714,9 +711,9 @@ func (a *ImagesAPIService) GetImageBuildLogsExecute(r ImagesAPIGetImageBuildLogs
 }
 
 type ImagesAPIRemoveImageRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	id                     string
+	ctx context.Context
+	ApiService ImagesAPI
+	id string
 	xDaytonaOrganizationID *string
 }
 
@@ -733,24 +730,24 @@ func (r ImagesAPIRemoveImageRequest) Execute() (*http.Response, error) {
 /*
 RemoveImage Delete image
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Image ID
-	@return ImagesAPIRemoveImageRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Image ID
+ @return ImagesAPIRemoveImageRequest
 */
 func (a *ImagesAPIService) RemoveImage(ctx context.Context, id string) ImagesAPIRemoveImageRequest {
 	return ImagesAPIRemoveImageRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *ImagesAPIService) RemoveImageExecute(r ImagesAPIRemoveImageRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodDelete
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodDelete
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.RemoveImage")
@@ -814,10 +811,10 @@ func (a *ImagesAPIService) RemoveImageExecute(r ImagesAPIRemoveImageRequest) (*h
 }
 
 type ImagesAPISetImageGeneralStatusRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	id                     string
-	setImageGeneralStatus  *SetImageGeneralStatus
+	ctx context.Context
+	ApiService ImagesAPI
+	id string
+	setImageGeneralStatus *SetImageGeneralStatus
 	xDaytonaOrganizationID *string
 }
 
@@ -839,27 +836,26 @@ func (r ImagesAPISetImageGeneralStatusRequest) Execute() (*ImageDto, *http.Respo
 /*
 SetImageGeneralStatus Set image general status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Image ID
-	@return ImagesAPISetImageGeneralStatusRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Image ID
+ @return ImagesAPISetImageGeneralStatusRequest
 */
 func (a *ImagesAPIService) SetImageGeneralStatus(ctx context.Context, id string) ImagesAPISetImageGeneralStatusRequest {
 	return ImagesAPISetImageGeneralStatusRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ImageDto
+//  @return ImageDto
 func (a *ImagesAPIService) SetImageGeneralStatusExecute(r ImagesAPISetImageGeneralStatusRequest) (*ImageDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ImageDto
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ImageDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.SetImageGeneralStatus")
@@ -937,10 +933,10 @@ func (a *ImagesAPIService) SetImageGeneralStatusExecute(r ImagesAPISetImageGener
 }
 
 type ImagesAPIToggleImageStateRequest struct {
-	ctx                    context.Context
-	ApiService             ImagesAPI
-	id                     string
-	toggleState            *ToggleState
+	ctx context.Context
+	ApiService ImagesAPI
+	id string
+	toggleState *ToggleState
 	xDaytonaOrganizationID *string
 }
 
@@ -962,27 +958,26 @@ func (r ImagesAPIToggleImageStateRequest) Execute() (*ImageDto, *http.Response, 
 /*
 ToggleImageState Toggle image state
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Image ID
-	@return ImagesAPIToggleImageStateRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id Image ID
+ @return ImagesAPIToggleImageStateRequest
 */
 func (a *ImagesAPIService) ToggleImageState(ctx context.Context, id string) ImagesAPIToggleImageStateRequest {
 	return ImagesAPIToggleImageStateRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
-//
-//	@return ImageDto
+//  @return ImageDto
 func (a *ImagesAPIService) ToggleImageStateExecute(r ImagesAPIToggleImageStateRequest) (*ImageDto, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPatch
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *ImageDto
+		localVarHTTPMethod   = http.MethodPatch
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *ImageDto
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ImagesAPIService.ToggleImageState")

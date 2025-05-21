@@ -12,10 +12,10 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"time"
+	"bytes"
+	"fmt"
 )
 
 // checks if the ImageDto type satisfies the MappedNullable interface at compile time
@@ -23,18 +23,18 @@ var _ MappedNullable = &ImageDto{}
 
 // ImageDto struct for ImageDto
 type ImageDto struct {
-	Id             string          `json:"id"`
-	OrganizationId *string         `json:"organizationId,omitempty"`
-	General        bool            `json:"general"`
-	Name           string          `json:"name"`
-	Enabled        bool            `json:"enabled"`
-	State          ImageState      `json:"state"`
-	Size           NullableFloat32 `json:"size"`
-	Entrypoint     []string        `json:"entrypoint"`
-	ErrorReason    NullableString  `json:"errorReason"`
-	CreatedAt      time.Time       `json:"createdAt"`
-	UpdatedAt      time.Time       `json:"updatedAt"`
-	LastUsedAt     NullableTime    `json:"lastUsedAt"`
+	Id string `json:"id"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+	General bool `json:"general"`
+	Name string `json:"name"`
+	Enabled bool `json:"enabled"`
+	State ImageState `json:"state"`
+	Size NullableFloat32 `json:"size"`
+	Entrypoint []string `json:"entrypoint"`
+	ErrorReason NullableString `json:"errorReason"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	LastUsedAt NullableTime `json:"lastUsedAt"`
 }
 
 type _ImageDto ImageDto
@@ -372,7 +372,7 @@ func (o *ImageDto) SetLastUsedAt(v time.Time) {
 }
 
 func (o ImageDto) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -423,10 +423,10 @@ func (o *ImageDto) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -482,3 +482,5 @@ func (v *NullableImageDto) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

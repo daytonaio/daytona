@@ -66,7 +66,7 @@ import {
   LspSymbolDto,
   LspServerRequestDto,
 } from '../dto/lsp.dto'
-import { createProxyMiddleware, RequestHandler, fixRequestBody } from 'http-proxy-middleware'
+import { createProxyMiddleware, RequestHandler, fixRequestBody, Options } from 'http-proxy-middleware'
 import { IncomingMessage } from 'http'
 import { NextFunction } from 'express'
 import { ServerResponse } from 'http'
@@ -102,7 +102,7 @@ export class ToolboxController {
   >
 
   constructor(private readonly toolboxService: ToolboxService) {
-    const commonProxyOptions = {
+    const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]

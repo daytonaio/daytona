@@ -20,18 +20,18 @@ var _ MappedNullable = &CreateOrganizationQuota{}
 
 // CreateOrganizationQuota struct for CreateOrganizationQuota
 type CreateOrganizationQuota struct {
-	TotalCpuQuota           *float32 `json:"totalCpuQuota,omitempty"`
-	TotalMemoryQuota        *float32 `json:"totalMemoryQuota,omitempty"`
-	TotalDiskQuota          *float32 `json:"totalDiskQuota,omitempty"`
-	MaxCpuPerWorkspace      *float32 `json:"maxCpuPerWorkspace,omitempty"`
-	MaxMemoryPerWorkspace   *float32 `json:"maxMemoryPerWorkspace,omitempty"`
-	MaxDiskPerWorkspace     *float32 `json:"maxDiskPerWorkspace,omitempty"`
+	TotalCpuQuota *float32 `json:"totalCpuQuota,omitempty"`
+	TotalMemoryQuota *float32 `json:"totalMemoryQuota,omitempty"`
+	TotalDiskQuota *float32 `json:"totalDiskQuota,omitempty"`
+	MaxCpuPerWorkspace *float32 `json:"maxCpuPerWorkspace,omitempty"`
+	MaxMemoryPerWorkspace *float32 `json:"maxMemoryPerWorkspace,omitempty"`
+	MaxDiskPerWorkspace *float32 `json:"maxDiskPerWorkspace,omitempty"`
 	MaxConcurrentWorkspaces *float32 `json:"maxConcurrentWorkspaces,omitempty"`
-	WorkspaceQuota          *float32 `json:"workspaceQuota,omitempty"`
-	ImageQuota              *float32 `json:"imageQuota,omitempty"`
-	MaxImageSize            *float32 `json:"maxImageSize,omitempty"`
-	TotalImageSize          *float32 `json:"totalImageSize,omitempty"`
-	VolumeQuota             *float32 `json:"volumeQuota,omitempty"`
+	WorkspaceQuota *float32 `json:"workspaceQuota,omitempty"`
+	ImageQuota *float32 `json:"imageQuota,omitempty"`
+	MaxImageSize *float32 `json:"maxImageSize,omitempty"`
+	TotalImageSize *float32 `json:"totalImageSize,omitempty"`
+	VolumeQuota *float32 `json:"volumeQuota,omitempty"`
 }
 
 // NewCreateOrganizationQuota instantiates a new CreateOrganizationQuota object
@@ -436,7 +436,7 @@ func (o *CreateOrganizationQuota) SetVolumeQuota(v float32) {
 }
 
 func (o CreateOrganizationQuota) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -519,3 +519,5 @@ func (v *NullableCreateOrganizationQuota) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

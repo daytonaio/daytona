@@ -12,10 +12,10 @@ Contact: support@daytona.com
 package daytonaapiclient
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
 	"time"
+	"bytes"
+	"fmt"
 )
 
 // checks if the ApiKeyList type satisfies the MappedNullable interface at compile time
@@ -30,8 +30,8 @@ type ApiKeyList struct {
 	// When the API key was created
 	CreatedAt time.Time `json:"createdAt"`
 	// The list of organization resource permissions assigned to the API key
-	Permissions []string     `json:"permissions"`
-	LastUsedAt  NullableTime `json:"lastUsedAt"`
+	Permissions []string `json:"permissions"`
+	LastUsedAt NullableTime `json:"lastUsedAt"`
 }
 
 type _ApiKeyList ApiKeyList
@@ -181,7 +181,7 @@ func (o *ApiKeyList) SetLastUsedAt(v time.Time) {
 }
 
 func (o ApiKeyList) MarshalJSON() ([]byte, error) {
-	toSerialize, err := o.ToMap()
+	toSerialize,err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -215,10 +215,10 @@ func (o *ApiKeyList) UnmarshalJSON(data []byte) (err error) {
 	err = json.Unmarshal(data, &allProperties)
 
 	if err != nil {
-		return err
+		return err;
 	}
 
-	for _, requiredProperty := range requiredProperties {
+	for _, requiredProperty := range(requiredProperties) {
 		if _, exists := allProperties[requiredProperty]; !exists {
 			return fmt.Errorf("no value given for required property %v", requiredProperty)
 		}
@@ -274,3 +274,5 @@ func (v *NullableApiKeyList) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
+
+

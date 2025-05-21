@@ -20,13 +20,14 @@ import (
 	"strings"
 )
 
+
 type UsersAPI interface {
 
 	/*
-		CreateUser Create user
+	CreateUser Create user
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPICreateUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPICreateUserRequest
 	*/
 	CreateUser(ctx context.Context) UsersAPICreateUserRequest
 
@@ -34,10 +35,10 @@ type UsersAPI interface {
 	CreateUserExecute(r UsersAPICreateUserRequest) (*http.Response, error)
 
 	/*
-		GetAuthenticatedUser Get authenticated user
+	GetAuthenticatedUser Get authenticated user
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPIGetAuthenticatedUserRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIGetAuthenticatedUserRequest
 	*/
 	GetAuthenticatedUser(ctx context.Context) UsersAPIGetAuthenticatedUserRequest
 
@@ -46,10 +47,10 @@ type UsersAPI interface {
 	GetAuthenticatedUserExecute(r UsersAPIGetAuthenticatedUserRequest) (*User, *http.Response, error)
 
 	/*
-		ListUsers List all users
+	ListUsers List all users
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return UsersAPIListUsersRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIListUsersRequest
 	*/
 	ListUsers(ctx context.Context) UsersAPIListUsersRequest
 
@@ -57,11 +58,11 @@ type UsersAPI interface {
 	ListUsersExecute(r UsersAPIListUsersRequest) (*http.Response, error)
 
 	/*
-		RegenerateKeyPair Regenerate user key pair
+	RegenerateKeyPair Regenerate user key pair
 
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id
-		@return UsersAPIRegenerateKeyPairRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return UsersAPIRegenerateKeyPairRequest
 	*/
 	RegenerateKeyPair(ctx context.Context, id string) UsersAPIRegenerateKeyPairRequest
 
@@ -73,7 +74,7 @@ type UsersAPI interface {
 type UsersAPIService service
 
 type UsersAPICreateUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 	createUser *CreateUser
 }
@@ -90,22 +91,22 @@ func (r UsersAPICreateUserRequest) Execute() (*http.Response, error) {
 /*
 CreateUser Create user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPICreateUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPICreateUserRequest
 */
 func (a *UsersAPIService) CreateUser(ctx context.Context) UsersAPICreateUserRequest {
 	return UsersAPICreateUserRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) CreateUserExecute(r UsersAPICreateUserRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.CreateUser")
@@ -170,7 +171,7 @@ func (a *UsersAPIService) CreateUserExecute(r UsersAPICreateUserRequest) (*http.
 }
 
 type UsersAPIGetAuthenticatedUserRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -181,25 +182,24 @@ func (r UsersAPIGetAuthenticatedUserRequest) Execute() (*User, *http.Response, e
 /*
 GetAuthenticatedUser Get authenticated user
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIGetAuthenticatedUserRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIGetAuthenticatedUserRequest
 */
 func (a *UsersAPIService) GetAuthenticatedUser(ctx context.Context) UsersAPIGetAuthenticatedUserRequest {
 	return UsersAPIGetAuthenticatedUserRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
-//
-//	@return User
+//  @return User
 func (a *UsersAPIService) GetAuthenticatedUserExecute(r UsersAPIGetAuthenticatedUserRequest) (*User, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *User
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *User
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.GetAuthenticatedUser")
@@ -268,7 +268,7 @@ func (a *UsersAPIService) GetAuthenticatedUserExecute(r UsersAPIGetAuthenticated
 }
 
 type UsersAPIListUsersRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
 }
 
@@ -279,22 +279,22 @@ func (r UsersAPIListUsersRequest) Execute() (*http.Response, error) {
 /*
 ListUsers List all users
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return UsersAPIListUsersRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return UsersAPIListUsersRequest
 */
 func (a *UsersAPIService) ListUsers(ctx context.Context) UsersAPIListUsersRequest {
 	return UsersAPIListUsersRequest{
 		ApiService: a,
-		ctx:        ctx,
+		ctx: ctx,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) ListUsersExecute(r UsersAPIListUsersRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodGet
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodGet
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.ListUsers")
@@ -354,9 +354,9 @@ func (a *UsersAPIService) ListUsersExecute(r UsersAPIListUsersRequest) (*http.Re
 }
 
 type UsersAPIRegenerateKeyPairRequest struct {
-	ctx        context.Context
+	ctx context.Context
 	ApiService UsersAPI
-	id         string
+	id string
 }
 
 func (r UsersAPIRegenerateKeyPairRequest) Execute() (*http.Response, error) {
@@ -366,24 +366,24 @@ func (r UsersAPIRegenerateKeyPairRequest) Execute() (*http.Response, error) {
 /*
 RegenerateKeyPair Regenerate user key pair
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return UsersAPIRegenerateKeyPairRequest
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @param id
+ @return UsersAPIRegenerateKeyPairRequest
 */
 func (a *UsersAPIService) RegenerateKeyPair(ctx context.Context, id string) UsersAPIRegenerateKeyPairRequest {
 	return UsersAPIRegenerateKeyPairRequest{
 		ApiService: a,
-		ctx:        ctx,
-		id:         id,
+		ctx: ctx,
+		id: id,
 	}
 }
 
 // Execute executes the request
 func (a *UsersAPIService) RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod = http.MethodPost
-		localVarPostBody   interface{}
-		formFiles          []formFile
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.RegenerateKeyPair")
