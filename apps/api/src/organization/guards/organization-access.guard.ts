@@ -52,6 +52,7 @@ export class OrganizationAccessGuard implements CanActivate {
     const organizationAuthContext: OrganizationAuthContext = {
       ...authContext,
       organizationId,
+      organization,
     }
     request.user = organizationAuthContext
 

@@ -53,7 +53,7 @@ export class ImageManager {
   @Cron(CronExpression.EVERY_5_SECONDS)
   async syncNodeImages() {
     const lockKey = 'sync-node-images-lock'
-    if (await this.redisLockProvider.lock(lockKey, 30)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
@@ -113,7 +113,7 @@ export class ImageManager {
     //  todo: find a better approach
 
     const lockKey = 'sync-node-image-states-lock'
-    if (await this.redisLockProvider.lock(lockKey, 30)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
@@ -311,7 +311,7 @@ export class ImageManager {
   @Cron(CronExpression.EVERY_10_SECONDS)
   async checkImageCleanup() {
     const lockKey = 'check-image-cleanup-lock'
-    if (await this.redisLockProvider.lock(lockKey, 30)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
@@ -356,7 +356,7 @@ export class ImageManager {
     await Promise.all(
       images.map(async (image) => {
         const lockKey = `check-image-state-lock-${image.id}`
-        if (await this.redisLockProvider.lock(lockKey, 720)) {
+        if (!(await this.redisLockProvider.lock(lockKey, 720))) {
           return
         }
 
@@ -810,7 +810,7 @@ export class ImageManager {
   @Cron(CronExpression.EVERY_HOUR)
   async cleanupOldBuildInfoImageNodes() {
     const lockKey = 'cleanup-old-buildinfo-images-lock'
-    if (await this.redisLockProvider.lock(lockKey, 300)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 300))) {
       return
     }
 

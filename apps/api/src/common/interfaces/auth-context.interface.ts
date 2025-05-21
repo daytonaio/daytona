@@ -5,6 +5,7 @@
 
 import { ApiKey } from '../../api-key/api-key.entity'
 import { OrganizationUser } from '../../organization/entities/organization-user.entity'
+import { Organization } from '../../organization/entities/organization.entity'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
 export interface AuthContext {
@@ -17,5 +18,6 @@ export interface AuthContext {
 
 export interface OrganizationAuthContext extends AuthContext {
   organizationId: string
+  organization: Organization
   organizationUser?: OrganizationUser
 }
