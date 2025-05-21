@@ -241,7 +241,7 @@ export class WorkspaceService {
 
     if (!createWorkspaceDto.buildInfo && (createWorkspaceDto.volumes || []).length === 0) {
       if (!image) {
-        throw new BadRequestError(`Image ${workspaceImage} not found or not accessible`)
+        throw new BadRequestError(`Image ${workspaceImage} not found. Did you add it through the Daytona Dashboard?`)
       }
 
       if (organizationId !== WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION) {
