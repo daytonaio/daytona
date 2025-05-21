@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: AGPL-3.0
+ */
+
 /**
  Unstable SemConv
  Because the "incubating" entry-point may include breaking changes in minor versions,
