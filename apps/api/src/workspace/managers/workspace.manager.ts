@@ -430,6 +430,7 @@ export class WorkspaceManager {
         }
 
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYED)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         //  sync states again immediately for workspace
         this.syncInstanceState(workspace.id)
         break
@@ -451,6 +452,7 @@ export class WorkspaceManager {
           }
         }
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYING)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -591,6 +593,7 @@ export class WorkspaceManager {
           await this.workspaceRepository.update(workspace.id, {
             state: WorkspaceState.UNKNOWN,
           })
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           this.syncInstanceState(workspace.id)
           return
         }
@@ -606,6 +609,7 @@ export class WorkspaceManager {
     if (!imageNode || imageNode.state === ImageNodeState.BUILDING_IMAGE) {
       // Sleep for a second and go back to syncing instance state
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return
     }
