@@ -13,51 +13,45 @@ package daytonaapiclient
 
 import (
 	"encoding/json"
-	"os"
 	"fmt"
-	"gopkg.in/validator.v2"
+	"os"
 )
 
 // UploadFileRequestFile - File to upload. Supports file streaming and various file object types.
 type UploadFileRequestFile struct {
-	*OsFile **os.File
+	OsFile            *os.File
 	MapmapOfStringAny *map[string]interface{}
 }
 
-// *os.FileAsUploadFileRequestFile is a convenience function that returns *os.File wrapped in UploadFileRequestFile
-func *OsFileAsUploadFileRequestFile(v **os.File) UploadFileRequestFile {
+// OsFileAsUploadFileRequestFile is a convenience function that returns os.File wrapped in UploadFileRequestFile
+func OsFileAsUploadFileRequestFile(v *os.File) UploadFileRequestFile {
 	return UploadFileRequestFile{
-		*OsFile: v,
+		OsFile: v,
 	}
 }
 
-// map[string]interface{}AsUploadFileRequestFile is a convenience function that returns map[string]interface{} wrapped in UploadFileRequestFile
+// MapmapOfStringAnyAsUploadFileRequestFile is a convenience function that returns map[string]interface{} wrapped in UploadFileRequestFile
 func MapmapOfStringAnyAsUploadFileRequestFile(v *map[string]interface{}) UploadFileRequestFile {
 	return UploadFileRequestFile{
 		MapmapOfStringAny: v,
 	}
 }
 
-
 // Unmarshal JSON data into one of the pointers in the struct
 func (dst *UploadFileRequestFile) UnmarshalJSON(data []byte) error {
 	var err error
 	match := 0
 	// try to unmarshal data into *OsFile
-	err = newStrictDecoder(data).Decode(&dst.*OsFile)
+	err = newStrictDecoder(data).Decode(&dst.OsFile)
 	if err == nil {
-		json*OsFile, _ := json.Marshal(dst.*OsFile)
-		if string(json*OsFile) == "{}" { // empty struct
-			dst.*OsFile = nil
+		jsonOsFile, _ := json.Marshal(dst.OsFile)
+		if string(jsonOsFile) == "{}" { // empty struct
+			dst.OsFile = nil
 		} else {
-			if err = validator.Validate(dst.*OsFile); err != nil {
-				dst.*OsFile = nil
-			} else {
-				match++
-			}
+			match++
 		}
 	} else {
-		dst.*OsFile = nil
+		dst.OsFile = nil
 	}
 
 	// try to unmarshal data into MapmapOfStringAny
@@ -67,11 +61,7 @@ func (dst *UploadFileRequestFile) UnmarshalJSON(data []byte) error {
 		if string(jsonMapmapOfStringAny) == "{}" { // empty struct
 			dst.MapmapOfStringAny = nil
 		} else {
-			if err = validator.Validate(dst.MapmapOfStringAny); err != nil {
-				dst.MapmapOfStringAny = nil
-			} else {
-				match++
-			}
+			match++
 		}
 	} else {
 		dst.MapmapOfStringAny = nil
@@ -79,7 +69,7 @@ func (dst *UploadFileRequestFile) UnmarshalJSON(data []byte) error {
 
 	if match > 1 { // more than 1 match
 		// reset to nil
-		dst.*OsFile = nil
+		dst.OsFile = nil
 		dst.MapmapOfStringAny = nil
 
 		return fmt.Errorf("data matches more than one schema in oneOf(UploadFileRequestFile)")
@@ -92,8 +82,8 @@ func (dst *UploadFileRequestFile) UnmarshalJSON(data []byte) error {
 
 // Marshal data from the first non-nil pointers in the struct to JSON
 func (src UploadFileRequestFile) MarshalJSON() ([]byte, error) {
-	if src.*OsFile != nil {
-		return json.Marshal(&src.*OsFile)
+	if src.OsFile != nil {
+		return json.Marshal(&src.OsFile)
 	}
 
 	if src.MapmapOfStringAny != nil {
@@ -104,12 +94,12 @@ func (src UploadFileRequestFile) MarshalJSON() ([]byte, error) {
 }
 
 // Get the actual instance
-func (obj *UploadFileRequestFile) GetActualInstance() (interface{}) {
+func (obj *UploadFileRequestFile) GetActualInstance() interface{} {
 	if obj == nil {
 		return nil
 	}
-	if obj.*OsFile != nil {
-		return obj.*OsFile
+	if obj.OsFile != nil {
+		return obj.OsFile
 	}
 
 	if obj.MapmapOfStringAny != nil {
@@ -121,9 +111,9 @@ func (obj *UploadFileRequestFile) GetActualInstance() (interface{}) {
 }
 
 // Get the actual instance value
-func (obj UploadFileRequestFile) GetActualInstanceValue() (interface{}) {
-	if obj.*OsFile != nil {
-		return *obj.*OsFile
+func (obj UploadFileRequestFile) GetActualInstanceValue() interface{} {
+	if obj.OsFile != nil {
+		return *obj.OsFile
 	}
 
 	if obj.MapmapOfStringAny != nil {
@@ -169,5 +159,3 @@ func (v *NullableUploadFileRequestFile) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
-

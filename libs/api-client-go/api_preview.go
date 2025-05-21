@@ -20,15 +20,14 @@ import (
 	"strings"
 )
 
-
 type PreviewAPI interface {
 
 	/*
-	HasWorkspaceAccess Check if user has access to the workspace
+		HasWorkspaceAccess Check if user has access to the workspace
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId
-	@return PreviewAPIHasWorkspaceAccessRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId
+		@return PreviewAPIHasWorkspaceAccessRequest
 	*/
 	HasWorkspaceAccess(ctx context.Context, workspaceId string) PreviewAPIHasWorkspaceAccessRequest
 
@@ -36,12 +35,12 @@ type PreviewAPI interface {
 	HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAccessRequest) (*http.Response, error)
 
 	/*
-	IsValidAuthToken Check if workspace auth token is valid
+		IsValidAuthToken Check if workspace auth token is valid
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param authToken Auth token of the workspace
-	@return PreviewAPIIsValidAuthTokenRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param authToken Auth token of the workspace
+		@return PreviewAPIIsValidAuthTokenRequest
 	*/
 	IsValidAuthToken(ctx context.Context, workspaceId string, authToken string) PreviewAPIIsValidAuthTokenRequest
 
@@ -50,11 +49,11 @@ type PreviewAPI interface {
 	IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error)
 
 	/*
-	IsWorkspacePublic Check if workspace is public
+		IsWorkspacePublic Check if workspace is public
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return PreviewAPIIsWorkspacePublicRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@return PreviewAPIIsWorkspacePublicRequest
 	*/
 	IsWorkspacePublic(ctx context.Context, workspaceId string) PreviewAPIIsWorkspacePublicRequest
 
@@ -67,8 +66,8 @@ type PreviewAPI interface {
 type PreviewAPIService service
 
 type PreviewAPIHasWorkspaceAccessRequest struct {
-	ctx context.Context
-	ApiService PreviewAPI
+	ctx         context.Context
+	ApiService  PreviewAPI
 	workspaceId string
 }
 
@@ -79,14 +78,14 @@ func (r PreviewAPIHasWorkspaceAccessRequest) Execute() (*http.Response, error) {
 /*
 HasWorkspaceAccess Check if user has access to the workspace
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId
- @return PreviewAPIHasWorkspaceAccessRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId
+	@return PreviewAPIHasWorkspaceAccessRequest
 */
 func (a *PreviewAPIService) HasWorkspaceAccess(ctx context.Context, workspaceId string) PreviewAPIHasWorkspaceAccessRequest {
 	return PreviewAPIHasWorkspaceAccessRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
@@ -94,9 +93,9 @@ func (a *PreviewAPIService) HasWorkspaceAccess(ctx context.Context, workspaceId 
 // Execute executes the request
 func (a *PreviewAPIService) HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAccessRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.HasWorkspaceAccess")
@@ -157,10 +156,10 @@ func (a *PreviewAPIService) HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAc
 }
 
 type PreviewAPIIsValidAuthTokenRequest struct {
-	ctx context.Context
-	ApiService PreviewAPI
+	ctx         context.Context
+	ApiService  PreviewAPI
 	workspaceId string
-	authToken string
+	authToken   string
 }
 
 func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, error) {
@@ -170,28 +169,29 @@ func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, erro
 /*
 IsValidAuthToken Check if workspace auth token is valid
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @param authToken Auth token of the workspace
- @return PreviewAPIIsValidAuthTokenRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param authToken Auth token of the workspace
+	@return PreviewAPIIsValidAuthTokenRequest
 */
 func (a *PreviewAPIService) IsValidAuthToken(ctx context.Context, workspaceId string, authToken string) PreviewAPIIsValidAuthTokenRequest {
 	return PreviewAPIIsValidAuthTokenRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
-		authToken: authToken,
+		authToken:   authToken,
 	}
 }
 
 // Execute executes the request
-//  @return bool
+//
+//	@return bool
 func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  bool
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsValidAuthToken")
@@ -262,8 +262,8 @@ func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthToken
 }
 
 type PreviewAPIIsWorkspacePublicRequest struct {
-	ctx context.Context
-	ApiService PreviewAPI
+	ctx         context.Context
+	ApiService  PreviewAPI
 	workspaceId string
 }
 
@@ -274,26 +274,27 @@ func (r PreviewAPIIsWorkspacePublicRequest) Execute() (bool, *http.Response, err
 /*
 IsWorkspacePublic Check if workspace is public
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param workspaceId ID of the workspace
- @return PreviewAPIIsWorkspacePublicRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@return PreviewAPIIsWorkspacePublicRequest
 */
 func (a *PreviewAPIService) IsWorkspacePublic(ctx context.Context, workspaceId string) PreviewAPIIsWorkspacePublicRequest {
 	return PreviewAPIIsWorkspacePublicRequest{
-		ApiService: a,
-		ctx: ctx,
+		ApiService:  a,
+		ctx:         ctx,
 		workspaceId: workspaceId,
 	}
 }
 
 // Execute executes the request
-//  @return bool
+//
+//	@return bool
 func (a *PreviewAPIService) IsWorkspacePublicExecute(r PreviewAPIIsWorkspacePublicRequest) (bool, *http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
-		localVarReturnValue  bool
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue bool
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsWorkspacePublic")

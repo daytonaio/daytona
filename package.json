@@ -175,7 +175,7 @@
       "eslint --cache --fix",
       "prettier --write"
     ],
-    "!(libs/api-client-go/**)*.go": [
+    "*.go": [
       "gofmt -w"
     ],
     "*.{mdx,md}": [

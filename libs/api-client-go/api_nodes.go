@@ -20,14 +20,13 @@ import (
 	"strings"
 )
 
-
 type NodesAPI interface {
 
 	/*
-	CreateNode Create node
+		CreateNode Create node
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return NodesAPICreateNodeRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return NodesAPICreateNodeRequest
 	*/
 	CreateNode(ctx context.Context) NodesAPICreateNodeRequest
 
@@ -35,10 +34,10 @@ type NodesAPI interface {
 	CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.Response, error)
 
 	/*
-	ListNodes List all nodes
+		ListNodes List all nodes
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return NodesAPIListNodesRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return NodesAPIListNodesRequest
 	*/
 	ListNodes(ctx context.Context) NodesAPIListNodesRequest
 
@@ -46,11 +45,11 @@ type NodesAPI interface {
 	ListNodesExecute(r NodesAPIListNodesRequest) (*http.Response, error)
 
 	/*
-	UpdateNodeScheduling Update node scheduling status
+		UpdateNodeScheduling Update node scheduling status
 
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id
-	@return NodesAPIUpdateNodeSchedulingRequest
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param id
+		@return NodesAPIUpdateNodeSchedulingRequest
 	*/
 	UpdateNodeScheduling(ctx context.Context, id string) NodesAPIUpdateNodeSchedulingRequest
 
@@ -62,7 +61,7 @@ type NodesAPI interface {
 type NodesAPIService service
 
 type NodesAPICreateNodeRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService NodesAPI
 	createNode *CreateNode
 }
@@ -79,22 +78,22 @@ func (r NodesAPICreateNodeRequest) Execute() (*http.Response, error) {
 /*
 CreateNode Create node
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return NodesAPICreateNodeRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return NodesAPICreateNodeRequest
 */
 func (a *NodesAPIService) CreateNode(ctx context.Context) NodesAPICreateNodeRequest {
 	return NodesAPICreateNodeRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *NodesAPIService) CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPost
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.CreateNode")
@@ -159,7 +158,7 @@ func (a *NodesAPIService) CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.
 }
 
 type NodesAPIListNodesRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService NodesAPI
 }
 
@@ -170,22 +169,22 @@ func (r NodesAPIListNodesRequest) Execute() (*http.Response, error) {
 /*
 ListNodes List all nodes
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @return NodesAPIListNodesRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return NodesAPIListNodesRequest
 */
 func (a *NodesAPIService) ListNodes(ctx context.Context) NodesAPIListNodesRequest {
 	return NodesAPIListNodesRequest{
 		ApiService: a,
-		ctx: ctx,
+		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
 func (a *NodesAPIService) ListNodesExecute(r NodesAPIListNodesRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodGet
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodGet
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.ListNodes")
@@ -245,9 +244,9 @@ func (a *NodesAPIService) ListNodesExecute(r NodesAPIListNodesRequest) (*http.Re
 }
 
 type NodesAPIUpdateNodeSchedulingRequest struct {
-	ctx context.Context
+	ctx        context.Context
 	ApiService NodesAPI
-	id string
+	id         string
 }
 
 func (r NodesAPIUpdateNodeSchedulingRequest) Execute() (*http.Response, error) {
@@ -257,24 +256,24 @@ func (r NodesAPIUpdateNodeSchedulingRequest) Execute() (*http.Response, error) {
 /*
 UpdateNodeScheduling Update node scheduling status
 
- @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
- @param id
- @return NodesAPIUpdateNodeSchedulingRequest
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param id
+	@return NodesAPIUpdateNodeSchedulingRequest
 */
 func (a *NodesAPIService) UpdateNodeScheduling(ctx context.Context, id string) NodesAPIUpdateNodeSchedulingRequest {
 	return NodesAPIUpdateNodeSchedulingRequest{
 		ApiService: a,
-		ctx: ctx,
-		id: id,
+		ctx:        ctx,
+		id:         id,
 	}
 }
 
 // Execute executes the request
 func (a *NodesAPIService) UpdateNodeSchedulingExecute(r NodesAPIUpdateNodeSchedulingRequest) (*http.Response, error) {
 	var (
-		localVarHTTPMethod   = http.MethodPatch
-		localVarPostBody     interface{}
-		formFiles            []formFile
+		localVarHTTPMethod = http.MethodPatch
+		localVarPostBody   interface{}
+		formFiles          []formFile
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.UpdateNodeScheduling")

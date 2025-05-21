@@ -21,15 +21,15 @@ type ImageState string
 
 // List of ImageState
 const (
-	IMAGESTATE_BUILD_PENDING ImageState = "build_pending"
-	IMAGESTATE_BUILDING ImageState = "building"
-	IMAGESTATE_PENDING ImageState = "pending"
-	IMAGESTATE_PULLING_IMAGE ImageState = "pulling_image"
+	IMAGESTATE_BUILD_PENDING      ImageState = "build_pending"
+	IMAGESTATE_BUILDING           ImageState = "building"
+	IMAGESTATE_PENDING            ImageState = "pending"
+	IMAGESTATE_PULLING_IMAGE      ImageState = "pulling_image"
 	IMAGESTATE_PENDING_VALIDATION ImageState = "pending_validation"
-	IMAGESTATE_VALIDATING ImageState = "validating"
-	IMAGESTATE_ACTIVE ImageState = "active"
-	IMAGESTATE_ERROR ImageState = "error"
-	IMAGESTATE_REMOVING ImageState = "removing"
+	IMAGESTATE_VALIDATING         ImageState = "validating"
+	IMAGESTATE_ACTIVE             ImageState = "active"
+	IMAGESTATE_ERROR              ImageState = "error"
+	IMAGESTATE_REMOVING           ImageState = "removing"
 )
 
 // All allowed values of ImageState enum
@@ -123,4 +123,3 @@ func (v *NullableImageState) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }
-
