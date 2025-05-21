@@ -14,11 +14,14 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { CreateImageDto } from '../../workspace/dto/create-image.dto'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateBuildInfoDto } from '../dto/create-build-info.dto'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
+import { OnEvent } from '@nestjs/event-emitter'
+import { WorkspaceEvents } from '../constants/workspace-events.constants'
+import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
+import { Organization } from '../../organization/entities/organization.entity'
 
 @Injectable()
 export class ImageService {
@@ -27,7 +30,6 @@ export class ImageService {
     private readonly imageRepository: Repository<Image>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   private validateImageName(name: string): string | null {
@@ -51,7 +53,7 @@ export class ImageService {
   }
 
   async createImage(
-    organizationId: string,
+    organization: Organization,
     createImageDto: CreateImageDto,
     buildInfo?: CreateBuildInfoDto,
     general = false,
@@ -61,15 +63,9 @@ export class ImageService {
       throw new BadRequestException(validationError)
     }
 
-    // get the org
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-    }
-
     // check if the organization has reached the image quota
     const images = await this.imageRepository.find({
-      where: { organizationId },
+      where: { organizationId: organization.id },
     })
 
     if (images.length >= organization.imageQuota) {
@@ -78,7 +74,7 @@ export class ImageService {
 
     try {
       const image = this.imageRepository.create({
-        organizationId,
+        organizationId: organization.id,
         ...createImageDto,
         state: buildInfo ? ImageState.BUILD_PENDING : ImageState.PENDING,
         general,
@@ -148,6 +144,10 @@ export class ImageService {
     const [items, total] = await this.imageRepository.findAndCount({
       where: { organizationId },
       order: {
+        lastUsedAt: {
+          direction: 'DESC',
+          nulls: 'LAST',
+        },
         createdAt: 'DESC',
       },
       skip: (pageNum - 1) * limitNum,
@@ -205,5 +205,16 @@ export class ImageService {
 
     image.general = general
     return await this.imageRepository.save(image)
+  }
+
+  @OnEvent(WorkspaceEvents.CREATED)
+  private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
+    if (!event.workspace.image) {
+      return
+    }
+
+    const image = await this.getImageByName(event.workspace.image, event.workspace.organizationId)
+    image.lastUsedAt = event.workspace.createdAt
+    await this.imageRepository.save(image)
   }
 }

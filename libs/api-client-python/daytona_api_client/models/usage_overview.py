@@ -42,8 +42,10 @@ class UsageOverview(BaseModel):
     image_quota: Union[StrictFloat, StrictInt] = Field(alias="imageQuota")
     total_image_size_quota: Union[StrictFloat, StrictInt] = Field(alias="totalImageSizeQuota")
     total_image_size_used: Union[StrictFloat, StrictInt] = Field(alias="totalImageSizeUsed")
+    max_volumes: Union[StrictFloat, StrictInt] = Field(alias="maxVolumes")
+    used_volumes: Union[StrictFloat, StrictInt] = Field(alias="usedVolumes")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalGpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalWorkspaceQuota", "concurrentWorkspaceQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage", "currentWorkspaces", "concurrentWorkspaces", "currentImageNumber", "imageQuota", "totalImageSizeQuota", "totalImageSizeUsed"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalGpuQuota", "totalMemoryQuota", "totalDiskQuota", "totalWorkspaceQuota", "concurrentWorkspaceQuota", "currentCpuUsage", "currentMemoryUsage", "currentDiskUsage", "currentWorkspaces", "concurrentWorkspaces", "currentImageNumber", "imageQuota", "totalImageSizeQuota", "totalImageSizeUsed", "maxVolumes", "usedVolumes"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -117,7 +119,9 @@ class UsageOverview(BaseModel):
             "currentImageNumber": obj.get("currentImageNumber"),
             "imageQuota": obj.get("imageQuota"),
             "totalImageSizeQuota": obj.get("totalImageSizeQuota"),
-            "totalImageSizeUsed": obj.get("totalImageSizeUsed")
+            "totalImageSizeUsed": obj.get("totalImageSizeUsed"),
+            "maxVolumes": obj.get("maxVolumes"),
+            "usedVolumes": obj.get("usedVolumes")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

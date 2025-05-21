@@ -20,10 +20,15 @@ func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
 	gitCloneRequest, err := getGitCloneRequest(request)
@@ -31,7 +36,7 @@ func GitClone(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolRe
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, sandboxID).GitCloneRequest(*gitCloneRequest).Execute()
+	_, err = apiClient.ToolboxAPI.GitCloneRepository(ctx, sandboxId).GitCloneRequest(*gitCloneRequest).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error cloning repository: %v", err)
 	}

@@ -48,7 +48,7 @@ var CreateCmd = &cobra.Command{
 		}
 
 		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
-			return common.AwaitImageActive(ctx, apiClient, image.Name)
+			return common.AwaitImageState(ctx, apiClient, image.Name, daytonaapiclient.IMAGESTATE_ACTIVE)
 		})
 		if err != nil {
 			return err

@@ -20,20 +20,25 @@ func GetFileInfo(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
+	}
+
 	// Get file path from request arguments
 	filePath, ok := request.Params.Arguments["file_path"].(string)
 	if !ok {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
 	// Get file info
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, sandboxID).Path(filePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, sandboxId).Path(filePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error getting file info: %v", err)
 	}

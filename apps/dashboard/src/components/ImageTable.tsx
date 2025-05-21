@@ -29,6 +29,7 @@ import {
 } from './ui/dropdown-menu'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { getRelativeTimeString } from '@/lib/utils'
 
 interface ImageTableProps {
   data: ImageDto[]
@@ -265,12 +266,12 @@ const getColumns = ({
   {
     accessorKey: 'createdAt',
     header: ({ column }) => <SortableHeader column={column} title="Created" />,
-    cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+    cell: ({ row }) => getRelativeTimeString(row.original.createdAt).relativeTimeString,
   },
   {
     accessorKey: 'lastUsedAt',
     header: ({ column }) => <SortableHeader column={column} title="Last Used" />,
-    cell: ({ row }) => (row.original.lastUsedAt ? new Date(row.original.lastUsedAt).toLocaleDateString() : '-'),
+    cell: ({ row }) => getRelativeTimeString(row.original.lastUsedAt).relativeTimeString,
   },
   {
     id: 'actions',

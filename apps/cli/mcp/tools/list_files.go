@@ -20,20 +20,25 @@ func ListFiles(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolR
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
+	sandboxId := ""
+	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
+		if idStr, ok := id.(string); ok && idStr != "" {
+			sandboxId = idStr
+		}
+	}
+
+	if sandboxId == "" {
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
+	}
+
 	// Get directory path from request arguments (optional)
 	dirPath := "."
 	if path, ok := request.Params.Arguments["path"].(string); ok && path != "" {
 		dirPath = path
 	}
 
-	// Get sandbox from tracking file
-	sandboxID, err := getActiveSandbox()
-	if err != nil || sandboxID == "" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("no sandbox ID found in tracking file: %v", err)
-	}
-
 	// List files
-	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, sandboxID).Path(dirPath).Execute()
+	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, sandboxId).Path(dirPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error listing files: %v", err)
 	}

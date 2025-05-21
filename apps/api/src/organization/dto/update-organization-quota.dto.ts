@@ -51,4 +51,8 @@ export class UpdateOrganizationQuotaDto {
   @ApiProperty()
   @IsNumber()
   totalImageSize: number
+
+  @ApiProperty()
+  @IsNumber()
+  volumeQuota: number
 }

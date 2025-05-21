@@ -33,6 +33,7 @@ type UpdateOrganizationQuota struct {
 	ImageQuota              float32 `json:"imageQuota"`
 	MaxImageSize            float32 `json:"maxImageSize"`
 	TotalImageSize          float32 `json:"totalImageSize"`
+	VolumeQuota             float32 `json:"volumeQuota"`
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -41,7 +42,7 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerWorkspace float32, maxMemoryPerWorkspace float32, maxDiskPerWorkspace float32, maxConcurrentWorkspaces float32, workspaceQuota float32, imageQuota float32, maxImageSize float32, totalImageSize float32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerWorkspace float32, maxMemoryPerWorkspace float32, maxDiskPerWorkspace float32, maxConcurrentWorkspaces float32, workspaceQuota float32, imageQuota float32, maxImageSize float32, totalImageSize float32, volumeQuota float32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -54,6 +55,7 @@ func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32,
 	this.ImageQuota = imageQuota
 	this.MaxImageSize = maxImageSize
 	this.TotalImageSize = totalImageSize
+	this.VolumeQuota = volumeQuota
 	return &this
 }
 
@@ -329,6 +331,30 @@ func (o *UpdateOrganizationQuota) SetTotalImageSize(v float32) {
 	o.TotalImageSize = v
 }
 
+// GetVolumeQuota returns the VolumeQuota field value
+func (o *UpdateOrganizationQuota) GetVolumeQuota() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.VolumeQuota
+}
+
+// GetVolumeQuotaOk returns a tuple with the VolumeQuota field value
+// and a boolean to check if the value has been set.
+func (o *UpdateOrganizationQuota) GetVolumeQuotaOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.VolumeQuota, true
+}
+
+// SetVolumeQuota sets field value
+func (o *UpdateOrganizationQuota) SetVolumeQuota(v float32) {
+	o.VolumeQuota = v
+}
+
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -350,6 +376,7 @@ func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize["imageQuota"] = o.ImageQuota
 	toSerialize["maxImageSize"] = o.MaxImageSize
 	toSerialize["totalImageSize"] = o.TotalImageSize
+	toSerialize["volumeQuota"] = o.VolumeQuota
 	return toSerialize, nil
 }
 
@@ -369,6 +396,7 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		"imageQuota",
 		"maxImageSize",
 		"totalImageSize",
+		"volumeQuota",
 	}
 
 	allProperties := make(map[string]interface{})

@@ -138,6 +138,15 @@ export class GitCommitResponseDto {
   hash: string
 }
 
+@ApiSchema({ name: 'GitCheckoutRequest' })
+export class GitCheckoutRequestDto {
+  @ApiProperty()
+  path: string
+
+  @ApiProperty()
+  branch: string
+}
+
 @ApiSchema({ name: 'GitRepoRequest' })
 export class GitRepoRequestDto {
   @ApiProperty()

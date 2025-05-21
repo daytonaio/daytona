@@ -34,6 +34,9 @@ export class ApiKeyListDto {
   })
   permissions: OrganizationResourcePermission[]
 
+  @ApiProperty({ nullable: true })
+  lastUsedAt?: Date
+
   constructor(partial: Partial<ApiKeyListDto>) {
     Object.assign(this, partial)
   }
@@ -46,6 +49,7 @@ export class ApiKeyListDto {
       value: maskedValue,
       createdAt: apiKey.createdAt,
       permissions: apiKey.permissions,
+      lastUsedAt: apiKey.lastUsedAt,
     })
   }
 }

@@ -36,7 +36,19 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
+
+    axiosInstance.interceptors.response.use(
+      (response) => {
+        return response
+      },
+      (error) => {
+        const errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+
+        throw new Error(String(errorMessage))
+      },
+    )
 
     if (isDebugEnabled) {
       axiosDebug.addLogger(axiosInstance)
@@ -51,6 +63,7 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
     if (isDebugEnabled) {
@@ -66,6 +79,7 @@ export class NodeApiFactory {
       headers: {
         Authorization: `Bearer ${node.apiKey}`,
       },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
 
     if (isDebugEnabled) {

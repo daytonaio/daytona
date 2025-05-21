@@ -30,7 +30,8 @@ type ApiKeyList struct {
 	// When the API key was created
 	CreatedAt time.Time `json:"createdAt"`
 	// The list of organization resource permissions assigned to the API key
-	Permissions []string `json:"permissions"`
+	Permissions []string     `json:"permissions"`
+	LastUsedAt  NullableTime `json:"lastUsedAt"`
 }
 
 type _ApiKeyList ApiKeyList
@@ -39,12 +40,13 @@ type _ApiKeyList ApiKeyList
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string) *ApiKeyList {
+func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime) *ApiKeyList {
 	this := ApiKeyList{}
 	this.Name = name
 	this.Value = value
 	this.CreatedAt = createdAt
 	this.Permissions = permissions
+	this.LastUsedAt = lastUsedAt
 	return &this
 }
 
@@ -152,6 +154,32 @@ func (o *ApiKeyList) SetPermissions(v []string) {
 	o.Permissions = v
 }
 
+// GetLastUsedAt returns the LastUsedAt field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *ApiKeyList) GetLastUsedAt() time.Time {
+	if o == nil || o.LastUsedAt.Get() == nil {
+		var ret time.Time
+		return ret
+	}
+
+	return *o.LastUsedAt.Get()
+}
+
+// GetLastUsedAtOk returns a tuple with the LastUsedAt field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ApiKeyList) GetLastUsedAtOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LastUsedAt.Get(), o.LastUsedAt.IsSet()
+}
+
+// SetLastUsedAt sets field value
+func (o *ApiKeyList) SetLastUsedAt(v time.Time) {
+	o.LastUsedAt.Set(&v)
+}
+
 func (o ApiKeyList) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -166,6 +194,7 @@ func (o ApiKeyList) ToMap() (map[string]interface{}, error) {
 	toSerialize["value"] = o.Value
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["permissions"] = o.Permissions
+	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	return toSerialize, nil
 }
 
@@ -178,6 +207,7 @@ func (o *ApiKeyList) UnmarshalJSON(data []byte) (err error) {
 		"value",
 		"createdAt",
 		"permissions",
+		"lastUsedAt",
 	}
 
 	allProperties := make(map[string]interface{})

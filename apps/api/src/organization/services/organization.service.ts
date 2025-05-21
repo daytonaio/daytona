@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Injectable, NotFoundException, Logger, OnModuleInit } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { EntityManager, In, IsNull, LessThan, MoreThan, Not, Or, Repository } from 'typeorm'
 import { CreateOrganizationDto } from '../dto/create-organization.dto'
@@ -25,19 +25,36 @@ import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto
 import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
 import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
+import { Volume } from '../../workspace/entities/volume.entity'
+import { VolumeState } from '../../workspace/enums/volume-state.enum'
+import { Cron, CronExpression } from '@nestjs/schedule'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import { Redis } from 'ioredis'
+import { RedisLockProvider } from '../../workspace/common/redis-lock.provider'
+import { OrganizationSuspendedWorkspaceStoppedEvent } from '../events/organization-suspended-workspace-stopped.event'
 
 @Injectable()
-export class OrganizationService {
+export class OrganizationService implements OnModuleInit {
+  private readonly logger = new Logger(OrganizationService.name)
+
   constructor(
+    @InjectRedis() private readonly redis: Redis,
     @InjectRepository(Organization)
     private readonly organizationRepository: Repository<Organization>,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Volume)
+    private readonly volumeRepository: Repository<Volume>,
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: ConfigService,
+    private readonly redisLockProvider: RedisLockProvider,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.stopSuspendedOrganizationWorkspaces()
+  }
 
   async create(
     createOrganizationDto: CreateOrganizationDto,
@@ -70,13 +87,16 @@ export class OrganizationService {
     })
   }
 
-  async findSuspended(suspendedBefore?: Date): Promise<Organization[]> {
+  async findSuspended(suspendedBefore?: Date, suspendedAfter?: Date): Promise<Organization[]> {
     return this.organizationRepository.find({
       where: {
         suspended: true,
         suspendedUntil: Or(IsNull(), MoreThan(new Date())),
         ...(suspendedBefore ? { suspendedAt: LessThan(suspendedBefore) } : {}),
+        ...(suspendedAfter ? { suspendedAt: MoreThan(suspendedAfter) } : {}),
       },
+      //  limit the number of organizations to avoid memory issues
+      take: 1000,
     })
   }
 
@@ -127,6 +147,13 @@ export class OrganizationService {
         organizationId,
       })) || 0
 
+    const activeVolumesCount = await this.volumeRepository.count({
+      where: {
+        organizationId,
+        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
+      },
+    })
+
     return {
       totalCpuQuota: organization.totalCpuQuota,
       totalGpuQuota: 0,
@@ -143,6 +170,8 @@ export class OrganizationService {
       imageQuota: organization.imageQuota,
       totalImageSizeQuota: organization.totalImageSize,
       totalImageSizeUsed,
+      maxVolumes: organization.volumeQuota,
+      usedVolumes: activeVolumesCount,
     }
   }
 
@@ -166,6 +195,7 @@ export class OrganizationService {
     organization.imageQuota = updateOrganizationQuotaDto.imageQuota
     organization.maxImageSize = updateOrganizationQuotaDto.maxImageSize
     organization.totalImageSize = updateOrganizationQuotaDto.totalImageSize
+    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota
 
     return this.organizationRepository.save(organization)
   }
@@ -239,6 +269,7 @@ export class OrganizationService {
     organization.imageQuota = quota.imageQuota
     organization.maxImageSize = quota.maxImageSize
     organization.totalImageSize = quota.totalImageSize
+    organization.volumeQuota = quota.volumeQuota
 
     if (!creatorEmailVerified) {
       organization.suspended = true
@@ -297,6 +328,40 @@ export class OrganizationService {
     }
 
     return organization
+  }
+
+  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'stop-suspended-organization-workspaces' })
+  async stopSuspendedOrganizationWorkspaces(): Promise<void> {
+    //  lock the sync to only run one instance at a time
+    const lockKey = 'stop-suspended-organization-workspaces'
+    if (!(await this.redisLockProvider.lock(lockKey, 60))) {
+      return
+    }
+
+    const suspendedOrganizations = await this.findSuspended(
+      // Find organization suspended more than 24 hours ago
+      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
+      //  and less than 7 days ago
+      new Date(Date.now() - 7 * 1000 * 60 * 60 * 24),
+    )
+
+    const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+
+    const workspaces = await this.workspaceRepository.find({
+      where: {
+        organizationId: In(suspendedOrganizationIds),
+        state: WorkspaceState.STARTED,
+      },
+    })
+
+    workspaces.map((workspace) =>
+      this.eventEmitter.emitAsync(
+        OrganizationEvents.SUSPENDED_WORKSPACE_STOPPED,
+        new OrganizationSuspendedWorkspaceStoppedEvent(workspace.id),
+      ),
+    )
+
+    await this.redis.del(lockKey)
   }
 
   @OnAsyncEvent({

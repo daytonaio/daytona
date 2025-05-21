@@ -1450,6 +1450,46 @@ paths:
       summary: Get preview URL for a workspace port
       tags:
         - workspace
+  /workspace/{workspaceId}/build-logs:
+    get:
+      operationId: getBuildLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Whether to follow the logs stream
+          explode: true
+          in: query
+          name: follow
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          description: Build logs stream
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get build logs
+      tags:
+        - workspace
   /nodes:
     get:
       operationId: listNodes
@@ -2374,6 +2414,44 @@ paths:
             - profile
             - email
       summary: Push changes
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/git/checkout:
+    post:
+      description: Checkout branch or commit in git repository
+      operationId: gitCheckoutBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitCheckoutRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch checked out successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Checkout branch
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/status:
@@ -3363,6 +3441,46 @@ paths:
       summary: Set image general status
       tags:
         - images
+  /images/{id}/build-logs:
+    get:
+      operationId: getImageBuildLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Image ID
+          explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Whether to follow the logs stream
+          explode: true
+          in: query
+          name: follow
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get image build logs
+      tags:
+        - images
   /preview/{workspaceId}/public:
     get:
       operationId: isWorkspacePublic
@@ -3954,6 +4072,7 @@ components:
     ApiKeyList:
       example:
         createdAt: 2024-03-14T12:00:00Z
+        lastUsedAt: 2000-01-23T04:56:07.000+00:00
         permissions:
           - write:registries
           - write:registries
@@ -3989,8 +4108,13 @@ components:
               - delete:volumes
             type: string
           type: array
+        lastUsedAt:
+          format: date-time
+          nullable: true
+          type: string
       required:
         - createdAt
+        - lastUsedAt
         - name
         - permissions
         - value
@@ -4229,6 +4353,8 @@ components:
         currentCpuUsage: 7.061401241503109
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.962133916683182
+        maxVolumes: 6.84685269835264
+        usedVolumes: 7.457744773683766
       properties:
         totalCpuQuota:
           type: number
@@ -4260,6 +4386,10 @@ components:
           type: number
         totalImageSizeUsed:
           type: number
+        maxVolumes:
+          type: number
+        usedVolumes:
+          type: number
       required:
         - concurrentWorkspaceQuota
         - concurrentWorkspaces
@@ -4269,6 +4399,7 @@ components:
         - currentMemoryUsage
         - currentWorkspaces
         - imageQuota
+        - maxVolumes
         - totalCpuQuota
         - totalDiskQuota
         - totalGpuQuota
@@ -4276,6 +4407,7 @@ components:
         - totalImageSizeUsed
         - totalMemoryQuota
         - totalWorkspaceQuota
+        - usedVolumes
       type: object
     UpdateOrganizationQuota:
       example:
@@ -4285,6 +4417,7 @@ components:
         maxConcurrentWorkspaces: 7.061401241503109
         totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
+        volumeQuota: 7.386281948385884
         workspaceQuota: 9.301444243932576
         maxImageSize: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
@@ -4313,6 +4446,8 @@ components:
           type: number
         totalImageSize:
           type: number
+        volumeQuota:
+          type: number
       required:
         - imageQuota
         - maxConcurrentWorkspaces
@@ -4324,6 +4459,7 @@ components:
         - totalDiskQuota
         - totalImageSize
         - totalMemoryQuota
+        - volumeQuota
         - workspaceQuota
       type: object
     OrganizationSuspension:
@@ -4630,6 +4766,7 @@ components:
         maxConcurrentWorkspaces: 7.061401241503109
         totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
+        volumeQuota: 7.386281948385884
         workspaceQuota: 9.301444243932576
         maxImageSize: 2.027123023002322
         totalMemoryQuota: 6.027456183070403
@@ -4658,6 +4795,8 @@ components:
           type: number
         totalImageSize:
           type: number
+        volumeQuota:
+          type: number
       type: object
     CreateUser:
       example:
@@ -4672,6 +4811,7 @@ components:
           maxConcurrentWorkspaces: 7.061401241503109
           totalImageSize: 4.145608029883936
           maxDiskPerWorkspace: 2.3021358869347655
+          volumeQuota: 7.386281948385884
           workspaceQuota: 9.301444243932576
           maxImageSize: 2.027123023002322
           totalMemoryQuota: 6.027456183070403
@@ -5344,6 +5484,19 @@ components:
         password:
           type: string
       required:
+        - path
+      type: object
+    GitCheckoutRequest:
+      example:
+        path: path
+        branch: branch
+      properties:
+        path:
+          type: string
+        branch:
+          type: string
+      required:
+        - branch
         - path
       type: object
     FileStatus:
@@ -6167,9 +6320,9 @@ components:
     StorageAccessDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
+        bucket: daytona
         accessKey: temp-user-123
         sessionToken: eyJhbGciOiJIUzI1NiIs...
-        registryId: 123e4567-e89b-12d3-a456-426614174000
         secret: abchbGciOiJIUzI1NiIs...
         storageUrl: storage.example.com
       properties:
@@ -6189,18 +6342,18 @@ components:
           description: Storage URL
           example: storage.example.com
           type: string
-        registryId:
-          description: Registry ID
-          example: 123e4567-e89b-12d3-a456-426614174000
-          type: string
         organizationId:
           description: Organization ID
           example: 123e4567-e89b-12d3-a456-426614174000
           type: string
+        bucket:
+          description: S3 bucket name
+          example: daytona
+          type: string
       required:
         - accessKey
+        - bucket
         - organizationId
-        - registryId
         - secret
         - sessionToken
         - storageUrl

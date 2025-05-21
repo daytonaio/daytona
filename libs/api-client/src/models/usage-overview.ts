@@ -108,4 +108,16 @@ export interface UsageOverview {
    * @memberof UsageOverview
    */
   totalImageSizeUsed: number
+  /**
+   *
+   * @type {number}
+   * @memberof UsageOverview
+   */
+  maxVolumes: number
+  /**
+   *
+   * @type {number}
+   * @memberof UsageOverview
+   */
+  usedVolumes: number
 }

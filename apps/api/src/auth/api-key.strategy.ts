@@ -34,6 +34,9 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       const apiKey = await this.apiKeyService.getApiKeyByValue(token)
       this.logger.debug(`API key found for userId: ${apiKey.userId}`)
 
+      this.logger.debug(`Updating last used timestamp for API key: ${token.substring(0, 8)}...`)
+      await this.apiKeyService.updateLastUsedAt(apiKey.organizationId, apiKey.userId, apiKey.name, new Date())
+
       let user = await this.userService.findOne(apiKey.userId)
       if (!user) {
         this.logger.debug(`Creating new user for userId: ${apiKey.userId}`)

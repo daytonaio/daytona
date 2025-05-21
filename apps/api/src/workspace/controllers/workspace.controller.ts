@@ -18,6 +18,11 @@ import {
   Put,
   NotFoundException,
   ForbiddenException,
+  Res,
+  Request,
+  RawBodyRequest,
+  Next,
+  ParseBoolPipe,
 } from '@nestjs/common'
 import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
@@ -41,7 +46,6 @@ import { ContentTypeInterceptor } from '../../common/interceptors/content-type.i
 import { Throttle } from '@nestjs/throttler'
 import { Node } from '../entities/node.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
-import { ResizeDto } from '../dto/resize.dto'
 import { Workspace } from '../decorators/workspace.decorator'
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -50,8 +54,10 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
+import { IncomingMessage, ServerResponse } from 'http'
+import { NextFunction } from 'http-proxy-middleware/dist/types'
+import { LogProxy } from '../proxy/log-proxy'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -66,7 +72,6 @@ export class WorkspaceController {
     @InjectRedis() private readonly redis: Redis,
     private readonly nodeService: NodeService,
     private readonly workspaceService: WorkspaceService,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Get()
@@ -125,38 +130,36 @@ export class WorkspaceController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    const organizationId = authContext.organizationId
+    const organization = authContext.organization
 
     //  optimistic quota guard
     //  protect against race condition on workspace create abuse
     //  not 100% correct when close to quota limit
-    const workspaceQuotaKey = `workspace-quota-${organizationId}`
+    const workspaceQuotaKey = `workspace-quota-${organization.id}`
     let workspaceQuota = parseInt(await this.redis.get(workspaceQuotaKey)) || 0
     workspaceQuota++
     await this.redis.setex(workspaceQuotaKey, 1, workspaceQuota)
 
     // Get current workspace count for organization
-    const workspaceCount = await this.workspaceService.count(organizationId)
-
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-    }
+    const workspaceCount = await this.workspaceService.count(organization.id)
 
     if (workspaceCount + workspaceQuota > organization.workspaceQuota) {
       throw new ForbiddenException(`Workspace quota exceeded. Maximum allowed: ${organization.workspaceQuota}`)
     }
 
-    const workspace = await this.workspaceService.create(organizationId, createWorkspaceDto)
+    const workspace = await this.workspaceService.create(organization.id, createWorkspaceDto, organization)
 
-    // Wait for workspace to be started
-    const workspaceState = await this.waitForWorkspaceState(
-      workspace.id,
-      WorkspaceState.STARTED,
-      30000, // 30 seconds timeout
-    )
+    // If the workspace has no node, it means it is still building - return the ID to the client so they can fetch logs
+    if (workspace.nodeId) {
+      // Wait for workspace to be started
+      const workspaceState = await this.waitForWorkspaceState(
+        workspace.id,
+        WorkspaceState.STARTED,
+        30000, // 30 seconds timeout
+      )
 
-    workspace.state = workspaceState
+      workspace.state = workspaceState
+    }
 
     const node = await this.nodeService.findOne(workspace.nodeId)
     const dto = WorkspaceDto.fromWorkspace(workspace, node.domain)
@@ -241,8 +244,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
-  async startWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
-    return this.workspaceService.start(workspaceId)
+  async startWorkspace(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('workspaceId') workspaceId: string,
+  ): Promise<void> {
+    return this.workspaceService.start(workspaceId, authContext.organization)
   }
 
   @Post(':workspaceId/stop')
@@ -409,6 +415,60 @@ export class WorkspaceController {
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
     return this.workspaceService.getPortPreviewUrl(workspaceId, port)
+  }
+
+  @Get(':workspaceId/build-logs')
+  @ApiOperation({
+    summary: 'Get build logs',
+    operationId: 'getBuildLogs',
+  })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'ID of the workspace',
+    type: 'string',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Build logs stream',
+  })
+  @ApiQuery({
+    name: 'follow',
+    required: false,
+    type: Boolean,
+    description: 'Whether to follow the logs stream',
+  })
+  @UseGuards(WorkspaceAccessGuard)
+  async getBuildLogs(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+    @Param('workspaceId') workspaceId: string,
+    @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
+  ): Promise<void> {
+    const workspace = await this.workspaceService.findOne(workspaceId)
+    if (!workspace || !workspace.nodeId) {
+      throw new NotFoundException(`Workspace with ID ${workspaceId} not found or has no node assigned`)
+    }
+
+    if (!workspace.buildInfo) {
+      throw new NotFoundException(`Workspace with ID ${workspaceId} has no build info`)
+    }
+
+    const node = await this.nodeService.findOne(workspace.nodeId)
+    if (!node) {
+      throw new NotFoundException(`Node for workspace ${workspaceId} not found`)
+    }
+
+    const logProxy = new LogProxy(
+      node.apiUrl,
+      workspace.buildInfo.imageRef.split(':')[0],
+      node.apiKey,
+      follow === true,
+      req,
+      res,
+      next,
+    )
+    return logProxy.create()
   }
 
   private async waitForWorkspaceState(

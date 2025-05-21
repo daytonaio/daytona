@@ -6,9 +6,14 @@ package docker
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"sync"
 
+	"github.com/daytonaio/runner/cmd/runner/config"
+	"github.com/daytonaio/runner/internal/util"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	log "github.com/sirupsen/logrus"
 )
@@ -58,4 +63,45 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 	}
 
 	return volumeMountPathBinds, nil
+}
+
+func (d *DockerClient) getNodeVolumeMountPath(volumeId string) string {
+	volumePath := filepath.Join("/mnt", volumeId)
+	if config.GetNodeEnv() == "development" {
+		volumePath = filepath.Join("/tmp", volumeId)
+	}
+
+	return volumePath
+}
+
+func (d *DockerClient) isDirectoryMounted(path string) bool {
+	cmd := exec.Command("mountpoint", path)
+	_, err := cmd.Output()
+
+	return err == nil
+}
+
+func (d *DockerClient) getMountCmd(ctx context.Context, volume, path string) *exec.Cmd {
+	cmd := exec.CommandContext(ctx, "mount-s3", "--allow-other", "--allow-delete", "--allow-overwrite", "--file-mode", "0666", "--dir-mode", "0777", volume, path)
+
+	if d.awsEndpointUrl != "" {
+		cmd.Env = append(cmd.Env, "AWS_ENDPOINT_URL="+d.awsEndpointUrl)
+	}
+
+	if d.awsAccessKeyId != "" {
+		cmd.Env = append(cmd.Env, "AWS_ACCESS_KEY_ID="+d.awsAccessKeyId)
+	}
+
+	if d.awsSecretAccessKey != "" {
+		cmd.Env = append(cmd.Env, "AWS_SECRET_ACCESS_KEY="+d.awsSecretAccessKey)
+	}
+
+	if d.awsRegion != "" {
+		cmd.Env = append(cmd.Env, "AWS_REGION="+d.awsRegion)
+	}
+
+	cmd.Stderr = io.Writer(&util.ErrorLogWriter{})
+	cmd.Stdout = io.Writer(&util.InfoLogWriter{})
+
+	return cmd
 }

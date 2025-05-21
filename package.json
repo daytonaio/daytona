@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",
+    "@aws-sdk/client-sts": "^3.803.0",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",

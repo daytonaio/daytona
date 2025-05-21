@@ -28,6 +28,7 @@ import {
 import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: DockerRegistry[]
@@ -60,6 +61,11 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+    },
+    initialState: {
+      pagination: {
+        pageSize: DEFAULT_PAGE_SIZE,
+      },
     },
   })
 

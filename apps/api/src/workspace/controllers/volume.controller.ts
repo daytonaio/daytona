@@ -38,6 +38,9 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { VolumeDto } from '../dto/volume.dto'
+import { InjectRedis } from '@nestjs-modules/ioredis'
+import Redis from 'ioredis'
+import { ForbiddenException } from '@nestjs/common'
 
 @ApiTags('volumes')
 @Controller('volumes')
@@ -48,7 +51,10 @@ import { VolumeDto } from '../dto/volume.dto'
 export class VolumeController {
   private readonly logger = new Logger(VolumeController.name)
 
-  constructor(private readonly volumeService: VolumeService) {}
+  constructor(
+    @InjectRedis() private readonly redis: Redis,
+    private readonly volumeService: VolumeService,
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -92,7 +98,23 @@ export class VolumeController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
   ): Promise<VolumeDto> {
-    const volume = await this.volumeService.create(authContext.organizationId, createVolumeDto)
+    const organization = authContext.organization
+
+    //  optimistic quota guard
+    //  protect against race condition on volume create abuse
+    //  not 100% correct when close to quota limit
+    const concurrentCreateKey = `volume-concurrent-create-${organization.id}`
+    let concurrentCreateCount = parseInt(await this.redis.get(concurrentCreateKey)) || 0
+    concurrentCreateCount++
+    await this.redis.setex(concurrentCreateKey, 1, concurrentCreateCount)
+
+    const activeVolumeCount = await this.volumeService.countActive(organization.id)
+
+    if (activeVolumeCount + concurrentCreateCount > organization.volumeQuota) {
+      throw new ForbiddenException(`Volume quota exceeded. Maximum allowed: ${organization.volumeQuota}`)
+    }
+
+    const volume = await this.volumeService.create(organization, createVolumeDto)
     return this.toVolumeDto(volume)
   }
 
