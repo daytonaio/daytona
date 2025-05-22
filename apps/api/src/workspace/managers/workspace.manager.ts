@@ -393,7 +393,7 @@ export class WorkspaceManager {
 
         try {
           const workspaceInfo = await runnerClient.getSandboxInfo({
-            workspaceId: workspace.id,
+            sandboxId: workspace.id,
           })
           switch (workspaceInfo.state) {
             case NodeWorkspaceState.SandboxStateDestroying:
@@ -406,7 +406,7 @@ export class WorkspaceManager {
               break
             default:
               await runnerClient.destroySandbox({
-                workspaceId: workspace.id,
+                sandboxId: workspace.id,
               })
               await this.redis.del(workspace.id)
               this.syncInstanceState(workspace.id)
@@ -457,14 +457,14 @@ export class WorkspaceManager {
 
         try {
           const workspaceInfo = await runnerClient.getSandboxInfo({
-            workspaceId: workspace.id,
+            sandboxId: workspace.id,
           })
           if (
             workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed ||
             workspaceInfo.state === NodeWorkspaceState.SandboxStateError
           ) {
             await runnerClient.removeDestroyedSandbox({
-              workspaceId: workspace.id,
+              sandboxId: workspace.id,
             })
           }
         } catch (e) {
@@ -484,13 +484,13 @@ export class WorkspaceManager {
         try {
           const runnerClient = this.runnerClientFactory.create(node)
           const workspaceInfo = await runnerClient.getSandboxInfo({
-            workspaceId: workspace.id,
+            sandboxId: workspace.id,
           })
           if (workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed) {
             break
           }
           await runnerClient.destroySandbox({
-            workspaceId: workspace.id,
+            sandboxId: workspace.id,
           })
         } catch (e) {
           //  if the workspace is not found on node, it is already destroyed
@@ -551,7 +551,7 @@ export class WorkspaceManager {
         const node = await this.nodeService.findOne(workspace.nodeId)
         const runnerClient = this.runnerClientFactory.create(node)
         const workspaceInfo = await runnerClient.getSandboxInfo({
-          workspaceId: workspace.id,
+          sandboxId: workspace.id,
         })
         if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStarted) {
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
@@ -581,7 +581,7 @@ export class WorkspaceManager {
         // stop workspace
         const runnerClient = this.runnerClientFactory.create(node)
         await runnerClient.stopSandbox({
-          workspaceId: workspace.id,
+          sandboxId: workspace.id,
         })
         await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
         //  sync states again immediately for workspace
@@ -594,7 +594,7 @@ export class WorkspaceManager {
         const node = await this.nodeService.findOne(workspace.nodeId)
         const runnerClient = this.runnerClientFactory.create(node)
         const workspaceInfo = await runnerClient.getSandboxInfo({
-          workspaceId: workspace.id,
+          sandboxId: workspace.id,
         })
         switch (workspaceInfo.state) {
           case NodeWorkspaceState.SandboxStateStopped: {
@@ -625,7 +625,7 @@ export class WorkspaceManager {
         const node = await this.nodeService.findOne(workspace.nodeId)
         const runnerClient = this.runnerClientFactory.create(node)
         const workspaceInfo = await runnerClient.getSandboxInfo({
-          workspaceId: workspace.id,
+          sandboxId: workspace.id,
         })
         if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStopped) {
           await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPED)
@@ -879,7 +879,7 @@ export class WorkspaceManager {
       const runnerClient = this.runnerClientFactory.create(node)
 
       await runnerClient.startSandbox({
-        workspaceId: workspace.id,
+        sandboxId: workspace.id,
       })
 
       await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTING)
@@ -896,7 +896,7 @@ export class WorkspaceManager {
     const node = await this.nodeService.findOne(workspace.nodeId)
     const runnerClient = this.runnerClientFactory.create(node)
     const workspaceInfo = await runnerClient.getSandboxInfo({
-      workspaceId: workspace.id,
+      sandboxId: workspace.id,
     })
 
     if (workspaceInfo.state === NodeWorkspaceState.SandboxStatePullingImage) {
@@ -919,7 +919,7 @@ export class WorkspaceManager {
     const node = await this.nodeService.findOne(workspace.nodeId)
     const runnerClient = this.runnerClientFactory.create(node)
     const workspaceInfo = await runnerClient.getSandboxInfo({
-      workspaceId: workspace.id,
+      sandboxId: workspace.id,
     })
 
     switch (workspaceInfo.state) {
@@ -957,7 +957,7 @@ export class WorkspaceManager {
           try {
             // First try to destroy the workspace
             await runnerClient.destroySandbox({
-              workspaceId: workspace.id,
+              sandboxId: workspace.id,
             })
 
             // Wait for workspace to be destroyed before removing
@@ -965,7 +965,7 @@ export class WorkspaceManager {
             while (retries < 10) {
               try {
                 const workspaceInfo = await runnerClient.getSandboxInfo({
-                  workspaceId: workspace.id,
+                  sandboxId: workspace.id,
                 })
                 if (workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed) {
                   break
@@ -982,7 +982,7 @@ export class WorkspaceManager {
 
             // Finally remove the destroyed workspace
             await runnerClient.removeDestroyedSandbox({
-              workspaceId: workspace.id,
+              sandboxId: workspace.id,
             })
             workspace.prevNodeId = null
 

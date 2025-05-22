@@ -38,6 +38,7 @@ import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
+import { RunnerClientFactory } from './runner-api/runnerApi'
 
 @Module({
   imports: [
@@ -70,8 +71,17 @@ import { SnapshotManager } from './managers/snapshot.manager'
     ImageSubscriber,
     VolumeService,
     VolumeManager,
+    RunnerClientFactory,
   ],
-  exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
+  exports: [
+    WorkspaceService,
+    NodeService,
+    RedisLockProvider,
+    ImageService,
+    VolumeService,
+    VolumeManager,
+    RunnerClientFactory,
+  ],
 })
 export class WorkspaceModule {
   configure(consumer: MiddlewareConsumer) {

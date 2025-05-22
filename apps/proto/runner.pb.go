@@ -253,7 +253,7 @@ func (x *CreateSandboxRequest) GetVolumes() []*Volume {
 
 type CreateSandboxResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	ContainerId   string                 `protobuf:"bytes,1,opt,name=container_id,json=containerId,proto3" json:"container_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -288,16 +288,16 @@ func (*CreateSandboxResponse) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *CreateSandboxResponse) GetContainerId() string {
+func (x *CreateSandboxResponse) GetSandboxId() string {
 	if x != nil {
-		return x.ContainerId
+		return x.SandboxId
 	}
 	return ""
 }
 
 type DestroySandboxRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -332,9 +332,9 @@ func (*DestroySandboxRequest) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *DestroySandboxRequest) GetWorkspaceId() string {
+func (x *DestroySandboxRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -385,7 +385,7 @@ func (x *DestroySandboxResponse) GetMessage() string {
 
 type CreateSnapshotRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	Registry      *Registry              `protobuf:"bytes,2,opt,name=registry,proto3" json:"registry,omitempty"`
 	Image         string                 `protobuf:"bytes,3,opt,name=image,proto3" json:"image,omitempty"`
 	unknownFields protoimpl.UnknownFields
@@ -422,9 +422,9 @@ func (*CreateSnapshotRequest) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateSnapshotRequest) GetWorkspaceId() string {
+func (x *CreateSnapshotRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -487,128 +487,16 @@ func (x *CreateSnapshotResponse) GetMessage() string {
 	return ""
 }
 
-type ResizeSandboxRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
-	Cpu           int64                  `protobuf:"varint,2,opt,name=cpu,proto3" json:"cpu,omitempty"`
-	Gpu           int64                  `protobuf:"varint,3,opt,name=gpu,proto3" json:"gpu,omitempty"`
-	Memory        int64                  `protobuf:"varint,4,opt,name=memory,proto3" json:"memory,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ResizeSandboxRequest) Reset() {
-	*x = ResizeSandboxRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ResizeSandboxRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResizeSandboxRequest) ProtoMessage() {}
-
-func (x *ResizeSandboxRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResizeSandboxRequest.ProtoReflect.Descriptor instead.
-func (*ResizeSandboxRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *ResizeSandboxRequest) GetWorkspaceId() string {
-	if x != nil {
-		return x.WorkspaceId
-	}
-	return ""
-}
-
-func (x *ResizeSandboxRequest) GetCpu() int64 {
-	if x != nil {
-		return x.Cpu
-	}
-	return 0
-}
-
-func (x *ResizeSandboxRequest) GetGpu() int64 {
-	if x != nil {
-		return x.Gpu
-	}
-	return 0
-}
-
-func (x *ResizeSandboxRequest) GetMemory() int64 {
-	if x != nil {
-		return x.Memory
-	}
-	return 0
-}
-
-type ResizeSandboxResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ResizeSandboxResponse) Reset() {
-	*x = ResizeSandboxResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ResizeSandboxResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ResizeSandboxResponse) ProtoMessage() {}
-
-func (x *ResizeSandboxResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ResizeSandboxResponse.ProtoReflect.Descriptor instead.
-func (*ResizeSandboxResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *ResizeSandboxResponse) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
 type StartSandboxRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StartSandboxRequest) Reset() {
 	*x = StartSandboxRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[10]
+	mi := &file_apps_proto_runner_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -620,7 +508,7 @@ func (x *StartSandboxRequest) String() string {
 func (*StartSandboxRequest) ProtoMessage() {}
 
 func (x *StartSandboxRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[10]
+	mi := &file_apps_proto_runner_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -633,12 +521,12 @@ func (x *StartSandboxRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartSandboxRequest.ProtoReflect.Descriptor instead.
 func (*StartSandboxRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{10}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{8}
 }
 
-func (x *StartSandboxRequest) GetWorkspaceId() string {
+func (x *StartSandboxRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -652,7 +540,7 @@ type StartSandboxResponse struct {
 
 func (x *StartSandboxResponse) Reset() {
 	*x = StartSandboxResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[11]
+	mi := &file_apps_proto_runner_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -664,7 +552,7 @@ func (x *StartSandboxResponse) String() string {
 func (*StartSandboxResponse) ProtoMessage() {}
 
 func (x *StartSandboxResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[11]
+	mi := &file_apps_proto_runner_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -677,7 +565,7 @@ func (x *StartSandboxResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StartSandboxResponse.ProtoReflect.Descriptor instead.
 func (*StartSandboxResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{11}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *StartSandboxResponse) GetMessage() string {
@@ -689,14 +577,14 @@ func (x *StartSandboxResponse) GetMessage() string {
 
 type StopSandboxRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *StopSandboxRequest) Reset() {
 	*x = StopSandboxRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[12]
+	mi := &file_apps_proto_runner_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -708,7 +596,7 @@ func (x *StopSandboxRequest) String() string {
 func (*StopSandboxRequest) ProtoMessage() {}
 
 func (x *StopSandboxRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[12]
+	mi := &file_apps_proto_runner_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -721,12 +609,12 @@ func (x *StopSandboxRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopSandboxRequest.ProtoReflect.Descriptor instead.
 func (*StopSandboxRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{12}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{10}
 }
 
-func (x *StopSandboxRequest) GetWorkspaceId() string {
+func (x *StopSandboxRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -740,7 +628,7 @@ type StopSandboxResponse struct {
 
 func (x *StopSandboxResponse) Reset() {
 	*x = StopSandboxResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[13]
+	mi := &file_apps_proto_runner_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -752,7 +640,7 @@ func (x *StopSandboxResponse) String() string {
 func (*StopSandboxResponse) ProtoMessage() {}
 
 func (x *StopSandboxResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[13]
+	mi := &file_apps_proto_runner_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -765,7 +653,7 @@ func (x *StopSandboxResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StopSandboxResponse.ProtoReflect.Descriptor instead.
 func (*StopSandboxResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{13}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *StopSandboxResponse) GetMessage() string {
@@ -777,14 +665,14 @@ func (x *StopSandboxResponse) GetMessage() string {
 
 type GetSandboxInfoRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetSandboxInfoRequest) Reset() {
 	*x = GetSandboxInfoRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[14]
+	mi := &file_apps_proto_runner_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -796,7 +684,7 @@ func (x *GetSandboxInfoRequest) String() string {
 func (*GetSandboxInfoRequest) ProtoMessage() {}
 
 func (x *GetSandboxInfoRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[14]
+	mi := &file_apps_proto_runner_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -809,12 +697,12 @@ func (x *GetSandboxInfoRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSandboxInfoRequest.ProtoReflect.Descriptor instead.
 func (*GetSandboxInfoRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{14}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *GetSandboxInfoRequest) GetWorkspaceId() string {
+func (x *GetSandboxInfoRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -829,7 +717,7 @@ type GetSandboxInfoResponse struct {
 
 func (x *GetSandboxInfoResponse) Reset() {
 	*x = GetSandboxInfoResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[15]
+	mi := &file_apps_proto_runner_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -841,7 +729,7 @@ func (x *GetSandboxInfoResponse) String() string {
 func (*GetSandboxInfoResponse) ProtoMessage() {}
 
 func (x *GetSandboxInfoResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[15]
+	mi := &file_apps_proto_runner_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -854,7 +742,7 @@ func (x *GetSandboxInfoResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetSandboxInfoResponse.ProtoReflect.Descriptor instead.
 func (*GetSandboxInfoResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{15}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *GetSandboxInfoResponse) GetState() string {
@@ -873,14 +761,14 @@ func (x *GetSandboxInfoResponse) GetSnapshotState() string {
 
 type RemoveDestroyedSandboxRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RemoveDestroyedSandboxRequest) Reset() {
 	*x = RemoveDestroyedSandboxRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[16]
+	mi := &file_apps_proto_runner_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -892,7 +780,7 @@ func (x *RemoveDestroyedSandboxRequest) String() string {
 func (*RemoveDestroyedSandboxRequest) ProtoMessage() {}
 
 func (x *RemoveDestroyedSandboxRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[16]
+	mi := &file_apps_proto_runner_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -905,12 +793,12 @@ func (x *RemoveDestroyedSandboxRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveDestroyedSandboxRequest.ProtoReflect.Descriptor instead.
 func (*RemoveDestroyedSandboxRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{16}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{14}
 }
 
-func (x *RemoveDestroyedSandboxRequest) GetWorkspaceId() string {
+func (x *RemoveDestroyedSandboxRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -924,7 +812,7 @@ type RemoveDestroyedSandboxResponse struct {
 
 func (x *RemoveDestroyedSandboxResponse) Reset() {
 	*x = RemoveDestroyedSandboxResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[17]
+	mi := &file_apps_proto_runner_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -936,7 +824,7 @@ func (x *RemoveDestroyedSandboxResponse) String() string {
 func (*RemoveDestroyedSandboxResponse) ProtoMessage() {}
 
 func (x *RemoveDestroyedSandboxResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[17]
+	mi := &file_apps_proto_runner_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -949,7 +837,7 @@ func (x *RemoveDestroyedSandboxResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveDestroyedSandboxResponse.ProtoReflect.Descriptor instead.
 func (*RemoveDestroyedSandboxResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{17}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *RemoveDestroyedSandboxResponse) GetMessage() string {
@@ -972,7 +860,7 @@ type Registry struct {
 
 func (x *Registry) Reset() {
 	*x = Registry{}
-	mi := &file_apps_proto_runner_proto_msgTypes[18]
+	mi := &file_apps_proto_runner_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -984,7 +872,7 @@ func (x *Registry) String() string {
 func (*Registry) ProtoMessage() {}
 
 func (x *Registry) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[18]
+	mi := &file_apps_proto_runner_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -997,7 +885,7 @@ func (x *Registry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Registry.ProtoReflect.Descriptor instead.
 func (*Registry) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{18}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *Registry) GetUrl() string {
@@ -1038,7 +926,7 @@ type PullImageRequest struct {
 
 func (x *PullImageRequest) Reset() {
 	*x = PullImageRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[19]
+	mi := &file_apps_proto_runner_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1050,7 +938,7 @@ func (x *PullImageRequest) String() string {
 func (*PullImageRequest) ProtoMessage() {}
 
 func (x *PullImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[19]
+	mi := &file_apps_proto_runner_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1063,7 +951,7 @@ func (x *PullImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullImageRequest.ProtoReflect.Descriptor instead.
 func (*PullImageRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{19}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *PullImageRequest) GetImage() string {
@@ -1089,7 +977,7 @@ type PullImageResponse struct {
 
 func (x *PullImageResponse) Reset() {
 	*x = PullImageResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[20]
+	mi := &file_apps_proto_runner_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1101,7 +989,7 @@ func (x *PullImageResponse) String() string {
 func (*PullImageResponse) ProtoMessage() {}
 
 func (x *PullImageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[20]
+	mi := &file_apps_proto_runner_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1114,7 +1002,7 @@ func (x *PullImageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PullImageResponse.ProtoReflect.Descriptor instead.
 func (*PullImageResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{20}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *PullImageResponse) GetMessage() string {
@@ -1138,7 +1026,7 @@ type BuildImageRequest struct {
 
 func (x *BuildImageRequest) Reset() {
 	*x = BuildImageRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[21]
+	mi := &file_apps_proto_runner_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1150,7 +1038,7 @@ func (x *BuildImageRequest) String() string {
 func (*BuildImageRequest) ProtoMessage() {}
 
 func (x *BuildImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[21]
+	mi := &file_apps_proto_runner_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1163,7 +1051,7 @@ func (x *BuildImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildImageRequest.ProtoReflect.Descriptor instead.
 func (*BuildImageRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{21}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *BuildImageRequest) GetImage() string {
@@ -1217,7 +1105,7 @@ type BuildImageResponse struct {
 
 func (x *BuildImageResponse) Reset() {
 	*x = BuildImageResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[22]
+	mi := &file_apps_proto_runner_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1229,7 +1117,7 @@ func (x *BuildImageResponse) String() string {
 func (*BuildImageResponse) ProtoMessage() {}
 
 func (x *BuildImageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[22]
+	mi := &file_apps_proto_runner_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1242,7 +1130,7 @@ func (x *BuildImageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuildImageResponse.ProtoReflect.Descriptor instead.
 func (*BuildImageResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{22}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *BuildImageResponse) GetMessage() string {
@@ -1255,13 +1143,14 @@ func (x *BuildImageResponse) GetMessage() string {
 type ImageExistsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Image         string                 `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	IncludeLatest bool                   `protobuf:"varint,2,opt,name=include_latest,json=includeLatest,proto3" json:"include_latest,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ImageExistsRequest) Reset() {
 	*x = ImageExistsRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[23]
+	mi := &file_apps_proto_runner_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1273,7 +1162,7 @@ func (x *ImageExistsRequest) String() string {
 func (*ImageExistsRequest) ProtoMessage() {}
 
 func (x *ImageExistsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[23]
+	mi := &file_apps_proto_runner_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1286,7 +1175,7 @@ func (x *ImageExistsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImageExistsRequest.ProtoReflect.Descriptor instead.
 func (*ImageExistsRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{23}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *ImageExistsRequest) GetImage() string {
@@ -1294,6 +1183,13 @@ func (x *ImageExistsRequest) GetImage() string {
 		return x.Image
 	}
 	return ""
+}
+
+func (x *ImageExistsRequest) GetIncludeLatest() bool {
+	if x != nil {
+		return x.IncludeLatest
+	}
+	return false
 }
 
 type ImageExistsResponse struct {
@@ -1305,7 +1201,7 @@ type ImageExistsResponse struct {
 
 func (x *ImageExistsResponse) Reset() {
 	*x = ImageExistsResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[24]
+	mi := &file_apps_proto_runner_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1317,7 +1213,7 @@ func (x *ImageExistsResponse) String() string {
 func (*ImageExistsResponse) ProtoMessage() {}
 
 func (x *ImageExistsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[24]
+	mi := &file_apps_proto_runner_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1330,7 +1226,7 @@ func (x *ImageExistsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ImageExistsResponse.ProtoReflect.Descriptor instead.
 func (*ImageExistsResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{24}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *ImageExistsResponse) GetExists() bool {
@@ -1343,13 +1239,14 @@ func (x *ImageExistsResponse) GetExists() bool {
 type RemoveImageRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Image         string                 `protobuf:"bytes,1,opt,name=image,proto3" json:"image,omitempty"`
+	Force         bool                   `protobuf:"varint,2,opt,name=force,proto3" json:"force,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RemoveImageRequest) Reset() {
 	*x = RemoveImageRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[25]
+	mi := &file_apps_proto_runner_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1361,7 +1258,7 @@ func (x *RemoveImageRequest) String() string {
 func (*RemoveImageRequest) ProtoMessage() {}
 
 func (x *RemoveImageRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[25]
+	mi := &file_apps_proto_runner_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1374,7 +1271,7 @@ func (x *RemoveImageRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveImageRequest.ProtoReflect.Descriptor instead.
 func (*RemoveImageRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{25}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *RemoveImageRequest) GetImage() string {
@@ -1382,6 +1279,13 @@ func (x *RemoveImageRequest) GetImage() string {
 		return x.Image
 	}
 	return ""
+}
+
+func (x *RemoveImageRequest) GetForce() bool {
+	if x != nil {
+		return x.Force
+	}
+	return false
 }
 
 type RemoveImageResponse struct {
@@ -1393,7 +1297,7 @@ type RemoveImageResponse struct {
 
 func (x *RemoveImageResponse) Reset() {
 	*x = RemoveImageResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[26]
+	mi := &file_apps_proto_runner_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1405,7 +1309,7 @@ func (x *RemoveImageResponse) String() string {
 func (*RemoveImageResponse) ProtoMessage() {}
 
 func (x *RemoveImageResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[26]
+	mi := &file_apps_proto_runner_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1418,7 +1322,7 @@ func (x *RemoveImageResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RemoveImageResponse.ProtoReflect.Descriptor instead.
 func (*RemoveImageResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{26}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *RemoveImageResponse) GetMessage() string {
@@ -1438,7 +1342,7 @@ type GetBuildLogsRequest struct {
 
 func (x *GetBuildLogsRequest) Reset() {
 	*x = GetBuildLogsRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[27]
+	mi := &file_apps_proto_runner_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1450,7 +1354,7 @@ func (x *GetBuildLogsRequest) String() string {
 func (*GetBuildLogsRequest) ProtoMessage() {}
 
 func (x *GetBuildLogsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[27]
+	mi := &file_apps_proto_runner_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1463,7 +1367,7 @@ func (x *GetBuildLogsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetBuildLogsRequest.ProtoReflect.Descriptor instead.
 func (*GetBuildLogsRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{27}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *GetBuildLogsRequest) GetImageRef() string {
@@ -1489,7 +1393,7 @@ type LogLine struct {
 
 func (x *LogLine) Reset() {
 	*x = LogLine{}
-	mi := &file_apps_proto_runner_proto_msgTypes[28]
+	mi := &file_apps_proto_runner_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1501,7 +1405,7 @@ func (x *LogLine) String() string {
 func (*LogLine) ProtoMessage() {}
 
 func (x *LogLine) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[28]
+	mi := &file_apps_proto_runner_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1514,7 +1418,7 @@ func (x *LogLine) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LogLine.ProtoReflect.Descriptor instead.
 func (*LogLine) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{28}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{26}
 }
 
 func (x *LogLine) GetContent() string {
@@ -1527,19 +1431,20 @@ func (x *LogLine) GetContent() string {
 // Proxy messages
 type ProxyRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	WorkspaceId   string                 `protobuf:"bytes,1,opt,name=workspace_id,json=workspaceId,proto3" json:"workspace_id,omitempty"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
 	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
 	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
 	Headers       map[string]string      `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	Body          []byte                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
 	Method        string                 `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
+	Follow        bool                   `protobuf:"varint,7,opt,name=follow,proto3" json:"follow,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ProxyRequest) Reset() {
 	*x = ProxyRequest{}
-	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	mi := &file_apps_proto_runner_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1551,7 +1456,7 @@ func (x *ProxyRequest) String() string {
 func (*ProxyRequest) ProtoMessage() {}
 
 func (x *ProxyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	mi := &file_apps_proto_runner_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1564,12 +1469,12 @@ func (x *ProxyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProxyRequest.ProtoReflect.Descriptor instead.
 func (*ProxyRequest) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{29}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *ProxyRequest) GetWorkspaceId() string {
+func (x *ProxyRequest) GetSandboxId() string {
 	if x != nil {
-		return x.WorkspaceId
+		return x.SandboxId
 	}
 	return ""
 }
@@ -1609,6 +1514,13 @@ func (x *ProxyRequest) GetMethod() string {
 	return ""
 }
 
+func (x *ProxyRequest) GetFollow() bool {
+	if x != nil {
+		return x.Follow
+	}
+	return false
+}
+
 type ProxyResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	StatusCode    int32                  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
@@ -1620,7 +1532,7 @@ type ProxyResponse struct {
 
 func (x *ProxyResponse) Reset() {
 	*x = ProxyResponse{}
-	mi := &file_apps_proto_runner_proto_msgTypes[30]
+	mi := &file_apps_proto_runner_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1632,7 +1544,7 @@ func (x *ProxyResponse) String() string {
 func (*ProxyResponse) ProtoMessage() {}
 
 func (x *ProxyResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[30]
+	mi := &file_apps_proto_runner_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1645,7 +1557,7 @@ func (x *ProxyResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProxyResponse.ProtoReflect.Descriptor instead.
 func (*ProxyResponse) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{30}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{28}
 }
 
 func (x *ProxyResponse) GetStatusCode() int32 {
@@ -1680,7 +1592,7 @@ type Volume struct {
 
 func (x *Volume) Reset() {
 	*x = Volume{}
-	mi := &file_apps_proto_runner_proto_msgTypes[31]
+	mi := &file_apps_proto_runner_proto_msgTypes[29]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1692,7 +1604,7 @@ func (x *Volume) String() string {
 func (*Volume) ProtoMessage() {}
 
 func (x *Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[31]
+	mi := &file_apps_proto_runner_proto_msgTypes[29]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1705,7 +1617,7 @@ func (x *Volume) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Volume.ProtoReflect.Descriptor instead.
 func (*Volume) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{31}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{29}
 }
 
 func (x *Volume) GetVolumeId() string {
@@ -1752,41 +1664,41 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\x11\n" +
 	"\x0f_from_volume_idB\v\n" +
-	"\t_registry\":\n" +
-	"\x15CreateSandboxResponse\x12!\n" +
-	"\fcontainer_id\x18\x01 \x01(\tR\vcontainerId\":\n" +
-	"\x15DestroySandboxRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\"2\n" +
+	"\t_registry\"6\n" +
+	"\x15CreateSandboxResponse\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"6\n" +
+	"\x15DestroySandboxRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"2\n" +
 	"\x16DestroySandboxResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"~\n" +
-	"\x15CreateSnapshotRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\x12,\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"z\n" +
+	"\x15CreateSnapshotRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12,\n" +
 	"\bregistry\x18\x02 \x01(\v2\x10.runner.RegistryR\bregistry\x12\x14\n" +
 	"\x05image\x18\x03 \x01(\tR\x05image\"2\n" +
 	"\x16CreateSnapshotResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"u\n" +
-	"\x14ResizeSandboxRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\x12\x10\n" +
-	"\x03cpu\x18\x02 \x01(\x03R\x03cpu\x12\x10\n" +
-	"\x03gpu\x18\x03 \x01(\x03R\x03gpu\x12\x16\n" +
-	"\x06memory\x18\x04 \x01(\x03R\x06memory\"1\n" +
-	"\x15ResizeSandboxResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"8\n" +
-	"\x13StartSandboxRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\"0\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"4\n" +
+	"\x13StartSandboxRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"0\n" +
 	"\x14StartSandboxResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"7\n" +
-	"\x12StopSandboxRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\"/\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"3\n" +
+	"\x12StopSandboxRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"/\n" +
 	"\x13StopSandboxResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\":\n" +
-	"\x15GetSandboxInfoRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\"U\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"6\n" +
+	"\x15GetSandboxInfoRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\"U\n" +
 	"\x16GetSandboxInfoResponse\x12\x14\n" +
 	"\x05state\x18\x01 \x01(\tR\x05state\x12%\n" +
-	"\x0esnapshot_state\x18\x02 \x01(\tR\rsnapshotState\"B\n" +
-	"\x1dRemoveDestroyedSandboxRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\":\n" +
+	"\x0esnapshot_state\x18\x02 \x01(\tR\rsnapshotState\">\n" +
+	"\x1dRemoveDestroyedSandboxRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\":\n" +
 	"\x1eRemoveDestroyedSandboxResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"\xa3\x01\n" +
 	"\bRegistry\x12\x10\n" +
@@ -1816,28 +1728,32 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\t_registryB\x1c\n" +
 	"\x1a_push_to_internal_registry\".\n" +
 	"\x12BuildImageResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"*\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"Q\n" +
 	"\x12ImageExistsRequest\x12\x14\n" +
-	"\x05image\x18\x01 \x01(\tR\x05image\"-\n" +
+	"\x05image\x18\x01 \x01(\tR\x05image\x12%\n" +
+	"\x0einclude_latest\x18\x02 \x01(\bR\rincludeLatest\"-\n" +
 	"\x13ImageExistsResponse\x12\x16\n" +
-	"\x06exists\x18\x01 \x01(\bR\x06exists\"*\n" +
+	"\x06exists\x18\x01 \x01(\bR\x06exists\"@\n" +
 	"\x12RemoveImageRequest\x12\x14\n" +
-	"\x05image\x18\x01 \x01(\tR\x05image\"/\n" +
+	"\x05image\x18\x01 \x01(\tR\x05image\x12\x14\n" +
+	"\x05force\x18\x02 \x01(\bR\x05force\"/\n" +
 	"\x13RemoveImageResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\"J\n" +
 	"\x13GetBuildLogsRequest\x12\x1b\n" +
 	"\timage_ref\x18\x01 \x01(\tR\bimageRef\x12\x16\n" +
 	"\x06follow\x18\x02 \x01(\bR\x06follow\"#\n" +
 	"\aLogLine\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\"\x89\x02\n" +
-	"\fProxyRequest\x12!\n" +
-	"\fworkspace_id\x18\x01 \x01(\tR\vworkspaceId\x12\x1d\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\"\x9d\x02\n" +
+	"\fProxyRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x1d\n" +
 	"\n" +
 	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x12\n" +
 	"\x04path\x18\x03 \x01(\tR\x04path\x12;\n" +
 	"\aheaders\x18\x04 \x03(\v2!.runner.ProxyRequest.HeadersEntryR\aheaders\x12\x12\n" +
 	"\x04body\x18\x05 \x01(\fR\x04body\x12\x16\n" +
-	"\x06method\x18\x06 \x01(\tR\x06method\x1a:\n" +
+	"\x06method\x18\x06 \x01(\tR\x06method\x12\x16\n" +
+	"\x06follow\x18\a \x01(\bR\x06follow\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbe\x01\n" +
@@ -1852,13 +1768,12 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\x06Volume\x12\x1b\n" +
 	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12\x1d\n" +
 	"\n" +
-	"mount_path\x18\x02 \x01(\tR\tmountPath2\x8a\t\n" +
+	"mount_path\x18\x02 \x01(\tR\tmountPath2\xba\b\n" +
 	"\x06Runner\x12H\n" +
 	"\vHealthCheck\x12\x1a.runner.HealthCheckRequest\x1a\x1b.runner.HealthCheckResponse\"\x00\x12N\n" +
 	"\rCreateSandbox\x12\x1c.runner.CreateSandboxRequest\x1a\x1d.runner.CreateSandboxResponse\"\x00\x12Q\n" +
 	"\x0eDestroySandbox\x12\x1d.runner.DestroySandboxRequest\x1a\x1e.runner.DestroySandboxResponse\"\x00\x12Q\n" +
-	"\x0eCreateSnapshot\x12\x1d.runner.CreateSnapshotRequest\x1a\x1e.runner.CreateSnapshotResponse\"\x00\x12N\n" +
-	"\rResizeSandbox\x12\x1c.runner.ResizeSandboxRequest\x1a\x1d.runner.ResizeSandboxResponse\"\x00\x12K\n" +
+	"\x0eCreateSnapshot\x12\x1d.runner.CreateSnapshotRequest\x1a\x1e.runner.CreateSnapshotResponse\"\x00\x12K\n" +
 	"\fStartSandbox\x12\x1b.runner.StartSandboxRequest\x1a\x1c.runner.StartSandboxResponse\"\x00\x12H\n" +
 	"\vStopSandbox\x12\x1a.runner.StopSandboxRequest\x1a\x1b.runner.StopSandboxResponse\"\x00\x12Q\n" +
 	"\x0eGetSandboxInfo\x12\x1d.runner.GetSandboxInfoRequest\x1a\x1e.runner.GetSandboxInfoResponse\"\x00\x12i\n" +
@@ -1883,7 +1798,7 @@ func file_apps_proto_runner_proto_rawDescGZIP() []byte {
 	return file_apps_proto_runner_proto_rawDescData
 }
 
-var file_apps_proto_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
+var file_apps_proto_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
 var file_apps_proto_runner_proto_goTypes = []any{
 	(*HealthCheckRequest)(nil),             // 0: runner.HealthCheckRequest
 	(*HealthCheckResponse)(nil),            // 1: runner.HealthCheckResponse
@@ -1893,75 +1808,71 @@ var file_apps_proto_runner_proto_goTypes = []any{
 	(*DestroySandboxResponse)(nil),         // 5: runner.DestroySandboxResponse
 	(*CreateSnapshotRequest)(nil),          // 6: runner.CreateSnapshotRequest
 	(*CreateSnapshotResponse)(nil),         // 7: runner.CreateSnapshotResponse
-	(*ResizeSandboxRequest)(nil),           // 8: runner.ResizeSandboxRequest
-	(*ResizeSandboxResponse)(nil),          // 9: runner.ResizeSandboxResponse
-	(*StartSandboxRequest)(nil),            // 10: runner.StartSandboxRequest
-	(*StartSandboxResponse)(nil),           // 11: runner.StartSandboxResponse
-	(*StopSandboxRequest)(nil),             // 12: runner.StopSandboxRequest
-	(*StopSandboxResponse)(nil),            // 13: runner.StopSandboxResponse
-	(*GetSandboxInfoRequest)(nil),          // 14: runner.GetSandboxInfoRequest
-	(*GetSandboxInfoResponse)(nil),         // 15: runner.GetSandboxInfoResponse
-	(*RemoveDestroyedSandboxRequest)(nil),  // 16: runner.RemoveDestroyedSandboxRequest
-	(*RemoveDestroyedSandboxResponse)(nil), // 17: runner.RemoveDestroyedSandboxResponse
-	(*Registry)(nil),                       // 18: runner.Registry
-	(*PullImageRequest)(nil),               // 19: runner.PullImageRequest
-	(*PullImageResponse)(nil),              // 20: runner.PullImageResponse
-	(*BuildImageRequest)(nil),              // 21: runner.BuildImageRequest
-	(*BuildImageResponse)(nil),             // 22: runner.BuildImageResponse
-	(*ImageExistsRequest)(nil),             // 23: runner.ImageExistsRequest
-	(*ImageExistsResponse)(nil),            // 24: runner.ImageExistsResponse
-	(*RemoveImageRequest)(nil),             // 25: runner.RemoveImageRequest
-	(*RemoveImageResponse)(nil),            // 26: runner.RemoveImageResponse
-	(*GetBuildLogsRequest)(nil),            // 27: runner.GetBuildLogsRequest
-	(*LogLine)(nil),                        // 28: runner.LogLine
-	(*ProxyRequest)(nil),                   // 29: runner.ProxyRequest
-	(*ProxyResponse)(nil),                  // 30: runner.ProxyResponse
-	(*Volume)(nil),                         // 31: runner.Volume
-	nil,                                    // 32: runner.CreateSandboxRequest.EnvEntry
-	nil,                                    // 33: runner.ProxyRequest.HeadersEntry
-	nil,                                    // 34: runner.ProxyResponse.HeadersEntry
+	(*StartSandboxRequest)(nil),            // 8: runner.StartSandboxRequest
+	(*StartSandboxResponse)(nil),           // 9: runner.StartSandboxResponse
+	(*StopSandboxRequest)(nil),             // 10: runner.StopSandboxRequest
+	(*StopSandboxResponse)(nil),            // 11: runner.StopSandboxResponse
+	(*GetSandboxInfoRequest)(nil),          // 12: runner.GetSandboxInfoRequest
+	(*GetSandboxInfoResponse)(nil),         // 13: runner.GetSandboxInfoResponse
+	(*RemoveDestroyedSandboxRequest)(nil),  // 14: runner.RemoveDestroyedSandboxRequest
+	(*RemoveDestroyedSandboxResponse)(nil), // 15: runner.RemoveDestroyedSandboxResponse
+	(*Registry)(nil),                       // 16: runner.Registry
+	(*PullImageRequest)(nil),               // 17: runner.PullImageRequest
+	(*PullImageResponse)(nil),              // 18: runner.PullImageResponse
+	(*BuildImageRequest)(nil),              // 19: runner.BuildImageRequest
+	(*BuildImageResponse)(nil),             // 20: runner.BuildImageResponse
+	(*ImageExistsRequest)(nil),             // 21: runner.ImageExistsRequest
+	(*ImageExistsResponse)(nil),            // 22: runner.ImageExistsResponse
+	(*RemoveImageRequest)(nil),             // 23: runner.RemoveImageRequest
+	(*RemoveImageResponse)(nil),            // 24: runner.RemoveImageResponse
+	(*GetBuildLogsRequest)(nil),            // 25: runner.GetBuildLogsRequest
+	(*LogLine)(nil),                        // 26: runner.LogLine
+	(*ProxyRequest)(nil),                   // 27: runner.ProxyRequest
+	(*ProxyResponse)(nil),                  // 28: runner.ProxyResponse
+	(*Volume)(nil),                         // 29: runner.Volume
+	nil,                                    // 30: runner.CreateSandboxRequest.EnvEntry
+	nil,                                    // 31: runner.ProxyRequest.HeadersEntry
+	nil,                                    // 32: runner.ProxyResponse.HeadersEntry
 }
 var file_apps_proto_runner_proto_depIdxs = []int32{
-	32, // 0: runner.CreateSandboxRequest.env:type_name -> runner.CreateSandboxRequest.EnvEntry
-	18, // 1: runner.CreateSandboxRequest.registry:type_name -> runner.Registry
-	31, // 2: runner.CreateSandboxRequest.volumes:type_name -> runner.Volume
-	18, // 3: runner.CreateSnapshotRequest.registry:type_name -> runner.Registry
-	18, // 4: runner.PullImageRequest.registry:type_name -> runner.Registry
-	18, // 5: runner.BuildImageRequest.registry:type_name -> runner.Registry
-	33, // 6: runner.ProxyRequest.headers:type_name -> runner.ProxyRequest.HeadersEntry
-	34, // 7: runner.ProxyResponse.headers:type_name -> runner.ProxyResponse.HeadersEntry
+	30, // 0: runner.CreateSandboxRequest.env:type_name -> runner.CreateSandboxRequest.EnvEntry
+	16, // 1: runner.CreateSandboxRequest.registry:type_name -> runner.Registry
+	29, // 2: runner.CreateSandboxRequest.volumes:type_name -> runner.Volume
+	16, // 3: runner.CreateSnapshotRequest.registry:type_name -> runner.Registry
+	16, // 4: runner.PullImageRequest.registry:type_name -> runner.Registry
+	16, // 5: runner.BuildImageRequest.registry:type_name -> runner.Registry
+	31, // 6: runner.ProxyRequest.headers:type_name -> runner.ProxyRequest.HeadersEntry
+	32, // 7: runner.ProxyResponse.headers:type_name -> runner.ProxyResponse.HeadersEntry
 	0,  // 8: runner.Runner.HealthCheck:input_type -> runner.HealthCheckRequest
 	2,  // 9: runner.Runner.CreateSandbox:input_type -> runner.CreateSandboxRequest
 	4,  // 10: runner.Runner.DestroySandbox:input_type -> runner.DestroySandboxRequest
 	6,  // 11: runner.Runner.CreateSnapshot:input_type -> runner.CreateSnapshotRequest
-	8,  // 12: runner.Runner.ResizeSandbox:input_type -> runner.ResizeSandboxRequest
-	10, // 13: runner.Runner.StartSandbox:input_type -> runner.StartSandboxRequest
-	12, // 14: runner.Runner.StopSandbox:input_type -> runner.StopSandboxRequest
-	14, // 15: runner.Runner.GetSandboxInfo:input_type -> runner.GetSandboxInfoRequest
-	16, // 16: runner.Runner.RemoveDestroyedSandbox:input_type -> runner.RemoveDestroyedSandboxRequest
-	19, // 17: runner.Runner.PullImage:input_type -> runner.PullImageRequest
-	21, // 18: runner.Runner.BuildImage:input_type -> runner.BuildImageRequest
-	23, // 19: runner.Runner.ImageExists:input_type -> runner.ImageExistsRequest
-	25, // 20: runner.Runner.RemoveImage:input_type -> runner.RemoveImageRequest
-	27, // 21: runner.Runner.GetBuildLogs:input_type -> runner.GetBuildLogsRequest
-	29, // 22: runner.Runner.SendProxy:input_type -> runner.ProxyRequest
-	1,  // 23: runner.Runner.HealthCheck:output_type -> runner.HealthCheckResponse
-	3,  // 24: runner.Runner.CreateSandbox:output_type -> runner.CreateSandboxResponse
-	5,  // 25: runner.Runner.DestroySandbox:output_type -> runner.DestroySandboxResponse
-	7,  // 26: runner.Runner.CreateSnapshot:output_type -> runner.CreateSnapshotResponse
-	9,  // 27: runner.Runner.ResizeSandbox:output_type -> runner.ResizeSandboxResponse
-	11, // 28: runner.Runner.StartSandbox:output_type -> runner.StartSandboxResponse
-	13, // 29: runner.Runner.StopSandbox:output_type -> runner.StopSandboxResponse
-	15, // 30: runner.Runner.GetSandboxInfo:output_type -> runner.GetSandboxInfoResponse
-	17, // 31: runner.Runner.RemoveDestroyedSandbox:output_type -> runner.RemoveDestroyedSandboxResponse
-	20, // 32: runner.Runner.PullImage:output_type -> runner.PullImageResponse
-	22, // 33: runner.Runner.BuildImage:output_type -> runner.BuildImageResponse
-	24, // 34: runner.Runner.ImageExists:output_type -> runner.ImageExistsResponse
-	26, // 35: runner.Runner.RemoveImage:output_type -> runner.RemoveImageResponse
-	28, // 36: runner.Runner.GetBuildLogs:output_type -> runner.LogLine
-	30, // 37: runner.Runner.SendProxy:output_type -> runner.ProxyResponse
-	23, // [23:38] is the sub-list for method output_type
-	8,  // [8:23] is the sub-list for method input_type
+	8,  // 12: runner.Runner.StartSandbox:input_type -> runner.StartSandboxRequest
+	10, // 13: runner.Runner.StopSandbox:input_type -> runner.StopSandboxRequest
+	12, // 14: runner.Runner.GetSandboxInfo:input_type -> runner.GetSandboxInfoRequest
+	14, // 15: runner.Runner.RemoveDestroyedSandbox:input_type -> runner.RemoveDestroyedSandboxRequest
+	17, // 16: runner.Runner.PullImage:input_type -> runner.PullImageRequest
+	19, // 17: runner.Runner.BuildImage:input_type -> runner.BuildImageRequest
+	21, // 18: runner.Runner.ImageExists:input_type -> runner.ImageExistsRequest
+	23, // 19: runner.Runner.RemoveImage:input_type -> runner.RemoveImageRequest
+	25, // 20: runner.Runner.GetBuildLogs:input_type -> runner.GetBuildLogsRequest
+	27, // 21: runner.Runner.SendProxy:input_type -> runner.ProxyRequest
+	1,  // 22: runner.Runner.HealthCheck:output_type -> runner.HealthCheckResponse
+	3,  // 23: runner.Runner.CreateSandbox:output_type -> runner.CreateSandboxResponse
+	5,  // 24: runner.Runner.DestroySandbox:output_type -> runner.DestroySandboxResponse
+	7,  // 25: runner.Runner.CreateSnapshot:output_type -> runner.CreateSnapshotResponse
+	9,  // 26: runner.Runner.StartSandbox:output_type -> runner.StartSandboxResponse
+	11, // 27: runner.Runner.StopSandbox:output_type -> runner.StopSandboxResponse
+	13, // 28: runner.Runner.GetSandboxInfo:output_type -> runner.GetSandboxInfoResponse
+	15, // 29: runner.Runner.RemoveDestroyedSandbox:output_type -> runner.RemoveDestroyedSandboxResponse
+	18, // 30: runner.Runner.PullImage:output_type -> runner.PullImageResponse
+	20, // 31: runner.Runner.BuildImage:output_type -> runner.BuildImageResponse
+	22, // 32: runner.Runner.ImageExists:output_type -> runner.ImageExistsResponse
+	24, // 33: runner.Runner.RemoveImage:output_type -> runner.RemoveImageResponse
+	26, // 34: runner.Runner.GetBuildLogs:output_type -> runner.LogLine
+	28, // 35: runner.Runner.SendProxy:output_type -> runner.ProxyResponse
+	22, // [22:36] is the sub-list for method output_type
+	8,  // [8:22] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1973,15 +1884,15 @@ func file_apps_proto_runner_proto_init() {
 		return
 	}
 	file_apps_proto_runner_proto_msgTypes[2].OneofWrappers = []any{}
-	file_apps_proto_runner_proto_msgTypes[18].OneofWrappers = []any{}
-	file_apps_proto_runner_proto_msgTypes[21].OneofWrappers = []any{}
+	file_apps_proto_runner_proto_msgTypes[16].OneofWrappers = []any{}
+	file_apps_proto_runner_proto_msgTypes[19].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_proto_runner_proto_rawDesc), len(file_apps_proto_runner_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   35,
+			NumMessages:   33,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

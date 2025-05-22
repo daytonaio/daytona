@@ -12,7 +12,6 @@ service Runner {
   rpc CreateSandbox(CreateSandboxRequest) returns (CreateSandboxResponse) {}
   rpc DestroySandbox(DestroySandboxRequest) returns (DestroySandboxResponse) {}
   rpc CreateSnapshot(CreateSnapshotRequest) returns (CreateSnapshotResponse) {}
-  rpc ResizeSandbox(ResizeSandboxRequest) returns (ResizeSandboxResponse) {}
   rpc StartSandbox(StartSandboxRequest) returns (StartSandboxResponse) {}
   rpc StopSandbox(StopSandboxRequest) returns (StopSandboxResponse) {}
   rpc GetSandboxInfo(GetSandboxInfoRequest) returns (GetSandboxInfoResponse) {}
@@ -55,11 +54,11 @@ message CreateSandboxRequest {
 }
 
 message CreateSandboxResponse {
-  string container_id = 1;
+  string sandbox_id = 1;
 }
 
 message DestroySandboxRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
 }
 
 message DestroySandboxResponse {
@@ -67,7 +66,7 @@ message DestroySandboxResponse {
 }
 
 message CreateSnapshotRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
   Registry registry = 2;
   string image = 3;
 }
@@ -76,19 +75,8 @@ message CreateSnapshotResponse {
   string message = 1;
 }
 
-message ResizeSandboxRequest {
-  string workspace_id = 1;
-  int64 cpu = 2;
-  int64 gpu = 3;
-  int64 memory = 4;
-}
-
-message ResizeSandboxResponse {
-  string message = 1;
-}
-
 message StartSandboxRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
 }
 
 message StartSandboxResponse {
@@ -96,7 +84,7 @@ message StartSandboxResponse {
 }
 
 message StopSandboxRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
 }
 
 message StopSandboxResponse {
@@ -104,7 +92,7 @@ message StopSandboxResponse {
 }
 
 message GetSandboxInfoRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
 }
 
 message GetSandboxInfoResponse {
@@ -113,7 +101,7 @@ message GetSandboxInfoResponse {
 }
 
 message RemoveDestroyedSandboxRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
 }
 
 message RemoveDestroyedSandboxResponse {
@@ -152,6 +140,7 @@ message BuildImageResponse {
 
 message ImageExistsRequest {
   string image = 1;
+  bool include_latest = 2;
 }
 
 message ImageExistsResponse {
@@ -160,6 +149,7 @@ message ImageExistsResponse {
 
 message RemoveImageRequest {
   string image = 1;
+  bool force = 2;
 }
 
 message RemoveImageResponse {
@@ -177,12 +167,13 @@ message LogLine {
 
 // Proxy messages
 message ProxyRequest {
-  string workspace_id = 1;
+  string sandbox_id = 1;
   string project_id = 2;
   string path = 3;
   map<string, string> headers = 4;
   bytes body = 5;
   string method = 6;
+  bool follow = 7;
 }
 
 message ProxyResponse {

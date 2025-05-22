@@ -41,11 +41,11 @@ export interface CreateSandboxRequest_EnvEntry {
 }
 
 export interface CreateSandboxResponse {
-  containerId: string
+  sandboxId: string
 }
 
 export interface DestroySandboxRequest {
-  workspaceId: string
+  sandboxId: string
 }
 
 export interface DestroySandboxResponse {
@@ -53,7 +53,7 @@ export interface DestroySandboxResponse {
 }
 
 export interface CreateSnapshotRequest {
-  workspaceId: string
+  sandboxId: string
   registry?: Registry | undefined
   image: string
 }
@@ -62,19 +62,8 @@ export interface CreateSnapshotResponse {
   message: string
 }
 
-export interface ResizeSandboxRequest {
-  workspaceId: string
-  cpu: number
-  gpu: number
-  memory: number
-}
-
-export interface ResizeSandboxResponse {
-  message: string
-}
-
 export interface StartSandboxRequest {
-  workspaceId: string
+  sandboxId: string
 }
 
 export interface StartSandboxResponse {
@@ -82,7 +71,7 @@ export interface StartSandboxResponse {
 }
 
 export interface StopSandboxRequest {
-  workspaceId: string
+  sandboxId: string
 }
 
 export interface StopSandboxResponse {
@@ -90,7 +79,7 @@ export interface StopSandboxResponse {
 }
 
 export interface GetSandboxInfoRequest {
-  workspaceId: string
+  sandboxId: string
 }
 
 export interface GetSandboxInfoResponse {
@@ -99,7 +88,7 @@ export interface GetSandboxInfoResponse {
 }
 
 export interface RemoveDestroyedSandboxRequest {
-  workspaceId: string
+  sandboxId: string
 }
 
 export interface RemoveDestroyedSandboxResponse {
@@ -138,6 +127,7 @@ export interface BuildImageResponse {
 
 export interface ImageExistsRequest {
   image: string
+  includeLatest: boolean
 }
 
 export interface ImageExistsResponse {
@@ -146,6 +136,7 @@ export interface ImageExistsResponse {
 
 export interface RemoveImageRequest {
   image: string
+  force: boolean
 }
 
 export interface RemoveImageResponse {
@@ -163,12 +154,13 @@ export interface LogLine {
 
 /** Proxy messages */
 export interface ProxyRequest {
-  workspaceId: string
+  sandboxId: string
   projectId: string
   path: string
   headers: { [key: string]: string }
   body: Uint8Array
   method: string
+  follow: boolean
 }
 
 export interface ProxyRequest_HeadersEntry {
@@ -679,13 +671,13 @@ export const CreateSandboxRequest_EnvEntry: MessageFns<CreateSandboxRequest_EnvE
 }
 
 function createBaseCreateSandboxResponse(): CreateSandboxResponse {
-  return { containerId: '' }
+  return { sandboxId: '' }
 }
 
 export const CreateSandboxResponse: MessageFns<CreateSandboxResponse> = {
   encode(message: CreateSandboxResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.containerId !== '') {
-      writer.uint32(10).string(message.containerId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -702,7 +694,7 @@ export const CreateSandboxResponse: MessageFns<CreateSandboxResponse> = {
             break
           }
 
-          message.containerId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -715,13 +707,13 @@ export const CreateSandboxResponse: MessageFns<CreateSandboxResponse> = {
   },
 
   fromJSON(object: any): CreateSandboxResponse {
-    return { containerId: isSet(object.containerId) ? globalThis.String(object.containerId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: CreateSandboxResponse): unknown {
     const obj: any = {}
-    if (message.containerId !== '') {
-      obj.containerId = message.containerId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -731,19 +723,19 @@ export const CreateSandboxResponse: MessageFns<CreateSandboxResponse> = {
   },
   fromPartial<I extends Exact<DeepPartial<CreateSandboxResponse>, I>>(object: I): CreateSandboxResponse {
     const message = createBaseCreateSandboxResponse()
-    message.containerId = object.containerId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
 
 function createBaseDestroySandboxRequest(): DestroySandboxRequest {
-  return { workspaceId: '' }
+  return { sandboxId: '' }
 }
 
 export const DestroySandboxRequest: MessageFns<DestroySandboxRequest> = {
   encode(message: DestroySandboxRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -760,7 +752,7 @@ export const DestroySandboxRequest: MessageFns<DestroySandboxRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -773,13 +765,13 @@ export const DestroySandboxRequest: MessageFns<DestroySandboxRequest> = {
   },
 
   fromJSON(object: any): DestroySandboxRequest {
-    return { workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: DestroySandboxRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -789,7 +781,7 @@ export const DestroySandboxRequest: MessageFns<DestroySandboxRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<DestroySandboxRequest>, I>>(object: I): DestroySandboxRequest {
     const message = createBaseDestroySandboxRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
@@ -853,13 +845,13 @@ export const DestroySandboxResponse: MessageFns<DestroySandboxResponse> = {
 }
 
 function createBaseCreateSnapshotRequest(): CreateSnapshotRequest {
-  return { workspaceId: '', registry: undefined, image: '' }
+  return { sandboxId: '', registry: undefined, image: '' }
 }
 
 export const CreateSnapshotRequest: MessageFns<CreateSnapshotRequest> = {
   encode(message: CreateSnapshotRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     if (message.registry !== undefined) {
       Registry.encode(message.registry, writer.uint32(18).fork()).join()
@@ -882,7 +874,7 @@ export const CreateSnapshotRequest: MessageFns<CreateSnapshotRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
         case 2: {
@@ -912,7 +904,7 @@ export const CreateSnapshotRequest: MessageFns<CreateSnapshotRequest> = {
 
   fromJSON(object: any): CreateSnapshotRequest {
     return {
-      workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '',
+      sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '',
       registry: isSet(object.registry) ? Registry.fromJSON(object.registry) : undefined,
       image: isSet(object.image) ? globalThis.String(object.image) : '',
     }
@@ -920,8 +912,8 @@ export const CreateSnapshotRequest: MessageFns<CreateSnapshotRequest> = {
 
   toJSON(message: CreateSnapshotRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     if (message.registry !== undefined) {
       obj.registry = Registry.toJSON(message.registry)
@@ -937,7 +929,7 @@ export const CreateSnapshotRequest: MessageFns<CreateSnapshotRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<CreateSnapshotRequest>, I>>(object: I): CreateSnapshotRequest {
     const message = createBaseCreateSnapshotRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     message.registry =
       object.registry !== undefined && object.registry !== null ? Registry.fromPartial(object.registry) : undefined
     message.image = object.image ?? ''
@@ -1003,180 +995,14 @@ export const CreateSnapshotResponse: MessageFns<CreateSnapshotResponse> = {
   },
 }
 
-function createBaseResizeSandboxRequest(): ResizeSandboxRequest {
-  return { workspaceId: '', cpu: 0, gpu: 0, memory: 0 }
-}
-
-export const ResizeSandboxRequest: MessageFns<ResizeSandboxRequest> = {
-  encode(message: ResizeSandboxRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
-    }
-    if (message.cpu !== 0) {
-      writer.uint32(16).int64(message.cpu)
-    }
-    if (message.gpu !== 0) {
-      writer.uint32(24).int64(message.gpu)
-    }
-    if (message.memory !== 0) {
-      writer.uint32(32).int64(message.memory)
-    }
-    return writer
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ResizeSandboxRequest {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
-    let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseResizeSandboxRequest()
-    while (reader.pos < end) {
-      const tag = reader.uint32()
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break
-          }
-
-          message.workspaceId = reader.string()
-          continue
-        }
-        case 2: {
-          if (tag !== 16) {
-            break
-          }
-
-          message.cpu = longToNumber(reader.int64())
-          continue
-        }
-        case 3: {
-          if (tag !== 24) {
-            break
-          }
-
-          message.gpu = longToNumber(reader.int64())
-          continue
-        }
-        case 4: {
-          if (tag !== 32) {
-            break
-          }
-
-          message.memory = longToNumber(reader.int64())
-          continue
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break
-      }
-      reader.skip(tag & 7)
-    }
-    return message
-  },
-
-  fromJSON(object: any): ResizeSandboxRequest {
-    return {
-      workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '',
-      cpu: isSet(object.cpu) ? globalThis.Number(object.cpu) : 0,
-      gpu: isSet(object.gpu) ? globalThis.Number(object.gpu) : 0,
-      memory: isSet(object.memory) ? globalThis.Number(object.memory) : 0,
-    }
-  },
-
-  toJSON(message: ResizeSandboxRequest): unknown {
-    const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
-    }
-    if (message.cpu !== 0) {
-      obj.cpu = Math.round(message.cpu)
-    }
-    if (message.gpu !== 0) {
-      obj.gpu = Math.round(message.gpu)
-    }
-    if (message.memory !== 0) {
-      obj.memory = Math.round(message.memory)
-    }
-    return obj
-  },
-
-  create<I extends Exact<DeepPartial<ResizeSandboxRequest>, I>>(base?: I): ResizeSandboxRequest {
-    return ResizeSandboxRequest.fromPartial(base ?? ({} as any))
-  },
-  fromPartial<I extends Exact<DeepPartial<ResizeSandboxRequest>, I>>(object: I): ResizeSandboxRequest {
-    const message = createBaseResizeSandboxRequest()
-    message.workspaceId = object.workspaceId ?? ''
-    message.cpu = object.cpu ?? 0
-    message.gpu = object.gpu ?? 0
-    message.memory = object.memory ?? 0
-    return message
-  },
-}
-
-function createBaseResizeSandboxResponse(): ResizeSandboxResponse {
-  return { message: '' }
-}
-
-export const ResizeSandboxResponse: MessageFns<ResizeSandboxResponse> = {
-  encode(message: ResizeSandboxResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.message !== '') {
-      writer.uint32(10).string(message.message)
-    }
-    return writer
-  },
-
-  decode(input: BinaryReader | Uint8Array, length?: number): ResizeSandboxResponse {
-    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
-    let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseResizeSandboxResponse()
-    while (reader.pos < end) {
-      const tag = reader.uint32()
-      switch (tag >>> 3) {
-        case 1: {
-          if (tag !== 10) {
-            break
-          }
-
-          message.message = reader.string()
-          continue
-        }
-      }
-      if ((tag & 7) === 4 || tag === 0) {
-        break
-      }
-      reader.skip(tag & 7)
-    }
-    return message
-  },
-
-  fromJSON(object: any): ResizeSandboxResponse {
-    return { message: isSet(object.message) ? globalThis.String(object.message) : '' }
-  },
-
-  toJSON(message: ResizeSandboxResponse): unknown {
-    const obj: any = {}
-    if (message.message !== '') {
-      obj.message = message.message
-    }
-    return obj
-  },
-
-  create<I extends Exact<DeepPartial<ResizeSandboxResponse>, I>>(base?: I): ResizeSandboxResponse {
-    return ResizeSandboxResponse.fromPartial(base ?? ({} as any))
-  },
-  fromPartial<I extends Exact<DeepPartial<ResizeSandboxResponse>, I>>(object: I): ResizeSandboxResponse {
-    const message = createBaseResizeSandboxResponse()
-    message.message = object.message ?? ''
-    return message
-  },
-}
-
 function createBaseStartSandboxRequest(): StartSandboxRequest {
-  return { workspaceId: '' }
+  return { sandboxId: '' }
 }
 
 export const StartSandboxRequest: MessageFns<StartSandboxRequest> = {
   encode(message: StartSandboxRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -1193,7 +1019,7 @@ export const StartSandboxRequest: MessageFns<StartSandboxRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -1206,13 +1032,13 @@ export const StartSandboxRequest: MessageFns<StartSandboxRequest> = {
   },
 
   fromJSON(object: any): StartSandboxRequest {
-    return { workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: StartSandboxRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -1222,7 +1048,7 @@ export const StartSandboxRequest: MessageFns<StartSandboxRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<StartSandboxRequest>, I>>(object: I): StartSandboxRequest {
     const message = createBaseStartSandboxRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
@@ -1286,13 +1112,13 @@ export const StartSandboxResponse: MessageFns<StartSandboxResponse> = {
 }
 
 function createBaseStopSandboxRequest(): StopSandboxRequest {
-  return { workspaceId: '' }
+  return { sandboxId: '' }
 }
 
 export const StopSandboxRequest: MessageFns<StopSandboxRequest> = {
   encode(message: StopSandboxRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -1309,7 +1135,7 @@ export const StopSandboxRequest: MessageFns<StopSandboxRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -1322,13 +1148,13 @@ export const StopSandboxRequest: MessageFns<StopSandboxRequest> = {
   },
 
   fromJSON(object: any): StopSandboxRequest {
-    return { workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: StopSandboxRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -1338,7 +1164,7 @@ export const StopSandboxRequest: MessageFns<StopSandboxRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<StopSandboxRequest>, I>>(object: I): StopSandboxRequest {
     const message = createBaseStopSandboxRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
@@ -1402,13 +1228,13 @@ export const StopSandboxResponse: MessageFns<StopSandboxResponse> = {
 }
 
 function createBaseGetSandboxInfoRequest(): GetSandboxInfoRequest {
-  return { workspaceId: '' }
+  return { sandboxId: '' }
 }
 
 export const GetSandboxInfoRequest: MessageFns<GetSandboxInfoRequest> = {
   encode(message: GetSandboxInfoRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -1425,7 +1251,7 @@ export const GetSandboxInfoRequest: MessageFns<GetSandboxInfoRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -1438,13 +1264,13 @@ export const GetSandboxInfoRequest: MessageFns<GetSandboxInfoRequest> = {
   },
 
   fromJSON(object: any): GetSandboxInfoRequest {
-    return { workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: GetSandboxInfoRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -1454,7 +1280,7 @@ export const GetSandboxInfoRequest: MessageFns<GetSandboxInfoRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<GetSandboxInfoRequest>, I>>(object: I): GetSandboxInfoRequest {
     const message = createBaseGetSandboxInfoRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
@@ -1536,13 +1362,13 @@ export const GetSandboxInfoResponse: MessageFns<GetSandboxInfoResponse> = {
 }
 
 function createBaseRemoveDestroyedSandboxRequest(): RemoveDestroyedSandboxRequest {
-  return { workspaceId: '' }
+  return { sandboxId: '' }
 }
 
 export const RemoveDestroyedSandboxRequest: MessageFns<RemoveDestroyedSandboxRequest> = {
   encode(message: RemoveDestroyedSandboxRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     return writer
   },
@@ -1559,7 +1385,7 @@ export const RemoveDestroyedSandboxRequest: MessageFns<RemoveDestroyedSandboxReq
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
       }
@@ -1572,13 +1398,13 @@ export const RemoveDestroyedSandboxRequest: MessageFns<RemoveDestroyedSandboxReq
   },
 
   fromJSON(object: any): RemoveDestroyedSandboxRequest {
-    return { workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '' }
+    return { sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '' }
   },
 
   toJSON(message: RemoveDestroyedSandboxRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     return obj
   },
@@ -1590,7 +1416,7 @@ export const RemoveDestroyedSandboxRequest: MessageFns<RemoveDestroyedSandboxReq
     object: I,
   ): RemoveDestroyedSandboxRequest {
     const message = createBaseRemoveDestroyedSandboxRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     return message
   },
 }
@@ -2107,13 +1933,16 @@ export const BuildImageResponse: MessageFns<BuildImageResponse> = {
 }
 
 function createBaseImageExistsRequest(): ImageExistsRequest {
-  return { image: '' }
+  return { image: '', includeLatest: false }
 }
 
 export const ImageExistsRequest: MessageFns<ImageExistsRequest> = {
   encode(message: ImageExistsRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.image !== '') {
       writer.uint32(10).string(message.image)
+    }
+    if (message.includeLatest !== false) {
+      writer.uint32(16).bool(message.includeLatest)
     }
     return writer
   },
@@ -2133,6 +1962,14 @@ export const ImageExistsRequest: MessageFns<ImageExistsRequest> = {
           message.image = reader.string()
           continue
         }
+        case 2: {
+          if (tag !== 16) {
+            break
+          }
+
+          message.includeLatest = reader.bool()
+          continue
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break
@@ -2143,13 +1980,19 @@ export const ImageExistsRequest: MessageFns<ImageExistsRequest> = {
   },
 
   fromJSON(object: any): ImageExistsRequest {
-    return { image: isSet(object.image) ? globalThis.String(object.image) : '' }
+    return {
+      image: isSet(object.image) ? globalThis.String(object.image) : '',
+      includeLatest: isSet(object.includeLatest) ? globalThis.Boolean(object.includeLatest) : false,
+    }
   },
 
   toJSON(message: ImageExistsRequest): unknown {
     const obj: any = {}
     if (message.image !== '') {
       obj.image = message.image
+    }
+    if (message.includeLatest !== false) {
+      obj.includeLatest = message.includeLatest
     }
     return obj
   },
@@ -2160,6 +2003,7 @@ export const ImageExistsRequest: MessageFns<ImageExistsRequest> = {
   fromPartial<I extends Exact<DeepPartial<ImageExistsRequest>, I>>(object: I): ImageExistsRequest {
     const message = createBaseImageExistsRequest()
     message.image = object.image ?? ''
+    message.includeLatest = object.includeLatest ?? false
     return message
   },
 }
@@ -2223,13 +2067,16 @@ export const ImageExistsResponse: MessageFns<ImageExistsResponse> = {
 }
 
 function createBaseRemoveImageRequest(): RemoveImageRequest {
-  return { image: '' }
+  return { image: '', force: false }
 }
 
 export const RemoveImageRequest: MessageFns<RemoveImageRequest> = {
   encode(message: RemoveImageRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.image !== '') {
       writer.uint32(10).string(message.image)
+    }
+    if (message.force !== false) {
+      writer.uint32(16).bool(message.force)
     }
     return writer
   },
@@ -2249,6 +2096,14 @@ export const RemoveImageRequest: MessageFns<RemoveImageRequest> = {
           message.image = reader.string()
           continue
         }
+        case 2: {
+          if (tag !== 16) {
+            break
+          }
+
+          message.force = reader.bool()
+          continue
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break
@@ -2259,13 +2114,19 @@ export const RemoveImageRequest: MessageFns<RemoveImageRequest> = {
   },
 
   fromJSON(object: any): RemoveImageRequest {
-    return { image: isSet(object.image) ? globalThis.String(object.image) : '' }
+    return {
+      image: isSet(object.image) ? globalThis.String(object.image) : '',
+      force: isSet(object.force) ? globalThis.Boolean(object.force) : false,
+    }
   },
 
   toJSON(message: RemoveImageRequest): unknown {
     const obj: any = {}
     if (message.image !== '') {
       obj.image = message.image
+    }
+    if (message.force !== false) {
+      obj.force = message.force
     }
     return obj
   },
@@ -2276,6 +2137,7 @@ export const RemoveImageRequest: MessageFns<RemoveImageRequest> = {
   fromPartial<I extends Exact<DeepPartial<RemoveImageRequest>, I>>(object: I): RemoveImageRequest {
     const message = createBaseRemoveImageRequest()
     message.image = object.image ?? ''
+    message.force = object.force ?? false
     return message
   },
 }
@@ -2473,13 +2335,13 @@ export const LogLine: MessageFns<LogLine> = {
 }
 
 function createBaseProxyRequest(): ProxyRequest {
-  return { workspaceId: '', projectId: '', path: '', headers: {}, body: new Uint8Array(0), method: '' }
+  return { sandboxId: '', projectId: '', path: '', headers: {}, body: new Uint8Array(0), method: '', follow: false }
 }
 
 export const ProxyRequest: MessageFns<ProxyRequest> = {
   encode(message: ProxyRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
-    if (message.workspaceId !== '') {
-      writer.uint32(10).string(message.workspaceId)
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
     }
     if (message.projectId !== '') {
       writer.uint32(18).string(message.projectId)
@@ -2496,6 +2358,9 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
     if (message.method !== '') {
       writer.uint32(50).string(message.method)
     }
+    if (message.follow !== false) {
+      writer.uint32(56).bool(message.follow)
+    }
     return writer
   },
 
@@ -2511,7 +2376,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
             break
           }
 
-          message.workspaceId = reader.string()
+          message.sandboxId = reader.string()
           continue
         }
         case 2: {
@@ -2557,6 +2422,14 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
           message.method = reader.string()
           continue
         }
+        case 7: {
+          if (tag !== 56) {
+            break
+          }
+
+          message.follow = reader.bool()
+          continue
+        }
       }
       if ((tag & 7) === 4 || tag === 0) {
         break
@@ -2568,7 +2441,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
 
   fromJSON(object: any): ProxyRequest {
     return {
-      workspaceId: isSet(object.workspaceId) ? globalThis.String(object.workspaceId) : '',
+      sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '',
       projectId: isSet(object.projectId) ? globalThis.String(object.projectId) : '',
       path: isSet(object.path) ? globalThis.String(object.path) : '',
       headers: isObject(object.headers)
@@ -2579,13 +2452,14 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
         : {},
       body: isSet(object.body) ? bytesFromBase64(object.body) : new Uint8Array(0),
       method: isSet(object.method) ? globalThis.String(object.method) : '',
+      follow: isSet(object.follow) ? globalThis.Boolean(object.follow) : false,
     }
   },
 
   toJSON(message: ProxyRequest): unknown {
     const obj: any = {}
-    if (message.workspaceId !== '') {
-      obj.workspaceId = message.workspaceId
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
     }
     if (message.projectId !== '') {
       obj.projectId = message.projectId
@@ -2608,6 +2482,9 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
     if (message.method !== '') {
       obj.method = message.method
     }
+    if (message.follow !== false) {
+      obj.follow = message.follow
+    }
     return obj
   },
 
@@ -2616,7 +2493,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
   },
   fromPartial<I extends Exact<DeepPartial<ProxyRequest>, I>>(object: I): ProxyRequest {
     const message = createBaseProxyRequest()
-    message.workspaceId = object.workspaceId ?? ''
+    message.sandboxId = object.sandboxId ?? ''
     message.projectId = object.projectId ?? ''
     message.path = object.path ?? ''
     message.headers = Object.entries(object.headers ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
@@ -2627,6 +2504,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
     }, {})
     message.body = object.body ?? new Uint8Array(0)
     message.method = object.method ?? ''
+    message.follow = object.follow ?? false
     return message
   },
 }
@@ -2989,10 +2867,6 @@ export interface RunnerServiceImplementation<CallContextExt = {}> {
     request: CreateSnapshotRequest,
     context: CallContext & CallContextExt,
   ): Promise<DeepPartial<CreateSnapshotResponse>>
-  resizeSandbox(
-    request: ResizeSandboxRequest,
-    context: CallContext & CallContextExt,
-  ): Promise<DeepPartial<ResizeSandboxResponse>>
   startSandbox(
     request: StartSandboxRequest,
     context: CallContext & CallContextExt,
@@ -3050,10 +2924,6 @@ export interface RunnerClient<CallOptionsExt = {}> {
     request: DeepPartial<CreateSnapshotRequest>,
     options?: CallOptions & CallOptionsExt,
   ): Promise<CreateSnapshotResponse>
-  resizeSandbox(
-    request: DeepPartial<ResizeSandboxRequest>,
-    options?: CallOptions & CallOptionsExt,
-  ): Promise<ResizeSandboxResponse>
   startSandbox(
     request: DeepPartial<StartSandboxRequest>,
     options?: CallOptions & CallOptionsExt,

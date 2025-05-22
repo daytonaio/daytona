@@ -23,7 +23,6 @@ const (
 	Runner_CreateSandbox_FullMethodName          = "/runner.Runner/CreateSandbox"
 	Runner_DestroySandbox_FullMethodName         = "/runner.Runner/DestroySandbox"
 	Runner_CreateSnapshot_FullMethodName         = "/runner.Runner/CreateSnapshot"
-	Runner_ResizeSandbox_FullMethodName          = "/runner.Runner/ResizeSandbox"
 	Runner_StartSandbox_FullMethodName           = "/runner.Runner/StartSandbox"
 	Runner_StopSandbox_FullMethodName            = "/runner.Runner/StopSandbox"
 	Runner_GetSandboxInfo_FullMethodName         = "/runner.Runner/GetSandboxInfo"
@@ -46,7 +45,6 @@ type RunnerClient interface {
 	CreateSandbox(ctx context.Context, in *CreateSandboxRequest, opts ...grpc.CallOption) (*CreateSandboxResponse, error)
 	DestroySandbox(ctx context.Context, in *DestroySandboxRequest, opts ...grpc.CallOption) (*DestroySandboxResponse, error)
 	CreateSnapshot(ctx context.Context, in *CreateSnapshotRequest, opts ...grpc.CallOption) (*CreateSnapshotResponse, error)
-	ResizeSandbox(ctx context.Context, in *ResizeSandboxRequest, opts ...grpc.CallOption) (*ResizeSandboxResponse, error)
 	StartSandbox(ctx context.Context, in *StartSandboxRequest, opts ...grpc.CallOption) (*StartSandboxResponse, error)
 	StopSandbox(ctx context.Context, in *StopSandboxRequest, opts ...grpc.CallOption) (*StopSandboxResponse, error)
 	GetSandboxInfo(ctx context.Context, in *GetSandboxInfoRequest, opts ...grpc.CallOption) (*GetSandboxInfoResponse, error)
@@ -103,16 +101,6 @@ func (c *runnerClient) CreateSnapshot(ctx context.Context, in *CreateSnapshotReq
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(CreateSnapshotResponse)
 	err := c.cc.Invoke(ctx, Runner_CreateSnapshot_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *runnerClient) ResizeSandbox(ctx context.Context, in *ResizeSandboxRequest, opts ...grpc.CallOption) (*ResizeSandboxResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ResizeSandboxResponse)
-	err := c.cc.Invoke(ctx, Runner_ResizeSandbox_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +226,6 @@ type RunnerServer interface {
 	CreateSandbox(context.Context, *CreateSandboxRequest) (*CreateSandboxResponse, error)
 	DestroySandbox(context.Context, *DestroySandboxRequest) (*DestroySandboxResponse, error)
 	CreateSnapshot(context.Context, *CreateSnapshotRequest) (*CreateSnapshotResponse, error)
-	ResizeSandbox(context.Context, *ResizeSandboxRequest) (*ResizeSandboxResponse, error)
 	StartSandbox(context.Context, *StartSandboxRequest) (*StartSandboxResponse, error)
 	StopSandbox(context.Context, *StopSandboxRequest) (*StopSandboxResponse, error)
 	GetSandboxInfo(context.Context, *GetSandboxInfoRequest) (*GetSandboxInfoResponse, error)
@@ -272,9 +259,6 @@ func (UnimplementedRunnerServer) DestroySandbox(context.Context, *DestroySandbox
 }
 func (UnimplementedRunnerServer) CreateSnapshot(context.Context, *CreateSnapshotRequest) (*CreateSnapshotResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSnapshot not implemented")
-}
-func (UnimplementedRunnerServer) ResizeSandbox(context.Context, *ResizeSandboxRequest) (*ResizeSandboxResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ResizeSandbox not implemented")
 }
 func (UnimplementedRunnerServer) StartSandbox(context.Context, *StartSandboxRequest) (*StartSandboxResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method StartSandbox not implemented")
@@ -395,24 +379,6 @@ func _Runner_CreateSnapshot_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(RunnerServer).CreateSnapshot(ctx, req.(*CreateSnapshotRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _Runner_ResizeSandbox_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ResizeSandboxRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(RunnerServer).ResizeSandbox(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Runner_ResizeSandbox_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).ResizeSandbox(ctx, req.(*ResizeSandboxRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -612,10 +578,6 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateSnapshot",
 			Handler:    _Runner_CreateSnapshot_Handler,
-		},
-		{
-			MethodName: "ResizeSandbox",
-			Handler:    _Runner_ResizeSandbox_Handler,
 		},
 		{
 			MethodName: "StartSandbox",

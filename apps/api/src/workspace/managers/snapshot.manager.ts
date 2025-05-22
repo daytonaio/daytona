@@ -239,7 +239,7 @@ export class SnapshotManager {
 
       // Get workspace info from node
       const workspaceInfo = await runnerClient.getSandboxInfo({
-        workspaceId: workspace.id,
+        sandboxId: workspace.id,
       })
 
       switch (workspaceInfo.snapshotState?.toUpperCase()) {
@@ -293,7 +293,7 @@ export class SnapshotManager {
 
       //  check if snapshot is already in progress on the node
       const nodeWorkspace = await runnerClient.getSandboxInfo({
-        workspaceId: workspace.id,
+        sandboxId: workspace.id,
       })
       if (nodeWorkspace.snapshotState?.toUpperCase() === 'IN_PROGRESS') {
         return
@@ -301,7 +301,7 @@ export class SnapshotManager {
 
       // Initiate snapshot on node
       await runnerClient.createSnapshot({
-        workspaceId: workspace.id,
+        sandboxId: workspace.id,
         registry: {
           url: registry.url,
           username: registry.username,

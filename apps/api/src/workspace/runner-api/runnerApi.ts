@@ -8,23 +8,29 @@ import { ClientGrpc, Transport, ClientProxyFactory } from '@nestjs/microservices
 import { Node } from '../entities/node.entity'
 import { join } from 'path'
 import { RunnerClient } from '@daytonaio/runner-grpc-client'
+import * as grpc from '@grpc/grpc-js'
+
 @Injectable()
 export class RunnerClientFactory {
   create(node: Node): RunnerClient {
     const client = ClientProxyFactory.create({
       transport: Transport.GRPC,
       options: {
-        url: node.apiUrl,
         package: 'runner',
-        protoPath: join(__dirname, 'apps/api/runner-grpc/proto/runner.proto'),
-        credentials: this.getCredentials(node.apiKey),
-      },
+        protoPath: '/workspaces/daytona/apps/proto/runner.proto',
+        url: node.apiUrl,
+        loader: {
+          keepCase: true,
+          longs: String,
+          enums: String,
+          defaults: true,
+          oneofs: true,
+        },
+        credentials: grpc.credentials.createInsecure(),
+        metadata: { authorization: `Bearer ${node.apiKey}` },
+      } as any, // Type assertion to bypass type checking temporarily
     }) as ClientGrpc
 
     return client.getService('Runner') as RunnerClient
-  }
-
-  private getCredentials(apiKey: string) {
-    return { metadata: { authorization: `Bearer ${apiKey}` } }
   }
 }
