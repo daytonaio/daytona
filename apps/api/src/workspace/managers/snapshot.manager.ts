@@ -9,7 +9,6 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, Not, Repository } from 'typeorm'
 import { Workspace } from '../entities/workspace.entity'
 import { WorkspaceState } from '../enums/workspace-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
 import { NodeService } from '../services/node.service'
 import { NodeState } from '../enums/node-state.enum'
 import { ResourceNotFoundError } from '../../exceptions/not-found.exception'
@@ -27,6 +26,7 @@ import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceSnapshotCreatedEvent } from '../events/workspace-snapshot-created.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 
 @Injectable()
 export class SnapshotManager {
@@ -36,7 +36,7 @@ export class SnapshotManager {
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     private readonly nodeService: NodeService,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerClientFactory: RunnerClientFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
@@ -234,12 +234,14 @@ export class SnapshotManager {
   private async checkSnapshotProgress(workspace: Workspace): Promise<void> {
     try {
       const node = await this.nodeService.findOne(workspace.nodeId)
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerClient = this.runnerClientFactory.create(node)
 
       // Get workspace info from node
-      const workspaceInfo = await nodeWorkspaceApi.info(workspace.id)
+      const workspaceInfo = await runnerClient.getSandboxInfo({
+        sandboxId: workspace.id,
+      })
 
-      switch (workspaceInfo.data.snapshotState?.toUpperCase()) {
+      switch (workspaceInfo.snapshotState?.toUpperCase()) {
         case 'COMPLETED': {
           workspace.snapshotState = SnapshotState.COMPLETED
           workspace.lastSnapshotAt = new Date()
@@ -286,17 +288,19 @@ export class SnapshotManager {
       }
 
       const node = await this.nodeService.findOne(workspace.nodeId)
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerClient = this.runnerClientFactory.create(node)
 
       //  check if snapshot is already in progress on the node
-      const nodeWorkspaceResponse = await nodeWorkspaceApi.info(workspace.id)
-      const nodeWorkspace = nodeWorkspaceResponse.data
+      const nodeWorkspace = await runnerClient.getSandboxInfo({
+        sandboxId: workspace.id,
+      })
       if (nodeWorkspace.snapshotState?.toUpperCase() === 'IN_PROGRESS') {
         return
       }
 
       // Initiate snapshot on node
-      await nodeWorkspaceApi.createSnapshot(workspace.id, {
+      await runnerClient.createSnapshot({
+        sandboxId: workspace.id,
         registry: {
           url: registry.url,
           username: registry.username,

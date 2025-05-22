@@ -3,89 +3,81 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxApi, DefaultApi, ImagesApi, Configuration } from '@daytonaio/runner-api-client'
+import { Injectable, Logger } from '@nestjs/common'
+import { ClientGrpc, Transport, ClientProxyFactory } from '@nestjs/microservices'
 import { Node } from '../entities/node.entity'
-import { Injectable } from '@nestjs/common'
-import axios from 'axios'
-import axiosDebug from 'axios-debug-log'
-
-const isDebugEnabled = process.env.DEBUG === 'true'
-
-if (isDebugEnabled) {
-  axiosDebug({
-    request: function (debug, config) {
-      debug('Request with ' + JSON.stringify(config))
-      return config
-    },
-    response: function (debug, response) {
-      debug('Response with ' + response)
-      return response
-    },
-    error: function (debug, error) {
-      debug('Error with ' + error)
-      return Promise.reject(error)
-    },
-  })
-}
+import { join } from 'path'
+import { RunnerClient } from '@daytonaio/runner-grpc-client'
+import * as grpc from '@grpc/grpc-js'
 
 @Injectable()
-export class NodeApiFactory {
-  createNodeApi(node: Node): DefaultApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
-      },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
+export class RunnerClientFactory {
+  private readonly logger = new Logger(RunnerClientFactory.name)
 
-    axiosInstance.interceptors.response.use(
-      (response) => {
-        return response
-      },
-      (error) => {
-        const errorMessage = error.response?.data?.message || error.response?.data || error.message || String(error)
+  create(node: Node): RunnerClient {
+    // Ensure URL is properly formatted for gRPC
+    const url =
+      node.apiUrl.startsWith('http://') || node.apiUrl.startsWith('https://')
+        ? node.apiUrl.replace(/^https?:\/\//, '')
+        : node.apiUrl
 
-        throw new Error(String(errorMessage))
-      },
-    )
+    this.logger.debug(`Creating gRPC client for runner with id: ${node.id} at ${url}`)
 
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
+    try {
+      const client = ClientProxyFactory.create({
+        transport: Transport.GRPC,
+        options: {
+          package: 'runner',
+          protoPath: join(__dirname, 'assets/runner.proto'),
+          url: url,
+          credentials: grpc.credentials.createInsecure(),
+        } as any,
+      }) as ClientGrpc
+
+      const service = client.getService('Runner')
+      if (!service) {
+        this.logger.error(`Failed to get Runner with id: ${node.id}`)
+        throw new Error('Runner not found')
+      }
+
+      // Convert Observable methods to Promise-based methods
+      // Authorization is attached in the proxy for each method call
+      return new Proxy(service, {
+        get: (target: any, prop: string) => {
+          if (typeof target[prop] === 'function') {
+            return async (...args: any[]) => {
+              return new Promise((resolve, reject) => {
+                const metadata = new grpc.Metadata()
+                metadata.add('authorization', `Bearer ${node.apiKey}`)
+
+                // The metadata must be passed as the last argument to the gRPC call
+                // Check if the last argument is already metadata
+                const lastArg = args[args.length - 1]
+                if (lastArg && lastArg instanceof grpc.Metadata) {
+                  // If metadata already exists, add our authorization to it
+                  lastArg.add('authorization', `Bearer ${node.apiKey}`)
+                } else {
+                  // If no metadata exists, add our metadata as the last argument
+                  args.push(metadata)
+                }
+
+                const observable = target[prop](...args)
+                observable.subscribe({
+                  next: (value: any) => resolve(value),
+                  error: (error: any) => reject(error),
+                  complete: () => {
+                    resolve(undefined)
+                  },
+                })
+              })
+            }
+          }
+          return target[prop]
+        },
+      }) as RunnerClient
+    } catch (error) {
+      this.logger.error(`Failed to create gRPC client for runner with id: ${node.id}: ${error.message}`)
+      throw error
     }
-
-    return new DefaultApi(new Configuration(), '', axiosInstance)
-  }
-
-  createImageApi(node: Node): ImagesApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
-      },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
-
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
-    }
-
-    return new ImagesApi(new Configuration(), '', axiosInstance)
-  }
-
-  createWorkspaceApi(node: Node): SandboxApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
-      },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
-
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
-    }
-
-    return new SandboxApi(new Configuration(), '', axiosInstance)
   }
 }

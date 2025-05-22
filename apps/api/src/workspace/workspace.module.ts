@@ -13,7 +13,6 @@ import { UserModule } from '../user/user.module'
 import { NodeService } from './services/node.service'
 import { Node } from './entities/node.entity'
 import { NodeController } from './controllers/node.controller'
-import { NodeApiFactory } from './runner-api/runnerApi'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
@@ -40,6 +39,7 @@ import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
+import { RunnerClientFactory } from './runner-api/runnerApi'
 
 @Module({
   imports: [
@@ -63,7 +63,6 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     SnapshotManager,
     WorkspaceWarmPoolService,
     NodeService,
-    NodeApiFactory,
     ToolboxService,
     ImageService,
     ImageManager,
@@ -74,8 +73,17 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     VolumeService,
     VolumeManager,
     VolumeSubscriber,
+    RunnerClientFactory,
   ],
-  exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
+  exports: [
+    WorkspaceService,
+    NodeService,
+    RedisLockProvider,
+    ImageService,
+    VolumeService,
+    VolumeManager,
+    RunnerClientFactory,
+  ],
 })
 export class WorkspaceModule {
   configure(consumer: MiddlewareConsumer) {
