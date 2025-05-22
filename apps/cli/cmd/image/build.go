@@ -68,11 +68,12 @@ var BuildCmd = &cobra.Command{
 		defer stopLogs()
 
 		go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-			Id:           image.Id,
-			ServerUrl:    activeProfile.Api.Url,
-			ServerApi:    activeProfile.Api,
-			Follow:       util.Pointer(true),
-			ResourceType: common.ResourceTypeImage,
+			Id:                   image.Id,
+			ServerUrl:            activeProfile.Api.Url,
+			ServerApi:            activeProfile.Api,
+			ActiveOrganizationId: activeProfile.ActiveOrganizationId,
+			Follow:               util.Pointer(true),
+			ResourceType:         common.ResourceTypeImage,
 		})
 
 		err = common.AwaitImageState(ctx, apiClient, imageName, daytonaapiclient.IMAGESTATE_PENDING)
