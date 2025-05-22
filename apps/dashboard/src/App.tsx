@@ -30,7 +30,7 @@ import OrganizationMembers from '@/pages/OrganizationMembers'
 import OrganizationSettings from '@/pages/OrganizationSettings'
 import UserOrganizationInvitations from '@/pages/UserOrganizationInvitations'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import Usage from './pages/Usage'
+import Limits from './pages/Limits'
 import Billing from './pages/Billing'
 import { NotificationSocketProvider } from '@/providers/NotificationSocketProvider'
 import { ApiProvider } from './providers/ApiProvider'
@@ -41,6 +41,7 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
 import LinkedAccounts from '@/pages/LinkedAccounts'
 import { Button } from './components/ui/button'
+import Usage from './pages/Usage'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -131,6 +132,7 @@ function App() {
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Workspaces />} />
           <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />
           <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
+          <Route path={getRouteSubPath(RoutePath.LIMITS)} element={<Limits />} />
           <Route path={getRouteSubPath(RoutePath.USAGE)} element={<Usage />} />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route

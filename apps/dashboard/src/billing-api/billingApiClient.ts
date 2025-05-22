@@ -63,4 +63,9 @@ export class BillingApiClient {
   public async redeemCoupon(organizationId: string, couponCode: string): Promise<void> {
     await this.axiosInstance.post(`/organization/${organizationId}/redeem-coupon/${couponCode}`)
   }
+
+  public async getOrganizationTier(organizationId: string): Promise<number> {
+    const response = await this.axiosInstance.get(`/organization/${organizationId}/tier`)
+    return response.data?.tier
+  }
 }

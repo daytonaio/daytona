@@ -42,9 +42,9 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedWorkspaceStoppedEvent } from '../../organization/events/organization-suspended-workspace-stopped.event'
 
-const DEFAULT_CPU = 2
-const DEFAULT_MEMORY = 4
-const DEFAULT_DISK = 10
+const DEFAULT_CPU = 1
+const DEFAULT_MEMORY = 1
+const DEFAULT_DISK = 3
 const DEFAULT_GPU = 0
 
 @Injectable()

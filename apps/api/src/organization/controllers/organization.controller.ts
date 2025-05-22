@@ -264,9 +264,9 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
-  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
-  async updateUserQuota(
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
     @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
   ): Promise<OrganizationDto> {

@@ -6,16 +6,16 @@
 import { CreateOrganizationQuotaDto } from '../../organization/dto/create-organization-quota.dto'
 
 export const DEFAULT_ORGANIZATION_QUOTA: CreateOrganizationQuotaDto = {
-  totalCpuQuota: 20,
-  totalMemoryQuota: 40,
-  totalDiskQuota: 50,
-  maxCpuPerWorkspace: 4,
-  maxMemoryPerWorkspace: 8,
-  maxDiskPerWorkspace: 10,
+  totalCpuQuota: 10,
+  totalMemoryQuota: 10,
+  totalDiskQuota: 30,
+  maxCpuPerWorkspace: 2,
+  maxMemoryPerWorkspace: 2,
+  maxDiskPerWorkspace: 3,
   maxConcurrentWorkspaces: 10,
-  workspaceQuota: 10,
-  imageQuota: 5,
-  maxImageSize: 5,
-  totalImageSize: 10,
-  volumeQuota: 10,
+  workspaceQuota: 20,
+  imageQuota: 3,
+  maxImageSize: 3,
+  totalImageSize: 3,
+  volumeQuota: 3,
 }

@@ -8,7 +8,7 @@ import { useApi } from '@/hooks/useApi'
 import { UsageOverview } from '@daytonaio/api-client'
 import { AlertTriangle } from 'lucide-react'
 import QuotaLine from '@/components/QuotaLine'
-import { Card, CardContent } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { handleApiError } from '@/lib/error-handling'
 
@@ -54,82 +54,95 @@ const Usage: React.FC = () => {
     <div className="p-6">
       <h1 className="text-2xl font-bold">Usage</h1>
       {usageOverview && (
-        <Card className="my-4">
-          <CardContent className="p-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span>Sandboxes:</span>
-                  {getUsageDisplay(usageOverview.currentWorkspaces, usageOverview.totalWorkspaceQuota)}
+        <>
+          <Card className="my-4">
+            <CardHeader>
+              <CardTitle>Sandboxes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span>Total Sandboxes:</span>
+                    {getUsageDisplay(usageOverview.currentWorkspaces, usageOverview.totalWorkspaceQuota)}
+                  </div>
+                  <QuotaLine current={usageOverview.currentWorkspaces} total={usageOverview.totalWorkspaceQuota} />
                 </div>
-                <QuotaLine current={usageOverview.currentWorkspaces} total={usageOverview.totalWorkspaceQuota} />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span>Running Sandboxes:</span>
-                  {getUsageDisplay(usageOverview.concurrentWorkspaces, usageOverview.concurrentWorkspaceQuota)}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span>Concurrent Sandboxes:</span>
+                    {getUsageDisplay(usageOverview.concurrentWorkspaces, usageOverview.concurrentWorkspaceQuota)}
+                  </div>
+                  <QuotaLine
+                    current={usageOverview.concurrentWorkspaces}
+                    total={usageOverview.concurrentWorkspaceQuota}
+                  />
                 </div>
-                <QuotaLine
-                  current={usageOverview.concurrentWorkspaces}
-                  total={usageOverview.concurrentWorkspaceQuota}
-                />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>CPU:</span>
-                  {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota)}
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Concurrent CPU:</span>
+                    {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota)}
+                  </div>
+                  <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
                 </div>
-                <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Memory:</span>
-                  {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GB')}
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Concurrent Memory:</span>
+                    {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GB')}
+                  </div>
+                  <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
                 </div>
-                <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Disk:</span>
-                  {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GB')}
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Concurrent Disk:</span>
+                    {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GB')}
+                  </div>
+                  <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
                 </div>
-                <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
               </div>
+            </CardContent>
+          </Card>
+          <Card className="my-4">
+            <CardHeader>
+              <CardTitle>Images & Volumes</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Images:</span>
+                    {getUsageDisplay(usageOverview.currentImageNumber, usageOverview.imageQuota)}
+                  </div>
+                  <QuotaLine current={usageOverview.currentImageNumber} total={usageOverview.imageQuota} />
+                </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Images:</span>
-                  {getUsageDisplay(usageOverview.currentImageNumber, usageOverview.imageQuota)}
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Total Images Size:</span>
+                    {getUsageDisplay(
+                      Number(usageOverview.totalImageSizeUsed.toFixed(1)),
+                      usageOverview.totalImageSizeQuota,
+                      'GB',
+                    )}
+                  </div>
+                  <QuotaLine current={usageOverview.totalImageSizeUsed} total={usageOverview.totalImageSizeQuota} />
                 </div>
-                <QuotaLine current={usageOverview.currentImageNumber} total={usageOverview.imageQuota} />
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Total Images Size:</span>
-                  {getUsageDisplay(
-                    Number(usageOverview.totalImageSizeUsed.toFixed(1)),
-                    usageOverview.totalImageSizeQuota,
-                    'GB',
-                  )}
+                <div>
+                  <div className="flex items-center justify-between mb-1 mt-3">
+                    <span>Volumes:</span>
+                    {getUsageDisplay(usageOverview.usedVolumes, usageOverview.maxVolumes)}
+                  </div>
+                  <QuotaLine current={usageOverview.usedVolumes} total={usageOverview.maxVolumes} />
                 </div>
-                <QuotaLine current={usageOverview.totalImageSizeUsed} total={usageOverview.totalImageSizeQuota} />
               </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Volumes:</span>
-                  {getUsageDisplay(usageOverview.usedVolumes, usageOverview.maxVolumes)}
-                </div>
-                <QuotaLine current={usageOverview.usedVolumes} total={usageOverview.maxVolumes} />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </>
       )}
     </div>
   )

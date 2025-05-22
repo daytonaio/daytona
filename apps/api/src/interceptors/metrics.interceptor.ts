@@ -217,7 +217,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             this.captureUpdateWorkspaceLabels(props, request.params.workspaceId)
             break
           case '/api/organizations/:organizationId/quota':
-            this.captureUpdateOrganizationUserQuota(props, request.params.organizationId, request.body)
+            this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
             break
           case '/api/organizations/:organizationId/roles/:roleId':
             this.captureUpdateOrganizationRole(
@@ -572,22 +572,25 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureUpdateOrganizationUserQuota(
+  private captureUpdateOrganizationQuota(
     props: CommonCaptureProps,
     organizationId: string,
     request: UpdateOrganizationQuotaDto,
   ) {
-    this.capture('api_organization_user_quota_updated', props, 'api_organization_user_quota_update_failed', {
+    this.capture('api_organization_quota_updated', props, 'api_organization_quota_update_failed', {
       organization_id: organizationId,
-      organization_user_image_quota: request.imageQuota,
-      organization_user_total_cpu_quota: request.totalCpuQuota,
-      organization_user_total_memory_quota_mb: request.totalMemoryQuota * 1024,
-      organization_user_total_disk_quota_gb: request.totalDiskQuota,
-      organization_user_max_concurrent_workspaces: request.maxConcurrentWorkspaces,
-      organization_user_max_cpu_per_workspace: request.maxCpuPerWorkspace,
-      organization_user_max_memory_per_workspace_mb: request.maxMemoryPerWorkspace * 1024,
-      organization_user_max_disk_per_workspace_gb: request.maxDiskPerWorkspace,
-      organization_user_max_image_size_mb: request.maxImageSize * 1024,
+      organization_total_cpu_quota: request.totalCpuQuota,
+      organization_total_memory_quota_mb: request.totalMemoryQuota * 1024,
+      organization_total_disk_quota_gb: request.totalDiskQuota,
+      organization_max_cpu_per_workspace: request.maxCpuPerWorkspace,
+      organization_max_memory_per_workspace_mb: request.maxMemoryPerWorkspace * 1024,
+      organization_max_disk_per_workspace_gb: request.maxDiskPerWorkspace,
+      organization_max_concurrent_workspaces: request.maxConcurrentWorkspaces,
+      organization_workspace_quota: request.workspaceQuota,
+      organization_image_quota: request.imageQuota,
+      organization_max_image_size_mb: request.maxImageSize * 1024,
+      organization_total_image_size_mb: request.totalImageSize * 1024,
+      organization_volume_quota: request.volumeQuota,
     })
   }
 
