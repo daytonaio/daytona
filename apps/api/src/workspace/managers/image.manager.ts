@@ -376,9 +376,15 @@ export class ImageManager {
               break
             case ImageState.PENDING_VALIDATION:
               //  temp workaround to avoid race condition between api instances
-              if (!(await this.dockerProvider.imageExists(image.name))) {
-                await this.redisLockProvider.unlock(lockKey)
-                return
+              {
+                let imageName = image.name
+                if (image.buildInfo) {
+                  imageName = image.internalName
+                }
+                if (!(await this.dockerProvider.imageExists(imageName))) {
+                  await this.redisLockProvider.unlock(lockKey)
+                  return
+                }
               }
 
               await this.handleImageTagStatePendingValidation(image)
