@@ -11,13 +11,13 @@ import { DockerRegistryService } from '../../docker-registry/services/docker-reg
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
 import { DockerProvider } from '../docker/docker-provider'
-import { ImageNode } from '../entities/image-node.entity'
-import { Node } from '../entities/node.entity'
-import { NodeState } from '../enums/node-state.enum'
-import { ImageNodeState } from '../enums/image-node-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
+import { ImageRunner } from '../entities/image-runner.entity'
+import { Runner } from '../entities/runner.entity'
+import { RunnerState } from '../enums/runner-state.enum'
+import { ImageRunnerState } from '../enums/image-runner-state.enum'
+import { RunnerApiFactory } from '../runner-api/runnerApi'
 import { v4 as uuidv4 } from 'uuid'
-import { NodeNotReadyError } from '../errors/node-not-ready.error'
+import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { OrganizationService } from '../../organization/services/organization.service'
@@ -37,31 +37,31 @@ export class ImageManager {
     @InjectRedis() private readonly redis: Redis,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-    @InjectRepository(ImageNode)
-    private readonly imageNodeRepository: Repository<ImageNode>,
-    @InjectRepository(Node)
-    private readonly nodeRepository: Repository<Node>,
+    @InjectRepository(ImageRunner)
+    private readonly imageRunnerRepository: Repository<ImageRunner>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerApiFactory: RunnerApiFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
   ) {}
 
   @Cron(CronExpression.EVERY_5_SECONDS)
-  async syncNodeImages() {
-    const lockKey = 'sync-node-images-lock'
+  async syncRunnerImages() {
+    const lockKey = 'sync-runner-images-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
-    const skip = (await this.redis.get('sync-node-images-skip')) || 0
+    const skip = (await this.redis.get('sync-runner-images-skip')) || 0
 
-    const totalNodes = await this.nodeRepository.count({
+    const totalRunners = await this.runnerRepository.count({
       where: {
-        state: NodeState.READY,
+        state: RunnerState.READY,
         unschedulable: false,
       },
     })
@@ -78,27 +78,27 @@ export class ImageManager {
     })
 
     if (images.length === 0) {
-      await this.redis.set('sync-node-images-skip', 0)
+      await this.redis.set('sync-runner-images-skip', 0)
       return
     }
 
-    await this.redis.set('sync-node-images-skip', Number(skip) + images.length)
+    await this.redis.set('sync-runner-images-skip', Number(skip) + images.length)
 
-    const imageNodes = await this.imageNodeRepository.count({
+    const imageRunners = await this.imageRunnerRepository.count({
       where: {
         imageRef: In(images.map((image) => image.internalName)),
-        state: ImageNodeState.READY,
+        state: ImageRunnerState.READY,
       },
     })
 
-    if (imageNodes === totalNodes) {
+    if (imageRunners === totalRunners) {
       return
     }
 
     await Promise.all(
       images.map((image) => {
-        this.propagateImageToNodes(image.internalName).catch((err) => {
-          this.logger.error(`Error propagating image ${image.id} to nodes: ${err}`)
+        this.propagateImageToRunners(image.internalName).catch((err) => {
+          this.logger.error(`Error propagating image ${image.id} to runners: ${err}`)
         })
       }),
     )
@@ -107,32 +107,32 @@ export class ImageManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS)
-  async syncNodeImageStates() {
-    //  this approach is not ideal, as if the number of nodes is large, this will take a long time
+  async syncRunnerImageStates() {
+    //  this approach is not ideal, as if the number of runners is large, this will take a long time
     //  also, if some images stuck in a "pulling" state, they will infest the queue
     //  todo: find a better approach
 
-    const lockKey = 'sync-node-image-states-lock'
+    const lockKey = 'sync-runner-image-states-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
-    const nodeImages = await this.imageNodeRepository
-      .createQueryBuilder('imageNode')
+    const runnerImages = await this.imageRunnerRepository
+      .createQueryBuilder('imageRunner')
       .where({
-        state: In([ImageNodeState.PULLING_IMAGE, ImageNodeState.BUILDING_IMAGE, ImageNodeState.REMOVING]),
+        state: In([ImageRunnerState.PULLING_IMAGE, ImageRunnerState.BUILDING_IMAGE, ImageRunnerState.REMOVING]),
       })
       .orderBy('RANDOM()')
       .take(100)
       .getMany()
 
     await Promise.allSettled(
-      nodeImages.map((imageNode) => {
-        return this.syncNodeImageState(imageNode).catch((err) => {
+      runnerImages.map((imageRunner) => {
+        return this.syncRunnerImageState(imageRunner).catch((err) => {
           if (err.code !== 'ECONNRESET') {
-            this.logger.error(`Error syncing node image state ${imageNode.id}: ${fromAxiosError(err)}`)
-            this.imageNodeRepository.update(imageNode.id, {
-              state: ImageNodeState.ERROR,
+            this.logger.error(`Error syncing runner image state ${imageRunner.id}: ${fromAxiosError(err)}`)
+            this.imageRunnerRepository.update(imageRunner.id, {
+              state: ImageRunnerState.ERROR,
               errorReason: fromAxiosError(err).message,
             })
           }
@@ -143,83 +143,83 @@ export class ImageManager {
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  async syncNodeImageState(imageNode: ImageNode): Promise<void> {
-    const node = await this.nodeRepository.findOne({
+  async syncRunnerImageState(imageRunner: ImageRunner): Promise<void> {
+    const runner = await this.runnerRepository.findOne({
       where: {
-        id: imageNode.nodeId,
+        id: imageRunner.runnerId,
       },
     })
-    if (!node) {
-      //  cleanup the image node record if the node is not found
-      //  this can happen if the node is deleted from the database without cleaning up the image nodes
-      await this.imageNodeRepository.delete(imageNode.id)
+    if (!runner) {
+      //  cleanup the image runner record if the runner is not found
+      //  this can happen if the runner is deleted from the database without cleaning up the image runners
+      await this.imageRunnerRepository.delete(imageRunner.id)
       this.logger.warn(
-        `Node ${imageNode.nodeId} not found while trying to process image node ${imageNode.id}. Image node has been removed.`,
+        `Runner ${imageRunner.runnerId} not found while trying to process image runner ${imageRunner.id}. Image runner has been removed.`,
       )
       return
     }
-    if (node.state !== NodeState.READY) {
+    if (runner.state !== RunnerState.READY) {
       //  todo: handle timeout policy
-      //  for now just remove the image node record if the node is not ready
-      await this.imageNodeRepository.delete(imageNode.id)
+      //  for now just remove the image runner record if the runner is not ready
+      await this.imageRunnerRepository.delete(imageRunner.id)
 
-      throw new NodeNotReadyError(`Node ${node.id} is not ready`)
+      throw new RunnerNotReadyError(`Runner ${runner.id} is not ready`)
     }
 
-    switch (imageNode.state) {
-      case ImageNodeState.PULLING_IMAGE:
-        await this.handleImageNodeStatePullingImage(imageNode)
+    switch (imageRunner.state) {
+      case ImageRunnerState.PULLING_IMAGE:
+        await this.handleImageRunnerStatePullingImage(imageRunner)
         break
-      case ImageNodeState.BUILDING_IMAGE:
-        await this.handleImageNodeStateBuildingImage(imageNode)
+      case ImageRunnerState.BUILDING_IMAGE:
+        await this.handleImageRunnerStateBuildingImage(imageRunner)
         break
-      case ImageNodeState.REMOVING:
-        await this.handleImageNodeStateRemovingImage(imageNode)
+      case ImageRunnerState.REMOVING:
+        await this.handleImageRunnerStateRemovingImage(imageRunner)
         break
     }
   }
 
-  async propagateImageToNodes(internalImageName: string) {
+  async propagateImageToRunners(internalImageName: string) {
     //  todo: remove try catch block and implement error handling
     try {
-      const nodes = await this.nodeRepository.find({
+      const runners = await this.runnerRepository.find({
         where: {
-          state: NodeState.READY,
+          state: RunnerState.READY,
           unschedulable: false,
         },
       })
 
       const results = await Promise.allSettled(
-        nodes.map(async (node) => {
-          let imageNode = await this.imageNodeRepository.findOne({
+        runners.map(async (runner) => {
+          let imageRunner = await this.imageRunnerRepository.findOne({
             where: {
               imageRef: internalImageName,
-              nodeId: node.id,
+              runnerId: runner.id,
             },
           })
 
           try {
-            if (imageNode && !imageNode.imageRef) {
+            if (imageRunner && !imageRunner.imageRef) {
               //  this should never happen
-              this.logger.warn(`Internal image name not found for image node ${imageNode.id}`)
+              this.logger.warn(`Internal image name not found for image runner ${imageRunner.id}`)
               return
             }
 
-            if (!imageNode) {
-              imageNode = new ImageNode()
-              imageNode.imageRef = internalImageName
-              imageNode.nodeId = node.id
-              imageNode.state = ImageNodeState.PULLING_IMAGE
-              await this.imageNodeRepository.save(imageNode)
-              await this.propagateImageToNode(internalImageName, node)
-            } else if (imageNode.state === ImageNodeState.PULLING_IMAGE) {
-              await this.handleImageNodeStatePullingImage(imageNode)
+            if (!imageRunner) {
+              imageRunner = new ImageRunner()
+              imageRunner.imageRef = internalImageName
+              imageRunner.runnerId = runner.id
+              imageRunner.state = ImageRunnerState.PULLING_IMAGE
+              await this.imageRunnerRepository.save(imageRunner)
+              await this.propagateImageToRunner(internalImageName, runner)
+            } else if (imageRunner.state === ImageRunnerState.PULLING_IMAGE) {
+              await this.handleImageRunnerStatePullingImage(imageRunner)
             }
           } catch (err) {
-            this.logger.error(`Error propagating image to node ${node.id}: ${fromAxiosError(err)}`)
-            imageNode.state = ImageNodeState.ERROR
-            imageNode.errorReason = err.message
-            await this.imageNodeRepository.update(imageNode.id, imageNode)
+            this.logger.error(`Error propagating image to runner ${runner.id}: ${fromAxiosError(err)}`)
+            imageRunner.state = ImageRunnerState.ERROR
+            imageRunner.errorReason = err.message
+            await this.imageRunnerRepository.update(imageRunner.id, imageRunner)
           }
         }),
       )
@@ -234,10 +234,10 @@ export class ImageManager {
     }
   }
 
-  async propagateImageToNode(internalImageName: string, node: Node) {
+  async propagateImageToRunner(internalImageName: string, runner: Runner) {
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
+    const imageApi = this.runnerApiFactory.createImageApi(runner)
 
     let retries = 0
     while (retries < 10) {
@@ -260,50 +260,50 @@ export class ImageManager {
     }
   }
 
-  async handleImageNodeStatePullingImage(imageNode: ImageNode) {
-    const node = await this.nodeRepository.findOneOrFail({
+  async handleImageRunnerStatePullingImage(imageRunner: ImageRunner) {
+    const runner = await this.runnerRepository.findOneOrFail({
       where: {
-        id: imageNode.nodeId,
+        id: imageRunner.runnerId,
       },
     })
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const response = (await imageApi.imageExists(imageNode.imageRef)).data
+    const imageApi = this.runnerApiFactory.createImageApi(runner)
+    const response = (await imageApi.imageExists(imageRunner.imageRef)).data
     if (response.exists) {
-      imageNode.state = ImageNodeState.READY
-      await this.imageNodeRepository.save(imageNode)
+      imageRunner.state = ImageRunnerState.READY
+      await this.imageRunnerRepository.save(imageRunner)
       return
     }
 
     const timeoutMinutes = 60
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - imageNode.createdAt.getTime() > timeoutMs) {
-      imageNode.state = ImageNodeState.ERROR
-      imageNode.errorReason = 'Timeout while pulling image'
-      await this.imageNodeRepository.save(imageNode)
+    if (Date.now() - imageRunner.createdAt.getTime() > timeoutMs) {
+      imageRunner.state = ImageRunnerState.ERROR
+      imageRunner.errorReason = 'Timeout while pulling image'
+      await this.imageRunnerRepository.save(imageRunner)
       return
     }
 
     const retryTimeoutMinutes = 10
     const retryTimeoutMs = retryTimeoutMinutes * 60 * 1000
-    if (Date.now() - imageNode.createdAt.getTime() > retryTimeoutMs) {
-      await this.retryImageNodePull(imageNode)
+    if (Date.now() - imageRunner.createdAt.getTime() > retryTimeoutMs) {
+      await this.retryImageRunnerPull(imageRunner)
       return
     }
   }
 
-  async handleImageNodeStateBuildingImage(imageNode: ImageNode) {
-    const node = await this.nodeRepository.findOneOrFail({
+  async handleImageRunnerStateBuildingImage(imageRunner: ImageRunner) {
+    const runner = await this.runnerRepository.findOneOrFail({
       where: {
-        id: imageNode.nodeId,
+        id: imageRunner.runnerId,
       },
     })
 
-    const nodeWorkspaceApi = this.nodeApiFactory.createImageApi(node)
-    const response = (await nodeWorkspaceApi.imageExists(imageNode.imageRef)).data
+    const runnerWorkspaceApi = this.runnerApiFactory.createImageApi(runner)
+    const response = (await runnerWorkspaceApi.imageExists(imageRunner.imageRef)).data
     if (response && response.exists) {
-      imageNode.state = ImageNodeState.READY
-      await this.imageNodeRepository.save(imageNode)
+      imageRunner.state = ImageRunnerState.READY
+      await this.imageRunnerRepository.save(imageRunner)
       return
     }
   }
@@ -324,12 +324,12 @@ export class ImageManager {
 
     await Promise.all(
       images.map(async (image) => {
-        await this.imageNodeRepository.update(
+        await this.imageRunnerRepository.update(
           {
             imageRef: image.internalName,
           },
           {
-            state: ImageNodeState.REMOVING,
+            state: ImageRunnerState.REMOVING,
           },
         )
 
@@ -343,7 +343,7 @@ export class ImageManager {
   @Cron(CronExpression.EVERY_10_SECONDS)
   async checkImageState() {
     //  the first time the image is created it needs to be validated and pushed to the internal registry
-    //  before propagating to the nodes
+    //  before propagating to the runners
     //  this cron job will process the image states until the image is active (or error)
 
     //  get all images
@@ -419,77 +419,77 @@ export class ImageManager {
     await this.dockerProvider.imagePrune()
   }
 
-  async removeImageFromNode(node: Node, imageNode: ImageNode) {
-    if (imageNode && !imageNode.imageRef) {
+  async removeImageFromRunner(runner: Runner, imageRunner: ImageRunner) {
+    if (imageRunner && !imageRunner.imageRef) {
       //  this should never happen
-      this.logger.warn(`Internal image name not found for image node ${imageNode.id}`)
+      this.logger.warn(`Internal image name not found for image runner ${imageRunner.id}`)
       return
     }
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const imageExists = (await imageApi.imageExists(imageNode.imageRef)).data
+    const imageApi = this.runnerApiFactory.createImageApi(runner)
+    const imageExists = (await imageApi.imageExists(imageRunner.imageRef)).data
     if (imageExists.exists) {
-      await imageApi.removeImage(imageNode.imageRef)
+      await imageApi.removeImage(imageRunner.imageRef)
     }
 
-    imageNode.state = ImageNodeState.REMOVING
-    await this.imageNodeRepository.save(imageNode)
+    imageRunner.state = ImageRunnerState.REMOVING
+    await this.imageRunnerRepository.save(imageRunner)
   }
 
-  async handleImageNodeStateRemovingImage(imageNode: ImageNode) {
-    const node = await this.nodeRepository.findOne({
+  async handleImageRunnerStateRemovingImage(imageRunner: ImageRunner) {
+    const runner = await this.runnerRepository.findOne({
       where: {
-        id: imageNode.nodeId,
+        id: imageRunner.runnerId,
       },
     })
-    if (!node) {
+    if (!runner) {
       //  generally this should not happen
-      //  in case the node has been deleted from the database, delete the image node record
-      const errorMessage = `Node not found while trying to remove image ${imageNode.imageRef} from node ${imageNode.nodeId}`
+      //  in case the runner has been deleted from the database, delete the image runner record
+      const errorMessage = `Runner not found while trying to remove image ${imageRunner.imageRef} from runner ${imageRunner.runnerId}`
       this.logger.warn(errorMessage)
 
-      this.imageNodeRepository.delete(imageNode.id).catch((err) => {
+      this.imageRunnerRepository.delete(imageRunner.id).catch((err) => {
         this.logger.error(fromAxiosError(err))
       })
       return
     }
-    if (!imageNode.imageRef) {
+    if (!imageRunner.imageRef) {
       //  this should never happen
-      //  remove the image node record (it will be recreated again by the image propagation job)
-      this.logger.warn(`Internal image name not found for image node ${imageNode.id}`)
-      this.imageNodeRepository.delete(imageNode.id).catch((err) => {
+      //  remove the image runner record (it will be recreated again by the image propagation job)
+      this.logger.warn(`Internal image name not found for image runner ${imageRunner.id}`)
+      this.imageRunnerRepository.delete(imageRunner.id).catch((err) => {
         this.logger.error(fromAxiosError(err))
       })
       return
     }
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const response = await imageApi.imageExists(imageNode.imageRef)
+    const imageApi = this.runnerApiFactory.createImageApi(runner)
+    const response = await imageApi.imageExists(imageRunner.imageRef)
     if (response.data && !response.data.exists) {
-      await this.imageNodeRepository.delete(imageNode.id)
+      await this.imageRunnerRepository.delete(imageRunner.id)
     } else {
       //  just in case the image is still there
-      imageApi.removeImage(imageNode.imageRef).catch((err) => {
+      imageApi.removeImage(imageRunner.imageRef).catch((err) => {
         //  this should not happen, and is not critical
-        //  if the node can not remote the image, just delete the node record
-        this.imageNodeRepository.delete(imageNode.id).catch((err) => {
+        //  if the runner can not remote the image, just delete the runner record
+        this.imageRunnerRepository.delete(imageRunner.id).catch((err) => {
           this.logger.error(fromAxiosError(err))
         })
         //  and log the error for tracking
-        const errorMessage = `Failed to do just in case remove image ${imageNode.imageRef} from node ${node.id}: ${fromAxiosError(err)}`
+        const errorMessage = `Failed to do just in case remove image ${imageRunner.imageRef} from runner ${runner.id}: ${fromAxiosError(err)}`
         this.logger.warn(errorMessage)
       })
     }
   }
 
   async handleImageTagStateRemoving(image: Image) {
-    const imageNodeItems = await this.imageNodeRepository.find({
+    const imageRunnerItems = await this.imageRunnerRepository.find({
       where: {
         imageRef: image.internalName,
       },
     })
 
-    if (imageNodeItems.length === 0) {
+    if (imageRunnerItems.length === 0) {
       await this.imageRepository.remove(image)
     }
   }
@@ -514,31 +514,31 @@ export class ImageManager {
     }
 
     try {
-      // Find a node to build the image on
-      const node = await this.nodeRepository.findOne({
-        where: { state: NodeState.READY, unschedulable: Not(true) },
+      // Find a runner to build the image on
+      const runner = await this.runnerRepository.findOne({
+        where: { state: RunnerState.READY, unschedulable: Not(true) },
         order: { createdAt: 'ASC' },
       })
 
-      // TODO: get only nodes where the base image is available (extract from buildInfo)
+      // TODO: get only runners where the base image is available (extract from buildInfo)
 
-      if (!node) {
-        // No ready nodes available, retry later
+      if (!runner) {
+        // No ready runners available, retry later
         return
       }
 
-      // Assign the node ID to the image for tracking build progress
-      image.buildNodeId = node.id
+      // Assign the runner ID to the image for tracking build progress
+      image.buildRunnerId = runner.id
       await this.imageRepository.save(image)
 
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
-      const nodeImageApi = this.nodeApiFactory.createImageApi(node)
+      const runnerImageApi = this.runnerApiFactory.createImageApi(runner)
 
       const tag = image.name.split(':')[1] // Tag existance had already been validated
       const imageIdWithTag = `${image.id}:${tag}`
 
-      await nodeImageApi.buildImage({
+      await runnerImageApi.buildImage({
         image: imageIdWithTag, // Name doesn't matter for runner, it uses the image ID when pushing to internal registry
         registry: {
           url: registry.url,
@@ -552,7 +552,7 @@ export class ImageManager {
         pushToInternalRegistry: true,
       })
 
-      // save ImageNode
+      // save ImageRunner
 
       const internalImageName = `${registry.url}/${registry.project}/${imageIdWithTag}`
 
@@ -676,7 +676,7 @@ export class ImageManager {
         // Imanges that went through the build process are already in the internal registry
         await this.pushImageToInternalRegistry(image.id)
       }
-      await this.propagateImageToNodes(image.internalName)
+      await this.propagateImageToRunners(image.internalName)
       await this.updateImageState(image.id, ImageState.ACTIVE)
 
       // Best effort removal of old image from transient registry
@@ -693,7 +693,7 @@ export class ImageManager {
         }
       }
     } catch (error) {
-      // workaround when app nodes don't use a single docker host instance
+      // workaround when app runners don't use a single docker host instance
       if (error.statusCode === 404 || error.message?.toLowerCase().includes('no such image')) {
         return
       }
@@ -778,20 +778,20 @@ export class ImageManager {
     await this.dockerProvider.pushImage(internalImageName, registry)
   }
 
-  async retryImageNodePull(imageNode: ImageNode) {
-    const node = await this.nodeRepository.findOneOrFail({
+  async retryImageRunnerPull(imageRunner: ImageRunner) {
+    const runner = await this.runnerRepository.findOneOrFail({
       where: {
-        id: imageNode.nodeId,
+        id: imageRunner.runnerId,
       },
     })
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
+    const imageApi = this.runnerApiFactory.createImageApi(runner)
 
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
     await imageApi.pullImage({
-      image: imageNode.imageRef,
+      image: imageRunner.imageRef,
       registry: {
         url: dockerRegistry.url,
         username: dockerRegistry.username,
@@ -814,7 +814,7 @@ export class ImageManager {
   }
 
   @Cron(CronExpression.EVERY_HOUR)
-  async cleanupOldBuildInfoImageNodes() {
+  async cleanupOldBuildInfoImageRunners() {
     const lockKey = 'cleanup-old-buildinfo-images-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
       return
@@ -837,16 +837,16 @@ export class ImageManager {
 
       const imageRefs = oldBuildInfos.map((buildInfo) => buildInfo.imageRef)
 
-      const result = await this.imageNodeRepository.update(
+      const result = await this.imageRunnerRepository.update(
         { imageRef: In(imageRefs) },
-        { state: ImageNodeState.REMOVING },
+        { state: ImageRunnerState.REMOVING },
       )
 
       if (result.affected > 0) {
-        this.logger.debug(`Marked ${result.affected} ImageNodes for removal due to unused BuildInfo`)
+        this.logger.debug(`Marked ${result.affected} ImageRunners for removal due to unused BuildInfo`)
       }
     } catch (error) {
-      this.logger.error(`Failed to mark old BuildInfo ImageNodes for removal: ${fromAxiosError(error)}`)
+      this.logger.error(`Failed to mark old BuildInfo ImageRunners for removal: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }
