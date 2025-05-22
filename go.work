@@ -4,5 +4,6 @@ use (
 	./apps/cli
 	./apps/daemon
 	./apps/runner
+	./apps/runner-docker
 	./libs/api-client-go
 )

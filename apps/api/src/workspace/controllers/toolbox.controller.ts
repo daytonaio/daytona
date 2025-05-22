@@ -106,13 +106,15 @@ export class ToolboxController {
     const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
-        const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        const sandboxId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
         try {
-          const node = await this.toolboxService.getNode(workspaceId)
+          const node = await this.toolboxService.getNode(sandboxId)
           // @ts-expect-error - used later to set request headers
           req._nodeApiKey = node.apiKey
 
-          return node.apiUrl
+          const proxyUrl = await this.toolboxService.getProxyUrl(sandboxId)
+
+          return proxyUrl
         } catch (err) {
           // @ts-expect-error - used later to throw error
           req._err = err
@@ -123,9 +125,9 @@ export class ToolboxController {
       },
       pathRewrite: (path) => {
         // eslint-disable-next-line no-useless-escape
-        const workspaceId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-        const routePath = path.split(`/api/toolbox/${workspaceId}/toolbox`)[1]
-        const newPath = `/workspaces/${workspaceId}/main/toolbox${routePath}`
+        const sandboxId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        const routePath = path.split(`/api/toolbox/${sandboxId}/toolbox`)[1]
+        const newPath = `/sandbox/${sandboxId}/toolbox${routePath}`
 
         return newPath
       },
@@ -733,13 +735,13 @@ export class ToolboxController {
     type: ExecuteResponseDto,
   })
   async executeCommand(
-    @Param('workspaceId') workspaceId: string,
+    @Param('workspaceId') sandboxId: string,
     @Body() executeRequest: ExecuteRequestDto,
   ): Promise<ExecuteResponseDto> {
     const response = await this.toolboxService.forwardRequestToNode(
-      workspaceId,
+      sandboxId,
       'POST',
-      '/toolbox/process/execute',
+      '/process/execute',
       executeRequest,
     )
 

@@ -10,6 +10,7 @@ import { Workspace } from '../entities/workspace.entity'
 import { Node } from '../entities/node.entity'
 import axios from 'axios'
 import { WorkspaceState } from '../enums/workspace-state.enum'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class ToolboxService {
@@ -20,10 +21,11 @@ export class ToolboxService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(Node)
     private readonly nodeRepository: Repository<Node>,
+    private readonly configService: ConfigService,
   ) {}
 
-  async forwardRequestToNode(workspaceId: string, method: string, path: string, data?: any): Promise<any> {
-    const node = await this.getNode(workspaceId)
+  async forwardRequestToNode(sandboxId: string, method: string, path: string, data?: any): Promise<any> {
+    const node = await this.getNode(sandboxId)
 
     const maxRetries = 5
     let attempt = 1
@@ -39,10 +41,11 @@ export class ToolboxService {
           headers['Content-Type'] = 'application/json'
         }
 
+        const proxyUrl = await this.getProxyUrl(sandboxId)
+
         const requestConfig: any = {
           method,
-          // TODO: remove /main from the path after the node-agent refactor
-          url: `${node.apiUrl}/workspaces/${workspaceId}/main${path}`,
+          url: `${proxyUrl}sandbox/${sandboxId}/toolbox${path}`,
           headers,
           maxBodyLength: 209715200, // 200MB in bytes
           maxContentLength: 209715200, // 200MB in bytes
@@ -77,33 +80,44 @@ export class ToolboxService {
     }
   }
 
-  public async getNode(workspaceId: string): Promise<Node> {
+  public async getNode(sandboxId: string): Promise<Node> {
     try {
-      const workspace = await this.workspaceRepository.findOne({
-        where: { id: workspaceId },
+      const sandbox = await this.workspaceRepository.findOne({
+        where: { id: sandboxId },
       })
 
-      if (!workspace) {
-        throw new NotFoundException('Workspace not found')
+      if (!sandbox) {
+        throw new NotFoundException('Sandbox not found')
       }
 
       const node = await this.nodeRepository.findOne({
-        where: { id: workspace.nodeId },
+        where: { id: sandbox.nodeId },
       })
 
       if (!node) {
-        throw new NotFoundException('Node not found for the workspace')
+        throw new NotFoundException('Node not found for the sandbox')
       }
 
-      if (workspace.state !== WorkspaceState.STARTED) {
-        throw new BadRequestException('Workspace is not running')
+      if (sandbox.state !== WorkspaceState.STARTED) {
+        throw new BadRequestException('Sandbox is not running')
       }
 
       return node
     } finally {
-      await this.workspaceRepository.update(workspaceId, {
+      await this.workspaceRepository.update(sandboxId, {
         lastActivityAt: new Date(),
       })
     }
+  }
+
+  public async getProxyUrl(sandboxId: string): Promise<string> {
+    const node = await this.getNode(sandboxId)
+
+    const proxyPort = this.configService.get<number>('RUNNER_PROXY_PORT')
+
+    const url = new URL(node.apiUrl)
+    url.port = proxyPort.toString()
+
+    return url.toString()
   }
 }

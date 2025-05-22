@@ -11,7 +11,6 @@ import { Node } from '../entities/node.entity'
 import { CreateNodeDto } from '../dto/create-node.dto'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { NodeRegion } from '../enums/node-region.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
 import { NodeState } from '../enums/node-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { WorkspaceEvents } from './../../workspace/constants/workspace-events.constants'
@@ -21,6 +20,7 @@ import { WorkspaceState } from './../../workspace/enums/workspace-state.enum'
 import { Workspace } from './../../workspace/entities/workspace.entity'
 import { ImageNode } from './../../workspace/entities/image-node.entity'
 import { ImageNodeState } from './../../workspace/enums/image-node-state.enum'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 
 @Injectable()
 export class NodeService {
@@ -30,7 +30,7 @@ export class NodeService {
   constructor(
     @InjectRepository(Node)
     private readonly nodeRepository: Repository<Node>,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerClientFactory: RunnerClientFactory,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(ImageNode)
@@ -143,9 +143,33 @@ export class NodeService {
     for (const node of nodes) {
       this.logger.debug(`Checking node ${node.id}`)
       try {
-        // Do something with the node
-        const nodeApi = this.nodeApiFactory.createNodeApi(node)
-        await nodeApi.healthCheck()
+        const runnerClient = this.runnerClientFactory.create(node)
+        this.logger.debug(`Attempting health check for node ${node.id} at ${node.apiUrl}`)
+
+        // Add timeout to the health check
+        const response = (await Promise.race([
+          runnerClient.healthCheck({}),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Health check timeout')), 5000)),
+        ])) as { status: string; version: string }
+
+        // Log the full response for debugging
+        this.logger.debug(`Health check response from node ${node.id}:`, JSON.stringify(response))
+
+        // Check if response is valid
+        if (!response) {
+          throw new Error('Empty health check response received')
+        }
+
+        // Check if status field exists and is a string
+        if (!response.status || typeof response.status !== 'string') {
+          throw new Error('Health check response missing status field')
+        }
+
+        // Verify the health check response
+        if (response.status !== 'healthy') {
+          throw new Error(`Node reported unhealthy status: ${response.status}`)
+        }
+
         await this.nodeRepository.update(node.id, {
           state: NodeState.READY,
           lastChecked: new Date(),
@@ -153,13 +177,10 @@ export class NodeService {
 
         await this.recalculateNodeUsage(node.id)
       } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Node not reachable')
-        } else {
-          this.logger.error(`Error checking node ${node.id}: ${e.message}`)
-          this.logger.error(e)
-        }
+        this.logger.error(`Error checking node ${node.id}: ${e.message}`)
+        this.logger.error(e)
 
+        // Update node state to UNRESPONSIVE for any error
         await this.nodeRepository.update(node.id, {
           state: NodeState.UNRESPONSIVE,
           lastChecked: new Date(),

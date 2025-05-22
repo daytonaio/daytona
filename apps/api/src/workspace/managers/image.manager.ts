@@ -15,7 +15,6 @@ import { ImageNode } from '../entities/image-node.entity'
 import { Node } from '../entities/node.entity'
 import { NodeState } from '../enums/node-state.enum'
 import { ImageNodeState } from '../enums/image-node-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
 import { v4 as uuidv4 } from 'uuid'
 import { NodeNotReadyError } from '../errors/node-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
@@ -27,6 +26,7 @@ import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { NodeService } from '../services/node.service'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)
@@ -47,7 +47,7 @@ export class ImageManager {
     private readonly nodeService: NodeService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerClientFactory: RunnerClientFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
   ) {}
@@ -239,12 +239,12 @@ export class ImageManager {
   async propagateImageToNode(internalImageName: string, node: Node) {
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
+    const runnerClient = this.runnerClientFactory.create(node)
 
     let retries = 0
     while (retries < 10) {
       try {
-        await imageApi.pullImage({
+        await runnerClient.pullImage({
           image: internalImageName,
           registry: {
             url: dockerRegistry.url,
@@ -269,8 +269,10 @@ export class ImageManager {
       },
     })
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const response = (await imageApi.imageExists(imageNode.imageRef)).data
+    const runnerClient = this.runnerClientFactory.create(node)
+    const response = await runnerClient.imageExists({
+      image: imageNode.imageRef,
+    })
     if (response.exists) {
       imageNode.state = ImageNodeState.READY
       await this.imageNodeRepository.save(imageNode)
@@ -301,8 +303,10 @@ export class ImageManager {
       },
     })
 
-    const nodeWorkspaceApi = this.nodeApiFactory.createImageApi(node)
-    const response = (await nodeWorkspaceApi.imageExists(imageNode.imageRef)).data
+    const runnerClient = this.runnerClientFactory.create(node)
+    const response = await runnerClient.imageExists({
+      image: imageNode.imageRef,
+    })
     if (response && response.exists) {
       imageNode.state = ImageNodeState.READY
       await this.imageNodeRepository.save(imageNode)
@@ -428,10 +432,14 @@ export class ImageManager {
       return
     }
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const imageExists = (await imageApi.imageExists(imageNode.imageRef)).data
+    const runnerClient = this.runnerClientFactory.create(node)
+    const imageExists = await runnerClient.imageExists({
+      image: imageNode.imageRef,
+    })
     if (imageExists.exists) {
-      await imageApi.removeImage(imageNode.imageRef)
+      await runnerClient.removeImage({
+        image: imageNode.imageRef,
+      })
     }
 
     imageNode.state = ImageNodeState.REMOVING
@@ -465,22 +473,28 @@ export class ImageManager {
       return
     }
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
-    const response = await imageApi.imageExists(imageNode.imageRef)
-    if (response.data && !response.data.exists) {
+    const runnerClient = this.runnerClientFactory.create(node)
+    const response = await runnerClient.imageExists({
+      image: imageNode.imageRef,
+    })
+    if (response.exists) {
       await this.imageNodeRepository.delete(imageNode.id)
     } else {
       //  just in case the image is still there
-      imageApi.removeImage(imageNode.imageRef).catch((err) => {
-        //  this should not happen, and is not critical
-        //  if the node can not remote the image, just delete the node record
-        this.imageNodeRepository.delete(imageNode.id).catch((err) => {
-          this.logger.error(fromAxiosError(err))
+      runnerClient
+        .removeImage({
+          image: imageNode.imageRef,
         })
-        //  and log the error for tracking
-        const errorMessage = `Failed to do just in case remove image ${imageNode.imageRef} from node ${node.id}: ${fromAxiosError(err)}`
-        this.logger.warn(errorMessage)
-      })
+        .catch((err) => {
+          //  this should not happen, and is not critical
+          //  if the node can not remote the image, just delete the node record
+          this.imageNodeRepository.delete(imageNode.id).catch((err) => {
+            this.logger.error(fromAxiosError(err))
+          })
+          //  and log the error for tracking
+          const errorMessage = `Failed to do just in case remove image ${imageNode.imageRef} from node ${node.id}: ${fromAxiosError(err)}`
+          this.logger.warn(errorMessage)
+        })
     }
   }
 
@@ -538,12 +552,12 @@ export class ImageManager {
 
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
-      const nodeImageApi = this.nodeApiFactory.createImageApi(node)
+      const runnerClient = this.runnerClientFactory.create(node)
 
       const tag = image.name.split(':')[1] // Tag existance had already been validated
       const imageIdWithTag = `${image.id}:${tag}`
 
-      await nodeImageApi.buildImage({
+      await runnerClient.buildImage({
         image: imageIdWithTag, // Name doesn't matter for runner, it uses the image ID when pushing to internal registry
         registry: {
           url: registry.url,
@@ -777,12 +791,12 @@ export class ImageManager {
       },
     })
 
-    const imageApi = this.nodeApiFactory.createImageApi(node)
+    const runnerClient = this.runnerClientFactory.create(node)
 
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await imageApi.pullImage({
+    await runnerClient.pullImage({
       image: imageNode.imageRef,
       registry: {
         url: dockerRegistry.url,

@@ -1,0 +1,169 @@
+syntax = "proto3";
+
+package runner;
+
+option go_package = "github.com/daytonaio/runner/proto";
+
+service Runner {
+  // Health endpoints
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+
+  // Sandbox endpoints
+  rpc CreateSandbox(CreateSandboxRequest) returns (CreateSandboxResponse) {}
+  rpc DestroySandbox(DestroySandboxRequest) returns (DestroySandboxResponse) {}
+  rpc CreateSnapshot(CreateSnapshotRequest) returns (CreateSnapshotResponse) {}
+  rpc StartSandbox(StartSandboxRequest) returns (StartSandboxResponse) {}
+  rpc StopSandbox(StopSandboxRequest) returns (StopSandboxResponse) {}
+  rpc GetSandboxInfo(GetSandboxInfoRequest) returns (GetSandboxInfoResponse) {}
+  rpc RemoveDestroyedSandbox(RemoveDestroyedSandboxRequest) returns (RemoveDestroyedSandboxResponse) {}
+
+  // Image endpoints
+  rpc PullImage(PullImageRequest) returns (PullImageResponse) {}
+  rpc BuildImage(BuildImageRequest) returns (BuildImageResponse) {}
+  rpc ImageExists(ImageExistsRequest) returns (ImageExistsResponse) {}
+  rpc RemoveImage(RemoveImageRequest) returns (RemoveImageResponse) {}
+  rpc GetBuildLogs(GetBuildLogsRequest) returns (stream LogLine) {}
+}
+
+// Health messages
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string version = 2;
+}
+
+// Sandbox messages
+message CreateSandboxRequest {
+  string id = 1;
+  optional string from_volume_id = 2;
+  string user_id = 3;
+  string image = 4;
+  string os_user = 5;
+  int64 cpu_quota = 6;
+  int64 gpu_quota = 7;
+  int64 memory_quota = 8;
+  int64 storage_quota = 9;
+  map<string, string> env = 10;
+  optional Registry registry = 11;
+  repeated string entrypoint = 12;
+  repeated Volume volumes = 13;
+}
+
+message CreateSandboxResponse {
+  string sandbox_id = 1;
+}
+
+message DestroySandboxRequest {
+  string sandbox_id = 1;
+}
+
+message DestroySandboxResponse {
+  string message = 1;
+}
+
+message CreateSnapshotRequest {
+  string sandbox_id = 1;
+  Registry registry = 2;
+  string image = 3;
+}
+
+message CreateSnapshotResponse {
+  string message = 1;
+}
+
+message StartSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message StartSandboxResponse {
+  string message = 1;
+}
+
+message StopSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message StopSandboxResponse {
+  string message = 1;
+}
+
+message GetSandboxInfoRequest {
+  string sandbox_id = 1;
+}
+
+message GetSandboxInfoResponse {
+  string state = 1;
+  string snapshot_state = 2;
+}
+
+message RemoveDestroyedSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message RemoveDestroyedSandboxResponse {
+  string message = 1;
+}
+
+// Image messages
+message Registry {
+  string url = 1;
+  optional string project = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message PullImageRequest {
+  string image = 1;
+  Registry registry = 2;
+}
+
+message PullImageResponse {
+  string message = 1;
+}
+
+message BuildImageRequest {
+  optional string image = 1;
+  optional Registry registry = 2;
+  string dockerfile = 3;
+  string organization_id = 4;
+  repeated string context = 5;
+  optional bool push_to_internal_registry = 6;
+}
+
+message BuildImageResponse {
+  string message = 1;
+}
+
+message ImageExistsRequest {
+  string image = 1;
+  bool include_latest = 2;
+}
+
+message ImageExistsResponse {
+  bool exists = 1;
+}
+
+message RemoveImageRequest {
+  string image = 1;
+  bool force = 2;
+}
+
+message RemoveImageResponse {
+  string message = 1;
+}
+
+message GetBuildLogsRequest {
+  string image_ref = 1;
+  bool follow = 2;
+}
+
+message LogLine {
+  string content = 1;
+}
+
+// Add Volume message for CreateSandboxRequest
+message Volume {
+  string volume_id = 1;
+  string mount_path = 2;
+}

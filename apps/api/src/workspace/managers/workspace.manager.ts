@@ -10,7 +10,7 @@ import { In, Not, Raw, Repository } from 'typeorm'
 import { Workspace } from '../entities/workspace.entity'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 import { NodeService } from '../services/node.service'
 import { EnumsSandboxState as NodeWorkspaceState } from '@daytonaio/runner-api-client'
 import { NodeState } from '../enums/node-state.enum'
@@ -48,7 +48,7 @@ export class WorkspaceManager {
     @InjectRepository(ImageNode)
     private readonly imageNodeRepository: Repository<ImageNode>,
     private readonly nodeService: NodeService,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerClientFactory: RunnerClientFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
     private readonly imageService: ImageService,
@@ -221,6 +221,30 @@ export class WorkspaceManager {
         return
       }
 
+      //  *** ORG CODE ***
+      //if (error.code === 'ECONNRESET') {
+      //  await this.redis.del(lockKey)
+      //  this.syncInstanceState(workspaceId)
+      //  return
+      //}
+      //  *** END ORG CODE ***
+
+      //  *** 409 OVERRIDE PATCH ***
+      if (error.code === 'ECONNRESET' || error.message === 'Request failed with status code 409') {
+        const retryKey = `sync-instance-state-retry-${workspaceId}`
+        const retryCountStr = await this.redis.get(retryKey)
+        const retryCount = retryCountStr ? parseInt(retryCountStr) : 0
+
+        if (retryCount < 10) {
+          await this.redis.setex(retryKey, 300, (retryCount + 1).toString())
+          await new Promise((resolve) => setTimeout(resolve, 100 * retryCount))
+          await this.redis.del(lockKey)
+          this.syncInstanceState(workspaceId)
+          return
+        }
+      }
+      //  *** END 409 OVERRIDE PATCH ***
+
       this.logger.error(`Error processing desired state for workspace ${workspaceId}:`, fromAxiosError(error))
 
       const workspace = await this.workspaceRepository.findOneBy({
@@ -295,13 +319,13 @@ export class WorkspaceManager {
   // Initiates the image build on the runner and creates an ImageNode depending on the result
   async buildOnNode(buildInfo: BuildInfo, nodeId: string, organizationId: string) {
     const node = await this.nodeService.findOne(nodeId)
-    const nodeImageApi = this.nodeApiFactory.createImageApi(node)
+    const runnerClient = this.runnerClientFactory.create(node)
 
     let retries = 0
 
     while (retries < 10) {
       try {
-        await nodeImageApi.buildImage({
+        await runnerClient.buildImage({
           image: buildInfo.imageRef,
           organizationId: organizationId,
           dockerfile: buildInfo.dockerfileContent,
@@ -323,7 +347,9 @@ export class WorkspaceManager {
       return
     }
 
-    const response = (await nodeImageApi.imageExists(buildInfo.imageRef)).data
+    const response = await runnerClient.imageExists({
+      image: buildInfo.imageRef,
+    })
     let state = ImageNodeState.BUILDING_IMAGE
     if (response && response.exists) {
       state = ImageNodeState.READY
@@ -410,11 +436,12 @@ export class WorkspaceManager {
         //  when the snapshot is completed, destroy the workspace on the node
         //  and deassociate the workspace from the node
         const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+        const runnerClient = this.runnerClientFactory.create(node)
 
         try {
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-          const workspaceInfo = workspaceInfoResponse.data
+          const workspaceInfo = await runnerClient.getSandboxInfo({
+            sandboxId: workspace.id,
+          })
           switch (workspaceInfo.state) {
             case NodeWorkspaceState.SandboxStateDestroying:
               //  wait until workspace is destroyed on node
@@ -425,13 +452,16 @@ export class WorkspaceManager {
               await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVED, null)
               break
             default:
-              await nodeWorkspaceApi.destroy(workspace.id)
+              await runnerClient.destroySandbox({
+                sandboxId: workspace.id,
+              })
               await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
           }
         } catch (error) {
           //  fail for errors other than workspace not found or workspace already destroyed
+          //  TODO: error.response will not work with grpc
           if (
             !(
               (error.response?.data?.statusCode === 400 &&
@@ -470,16 +500,19 @@ export class WorkspaceManager {
         break
       case WorkspaceState.DESTROYING: {
         // check if workspace is destroyed
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+        const runnerClient = this.runnerClientFactory.create(node)
 
         try {
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspaceId)
-          const workspaceInfo = workspaceInfoResponse.data
+          const workspaceInfo = await runnerClient.getSandboxInfo({
+            sandboxId: workspace.id,
+          })
           if (
             workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed ||
             workspaceInfo.state === NodeWorkspaceState.SandboxStateError
           ) {
-            await nodeWorkspaceApi.removeDestroyed(workspaceId)
+            await runnerClient.removeDestroyedSandbox({
+              sandboxId: workspace.id,
+            })
           }
         } catch (e) {
           //  if the workspace is not found on node, it is already destroyed
@@ -497,13 +530,16 @@ export class WorkspaceManager {
       default: {
         // destroy workspace
         try {
-          const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspaceId)
-          const workspaceInfo = workspaceInfoResponse.data
-          if (workspaceInfo?.state === NodeWorkspaceState.SandboxStateDestroyed) {
+          const runnerClient = this.runnerClientFactory.create(node)
+          const workspaceInfo = await runnerClient.getSandboxInfo({
+            sandboxId: workspace.id,
+          })
+          if (workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed) {
             break
           }
-          await nodeWorkspaceApi.destroy(workspace.id)
+          await runnerClient.destroySandbox({
+            sandboxId: workspace.id,
+          })
         } catch (e) {
           //  if the workspace is not found on node, it is already destroyed
           if (e.response.status !== 404) {
@@ -562,9 +598,10 @@ export class WorkspaceManager {
           return
         }
         const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-        const workspaceInfo = workspaceInfoResponse.data
+        const runnerClient = this.runnerClientFactory.create(node)
+        const workspaceInfo = await runnerClient.getSandboxInfo({
+          sandboxId: workspace.id,
+        })
         if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStarted) {
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
             id: workspace.id,
@@ -591,8 +628,10 @@ export class WorkspaceManager {
     switch (workspace.state) {
       case WorkspaceState.STARTED: {
         // stop workspace
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        await nodeWorkspaceApi.stop(workspace.id)
+        const runnerClient = this.runnerClientFactory.create(node)
+        await runnerClient.stopSandbox({
+          sandboxId: workspace.id,
+        })
         await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
         //  sync states again immediately for workspace
         await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
@@ -602,9 +641,10 @@ export class WorkspaceManager {
       case WorkspaceState.STOPPING: {
         // check if workspace is stopped
         const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-        const workspaceInfo = workspaceInfoResponse.data
+        const runnerClient = this.runnerClientFactory.create(node)
+        const workspaceInfo = await runnerClient.getSandboxInfo({
+          sandboxId: workspace.id,
+        })
         switch (workspaceInfo.state) {
           case NodeWorkspaceState.SandboxStateStopped: {
             const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
@@ -632,9 +672,10 @@ export class WorkspaceManager {
           return
         }
         const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-        const workspaceInfo = workspaceInfoResponse.data
+        const runnerClient = this.runnerClientFactory.create(node)
+        const workspaceInfo = await runnerClient.getSandboxInfo({
+          sandboxId: workspace.id,
+        })
         if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStopped) {
           await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPED)
         }
@@ -724,8 +765,8 @@ export class WorkspaceManager {
       }
     }
 
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    await nodeWorkspaceApi.create(createWorkspaceDto)
+    const runnerClient = this.runnerClientFactory.create(node)
+    await runnerClient.createSandbox(createWorkspaceDto)
     await this.updateWorkspaceState(workspace.id, WorkspaceState.CREATING)
     //  sync states again immediately for workspace
     await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
@@ -818,8 +859,10 @@ export class WorkspaceManager {
               prevNodeId: workspace.nodeId,
             })
             try {
-              const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-              await nodeWorkspaceApi.removeDestroyed(workspace.id)
+              const runnerClient = this.runnerClientFactory.create(node)
+              await runnerClient.destroySandbox({
+                sandboxId: workspace.id,
+              })
             } catch (e) {
               this.logger.error(
                 `Failed to cleanup workspace ${workspace.id} on previous node ${node.id}:`,
@@ -891,15 +934,25 @@ export class WorkspaceManager {
         })
       ).filter((node) => node.id != workspace.prevNodeId)
 
-      //  get random node from available nodes
-      const randomNodeIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-      const nodeId = availableNodes[randomNodeIndex(0, availableNodes.length - 1)].id
+      //  if there are available nodes with the workspace base image,
+      //  search for available nodes with the base image cached on the node
+      //  otherwise, search all available nodes
+      const includeImage = availableNodes.length > 0 ? image.internalName : undefined
 
+      const nodeId = await this.nodeService.getRandomAvailableNode({
+        region: workspace.region,
+        workspaceClass: workspace.class,
+        imageRef: includeImage,
+      })
       const node = await this.nodeService.findOne(nodeId)
+      if (node.state !== NodeState.READY) {
+        //  console.debug(`Node ${node.id} is not ready`);
+        return
+      }
 
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerClient = this.runnerClientFactory.create(node)
 
-      await nodeWorkspaceApi.create({
+      await runnerClient.createSandbox({
         id: workspace.id,
         image: validSnapshotImage,
         osUser: workspace.osUser,
@@ -923,9 +976,11 @@ export class WorkspaceManager {
       // if workspace has node, start workspace
       const node = await this.nodeService.findOne(workspace.nodeId)
 
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerClient = this.runnerClientFactory.create(node)
 
-      await nodeWorkspaceApi.start(workspace.id)
+      await runnerClient.startSandbox({
+        sandboxId: workspace.id,
+      })
 
       await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTING)
       //  sync states again immediately for workspace
@@ -938,15 +993,11 @@ export class WorkspaceManager {
 
   //  used to check if workspace is pulling image on node and update workspace state accordingly
   private async handleNodeWorkspacePullingImageStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
-    //  edge case when workspace is being transferred to a new node
-    if (!workspace.nodeId) {
-      return true
-    }
-
     const node = await this.nodeService.findOne(workspace.nodeId)
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-    const workspaceInfo = workspaceInfoResponse.data
+    const runnerClient = this.runnerClientFactory.create(node)
+    const workspaceInfo = await runnerClient.getSandboxInfo({
+      sandboxId: workspace.id,
+    })
 
     if (workspaceInfo.state === NodeWorkspaceState.SandboxStatePullingImage) {
       await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_IMAGE)
@@ -966,9 +1017,10 @@ export class WorkspaceManager {
   //  also used to handle the case where a workspace is started on a node and then transferred to a new node
   private async handleNodeWorkspaceStartedStateCheck(workspace: Workspace) {
     const node = await this.nodeService.findOne(workspace.nodeId)
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
-    const workspaceInfo = workspaceInfoResponse.data
+    const runnerClient = this.runnerClientFactory.create(node)
+    const workspaceInfo = await runnerClient.getSandboxInfo({
+      sandboxId: workspace.id,
+    })
 
     switch (workspaceInfo.state) {
       case NodeWorkspaceState.SandboxStateStarted: {
@@ -1001,17 +1053,21 @@ export class WorkspaceManager {
             await this.workspaceRepository.save(workspaceToUpdate)
             break
           }
-          const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+          const runnerClient = this.runnerClientFactory.create(node)
           try {
             // First try to destroy the workspace
-            await nodeWorkspaceApi.destroy(workspace.id)
+            await runnerClient.destroySandbox({
+              sandboxId: workspace.id,
+            })
 
             // Wait for workspace to be destroyed before removing
             let retries = 0
             while (retries < 10) {
               try {
-                const workspaceInfo = await nodeWorkspaceApi.info(workspace.id)
-                if (workspaceInfo.data.state === NodeWorkspaceState.SandboxStateDestroyed) {
+                const workspaceInfo = await runnerClient.getSandboxInfo({
+                  sandboxId: workspace.id,
+                })
+                if (workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed) {
                   break
                 }
               } catch (e) {
@@ -1025,7 +1081,9 @@ export class WorkspaceManager {
             }
 
             // Finally remove the destroyed workspace
-            await nodeWorkspaceApi.removeDestroyed(workspace.id)
+            await runnerClient.removeDestroyedSandbox({
+              sandboxId: workspace.id,
+            })
             workspace.prevNodeId = null
 
             const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({

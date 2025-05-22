@@ -28,6 +28,16 @@
       "preLaunchTask": "debug-build-runner"
     },
     {
+      "name": "Runner Docker",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/apps/runner-docker/cmd",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/apps/runner-docker/.env",
+      "output": "${workspaceFolder}/dist/apps/runner-docker"
+    },
+    {
       "name": "Daemon",
       "type": "go",
       "request": "launch",
