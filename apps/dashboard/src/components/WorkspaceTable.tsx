@@ -122,6 +122,17 @@ export function WorkspaceTable({
     },
     enableRowSelection: true,
     getRowId: (row) => row.id,
+    // count how many sandboxes get deleted
+    onRowSelectionChange: (rowSelection) => {
+      const selectedCount = Object.keys(rowSelection).length
+      const totalCount = data.length
+      if (selectedCount > 1) {
+        if (selectedCount === totalCount) {
+          // If all sandboxes are selected, show a tooltip or prompt asking "Select ALL {totalCount} Sandboxes?"
+          console.log(`Select ALL ${totalCount} Sandboxes?`)
+        }
+      }
+    },
     initialState: {
       pagination: {
         pageSize: DEFAULT_PAGE_SIZE,
@@ -197,45 +208,54 @@ export function WorkspaceTable({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between space-x-2 py-4">
-        <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
-            <div className="flex items-center space-x-2">
-              <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-                <PopoverTrigger>
-                  <Button variant="destructive" size="sm" className="h-8">
-                    Bulk Delete
+      {/* When clicking bulk selection checkbox and you have more than sandboxes (eg 15), add a tooltip (or prompt) asking "Select ALL 15 Sandboxes?" */}
+      <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center">
+          {table.getIsSomeRowsSelected() && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="mr-2"
+                  onClick={() => setBulkDeleteConfirmationOpen(true)}
+                  disabled={!deletePermitted}
+                >
+                  Delete {table.getSelectedRowModel().rows.length} selected
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56">
+                <p>Are you sure you want to delete these workspaces?</p>
+                <div className="flex justify-end mt-2">
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      handleBulkDelete(table.getSelectedRowModel().rows.map((row) => row.original.id))
+                      setBulkDeleteConfirmationOpen(false)
+                    }}
+                  >
+                    Delete
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent side="top">
-                  <div className="flex flex-col gap-4">
-                    <p>Are you sure you want to delete these workspaces?</p>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="destructive"
-                        onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
-                          setBulkDeleteConfirmationOpen(false)
-                        }}
-                      >
-                        Delete
-                      </Button>
-                      <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
+                  {/* cancel deletion */}
+                  <Button
+                    variant="outline"
+                    className="ml-2"
+                    onClick={() => {
+                      setBulkDeleteConfirmationOpen(false)
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </PopoverContent>
+            </Popover>
           )}
         </div>
-        <Pagination table={table} selectionEnabled />
+        <Pagination table={table} />
+      </div>
+      <div className="flex items-center mt-4">
+        <span className="text-sm text-muted-foreground">
+          {table.getRowModel().rows.length} of {table.getPrePaginationRowModel().rows.length} workspaces
+        </span>
       </div>
     </div>
   )
@@ -279,11 +299,6 @@ const getProviderMetadata = (metadata: string | undefined) => {
     console.error('Error parsing provider metadata:', e)
     return null
   }
-}
-
-const getProviderClass = (workspace: Workspace): string => {
-  const parsed = getProviderMetadata(workspace.info?.providerMetadata)
-  return parsed?.class || 'unknown'
 }
 
 const getNodeDomain = (metadata: string | undefined): string | null => {
@@ -349,7 +364,7 @@ const getColumns = ({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
+          onCheckedChange={(value: any) => {
             for (const row of table.getRowModel().rows) {
               if (loadingWorkspaces[row.original.id]) {
                 row.toggleSelected(false)
@@ -369,7 +384,7 @@ const getColumns = ({
         return (
           <Checkbox
             checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            onCheckedChange={(value: any) => row.toggleSelected(!!value)}
             aria-label="Select row"
             className="translate-y-[2px]"
           />
