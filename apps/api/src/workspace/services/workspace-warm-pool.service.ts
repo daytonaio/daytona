@@ -76,7 +76,7 @@ export class WorkspaceWarmPoolService {
       ],
     })
     if (!image) {
-      throw new BadRequestError(`Image ${workspaceImage} not found or not accessible`)
+      throw new BadRequestError(`Image ${workspaceImage} not found. Did you add it through the Daytona Dashboard?`)
     }
 
     //  check if workspace is warm pool
