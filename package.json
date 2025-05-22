@@ -3,11 +3,21 @@
   "version": "0.14.0",
   "license": "UNLICENSED",
   "private": true,
+  "workspaces": [
+    "apps/*",
+    "libs/*",
+    "examples/*"
+  ],
   "scripts": {
     "postinstall": "is-ci || husky",
-    "format": "nx run-many --target=format --all --parallel=$(getconf _NPROCESSORS_ONLN) && prettier --write \"*.{ts,js,json,yaml}\" \"functions/**/*.js\" && markdownlint-cli2 \"**/*.{mdx,md}\" \"#node_modules\" --fix",
-    "lint": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\"",
+    "format": "nx run-many --target=format --all --parallel=$(getconf _NPROCESSORS_ONLN) && prettier --write \"*.{ts,js,json,yaml}\" \"functions/**/*.js\" && markdownlint-cli2 \"**/*.{mdx,md}\" --fix && npm run format:py && npm run format:jupyter",
+    "format:py": "isort libs examples/python --skip libs/api-client-python && black libs examples/python --exclude libs/api-client-python",
+    "format:jupyter": "nbqa isort examples/jupyter && black examples/jupyter",
+    "lint": "npm run lint:ts && npm run lint:py && npm run lint:jupyter",
+    "lint:ts": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\"",
+    "lint:py": "pylint libs examples/python --ignore-paths='^(?:.*/build/.*|libs/api-client-python/.*)$' --recursive=y -sn",
     "lint:fix": "eslint \"{apps,libs,test}/**/*.{ts,tsx}\" --fix",
+    "lint:jupyter": "nbqa pylint examples/jupyter --recursive=y -sn",
     "build": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
     "serve": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
@@ -18,7 +28,8 @@
     "migration:generate": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:generate -d ./src/data-source.ts ./src/migrations/migration",
     "migration:run": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/data-source.ts",
     "migration:revert": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:revert -d ./src/data-source.ts",
-    "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add"
+    "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add",
+    "docs": "nx run-many --target=docs --all"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",
@@ -53,7 +64,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@socket.io/redis-adapter": "^8.3.0",
     "@tanstack/react-table": "^8.21.2",
-    "axios": "^1.6.0",
+    "axios": "^1.6.1",
     "axios-debug-log": "^1.0.0",
     "cache-manager": "^6.4.1",
     "cache-manager-memcached-store": "^6.0.1",
@@ -180,6 +191,16 @@
     ],
     "*.{mdx,md}": [
       "markdownlint-cli2 --fix"
+    ],
+    "!(libs/api-client-python/**/*)*.py": [
+      "isort",
+      "black",
+      "pylint -sn"
+    ],
+    "*.ipynb": [
+      "nbqa isort",
+      "black",
+      "nbqa pylint -sn"
     ]
   }
 }

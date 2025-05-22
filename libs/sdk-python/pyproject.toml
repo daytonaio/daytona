@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=68.0.0", "wheel>=0.41.2", "build>=1.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "daytona_sdk"
+version = "0.0.0-dev"
+authors = [
+    { name = "Daytona Platforms Inc." },
+]
+description = "Python SDK for Daytona"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "environs>=9.5.0,<10.0.0",
+    "marshmallow>=3.19.0,<4.0.0",
+    "pydantic>=2.4.2,<3.0.0",
+    "python-dateutil>=2.8.2,<3.0.0",
+    "urllib3>=2.0.7,<3.0.0",
+    "daytona_api_client>=0.19.1,<1.0.0",
+    "Deprecated>=1.2.18,<2.0.0",
+    "httpx>=0.28.0,<0.29.0",
+    "requests_toolbelt>=1.0.0,<1.1.0"
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+]
+keywords = ["daytona", "sdk"]
+license = {text = "AGPL-3.0"}
+
+[project.optional-dependencies]
+dev = [
+    "pydoc-markdown>=4.8.2",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "build>=1.0.3",
+    "wheel>=0.41.2",
+    "setuptools>=68.0.0",
+    "twine>=4.0.2",
+    "nbqa>=1.9.1",
+    "black[jupyter]>=23.1.0,<=23.12.1",
+    "pylint>=3.3.4",
+    "matplotlib>=3.10.0,<3.11.0"
+]
