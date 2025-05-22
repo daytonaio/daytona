@@ -31,8 +31,8 @@ type VolumesAPI interface {
 	CreateVolume(ctx context.Context) VolumesAPICreateVolumeRequest
 
 	// CreateVolumeExecute executes the request
-	//  @return VolumeDto
-	CreateVolumeExecute(r VolumesAPICreateVolumeRequest) (*VolumeDto, *http.Response, error)
+	//  @return Volume
+	CreateVolumeExecute(r VolumesAPICreateVolumeRequest) (*Volume, *http.Response, error)
 
 	/*
 		DeleteVolume Delete volume
@@ -56,8 +56,8 @@ type VolumesAPI interface {
 	GetVolume(ctx context.Context, volumeId string) VolumesAPIGetVolumeRequest
 
 	// GetVolumeExecute executes the request
-	//  @return VolumeDto
-	GetVolumeExecute(r VolumesAPIGetVolumeRequest) (*VolumeDto, *http.Response, error)
+	//  @return Volume
+	GetVolumeExecute(r VolumesAPIGetVolumeRequest) (*Volume, *http.Response, error)
 
 	/*
 		GetVolumeByName Get volume details by name
@@ -69,8 +69,8 @@ type VolumesAPI interface {
 	GetVolumeByName(ctx context.Context, name string) VolumesAPIGetVolumeByNameRequest
 
 	// GetVolumeByNameExecute executes the request
-	//  @return VolumeDto
-	GetVolumeByNameExecute(r VolumesAPIGetVolumeByNameRequest) (*VolumeDto, *http.Response, error)
+	//  @return Volume
+	GetVolumeByNameExecute(r VolumesAPIGetVolumeByNameRequest) (*Volume, *http.Response, error)
 
 	/*
 		ListVolumes List all volumes
@@ -81,8 +81,8 @@ type VolumesAPI interface {
 	ListVolumes(ctx context.Context) VolumesAPIListVolumesRequest
 
 	// ListVolumesExecute executes the request
-	//  @return []VolumeDto
-	ListVolumesExecute(r VolumesAPIListVolumesRequest) ([]VolumeDto, *http.Response, error)
+	//  @return []Volume
+	ListVolumesExecute(r VolumesAPIListVolumesRequest) ([]Volume, *http.Response, error)
 }
 
 // VolumesAPIService VolumesAPI service
@@ -106,7 +106,7 @@ func (r VolumesAPICreateVolumeRequest) XDaytonaOrganizationID(xDaytonaOrganizati
 	return r
 }
 
-func (r VolumesAPICreateVolumeRequest) Execute() (*VolumeDto, *http.Response, error) {
+func (r VolumesAPICreateVolumeRequest) Execute() (*Volume, *http.Response, error) {
 	return r.ApiService.CreateVolumeExecute(r)
 }
 
@@ -125,13 +125,13 @@ func (a *VolumesAPIService) CreateVolume(ctx context.Context) VolumesAPICreateVo
 
 // Execute executes the request
 //
-//	@return VolumeDto
-func (a *VolumesAPIService) CreateVolumeExecute(r VolumesAPICreateVolumeRequest) (*VolumeDto, *http.Response, error) {
+//	@return Volume
+func (a *VolumesAPIService) CreateVolumeExecute(r VolumesAPICreateVolumeRequest) (*Volume, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *VolumeDto
+		localVarReturnValue *Volume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VolumesAPIService.CreateVolume")
@@ -320,7 +320,7 @@ func (r VolumesAPIGetVolumeRequest) XDaytonaOrganizationID(xDaytonaOrganizationI
 	return r
 }
 
-func (r VolumesAPIGetVolumeRequest) Execute() (*VolumeDto, *http.Response, error) {
+func (r VolumesAPIGetVolumeRequest) Execute() (*Volume, *http.Response, error) {
 	return r.ApiService.GetVolumeExecute(r)
 }
 
@@ -341,13 +341,13 @@ func (a *VolumesAPIService) GetVolume(ctx context.Context, volumeId string) Volu
 
 // Execute executes the request
 //
-//	@return VolumeDto
-func (a *VolumesAPIService) GetVolumeExecute(r VolumesAPIGetVolumeRequest) (*VolumeDto, *http.Response, error) {
+//	@return Volume
+func (a *VolumesAPIService) GetVolumeExecute(r VolumesAPIGetVolumeRequest) (*Volume, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *VolumeDto
+		localVarReturnValue *Volume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VolumesAPIService.GetVolume")
@@ -432,7 +432,7 @@ func (r VolumesAPIGetVolumeByNameRequest) XDaytonaOrganizationID(xDaytonaOrganiz
 	return r
 }
 
-func (r VolumesAPIGetVolumeByNameRequest) Execute() (*VolumeDto, *http.Response, error) {
+func (r VolumesAPIGetVolumeByNameRequest) Execute() (*Volume, *http.Response, error) {
 	return r.ApiService.GetVolumeByNameExecute(r)
 }
 
@@ -453,13 +453,13 @@ func (a *VolumesAPIService) GetVolumeByName(ctx context.Context, name string) Vo
 
 // Execute executes the request
 //
-//	@return VolumeDto
-func (a *VolumesAPIService) GetVolumeByNameExecute(r VolumesAPIGetVolumeByNameRequest) (*VolumeDto, *http.Response, error) {
+//	@return Volume
+func (a *VolumesAPIService) GetVolumeByNameExecute(r VolumesAPIGetVolumeByNameRequest) (*Volume, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *VolumeDto
+		localVarReturnValue *Volume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VolumesAPIService.GetVolumeByName")
@@ -550,7 +550,7 @@ func (r VolumesAPIListVolumesRequest) IncludeDeleted(includeDeleted bool) Volume
 	return r
 }
 
-func (r VolumesAPIListVolumesRequest) Execute() ([]VolumeDto, *http.Response, error) {
+func (r VolumesAPIListVolumesRequest) Execute() ([]Volume, *http.Response, error) {
 	return r.ApiService.ListVolumesExecute(r)
 }
 
@@ -569,13 +569,13 @@ func (a *VolumesAPIService) ListVolumes(ctx context.Context) VolumesAPIListVolum
 
 // Execute executes the request
 //
-//	@return []VolumeDto
-func (a *VolumesAPIService) ListVolumesExecute(r VolumesAPIListVolumesRequest) ([]VolumeDto, *http.Response, error) {
+//	@return []Volume
+func (a *VolumesAPIService) ListVolumesExecute(r VolumesAPIListVolumesRequest) ([]Volume, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []VolumeDto
+		localVarReturnValue []Volume
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "VolumesAPIService.ListVolumes")

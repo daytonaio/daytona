@@ -39,6 +39,7 @@ import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
+import { VolumeSubscriber } from './subscribers/volume.subscriber'
 
 @Module({
   imports: [
@@ -72,6 +73,7 @@ import { SnapshotManager } from './managers/snapshot.manager'
     ImageSubscriber,
     VolumeService,
     VolumeManager,
+    VolumeSubscriber,
   ],
   exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
 })

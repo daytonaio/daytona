@@ -21,7 +21,7 @@ from pydantic import Field, StrictBool, StrictStr
 from typing import List, Optional
 from typing_extensions import Annotated
 from daytona_api_client.models.create_volume import CreateVolume
-from daytona_api_client.models.volume_dto import VolumeDto
+from daytona_api_client.models.volume import Volume
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -58,7 +58,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> VolumeDto:
+    ) -> Volume:
         """Create a new volume
 
 
@@ -98,7 +98,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -128,7 +128,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[VolumeDto]:
+    ) -> ApiResponse[Volume]:
         """Create a new volume
 
 
@@ -168,7 +168,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -238,7 +238,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -612,7 +612,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> VolumeDto:
+    ) -> Volume:
         """Get volume details
 
 
@@ -652,7 +652,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -682,7 +682,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[VolumeDto]:
+    ) -> ApiResponse[Volume]:
         """Get volume details
 
 
@@ -722,7 +722,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -792,7 +792,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -886,7 +886,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> VolumeDto:
+    ) -> Volume:
         """Get volume details by name
 
 
@@ -926,7 +926,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -956,7 +956,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[VolumeDto]:
+    ) -> ApiResponse[Volume]:
         """Get volume details by name
 
 
@@ -996,7 +996,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1066,7 +1066,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "VolumeDto",
+            '200': "Volume",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1160,7 +1160,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[VolumeDto]:
+    ) -> List[Volume]:
         """List all volumes
 
 
@@ -1200,7 +1200,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[VolumeDto]",
+            '200': "List[Volume]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1230,7 +1230,7 @@ class VolumesApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[VolumeDto]]:
+    ) -> ApiResponse[List[Volume]]:
         """List all volumes
 
 
@@ -1270,7 +1270,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[VolumeDto]",
+            '200': "List[Volume]",
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1340,7 +1340,7 @@ class VolumesApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[VolumeDto]",
+            '200': "List[Volume]",
         }
         response_data = self.api_client.call_api(
             *_param,

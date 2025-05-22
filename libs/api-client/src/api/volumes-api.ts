@@ -34,7 +34,7 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { CreateVolume } from '../models'
 // @ts-ignore
-import type { VolumeDto } from '../models'
+import type { Volume } from '../models'
 /**
  * VolumesApi - axios parameter creator
  * @export
@@ -293,7 +293,7 @@ export const VolumesApiFp = function (configuration?: Configuration) {
       createVolume: CreateVolume,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VolumeDto>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Volume>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createVolume(
         createVolume,
         xDaytonaOrganizationID,
@@ -347,7 +347,7 @@ export const VolumesApiFp = function (configuration?: Configuration) {
       volumeId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VolumeDto>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Volume>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getVolume(volumeId, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -372,7 +372,7 @@ export const VolumesApiFp = function (configuration?: Configuration) {
       name: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<VolumeDto>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Volume>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getVolumeByName(name, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
@@ -397,7 +397,7 @@ export const VolumesApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       includeDeleted?: boolean,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<VolumeDto>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Volume>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listVolumes(
         xDaytonaOrganizationID,
         includeDeleted,
@@ -436,7 +436,7 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
       createVolume: CreateVolume,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<VolumeDto> {
+    ): AxiosPromise<Volume> {
       return localVarFp
         .createVolume(createVolume, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -470,7 +470,7 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
       volumeId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<VolumeDto> {
+    ): AxiosPromise<Volume> {
       return localVarFp.getVolume(volumeId, xDaytonaOrganizationID, options).then((request) => request(axios, basePath))
     },
     /**
@@ -485,7 +485,7 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
       name: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<VolumeDto> {
+    ): AxiosPromise<Volume> {
       return localVarFp
         .getVolumeByName(name, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -502,7 +502,7 @@ export const VolumesApiFactory = function (configuration?: Configuration, basePa
       xDaytonaOrganizationID?: string,
       includeDeleted?: boolean,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<VolumeDto>> {
+    ): AxiosPromise<Array<Volume>> {
       return localVarFp
         .listVolumes(xDaytonaOrganizationID, includeDeleted, options)
         .then((request) => request(axios, basePath))

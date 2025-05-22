@@ -17,6 +17,9 @@ import { ImageState } from '../../workspace/enums/image-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { JwtStrategy } from '../../auth/jwt.strategy'
+import { VolumeEvents } from '../../workspace/constants/volume-events'
+import { VolumeDto } from '../../workspace/dto/volume.dto'
+import { VolumeState } from '../../workspace/enums/volume-state.enum'
 
 @WebSocketGateway({
   path: '/api/socket.io/',
@@ -87,5 +90,17 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
 
   emitImageRemoved(image: ImageDto) {
     this.server.to(image.organizationId).emit(ImageEvents.REMOVED, image.id)
+  }
+
+  emitVolumeCreated(volume: VolumeDto) {
+    this.server.to(volume.organizationId).emit(VolumeEvents.CREATED, volume)
+  }
+
+  emitVolumeStateUpdated(volume: VolumeDto, oldState: VolumeState, newState: VolumeState) {
+    this.server.to(volume.organizationId).emit(VolumeEvents.STATE_UPDATED, { volume, oldState, newState })
+  }
+
+  emitVolumeLastUsedAtUpdated(volume: VolumeDto) {
+    this.server.to(volume.organizationId).emit(VolumeEvents.LAST_USED_AT_UPDATED, volume)
   }
 }

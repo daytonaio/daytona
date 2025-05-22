@@ -10,6 +10,7 @@ import {
   ChevronsUpDown,
   Container,
   CreditCard,
+  HardDrive,
   KeyRound,
   ListChecks,
   LogOut,
@@ -46,7 +47,7 @@ import { useMemo } from 'react'
 import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
-import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
@@ -59,7 +60,8 @@ export function Sidebar() {
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
 
-  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
+    useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
 
   const sidebarItems = useMemo(() => {
@@ -72,6 +74,9 @@ export function Sidebar() {
         path: RoutePath.IMAGES,
       },
       { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
+      ...(authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)
+        ? [{ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES }]
+        : []),
       { icon: <ChartColumn className="w-5 h-5" />, label: 'Usage', path: RoutePath.USAGE },
     ]
 
@@ -92,7 +97,7 @@ export function Sidebar() {
     }
     arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
 
   const handleSignOut = () => {
     signoutRedirect()
