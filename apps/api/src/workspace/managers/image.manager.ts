@@ -26,6 +26,7 @@ import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { NodeService } from '../services/node.service'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)
@@ -43,6 +44,7 @@ export class ImageManager {
     private readonly nodeRepository: Repository<Node>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    private readonly nodeService: NodeService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
     private readonly nodeApiFactory: NodeApiFactory,
@@ -514,18 +516,28 @@ export class ImageManager {
     }
 
     try {
+      const excludedNodeIds = (
+        await this.imageNodeRepository
+          .createQueryBuilder('imageNode')
+          .select('imageNode.nodeId')
+          .groupBy('imageNode.nodeId')
+          .having('COUNT(DISTINCT imageNode.imageRef) > :minImageCount', { minImageCount: 2 })
+          .getRawMany()
+      ).map((item) => item.nodeId)
+
       // Find a node to build the image on
-      const node = await this.nodeRepository.findOne({
-        where: { state: NodeState.READY, unschedulable: Not(true) },
-        order: { createdAt: 'ASC' },
+      const nodeId = await this.nodeService.getRandomAvailableNode({
+        excludedNodeIds: excludedNodeIds,
       })
 
       // TODO: get only nodes where the base image is available (extract from buildInfo)
 
-      if (!node) {
+      if (!nodeId) {
         // No ready nodes available, retry later
         return
       }
+
+      const node = await this.nodeService.findOne(nodeId)
 
       // Assign the node ID to the image for tracking build progress
       image.buildNodeId = node.id
