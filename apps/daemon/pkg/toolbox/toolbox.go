@@ -1,9 +1,6 @@
 // Copyright 2025 Daytona Platforms Inc.
 // SPDX-License-Identifier: AGPL-3.0
 
-// Copyright 2024 Daytona Platforms Inc.
-// SPDX-License-Identifier: Apache-2.0
-
 package toolbox
 
 import (
@@ -87,6 +84,7 @@ func (s *Server) Start() error {
 		fsController.POST("/permissions", fs.SetFilePermissions)
 		fsController.POST("/replace", fs.ReplaceInFiles)
 		fsController.POST("/upload", fs.UploadFile)
+		fsController.POST("/bulk-upload", fs.UploadFiles)
 
 		// delete operations
 		fsController.DELETE("/", fs.DeleteFile)
