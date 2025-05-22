@@ -120,8 +120,52 @@ export class WorkspaceManager {
     const workspaces = await this.workspaceRepository.find({
       where: {
         state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
-        desiredState: Raw(() => '"Workspace"."desiredState"::text != "Workspace"."state"::text'),
+        desiredState: Raw(
+          () =>
+            `"Workspace"."desiredState"::text != "Workspace"."state"::text AND "Workspace"."desiredState"::text != 'archived'`,
+        ),
       },
+      take: 100,
+      order: {
+        lastActivityAt: 'DESC',
+      },
+    })
+
+    await Promise.all(
+      workspaces.map(async (workspace) => {
+        this.syncInstanceState(workspace.id)
+      }),
+    )
+    await this.redisLockProvider.unlock(lockKey)
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  async syncArchivedDesiredStates(): Promise<void> {
+    const lockKey = 'sync-archived-desired-states'
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+      return
+    }
+
+    const nodesWith3InProgress = await this.workspaceRepository
+      .createQueryBuilder('workspace')
+      .select('"nodeId"')
+      .where('"workspace"."state" = :state', { state: WorkspaceState.ARCHIVING })
+      .groupBy('"nodeId"')
+      .having('COUNT(*) >= 3')
+      .getRawMany()
+
+    const workspaces = await this.workspaceRepository.find({
+      where: [
+        {
+          state: WorkspaceState.ARCHIVING,
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+        },
+        {
+          state: Not(In([WorkspaceState.ARCHIVED, WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+          nodeId: Not(In(nodesWith3InProgress.map((node) => node.nodeId))),
+        },
+      ],
       take: 100,
       order: {
         lastActivityAt: 'DESC',
