@@ -16,7 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@daytonaio/api-client": ["libs/api-client/src/index.ts"],
-      "@daytonaio/runner-api-client": ["libs/runner-api-client/src/index.ts"]
+      "@daytonaio/runner-api-client": ["libs/runner-api-client/src/index.ts"],
+      "@daytonaio/runner-grpc-client": ["libs/runner-grpc-client/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

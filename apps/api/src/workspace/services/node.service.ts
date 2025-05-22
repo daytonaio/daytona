@@ -11,7 +11,6 @@ import { Node } from '../entities/node.entity'
 import { CreateNodeDto } from '../dto/create-node.dto'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { NodeRegion } from '../enums/node-region.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
 import { NodeState } from '../enums/node-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { WorkspaceEvents } from './../../workspace/constants/workspace-events.constants'
@@ -22,6 +21,7 @@ import { Workspace } from './../../workspace/entities/workspace.entity'
 import { ImageNode } from './../../workspace/entities/image-node.entity'
 import { ImageNodeState } from './../../workspace/enums/image-node-state.enum'
 import { ImageManager } from '../managers/image.manager'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 
 @Injectable()
 export class NodeService {
@@ -31,7 +31,7 @@ export class NodeService {
   constructor(
     @InjectRepository(Node)
     private readonly nodeRepository: Repository<Node>,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerClientFactory: RunnerClientFactory,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(ImageNode)
@@ -129,8 +129,8 @@ export class NodeService {
       this.logger.debug(`Checking node ${node.id}`)
       try {
         // Do something with the node
-        const nodeApi = this.nodeApiFactory.createNodeApi(node)
-        await nodeApi.healthCheck()
+        const runnerClient = this.runnerClientFactory.create(node)
+        await runnerClient.healthCheck({})
         await this.nodeRepository.update(node.id, {
           state: NodeState.READY,
           lastChecked: new Date(),

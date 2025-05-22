@@ -3,78 +3,28 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxApi, DefaultApi, ImagesApi, Configuration } from '@daytonaio/runner-api-client'
-import { Node } from '../entities/node.entity'
 import { Injectable } from '@nestjs/common'
-import axios from 'axios'
-import axiosDebug from 'axios-debug-log'
-
-const isDebugEnabled = process.env.DEBUG === 'true'
-
-if (isDebugEnabled) {
-  axiosDebug({
-    request: function (debug, config) {
-      debug('Request with ' + JSON.stringify(config))
-      return config
-    },
-    response: function (debug, response) {
-      debug('Response with ' + response)
-      return response
-    },
-    error: function (debug, error) {
-      debug('Error with ' + error)
-      return Promise.reject(error)
-    },
-  })
-}
-
+import { ClientGrpc, Transport, ClientProxyFactory } from '@nestjs/microservices'
+import { Node } from '../entities/node.entity'
+import { join } from 'path'
+import { RunnerClient } from '@daytonaio/runner-grpc-client'
 @Injectable()
-export class NodeApiFactory {
-  createNodeApi(node: Node): DefaultApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
+export class RunnerClientFactory {
+  create(node: Node): RunnerClient {
+    const client = ClientProxyFactory.create({
+      transport: Transport.GRPC,
+      options: {
+        url: node.apiUrl,
+        package: 'runner',
+        protoPath: join(__dirname, 'apps/api/runner-grpc/proto/runner.proto'),
+        credentials: this.getCredentials(node.apiKey),
       },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
+    }) as ClientGrpc
 
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
-    }
-
-    return new DefaultApi(new Configuration(), '', axiosInstance)
+    return client.getService('Runner') as RunnerClient
   }
 
-  createImageApi(node: Node): ImagesApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
-      },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
-
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
-    }
-
-    return new ImagesApi(new Configuration(), '', axiosInstance)
-  }
-
-  createWorkspaceApi(node: Node): SandboxApi {
-    const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
-      headers: {
-        Authorization: `Bearer ${node.apiKey}`,
-      },
-      timeout: 1 * 60 * 60 * 1000, // 1 hour
-    })
-
-    if (isDebugEnabled) {
-      axiosDebug.addLogger(axiosInstance)
-    }
-
-    return new SandboxApi(new Configuration(), '', axiosInstance)
+  private getCredentials(apiKey: string) {
+    return { metadata: { authorization: `Bearer ${apiKey}` } }
   }
 }

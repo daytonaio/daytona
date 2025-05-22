@@ -13,7 +13,6 @@ import { UserModule } from '../user/user.module'
 import { NodeService } from './services/node.service'
 import { Node } from './entities/node.entity'
 import { NodeController } from './controllers/node.controller'
-import { NodeApiFactory } from './runner-api/runnerApi'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
@@ -62,7 +61,6 @@ import { SnapshotManager } from './managers/snapshot.manager'
     SnapshotManager,
     WorkspaceWarmPoolService,
     NodeService,
-    NodeApiFactory,
     ToolboxService,
     ImageService,
     ImageManager,
