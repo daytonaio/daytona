@@ -24,7 +24,8 @@
       "program": "${workspaceFolder}/apps/runner/cmd/runner",
       "console": "integratedTerminal",
       "envFile": "${workspaceFolder}/apps/runner/.env",
-      "output": "${workspaceFolder}/dist/apps/runner"
+      "output": "${workspaceFolder}/dist/apps/runner",
+      "preLaunchTask": "debug-build-runner"
     },
     {
       "name": "Daemon",
