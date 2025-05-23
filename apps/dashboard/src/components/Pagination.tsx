@@ -14,15 +14,29 @@ interface PaginationProps<TData> {
   selectionEnabled?: boolean
   className?: string
   entityName?: string
+  onUndoSelection?: () => void
+  customSelectionText?: string
 }
 
-export function Pagination<TData>({ table, selectionEnabled, className, entityName }: PaginationProps<TData>) {
+export function Pagination<TData>({
+  table,
+  selectionEnabled,
+  className,
+  entityName,
+  onUndoSelection,
+  customSelectionText,
+}: PaginationProps<TData>) {
   return (
     <div className={`flex items-center justify-between px-2 w-full ${className}`}>
       {selectionEnabled ? (
         <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
-          selected.
+          {customSelectionText ||
+            `${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} row(s) selected.`}
+          {onUndoSelection && (table.getFilteredSelectedRowModel().rows.length > 0 || customSelectionText) && (
+            <button onClick={onUndoSelection} className="ml-2 text-primary hover:underline">
+              Undo
+            </button>
+          )}
         </div>
       ) : (
         <div></div>
