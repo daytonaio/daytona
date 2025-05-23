@@ -6,7 +6,7 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron } from '@nestjs/schedule'
-import { FindOptionsWhere, In, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
 import { Node } from '../entities/node.entity'
 import { CreateNodeDto } from '../dto/create-node.dto'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
@@ -89,6 +89,7 @@ export class NodeService {
       id: In(imageNodes.map((imageNode) => imageNode.nodeId)),
       state: NodeState.READY,
       unschedulable: Not(true),
+      used: Raw((alias) => `${alias} < capacity`),
     }
 
     if (params.region !== undefined) {
@@ -103,10 +104,7 @@ export class NodeService {
       where: nodeFilter,
     })
 
-    return nodes
-      .filter((node) => node.used < node.capacity)
-      .sort((a, b) => a.used / a.capacity - b.used / b.capacity)
-      .slice(0, 10)
+    return nodes.sort((a, b) => a.used / a.capacity - b.used / b.capacity).slice(0, 10)
   }
 
   async remove(id: string): Promise<void> {
