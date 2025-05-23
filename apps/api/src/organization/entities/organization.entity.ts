@@ -38,28 +38,28 @@ export class Organization {
 
   @Column({
     type: 'int',
-    default: 40,
+    default: 10,
     name: 'total_memory_quota',
   })
   totalMemoryQuota: number
 
   @Column({
     type: 'int',
-    default: 100,
+    default: 30,
     name: 'total_disk_quota',
   })
   totalDiskQuota: number
 
   @Column({
     type: 'int',
-    default: 2,
+    default: 4,
     name: 'max_cpu_per_workspace',
   })
   maxCpuPerWorkspace: number
 
   @Column({
     type: 'int',
-    default: 4,
+    default: 8,
     name: 'max_memory_per_workspace',
   })
   maxMemoryPerWorkspace: number
@@ -73,42 +73,21 @@ export class Organization {
 
   @Column({
     type: 'int',
-    default: 10,
-    name: 'max_concurrent_workspaces',
-  })
-  maxConcurrentWorkspaces: number
-
-  @Column({
-    type: 'int',
-    default: 0,
-    name: 'workspace_quota',
-  })
-  workspaceQuota: number
-
-  @Column({
-    type: 'int',
-    default: 0,
-    name: 'image_quota',
-  })
-  imageQuota: number
-
-  @Column({
-    type: 'int',
-    default: 2,
+    default: 20,
     name: 'max_image_size',
   })
   maxImageSize: number
 
   @Column({
     type: 'int',
-    default: 5,
-    name: 'total_image_size',
+    default: 100,
+    name: 'image_quota',
   })
-  totalImageSize: number
+  imageQuota: number
 
   @Column({
     type: 'int',
-    default: 10,
+    default: 100,
     name: 'volume_quota',
   })
   volumeQuota: number

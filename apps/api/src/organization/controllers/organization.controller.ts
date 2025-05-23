@@ -11,8 +11,8 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -249,7 +249,7 @@ export class OrganizationController {
     return this.organizationService.getUsageOverview(organizationId)
   }
 
-  @Put('/:organizationId/quota')
+  @Patch('/:organizationId/quota')
   @ApiOperation({
     summary: 'Update organization quota',
     operationId: 'updateOrganizationQuota',
@@ -264,9 +264,9 @@ export class OrganizationController {
     description: 'Organization ID',
     type: 'string',
   })
-  @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
-  @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
-  async updateUserQuota(
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
     @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
   ): Promise<OrganizationDto> {

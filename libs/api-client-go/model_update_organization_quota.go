@@ -22,18 +22,15 @@ var _ MappedNullable = &UpdateOrganizationQuota{}
 
 // UpdateOrganizationQuota struct for UpdateOrganizationQuota
 type UpdateOrganizationQuota struct {
-	TotalCpuQuota           float32 `json:"totalCpuQuota"`
-	TotalMemoryQuota        float32 `json:"totalMemoryQuota"`
-	TotalDiskQuota          float32 `json:"totalDiskQuota"`
-	MaxCpuPerWorkspace      float32 `json:"maxCpuPerWorkspace"`
-	MaxMemoryPerWorkspace   float32 `json:"maxMemoryPerWorkspace"`
-	MaxDiskPerWorkspace     float32 `json:"maxDiskPerWorkspace"`
-	MaxConcurrentWorkspaces float32 `json:"maxConcurrentWorkspaces"`
-	WorkspaceQuota          float32 `json:"workspaceQuota"`
-	ImageQuota              float32 `json:"imageQuota"`
-	MaxImageSize            float32 `json:"maxImageSize"`
-	TotalImageSize          float32 `json:"totalImageSize"`
-	VolumeQuota             float32 `json:"volumeQuota"`
+	TotalCpuQuota         NullableFloat32 `json:"totalCpuQuota"`
+	TotalMemoryQuota      NullableFloat32 `json:"totalMemoryQuota"`
+	TotalDiskQuota        NullableFloat32 `json:"totalDiskQuota"`
+	MaxCpuPerWorkspace    NullableFloat32 `json:"maxCpuPerWorkspace"`
+	MaxMemoryPerWorkspace NullableFloat32 `json:"maxMemoryPerWorkspace"`
+	MaxDiskPerWorkspace   NullableFloat32 `json:"maxDiskPerWorkspace"`
+	ImageQuota            NullableFloat32 `json:"imageQuota"`
+	MaxImageSize          NullableFloat32 `json:"maxImageSize"`
+	VolumeQuota           NullableFloat32 `json:"volumeQuota"`
 }
 
 type _UpdateOrganizationQuota UpdateOrganizationQuota
@@ -42,7 +39,7 @@ type _UpdateOrganizationQuota UpdateOrganizationQuota
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, maxCpuPerWorkspace float32, maxMemoryPerWorkspace float32, maxDiskPerWorkspace float32, maxConcurrentWorkspaces float32, workspaceQuota float32, imageQuota float32, maxImageSize float32, totalImageSize float32, volumeQuota float32) *UpdateOrganizationQuota {
+func NewUpdateOrganizationQuota(totalCpuQuota NullableFloat32, totalMemoryQuota NullableFloat32, totalDiskQuota NullableFloat32, maxCpuPerWorkspace NullableFloat32, maxMemoryPerWorkspace NullableFloat32, maxDiskPerWorkspace NullableFloat32, imageQuota NullableFloat32, maxImageSize NullableFloat32, volumeQuota NullableFloat32) *UpdateOrganizationQuota {
 	this := UpdateOrganizationQuota{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
@@ -50,11 +47,8 @@ func NewUpdateOrganizationQuota(totalCpuQuota float32, totalMemoryQuota float32,
 	this.MaxCpuPerWorkspace = maxCpuPerWorkspace
 	this.MaxMemoryPerWorkspace = maxMemoryPerWorkspace
 	this.MaxDiskPerWorkspace = maxDiskPerWorkspace
-	this.MaxConcurrentWorkspaces = maxConcurrentWorkspaces
-	this.WorkspaceQuota = workspaceQuota
 	this.ImageQuota = imageQuota
 	this.MaxImageSize = maxImageSize
-	this.TotalImageSize = totalImageSize
 	this.VolumeQuota = volumeQuota
 	return &this
 }
@@ -68,291 +62,237 @@ func NewUpdateOrganizationQuotaWithDefaults() *UpdateOrganizationQuota {
 }
 
 // GetTotalCpuQuota returns the TotalCpuQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalCpuQuota() float32 {
-	if o == nil {
+	if o == nil || o.TotalCpuQuota.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.TotalCpuQuota
+	return *o.TotalCpuQuota.Get()
 }
 
 // GetTotalCpuQuotaOk returns a tuple with the TotalCpuQuota field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalCpuQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TotalCpuQuota, true
+	return o.TotalCpuQuota.Get(), o.TotalCpuQuota.IsSet()
 }
 
 // SetTotalCpuQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalCpuQuota(v float32) {
-	o.TotalCpuQuota = v
+	o.TotalCpuQuota.Set(&v)
 }
 
 // GetTotalMemoryQuota returns the TotalMemoryQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalMemoryQuota() float32 {
-	if o == nil {
+	if o == nil || o.TotalMemoryQuota.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.TotalMemoryQuota
+	return *o.TotalMemoryQuota.Get()
 }
 
 // GetTotalMemoryQuotaOk returns a tuple with the TotalMemoryQuota field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalMemoryQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TotalMemoryQuota, true
+	return o.TotalMemoryQuota.Get(), o.TotalMemoryQuota.IsSet()
 }
 
 // SetTotalMemoryQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalMemoryQuota(v float32) {
-	o.TotalMemoryQuota = v
+	o.TotalMemoryQuota.Set(&v)
 }
 
 // GetTotalDiskQuota returns the TotalDiskQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetTotalDiskQuota() float32 {
-	if o == nil {
+	if o == nil || o.TotalDiskQuota.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.TotalDiskQuota
+	return *o.TotalDiskQuota.Get()
 }
 
 // GetTotalDiskQuotaOk returns a tuple with the TotalDiskQuota field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetTotalDiskQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.TotalDiskQuota, true
+	return o.TotalDiskQuota.Get(), o.TotalDiskQuota.IsSet()
 }
 
 // SetTotalDiskQuota sets field value
 func (o *UpdateOrganizationQuota) SetTotalDiskQuota(v float32) {
-	o.TotalDiskQuota = v
+	o.TotalDiskQuota.Set(&v)
 }
 
 // GetMaxCpuPerWorkspace returns the MaxCpuPerWorkspace field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxCpuPerWorkspace() float32 {
-	if o == nil {
+	if o == nil || o.MaxCpuPerWorkspace.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.MaxCpuPerWorkspace
+	return *o.MaxCpuPerWorkspace.Get()
 }
 
 // GetMaxCpuPerWorkspaceOk returns a tuple with the MaxCpuPerWorkspace field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxCpuPerWorkspaceOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxCpuPerWorkspace, true
+	return o.MaxCpuPerWorkspace.Get(), o.MaxCpuPerWorkspace.IsSet()
 }
 
 // SetMaxCpuPerWorkspace sets field value
 func (o *UpdateOrganizationQuota) SetMaxCpuPerWorkspace(v float32) {
-	o.MaxCpuPerWorkspace = v
+	o.MaxCpuPerWorkspace.Set(&v)
 }
 
 // GetMaxMemoryPerWorkspace returns the MaxMemoryPerWorkspace field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxMemoryPerWorkspace() float32 {
-	if o == nil {
+	if o == nil || o.MaxMemoryPerWorkspace.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.MaxMemoryPerWorkspace
+	return *o.MaxMemoryPerWorkspace.Get()
 }
 
 // GetMaxMemoryPerWorkspaceOk returns a tuple with the MaxMemoryPerWorkspace field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxMemoryPerWorkspaceOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxMemoryPerWorkspace, true
+	return o.MaxMemoryPerWorkspace.Get(), o.MaxMemoryPerWorkspace.IsSet()
 }
 
 // SetMaxMemoryPerWorkspace sets field value
 func (o *UpdateOrganizationQuota) SetMaxMemoryPerWorkspace(v float32) {
-	o.MaxMemoryPerWorkspace = v
+	o.MaxMemoryPerWorkspace.Set(&v)
 }
 
 // GetMaxDiskPerWorkspace returns the MaxDiskPerWorkspace field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxDiskPerWorkspace() float32 {
-	if o == nil {
+	if o == nil || o.MaxDiskPerWorkspace.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.MaxDiskPerWorkspace
+	return *o.MaxDiskPerWorkspace.Get()
 }
 
 // GetMaxDiskPerWorkspaceOk returns a tuple with the MaxDiskPerWorkspace field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxDiskPerWorkspaceOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxDiskPerWorkspace, true
+	return o.MaxDiskPerWorkspace.Get(), o.MaxDiskPerWorkspace.IsSet()
 }
 
 // SetMaxDiskPerWorkspace sets field value
 func (o *UpdateOrganizationQuota) SetMaxDiskPerWorkspace(v float32) {
-	o.MaxDiskPerWorkspace = v
-}
-
-// GetMaxConcurrentWorkspaces returns the MaxConcurrentWorkspaces field value
-func (o *UpdateOrganizationQuota) GetMaxConcurrentWorkspaces() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.MaxConcurrentWorkspaces
-}
-
-// GetMaxConcurrentWorkspacesOk returns a tuple with the MaxConcurrentWorkspaces field value
-// and a boolean to check if the value has been set.
-func (o *UpdateOrganizationQuota) GetMaxConcurrentWorkspacesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.MaxConcurrentWorkspaces, true
-}
-
-// SetMaxConcurrentWorkspaces sets field value
-func (o *UpdateOrganizationQuota) SetMaxConcurrentWorkspaces(v float32) {
-	o.MaxConcurrentWorkspaces = v
-}
-
-// GetWorkspaceQuota returns the WorkspaceQuota field value
-func (o *UpdateOrganizationQuota) GetWorkspaceQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.WorkspaceQuota
-}
-
-// GetWorkspaceQuotaOk returns a tuple with the WorkspaceQuota field value
-// and a boolean to check if the value has been set.
-func (o *UpdateOrganizationQuota) GetWorkspaceQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.WorkspaceQuota, true
-}
-
-// SetWorkspaceQuota sets field value
-func (o *UpdateOrganizationQuota) SetWorkspaceQuota(v float32) {
-	o.WorkspaceQuota = v
+	o.MaxDiskPerWorkspace.Set(&v)
 }
 
 // GetImageQuota returns the ImageQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetImageQuota() float32 {
-	if o == nil {
+	if o == nil || o.ImageQuota.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.ImageQuota
+	return *o.ImageQuota.Get()
 }
 
 // GetImageQuotaOk returns a tuple with the ImageQuota field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetImageQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.ImageQuota, true
+	return o.ImageQuota.Get(), o.ImageQuota.IsSet()
 }
 
 // SetImageQuota sets field value
 func (o *UpdateOrganizationQuota) SetImageQuota(v float32) {
-	o.ImageQuota = v
+	o.ImageQuota.Set(&v)
 }
 
 // GetMaxImageSize returns the MaxImageSize field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetMaxImageSize() float32 {
-	if o == nil {
+	if o == nil || o.MaxImageSize.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.MaxImageSize
+	return *o.MaxImageSize.Get()
 }
 
 // GetMaxImageSizeOk returns a tuple with the MaxImageSize field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetMaxImageSizeOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.MaxImageSize, true
+	return o.MaxImageSize.Get(), o.MaxImageSize.IsSet()
 }
 
 // SetMaxImageSize sets field value
 func (o *UpdateOrganizationQuota) SetMaxImageSize(v float32) {
-	o.MaxImageSize = v
-}
-
-// GetTotalImageSize returns the TotalImageSize field value
-func (o *UpdateOrganizationQuota) GetTotalImageSize() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalImageSize
-}
-
-// GetTotalImageSizeOk returns a tuple with the TotalImageSize field value
-// and a boolean to check if the value has been set.
-func (o *UpdateOrganizationQuota) GetTotalImageSizeOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalImageSize, true
-}
-
-// SetTotalImageSize sets field value
-func (o *UpdateOrganizationQuota) SetTotalImageSize(v float32) {
-	o.TotalImageSize = v
+	o.MaxImageSize.Set(&v)
 }
 
 // GetVolumeQuota returns the VolumeQuota field value
+// If the value is explicit nil, the zero value for float32 will be returned
 func (o *UpdateOrganizationQuota) GetVolumeQuota() float32 {
-	if o == nil {
+	if o == nil || o.VolumeQuota.Get() == nil {
 		var ret float32
 		return ret
 	}
 
-	return o.VolumeQuota
+	return *o.VolumeQuota.Get()
 }
 
 // GetVolumeQuotaOk returns a tuple with the VolumeQuota field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *UpdateOrganizationQuota) GetVolumeQuotaOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.VolumeQuota, true
+	return o.VolumeQuota.Get(), o.VolumeQuota.IsSet()
 }
 
 // SetVolumeQuota sets field value
 func (o *UpdateOrganizationQuota) SetVolumeQuota(v float32) {
-	o.VolumeQuota = v
+	o.VolumeQuota.Set(&v)
 }
 
 func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
@@ -365,18 +305,15 @@ func (o UpdateOrganizationQuota) MarshalJSON() ([]byte, error) {
 
 func (o UpdateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["totalCpuQuota"] = o.TotalCpuQuota
-	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
-	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
-	toSerialize["maxCpuPerWorkspace"] = o.MaxCpuPerWorkspace
-	toSerialize["maxMemoryPerWorkspace"] = o.MaxMemoryPerWorkspace
-	toSerialize["maxDiskPerWorkspace"] = o.MaxDiskPerWorkspace
-	toSerialize["maxConcurrentWorkspaces"] = o.MaxConcurrentWorkspaces
-	toSerialize["workspaceQuota"] = o.WorkspaceQuota
-	toSerialize["imageQuota"] = o.ImageQuota
-	toSerialize["maxImageSize"] = o.MaxImageSize
-	toSerialize["totalImageSize"] = o.TotalImageSize
-	toSerialize["volumeQuota"] = o.VolumeQuota
+	toSerialize["totalCpuQuota"] = o.TotalCpuQuota.Get()
+	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota.Get()
+	toSerialize["totalDiskQuota"] = o.TotalDiskQuota.Get()
+	toSerialize["maxCpuPerWorkspace"] = o.MaxCpuPerWorkspace.Get()
+	toSerialize["maxMemoryPerWorkspace"] = o.MaxMemoryPerWorkspace.Get()
+	toSerialize["maxDiskPerWorkspace"] = o.MaxDiskPerWorkspace.Get()
+	toSerialize["imageQuota"] = o.ImageQuota.Get()
+	toSerialize["maxImageSize"] = o.MaxImageSize.Get()
+	toSerialize["volumeQuota"] = o.VolumeQuota.Get()
 	return toSerialize, nil
 }
 
@@ -391,11 +328,8 @@ func (o *UpdateOrganizationQuota) UnmarshalJSON(data []byte) (err error) {
 		"maxCpuPerWorkspace",
 		"maxMemoryPerWorkspace",
 		"maxDiskPerWorkspace",
-		"maxConcurrentWorkspaces",
-		"workspaceQuota",
 		"imageQuota",
 		"maxImageSize",
-		"totalImageSize",
 		"volumeQuota",
 	}
 

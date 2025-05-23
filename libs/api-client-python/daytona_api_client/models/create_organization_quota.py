@@ -33,14 +33,11 @@ class CreateOrganizationQuota(BaseModel):
     max_cpu_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxCpuPerWorkspace")
     max_memory_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxMemoryPerWorkspace")
     max_disk_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxDiskPerWorkspace")
-    max_concurrent_workspaces: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxConcurrentWorkspaces")
-    workspace_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="workspaceQuota")
     image_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="imageQuota")
     max_image_size: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxImageSize")
-    total_image_size: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="totalImageSize")
     volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "maxConcurrentWorkspaces", "workspaceQuota", "imageQuota", "maxImageSize", "totalImageSize", "volumeQuota"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "imageQuota", "maxImageSize", "volumeQuota"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -106,11 +103,8 @@ class CreateOrganizationQuota(BaseModel):
             "maxCpuPerWorkspace": obj.get("maxCpuPerWorkspace"),
             "maxMemoryPerWorkspace": obj.get("maxMemoryPerWorkspace"),
             "maxDiskPerWorkspace": obj.get("maxDiskPerWorkspace"),
-            "maxConcurrentWorkspaces": obj.get("maxConcurrentWorkspaces"),
-            "workspaceQuota": obj.get("workspaceQuota"),
             "imageQuota": obj.get("imageQuota"),
             "maxImageSize": obj.get("maxImageSize"),
-            "totalImageSize": obj.get("totalImageSize"),
             "volumeQuota": obj.get("volumeQuota")
         })
         # store additional fields in additional_properties

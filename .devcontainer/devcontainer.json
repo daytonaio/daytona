@@ -26,7 +26,8 @@
         "foxundermoon.shell-format",
         "cschlosser.doxdocgen",
         "ms-python.python",
-        "ms-toolsai.jupyter"
+        "ms-toolsai.jupyter",
+        "bradlc.vscode-tailwindcss"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"

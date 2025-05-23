@@ -3,10 +3,15 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import axios, { AxiosError, AxiosInstance } from 'axios'
+import axios, { AxiosInstance } from 'axios'
 import { OrganizationUsage } from './types/OrganizationUsage'
 import { AutomaticTopUp, OrganizationWallet } from './types/OrganizationWallet'
 import { DaytonaError } from '@/api/errors'
+
+export type OrganizationTier = {
+  tier: number
+  didTopUpTenDollars: boolean
+}
 
 export class BillingApiClient {
   private axiosInstance: AxiosInstance
@@ -62,5 +67,10 @@ export class BillingApiClient {
 
   public async redeemCoupon(organizationId: string, couponCode: string): Promise<void> {
     await this.axiosInstance.post(`/organization/${organizationId}/redeem-coupon/${couponCode}`)
+  }
+
+  public async getOrganizationTier(organizationId: string): Promise<OrganizationTier> {
+    const response = await this.axiosInstance.get(`/organization/${organizationId}/tier`)
+    return response.data
   }
 }

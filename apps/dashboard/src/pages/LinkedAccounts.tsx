@@ -17,7 +17,7 @@ import { useLocation } from 'react-router-dom'
 import { AccountProviderIcon } from '@/components/AccountProviderIcon'
 import { AccountProvider as AccountProviderApi } from '@daytonaio/api-client'
 
-interface UserProfileIdentity {
+export interface UserProfileIdentity {
   provider: string
   userId: string
 }

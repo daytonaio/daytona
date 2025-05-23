@@ -20,7 +20,7 @@ export enum RoutePath {
   SANDBOXES = '/dashboard/sandboxes',
   IMAGES = '/dashboard/images',
   REGISTRIES = '/dashboard/registries',
-  USAGE = '/dashboard/usage',
+  LIMITS = '/dashboard/limits',
   BILLING = '/dashboard/billing',
   MEMBERS = '/dashboard/members',
   ROLES = '/dashboard/roles',

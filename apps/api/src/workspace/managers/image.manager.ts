@@ -639,19 +639,6 @@ export class ImageManager {
       return
     }
 
-    //  check if the organization has reached the image size quota
-    const totalImageSizeUsed = await this.imageRepository.sum('size', {
-      organizationId: image.organizationId,
-    })
-    if (totalImageSizeUsed + imageInfo.sizeGB > organization.totalImageSize) {
-      await this.updateImageState(
-        image.id,
-        ImageState.ERROR,
-        `Total image size quota (${organization.totalImageSize.toFixed(2)}GB) exceeded`,
-      )
-      return
-    }
-
     image.size = imageInfo.sizeGB
     image.state = ImageState.PENDING_VALIDATION
 

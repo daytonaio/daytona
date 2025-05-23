@@ -42,9 +42,9 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedWorkspaceStoppedEvent } from '../../organization/events/organization-suspended-workspace-stopped.event'
 
-const DEFAULT_CPU = 2
-const DEFAULT_MEMORY = 4
-const DEFAULT_DISK = 10
+const DEFAULT_CPU = 1
+const DEFAULT_MEMORY = 1
+const DEFAULT_DISK = 3
 const DEFAULT_GPU = 0
 
 @Injectable()
@@ -101,16 +101,12 @@ export class WorkspaceService {
       used_disk: number
       used_cpu: number
       used_mem: number
-      count_running: number
-      count_total: number
     } = await this.workspaceRepository
       .createQueryBuilder('workspace')
       .select([
         'SUM(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN workspace.disk ELSE 0 END) as used_disk',
         'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.cpu ELSE 0 END) as used_cpu',
         'SUM(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN workspace.mem ELSE 0 END) as used_mem',
-        'COUNT(CASE WHEN workspace.state NOT IN (:...inactiveStates) THEN 1 ELSE NULL END) as count_running',
-        'COUNT(CASE WHEN workspace.state NOT IN (:...ignoredStates) THEN 1 ELSE NULL END) as count_total',
       ])
       .where('workspace.organizationId = :organizationId', { organizationId: organization.id })
       .andWhere(
@@ -124,8 +120,6 @@ export class WorkspaceService {
     const usedDisk = Number(resourceMetrics.used_disk) || 0
     const usedCpu = Number(resourceMetrics.used_cpu) || 0
     const usedMem = Number(resourceMetrics.used_mem) || 0
-    const countRunning = Number(resourceMetrics.count_running) || 0
-    const countTotal = Number(resourceMetrics.count_total) || 0
 
     if (usedDisk + disk > organization.totalDiskQuota) {
       throw new ForbiddenException(
@@ -142,17 +136,6 @@ export class WorkspaceService {
       throw new ForbiddenException(
         `Total memory quota exceeded (${usedMem + memory}GB > ${organization.totalMemoryQuota}GB)`,
       )
-    }
-
-    if (countRunning >= organization.maxConcurrentWorkspaces) {
-      throw new ForbiddenException(
-        `Maximum number of concurrent workspaces (${organization.maxConcurrentWorkspaces}) reached`,
-      )
-    }
-
-    // Check total workspace quota if set
-    if (organization.workspaceQuota > 0 && countTotal >= organization.workspaceQuota) {
-      throw new ForbiddenException(`Workspace quota limit (${organization.workspaceQuota}) reached`)
     }
   }
 
@@ -463,19 +446,6 @@ export class WorkspaceService {
     }
 
     await this.assertOrganizationIsNotSuspended(organization)
-
-    const startedWorkspaces = await this.workspaceRepository.count({
-      where: {
-        organizationId: workspace.organizationId,
-        state: WorkspaceState.STARTED,
-      },
-    })
-
-    if (startedWorkspaces >= organization.maxConcurrentWorkspaces) {
-      throw new ForbiddenException(
-        `Maximum number of concurrent workspaces (${organization.maxConcurrentWorkspaces}) reached`,
-      )
-    }
 
     if (workspace.nodeId) {
       // Add node readiness check
