@@ -74,7 +74,10 @@ export class NodeService {
   async findAvailableNodes(params: GetNodeParams): Promise<Node[]> {
     const imageNodeFilter: FindOptionsWhere<ImageNode> = {
       state: ImageNodeState.READY,
-      nodeId: Not(In(params.excludedNodeIds || [])),
+    }
+
+    if (params.excludedNodeIds && params.excludedNodeIds.length > 0) {
+      imageNodeFilter.nodeId = Not(In(params.excludedNodeIds))
     }
 
     if (params.imageRef !== undefined) {
