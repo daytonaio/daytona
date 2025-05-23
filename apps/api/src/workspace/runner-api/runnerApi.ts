@@ -17,7 +17,7 @@ export class RunnerClientFactory {
       transport: Transport.GRPC,
       options: {
         package: 'runner',
-        protoPath: '/workspaces/daytona/apps/proto/runner.proto',
+        protoPath: join(__dirname, '../../proto/runner.proto'),
         url: node.apiUrl,
         loader: {
           keepCase: true,
@@ -28,7 +28,21 @@ export class RunnerClientFactory {
         },
         credentials: grpc.credentials.createInsecure(),
         metadata: { authorization: `Bearer ${node.apiKey}` },
-      } as any, // Type assertion to bypass type checking temporarily
+        channelOptions: {
+          'grpc.keepalive_time_ms': 10000,
+          'grpc.keepalive_timeout_ms': 5000,
+          'grpc.http2.min_time_between_pings_ms': 10000,
+          'grpc.keepalive_permit_without_calls': 1,
+          'grpc.max_receive_message_length': -1,
+          'grpc.max_send_message_length': -1,
+        },
+        retryOptions: {
+          retries: 3,
+          initialRetryDelay: 1000,
+          maxRetryDelay: 5000,
+          retryDelayMultiplier: 1.5,
+        },
+      } as any,
     }) as ClientGrpc
 
     return client.getService('Runner') as RunnerClient

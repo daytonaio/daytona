@@ -30,10 +30,11 @@ type Config struct {
 	AWSAccessKeyId     string `envconfig:"AWS_ACCESS_KEY_ID"`
 	AWSSecretAccessKey string `envconfig:"AWS_SECRET_ACCESS_KEY"`
 	AWSDefaultBucket   string `envconfig:"AWS_DEFAULT_BUCKET"`
+	MetricsPort        int    `envconfig:"METRICS_PORT"`
 }
 
-var DEFAULT_PORT int = 8080
-
+var DEFAULT_PORT int = 3003
+var DEFAULT_METRICS_PORT int = 9090
 var config *Config
 
 func GetConfig() (*Config, error) {
@@ -63,6 +64,10 @@ func GetConfig() (*Config, error) {
 
 	if config.Port == 0 {
 		config.Port = DEFAULT_PORT
+	}
+
+	if config.MetricsPort == 0 {
+		config.MetricsPort = DEFAULT_METRICS_PORT
 	}
 
 	return config, nil

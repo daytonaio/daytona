@@ -30,13 +30,13 @@ import (
 
 // Sandbox endpoints
 func (s *RunnerServer) CreateSandbox(ctx context.Context, req *pb.CreateSandboxRequest) (*pb.CreateSandboxResponse, error) {
-	// startTime := time.Now()
-	// defer func() {
-	// 	obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("create")
-	// 	if err == nil {
-	// 		obs.Observe(time.Since(startTime).Seconds())
-	// 	}
-	// }()
+	startTime := time.Now()
+	defer func() {
+		obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("create")
+		if err == nil {
+			obs.Observe(time.Since(startTime).Seconds())
+		}
+	}()
 
 	state, err := s.getSandboxState(ctx, req.Id)
 	if err != nil && state == enums.SandboxStateError {

@@ -19,7 +19,8 @@
     "migration:run": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:run -d ./src/data-source.ts",
     "migration:revert": "cd apps/api && npx ts-node -P ./tsconfig.json -r tsconfig-paths/register ../../node_modules/typeorm/cli.js migration:revert -d ./src/data-source.ts",
     "shadcn:add": "TS_NODE_PROJECT=apps/dashboard/tsconfig.app.json npx shadcn@latest add",
-    "proto:generate": "./generate-proto.sh"
+    "proto:generate": "cd apps/proto && chmod +x generate-proto.sh && ./generate-proto.sh",
+    "generate:runner-grpc": "yarn proto:generate && cd apps/api && chmod +x copy-proto.sh && ./copy-proto.sh"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",

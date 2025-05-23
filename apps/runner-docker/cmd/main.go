@@ -9,8 +9,11 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"github.com/daytonaio/runner-docker/cmd/config"
@@ -22,6 +25,7 @@ import (
 	"github.com/daytonaio/runner-docker/pkg/server/middlewares"
 	pb "github.com/daytonaio/runner/proto"
 	"github.com/docker/docker/client"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
@@ -129,15 +133,70 @@ func main() {
 
 	pb.RegisterRunnerServer(s, runner)
 
-	// // Start Prometheus metrics endpoint
-	// go func() {
-	//     http.Handle("/metrics", promhttp.Handler())
-	//     log.Fatal(http.ListenAndServe(":9090", nil))
-	// }()
+	// Create a channel to listen for errors coming from the listener.
+	serverErrors := make(chan error, 1)
 
-	log.Printf("Server listening at %v", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	// Start the service listening for requests.
+	go func() {
+		log.Printf("Server listening at %v", lis.Addr())
+		serverErrors <- s.Serve(lis)
+	}()
+
+	// Create and start metrics server
+	metricsServer := &http.Server{
+		Addr:    fmt.Sprintf(":%d", cfg.MetricsPort),
+		Handler: promhttp.Handler(),
+	}
+
+	metricsErrors := make(chan error, 1)
+	go func() {
+		log.Printf("Metrics server listening at %s", metricsServer.Addr)
+		metricsErrors <- metricsServer.ListenAndServe()
+	}()
+
+	// Create a channel to listen for an interrupt or terminate signal from the OS.
+	// Use a buffered channel because the signal package requires it.
+	shutdown := make(chan os.Signal, 1)
+	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
+
+	// Blocking main and waiting for shutdown.
+	select {
+	case err := <-serverErrors:
+		log.Fatalf("Error starting gRPC server: %v", err)
+	case err := <-metricsErrors:
+		log.Fatalf("Error starting metrics server: %v", err)
+	case sig := <-shutdown:
+		log.Printf("Server is shutting down due to %v signal", sig)
+
+		// Give outstanding requests 5 seconds to complete.
+		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer shutdownCancel()
+
+		// Asking listener to stop accepting new connections.
+		if err := lis.Close(); err != nil {
+			log.Printf("Error closing gRPC listener: %v", err)
+		}
+
+		// Asking gRPC server to stop accepting new requests and wait for existing ones to complete.
+		stopped := make(chan struct{})
+		go func() {
+			s.GracefulStop()
+			close(stopped)
+		}()
+
+		// Shutdown metrics server
+		if err := metricsServer.Shutdown(shutdownCtx); err != nil {
+			log.Printf("Error shutting down metrics server: %v", err)
+		}
+
+		// Wait for graceful shutdown or timeout
+		select {
+		case <-shutdownCtx.Done():
+			log.Printf("Shutdown timeout reached, forcing stop")
+			s.Stop()
+		case <-stopped:
+			log.Printf("Server stopped gracefully")
+		}
 	}
 }
 

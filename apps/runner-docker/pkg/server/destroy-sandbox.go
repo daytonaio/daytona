@@ -6,7 +6,9 @@ package server
 import (
 	"context"
 	"fmt"
+	"time"
 
+	"github.com/daytonaio/runner-docker/pkg/common"
 	"github.com/daytonaio/runner-docker/pkg/models/enums"
 	pb "github.com/daytonaio/runner/proto"
 	"github.com/docker/docker/api/types/container"
@@ -14,13 +16,13 @@ import (
 )
 
 func (s *RunnerServer) DestroySandbox(ctx context.Context, req *pb.DestroySandboxRequest) (*pb.DestroySandboxResponse, error) {
-	// startTime := time.Now()
-	// defer func() {
-	// 	obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("destroy")
-	// 	if err == nil {
-	// 		obs.Observe(time.Since(startTime).Seconds())
-	// 	}
-	// }()
+	startTime := time.Now()
+	defer func() {
+		obs, err := common.ContainerOperationDuration.GetMetricWithLabelValues("destroy")
+		if err == nil {
+			obs.Observe(time.Since(startTime).Seconds())
+		}
+	}()
 
 	state, err := s.getSandboxState(ctx, req.SandboxId)
 	if err != nil && state == enums.SandboxStateError {

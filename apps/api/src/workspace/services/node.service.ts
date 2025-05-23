@@ -128,9 +128,31 @@ export class NodeService {
     for (const node of nodes) {
       this.logger.debug(`Checking node ${node.id}`)
       try {
-        // Do something with the node
         const runnerClient = this.runnerClientFactory.create(node)
-        await runnerClient.healthCheck({})
+        // Add timeout to the health check
+        const response = (await Promise.race([
+          runnerClient.healthCheck({}),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Health check timeout')), 5000)),
+        ])) as { status: string; version: string }
+
+        // Log the full response for debugging
+        this.logger.debug(`Health check response from node ${node.id}:`, response)
+
+        // Check if response is valid
+        if (!response) {
+          throw new Error('Empty health check response received')
+        }
+
+        // Check if status field exists
+        if (typeof response.status === 'undefined') {
+          throw new Error('Health check response missing status field')
+        }
+
+        // Verify the health check response
+        if (response.status !== 'healthy') {
+          throw new Error(`Node reported unhealthy status: ${response.status}`)
+        }
+
         await this.nodeRepository.update(node.id, {
           state: NodeState.READY,
           lastChecked: new Date(),
@@ -138,13 +160,10 @@ export class NodeService {
 
         await this.recalculateNodeUsage(node.id)
       } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Node not reachable')
-        } else {
-          this.logger.error(`Error checking node ${node.id}: ${e.message}`)
-          this.logger.error(e)
-        }
+        this.logger.error(`Error checking node ${node.id}: ${e.message}`)
+        this.logger.error(e)
 
+        // Update node state to UNRESPONSIVE for any error
         await this.nodeRepository.update(node.id, {
           state: NodeState.UNRESPONSIVE,
           lastChecked: new Date(),
