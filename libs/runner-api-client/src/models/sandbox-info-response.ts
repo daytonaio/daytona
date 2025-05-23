@@ -14,10 +14,10 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { EnumsSandboxState } from './enums-sandbox-state'
+import type { EnumsBackupState } from './enums-backup-state'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { EnumsSnapshotState } from './enums-snapshot-state'
+import type { EnumsSandboxState } from './enums-sandbox-state'
 
 /**
  *
@@ -27,10 +27,10 @@ import type { EnumsSnapshotState } from './enums-snapshot-state'
 export interface SandboxInfoResponse {
   /**
    *
-   * @type {EnumsSnapshotState}
+   * @type {EnumsBackupState}
    * @memberof SandboxInfoResponse
    */
-  snapshotState?: EnumsSnapshotState
+  backupState?: EnumsBackupState
   /**
    *
    * @type {EnumsSandboxState}

@@ -19,7 +19,7 @@ import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { NodeRegion } from '../enums/node-region.enum'
-import { SnapshotState } from '../enums/snapshot-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
 import { nanoid } from 'nanoid'
 import { WorkspaceVolume } from '../dto/workspace.dto'
 import { BuildInfo } from './build-info.entity'
@@ -99,26 +99,26 @@ export class Workspace {
   labels: { [key: string]: string }
 
   @Column({ nullable: true })
-  snapshotRegistryId: string
+  backupRegistryId: string
 
   @Column({ nullable: true })
-  snapshotImage: string
+  backupImage: string
 
   @Column({ nullable: true })
-  lastSnapshotAt: Date
+  lastBackupAt: Date
 
   @Column({
     type: 'enum',
-    enum: SnapshotState,
-    default: SnapshotState.NONE,
+    enum: BackupState,
+    default: BackupState.NONE,
   })
-  snapshotState: SnapshotState
+  backupState: BackupState
 
   @Column({
     type: 'jsonb',
     default: [],
   })
-  existingSnapshotImages: Array<{
+  existingBackupImages: Array<{
     imageName: string
     createdAt: Date
   }>

@@ -19,19 +19,19 @@ import type { RegistryDTO } from './registry-dto'
 /**
  *
  * @export
- * @interface CreateSnapshotDTO
+ * @interface CreateBackupDTO
  */
-export interface CreateSnapshotDTO {
+export interface CreateBackupDTO {
   /**
    *
    * @type {string}
-   * @memberof CreateSnapshotDTO
+   * @memberof CreateBackupDTO
    */
   image: string
   /**
    *
    * @type {RegistryDTO}
-   * @memberof CreateSnapshotDTO
+   * @memberof CreateBackupDTO
    */
   registry: RegistryDTO
 }

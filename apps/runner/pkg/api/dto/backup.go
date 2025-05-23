@@ -3,7 +3,7 @@
 
 package dto
 
-type CreateSnapshotDTO struct {
+type CreateBackupDTO struct {
 	Registry RegistryDTO `json:"registry" validate:"required"`
 	Image    string      `json:"image" validate:"required"`
-} //	@name	CreateSnapshotDTO
+} //	@name	CreateBackupDTO

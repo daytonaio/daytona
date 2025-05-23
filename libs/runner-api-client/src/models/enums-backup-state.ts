@@ -18,12 +18,12 @@
  * @enum {string}
  */
 
-export const EnumsSnapshotState = {
-  SnapshotStateNone: 'NONE',
-  SnapshotStatePending: 'PENDING',
-  SnapshotStateInProgress: 'IN_PROGRESS',
-  SnapshotStateCompleted: 'COMPLETED',
-  SnapshotStateFailed: 'FAILED',
+export const EnumsBackupState = {
+  BackupStateNone: 'NONE',
+  BackupStatePending: 'PENDING',
+  BackupStateInProgress: 'IN_PROGRESS',
+  BackupStateCompleted: 'COMPLETED',
+  BackupStateFailed: 'FAILED',
 } as const
 
-export type EnumsSnapshotState = (typeof EnumsSnapshotState)[keyof typeof EnumsSnapshotState]
+export type EnumsBackupState = (typeof EnumsBackupState)[keyof typeof EnumsBackupState]

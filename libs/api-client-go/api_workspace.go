@@ -35,17 +35,17 @@ type WorkspaceAPI interface {
 	ArchiveWorkspaceExecute(r WorkspaceAPIArchiveWorkspaceRequest) (*http.Response, error)
 
 	/*
-		CreateSnapshot Create workspace snapshot
+		CreateBackup Create workspace backup
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param workspaceId ID of the workspace
-		@return WorkspaceAPICreateSnapshotRequest
+		@return WorkspaceAPICreateBackupRequest
 	*/
-	CreateSnapshot(ctx context.Context, workspaceId string) WorkspaceAPICreateSnapshotRequest
+	CreateBackup(ctx context.Context, workspaceId string) WorkspaceAPICreateBackupRequest
 
-	// CreateSnapshotExecute executes the request
+	// CreateBackupExecute executes the request
 	//  @return Workspace
-	CreateSnapshotExecute(r WorkspaceAPICreateSnapshotRequest) (*Workspace, *http.Response, error)
+	CreateBackupExecute(r WorkspaceAPICreateBackupRequest) (*Workspace, *http.Response, error)
 
 	/*
 		CreateWorkspace Create a new workspace
@@ -302,7 +302,7 @@ func (a *WorkspaceAPIService) ArchiveWorkspaceExecute(r WorkspaceAPIArchiveWorks
 	return localVarHTTPResponse, nil
 }
 
-type WorkspaceAPICreateSnapshotRequest struct {
+type WorkspaceAPICreateBackupRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
 	workspaceId            string
@@ -310,24 +310,24 @@ type WorkspaceAPICreateSnapshotRequest struct {
 }
 
 // Use with JWT to specify the organization ID
-func (r WorkspaceAPICreateSnapshotRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPICreateSnapshotRequest {
+func (r WorkspaceAPICreateBackupRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPICreateBackupRequest {
 	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
 	return r
 }
 
-func (r WorkspaceAPICreateSnapshotRequest) Execute() (*Workspace, *http.Response, error) {
-	return r.ApiService.CreateSnapshotExecute(r)
+func (r WorkspaceAPICreateBackupRequest) Execute() (*Workspace, *http.Response, error) {
+	return r.ApiService.CreateBackupExecute(r)
 }
 
 /*
-CreateSnapshot Create workspace snapshot
+CreateBackup Create workspace backup
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId ID of the workspace
-	@return WorkspaceAPICreateSnapshotRequest
+	@return WorkspaceAPICreateBackupRequest
 */
-func (a *WorkspaceAPIService) CreateSnapshot(ctx context.Context, workspaceId string) WorkspaceAPICreateSnapshotRequest {
-	return WorkspaceAPICreateSnapshotRequest{
+func (a *WorkspaceAPIService) CreateBackup(ctx context.Context, workspaceId string) WorkspaceAPICreateBackupRequest {
+	return WorkspaceAPICreateBackupRequest{
 		ApiService:  a,
 		ctx:         ctx,
 		workspaceId: workspaceId,
@@ -337,7 +337,7 @@ func (a *WorkspaceAPIService) CreateSnapshot(ctx context.Context, workspaceId st
 // Execute executes the request
 //
 //	@return Workspace
-func (a *WorkspaceAPIService) CreateSnapshotExecute(r WorkspaceAPICreateSnapshotRequest) (*Workspace, *http.Response, error) {
+func (a *WorkspaceAPIService) CreateBackupExecute(r WorkspaceAPICreateBackupRequest) (*Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
@@ -345,12 +345,12 @@ func (a *WorkspaceAPIService) CreateSnapshotExecute(r WorkspaceAPICreateSnapshot
 		localVarReturnValue *Workspace
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateSnapshot")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateBackup")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/workspace/{workspaceId}/snapshot"
+	localVarPath := localBasePath + "/workspace/{workspaceId}/backup"
 	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
