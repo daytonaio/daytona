@@ -3,10 +3,10 @@ api/openapi.yaml
 api_api_keys.go
 api_docker_registry.go
 api_images.go
-api_nodes.go
 api_object_storage.go
 api_organizations.go
 api_preview.go
+api_runners.go
 api_toolbox.go
 api_users.go
 api_volumes.go
@@ -27,11 +27,11 @@ model_create_api_key.go
 model_create_build_info.go
 model_create_docker_registry.go
 model_create_image.go
-model_create_node.go
 model_create_organization.go
 model_create_organization_invitation.go
 model_create_organization_quota.go
 model_create_organization_role.go
+model_create_runner.go
 model_create_session_request.go
 model_create_user.go
 model_create_volume.go

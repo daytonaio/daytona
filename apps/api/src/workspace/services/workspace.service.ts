@@ -10,13 +10,13 @@ import { Workspace } from '../entities/workspace.entity'
 import { CreateWorkspaceDto } from '../dto/create-workspace.dto'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
-import { NodeService } from './node.service'
+import { RunnerService } from './runner.service'
 import { WorkspaceError } from '../../exceptions/workspace-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { NodeState } from '../enums/node-state.enum'
+import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
@@ -25,7 +25,7 @@ import { WorkspaceWarmPoolService } from './workspace-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { Organization } from '../../organization/entities/organization.entity'
 import { WorkspaceEvents } from '../constants/workspace-events.constants'
@@ -56,16 +56,16 @@ export class WorkspaceService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-    @InjectRepository(Node)
-    private readonly nodeRepository: Repository<Node>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
-    private readonly nodeService: NodeService,
+    private readonly runnerService: RunnerService,
     private readonly configService: TypedConfigService,
     private readonly warmPoolService: WorkspaceWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
-  ) {}
+  ) { }
 
   private async validateOrganizationQuotas(
     organization: Organization,
@@ -187,7 +187,7 @@ export class WorkspaceService {
     const disk = createWorkspaceDto.disk || DEFAULT_DISK
     const gpu = createWorkspaceDto.gpu || DEFAULT_GPU
     // Validate region and class
-    const region = createWorkspaceDto.target || NodeRegion.EU
+    const region = createWorkspaceDto.target || RunnerRegion.EU
     if (!this.isValidRegion(region)) {
       throw new BadRequestError('Invalid region')
     }
@@ -321,13 +321,17 @@ export class WorkspaceService {
     const imageRef = workspace.buildInfo ? workspace.buildInfo.imageRef : image.internalName
 
     try {
-      workspace.nodeId = await this.nodeService.getRandomAvailableNode({
+      workspace.runnerId = await this.runnerService.getRandomAvailableRunner({
         region: workspace.region,
         workspaceClass: workspace.class,
         imageRef,
       })
     } catch (error) {
-      if (error instanceof BadRequestError == false || error.message !== 'No available nodes' || !workspace.buildInfo) {
+      if (
+        error instanceof BadRequestError == false ||
+        error.message !== 'No available runners' ||
+        !workspace.buildInfo
+      ) {
         throw error
       }
       workspace.state = WorkspaceState.PENDING_BUILD
@@ -402,14 +406,14 @@ export class WorkspaceService {
       throw new WorkspaceError('Workspace must be started to get port preview URL')
     }
 
-    // Get node info
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    if (!node) {
-      throw new NotFoundException(`Node not found for workspace ${workspaceId}`)
+    // Get runner info
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner not found for workspace ${workspaceId}`)
     }
 
     return {
-      url: `https://${port}-${workspace.id}.${node.domain}`,
+      url: `https://${port}-${workspace.id}.${runner.domain}`,
       token: workspace.authToken,
     }
   }
@@ -456,15 +460,15 @@ export class WorkspaceService {
 
     await this.assertOrganizationIsNotSuspended(organization)
 
-    if (workspace.nodeId) {
-      // Add node readiness check
-      const node = await this.nodeService.findOne(workspace.nodeId)
-      if (node.state !== NodeState.READY) {
-        throw new WorkspaceError('Node is not ready')
+    if (workspace.runnerId) {
+      // Add runner readiness check
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      if (runner.state !== RunnerState.READY) {
+        throw new WorkspaceError('Runner is not ready')
       }
 
-      if (node.unschedulable && workspace.backupState !== BackupState.COMPLETED) {
-        throw new WorkspaceError('Node is unschedulable - can not start workspace until the backup is completed')
+      if (runner.unschedulable && workspace.backupState !== BackupState.COMPLETED) {
+        throw new WorkspaceError('Runner is unschedulable - can not start workspace until the backup is completed')
       }
     } else {
       //  restore operation
@@ -525,8 +529,8 @@ export class WorkspaceService {
     await this.workspaceRepository.save(workspace)
   }
 
-  private isValidRegion(region: NodeRegion): boolean {
-    return Object.values(NodeRegion).includes(region)
+  private isValidRegion(region: RunnerRegion): boolean {
+    return Object.values(RunnerRegion).includes(region)
   }
 
   private isValidClass(workspaceClass: WorkspaceClass): boolean {
@@ -611,17 +615,17 @@ export class WorkspaceService {
   }
 
   @Cron(CronExpression.EVERY_MINUTE)
-  private async handleUnschedulableNodes() {
-    const nodes = await this.nodeRepository.find({ where: { unschedulable: true } })
+  private async handleUnschedulableRunners() {
+    const runners = await this.runnerRepository.find({ where: { unschedulable: true } })
 
-    if (nodes.length === 0) {
+    if (runners.length === 0) {
       return
     }
 
-    //  find all workspaces that are using the unschedulable nodes and have organizationId = '00000000-0000-0000-0000-000000000000'
+    //  find all workspaces that are using the unschedulable runners and have organizationId = '00000000-0000-0000-0000-000000000000'
     const workspaces = await this.workspaceRepository.find({
       where: {
-        nodeId: In(nodes.map((node) => node.id)),
+        runnerId: In(runners.map((runner) => runner.id)),
         organizationId: '00000000-0000-0000-0000-000000000000',
         state: WorkspaceState.STARTED,
         desiredState: Not(WorkspaceDesiredState.DESTROYED),

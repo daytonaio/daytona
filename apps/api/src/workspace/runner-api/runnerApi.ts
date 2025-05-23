@@ -4,7 +4,7 @@
  */
 
 import { SandboxApi, DefaultApi, ImagesApi, Configuration } from '@daytonaio/runner-api-client'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
 import axiosDebug from 'axios-debug-log'
@@ -29,12 +29,12 @@ if (isDebugEnabled) {
 }
 
 @Injectable()
-export class NodeApiFactory {
-  createNodeApi(node: Node): DefaultApi {
+export class RunnerApiFactory {
+  createRunnerApi(runner: Runner): DefaultApi {
     const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
+      baseURL: runner.apiUrl,
       headers: {
-        Authorization: `Bearer ${node.apiKey}`,
+        Authorization: `Bearer ${runner.apiKey}`,
       },
       timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
@@ -57,11 +57,11 @@ export class NodeApiFactory {
     return new DefaultApi(new Configuration(), '', axiosInstance)
   }
 
-  createImageApi(node: Node): ImagesApi {
+  createImageApi(runner: Runner): ImagesApi {
     const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
+      baseURL: runner.apiUrl,
       headers: {
-        Authorization: `Bearer ${node.apiKey}`,
+        Authorization: `Bearer ${runner.apiKey}`,
       },
       timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
@@ -73,11 +73,11 @@ export class NodeApiFactory {
     return new ImagesApi(new Configuration(), '', axiosInstance)
   }
 
-  createWorkspaceApi(node: Node): SandboxApi {
+  createWorkspaceApi(runner: Runner): SandboxApi {
     const axiosInstance = axios.create({
-      baseURL: node.apiUrl,
+      baseURL: runner.apiUrl,
       headers: {
-        Authorization: `Bearer ${node.apiKey}`,
+        Authorization: `Bearer ${runner.apiKey}`,
       },
       timeout: 1 * 60 * 60 * 1000, // 1 hour
     })
