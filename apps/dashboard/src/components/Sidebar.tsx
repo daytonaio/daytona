@@ -226,7 +226,7 @@ export function Sidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
-                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED && (
+                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"
