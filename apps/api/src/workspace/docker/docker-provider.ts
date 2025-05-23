@@ -196,7 +196,7 @@ export class DockerProvider implements OnModuleInit {
     const registryUrl = this.dockerRegistryService.getRegistryUrl(registry)
     const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
 
-    const repoPath = `${registry.project}/snapshot-${repository}`
+    const repoPath = `${registry.project}/backup-${repository}`
 
     try {
       // Step 1: List all tags in the repository
@@ -287,7 +287,7 @@ export class DockerProvider implements OnModuleInit {
     }
   }
 
-  async deleteSnapshotImageFromRegistry(imageName: string, registry: DockerRegistry): Promise<void> {
+  async deleteBackupImageFromRegistry(imageName: string, registry: DockerRegistry): Promise<void> {
     // Extract tag
     const lastColonIndex = imageName.lastIndexOf(':')
     const fullPath = imageName.substring(0, lastColonIndex)
@@ -301,7 +301,7 @@ export class DockerProvider implements OnModuleInit {
       projectAndRepo = fullPath.substring(registryUrl.length + 1) // +1 for the slash
     }
 
-    // For Harbor format like: harbor.host/bbox-stage/snapshot-sandbox-75148d5a
+    // For Harbor format like: harbor.host/bbox-stage/backup-sandbox-75148d5a
     const parts = projectAndRepo.split('/')
 
     // Construct repository path (everything after the registry host)
@@ -467,7 +467,7 @@ export class DockerProvider implements OnModuleInit {
         projectAndRepo = fullPath.substring(registryUrl.length + 1) // +1 for the slash
       }
 
-      // For Harbor format like: harbor.host/bbox-stage/snapshot-sandbox-75148d5a
+      // For Harbor format like: harbor.host/bbox-stage/backup-sandbox-75148d5a
       const parts = projectAndRepo.split('/')
 
       const apiUrl = `${registryUrl}/v2/${parts[1]}/${parts[2]}/manifests/${tag}`

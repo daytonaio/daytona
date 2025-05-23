@@ -11,11 +11,11 @@ configuration.ts
 git_push.sh
 index.ts
 models/build-image-request-dto.ts
+models/create-backup-dto.ts
 models/create-sandbox-dto.ts
-models/create-snapshot-dto.ts
 models/dto-volume-dto.ts
+models/enums-backup-state.ts
 models/enums-sandbox-state.ts
-models/enums-snapshot-state.ts
 models/error-response.ts
 models/image-exists-response.ts
 models/index.ts

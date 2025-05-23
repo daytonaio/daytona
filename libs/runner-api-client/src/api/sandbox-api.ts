@@ -32,9 +32,9 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { CreateSandboxDTO } from '../models'
+import type { CreateBackupDTO } from '../models'
 // @ts-ignore
-import type { CreateSnapshotDTO } from '../models'
+import type { CreateSandboxDTO } from '../models'
 // @ts-ignore
 import type { ErrorResponse } from '../models'
 // @ts-ignore
@@ -85,23 +85,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Create sandbox snapshot
-     * @summary Create sandbox snapshot
+     * Create sandbox backup
+     * @summary Create sandbox backup
      * @param {string} workspaceId Sandbox ID
-     * @param {CreateSnapshotDTO} sandbox Create snapshot
+     * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createSnapshot: async (
+    createBackup: async (
       workspaceId: string,
-      sandbox: CreateSnapshotDTO,
+      sandbox: CreateBackupDTO,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createSnapshot', 'workspaceId', workspaceId)
+      assertParamExists('createBackup', 'workspaceId', workspaceId)
       // verify required parameter 'sandbox' is not null or undefined
-      assertParamExists('createSnapshot', 'sandbox', sandbox)
-      const localVarPath = `/workspaces/{workspaceId}/snapshot`.replace(
+      assertParamExists('createBackup', 'sandbox', sandbox)
+      const localVarPath = `/workspaces/{workspaceId}/backup`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
       )
@@ -397,22 +397,22 @@ export const SandboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Create sandbox snapshot
-     * @summary Create sandbox snapshot
+     * Create sandbox backup
+     * @summary Create sandbox backup
      * @param {string} workspaceId Sandbox ID
-     * @param {CreateSnapshotDTO} sandbox Create snapshot
+     * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async createSnapshot(
+    async createBackup(
       workspaceId: string,
-      sandbox: CreateSnapshotDTO,
+      sandbox: CreateBackupDTO,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createSnapshot(workspaceId, sandbox, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(workspaceId, sandbox, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['SandboxApi.createSnapshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['SandboxApi.createBackup']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -580,19 +580,15 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
       return localVarFp.create(sandbox, options).then((request) => request(axios, basePath))
     },
     /**
-     * Create sandbox snapshot
-     * @summary Create sandbox snapshot
+     * Create sandbox backup
+     * @summary Create sandbox backup
      * @param {string} workspaceId Sandbox ID
-     * @param {CreateSnapshotDTO} sandbox Create snapshot
+     * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createSnapshot(
-      workspaceId: string,
-      sandbox: CreateSnapshotDTO,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<string> {
-      return localVarFp.createSnapshot(workspaceId, sandbox, options).then((request) => request(axios, basePath))
+    createBackup(workspaceId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.createBackup(workspaceId, sandbox, options).then((request) => request(axios, basePath))
     },
     /**
      * Destroy sandbox
@@ -680,17 +676,17 @@ export class SandboxApi extends BaseAPI {
   }
 
   /**
-   * Create sandbox snapshot
-   * @summary Create sandbox snapshot
+   * Create sandbox backup
+   * @summary Create sandbox backup
    * @param {string} workspaceId Sandbox ID
-   * @param {CreateSnapshotDTO} sandbox Create snapshot
+   * @param {CreateBackupDTO} sandbox Create backup
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public createSnapshot(workspaceId: string, sandbox: CreateSnapshotDTO, options?: RawAxiosRequestConfig) {
+  public createBackup(workspaceId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .createSnapshot(workspaceId, sandbox, options)
+      .createBackup(workspaceId, sandbox, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

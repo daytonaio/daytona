@@ -511,6 +511,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/workspaces/{workspaceId}/backup": {
+            "post": {
+                "description": "Create sandbox backup",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Create sandbox backup",
+                "operationId": "CreateBackup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "workspaceId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Create backup",
+                        "name": "sandbox",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateBackupDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Backup created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/workspaces/{workspaceId}/destroy": {
             "post": {
                 "description": "Destroy sandbox",
@@ -603,75 +672,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "Sandbox resized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/workspaces/{workspaceId}/snapshot": {
-            "post": {
-                "description": "Create sandbox snapshot",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sandbox"
-                ],
-                "summary": "Create sandbox snapshot",
-                "operationId": "CreateSnapshot",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Sandbox ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Create snapshot",
-                        "name": "sandbox",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CreateSnapshotDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Snapshot created",
                         "schema": {
                             "type": "string"
                         }
@@ -932,6 +932,21 @@ const docTemplate = `{
                 }
             }
         },
+        "CreateBackupDTO": {
+            "type": "object",
+            "required": [
+                "image",
+                "registry"
+            ],
+            "properties": {
+                "image": {
+                    "type": "string"
+                },
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                }
+            }
+        },
         "CreateSandboxDTO": {
             "type": "object",
             "required": [
@@ -992,21 +1007,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.VolumeDTO"
                     }
-                }
-            }
-        },
-        "CreateSnapshotDTO": {
-            "type": "object",
-            "required": [
-                "image",
-                "registry"
-            ],
-            "properties": {
-                "image": {
-                    "type": "string"
-                },
-                "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },
@@ -1113,8 +1113,8 @@ const docTemplate = `{
         "SandboxInfoResponse": {
             "type": "object",
             "properties": {
-                "snapshotState": {
-                    "$ref": "#/definitions/enums.SnapshotState"
+                "backupState": {
+                    "$ref": "#/definitions/enums.BackupState"
                 },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
@@ -1131,6 +1131,23 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "enums.BackupState": {
+            "type": "string",
+            "enum": [
+                "NONE",
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "FAILED"
+            ],
+            "x-enum-varnames": [
+                "BackupStateNone",
+                "BackupStatePending",
+                "BackupStateInProgress",
+                "BackupStateCompleted",
+                "BackupStateFailed"
+            ]
         },
         "enums.SandboxState": {
             "type": "string",
@@ -1161,23 +1178,6 @@ const docTemplate = `{
                 "SandboxStateError",
                 "SandboxStateUnknown",
                 "SandboxStatePullingImage"
-            ]
-        },
-        "enums.SnapshotState": {
-            "type": "string",
-            "enum": [
-                "NONE",
-                "PENDING",
-                "IN_PROGRESS",
-                "COMPLETED",
-                "FAILED"
-            ],
-            "x-enum-varnames": [
-                "SnapshotStateNone",
-                "SnapshotStatePending",
-                "SnapshotStateInProgress",
-                "SnapshotStateCompleted",
-                "SnapshotStateFailed"
             ]
         }
     },

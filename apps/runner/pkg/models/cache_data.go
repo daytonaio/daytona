@@ -11,6 +11,6 @@ import (
 
 type CacheData struct {
 	SandboxState    enums.SandboxState
-	SnapshotState   enums.SnapshotState
+	BackupState     enums.BackupState
 	DestructionTime *time.Time
 }
