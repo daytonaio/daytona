@@ -299,10 +299,10 @@ export class WorkspaceController {
     return { labels }
   }
 
-  @Post(':workspaceId/snapshot')
+  @Post(':workspaceId/backup')
   @ApiOperation({
-    summary: 'Create workspace snapshot',
-    operationId: 'createSnapshot',
+    summary: 'Create workspace backup',
+    operationId: 'createBackup',
   })
   @ApiParam({
     name: 'workspaceId',
@@ -311,13 +311,13 @@ export class WorkspaceController {
   })
   @ApiResponse({
     status: 200,
-    description: 'Workspace snapshot has been initiated',
+    description: 'Workspace backup has been initiated',
     type: WorkspaceDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
-  async createSnapshot(@Param('workspaceId') workspaceId: string): Promise<void> {
-    await this.workspaceService.createSnapshot(workspaceId)
+  async createBackup(@Param('workspaceId') workspaceId: string): Promise<void> {
+    await this.workspaceService.createBackup(workspaceId)
   }
 
   @Post(':workspaceId/public/:isPublic')

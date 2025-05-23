@@ -14,5 +14,5 @@ export const WorkspaceEvents = {
   RESIZED: 'workspace.resized',
   PUBLIC_STATUS_UPDATED: 'workspace.public-status.updated',
   ORGANIZATION_UPDATED: 'workspace.organization.updated',
-  SNAPSHOT_CREATED: 'workspace.snapshot.created',
+  BACKUP_CREATED: 'workspace.backup.created',
 } as const

@@ -95,20 +95,20 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createSnapshot: async (
+    createBackup: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createSnapshot', 'workspaceId', workspaceId)
-      const localVarPath = `/workspace/{workspaceId}/snapshot`.replace(
+      assertParamExists('createBackup', 'workspaceId', workspaceId)
+      const localVarPath = `/workspace/{workspaceId}/backup`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
       )
@@ -751,25 +751,25 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async createSnapshot(
+    async createBackup(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createSnapshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(
         workspaceId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.createSnapshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.createBackup']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1150,19 +1150,19 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createSnapshot(
+    createBackup(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Workspace> {
       return localVarFp
-        .createSnapshot(workspaceId, xDaytonaOrganizationID, options)
+        .createBackup(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1395,16 +1395,16 @@ export class WorkspaceApi extends BaseAPI {
 
   /**
    *
-   * @summary Create workspace snapshot
+   * @summary Create workspace backup
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public createSnapshot(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public createBackup(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return WorkspaceApiFp(this.configuration)
-      .createSnapshot(workspaceId, xDaytonaOrganizationID, options)
+      .createBackup(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

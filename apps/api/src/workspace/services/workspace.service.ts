@@ -17,7 +17,7 @@ import { WorkspaceError } from '../../exceptions/workspace-error.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { NodeState } from '../enums/node-state.enum'
-import { SnapshotState } from '../enums/snapshot-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
@@ -33,7 +33,7 @@ import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceStateUpdatedEvent } from '../events/workspace-state-updated.event'
 import { BuildInfo } from '../entities/build-info.entity'
 import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
-import { WorkspaceSnapshotCreatedEvent } from '../events/workspace-snapshot-created.event'
+import { WorkspaceBackupCreatedEvent } from '../events/workspace-backup-created.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceStartedEvent } from '../events/workspace-started.event'
 import { WorkspaceStoppedEvent } from '../events/workspace-stopped.event'
@@ -341,7 +341,7 @@ export class WorkspaceService {
     return workspace
   }
 
-  async createSnapshot(workspaceId: string): Promise<void> {
+  async createBackup(workspaceId: string): Promise<void> {
     const workspace = await this.workspaceRepository.findOne({
       where: {
         id: workspaceId,
@@ -352,15 +352,15 @@ export class WorkspaceService {
       throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
     }
 
-    if (![SnapshotState.COMPLETED, SnapshotState.NONE].includes(workspace.snapshotState)) {
-      throw new WorkspaceError('Workspace snapshot is already in progress')
+    if (![BackupState.COMPLETED, BackupState.NONE].includes(workspace.backupState)) {
+      throw new WorkspaceError('Workspace backup is already in progress')
     }
 
     await this.workspaceRepository.update(workspaceId, {
-      snapshotState: SnapshotState.PENDING,
+      backupState: BackupState.PENDING,
     })
 
-    this.eventEmitter.emit(WorkspaceEvents.SNAPSHOT_CREATED, new WorkspaceSnapshotCreatedEvent(workspace))
+    this.eventEmitter.emit(WorkspaceEvents.BACKUP_CREATED, new WorkspaceBackupCreatedEvent(workspace))
   }
 
   async findAll(organizationId: string, labels?: { [key: string]: string }): Promise<Workspace[]> {
@@ -480,8 +480,8 @@ export class WorkspaceService {
         throw new WorkspaceError('Node is not ready')
       }
 
-      if (node.unschedulable && workspace.snapshotState !== SnapshotState.COMPLETED) {
-        throw new WorkspaceError('Node is unschedulable - can not start workspace until the snapshot is completed')
+      if (node.unschedulable && workspace.backupState !== BackupState.COMPLETED) {
+        throw new WorkspaceError('Node is unschedulable - can not start workspace until the backup is completed')
       }
     } else {
       //  restore operation
