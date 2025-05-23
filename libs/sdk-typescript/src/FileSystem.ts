@@ -141,9 +141,15 @@ export class FileSystem {
         responseType: 'arraybuffer',
         timeout: timeout * 1000,
       })
+
       if (Buffer.isBuffer(data)) {
         return data
       }
+
+      if (data instanceof ArrayBuffer) {
+        return Buffer.from(data)
+      }
+
       return Buffer.from(await data.arrayBuffer())
     }
 

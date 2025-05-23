@@ -36,14 +36,13 @@ license = {text = "AGPL-3.0"}
 [project.optional-dependencies]
 dev = [
     "pydoc-markdown>=4.8.2",
-    "black>=22.0.0",
-    "isort>=5.10.0",
     "build>=1.0.3",
     "wheel>=0.41.2",
     "setuptools>=68.0.0",
     "twine>=4.0.2",
-    "nbqa>=1.9.1",
-    "black[jupyter]>=23.1.0,<=23.12.1",
-    "pylint>=3.3.4",
+    "nbqa>=1.9.1,<2.0.0 ",
+    "black[jupyter]>=23.1.0,<24.0.0",
+    "pylint>=3.3.4,<4.0.0",
+    "isort>=5.10.0,<6.0.0",
     "matplotlib>=3.10.0,<3.11.0"
 ]

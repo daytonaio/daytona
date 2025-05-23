@@ -57,7 +57,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install isort black nbqa pylint
+          pip install "isort>=5.10.0,<6.0.0" "black[jupyter]>=23.1.0,<24.0.0" "nbqa>=1.9.1,<2.0.0 " "pylint>=3.3.4,<4.0.0"
       - run: corepack enable
       - name: generate-api-clients
         run: |
