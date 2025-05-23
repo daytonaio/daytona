@@ -1,7 +1,7 @@
 import { WorkspaceState } from "../enums/workspace-state.enum";
 import { WorkspaceDesiredState } from "../enums/workspace-desired-state.enum";
 import { WorkspaceClass } from "../enums/workspace-class.enum";
-import { NodeRegion } from "../enums/node-region.enum";
+import { RunnerRegion } from "../enums/runner-region.enum";
 import { ApiProperty } from "@nestjs/swagger";
 
 export class WorkspaceDto {
@@ -15,15 +15,15 @@ export class WorkspaceDto {
   userId: string;
 
   @ApiProperty({
-    enum: NodeRegion,
+    enum: RunnerRegion,
   })
-  region: NodeRegion;
+  region: RunnerRegion;
 
   @ApiProperty()
-  nodeId: string;
+  runnerId: string;
 
   @ApiProperty()
-  nodeDomain: string;
+  runnerDomain: string;
 
   @ApiProperty({
     enum: WorkspaceClass,

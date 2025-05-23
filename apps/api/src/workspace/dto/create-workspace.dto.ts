@@ -6,7 +6,7 @@
 import { IsEnum, IsObject, IsOptional, IsString, IsNumber, IsBoolean } from 'class-validator'
 import { ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceVolume } from './workspace.dto'
 import { CreateBuildInfoDto } from './create-build-info.dto'
 
@@ -67,12 +67,12 @@ export class CreateWorkspaceDto {
 
   @ApiPropertyOptional({
     description: 'The target (region) where the workspace will be created',
-    enum: NodeRegion,
-    example: Object.values(NodeRegion)[0],
+    enum: RunnerRegion,
+    example: Object.values(RunnerRegion)[0],
   })
   @IsOptional()
-  @IsEnum(NodeRegion)
-  target?: NodeRegion
+  @IsEnum(RunnerRegion)
+  target?: RunnerRegion
 
   @ApiPropertyOptional({
     description: 'CPU cores allocated to the workspace',

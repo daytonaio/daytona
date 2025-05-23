@@ -286,9 +286,9 @@ const getProviderClass = (workspace: Workspace): string => {
   return parsed?.class || 'unknown'
 }
 
-const getNodeDomain = (metadata: string | undefined): string | null => {
+const getRunnerDomain = (metadata: string | undefined): string | null => {
   const parsed = getProviderMetadata(metadata)
-  return parsed?.nodeDomain || null
+  return parsed?.runnerDomain || null
 }
 
 const getStateColor = (state?: WorkspaceState) => {
@@ -591,10 +591,10 @@ const getColumns = ({
       id: 'access',
       header: 'Access',
       cell: ({ row }) => {
-        const nodeDomain = getNodeDomain(row.original.info?.providerMetadata)
-        if (!nodeDomain || row.original.state !== WorkspaceState.STARTED) return ''
+        const runnerDomain = getRunnerDomain(row.original.info?.providerMetadata)
+        if (!runnerDomain || row.original.state !== WorkspaceState.STARTED) return ''
         return (
-          <a href={`https://22222-${row.original.id}.${nodeDomain}`} target="_blank" rel="noopener noreferrer">
+          <a href={`https://22222-${row.original.id}.${runnerDomain}`} target="_blank" rel="noopener noreferrer">
             <Terminal className="w-4 h-4" />
           </a>
         )

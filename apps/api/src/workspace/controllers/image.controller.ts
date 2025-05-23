@@ -26,7 +26,7 @@ import {
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
 import { ImageService } from '../services/image.service'
-import { NodeService } from '../services/node.service'
+import { RunnerService } from '../services/runner.service'
 import {
   ApiOAuth2,
   ApiTags,
@@ -67,7 +67,7 @@ export class ImageController {
 
   constructor(
     private readonly imageService: ImageService,
-    private readonly nodeService: NodeService,
+    private readonly runnerService: RunnerService,
   ) {}
 
   @Post()
@@ -282,24 +282,24 @@ export class ImageController {
       throw new NotFoundException(`Image with ID ${imageId} has no build info`)
     }
 
-    // Retry until a node is assigned or timeout after 30 seconds
+    // Retry until a runner is assigned or timeout after 30 seconds
     const startTime = Date.now()
     const timeoutMs = 30 * 1000
 
-    while (!image.buildNodeId) {
+    while (!image.buildRunnerId) {
       if (Date.now() - startTime > timeoutMs) {
-        throw new NotFoundException(`Timeout waiting for build node assignment for image ${imageId}`)
+        throw new NotFoundException(`Timeout waiting for build runner assignment for image ${imageId}`)
       }
       await new Promise((resolve) => setTimeout(resolve, 1000))
       image = await this.imageService.getImage(imageId)
     }
 
-    const node = await this.nodeService.findOne(image.buildNodeId)
-    if (!node) {
-      throw new NotFoundException(`Build node for image ${imageId} not found`)
+    const runner = await this.runnerService.findOne(image.buildRunnerId)
+    if (!runner) {
+      throw new NotFoundException(`Build runner for image ${imageId} not found`)
     }
 
-    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, follow === true, req, res, next)
+    const logProxy = new LogProxy(runner.apiUrl, image.id, runner.apiKey, follow === true, req, res, next)
     return logProxy.create()
   }
 }

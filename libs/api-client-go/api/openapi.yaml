@@ -1546,9 +1546,9 @@ paths:
       summary: Get build logs
       tags:
         - workspace
-  /nodes:
+  /runners:
     get:
-      operationId: listNodes
+      operationId: listRunners
       parameters: []
       responses:
         '200':
@@ -1559,17 +1559,17 @@ paths:
             - openid
             - profile
             - email
-      summary: List all nodes
+      summary: List all runners
       tags:
-        - nodes
+        - runners
     post:
-      operationId: createNode
+      operationId: createRunner
       parameters: []
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateNode'
+              $ref: '#/components/schemas/CreateRunner'
         required: true
       responses:
         '201':
@@ -1580,12 +1580,12 @@ paths:
             - openid
             - profile
             - email
-      summary: Create node
+      summary: Create runner
       tags:
-        - nodes
-  /nodes/{id}/scheduling:
+        - runners
+  /runners/{id}/scheduling:
     patch:
-      operationId: updateNodeScheduling
+      operationId: updateRunnerScheduling
       parameters:
         - explode: false
           in: path
@@ -1603,9 +1603,9 @@ paths:
             - openid
             - profile
             - email
-      summary: Update node scheduling status
+      summary: Update runner scheduling status
       tags:
-        - nodes
+        - runners
   /toolbox/{workspaceId}/toolbox/project-dir:
     get:
       operationId: getProjectDir
@@ -5220,12 +5220,12 @@ components:
       type: object
     PortPreviewUrl:
       example:
-        url: https://123456-myworkspace.node.com
+        url: https://123456-myworkspace.runner.com
         token: ul67qtv-jl6wb9z5o3eii-ljqt9qed6l
       properties:
         url:
           description: Preview url
-          example: https://123456-myworkspace.node.com
+          example: https://123456-myworkspace.runner.com
           type: string
         token:
           description: Access token
@@ -5235,7 +5235,7 @@ components:
         - token
         - url
       type: object
-    CreateNode:
+    CreateRunner:
       example:
         disk: 1.4658129805029452
         memory: 6.027456183070403

@@ -17,11 +17,11 @@ import { WorkspaceOrganizationUpdatedEvent } from '../events/workspace-organizat
 import { ConfigService } from '@nestjs/config'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { WorkspaceState } from '../enums/workspace-state.enum'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import { WarmPoolTopUpRequested } from '../events/warmpool-topup-requested.event'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -30,7 +30,7 @@ import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 
 export type FetchWarmPoolWorkspaceParams = {
   image: string
-  target: NodeRegion
+  target: RunnerRegion
   class: WorkspaceClass
   cpu: number
   mem: number
@@ -52,8 +52,8 @@ export class WorkspaceWarmPoolService {
     private readonly workspaceRepository: Repository<Workspace>,
     @InjectRepository(Image)
     private readonly imageRepository: Repository<Image>,
-    @InjectRepository(Node)
-    private readonly nodeRepository: Repository<Node>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly configService: ConfigService,
     @Inject(EventEmitter2)
@@ -94,7 +94,7 @@ export class WorkspaceWarmPoolService {
       },
     })
     if (warmPoolItem) {
-      const unschedulableNodes = await this.nodeRepository.find({
+      const unschedulableRunners = await this.runnerRepository.find({
         where: {
           region: params.target,
           unschedulable: true,
@@ -103,7 +103,7 @@ export class WorkspaceWarmPoolService {
 
       const warmPoolWorkspaces = await this.workspaceRepository.find({
         where: {
-          nodeId: Not(In(unschedulableNodes.map((node) => node.id))),
+          runnerId: Not(In(unschedulableRunners.map((runner) => runner.id))),
           class: warmPoolItem.class,
           cpu: warmPoolItem.cpu,
           mem: warmPoolItem.mem,

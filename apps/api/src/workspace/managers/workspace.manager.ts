@@ -10,10 +10,10 @@ import { In, Not, Raw, Repository } from 'typeorm'
 import { Workspace } from '../entities/workspace.entity'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
-import { NodeService } from '../services/node.service'
-import { EnumsSandboxState as NodeWorkspaceState } from '@daytonaio/runner-api-client'
-import { NodeState } from '../enums/node-state.enum'
+import { RunnerApiFactory } from '../runner-api/runnerApi'
+import { RunnerService } from '../services/runner.service'
+import { EnumsSandboxState as RunnerWorkspaceState } from '@daytonaio/runner-api-client'
+import { RunnerState } from '../enums/runner-state.enum'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
@@ -22,7 +22,7 @@ import { ImageService } from '../services/image.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { DockerProvider } from '../docker/docker-provider'
-import { ImageNodeState } from '../enums/image-node-state.enum'
+import { ImageRunnerState } from '../enums/image-runner-state.enum'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
@@ -33,7 +33,7 @@ import { WorkspaceStartedEvent } from '../events/workspace-started.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
-import { ImageNode } from '../entities/image-node.entity'
+import { ImageRunner } from '../entities/image-runner.entity'
 
 type BreakFromSwitch = boolean
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
@@ -45,10 +45,10 @@ export class WorkspaceManager {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(ImageNode)
-    private readonly imageNodeRepository: Repository<ImageNode>,
-    private readonly nodeService: NodeService,
-    private readonly nodeApiFactory: NodeApiFactory,
+    @InjectRepository(ImageRunner)
+    private readonly imageRunnerRepository: Repository<ImageRunner>,
+    private readonly runnerService: RunnerService,
+    private readonly runnerApiFactory: RunnerApiFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
     private readonly imageService: ImageService,
@@ -65,16 +65,16 @@ export class WorkspaceManager {
       return
     }
 
-    // Get all ready nodes
-    const allNodes = await this.nodeService.findAll()
-    const readyNodes = allNodes.filter((node) => node.state === NodeState.READY)
+    // Get all ready runners
+    const allRunners = await this.runnerService.findAll()
+    const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
 
-    // Process all nodes in parallel
+    // Process all runners in parallel
     await Promise.all(
-      readyNodes.map(async (node) => {
+      readyRunners.map(async (runner) => {
         const workspaces = await this.workspaceRepository.find({
           where: {
-            nodeId: node.id,
+            runnerId: runner.id,
             organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: WorkspaceState.STARTED,
             autoStopInterval: Not(0),
@@ -148,11 +148,11 @@ export class WorkspaceManager {
       return
     }
 
-    const nodesWith3InProgress = await this.workspaceRepository
+    const runnersWith3InProgress = await this.workspaceRepository
       .createQueryBuilder('workspace')
-      .select('"nodeId"')
+      .select('"runnerId"')
       .where('"workspace"."state" = :state', { state: WorkspaceState.ARCHIVING })
-      .groupBy('"nodeId"')
+      .groupBy('"runnerId"')
       .having('COUNT(*) >= 3')
       .getRawMany()
 
@@ -165,7 +165,7 @@ export class WorkspaceManager {
         {
           state: Not(In([WorkspaceState.ARCHIVED, WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
           desiredState: WorkspaceDesiredState.ARCHIVED,
-          nodeId: Not(In(nodesWith3InProgress.map((node) => node.nodeId))),
+          runnerId: Not(In(runnersWith3InProgress.map((runner) => runner.runnerId))),
         },
       ],
       take: 100,
@@ -236,10 +236,10 @@ export class WorkspaceManager {
   }
 
   private async handleUnassignedBuildWorkspace(workspace: Workspace): Promise<void> {
-    // Try to assign an available node with the image build
-    let nodeId: string
+    // Try to assign an available runner with the image build
+    let runnerId: string
     try {
-      nodeId = await this.nodeService.getRandomAvailableNode({
+      runnerId = await this.runnerService.getRandomAvailableRunner({
         region: workspace.region,
         workspaceClass: workspace.class,
         imageRef: workspace.buildInfo.imageRef,
@@ -248,59 +248,59 @@ export class WorkspaceManager {
       // Continue to next assignment method
     }
 
-    if (nodeId) {
-      await this.updateWorkspaceState(workspace.id, WorkspaceState.UNKNOWN, nodeId)
+    if (runnerId) {
+      await this.updateWorkspaceState(workspace.id, WorkspaceState.UNKNOWN, runnerId)
       this.syncInstanceState(workspace.id)
       return
     }
 
-    // Try to assign an available node that is currently building the image
-    const imageNodes = await this.nodeService.getImageNodes(workspace.buildInfo.imageRef)
+    // Try to assign an available runner that is currently building the image
+    const imageRunners = await this.runnerService.getImageRunners(workspace.buildInfo.imageRef)
 
-    for (const imageNode of imageNodes) {
-      const node = await this.nodeService.findOne(imageNode.nodeId)
-      if (node.used < node.capacity) {
-        if (imageNode.state === ImageNodeState.BUILDING_IMAGE) {
+    for (const imageRunner of imageRunners) {
+      const runner = await this.runnerService.findOne(imageRunner.runnerId)
+      if (runner.used < runner.capacity) {
+        if (imageRunner.state === ImageRunnerState.BUILDING_IMAGE) {
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
             id: workspace.id,
           })
-          workspaceToUpdate.nodeId = node.id
+          workspaceToUpdate.runnerId = runner.id
           workspaceToUpdate.state = WorkspaceState.BUILDING_IMAGE
           await this.workspaceRepository.save(workspaceToUpdate)
           return
-        } else if (imageNode.state === ImageNodeState.ERROR) {
-          await this.updateWorkspaceErrorState(workspace.id, imageNode.errorReason)
+        } else if (imageRunner.state === ImageRunnerState.ERROR) {
+          await this.updateWorkspaceErrorState(workspace.id, imageRunner.errorReason)
           return
         }
       }
     }
 
-    const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
+    const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleImagesBuilding()
 
-    // Try to assign a new available node
-    nodeId = await this.nodeService.getRandomAvailableNode({
+    // Try to assign a new available runner
+    runnerId = await this.runnerService.getRandomAvailableRunner({
       region: workspace.region,
       workspaceClass: workspace.class,
-      excludedNodeIds: excludedNodeIds,
+      excludedRunnerIds: excludedRunnerIds,
     })
 
-    this.buildOnNode(workspace.buildInfo, nodeId, workspace.organizationId)
+    this.buildOnRunner(workspace.buildInfo, runnerId, workspace.organizationId)
 
-    await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_IMAGE, nodeId)
-    await this.nodeService.recalculateNodeUsage(nodeId)
+    await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_IMAGE, runnerId)
+    await this.runnerService.recalculateRunnerUsage(runnerId)
     this.syncInstanceState(workspace.id)
   }
 
-  // Initiates the image build on the runner and creates an ImageNode depending on the result
-  async buildOnNode(buildInfo: BuildInfo, nodeId: string, organizationId: string) {
-    const node = await this.nodeService.findOne(nodeId)
-    const nodeImageApi = this.nodeApiFactory.createImageApi(node)
+  // Initiates the image build on the runner and creates an ImageRunner depending on the result
+  async buildOnRunner(buildInfo: BuildInfo, runnerId: string, organizationId: string) {
+    const runner = await this.runnerService.findOne(runnerId)
+    const runnerImageApi = this.runnerApiFactory.createImageApi(runner)
 
     let retries = 0
 
     while (retries < 10) {
       try {
-        await nodeImageApi.buildImage({
+        await runnerImageApi.buildImage({
           image: buildInfo.imageRef,
           organizationId: organizationId,
           dockerfile: buildInfo.dockerfileContent,
@@ -309,7 +309,7 @@ export class WorkspaceManager {
         break
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
-          await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, ImageNodeState.ERROR, err.message)
+          await this.runnerService.createImageRunner(runnerId, buildInfo.imageRef, ImageRunnerState.ERROR, err.message)
           return
         }
       }
@@ -318,17 +318,22 @@ export class WorkspaceManager {
     }
 
     if (retries === 10) {
-      await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, ImageNodeState.ERROR, 'Timeout while building')
+      await this.runnerService.createImageRunner(
+        runnerId,
+        buildInfo.imageRef,
+        ImageRunnerState.ERROR,
+        'Timeout while building',
+      )
       return
     }
 
-    const response = (await nodeImageApi.imageExists(buildInfo.imageRef)).data
-    let state = ImageNodeState.BUILDING_IMAGE
+    const response = (await runnerImageApi.imageExists(buildInfo.imageRef)).data
+    let state = ImageRunnerState.BUILDING_IMAGE
     if (response && response.exists) {
-      state = ImageNodeState.READY
+      state = ImageRunnerState.READY
     }
 
-    await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, state)
+    await this.runnerService.createImageRunner(runnerId, buildInfo.imageRef, state)
   }
 
   private async handleWorkspaceDesiredStateArchived(workspaceId: string): Promise<void> {
@@ -336,14 +341,14 @@ export class WorkspaceManager {
       id: workspaceId,
     })
 
-    const lockKey = 'archive-lock-' + workspace.nodeId
+    const lockKey = 'archive-lock-' + workspace.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return
     }
 
-    const inProgressOnNode = await this.workspaceRepository.find({
+    const inProgressOnRunner = await this.workspaceRepository.find({
       where: {
-        nodeId: workspace.nodeId,
+        runnerId: workspace.runnerId,
         state: In([WorkspaceState.ARCHIVING]),
       },
       order: {
@@ -353,10 +358,10 @@ export class WorkspaceManager {
     })
 
     //  if the workspace is already in progress, continue
-    if (!inProgressOnNode.find((w) => w.id === workspace.id)) {
-      //  max 3 workspaces can be archived at the same time on the same node
-      //  this is to prevent the node from being overloaded
-      if (inProgressOnNode.length > 2) {
+    if (!inProgressOnRunner.find((w) => w.id === workspace.id)) {
+      //  max 3 workspaces can be archived at the same time on the same runner
+      //  this is to prevent the runner from being overloaded
+      if (inProgressOnRunner.length > 2) {
         await this.redisLockProvider.unlock(lockKey)
         return
       }
@@ -406,25 +411,25 @@ export class WorkspaceManager {
           break
         }
 
-        //  when the backup is completed, destroy the workspace on the node
-        //  and deassociate the workspace from the node
-        const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+        //  when the backup is completed, destroy the workspace on the runner
+        //  and deassociate the workspace from the runner
+        const runner = await this.runnerService.findOne(workspace.runnerId)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
         try {
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+          const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
           const workspaceInfo = workspaceInfoResponse.data
           switch (workspaceInfo.state) {
-            case NodeWorkspaceState.SandboxStateDestroying:
-              //  wait until workspace is destroyed on node
+            case RunnerWorkspaceState.SandboxStateDestroying:
+              //  wait until workspace is destroyed on runner
               await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
-            case NodeWorkspaceState.SandboxStateDestroyed:
+            case RunnerWorkspaceState.SandboxStateDestroyed:
               await this.updateWorkspaceState(workspaceId, WorkspaceState.ARCHIVED, null)
               break
             default:
-              await nodeWorkspaceApi.destroy(workspace.id)
+              await runnerWorkspaceApi.destroy(workspace.id)
               await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
@@ -458,9 +463,9 @@ export class WorkspaceManager {
       return
     }
 
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    if (node.state !== NodeState.READY) {
-      //  console.debug(`Node ${node.id} is not ready`);
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    if (runner.state !== RunnerState.READY) {
+      //  console.debug(`Runner ${runner.id} is not ready`);
       return
     }
 
@@ -469,19 +474,19 @@ export class WorkspaceManager {
         break
       case WorkspaceState.DESTROYING: {
         // check if workspace is destroyed
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
         try {
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspaceId)
+          const workspaceInfoResponse = await runnerWorkspaceApi.info(workspaceId)
           const workspaceInfo = workspaceInfoResponse.data
           if (
-            workspaceInfo.state === NodeWorkspaceState.SandboxStateDestroyed ||
-            workspaceInfo.state === NodeWorkspaceState.SandboxStateError
+            workspaceInfo.state === RunnerWorkspaceState.SandboxStateDestroyed ||
+            workspaceInfo.state === RunnerWorkspaceState.SandboxStateError
           ) {
-            await nodeWorkspaceApi.removeDestroyed(workspaceId)
+            await runnerWorkspaceApi.removeDestroyed(workspaceId)
           }
         } catch (e) {
-          //  if the workspace is not found on node, it is already destroyed
+          //  if the workspace is not found on runner, it is already destroyed
           if (!e.response || e.response.status !== 404) {
             throw e
           }
@@ -496,15 +501,15 @@ export class WorkspaceManager {
       default: {
         // destroy workspace
         try {
-          const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-          const workspaceInfoResponse = await nodeWorkspaceApi.info(workspaceId)
+          const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+          const workspaceInfoResponse = await runnerWorkspaceApi.info(workspaceId)
           const workspaceInfo = workspaceInfoResponse.data
-          if (workspaceInfo?.state === NodeWorkspaceState.SandboxStateDestroyed) {
+          if (workspaceInfo?.state === RunnerWorkspaceState.SandboxStateDestroyed) {
             break
           }
-          await nodeWorkspaceApi.destroy(workspace.id)
+          await runnerWorkspaceApi.destroy(workspace.id)
         } catch (e) {
-          //  if the workspace is not found on node, it is already destroyed
+          //  if the workspace is not found on runner, it is already destroyed
           if (e.response.status !== 404) {
             throw e
           }
@@ -528,29 +533,29 @@ export class WorkspaceManager {
         break
       }
       case WorkspaceState.BUILDING_IMAGE: {
-        await this.handleNodeWorkspaceBuildingImageStateOnDesiredStateStart(workspace)
+        await this.handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart(workspace)
         break
       }
       case WorkspaceState.UNKNOWN: {
-        await this.handleNodeWorkspaceUnknownStateOnDesiredStateStart(workspace)
+        await this.handleRunnerWorkspaceUnknownStateOnDesiredStateStart(workspace)
         break
       }
       case WorkspaceState.ARCHIVED:
       case WorkspaceState.STOPPED: {
-        if (await this.handleNodeWorkspaceStoppedOrArchivedStateOnDesiredStateStart(workspace)) {
+        if (await this.handleRunnerWorkspaceStoppedOrArchivedStateOnDesiredStateStart(workspace)) {
           break
         }
       }
       // eslint-disable-next-line no-fallthrough
       case WorkspaceState.RESTORING:
       case WorkspaceState.CREATING:
-        if (await this.handleNodeWorkspacePullingImageStateCheck(workspace)) {
+        if (await this.handleRunnerWorkspacePullingImageStateCheck(workspace)) {
           break
         }
       //  fallthrough to check if workspace is already started
       case WorkspaceState.PULLING_IMAGE:
       case WorkspaceState.STARTING: {
-        await this.handleNodeWorkspaceStartedStateCheck(workspace)
+        await this.handleRunnerWorkspaceStartedStateCheck(workspace)
         break
       }
       //  TODO: remove this case
@@ -560,11 +565,11 @@ export class WorkspaceManager {
         if (workspace.id.startsWith('err_')) {
           return
         }
-        const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+        const runner = await this.runnerService.findOne(workspace.runnerId)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+        const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
         const workspaceInfo = workspaceInfoResponse.data
-        if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStarted) {
+        if (workspaceInfo.state === RunnerWorkspaceState.SandboxStateStarted) {
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
             id: workspace.id,
           })
@@ -581,17 +586,17 @@ export class WorkspaceManager {
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
     })
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    if (node.state !== NodeState.READY) {
-      //  console.debug(`Node ${node.id} is not ready`);
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    if (runner.state !== RunnerState.READY) {
+      //  console.debug(`Runner ${runner.id} is not ready`);
       return
     }
 
     switch (workspace.state) {
       case WorkspaceState.STARTED: {
         // stop workspace
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        await nodeWorkspaceApi.stop(workspace.id)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+        await runnerWorkspaceApi.stop(workspace.id)
         await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
         //  sync states again immediately for workspace
         await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
@@ -600,12 +605,12 @@ export class WorkspaceManager {
       }
       case WorkspaceState.STOPPING: {
         // check if workspace is stopped
-        const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+        const runner = await this.runnerService.findOne(workspace.runnerId)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+        const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
         const workspaceInfo = workspaceInfoResponse.data
         switch (workspaceInfo.state) {
-          case NodeWorkspaceState.SandboxStateStopped: {
+          case RunnerWorkspaceState.SandboxStateStopped: {
             const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
               id: workspace.id,
             })
@@ -614,7 +619,7 @@ export class WorkspaceManager {
             await this.workspaceRepository.save(workspaceToUpdate)
             break
           }
-          case NodeWorkspaceState.SandboxStateError:
+          case RunnerWorkspaceState.SandboxStateError:
             {
               await this.updateWorkspaceErrorState(workspace.id, 'Sandbox is in error state on runner')
               break
@@ -630,11 +635,11 @@ export class WorkspaceManager {
         if (workspace.id.startsWith('err_')) {
           return
         }
-        const node = await this.nodeService.findOne(workspace.nodeId)
-        const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-        const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+        const runner = await this.runnerService.findOne(workspace.runnerId)
+        const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+        const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
         const workspaceInfo = workspaceInfoResponse.data
-        if (workspaceInfo.state === NodeWorkspaceState.SandboxStateStopped) {
+        if (workspaceInfo.state === RunnerWorkspaceState.SandboxStateStopped) {
           await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPED)
         }
         break
@@ -642,11 +647,11 @@ export class WorkspaceManager {
     }
   }
 
-  private async handleNodeWorkspaceBuildingImageStateOnDesiredStateStart(workspace: Workspace) {
-    const imageNode = await this.nodeService.getImageNode(workspace.nodeId, workspace.buildInfo.imageRef)
-    if (imageNode) {
-      switch (imageNode.state) {
-        case ImageNodeState.READY: {
+  private async handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart(workspace: Workspace) {
+    const imageRunner = await this.runnerService.getImageRunner(workspace.runnerId, workspace.buildInfo.imageRef)
+    if (imageRunner) {
+      switch (imageRunner.state) {
+        case ImageRunnerState.READY: {
           // TODO: "UNKNOWN" should probably be changed to something else
           await this.workspaceRepository.update(workspace.id, {
             state: WorkspaceState.UNKNOWN,
@@ -655,16 +660,16 @@ export class WorkspaceManager {
           this.syncInstanceState(workspace.id)
           return
         }
-        case ImageNodeState.ERROR: {
+        case ImageRunnerState.ERROR: {
           await this.workspaceRepository.update(workspace.id, {
             state: WorkspaceState.ERROR,
-            errorReason: imageNode.errorReason,
+            errorReason: imageRunner.errorReason,
           })
           return
         }
       }
     }
-    if (!imageNode || imageNode.state === ImageNodeState.BUILDING_IMAGE) {
+    if (!imageRunner || imageRunner.state === ImageRunnerState.BUILDING_IMAGE) {
       // Sleep for a second and go back to syncing instance state
       await new Promise((resolve) => setTimeout(resolve, 1000))
       await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
@@ -673,10 +678,10 @@ export class WorkspaceManager {
     }
   }
 
-  private async handleNodeWorkspaceUnknownStateOnDesiredStateStart(workspace: Workspace) {
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    if (node.state !== NodeState.READY) {
-      //  console.debug(`Node ${node.id} is not ready`);
+  private async handleRunnerWorkspaceUnknownStateOnDesiredStateStart(workspace: Workspace) {
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    if (runner.state !== RunnerState.READY) {
+      //  console.debug(`Runner ${runner.id} is not ready`);
       return
     }
 
@@ -723,8 +728,8 @@ export class WorkspaceManager {
       }
     }
 
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    await nodeWorkspaceApi.create(createWorkspaceDto)
+    const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+    await runnerWorkspaceApi.create(createWorkspaceDto)
     await this.updateWorkspaceState(workspace.id, WorkspaceState.CREATING)
     //  sync states again immediately for workspace
     await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
@@ -766,27 +771,27 @@ export class WorkspaceManager {
     return ['sleep', 'infinity']
   }
 
-  private async handleNodeWorkspaceStoppedOrArchivedStateOnDesiredStateStart(
+  private async handleRunnerWorkspaceStoppedOrArchivedStateOnDesiredStateStart(
     workspace: Workspace,
   ): Promise<BreakFromSwitch> {
-    //  check if workspace is assigned to a node and if that node is unschedulable
-    //  if it is, move workspace to prevNodeId, and set nodeId to null
-    //  this will assign a new node to the workspace and restore the workspace from the latest backup
-    if (workspace.nodeId) {
-      const node = await this.nodeService.findOne(workspace.nodeId)
-      if (node.unschedulable) {
+    //  check if workspace is assigned to a runner and if that runner is unschedulable
+    //  if it is, move workspace to prevRunnerId, and set runnerId to null
+    //  this will assign a new runner to the workspace and restore the workspace from the latest backup
+    if (workspace.runnerId) {
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      if (runner.unschedulable) {
         //  check if workspace has a valid backup
         if (workspace.backupState !== BackupState.COMPLETED) {
-          //  if not, keep workspace on the same node
+          //  if not, keep workspace on the same runner
         } else {
-          workspace.prevNodeId = workspace.nodeId
-          workspace.nodeId = null
+          workspace.prevRunnerId = workspace.runnerId
+          workspace.runnerId = null
 
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
             id: workspace.id,
           })
-          workspaceToUpdate.prevNodeId = workspace.nodeId
-          workspaceToUpdate.nodeId = null
+          workspaceToUpdate.prevRunnerId = workspace.runnerId
+          workspaceToUpdate.runnerId = null
           await this.workspaceRepository.save(workspaceToUpdate)
         }
       }
@@ -795,7 +800,7 @@ export class WorkspaceManager {
         const usageThreshold = 35
         const runningWorkspacesCount = await this.workspaceRepository.count({
           where: {
-            nodeId: workspace.nodeId,
+            runnerId: workspace.runnerId,
             state: WorkspaceState.STARTED,
           },
         })
@@ -803,43 +808,43 @@ export class WorkspaceManager {
           //  TODO: usage should be based on compute usage
 
           const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
-          const availableNodes = await this.nodeService.findAvailableNodes({
+          const availableRunners = await this.runnerService.findAvailableRunners({
             region: workspace.region,
             workspaceClass: workspace.class,
             imageRef: image.internalName,
           })
-          const lessUsedNodes = availableNodes.filter((node) => node.id !== workspace.nodeId)
+          const lessUsedRunners = availableRunners.filter((runner) => runner.id !== workspace.runnerId)
 
-          //  temp workaround to move workspaces to less used node
-          if (lessUsedNodes.length > 0) {
+          //  temp workaround to move workspaces to less used runner
+          if (lessUsedRunners.length > 0) {
             await this.workspaceRepository.update(workspace.id, {
-              nodeId: null,
-              prevNodeId: workspace.nodeId,
+              runnerId: null,
+              prevRunnerId: workspace.runnerId,
             })
             try {
-              const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-              await nodeWorkspaceApi.removeDestroyed(workspace.id)
+              const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+              await runnerWorkspaceApi.removeDestroyed(workspace.id)
             } catch (e) {
               this.logger.error(
-                `Failed to cleanup workspace ${workspace.id} on previous node ${node.id}:`,
+                `Failed to cleanup workspace ${workspace.id} on previous runner ${runner.id}:`,
                 fromAxiosError(e),
               )
             }
-            workspace.prevNodeId = workspace.nodeId
-            workspace.nodeId = null
+            workspace.prevRunnerId = workspace.runnerId
+            workspace.runnerId = null
           }
         }
       }
     }
 
-    if (workspace.nodeId === null) {
-      //  if workspace has no node, check if backup is completed
+    if (workspace.runnerId === null) {
+      //  if workspace has no runner, check if backup is completed
       //  if not, set workspace to error
-      //  if backup is completed, get random available node and start workspace
+      //  if backup is completed, get random available runner and start workspace
       //  use the backup image to start the workspace
 
       if (workspace.backupState !== BackupState.COMPLETED) {
-        await this.updateWorkspaceErrorState(workspace.id, 'Workspace has no node and backup is not completed')
+        await this.updateWorkspaceErrorState(workspace.id, 'Workspace has no runner and backup is not completed')
         return true
       }
 
@@ -881,24 +886,24 @@ export class WorkspaceManager {
 
       const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
 
-      //  exclude the node that the last node workspace was on
-      const availableNodes = (
-        await this.nodeService.findAvailableNodes({
+      //  exclude the runner that the last runner workspace was on
+      const availableRunners = (
+        await this.runnerService.findAvailableRunners({
           region: workspace.region,
           workspaceClass: workspace.class,
           imageRef: image.internalName,
         })
-      ).filter((node) => node.id != workspace.prevNodeId)
+      ).filter((runner) => runner.id != workspace.prevRunnerId)
 
-      //  get random node from available nodes
-      const randomNodeIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
-      const nodeId = availableNodes[randomNodeIndex(0, availableNodes.length - 1)].id
+      //  get random runner from available runners
+      const randomRunnerIndex = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
+      const runnerId = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
 
-      const node = await this.nodeService.findOne(nodeId)
+      const runner = await this.runnerService.findOne(runnerId)
 
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
-      await nodeWorkspaceApi.create({
+      await runnerWorkspaceApi.create({
         id: workspace.id,
         image: validBackupImage,
         osUser: workspace.osUser,
@@ -917,14 +922,14 @@ export class WorkspaceManager {
         },
       })
 
-      await this.updateWorkspaceState(workspace.id, WorkspaceState.RESTORING, nodeId)
+      await this.updateWorkspaceState(workspace.id, WorkspaceState.RESTORING, runnerId)
     } else {
-      // if workspace has node, start workspace
-      const node = await this.nodeService.findOne(workspace.nodeId)
+      // if workspace has runner, start workspace
+      const runner = await this.runnerService.findOne(workspace.runnerId)
 
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
-      await nodeWorkspaceApi.start(workspace.id)
+      await runnerWorkspaceApi.start(workspace.id)
 
       await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTING)
       //  sync states again immediately for workspace
@@ -935,42 +940,42 @@ export class WorkspaceManager {
     return false
   }
 
-  //  used to check if workspace is pulling image on node and update workspace state accordingly
-  private async handleNodeWorkspacePullingImageStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
-    //  edge case when workspace is being transferred to a new node
-    if (!workspace.nodeId) {
+  //  used to check if workspace is pulling image on runner and update workspace state accordingly
+  private async handleRunnerWorkspacePullingImageStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
+    //  edge case when workspace is being transferred to a new runner
+    if (!workspace.runnerId) {
       return true
     }
 
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+    const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
     const workspaceInfo = workspaceInfoResponse.data
 
-    if (workspaceInfo.state === NodeWorkspaceState.SandboxStatePullingImage) {
+    if (workspaceInfo.state === RunnerWorkspaceState.SandboxStatePullingImage) {
       await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_IMAGE)
 
       await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return true
     }
-    if (workspaceInfo.state === NodeWorkspaceState.SandboxStateError) {
+    if (workspaceInfo.state === RunnerWorkspaceState.SandboxStateError) {
       await this.updateWorkspaceErrorState(workspace.id)
       return true
     }
     return false
   }
 
-  //  used to check if workspace is started on node and update workspace state accordingly
-  //  also used to handle the case where a workspace is started on a node and then transferred to a new node
-  private async handleNodeWorkspaceStartedStateCheck(workspace: Workspace) {
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
-    const workspaceInfoResponse = await nodeWorkspaceApi.info(workspace.id)
+  //  used to check if workspace is started on runner and update workspace state accordingly
+  //  also used to handle the case where a workspace is started on a runner and then transferred to a new runner
+  private async handleRunnerWorkspaceStartedStateCheck(workspace: Workspace) {
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
+    const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
     const workspaceInfo = workspaceInfoResponse.data
 
     switch (workspaceInfo.state) {
-      case NodeWorkspaceState.SandboxStateStarted: {
+      case RunnerWorkspaceState.SandboxStateStarted: {
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(workspace.backupState)) {
           workspace.backupState = BackupState.NONE
@@ -985,32 +990,34 @@ export class WorkspaceManager {
           await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTED)
         }
 
-        //  if workspace was transferred to a new node, remove it from the old node
-        if (workspace.prevNodeId) {
-          const node = await this.nodeService.findOne(workspace.prevNodeId)
-          if (!node) {
-            this.logger.warn(`Previously assigned node ${workspace.prevNodeId} for workspace ${workspace.id} not found`)
-            //  clear prevNodeId to avoid trying to cleanup on a non-existent node
-            workspace.prevNodeId = null
+        //  if workspace was transferred to a new runner, remove it from the old runner
+        if (workspace.prevRunnerId) {
+          const runner = await this.runnerService.findOne(workspace.prevRunnerId)
+          if (!runner) {
+            this.logger.warn(
+              `Previously assigned runner ${workspace.prevRunnerId} for workspace ${workspace.id} not found`,
+            )
+            //  clear prevRunnerId to avoid trying to cleanup on a non-existent runner
+            workspace.prevRunnerId = null
 
             const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
               id: workspace.id,
             })
-            workspaceToUpdate.prevNodeId = null
+            workspaceToUpdate.prevRunnerId = null
             await this.workspaceRepository.save(workspaceToUpdate)
             break
           }
-          const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+          const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
           try {
             // First try to destroy the workspace
-            await nodeWorkspaceApi.destroy(workspace.id)
+            await runnerWorkspaceApi.destroy(workspace.id)
 
             // Wait for workspace to be destroyed before removing
             let retries = 0
             while (retries < 10) {
               try {
-                const workspaceInfo = await nodeWorkspaceApi.info(workspace.id)
-                if (workspaceInfo.data.state === NodeWorkspaceState.SandboxStateDestroyed) {
+                const workspaceInfo = await runnerWorkspaceApi.info(workspace.id)
+                if (workspaceInfo.data.state === RunnerWorkspaceState.SandboxStateDestroyed) {
                   break
                 }
               } catch (e) {
@@ -1024,24 +1031,24 @@ export class WorkspaceManager {
             }
 
             // Finally remove the destroyed workspace
-            await nodeWorkspaceApi.removeDestroyed(workspace.id)
-            workspace.prevNodeId = null
+            await runnerWorkspaceApi.removeDestroyed(workspace.id)
+            workspace.prevRunnerId = null
 
             const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
               id: workspace.id,
             })
-            workspaceToUpdate.prevNodeId = null
+            workspaceToUpdate.prevRunnerId = null
             await this.workspaceRepository.save(workspaceToUpdate)
           } catch (e) {
             this.logger.error(
-              `Failed to cleanup workspace ${workspace.id} on previous node ${node.id}:`,
+              `Failed to cleanup workspace ${workspace.id} on previous runner ${runner.id}:`,
               fromAxiosError(e),
             )
           }
         }
         break
       }
-      case NodeWorkspaceState.SandboxStateError: {
+      case RunnerWorkspaceState.SandboxStateError: {
         await this.updateWorkspaceErrorState(workspace.id)
         break
       }
@@ -1051,7 +1058,7 @@ export class WorkspaceManager {
     this.syncInstanceState(workspace.id)
   }
 
-  private async updateWorkspaceState(workspaceId: string, state: WorkspaceState, nodeId?: string | null | undefined) {
+  private async updateWorkspaceState(workspaceId: string, state: WorkspaceState, runnerId?: string | null | undefined) {
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
     })
@@ -1059,8 +1066,8 @@ export class WorkspaceManager {
       return
     }
     workspace.state = state
-    if (nodeId !== undefined) {
-      workspace.nodeId = nodeId
+    if (runnerId !== undefined) {
+      workspace.runnerId = runnerId
     }
 
     await this.workspaceRepository.save(workspace)

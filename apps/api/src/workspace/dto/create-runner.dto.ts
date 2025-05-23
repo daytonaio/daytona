@@ -5,11 +5,11 @@
 
 import { IsEnum, IsNumber, IsString } from 'class-validator'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { ApiProperty, ApiSchema } from '@nestjs/swagger'
 
-@ApiSchema({ name: 'CreateNode' })
-export class CreateNodeDto {
+@ApiSchema({ name: 'CreateRunner' })
+export class CreateRunnerDto {
   @ApiProperty()
   @IsString()
   domain: string
@@ -53,10 +53,10 @@ export class CreateNodeDto {
   @ApiProperty()
   capacity: number
 
-  @IsEnum(NodeRegion)
+  @IsEnum(RunnerRegion)
   @ApiProperty({
-    enum: NodeRegion,
-    example: Object.values(NodeRegion)[0],
+    enum: RunnerRegion,
+    example: Object.values(RunnerRegion)[0],
   })
-  region: NodeRegion
+  region: RunnerRegion
 }

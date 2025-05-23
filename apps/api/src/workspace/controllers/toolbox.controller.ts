@@ -107,11 +107,11 @@ export class ToolboxController {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
         try {
-          const node = await this.toolboxService.getNode(workspaceId)
+          const runner = await this.toolboxService.getRunner(workspaceId)
           // @ts-expect-error - used later to set request headers
-          req._nodeApiKey = node.apiKey
+          req._runnerApiKey = runner.apiKey
 
-          return node.apiUrl
+          return runner.apiUrl
         } catch (err) {
           // @ts-expect-error - used later to throw error
           req._err = err
@@ -142,9 +142,9 @@ export class ToolboxController {
           }
 
           // @ts-expect-error - set when routing
-          const nodeApiKey = req._nodeApiKey
+          const runnerApiKey = req._runnerApiKey
 
-          proxyReq.setHeader('Authorization', `Bearer ${nodeApiKey}`)
+          proxyReq.setHeader('Authorization', `Bearer ${runnerApiKey}`)
           fixRequestBody(proxyReq, req)
         },
       },
@@ -711,7 +711,7 @@ export class ToolboxController {
     @Param('workspaceId') workspaceId: string,
     @Body() executeRequest: ExecuteRequestDto,
   ): Promise<ExecuteResponseDto> {
-    const response = await this.toolboxService.forwardRequestToNode(
+    const response = await this.toolboxService.forwardRequestToRunner(
       workspaceId,
       'POST',
       '/toolbox/process/execute',

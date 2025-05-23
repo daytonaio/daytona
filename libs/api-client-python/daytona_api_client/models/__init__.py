@@ -27,11 +27,11 @@ from daytona_api_client.models.create_api_key import CreateApiKey
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client.models.create_image import CreateImage
-from daytona_api_client.models.create_node import CreateNode
 from daytona_api_client.models.create_organization import CreateOrganization
 from daytona_api_client.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client.models.create_runner import CreateRunner
 from daytona_api_client.models.create_session_request import CreateSessionRequest
 from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume

@@ -159,17 +159,17 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 		}
 
-		var nodeDomain string
+		var runnerDomain string
 		if workspace.Info != nil && workspace.Info.ProviderMetadata != nil {
 			metadata := make(map[string]interface{})
 			if err := json.Unmarshal([]byte(*workspace.Info.ProviderMetadata), &metadata); err == nil {
-				if domain, ok := metadata["nodeDomain"].(string); ok {
-					nodeDomain = domain
+				if domain, ok := metadata["runnerDomain"].(string); ok {
+					runnerDomain = domain
 				}
 			}
 		}
 
-		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, workspace.Id, nodeDomain)
+		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, workspace.Id, runnerDomain)
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(sandboxUrl)))
 		return nil
