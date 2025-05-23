@@ -19,23 +19,23 @@ func (d *DockerClient) CreateBackup(ctx context.Context, containerId string, bac
 
 	d.cache.SetBackupState(ctx, containerId, enums.BackupStateInProgress)
 
-	err := d.commitContainer(ctx, containerId, backupDto.Image)
+	err := d.commitContainer(ctx, containerId, backupDto.Snapshot)
 	if err != nil {
 		return err
 	}
 
-	err = d.PushImage(ctx, backupDto.Image, &backupDto.Registry)
+	err = d.PushImage(ctx, backupDto.Snapshot, &backupDto.Registry)
 	if err != nil {
 		return err
 	}
 
 	d.cache.SetBackupState(ctx, containerId, enums.BackupStateCompleted)
 
-	log.Infof("Backp (%s) for container %s created successfully", backupDto.Image, containerId)
+	log.Infof("Backp (%s) for container %s created successfully", backupDto.Snapshot, containerId)
 
-	err = d.RemoveImage(ctx, backupDto.Image, true)
+	err = d.RemoveImage(ctx, backupDto.Snapshot, true)
 	if err != nil {
-		log.Errorf("Error removing image %s: %v", backupDto.Image, err)
+		log.Errorf("Error removing image %s: %v", backupDto.Snapshot, err)
 	}
 
 	return nil

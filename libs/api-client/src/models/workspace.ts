@@ -48,11 +48,11 @@ export interface Workspace {
    */
   organizationId: string
   /**
-   * The image used for the workspace
+   * The snapshot used for the workspace
    * @type {string}
    * @memberof Workspace
    */
-  image?: string
+  snapshot?: string
   /**
    * The user associated with the project
    * @type {string}

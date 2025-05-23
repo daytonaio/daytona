@@ -13,7 +13,7 @@ export class LogProxy {
 
   constructor(
     private readonly targetUrl: string,
-    private readonly imageRef: string,
+    private readonly snapshotRef: string,
     private readonly authToken: string,
     private readonly follow: boolean,
     private readonly req: IncomingMessage,
@@ -27,7 +27,7 @@ export class LogProxy {
       secure: false,
       changeOrigin: true,
       autoRewrite: true,
-      pathRewrite: () => `/images/logs?imageRef=${this.imageRef}&follow=${this.follow}`,
+      pathRewrite: () => `/snapshots/logs?snapshotRef=${this.snapshotRef}&follow=${this.follow}`,
       on: {
         proxyReq: (proxyReq: any, req: any) => {
           proxyReq.setHeader('Authorization', `Bearer ${this.authToken}`)

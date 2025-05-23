@@ -19,12 +19,12 @@ import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
 import { WorkspaceManager } from './managers/workspace.manager'
 import { ToolboxController } from './controllers/toolbox.controller'
-import { Image } from './entities/image.entity'
-import { ImageController } from './controllers/image.controller'
-import { ImageService } from './services/image.service'
-import { ImageManager } from './managers/image.manager'
+import { Snapshot } from './entities/snapshot.entity'
+import { SnapshotController } from './controllers/snapshot.controller'
+import { SnapshotService } from './services/snapshot.service'
+import { SnapshotManager } from './managers/snapshot.manager'
 import { DockerProvider } from './docker/docker-provider'
-import { ImageRunner } from './entities/image-runner.entity'
+import { SnapshotRunner } from './entities/snapshot-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { WorkspaceSubscriber } from './subscribers/workspace.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
@@ -32,7 +32,7 @@ import { OrganizationModule } from '../organization/organization.module'
 import { WorkspaceWarmPoolService } from './services/workspace-warm-pool.service'
 import { WarmPool } from './entities/warm-pool.entity'
 import { PreviewController } from './controllers/preview.controller'
-import { ImageSubscriber } from './subscribers/image.subscriber'
+import { SnapshotSubscriber } from './subscribers/snapshot.subscriber'
 import { VolumeController } from './controllers/volume.controller'
 import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
@@ -46,13 +46,22 @@ import { BackupManager } from './managers/backup.manager'
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Workspace, Runner, Image, BuildInfo, ImageRunner, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([
+      Workspace,
+      Runner,
+      Snapshot,
+      BuildInfo,
+      SnapshotRunner,
+      DockerRegistry,
+      WarmPool,
+      Volume,
+    ]),
   ],
   controllers: [
     WorkspaceController,
     RunnerController,
     ToolboxController,
-    ImageController,
+    SnapshotController,
     PreviewController,
     VolumeController,
   ],
@@ -64,16 +73,16 @@ import { BackupManager } from './managers/backup.manager'
     RunnerService,
     RunnerApiFactory,
     ToolboxService,
-    ImageService,
-    ImageManager,
+    SnapshotService,
+    SnapshotManager,
     DockerProvider,
     WorkspaceSubscriber,
     RedisLockProvider,
-    ImageSubscriber,
+    SnapshotSubscriber,
     VolumeService,
     VolumeManager,
   ],
-  exports: [WorkspaceService, RunnerService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
+  exports: [WorkspaceService, RunnerService, RedisLockProvider, SnapshotService, VolumeService, VolumeManager],
 })
 export class WorkspaceModule {
   configure(consumer: MiddlewareConsumer) {

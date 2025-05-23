@@ -59,13 +59,13 @@ export interface UpdateOrganizationQuota {
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  imageQuota: number | null
+  snapshotQuota: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxImageSize: number | null
+  maxSnapshotSize: number | null
   /**
    *
    * @type {number}

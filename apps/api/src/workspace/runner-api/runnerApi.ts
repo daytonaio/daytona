@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxApi, DefaultApi, ImagesApi, Configuration } from '@daytonaio/runner-api-client'
+import { SandboxApi, DefaultApi, SnapshotsApi, Configuration } from '@daytonaio/runner-api-client'
 import { Runner } from '../entities/runner.entity'
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
@@ -57,7 +57,7 @@ export class RunnerApiFactory {
     return new DefaultApi(new Configuration(), '', axiosInstance)
   }
 
-  createImageApi(runner: Runner): ImagesApi {
+  createSnapshotApi(runner: Runner): SnapshotsApi {
     const axiosInstance = axios.create({
       baseURL: runner.apiUrl,
       headers: {
@@ -70,7 +70,7 @@ export class RunnerApiFactory {
       axiosDebug.addLogger(axiosInstance)
     }
 
-    return new ImagesApi(new Configuration(), '', axiosInstance)
+    return new SnapshotsApi(new Configuration(), '', axiosInstance)
   }
 
   createWorkspaceApi(runner: Runner): SandboxApi {

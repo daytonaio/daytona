@@ -11,7 +11,7 @@ export class BuildInfoDto {
     description: 'The unique identifier for the build info',
     example: '123e4567e89b12d3a456426614174000',
   })
-  imageRef: string
+  snapshotRef: string
 
   @ApiPropertyOptional({
     description: 'The Dockerfile content used for the build',

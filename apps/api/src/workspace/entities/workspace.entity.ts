@@ -77,7 +77,7 @@ export class Workspace {
   desiredState: WorkspaceDesiredState
 
   @Column({ nullable: true })
-  image?: string
+  snapshot?: string
 
   @Column()
   osUser: string
@@ -101,7 +101,7 @@ export class Workspace {
   backupRegistryId: string
 
   @Column({ nullable: true })
-  backupImage: string
+  backupSnapshot: string
 
   @Column({ nullable: true })
   lastBackupAt: Date
@@ -117,8 +117,8 @@ export class Workspace {
     type: 'jsonb',
     default: [],
   })
-  existingBackupImages: Array<{
-    imageName: string
+  existingBackupSnapshots: Array<{
+    snapshotName: string
     createdAt: Date
   }>
 
@@ -193,8 +193,8 @@ export class Workspace {
             WorkspaceState.UNKNOWN,
             WorkspaceState.RESTORING,
             WorkspaceState.PENDING_BUILD,
-            WorkspaceState.BUILDING_IMAGE,
-            WorkspaceState.PULLING_IMAGE,
+            WorkspaceState.BUILDING_SNAPSHOT,
+            WorkspaceState.PULLING_SNAPSHOT,
             WorkspaceState.ERROR,
           ].includes(this.state)
         ) {

@@ -1,5 +1,5 @@
 definitions:
-  BuildImageRequestDTO:
+  BuildSnapshotRequestDTO:
     properties:
       context:
         items:
@@ -7,28 +7,28 @@ definitions:
         type: array
       dockerfile:
         type: string
-      image:
-        description: Image ID and tag or the build's hash
-        type: string
       organizationId:
         type: string
       pushToInternalRegistry:
         type: boolean
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        description: Snapshot ID and tag or the build's hash
+        type: string
     required:
       - dockerfile
       - organizationId
     type: object
   CreateBackupDTO:
     properties:
-      image:
-        type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
     required:
-      - image
       - registry
+      - snapshot
     type: object
   CreateSandboxDTO:
     properties:
@@ -50,8 +50,6 @@ definitions:
         type: integer
       id:
         type: string
-      image:
-        type: string
       memoryQuota:
         minimum: 1
         type: integer
@@ -59,6 +57,8 @@ definitions:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
       storageQuota:
         minimum: 1
         type: integer
@@ -70,8 +70,8 @@ definitions:
         type: array
     required:
       - id
-      - image
       - osUser
+      - snapshot
       - userId
     type: object
   ErrorResponse:
@@ -103,20 +103,14 @@ definitions:
       - statusCode
       - timestamp
     type: object
-  ImageExistsResponse:
+  PullSnapshotRequestDTO:
     properties:
-      exists:
-        example: true
-        type: boolean
-    type: object
-  PullImageRequestDTO:
-    properties:
-      image:
-        type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
     required:
-      - image
+      - snapshot
     type: object
   RegistryDTO:
     properties:
@@ -152,6 +146,12 @@ definitions:
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object
+  SnapshotExistsResponse:
+    properties:
+      exists:
+        example: true
+        type: boolean
+    type: object
   dto.VolumeDTO:
     properties:
       mountPath:
@@ -186,7 +186,7 @@ definitions:
       - resizing
       - error
       - unknown
-      - pulling_image
+      - pulling_snapshot
     type: string
     x-enum-varnames:
       - SandboxStateCreating
@@ -200,7 +200,7 @@ definitions:
       - SandboxStateResizing
       - SandboxStateError
       - SandboxStateUnknown
-      - SandboxStatePullingImage
+      - SandboxStatePullingSnapshot
 info:
   contact: {}
   description: Daytona Runner API
@@ -221,20 +221,20 @@ paths:
               type: string
             type: object
       summary: Health check
-  /images/build:
+  /snapshots/build:
     post:
-      description: Build a Docker image from a Dockerfile and context hashes
-      operationId: BuildImage
+      description: Build a snapshot from a Dockerfile and context hashes
+      operationId: BuildSnapshot
       parameters:
-        - description: Build image request
+        - description: Build snapshot request
           in: body
           name: request
           required: true
           schema:
-            $ref: '#/definitions/BuildImageRequestDTO'
+            $ref: '#/definitions/BuildSnapshotRequestDTO'
       responses:
         '200':
-          description: Image successfully built
+          description: Snapshot successfully built
           schema:
             type: string
         '400':
@@ -257,17 +257,17 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Build a Docker image
+      summary: Build a snapshot
       tags:
-        - images
-  /images/exists:
+        - snapshots
+  /snapshots/exists:
     get:
-      description: Check if a specified Docker image exists locally
-      operationId: ImageExists
+      description: Check if a specified snapshot exists locally
+      operationId: SnapshotExists
       parameters:
-        - description: Image name and tag
+        - description: Snapshot name and tag
           in: query
-          name: image
+          name: snapshot
           required: true
           type: string
       produces:
@@ -276,7 +276,7 @@ paths:
         '200':
           description: OK
           schema:
-            $ref: '#/definitions/ImageExistsResponse'
+            $ref: '#/definitions/SnapshotExistsResponse'
         '400':
           description: Bad Request
           schema:
@@ -297,17 +297,17 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Check if a Docker image exists
+      summary: Check if a snapshot exists
       tags:
-        - images
-  /images/logs:
+        - snapshots
+  /snapshots/logs:
     get:
       description: Stream build logs
       operationId: GetBuildLogs
       parameters:
-        - description: Image ID or image ref without the tag
+        - description: Snapshot ID or snapshot ref without the tag
           in: query
-          name: imageRef
+          name: snapshotRef
           required: true
           type: string
         - description: Whether to follow the log output
@@ -337,21 +337,21 @@ paths:
             $ref: '#/definitions/ErrorResponse'
       summary: Get build logs
       tags:
-        - images
-  /images/pull:
+        - snapshots
+  /snapshots/pull:
     post:
-      description: Pull a Docker image from a registry
-      operationId: PullImage
+      description: Pull a snapshot from a registry
+      operationId: PullSnapshot
       parameters:
-        - description: Pull image
+        - description: Pull snapshot
           in: body
           name: request
           required: true
           schema:
-            $ref: '#/definitions/PullImageRequestDTO'
+            $ref: '#/definitions/PullSnapshotRequestDTO'
       responses:
         '200':
-          description: Image successfully pulled
+          description: Snapshot successfully pulled
           schema:
             type: string
         '400':
@@ -374,24 +374,24 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Pull a Docker image
+      summary: Pull a snapshot
       tags:
-        - images
-  /images/remove:
+        - snapshots
+  /snapshots/remove:
     post:
-      description: Remove a specified Docker image from the local system
-      operationId: RemoveImage
+      description: Remove a specified snapshot from the local system
+      operationId: RemoveSnapshot
       parameters:
-        - description: Image name and tag
+        - description: Snapshot name and tag
           in: query
-          name: image
+          name: snapshot
           required: true
           type: string
       produces:
         - application/json
       responses:
         '200':
-          description: Image successfully removed
+          description: Snapshot successfully removed
           schema:
             type: string
         '400':
@@ -414,9 +414,9 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/ErrorResponse'
-      summary: Remove a Docker image
+      summary: Remove a snapshot
       tags:
-        - images
+        - snapshots
   /workspaces:
     post:
       description: Create a sandbox
