@@ -102,7 +102,7 @@ export class NodeService {
       where: nodeFilter,
     })
     return nodes
-      .filter((node) => node.used < node.capacity && !params.excludedNodeIds?.includes(node.id))
+      .filter((node) => node.used < node.capacity && !params.excludedNodeIds?.has(node.id))
       .sort((a, b) => a.used / a.capacity - b.used / b.capacity)
       .slice(0, 10)
   }
@@ -241,11 +241,23 @@ export class NodeService {
     }
     await this.imageNodeRepository.save(imageNode)
   }
+
+  async getNodesWithMultipleImagesBuilding(minImageCount = 2): Promise<Set<string>> {
+    const nodes = await this.imageNodeRepository
+      .createQueryBuilder('imageNode')
+      .select('imageNode.nodeId')
+      .where('imageNode.state = :state', { state: ImageNodeState.BUILDING_IMAGE })
+      .groupBy('imageNode.nodeId')
+      .having('COUNT(DISTINCT imageNode.imageRef) > :minImageCount', { minImageCount })
+      .getRawMany()
+
+    return new Set(nodes.map((item) => item.nodeId))
+  }
 }
 
 export class GetNodeParams {
   region?: NodeRegion
   workspaceClass?: WorkspaceClass
   imageRef?: string
-  excludedNodeIds?: string[]
+  excludedNodeIds?: Set<string>
 }

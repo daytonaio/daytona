@@ -276,14 +276,7 @@ export class WorkspaceManager {
       }
     }
 
-    const excludedNodeIds = (
-      await this.imageNodeRepository
-        .createQueryBuilder('imageNode')
-        .select('imageNode.nodeId')
-        .groupBy('imageNode.nodeId')
-        .having('COUNT(DISTINCT imageNode.imageRef) > :minImageCount', { minImageCount: 2 })
-        .getRawMany()
-    ).map((item) => item.nodeId)
+    const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
 
     // Try to assign a new available node
     nodeId = await this.nodeService.getRandomAvailableNode({

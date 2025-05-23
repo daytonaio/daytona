@@ -516,14 +516,7 @@ export class ImageManager {
     }
 
     try {
-      const excludedNodeIds = (
-        await this.imageNodeRepository
-          .createQueryBuilder('imageNode')
-          .select('imageNode.nodeId')
-          .groupBy('imageNode.nodeId')
-          .having('COUNT(DISTINCT imageNode.imageRef) > :minImageCount', { minImageCount: 2 })
-          .getRawMany()
-      ).map((item) => item.nodeId)
+      const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
 
       // Find a node to build the image on
       const nodeId = await this.nodeService.getRandomAvailableNode({
