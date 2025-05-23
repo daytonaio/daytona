@@ -11,6 +11,7 @@ import {
   Container,
   CreditCard,
   KeyRound,
+  Link2,
   ListChecks,
   LogOut,
   Mail,
@@ -225,6 +226,18 @@ export function Sidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
+                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
+                  <DropdownMenuItem asChild>
+                    <Button
+                      variant="ghost"
+                      className="w-full cursor-pointer justify-start"
+                      onClick={() => navigate(RoutePath.LINKED_ACCOUNTS)}
+                    >
+                      <Link2 className="w-4 h-4" />
+                      Linked Accounts
+                    </Button>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                   <Button
                     variant="ghost"

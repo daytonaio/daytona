@@ -46,6 +46,18 @@ type UsersAPI interface {
 	GetAuthenticatedUserExecute(r UsersAPIGetAuthenticatedUserRequest) (*User, *http.Response, error)
 
 	/*
+		GetAvailableAccountProviders Get available account providers
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return UsersAPIGetAvailableAccountProvidersRequest
+	*/
+	GetAvailableAccountProviders(ctx context.Context) UsersAPIGetAvailableAccountProvidersRequest
+
+	// GetAvailableAccountProvidersExecute executes the request
+	//  @return []AccountProvider
+	GetAvailableAccountProvidersExecute(r UsersAPIGetAvailableAccountProvidersRequest) ([]AccountProvider, *http.Response, error)
+
+	/*
 		ListUsers List all users
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -67,6 +79,19 @@ type UsersAPI interface {
 
 	// RegenerateKeyPairExecute executes the request
 	RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRequest) (*http.Response, error)
+
+	/*
+		UnlinkAccount Unlink account
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param providerId
+		@param userId
+		@return UsersAPIUnlinkAccountRequest
+	*/
+	UnlinkAccount(ctx context.Context, providerId string, userId string) UsersAPIUnlinkAccountRequest
+
+	// UnlinkAccountExecute executes the request
+	UnlinkAccountExecute(r UsersAPIUnlinkAccountRequest) (*http.Response, error)
 }
 
 // UsersAPIService UsersAPI service
@@ -267,6 +292,104 @@ func (a *UsersAPIService) GetAuthenticatedUserExecute(r UsersAPIGetAuthenticated
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type UsersAPIGetAvailableAccountProvidersRequest struct {
+	ctx        context.Context
+	ApiService UsersAPI
+}
+
+func (r UsersAPIGetAvailableAccountProvidersRequest) Execute() ([]AccountProvider, *http.Response, error) {
+	return r.ApiService.GetAvailableAccountProvidersExecute(r)
+}
+
+/*
+GetAvailableAccountProviders Get available account providers
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return UsersAPIGetAvailableAccountProvidersRequest
+*/
+func (a *UsersAPIService) GetAvailableAccountProviders(ctx context.Context) UsersAPIGetAvailableAccountProvidersRequest {
+	return UsersAPIGetAvailableAccountProvidersRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []AccountProvider
+func (a *UsersAPIService) GetAvailableAccountProvidersExecute(r UsersAPIGetAvailableAccountProvidersRequest) ([]AccountProvider, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []AccountProvider
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.GetAvailableAccountProviders")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/users/account-providers"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type UsersAPIListUsersRequest struct {
 	ctx        context.Context
 	ApiService UsersAPI
@@ -393,6 +516,100 @@ func (a *UsersAPIService) RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRe
 
 	localVarPath := localBasePath + "/users/{id}/regenerate-key-pair"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type UsersAPIUnlinkAccountRequest struct {
+	ctx        context.Context
+	ApiService UsersAPI
+	providerId string
+	userId     string
+}
+
+func (r UsersAPIUnlinkAccountRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UnlinkAccountExecute(r)
+}
+
+/*
+UnlinkAccount Unlink account
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param providerId
+	@param userId
+	@return UsersAPIUnlinkAccountRequest
+*/
+func (a *UsersAPIService) UnlinkAccount(ctx context.Context, providerId string, userId string) UsersAPIUnlinkAccountRequest {
+	return UsersAPIUnlinkAccountRequest{
+		ApiService: a,
+		ctx:        ctx,
+		providerId: providerId,
+		userId:     userId,
+	}
+}
+
+// Execute executes the request
+func (a *UsersAPIService) UnlinkAccountExecute(r UsersAPIUnlinkAccountRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "UsersAPIService.UnlinkAccount")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/users/linked-accounts/{providerId}/{userId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"providerId"+"}", url.PathEscape(parameterValueToString(r.providerId, "providerId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

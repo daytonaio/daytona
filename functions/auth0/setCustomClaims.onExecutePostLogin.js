@@ -13,4 +13,6 @@ exports.onExecutePostLogin = async (event, api) => {
   api.accessToken.setCustomClaim('email', event.user.email)
   api.accessToken.setCustomClaim('name', event.user.name)
   api.accessToken.setCustomClaim('email_verified', event.user.email_verified)
+  api.accessToken.setCustomClaim('identities', event.user.identities)
+  api.idToken.setCustomClaim('identities', event.user.identities)
 }

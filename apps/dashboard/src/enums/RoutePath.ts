@@ -29,6 +29,7 @@ export enum RoutePath {
 
   // User routes
   USER_INVITATIONS = '/dashboard/user/invitations',
+  LINKED_ACCOUNTS = '/dashboard/user/linked-accounts',
 }
 
 /**

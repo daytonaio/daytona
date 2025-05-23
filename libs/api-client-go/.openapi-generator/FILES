@@ -15,6 +15,7 @@ client.go
 configuration.go
 go.mod
 go.sum
+model_account_provider.go
 model_api_key_list.go
 model_api_key_response.go
 model_build_image.go
