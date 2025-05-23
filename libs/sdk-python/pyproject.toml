@@ -19,7 +19,9 @@ dependencies = [
     "urllib3>=2.0.7,<3.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",
-    "requests_toolbelt>=1.0.0,<1.1.0"
+    "requests_toolbelt>=1.0.0,<1.1.0",
+    "boto3>=1.37.0,<1.38.0",
+    "toml>=0.10.0,<0.11.0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

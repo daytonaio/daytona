@@ -6,7 +6,7 @@
   },
   "scripts": {
     "build": "python -m build",
-    "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && npm run docs:daytona && npm run docs:sandbox && npm run docs:filesystem && npm run docs:git && npm run docs:process && npm run docs:lsp && npm run docs:errors && npm run docs:code_run_params && npm run docs:charts && npm run docs:execute_response && npm run docs:volume",
+    "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && npm run docs:daytona && npm run docs:sandbox && npm run docs:filesystem && npm run docs:git && npm run docs:process && npm run docs:lsp && npm run docs:errors && npm run docs:code_run_params && npm run docs:charts && npm run docs:execute_response && npm run docs:volume && npm run docs:object_storage && npm run docs:image",
     "docs:daytona": "FIRST_SECTION='Daytona' OUTPUT_FILE=\"$npm_package_config_docsDir/daytona.mdx\" pydoc-markdown -m daytona_sdk.daytona pydoc-markdown.yml",
     "docs:sandbox": "FIRST_SECTION='Sandbox' OUTPUT_FILE=\"$npm_package_config_docsDir/sandbox.mdx\" pydoc-markdown -m daytona_sdk.sandbox pydoc-markdown.yml",
     "docs:filesystem": "FIRST_SECTION='FileSystem' OUTPUT_FILE=\"$npm_package_config_docsDir/file-system.mdx\" pydoc-markdown -m daytona_sdk.filesystem pydoc-markdown.yml",
@@ -17,6 +17,8 @@
     "docs:code_run_params": "FIRST_SECTION='CodeRunParams' OUTPUT_FILE=\"$npm_package_config_docsDir/code-run-params.mdx\" pydoc-markdown -m daytona_sdk.common.code_run_params pydoc-markdown.yml",
     "docs:charts": "FIRST_SECTION='Chart' OUTPUT_FILE=\"$npm_package_config_docsDir/charts.mdx\" pydoc-markdown -m daytona_sdk.charts pydoc-markdown.yml",
     "docs:execute_response": "FIRST_SECTION='ExecuteResponse' OUTPUT_FILE=\"$npm_package_config_docsDir/execute-response.mdx\" pydoc-markdown -m daytona_sdk.common.execute_response pydoc-markdown.yml",
-    "docs:volume": "FIRST_SECTION='Volume' OUTPUT_FILE=\"$npm_package_config_docsDir/volume.mdx\" pydoc-markdown -m daytona_sdk.volume pydoc-markdown.yml"
+    "docs:volume": "FIRST_SECTION='Volume' OUTPUT_FILE=\"$npm_package_config_docsDir/volume.mdx\" pydoc-markdown -m daytona_sdk.volume pydoc-markdown.yml",
+    "docs:object_storage": "FIRST_SECTION='ObjectStorage' OUTPUT_FILE='../../docs/python-sdk/object-storage.mdx' pydoc-markdown -m daytona_sdk.object_storage pydoc-markdown.yml",
+    "docs:image": "FIRST_SECTION='Image' OUTPUT_FILE='../../docs/python-sdk/image.mdx' pydoc-markdown -m daytona_sdk.image pydoc-markdown.yml"
   }
 }

@@ -1,16 +1,28 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: AGPL-3.0
 
+import asyncio
 import json
+import threading
+import time
 import warnings
 from dataclasses import dataclass
 from enum import Enum
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated, Callable, Dict, List, Optional, Union
 
-from daytona_api_client import ApiClient, Configuration
+from daytona_api_client import ApiClient, BuildImage, Configuration, CreateBuildInfo
 from daytona_api_client import CreateWorkspace as CreateSandbox
-from daytona_api_client import SessionExecuteRequest, SessionExecuteResponse, ToolboxApi, VolumesApi
+from daytona_api_client import (
+    ImagesApi,
+    ImageState,
+    ObjectStorageApi,
+    SessionExecuteRequest,
+    SessionExecuteResponse,
+    ToolboxApi,
+    VolumesApi,
+)
 from daytona_api_client import WorkspaceApi as SandboxApi
+from daytona_api_client import WorkspaceState as SandboxState
 from daytona_api_client import WorkspaceVolume as VolumeMount
 from daytona_sdk._utils.errors import DaytonaError, intercept_errors
 from deprecated import deprecated
@@ -18,9 +30,12 @@ from environs import Env
 from pydantic import BaseModel, Field, model_validator
 
 from ._utils.enum import to_enum
+from ._utils.stream import process_streaming_response
 from ._utils.timeout import with_timeout
 from .code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from .code_toolbox.sandbox_ts_code_toolbox import SandboxTsCodeToolbox
+from .image import Image
+from .object_storage import ObjectStorage
 from .sandbox import Sandbox, SandboxTargetRegion
 from .volume import VolumeService
 
@@ -164,7 +179,7 @@ class CreateSandboxParams(BaseModel):
     """
 
     language: Optional[CodeLanguage] = None
-    image: Optional[str] = None
+    image: Optional[Union[str, Image]] = None
     os_user: Optional[str] = None
     env_vars: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
@@ -315,6 +330,8 @@ class Daytona:
         # Initialize API clients with the api_client instance
         self.sandbox_api = SandboxApi(api_client)
         self.toolbox_api = ToolboxApi(api_client)
+        self.image_api = ImagesApi(api_client)
+        self.object_storage_api = ObjectStorageApi(api_client)
 
         # Initialize volume service
         self.volume = VolumeService(VolumesApi(api_client))
@@ -324,6 +341,8 @@ class Daytona:
         self,
         params: Optional[CreateSandboxParams] = None,
         timeout: Optional[float] = 60,
+        *,
+        on_image_build_logs: Callable[[str], None] = None,
     ) -> Sandbox:
         """Creates Sandboxes with default or custom configurations. You can specify various parameters,
         including language, image, resources, environment variables, and volumes for the Sandbox.
@@ -333,6 +352,9 @@ class Daytona:
                    defaults to Python language.
             timeout (Optional[float]): Timeout (in seconds) for sandbox creation. 0 means no timeout.
                 Default is 60 seconds.
+            on_image_build_logs (Callable[[str], None]): This callback function handles image build logs.
+                It's invoked only when `params.image` is an instance of `Image` and there's no existing
+                image in Daytona with the same configuration.
 
         Returns:
             Sandbox: The created Sandbox instance.
@@ -366,7 +388,7 @@ class Daytona:
 
         effective_timeout = params.timeout if params.timeout else timeout
 
-        return self._create(params, effective_timeout)
+        return self._create(params, effective_timeout, on_image_build_logs=on_image_build_logs)
 
     @with_timeout(
         error_message=lambda self, timeout: (
@@ -377,6 +399,8 @@ class Daytona:
         self,
         params: Optional[CreateSandboxParams] = None,
         timeout: Optional[float] = 60,
+        *,
+        on_image_build_logs: Callable[[str], None] = None,
     ) -> Sandbox:
         """Creates a new Sandbox and waits for it to start.
 
@@ -385,6 +409,9 @@ class Daytona:
                    defaults to Python language.
             timeout (Optional[float]): Timeout (in seconds) for sandbox creation. 0 means no timeout.
                 Default is 60 seconds.
+            on_image_build_logs (Callable[[str], None]): This callback function handles image build logs.
+                It's invoked only when `params.image` is an instance of `Image` and there's no existing
+                image in Daytona with the same configuration.
 
         Returns:
             Sandbox: The created Sandbox instance.
@@ -404,7 +431,6 @@ class Daytona:
 
         # Create sandbox using dictionary
         sandbox_data = CreateSandbox(
-            image=params.image,
             user=params.os_user,
             env=params.env_vars if params.env_vars else {},
             labels=params.labels,
@@ -420,7 +446,52 @@ class Daytona:
             sandbox_data.disk = params.resources.disk
             sandbox_data.gpu = params.resources.gpu
 
+        if isinstance(params.image, str):
+            sandbox_data.image = params.image
+        elif isinstance(params.image, Image):
+            context_hashes = self.__process_image_context(params.image)
+            sandbox_data.build_info = CreateBuildInfo(
+                context_hashes=context_hashes,
+                dockerfile_content=params.image.dockerfile(),
+            )
+
         response = self.sandbox_api.create_workspace(sandbox_data, _request_timeout=timeout or None)
+
+        if response.state == SandboxState.PENDING_BUILD and on_image_build_logs:
+            _, url, *_ = self.sandbox_api._get_build_logs_serialize(  # pylint: disable=protected-access
+                response.id,
+                follow=True,
+                x_daytona_organization_id=None,
+                _request_auth=None,
+                _content_type=None,
+                _headers=None,
+                _host_index=None,
+            )
+
+            response_ref = {"response": response}
+
+            def should_terminate():
+                response_ref["response"] = self.sandbox_api.get_workspace(response_ref["response"].id)
+                return response_ref["response"].state in [
+                    SandboxState.STARTED,
+                    SandboxState.STARTING,
+                    SandboxState.ERROR,
+                ]
+
+            while response_ref["response"].state == SandboxState.PENDING_BUILD:
+                time.sleep(1)
+                response_ref["response"] = self.sandbox_api.get_workspace(response_ref["response"].id)
+
+            asyncio.run(
+                process_streaming_response(
+                    url=url,
+                    headers=self.sandbox_api.api_client.default_headers,
+                    on_chunk=on_image_build_logs,
+                    should_terminate=should_terminate,
+                )
+            )
+            response = response_ref["response"]
+
         sandbox_info = Sandbox.to_sandbox_info(response)
         response.info = sandbox_info
 
@@ -433,11 +504,12 @@ class Daytona:
         )
 
         # Wait for sandbox to start
-        try:
-            sandbox.wait_for_sandbox_start()
-        finally:
-            # If not Daytona SaaS, we don't need to handle pulling image state
-            pass
+        if sandbox.instance.state != SandboxState.STARTED:
+            try:
+                sandbox.wait_for_sandbox_start(timeout)
+            finally:
+                # If not Daytona SaaS, we don't need to handle pulling image state
+                pass
 
         return sandbox
 
@@ -664,6 +736,119 @@ class Daytona:
             DaytonaError: If timeout is negative; If Sandbox fails to stop or times out
         """
         sandbox.stop(timeout)
+
+    @intercept_errors(message_prefix="Failed to build image: ")
+    @with_timeout(
+        error_message=lambda self, timeout: (f"Failed to build image within {timeout} seconds timeout period.")
+    )
+    def create_image(
+        self,
+        name: str,
+        image: Image,
+        *,
+        on_logs: Callable[[str], None] = None,
+        timeout: Optional[float] = 0,  # pylint: disable=unused-argument
+    ) -> None:
+        """Creates and registers a new image from the given Image definition.
+
+        Args:
+            name (str): The name of the image to create.
+            image (Image): The Image instance.
+            on_logs (Callable[[str], None]): This callback function handles image build logs.
+            timeout (Optional[float]): Default is no timeout. Timeout in seconds (0 means no timeout).
+
+        Example:
+            ```python
+            image = Image.debianSlim('3.12').pipInstall('numpy')
+            daytona.create_image('my-image', image, on_logs=print)
+            ```
+        """
+        context_hashes = self.__process_image_context(image)
+        built_image = self.image_api.build_image(
+            BuildImage(
+                name=name,
+                build_info=CreateBuildInfo(
+                    context_hashes=context_hashes,
+                    dockerfile_content=image.dockerfile(),
+                ),
+            )
+        )
+
+        terminal_states = [ImageState.ACTIVE, ImageState.ERROR]
+
+        def start_log_streaming():
+            _, url, *_ = self.image_api._get_image_build_logs_serialize(  # pylint: disable=protected-access
+                id=built_image.id,
+                follow=True,
+                x_daytona_organization_id=None,
+                _request_auth=None,
+                _content_type=None,
+                _headers=None,
+                _host_index=None,
+            )
+
+            asyncio.run(
+                process_streaming_response(
+                    url=url,
+                    headers=self.image_api.api_client.default_headers,
+                    on_chunk=on_logs,
+                    should_terminate=lambda: built_image.state in terminal_states,
+                )
+            )
+
+        if on_logs:
+            on_logs(f"Building image {built_image.name} ({built_image.state})")
+            thread = threading.Thread(target=start_log_streaming)
+            if built_image.state != ImageState.BUILD_PENDING:
+                thread.start()
+
+        previous_state = built_image.state
+        while built_image.state not in terminal_states:
+            if on_logs and previous_state != built_image.state:
+                if built_image.state != ImageState.BUILD_PENDING and not thread.is_alive():
+                    thread.start()
+                on_logs(f"Building image {built_image.name} ({built_image.state})")
+                previous_state = built_image.state
+            time.sleep(1)
+            built_image = self.image_api.get_image(built_image.id)
+
+        if on_logs:
+            thread.join()
+            if built_image.state == ImageState.ACTIVE:
+                on_logs(f"Built image {built_image.name} ({built_image.state})")
+
+        if built_image.state == ImageState.ERROR:
+            raise DaytonaError(f"Failed to build image {built_image.name}, error reason: {built_image.error_reason}")
+
+    def __process_image_context(self, image: Image) -> List[str]:
+        """Processes the image context by uploading it to object storage.
+
+        Args:
+            image (Image): The Image instance.
+
+        Returns:
+            List[str]: List of context hashes stored in object storage.
+        """
+        if not image._context_list:  # pylint: disable=protected-access
+            return []
+
+        push_access_creds = self.object_storage_api.get_push_access()
+        object_storage = ObjectStorage(
+            push_access_creds.storage_url,
+            push_access_creds.access_key,
+            push_access_creds.secret,
+            push_access_creds.session_token,
+            push_access_creds.bucket,
+        )
+
+        context_hashes = []
+        for context in image._context_list:  # pylint: disable=protected-access
+            context_hash = object_storage.upload(
+                context.source_path, push_access_creds.organization_id, context.archive_path
+            )
+            context_hashes.append(context_hash)
+
+        return context_hashes
 
 
 # Export these at module level
