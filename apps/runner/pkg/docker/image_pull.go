@@ -46,7 +46,7 @@ func (d *DockerClient) PullImage(ctx context.Context, imageName string, reg *dto
 
 	if sandboxIdValue != nil {
 		sandboxId := sandboxIdValue.(string)
-		d.cache.SetSandboxState(ctx, sandboxId, enums.SandboxStatePullingImage)
+		d.cache.SetSandboxState(ctx, sandboxId, enums.SandboxStatePullingSnapshot)
 	}
 
 	responseBody, err := d.apiClient.ImagePull(ctx, imageName, image.PullOptions{

@@ -74,16 +74,16 @@ export class Organization {
   @Column({
     type: 'int',
     default: 20,
-    name: 'max_image_size',
+    name: 'max_snapshot_size',
   })
-  maxImageSize: number
+  maxSnapshotSize: number
 
   @Column({
     type: 'int',
     default: 100,
-    name: 'image_quota',
+    name: 'snapshot_quota',
   })
-  imageQuota: number
+  snapshotQuota: number
 
   @Column({
     type: 'int',

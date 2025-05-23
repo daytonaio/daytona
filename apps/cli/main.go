@@ -10,10 +10,10 @@ import (
 
 	"github.com/daytonaio/daytona/cli/cmd"
 	"github.com/daytonaio/daytona/cli/cmd/auth"
-	"github.com/daytonaio/daytona/cli/cmd/image"
 	"github.com/daytonaio/daytona/cli/cmd/mcp"
 	"github.com/daytonaio/daytona/cli/cmd/organization"
 	"github.com/daytonaio/daytona/cli/cmd/sandbox"
+	"github.com/daytonaio/daytona/cli/cmd/snapshot"
 	"github.com/daytonaio/daytona/cli/cmd/volume"
 	"github.com/daytonaio/daytona/cli/internal"
 	"github.com/joho/godotenv"
@@ -39,7 +39,7 @@ func init() {
 	rootCmd.AddCommand(auth.LoginCmd)
 	rootCmd.AddCommand(auth.LogoutCmd)
 	rootCmd.AddCommand(sandbox.SandboxCmd)
-	rootCmd.AddCommand(image.ImagesCmd)
+	rootCmd.AddCommand(snapshot.SnapshotsCmd)
 	rootCmd.AddCommand(volume.VolumeCmd)
 	rootCmd.AddCommand(organization.OrganizationCmd)
 	rootCmd.AddCommand(mcp.MCPCmd)

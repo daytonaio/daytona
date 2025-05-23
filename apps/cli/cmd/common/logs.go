@@ -30,7 +30,7 @@ type ResourceType string
 
 const (
 	ResourceTypeWorkspace ResourceType = "workspace"
-	ResourceTypeImage     ResourceType = "images"
+	ResourceTypeSnapshot  ResourceType = "snapshots"
 )
 
 func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
