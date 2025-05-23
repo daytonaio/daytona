@@ -11,8 +11,8 @@ import {
   Get,
   NotFoundException,
   Param,
+  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
@@ -249,7 +249,7 @@ export class OrganizationController {
     return this.organizationService.getUsageOverview(organizationId)
   }
 
-  @Put('/:organizationId/quota')
+  @Patch('/:organizationId/quota')
   @ApiOperation({
     summary: 'Update organization quota',
     operationId: 'updateOrganizationQuota',

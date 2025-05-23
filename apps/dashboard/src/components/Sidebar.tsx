@@ -49,7 +49,7 @@ import { OrganizationPicker } from '@/components/Organizations/OrganizationPicke
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
-import { Card, CardDescription, CardHeader, CardTitle } from './ui/card'
+import { Card, CardHeader, CardTitle } from './ui/card'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { addHours, formatRelative } from 'date-fns'
@@ -74,7 +74,6 @@ export function Sidebar() {
         path: RoutePath.IMAGES,
       },
       { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
-      { icon: <ChartColumn className="w-5 h-5" />, label: 'Usage', path: RoutePath.USAGE },
     ]
 
     if (

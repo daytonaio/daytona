@@ -41,7 +41,6 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
 import LinkedAccounts from '@/pages/LinkedAccounts'
 import { Button } from './components/ui/button'
-import Usage from './pages/Usage'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -133,7 +132,6 @@ function App() {
           <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />
           <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
           <Route path={getRouteSubPath(RoutePath.LIMITS)} element={<Limits />} />
-          <Route path={getRouteSubPath(RoutePath.USAGE)} element={<Usage />} />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
               path={getRouteSubPath(RoutePath.BILLING)}
