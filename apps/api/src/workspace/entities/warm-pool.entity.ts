@@ -16,7 +16,7 @@ export class WarmPool {
   pool: number
 
   @Column()
-  image: string
+  snapshot: string
 
   @Column({
     type: 'enum',

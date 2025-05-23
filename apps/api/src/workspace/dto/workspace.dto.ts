@@ -73,10 +73,10 @@ export class WorkspaceDto {
   organizationId: string
 
   @ApiPropertyOptional({
-    description: 'The image used for the workspace',
+    description: 'The snapshot used for the workspace',
     example: 'daytonaio/workspace:latest',
   })
-  image: string
+  snapshot: string
 
   @ApiProperty({
     description: 'The user associated with the project',
@@ -225,7 +225,7 @@ export class WorkspaceDto {
       name: workspace.id,
       organizationId: workspace.organizationId,
       target: workspace.region,
-      image: workspace.image,
+      snapshot: workspace.snapshot,
       user: workspace.osUser,
       env: workspace.env,
       cpu: workspace.cpu,

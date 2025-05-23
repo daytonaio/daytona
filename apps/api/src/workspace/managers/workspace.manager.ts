@@ -18,11 +18,11 @@ import { DockerRegistryService } from '../../docker-registry/services/docker-reg
 import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
-import { ImageService } from '../services/image.service'
+import { SnapshotService } from '../services/snapshot.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { DockerProvider } from '../docker/docker-provider'
-import { ImageRunnerState } from '../enums/image-runner-state.enum'
+import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
@@ -34,7 +34,7 @@ import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 import { OtelSpan } from '../../common/decorators/otel.decorator'
-import { ImageRunner } from '../entities/image-runner.entity'
+import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = true
@@ -49,13 +49,13 @@ export class WorkspaceManager {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(ImageRunner)
-    private readonly imageRunnerRepository: Repository<ImageRunner>,
+    @InjectRepository(SnapshotRunner)
+    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly runnerService: RunnerService,
     private readonly runnerApiFactory: RunnerApiFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
-    private readonly imageService: ImageService,
+    private readonly snapshotService: SnapshotService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerProvider: DockerProvider,
   ) {}
@@ -311,13 +311,13 @@ export class WorkspaceManager {
   }
 
   private handleUnassignedBuildWorkspace: StateSyncHandler = async (workspace: Workspace): Promise<ShouldSyncAgain> => {
-    // Try to assign an available runner with the image build
+    // Try to assign an available runner with the snapshot build
     let runnerId: string
     try {
       runnerId = await this.runnerService.getRandomAvailableRunner({
         region: workspace.region,
         workspaceClass: workspace.class,
-        imageRef: workspace.buildInfo.imageRef,
+        snapshotRef: workspace.buildInfo.snapshotRef,
       })
     } catch (error) {
       // Continue to next assignment method
@@ -328,23 +328,23 @@ export class WorkspaceManager {
       return SYNC_AGAIN
     }
 
-    // Try to assign an available runner that is currently building the image
-    const imageRunners = await this.runnerService.getImageRunners(workspace.buildInfo.imageRef)
+    // Try to assign an available runner that is currently building the snapshot
+    const snapshotRunners = await this.runnerService.getSnapshotRunners(workspace.buildInfo.snapshotRef)
 
-    for (const imageRunner of imageRunners) {
-      const runner = await this.runnerService.findOne(imageRunner.runnerId)
+    for (const snapshotRunner of snapshotRunners) {
+      const runner = await this.runnerService.findOne(snapshotRunner.runnerId)
       if (runner.used < runner.capacity) {
-        if (imageRunner.state === ImageRunnerState.BUILDING_IMAGE) {
-          await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_IMAGE, runner.id)
+        if (snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
+          await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_SNAPSHOT, runner.id)
           return SYNC_AGAIN
-        } else if (imageRunner.state === ImageRunnerState.ERROR) {
-          await this.updateWorkspaceErrorState(workspace.id, imageRunner.errorReason)
+        } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
+          await this.updateWorkspaceErrorState(workspace.id, snapshotRunner.errorReason)
           return DONT_SYNC_AGAIN
         }
       }
     }
 
-    const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleImagesBuilding()
+    const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
 
     // Try to assign a new available runner
     runnerId = await this.runnerService.getRandomAvailableRunner({
@@ -355,22 +355,22 @@ export class WorkspaceManager {
 
     this.buildOnRunner(workspace.buildInfo, runnerId, workspace.organizationId)
 
-    await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_IMAGE, runnerId)
+    await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_SNAPSHOT, runnerId)
     await this.runnerService.recalculateRunnerUsage(runnerId)
     return SYNC_AGAIN
   }
 
-  // Initiates the image build on the runner and creates an ImageRunner depending on the result
+  // Initiates the snapshot build on the runner and creates an SnapshotRunner depending on the result
   async buildOnRunner(buildInfo: BuildInfo, runnerId: string, organizationId: string) {
     const runner = await this.runnerService.findOne(runnerId)
-    const runnerImageApi = this.runnerApiFactory.createImageApi(runner)
+    const runnerSnapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
     let retries = 0
 
     while (retries < 10) {
       try {
-        await runnerImageApi.buildImage({
-          image: buildInfo.imageRef,
+        await runnerSnapshotApi.buildSnapshot({
+          snapshot: buildInfo.snapshotRef,
           organizationId: organizationId,
           dockerfile: buildInfo.dockerfileContent,
           context: buildInfo.contextHashes,
@@ -378,7 +378,12 @@ export class WorkspaceManager {
         break
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
-          await this.runnerService.createImageRunner(runnerId, buildInfo.imageRef, ImageRunnerState.ERROR, err.message)
+          await this.runnerService.createSnapshotRunner(
+            runnerId,
+            buildInfo.snapshotRef,
+            SnapshotRunnerState.ERROR,
+            err.message,
+          )
           return
         }
       }
@@ -387,22 +392,22 @@ export class WorkspaceManager {
     }
 
     if (retries === 10) {
-      await this.runnerService.createImageRunner(
+      await this.runnerService.createSnapshotRunner(
         runnerId,
-        buildInfo.imageRef,
-        ImageRunnerState.ERROR,
+        buildInfo.snapshotRef,
+        SnapshotRunnerState.ERROR,
         'Timeout while building',
       )
       return
     }
 
-    const response = (await runnerImageApi.imageExists(buildInfo.imageRef)).data
-    let state = ImageRunnerState.BUILDING_IMAGE
+    const response = (await runnerSnapshotApi.snapshotExists(buildInfo.snapshotRef)).data
+    let state = SnapshotRunnerState.BUILDING_SNAPSHOT
     if (response && response.exists) {
-      state = ImageRunnerState.READY
+      state = SnapshotRunnerState.READY
     }
 
-    await this.runnerService.createImageRunner(runnerId, buildInfo.imageRef, state)
+    await this.runnerService.createSnapshotRunner(runnerId, buildInfo.snapshotRef, state)
   }
 
   private handleWorkspaceDesiredStateArchived: StateSyncHandler = async (
@@ -583,8 +588,8 @@ export class WorkspaceManager {
       case WorkspaceState.PENDING_BUILD: {
         return this.handleUnassignedBuildWorkspace(workspace)
       }
-      case WorkspaceState.BUILDING_IMAGE: {
-        return this.handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart(workspace)
+      case WorkspaceState.BUILDING_SNAPSHOT: {
+        return this.handleRunnerWorkspaceBuildingSnapshotStateOnDesiredStateStart(workspace)
       }
       case WorkspaceState.UNKNOWN: {
         return this.handleRunnerWorkspaceUnknownStateOnDesiredStateStart(workspace)
@@ -595,9 +600,9 @@ export class WorkspaceManager {
       }
       case WorkspaceState.RESTORING:
       case WorkspaceState.CREATING: {
-        return this.handleRunnerWorkspacePullingImageStateCheck(workspace)
+        return this.handleRunnerWorkspacePullingSnapshotStateCheck(workspace)
       }
-      case WorkspaceState.PULLING_IMAGE:
+      case WorkspaceState.PULLING_SNAPSHOT:
       case WorkspaceState.STARTING: {
         return this.handleRunnerWorkspaceStartedStateCheck(workspace)
       }
@@ -684,24 +689,27 @@ export class WorkspaceManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart: StateSyncHandler = async (
+  private handleRunnerWorkspaceBuildingSnapshotStateOnDesiredStateStart: StateSyncHandler = async (
     workspace: Workspace,
   ): Promise<ShouldSyncAgain> => {
-    const imageRunner = await this.runnerService.getImageRunner(workspace.runnerId, workspace.buildInfo.imageRef)
-    if (imageRunner) {
-      switch (imageRunner.state) {
-        case ImageRunnerState.READY: {
+    const snapshotRunner = await this.runnerService.getSnapshotRunner(
+      workspace.runnerId,
+      workspace.buildInfo.snapshotRef,
+    )
+    if (snapshotRunner) {
+      switch (snapshotRunner.state) {
+        case SnapshotRunnerState.READY: {
           // TODO: "UNKNOWN" should probably be changed to something else
           await this.updateWorkspaceState(workspace.id, WorkspaceState.UNKNOWN)
           return SYNC_AGAIN
         }
-        case ImageRunnerState.ERROR: {
-          await this.updateWorkspaceErrorState(workspace.id, imageRunner.errorReason)
+        case SnapshotRunnerState.ERROR: {
+          await this.updateWorkspaceErrorState(workspace.id, snapshotRunner.errorReason)
           return DONT_SYNC_AGAIN
         }
       }
     }
-    if (!imageRunner || imageRunner.state === ImageRunnerState.BUILDING_IMAGE) {
+    if (!snapshotRunner || snapshotRunner.state === SnapshotRunnerState.BUILDING_SNAPSHOT) {
       // Sleep for a second and go back to syncing instance state
       await new Promise((resolve) => setTimeout(resolve, 1000))
       return SYNC_AGAIN
@@ -722,7 +730,7 @@ export class WorkspaceManager {
     let createWorkspaceDto: CreateSandboxDTO = {
       id: workspace.id,
       osUser: workspace.osUser,
-      image: '',
+      snapshot: '',
       // TODO: organizationId: workspace.organizationId,
       userId: workspace.organizationId,
       storageQuota: workspace.disk,
@@ -735,19 +743,22 @@ export class WorkspaceManager {
     }
 
     if (!workspace.buildInfo) {
-      //  get internal image name
-      const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
-      const internalImageName = image.internalName
+      //  get internal snapshot name
+      const snapshot = await this.snapshotService.getSnapshotName(workspace.snapshot, workspace.organizationId)
+      const internalSnapshotName = snapshot.internalName
 
-      const registry = await this.dockerRegistryService.findOneByImageName(internalImageName, workspace.organizationId)
+      const registry = await this.dockerRegistryService.findOneBySnapshotName(
+        internalSnapshotName,
+        workspace.organizationId,
+      )
       if (!registry) {
-        throw new Error('No registry found for image')
+        throw new Error('No registry found for snapshot')
       }
 
       createWorkspaceDto = {
         ...createWorkspaceDto,
-        image: internalImageName,
-        entrypoint: image.entrypoint,
+        snapshot: internalSnapshotName,
+        entrypoint: snapshot.entrypoint,
         registry: {
           url: registry.url,
           username: registry.username,
@@ -757,7 +768,7 @@ export class WorkspaceManager {
     } else {
       createWorkspaceDto = {
         ...createWorkspaceDto,
-        image: workspace.buildInfo.imageRef,
+        snapshot: workspace.buildInfo.snapshotRef,
         entrypoint: this.getEntrypointFromDockerfile(workspace.buildInfo.dockerfileContent),
       }
     }
@@ -840,11 +851,11 @@ export class WorkspaceManager {
         if (runningWorkspacesCount > usageThreshold) {
           //  TODO: usage should be based on compute usage
 
-          const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
+          const snapshot = await this.snapshotService.getSnapshotName(workspace.snapshot, workspace.organizationId)
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: workspace.region,
             workspaceClass: workspace.class,
-            imageRef: image.internalName,
+            snapshotRef: snapshot.internalName,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== workspace.runnerId)
 
@@ -874,7 +885,7 @@ export class WorkspaceManager {
       //  if workspace has no runner, check if backup is completed
       //  if not, set workspace to error
       //  if backup is completed, get random available runner and start workspace
-      //  use the backup image to start the workspace
+      //  use the backup snapshot to start the workspace
 
       if (workspace.backupState !== BackupState.COMPLETED) {
         await this.updateWorkspaceErrorState(workspace.id, 'Workspace has no runner and backup is not completed')
@@ -883,48 +894,50 @@ export class WorkspaceManager {
 
       const registry = await this.dockerRegistryService.findOne(workspace.backupRegistryId)
       if (!registry) {
-        throw new Error('No registry found for image')
+        throw new Error('No registry found for snapshot')
       }
 
-      const existingImages = workspace.existingBackupImages.map((existingImage) => existingImage.imageName)
-      let validBackupImage
+      const existingSnapshots = workspace.existingBackupSnapshots.map(
+        (existingSnapshot) => existingSnapshot.snapshotName,
+      )
+      let validBackupSnapshot
       let exists = false
 
-      while (existingImages.length > 0) {
+      while (existingSnapshots.length > 0) {
         try {
-          if (!validBackupImage) {
-            //  last image is the current image, so we don't need to check it
-            //  just in case, we'll use the value from the backupImage property
-            validBackupImage = workspace.backupImage
-            existingImages.pop()
+          if (!validBackupSnapshot) {
+            //  last snapshot is the current snapshot, so we don't need to check it
+            //  just in case, we'll use the value from the backupSnapshot property
+            validBackupSnapshot = workspace.backupSnapshot
+            existingSnapshots.pop()
           } else {
-            validBackupImage = existingImages.pop()
+            validBackupSnapshot = existingSnapshots.pop()
           }
-          if (await this.dockerProvider.checkImageExistsInRegistry(validBackupImage, registry)) {
+          if (await this.dockerProvider.checkImageExistsInRegistry(validBackupSnapshot, registry)) {
             exists = true
             break
           }
         } catch (error) {
           this.logger.error(
-            `Failed to check if backup image ${workspace.backupImage} exists in registry ${registry.id}:`,
+            `Failed to check if backup snapshot ${workspace.backupSnapshot} exists in registry ${registry.id}:`,
             fromAxiosError(error),
           )
         }
       }
 
       if (!exists) {
-        await this.updateWorkspaceErrorState(workspace.id, 'No valid backup image found')
+        await this.updateWorkspaceErrorState(workspace.id, 'No valid backup snapshot found')
         return SYNC_AGAIN
       }
 
-      const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
+      const snapshot = await this.snapshotService.getSnapshotName(workspace.snapshot, workspace.organizationId)
 
       //  exclude the runner that the last runner workspace was on
       const availableRunners = (
         await this.runnerService.findAvailableRunners({
           region: workspace.region,
           workspaceClass: workspace.class,
-          imageRef: image.internalName,
+          snapshotRef: snapshot.internalName,
         })
       ).filter((runner) => runner.id != workspace.prevRunnerId)
 
@@ -938,7 +951,7 @@ export class WorkspaceManager {
 
       await runnerWorkspaceApi.create({
         id: workspace.id,
-        image: validBackupImage,
+        snapshot: validBackupSnapshot,
         osUser: workspace.osUser,
         // TODO: organizationId: workspace.organizationId,
         userId: workspace.organizationId,
@@ -971,8 +984,8 @@ export class WorkspaceManager {
     return SYNC_AGAIN
   }
 
-  //  used to check if workspace is pulling image on runner and update workspace state accordingly
-  private handleRunnerWorkspacePullingImageStateCheck: StateSyncHandler = async (
+  //  used to check if workspace is pulling snapshot on runner and update workspace state accordingly
+  private handleRunnerWorkspacePullingSnapshotStateCheck: StateSyncHandler = async (
     workspace: Workspace,
   ): Promise<ShouldSyncAgain> => {
     //  edge case when workspace is being transferred to a new runner
@@ -985,8 +998,8 @@ export class WorkspaceManager {
     const workspaceInfoResponse = await runnerWorkspaceApi.info(workspace.id)
     const workspaceInfo = workspaceInfoResponse.data
 
-    if (workspaceInfo.state === RunnerWorkspaceState.SandboxStatePullingImage) {
-      await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_IMAGE)
+    if (workspaceInfo.state === RunnerWorkspaceState.SandboxStatePullingSnapshot) {
+      await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_SNAPSHOT)
     } else if (workspaceInfo.state === RunnerWorkspaceState.SandboxStateError) {
       await this.updateWorkspaceErrorState(workspace.id)
     } else {

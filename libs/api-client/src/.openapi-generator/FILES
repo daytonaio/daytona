@@ -3,11 +3,11 @@
 api.ts
 api/api-keys-api.ts
 api/docker-registry-api.ts
-api/images-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
 api/preview-api.ts
 api/runners-api.ts
+api/snapshots-api.ts
 api/toolbox-api.ts
 api/users-api.ts
 api/volumes-api.ts
@@ -20,7 +20,7 @@ index.ts
 models/account-provider.ts
 models/api-key-list.ts
 models/api-key-response.ts
-models/build-image.ts
+models/build-snapshot.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts
@@ -28,7 +28,6 @@ models/completion-list.ts
 models/create-api-key.ts
 models/create-build-info.ts
 models/create-docker-registry.ts
-models/create-image.ts
 models/create-linked-account.ts
 models/create-organization-invitation.ts
 models/create-organization-quota.ts
@@ -36,6 +35,7 @@ models/create-organization-role.ts
 models/create-organization.ts
 models/create-runner.ts
 models/create-session-request.ts
+models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
 models/create-workspace.ts
@@ -54,8 +54,6 @@ models/git-commit-response.ts
 models/git-delete-branch-request.ts
 models/git-repo-request.ts
 models/git-status.ts
-models/image-dto.ts
-models/image-state.ts
 models/index.ts
 models/list-branch-response.ts
 models/lsp-completion-params.ts
@@ -69,7 +67,7 @@ models/organization-role.ts
 models/organization-suspension.ts
 models/organization-user.ts
 models/organization.ts
-models/paginated-images-dto.ts
+models/paginated-snapshots-dto.ts
 models/port-preview-url.ts
 models/position.ts
 models/project-dir-response.ts
@@ -81,7 +79,9 @@ models/search-files-response.ts
 models/session-execute-request.ts
 models/session-execute-response.ts
 models/session.ts
-models/set-image-general-status.ts
+models/set-snapshot-general-status-dto.ts
+models/snapshot-dto.ts
+models/snapshot-state.ts
 models/storage-access-dto.ts
 models/toggle-state.ts
 models/update-assigned-organization-roles.ts
