@@ -3,8 +3,8 @@ requires = ["setuptools>=68.0.0", "wheel>=0.41.2", "build>=1.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "daytona_sdk"
-version = "0.0.0-dev"
+name = "daytona"
+version = "0.19.0a0"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },
 ]
@@ -19,7 +19,9 @@ dependencies = [
     "urllib3>=2.0.7,<3.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",
-    "requests_toolbelt>=1.0.0,<1.1.0"
+    "requests_toolbelt>=1.0.0,<1.1.0",
+    "boto3>=1.37.0,<1.38.0",
+    "toml>=0.10.0,<0.11.0"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

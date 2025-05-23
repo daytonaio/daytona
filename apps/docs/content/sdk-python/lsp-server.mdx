@@ -1,5 +1,5 @@
 ---
-title: 'LspServer'
+title: "LspServer"
 hideTitleOnPage: true
 ---
 
@@ -73,7 +73,7 @@ free up system resources.
 lsp.stop()  # Clean up resources
 ```
 
-#### LspServer.did_open
+#### LspServer.did\_open
 
 ```python
 @intercept_errors(message_prefix="Failed to open file: ")
@@ -90,7 +90,7 @@ will begin tracking the file's contents and providing language features.
 
 - `path` _str_ - Path to the opened file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-
+  
 **Example**:
 
 ```python
@@ -99,7 +99,7 @@ lsp.did_open("workspace/project/src/index.ts")
 # Now can get completions, symbols, etc. for this file
 ```
 
-#### LspServer.did_close
+#### LspServer.did\_close
 
 ```python
 @intercept_errors(message_prefix="Failed to close file: ")
@@ -115,7 +115,7 @@ the language server to clean up any resources associated with that file.
 
 - `path` _str_ - Path to the closed file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-
+  
 **Example**:
 
 ```python
@@ -123,7 +123,7 @@ the language server to clean up any resources associated with that file.
 lsp.did_close("workspace/project/src/index.ts")
 ```
 
-#### LspServer.document_symbols
+#### LspServer.document\_symbols
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from document: ")
@@ -136,14 +136,14 @@ Gets symbol information (functions, classes, variables, etc.) from a document.
 
 - `path` _str_ - Path to the file to get symbols from. Relative paths are resolved based on the project path
   set in the LSP server constructor.
-
+  
 **Returns**:
 
 - `List[LspSymbol]` - List of symbols in the document. Each symbol includes:
   - name: The symbol's name
   - kind: The symbol's kind (function, class, variable, etc.)
   - location: The location of the symbol in the file
-
+  
 **Example**:
 
 ```python
@@ -153,7 +153,7 @@ for symbol in symbols:
     print(f"{symbol.kind} {symbol.name}: {symbol.location}")
 ```
 
-#### LspServer.workspace_symbols
+#### LspServer.workspace\_symbols
 
 ```python
 @deprecated(
@@ -169,12 +169,12 @@ in the Sandbox.
 **Arguments**:
 
 - `query` _str_ - Search query to match against symbol names.
-
+  
 **Returns**:
 
 - `List[LspSymbol]` - List of matching symbols from all files.
 
-#### LspServer.sandbox_symbols
+#### LspServer.sandbox\_symbols
 
 ```python
 @intercept_errors(message_prefix="Failed to get symbols from sandbox: ")
@@ -187,7 +187,7 @@ in the Sandbox.
 **Arguments**:
 
 - `query` _str_ - Search query to match against symbol names.
-
+  
 **Returns**:
 
 - `List[LspSymbol]` - List of matching symbols from all files. Each symbol
@@ -195,7 +195,7 @@ in the Sandbox.
   - name: The symbol's name
   - kind: The symbol's kind (function, class, variable, etc.)
   - location: The location of the symbol in the file
-
+  
 **Example**:
 
 ```python
@@ -219,7 +219,7 @@ Gets completion suggestions at a position in a file.
 - `path` _str_ - Path to the file. Relative paths are resolved based on the project path
   set in the LSP server constructor.
 - `position` _Position_ - Cursor position to get completions for.
-
+  
 **Returns**:
 
 - `CompletionList` - List of completion suggestions. The list includes:
@@ -232,7 +232,7 @@ Gets completion suggestions at a position in a file.
   - sortText: Text used to sort the item in the list
   - filterText: Text used to filter the item
   - insertText: The actual text to insert (if different from label)
-
+  
 **Example**:
 
 ```python
@@ -251,7 +251,10 @@ class LspLanguageId(Enum)
 
 Language IDs for Language Server Protocol (LSP).
 
-**Enum Members**: - `PYTHON` ("python") - `TYPESCRIPT` ("typescript") - `JAVASCRIPT` ("javascript")
+**Enum Members**:
+    - `PYTHON` ("python")
+    - `TYPESCRIPT` ("typescript")
+    - `JAVASCRIPT` ("javascript")
 
 ## Position
 

@@ -1,9 +1,9 @@
 {
   "name": "@daytonaio/sdk",
-  "version": "0.0.0-dev",
+  "version": "0.19.0-alpha.0",
   "description": "TypeScript SDK for Daytona",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daytonaio/daytona.git"
@@ -31,6 +31,8 @@
     "@babel/preset-typescript": "^7.22.0",
     "@types/jest": "^29.5.0",
     "@types/node": "^22.10.0",
+    "@types/shell-quote": "^1.7.5",
+    "@types/tar": "^6.1.13",
     "jest": "^29.5.0",
     "ts-jest": "^29.1.0",
     "typedoc": "~0.27.7",
@@ -39,9 +41,17 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.445.0",
+    "@aws-sdk/lib-storage": "^3.798.0",
+    "@daytonaio/api-client": "^0.19.0-alpha.3",
     "@dotenvx/dotenvx": "^1.25.1",
+    "@iarna/toml": "^2.2.5",
     "axios": "^1.6.1",
+    "fast-glob": "^3.3.0",
     "form-data": "^4.0.0",
+    "shell-quote": "^1.8.2",
+    "tar": "^6.2.0",
+    "untildify": "^5.0.0",
     "uuid": "^11.0.3"
   }
 }

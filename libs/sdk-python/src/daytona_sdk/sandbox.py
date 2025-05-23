@@ -82,7 +82,7 @@ class SandboxInfo(ApiSandboxInfo):
 
     Attributes:
         id (str): Unique identifier for the Sandbox.
-        image (str): Docker image used for the Sandbox.
+        image (Optional[str]): Docker image used for the Sandbox.
         user (str): OS user running in the Sandbox.
         env (Dict[str, str]): Environment variables set in the Sandbox.
         labels (Dict[str, str]): Custom labels attached to the Sandbox.
@@ -117,7 +117,7 @@ class SandboxInfo(ApiSandboxInfo):
             deprecated="The `name` field is deprecated.",
         ),
     ]
-    image: str
+    image: Optional[str]
     user: str
     env: Dict[str, str]
     labels: Dict[str, str]
@@ -375,7 +375,7 @@ class Sandbox:
         Raises:
             DaytonaError: If timeout is negative; If Sandbox fails to start or times out
         """
-        state = None
+        state = self.info().state
         while state != "started":
             response = self.sandbox_api.get_workspace(self.id)
             state = response.state
@@ -426,7 +426,7 @@ class Sandbox:
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
-        state = None
+        state = self.info().state
         while state != "stopped":
             try:
                 response = self.sandbox_api.get_workspace(self.id)
