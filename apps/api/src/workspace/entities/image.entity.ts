@@ -15,7 +15,7 @@ import {
   Unique,
   UpdateDateColumn,
 } from 'typeorm'
-import { ImageNode } from './image-node.entity'
+import { ImageRunner } from './image-runner.entity'
 import { ImageState } from '../enums/image-state.enum'
 import { BuildInfo } from './build-info.entity'
 
@@ -57,8 +57,8 @@ export class Image {
   @Column({ type: 'float', nullable: true })
   size?: number
 
-  @OneToMany(() => ImageNode, (node) => node.imageRef)
-  nodes: ImageNode[]
+  @OneToMany(() => ImageRunner, (runner) => runner.imageRef)
+  runners: ImageRunner[]
 
   @Column({ array: true, type: 'text', nullable: true })
   entrypoint?: string[]
@@ -80,5 +80,5 @@ export class Image {
   buildInfo?: BuildInfo
 
   @Column({ nullable: true })
-  buildNodeId?: string
+  buildRunnerId?: string
 }

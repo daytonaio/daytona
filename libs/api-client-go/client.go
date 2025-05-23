@@ -55,13 +55,13 @@ type APIClient struct {
 
 	ImagesAPI ImagesAPI
 
-	NodesAPI NodesAPI
-
 	ObjectStorageAPI ObjectStorageAPI
 
 	OrganizationsAPI OrganizationsAPI
 
 	PreviewAPI PreviewAPI
+
+	RunnersAPI RunnersAPI
 
 	ToolboxAPI ToolboxAPI
 
@@ -91,10 +91,10 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ApiKeysAPI = (*ApiKeysAPIService)(&c.common)
 	c.DockerRegistryAPI = (*DockerRegistryAPIService)(&c.common)
 	c.ImagesAPI = (*ImagesAPIService)(&c.common)
-	c.NodesAPI = (*NodesAPIService)(&c.common)
 	c.ObjectStorageAPI = (*ObjectStorageAPIService)(&c.common)
 	c.OrganizationsAPI = (*OrganizationsAPIService)(&c.common)
 	c.PreviewAPI = (*PreviewAPIService)(&c.common)
+	c.RunnersAPI = (*RunnersAPIService)(&c.common)
 	c.ToolboxAPI = (*ToolboxAPIService)(&c.common)
 	c.UsersAPI = (*UsersAPIService)(&c.common)
 	c.VolumesAPI = (*VolumesAPIService)(&c.common)

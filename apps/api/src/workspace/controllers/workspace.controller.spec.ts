@@ -13,7 +13,7 @@ import { User } from '../../user/user.entity'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 
 describe('WorkspaceController', () => {
   let workspaceController: WorkspaceController
@@ -56,7 +56,7 @@ describe('WorkspaceController', () => {
           desiredState: WorkspaceDesiredState.STARTED,
           state: WorkspaceState.UNKNOWN,
           class: WorkspaceClass.SMALL,
-          region: NodeRegion.US,
+          region: RunnerRegion.US,
         },
       ]
       jest.spyOn(workspaceService, 'findAll').mockImplementation(async () => result)

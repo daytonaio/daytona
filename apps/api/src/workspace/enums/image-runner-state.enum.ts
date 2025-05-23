@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export enum ImageNodeState {
+export enum ImageRunnerState {
   PULLING_IMAGE = 'pulling_image',
   BUILDING_IMAGE = 'building_image',
   READY = 'ready',

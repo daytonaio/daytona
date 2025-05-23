@@ -18,27 +18,49 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
-
-class LspServerRequest(BaseModel):
+class CreateRunner(BaseModel):
     """
-    LspServerRequest
-    """  # noqa: E501
-
-    language_id: StrictStr = Field(description="Language identifier", alias="languageId")
-    path_to_project: StrictStr = Field(description="Path to the project", alias="pathToProject")
+    CreateRunner
+    """ # noqa: E501
+    domain: StrictStr
+    api_url: StrictStr = Field(alias="apiUrl")
+    api_key: StrictStr = Field(alias="apiKey")
+    cpu: Union[StrictFloat, StrictInt]
+    memory: Union[StrictFloat, StrictInt]
+    disk: Union[StrictFloat, StrictInt]
+    gpu: Union[StrictFloat, StrictInt]
+    gpu_type: StrictStr = Field(alias="gpuType")
+    var_class: StrictStr = Field(alias="class")
+    capacity: Union[StrictFloat, StrictInt]
+    region: StrictStr
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["languageId", "pathToProject"]
+    __properties: ClassVar[List[str]] = ["domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "capacity", "region"]
+
+    @field_validator('var_class')
+    def var_class_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['small', 'medium', 'large']):
+            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
+        return value
+
+    @field_validator('region')
+    def region_validate_enum(cls, value):
+        """Validates the enum"""
+        if value not in set(['eu', 'us', 'asia']):
+            raise ValueError("must be one of enum values ('eu', 'us', 'asia')")
+        return value
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -51,7 +73,7 @@ class LspServerRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of LspServerRequest from a JSON string"""
+        """Create an instance of CreateRunner from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -65,11 +87,9 @@ class LspServerRequest(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set(
-            [
-                "additional_properties",
-            ]
-        )
+        excluded_fields: Set[str] = set([
+            "additional_properties",
+        ])
 
         _dict = self.model_dump(
             by_alias=True,
@@ -85,17 +105,31 @@ class LspServerRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of LspServerRequest from a dict"""
+        """Create an instance of CreateRunner from a dict"""
         if obj is None:
             return None
 
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({"languageId": obj.get("languageId"), "pathToProject": obj.get("pathToProject")})
+        _obj = cls.model_validate({
+            "domain": obj.get("domain"),
+            "apiUrl": obj.get("apiUrl"),
+            "apiKey": obj.get("apiKey"),
+            "cpu": obj.get("cpu"),
+            "memory": obj.get("memory"),
+            "disk": obj.get("disk"),
+            "gpu": obj.get("gpu"),
+            "gpuType": obj.get("gpuType"),
+            "class": obj.get("class"),
+            "capacity": obj.get("capacity"),
+            "region": obj.get("region")
+        })
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

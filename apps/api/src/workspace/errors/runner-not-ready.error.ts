@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export class NodeNotReadyError extends Error {
+export class RunnerNotReadyError extends Error {
   constructor(message: string) {
     super(message)
-    this.name = 'NodeNotReadyError'
+    this.name = 'RunnerNotReadyError'
   }
 }

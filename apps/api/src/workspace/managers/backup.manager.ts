@@ -9,9 +9,9 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, Not, Repository } from 'typeorm'
 import { Workspace } from '../entities/workspace.entity'
 import { WorkspaceState } from '../enums/workspace-state.enum'
-import { NodeApiFactory } from '../runner-api/runnerApi'
-import { NodeService } from '../services/node.service'
-import { NodeState } from '../enums/node-state.enum'
+import { RunnerApiFactory } from '../runner-api/runnerApi'
+import { RunnerService } from '../services/runner.service'
+import { RunnerState } from '../enums/runner-state.enum'
 import { ResourceNotFoundError } from '../../exceptions/not-found.exception'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
@@ -35,8 +35,8 @@ export class BackupManager {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    private readonly nodeService: NodeService,
-    private readonly nodeApiFactory: NodeApiFactory,
+    private readonly runnerService: RunnerService,
+    private readonly runnerApiFactory: RunnerApiFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
@@ -51,16 +51,16 @@ export class BackupManager {
   //  todo: make frequency configurable or more efficient
   @Cron(CronExpression.EVERY_5_MINUTES, { name: 'ad-hoc-backup-check' })
   async adHocBackupCheck(): Promise<void> {
-    // Get all ready nodes
-    const allNodes = await this.nodeService.findAll()
-    const readyNodes = allNodes.filter((node) => node.state === NodeState.READY)
+    // Get all ready runners
+    const allRunners = await this.runnerService.findAll()
+    const readyRunners = allRunners.filter((runner) => runner.state === RunnerState.READY)
 
-    // Process all nodes in parallel
+    // Process all runners in parallel
     await Promise.all(
-      readyNodes.map(async (node) => {
+      readyRunners.map(async (runner) => {
         const workspaces = await this.workspaceRepository.find({
           where: {
-            nodeId: node.id,
+            runnerId: runner.id,
             organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
             state: In([WorkspaceState.STARTED, WorkspaceState.ARCHIVING]),
             backupState: In([BackupState.NONE, BackupState.COMPLETED]),
@@ -126,8 +126,8 @@ export class BackupManager {
           return
         }
 
-        const node = await this.nodeService.findOne(w.nodeId)
-        if (node.state !== NodeState.READY) {
+        const runner = await this.runnerService.findOne(w.runnerId)
+        if (runner.state !== RunnerState.READY) {
           return
         }
 
@@ -179,15 +179,15 @@ export class BackupManager {
       return
     }
 
-    // Allow backups for STARTED workspaces or STOPPED workspaces with nodeId
+    // Allow backups for STARTED workspaces or STOPPED workspaces with runnerId
     if (
       !(
         workspace.state === WorkspaceState.STARTED ||
         workspace.state === WorkspaceState.ARCHIVING ||
-        (workspace.state === WorkspaceState.STOPPED && workspace.nodeId)
+        (workspace.state === WorkspaceState.STOPPED && workspace.runnerId)
       )
     ) {
-      throw new BadRequestError('Workspace must be started or stopped with assigned node to create a backup')
+      throw new BadRequestError('Workspace must be started or stopped with assigned runner to create a backup')
     }
 
     if (workspace.backupState === BackupState.IN_PROGRESS || workspace.backupState === BackupState.PENDING) {
@@ -233,11 +233,11 @@ export class BackupManager {
 
   private async checkBackupProgress(workspace: Workspace): Promise<void> {
     try {
-      const node = await this.nodeService.findOne(workspace.nodeId)
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
-      // Get workspace info from node
-      const workspaceInfo = await nodeWorkspaceApi.info(workspace.id)
+      // Get workspace info from runner
+      const workspaceInfo = await runnerWorkspaceApi.info(workspace.id)
 
       switch (workspaceInfo.data.backupState?.toUpperCase()) {
         case 'COMPLETED': {
@@ -285,18 +285,18 @@ export class BackupManager {
         throw new Error('Registry not found')
       }
 
-      const node = await this.nodeService.findOne(workspace.nodeId)
-      const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      const runnerWorkspaceApi = this.runnerApiFactory.createWorkspaceApi(runner)
 
-      //  check if backup is already in progress on the node
-      const nodeWorkspaceResponse = await nodeWorkspaceApi.info(workspace.id)
-      const nodeWorkspace = nodeWorkspaceResponse.data
-      if (nodeWorkspace.backupState?.toUpperCase() === 'IN_PROGRESS') {
+      //  check if backup is already in progress on the runner
+      const runnerWorkspaceResponse = await runnerWorkspaceApi.info(workspace.id)
+      const runnerWorkspace = runnerWorkspaceResponse.data
+      if (runnerWorkspace.backupState?.toUpperCase() === 'IN_PROGRESS') {
         return
       }
 
-      // Initiate backup on node
-      await nodeWorkspaceApi.createBackup(workspace.id, {
+      // Initiate backup on runner
+      await runnerWorkspaceApi.createBackup(workspace.id, {
         registry: {
           url: registry.url,
           username: registry.username,
@@ -335,7 +335,7 @@ export class BackupManager {
 
     await Promise.all(
       workspaces
-        .filter((workspace) => workspace.nodeId !== null)
+        .filter((workspace) => workspace.runnerId !== null)
         .map(async (workspace) => {
           const lockKey = `workspace-backup-${workspace.id}`
           const hasLock = await this.redisLockProvider.lock(lockKey, 30)
@@ -343,8 +343,8 @@ export class BackupManager {
             return
           }
 
-          const node = await this.nodeService.findOne(workspace.nodeId)
-          if (node.state !== NodeState.READY) {
+          const runner = await this.runnerService.findOne(workspace.runnerId)
+          if (runner.state !== RunnerState.READY) {
             return
           }
 

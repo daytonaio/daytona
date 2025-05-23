@@ -21,10 +21,10 @@ __version__ = "0.0.0-dev"
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client_async.api.images_api import ImagesApi
-from daytona_api_client_async.api.nodes_api import NodesApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
 from daytona_api_client_async.api.preview_api import PreviewApi
+from daytona_api_client_async.api.runners_api import RunnersApi
 from daytona_api_client_async.api.toolbox_api import ToolboxApi
 from daytona_api_client_async.api.users_api import UsersApi
 from daytona_api_client_async.api.volumes_api import VolumesApi
@@ -55,11 +55,11 @@ from daytona_api_client_async.models.create_build_info import CreateBuildInfo
 from daytona_api_client_async.models.create_docker_registry import CreateDockerRegistry
 from daytona_api_client_async.models.create_image import CreateImage
 from daytona_api_client_async.models.create_linked_account import CreateLinkedAccount
-from daytona_api_client_async.models.create_node import CreateNode
 from daytona_api_client_async.models.create_organization import CreateOrganization
 from daytona_api_client_async.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client_async.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client_async.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client_async.models.create_runner import CreateRunner
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume

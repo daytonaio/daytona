@@ -7,7 +7,7 @@ import { Injectable, NotFoundException, HttpException, BadRequestException, Logg
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { Workspace } from '../entities/workspace.entity'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import axios from 'axios'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 
@@ -18,12 +18,12 @@ export class ToolboxService {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(Node)
-    private readonly nodeRepository: Repository<Node>,
+    @InjectRepository(Runner)
+    private readonly runnerRepository: Repository<Runner>,
   ) {}
 
-  async forwardRequestToNode(workspaceId: string, method: string, path: string, data?: any): Promise<any> {
-    const node = await this.getNode(workspaceId)
+  async forwardRequestToRunner(workspaceId: string, method: string, path: string, data?: any): Promise<any> {
+    const runner = await this.getRunner(workspaceId)
 
     const maxRetries = 5
     let attempt = 1
@@ -31,7 +31,7 @@ export class ToolboxService {
     while (attempt <= maxRetries) {
       try {
         const headers: any = {
-          Authorization: `Bearer ${node.apiKey}`,
+          Authorization: `Bearer ${runner.apiKey}`,
         }
 
         // Only set Content-Type for requests with body data
@@ -41,8 +41,8 @@ export class ToolboxService {
 
         const requestConfig: any = {
           method,
-          // TODO: remove /main from the path after the node-agent refactor
-          url: `${node.apiUrl}/workspaces/${workspaceId}/main${path}`,
+          // TODO: remove /main from the path after the runner-agent refactor
+          url: `${runner.apiUrl}/workspaces/${workspaceId}/main${path}`,
           headers,
           maxBodyLength: 209715200, // 200MB in bytes
           maxContentLength: 209715200, // 200MB in bytes
@@ -59,7 +59,7 @@ export class ToolboxService {
       } catch (error) {
         if (error.message.includes('ECONNREFUSED')) {
           if (attempt === maxRetries) {
-            throw new HttpException('Failed to connect to node after multiple attempts', 500)
+            throw new HttpException('Failed to connect to runner after multiple attempts', 500)
           }
           // Wait for attempt * 1000ms (1s, 2s, 3s)
           await new Promise((resolve) => setTimeout(resolve, attempt * 1000))
@@ -72,12 +72,12 @@ export class ToolboxService {
         }
 
         // For other types of errors, throw a generic 500 error
-        throw new HttpException(`Error forwarding request to node: ${error.message}`, 500)
+        throw new HttpException(`Error forwarding request to runner: ${error.message}`, 500)
       }
     }
   }
 
-  public async getNode(workspaceId: string): Promise<Node> {
+  public async getRunner(workspaceId: string): Promise<Runner> {
     try {
       const workspace = await this.workspaceRepository.findOne({
         where: { id: workspaceId },
@@ -87,19 +87,19 @@ export class ToolboxService {
         throw new NotFoundException('Workspace not found')
       }
 
-      const node = await this.nodeRepository.findOne({
-        where: { id: workspace.nodeId },
+      const runner = await this.runnerRepository.findOne({
+        where: { id: workspace.runnerId },
       })
 
-      if (!node) {
-        throw new NotFoundException('Node not found for the workspace')
+      if (!runner) {
+        throw new NotFoundException('Runner not found for the workspace')
       }
 
       if (workspace.state !== WorkspaceState.STARTED) {
         throw new BadRequestException('Workspace is not running')
       }
 
-      return node
+      return runner
     } finally {
       await this.workspaceRepository.update(workspaceId, {
         lastActivityAt: new Date(),

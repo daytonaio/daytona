@@ -6,7 +6,8 @@ from daytona_api_client import WorkspaceVolume as ApiVolumeMount
 from daytona_api_client_async import WorkspaceVolume as AsyncApiVolumeMount
 
 
-class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount): ...
+class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount):
+    ...
 
 
 class Volume(VolumeDto):

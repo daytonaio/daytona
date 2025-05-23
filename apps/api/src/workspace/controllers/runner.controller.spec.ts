@@ -4,30 +4,30 @@
  */
 
 import { Test } from '@nestjs/testing'
-import { NodeController } from './node.controller'
-import { NodeService } from '../services/node.service'
-import { Node } from '../entities/node.entity'
+import { RunnerController } from './runner.controller'
+import { RunnerService } from '../services/runner.service'
+import { Runner } from '../entities/runner.entity'
 import { getRepositoryToken } from '@nestjs/typeorm'
 import { UserService } from '../../user/user.service'
 import { User } from '../../user/user.entity'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 
-describe('NodeController', () => {
-  let nodeController: NodeController
-  let nodeService: NodeService
+describe('RunnerController', () => {
+  let runnerController: RunnerController
+  let runnerService: RunnerService
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [NodeController],
+      controllers: [RunnerController],
       providers: [
-        NodeService,
+        RunnerService,
         {
-          provide: getRepositoryToken(Node),
+          provide: getRepositoryToken(Runner),
           useValue: {
             find: jest.fn().mockResolvedValue([]),
-            findOne: jest.fn().mockResolvedValue(new Node()),
-            save: jest.fn().mockResolvedValue(new Node()),
+            findOne: jest.fn().mockResolvedValue(new Runner()),
+            save: jest.fn().mockResolvedValue(new Runner()),
             delete: jest.fn().mockResolvedValue({ affected: 1 }),
           },
         },
@@ -40,17 +40,17 @@ describe('NodeController', () => {
       ],
     }).compile()
 
-    nodeService = moduleRef.get<NodeService>(NodeService)
-    nodeController = moduleRef.get<NodeController>(NodeController)
+    runnerService = moduleRef.get<RunnerService>(RunnerService)
+    runnerController = moduleRef.get<RunnerController>(RunnerController)
   })
 
   describe('findAll', () => {
-    it('should return an array of nodes', async () => {
-      const result: Node[] = [
+    it('should return an array of runners', async () => {
+      const result: Runner[] = [
         {
           id: 'id1',
           class: WorkspaceClass.SMALL,
-          region: NodeRegion.US,
+          region: RunnerRegion.US,
           cpu: 1,
           disk: 1,
           memory: 1,
@@ -61,9 +61,9 @@ describe('NodeController', () => {
           limit: 1,
         },
       ]
-      jest.spyOn(nodeService, 'findAll').mockImplementation(async () => result)
+      jest.spyOn(runnerService, 'findAll').mockImplementation(async () => result)
 
-      expect(await nodeController.findAll()).toBe(result)
+      expect(await runnerController.findAll()).toBe(result)
     })
   })
 })

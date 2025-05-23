@@ -10,10 +10,10 @@ import { WorkspaceService } from './services/workspace.service'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { Workspace } from './entities/workspace.entity'
 import { UserModule } from '../user/user.module'
-import { NodeService } from './services/node.service'
-import { Node } from './entities/node.entity'
-import { NodeController } from './controllers/node.controller'
-import { NodeApiFactory } from './runner-api/runnerApi'
+import { RunnerService } from './services/runner.service'
+import { Runner } from './entities/runner.entity'
+import { RunnerController } from './controllers/runner.controller'
+import { RunnerApiFactory } from './runner-api/runnerApi'
 import { AuthModule } from '../auth/auth.module'
 import { ToolboxService } from './services/toolbox.service'
 import { DockerRegistryModule } from '../docker-registry/docker-registry.module'
@@ -24,7 +24,7 @@ import { ImageController } from './controllers/image.controller'
 import { ImageService } from './services/image.service'
 import { ImageManager } from './managers/image.manager'
 import { DockerProvider } from './docker/docker-provider'
-import { ImageNode } from './entities/image-node.entity'
+import { ImageRunner } from './entities/image-runner.entity'
 import { DockerRegistry } from '../docker-registry/entities/docker-registry.entity'
 import { WorkspaceSubscriber } from './subscribers/workspace.subscriber'
 import { RedisLockProvider } from './common/redis-lock.provider'
@@ -47,11 +47,11 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     AuthModule,
     DockerRegistryModule,
     OrganizationModule,
-    TypeOrmModule.forFeature([Workspace, Node, Image, BuildInfo, ImageNode, DockerRegistry, WarmPool, Volume]),
+    TypeOrmModule.forFeature([Workspace, Runner, Image, BuildInfo, ImageRunner, DockerRegistry, WarmPool, Volume]),
   ],
   controllers: [
     WorkspaceController,
-    NodeController,
+    RunnerController,
     ToolboxController,
     ImageController,
     PreviewController,
@@ -62,8 +62,8 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     WorkspaceManager,
     BackupManager,
     WorkspaceWarmPoolService,
-    NodeService,
-    NodeApiFactory,
+    RunnerService,
+    RunnerApiFactory,
     ToolboxService,
     ImageService,
     ImageManager,
@@ -75,7 +75,7 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     VolumeManager,
     VolumeSubscriber,
   ],
-  exports: [WorkspaceService, NodeService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
+  exports: [WorkspaceService, RunnerService, RedisLockProvider, ImageService, VolumeService, VolumeManager],
 })
 export class WorkspaceModule {
   configure(consumer: MiddlewareConsumer) {

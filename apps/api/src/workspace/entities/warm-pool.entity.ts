@@ -4,7 +4,7 @@
  */
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 
 @Entity()
@@ -20,10 +20,10 @@ export class WarmPool {
 
   @Column({
     type: 'enum',
-    enum: NodeRegion,
-    default: NodeRegion.EU,
+    enum: RunnerRegion,
+    default: RunnerRegion.EU,
   })
-  target: NodeRegion
+  target: RunnerRegion
 
   @Column()
   cpu: number

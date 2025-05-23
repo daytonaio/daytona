@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export enum NodeRegion {
+export enum RunnerRegion {
   EU = 'eu',
   US = 'us',
   ASIA = 'asia',
