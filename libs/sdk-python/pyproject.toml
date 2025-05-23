@@ -17,7 +17,6 @@ dependencies = [
     "pydantic>=2.4.2,<3.0.0",
     "python-dateutil>=2.8.2,<3.0.0",
     "urllib3>=2.0.7,<3.0.0",
-    "daytona_api_client>=0.19.1,<1.0.0",
     "Deprecated>=1.2.18,<2.0.0",
     "httpx>=0.28.0,<0.29.0",
     "requests_toolbelt>=1.0.0,<1.1.0"

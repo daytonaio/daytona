@@ -6,7 +6,7 @@
   "types": "dist/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/daytonaio/sdk.git"
+    "url": "git+https://github.com/daytonaio/daytona.git"
   },
   "author": "Daytona Platforms Inc.",
   "license": "AGPL-3.0",
@@ -39,7 +39,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@daytonaio/api-client": "^0.19.1",
     "@dotenvx/dotenvx": "^1.25.1",
     "axios": "^1.6.1",
     "form-data": "^4.0.0",
