@@ -18,7 +18,7 @@ export enum RoutePath {
   // Dashboard sub-routes
   KEYS = '/dashboard/keys',
   SANDBOXES = '/dashboard/sandboxes',
-  IMAGES = '/dashboard/images',
+  SNAPSHOTS = '/dashboard/snapshots',
   REGISTRIES = '/dashboard/registries',
   VOLUMES = '/dashboard/volumes',
   LIMITS = '/dashboard/limits',

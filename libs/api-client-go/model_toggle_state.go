@@ -22,7 +22,7 @@ var _ MappedNullable = &ToggleState{}
 
 // ToggleState struct for ToggleState
 type ToggleState struct {
-	// Enable or disable the image/tag
+	// Enable or disable the snapshot/tag
 	Enabled bool `json:"enabled"`
 }
 

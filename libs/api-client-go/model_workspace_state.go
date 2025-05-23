@@ -21,21 +21,21 @@ type WorkspaceState string
 
 // List of WorkspaceState
 const (
-	WORKSPACESTATE_CREATING       WorkspaceState = "creating"
-	WORKSPACESTATE_RESTORING      WorkspaceState = "restoring"
-	WORKSPACESTATE_DESTROYED      WorkspaceState = "destroyed"
-	WORKSPACESTATE_DESTROYING     WorkspaceState = "destroying"
-	WORKSPACESTATE_STARTED        WorkspaceState = "started"
-	WORKSPACESTATE_STOPPED        WorkspaceState = "stopped"
-	WORKSPACESTATE_STARTING       WorkspaceState = "starting"
-	WORKSPACESTATE_STOPPING       WorkspaceState = "stopping"
-	WORKSPACESTATE_ERROR          WorkspaceState = "error"
-	WORKSPACESTATE_PENDING_BUILD  WorkspaceState = "pending_build"
-	WORKSPACESTATE_BUILDING_IMAGE WorkspaceState = "building_image"
-	WORKSPACESTATE_UNKNOWN        WorkspaceState = "unknown"
-	WORKSPACESTATE_PULLING_IMAGE  WorkspaceState = "pulling_image"
-	WORKSPACESTATE_ARCHIVING      WorkspaceState = "archiving"
-	WORKSPACESTATE_ARCHIVED       WorkspaceState = "archived"
+	WORKSPACESTATE_CREATING          WorkspaceState = "creating"
+	WORKSPACESTATE_RESTORING         WorkspaceState = "restoring"
+	WORKSPACESTATE_DESTROYED         WorkspaceState = "destroyed"
+	WORKSPACESTATE_DESTROYING        WorkspaceState = "destroying"
+	WORKSPACESTATE_STARTED           WorkspaceState = "started"
+	WORKSPACESTATE_STOPPED           WorkspaceState = "stopped"
+	WORKSPACESTATE_STARTING          WorkspaceState = "starting"
+	WORKSPACESTATE_STOPPING          WorkspaceState = "stopping"
+	WORKSPACESTATE_ERROR             WorkspaceState = "error"
+	WORKSPACESTATE_PENDING_BUILD     WorkspaceState = "pending_build"
+	WORKSPACESTATE_BUILDING_SNAPSHOT WorkspaceState = "building_snapshot"
+	WORKSPACESTATE_UNKNOWN           WorkspaceState = "unknown"
+	WORKSPACESTATE_PULLING_SNAPSHOT  WorkspaceState = "pulling_snapshot"
+	WORKSPACESTATE_ARCHIVING         WorkspaceState = "archiving"
+	WORKSPACESTATE_ARCHIVED          WorkspaceState = "archived"
 )
 
 // All allowed values of WorkspaceState enum
@@ -50,9 +50,9 @@ var AllowedWorkspaceStateEnumValues = []WorkspaceState{
 	"stopping",
 	"error",
 	"pending_build",
-	"building_image",
+	"building_snapshot",
 	"unknown",
-	"pulling_image",
+	"pulling_snapshot",
 	"archiving",
 	"archived",
 }

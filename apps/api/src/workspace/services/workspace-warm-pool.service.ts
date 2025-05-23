@@ -15,8 +15,8 @@ import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceOrganizationUpdatedEvent } from '../events/workspace-organization-updated.event'
 import { ConfigService } from '@nestjs/config'
-import { Image } from '../entities/image.entity'
-import { ImageState } from '../enums/image-state.enum'
+import { Snapshot } from '../entities/snapshot.entity'
+import { SnapshotState } from '../enums/snapshot-state.enum'
 import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
@@ -29,7 +29,7 @@ import { Redis } from 'ioredis'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 
 export type FetchWarmPoolWorkspaceParams = {
-  image: string
+  snapshot: string
   target: RunnerRegion
   class: WorkspaceClass
   cpu: number
@@ -50,8 +50,8 @@ export class WorkspaceWarmPoolService {
     private readonly warmPoolRepository: Repository<WarmPool>,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(Image)
-    private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     private readonly redisLockProvider: RedisLockProvider,
@@ -67,22 +67,24 @@ export class WorkspaceWarmPoolService {
   }
 
   async fetchWarmPoolWorkspace(params: FetchWarmPoolWorkspaceParams): Promise<Workspace | null> {
-    //  validate image
-    const workspaceImage = params.image || this.configService.get<string>('DEFAULT_IMAGE')
-    const image = await this.imageRepository.findOne({
+    //  validate snapshot
+    const workspaceSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
+    const snapshot = await this.snapshotRepository.findOne({
       where: [
-        { organizationId: params.organizationId, name: workspaceImage, state: ImageState.ACTIVE },
-        { general: true, name: workspaceImage, state: ImageState.ACTIVE },
+        { organizationId: params.organizationId, name: workspaceSnapshot, state: SnapshotState.ACTIVE },
+        { general: true, name: workspaceSnapshot, state: SnapshotState.ACTIVE },
       ],
     })
-    if (!image) {
-      throw new BadRequestError(`Image ${workspaceImage} not found. Did you add it through the Daytona Dashboard?`)
+    if (!snapshot) {
+      throw new BadRequestError(
+        `Snapshot ${workspaceSnapshot} not found. Did you add it through the Daytona Dashboard?`,
+      )
     }
 
     //  check if workspace is warm pool
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
-        image: image.name,
+        snapshot: snapshot.name,
         target: params.target,
         class: params.class,
         cpu: params.cpu,
@@ -108,7 +110,7 @@ export class WorkspaceWarmPoolService {
           cpu: warmPoolItem.cpu,
           mem: warmPoolItem.mem,
           disk: warmPoolItem.disk,
-          image: workspaceImage,
+          snapshot: workspaceSnapshot,
           osUser: warmPoolItem.osUser,
           env: warmPoolItem.env,
           organizationId: WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION,
@@ -150,7 +152,7 @@ export class WorkspaceWarmPoolService {
 
         const workspaceCount = await this.workspaceRepository.count({
           where: {
-            image: warmPoolItem.image,
+            snapshot: warmPoolItem.snapshot,
             organizationId: WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION,
             class: warmPoolItem.class,
             osUser: warmPoolItem.osUser,
@@ -192,7 +194,7 @@ export class WorkspaceWarmPoolService {
     }
     const warmPoolItem = await this.warmPoolRepository.findOne({
       where: {
-        image: event.workspace.image,
+        snapshot: event.workspace.snapshot,
         class: event.workspace.class,
         cpu: event.workspace.cpu,
         mem: event.workspace.mem,
@@ -210,7 +212,7 @@ export class WorkspaceWarmPoolService {
 
     const workspaceCount = await this.workspaceRepository.count({
       where: {
-        image: warmPoolItem.image,
+        snapshot: warmPoolItem.snapshot,
         organizationId: WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION,
         class: warmPoolItem.class,
         osUser: warmPoolItem.osUser,

@@ -35,8 +35,8 @@ class UpdateOrganizationQuota(BaseModel):
     max_cpu_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxCpuPerWorkspace")
     max_memory_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxMemoryPerWorkspace")
     max_disk_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxDiskPerWorkspace")
-    image_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="imageQuota")
-    max_image_size: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxImageSize")
+    snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="snapshotQuota")
+    max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxSnapshotSize")
     volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
@@ -46,8 +46,8 @@ class UpdateOrganizationQuota(BaseModel):
         "maxCpuPerWorkspace",
         "maxMemoryPerWorkspace",
         "maxDiskPerWorkspace",
-        "imageQuota",
-        "maxImageSize",
+        "snapshotQuota",
+        "maxSnapshotSize",
         "volumeQuota",
     ]
 
@@ -128,15 +128,15 @@ class UpdateOrganizationQuota(BaseModel):
         if self.max_disk_per_workspace is None and "max_disk_per_workspace" in self.model_fields_set:
             _dict["maxDiskPerWorkspace"] = None
 
-        # set to None if image_quota (nullable) is None
+        # set to None if snapshot_quota (nullable) is None
         # and model_fields_set contains the field
-        if self.image_quota is None and "image_quota" in self.model_fields_set:
-            _dict["imageQuota"] = None
+        if self.snapshot_quota is None and "snapshot_quota" in self.model_fields_set:
+            _dict["snapshotQuota"] = None
 
-        # set to None if max_image_size (nullable) is None
+        # set to None if max_snapshot_size (nullable) is None
         # and model_fields_set contains the field
-        if self.max_image_size is None and "max_image_size" in self.model_fields_set:
-            _dict["maxImageSize"] = None
+        if self.max_snapshot_size is None and "max_snapshot_size" in self.model_fields_set:
+            _dict["maxSnapshotSize"] = None
 
         # set to None if volume_quota (nullable) is None
         # and model_fields_set contains the field
@@ -162,8 +162,8 @@ class UpdateOrganizationQuota(BaseModel):
                 "maxCpuPerWorkspace": obj.get("maxCpuPerWorkspace"),
                 "maxMemoryPerWorkspace": obj.get("maxMemoryPerWorkspace"),
                 "maxDiskPerWorkspace": obj.get("maxDiskPerWorkspace"),
-                "imageQuota": obj.get("imageQuota"),
-                "maxImageSize": obj.get("maxImageSize"),
+                "snapshotQuota": obj.get("snapshotQuota"),
+                "maxSnapshotSize": obj.get("maxSnapshotSize"),
                 "volumeQuota": obj.get("volumeQuota"),
             }
         )

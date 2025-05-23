@@ -888,7 +888,7 @@ class DockerRegistryApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RegistryPushAccessDto:
-        """Get temporary registry access for pushing images
+        """Get temporary registry access for pushing snapshots
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -954,7 +954,7 @@ class DockerRegistryApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[RegistryPushAccessDto]:
-        """Get temporary registry access for pushing images
+        """Get temporary registry access for pushing snapshots
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1020,7 +1020,7 @@ class DockerRegistryApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get temporary registry access for pushing images
+        """Get temporary registry access for pushing snapshots
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID

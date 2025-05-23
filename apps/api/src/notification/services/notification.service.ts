@@ -11,12 +11,12 @@ import { WorkspaceDto } from '../../workspace/dto/workspace.dto'
 import { WorkspaceCreatedEvent } from '../../workspace/events/workspace-create.event'
 import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
 import { RunnerService } from '../../workspace/services/runner.service'
-import { ImageCreatedEvent } from '../../workspace/events/image-created.event'
-import { ImageEvents } from '../../workspace/constants/image-events'
-import { ImageDto } from '../../workspace/dto/image.dto'
-import { ImageStateUpdatedEvent } from '../../workspace/events/image-state-updated.event'
-import { ImageRemovedEvent } from '../../workspace/events/image-removed.event'
-import { ImageEnabledToggledEvent } from '../../workspace/events/image-enabled-toggled.event'
+import { SnapshotCreatedEvent } from '../../workspace/events/snapshot-created.event'
+import { SnapshotEvents } from '../../workspace/constants/snapshot-events'
+import { SnapshotDto } from '../../workspace/dto/snapshot.dto'
+import { SnapshotStateUpdatedEvent } from '../../workspace/events/snapshot-state-updated.event'
+import { SnapshotRemovedEvent } from '../../workspace/events/snapshot-removed.event'
+import { SnapshotEnabledToggledEvent } from '../../workspace/events/snapshot-enabled-toggled.event'
 import { VolumeEvents } from '../../workspace/constants/volume-events'
 import { VolumeCreatedEvent } from '../../workspace/events/volume-created.event'
 import { VolumeDto } from '../../workspace/dto/volume.dto'
@@ -44,28 +44,28 @@ export class NotificationService {
     this.notificationGateway.emitWorkspaceStateUpdated(dto, event.oldState, event.newState)
   }
 
-  @OnEvent(ImageEvents.CREATED)
-  async handleImageCreated(event: ImageCreatedEvent) {
-    const dto = ImageDto.fromImage(event.image)
-    this.notificationGateway.emitImageCreated(dto)
+  @OnEvent(SnapshotEvents.CREATED)
+  async handleSnapshotCreated(event: SnapshotCreatedEvent) {
+    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    this.notificationGateway.emitSnapshotCreated(dto)
   }
 
-  @OnEvent(ImageEvents.STATE_UPDATED)
-  async handleImageStateUpdated(event: ImageStateUpdatedEvent) {
-    const dto = ImageDto.fromImage(event.image)
-    this.notificationGateway.emitImageStateUpdated(dto, event.oldState, event.newState)
+  @OnEvent(SnapshotEvents.STATE_UPDATED)
+  async handleSnapshotStateUpdated(event: SnapshotStateUpdatedEvent) {
+    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    this.notificationGateway.emitSnapshotStateUpdated(dto, event.oldState, event.newState)
   }
 
-  @OnEvent(ImageEvents.ENABLED_TOGGLED)
-  async handleImageEnabledToggled(event: ImageEnabledToggledEvent) {
-    const dto = ImageDto.fromImage(event.image)
-    this.notificationGateway.emitImageEnabledToggled(dto)
+  @OnEvent(SnapshotEvents.ENABLED_TOGGLED)
+  async handleSnapshotEnabledToggled(event: SnapshotEnabledToggledEvent) {
+    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    this.notificationGateway.emitSnapshotEnabledToggled(dto)
   }
 
-  @OnEvent(ImageEvents.REMOVED)
-  async handleImageRemoved(event: ImageRemovedEvent) {
-    const dto = ImageDto.fromImage(event.image)
-    this.notificationGateway.emitImageRemoved(dto)
+  @OnEvent(SnapshotEvents.REMOVED)
+  async handleSnapshotRemoved(event: SnapshotRemovedEvent) {
+    const dto = SnapshotDto.fromSnapshot(event.snapshot)
+    this.notificationGateway.emitSnapshotRemoved(dto)
   }
 
   @OnEvent(VolumeEvents.CREATED)
