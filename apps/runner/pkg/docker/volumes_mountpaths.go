@@ -67,7 +67,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 
 func (d *DockerClient) getRunnerVolumeMountPath(volumeId string) string {
 	volumePath := filepath.Join("/mnt", volumeId)
-	if config.GetNodeEnv() == "development" {
+	if config.GetRunnerEnv() == "development" {
 		volumePath = filepath.Join("/tmp", volumeId)
 	}
 
