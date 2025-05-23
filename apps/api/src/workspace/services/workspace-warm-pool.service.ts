@@ -63,7 +63,7 @@ export class WorkspaceWarmPoolService {
 
   //  on init
   async onApplicationBootstrap() {
-    //  await this.adHocSnapshotCheck()
+    //  await this.adHocBackupCheck()
   }
 
   async fetchWarmPoolWorkspace(params: FetchWarmPoolWorkspaceParams): Promise<Workspace | null> {

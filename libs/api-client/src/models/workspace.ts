@@ -126,17 +126,17 @@ export interface Workspace {
    */
   errorReason?: string
   /**
-   * The state of the snapshot
+   * The state of the backup
    * @type {string}
    * @memberof Workspace
    */
-  snapshotState?: WorkspaceSnapshotStateEnum
+  backupState?: WorkspaceBackupStateEnum
   /**
-   * The creation timestamp of the last snapshot
+   * The creation timestamp of the last backup
    * @type {string}
    * @memberof Workspace
    */
-  snapshotCreatedAt?: string
+  backupCreatedAt?: string
   /**
    * Auto-stop interval in minutes (0 means disabled)
    * @type {number}
@@ -151,7 +151,7 @@ export interface Workspace {
   volumes?: Array<WorkspaceVolume>
 }
 
-export const WorkspaceSnapshotStateEnum = {
+export const WorkspaceBackupStateEnum = {
   NONE: 'None',
   PENDING: 'Pending',
   IN_PROGRESS: 'InProgress',
@@ -159,4 +159,4 @@ export const WorkspaceSnapshotStateEnum = {
   ERROR: 'Error',
 } as const
 
-export type WorkspaceSnapshotStateEnum = (typeof WorkspaceSnapshotStateEnum)[keyof typeof WorkspaceSnapshotStateEnum]
+export type WorkspaceBackupStateEnum = (typeof WorkspaceBackupStateEnum)[keyof typeof WorkspaceBackupStateEnum]

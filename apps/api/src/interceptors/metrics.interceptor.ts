@@ -137,8 +137,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/workspace/:workspaceId/stop':
             this.captureStopWorkspace(props, request.params.workspaceId)
             break
-          case '/api/workspace/:workspaceId/snapshot':
-            this.captureCreateSnapshot(props, request.params.workspaceId)
+          case '/api/workspace/:workspaceId/backup':
+            this.captureCreateBackup(props, request.params.workspaceId)
             break
           case '/api/workspace/:workspaceId/public/:isPublic':
             this.captureUpdatePublicStatus(props, request.params.workspaceId, request.params.isPublic === 'true')
@@ -501,8 +501,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureCreateSnapshot(props: CommonCaptureProps, sandboxId: string) {
-    this.capture('api_sandbox_snapshot_created', props, 'api_sandbox_snapshot_creation_failed', {
+  private captureCreateBackup(props: CommonCaptureProps, sandboxId: string) {
+    this.capture('api_sandbox_backup_created', props, 'api_sandbox_backup_creation_failed', {
       sandbox_id: sandboxId,
     })
   }

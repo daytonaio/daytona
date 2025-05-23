@@ -55,10 +55,10 @@ type Workspace struct {
 	State *WorkspaceState `json:"state,omitempty"`
 	// The error reason of the workspace
 	ErrorReason *string `json:"errorReason,omitempty"`
-	// The state of the snapshot
-	SnapshotState *string `json:"snapshotState,omitempty"`
-	// The creation timestamp of the last snapshot
-	SnapshotCreatedAt *string `json:"snapshotCreatedAt,omitempty"`
+	// The state of the backup
+	BackupState *string `json:"backupState,omitempty"`
+	// The creation timestamp of the last backup
+	BackupCreatedAt *string `json:"backupCreatedAt,omitempty"`
 	// Auto-stop interval in minutes (0 means disabled)
 	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
 	// Array of volumes attached to the workspace
@@ -545,68 +545,68 @@ func (o *Workspace) SetErrorReason(v string) {
 	o.ErrorReason = &v
 }
 
-// GetSnapshotState returns the SnapshotState field value if set, zero value otherwise.
-func (o *Workspace) GetSnapshotState() string {
-	if o == nil || IsNil(o.SnapshotState) {
+// GetBackupState returns the BackupState field value if set, zero value otherwise.
+func (o *Workspace) GetBackupState() string {
+	if o == nil || IsNil(o.BackupState) {
 		var ret string
 		return ret
 	}
-	return *o.SnapshotState
+	return *o.BackupState
 }
 
-// GetSnapshotStateOk returns a tuple with the SnapshotState field value if set, nil otherwise
+// GetBackupStateOk returns a tuple with the BackupState field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetSnapshotStateOk() (*string, bool) {
-	if o == nil || IsNil(o.SnapshotState) {
+func (o *Workspace) GetBackupStateOk() (*string, bool) {
+	if o == nil || IsNil(o.BackupState) {
 		return nil, false
 	}
-	return o.SnapshotState, true
+	return o.BackupState, true
 }
 
-// HasSnapshotState returns a boolean if a field has been set.
-func (o *Workspace) HasSnapshotState() bool {
-	if o != nil && !IsNil(o.SnapshotState) {
+// HasBackupState returns a boolean if a field has been set.
+func (o *Workspace) HasBackupState() bool {
+	if o != nil && !IsNil(o.BackupState) {
 		return true
 	}
 
 	return false
 }
 
-// SetSnapshotState gets a reference to the given string and assigns it to the SnapshotState field.
-func (o *Workspace) SetSnapshotState(v string) {
-	o.SnapshotState = &v
+// SetBackupState gets a reference to the given string and assigns it to the BackupState field.
+func (o *Workspace) SetBackupState(v string) {
+	o.BackupState = &v
 }
 
-// GetSnapshotCreatedAt returns the SnapshotCreatedAt field value if set, zero value otherwise.
-func (o *Workspace) GetSnapshotCreatedAt() string {
-	if o == nil || IsNil(o.SnapshotCreatedAt) {
+// GetBackupCreatedAt returns the BackupCreatedAt field value if set, zero value otherwise.
+func (o *Workspace) GetBackupCreatedAt() string {
+	if o == nil || IsNil(o.BackupCreatedAt) {
 		var ret string
 		return ret
 	}
-	return *o.SnapshotCreatedAt
+	return *o.BackupCreatedAt
 }
 
-// GetSnapshotCreatedAtOk returns a tuple with the SnapshotCreatedAt field value if set, nil otherwise
+// GetBackupCreatedAtOk returns a tuple with the BackupCreatedAt field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetSnapshotCreatedAtOk() (*string, bool) {
-	if o == nil || IsNil(o.SnapshotCreatedAt) {
+func (o *Workspace) GetBackupCreatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.BackupCreatedAt) {
 		return nil, false
 	}
-	return o.SnapshotCreatedAt, true
+	return o.BackupCreatedAt, true
 }
 
-// HasSnapshotCreatedAt returns a boolean if a field has been set.
-func (o *Workspace) HasSnapshotCreatedAt() bool {
-	if o != nil && !IsNil(o.SnapshotCreatedAt) {
+// HasBackupCreatedAt returns a boolean if a field has been set.
+func (o *Workspace) HasBackupCreatedAt() bool {
+	if o != nil && !IsNil(o.BackupCreatedAt) {
 		return true
 	}
 
 	return false
 }
 
-// SetSnapshotCreatedAt gets a reference to the given string and assigns it to the SnapshotCreatedAt field.
-func (o *Workspace) SetSnapshotCreatedAt(v string) {
-	o.SnapshotCreatedAt = &v
+// SetBackupCreatedAt gets a reference to the given string and assigns it to the BackupCreatedAt field.
+func (o *Workspace) SetBackupCreatedAt(v string) {
+	o.BackupCreatedAt = &v
 }
 
 // GetAutoStopInterval returns the AutoStopInterval field value if set, zero value otherwise.
@@ -715,11 +715,11 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ErrorReason) {
 		toSerialize["errorReason"] = o.ErrorReason
 	}
-	if !IsNil(o.SnapshotState) {
-		toSerialize["snapshotState"] = o.SnapshotState
+	if !IsNil(o.BackupState) {
+		toSerialize["backupState"] = o.BackupState
 	}
-	if !IsNil(o.SnapshotCreatedAt) {
-		toSerialize["snapshotCreatedAt"] = o.SnapshotCreatedAt
+	if !IsNil(o.BackupCreatedAt) {
+		toSerialize["backupCreatedAt"] = o.BackupCreatedAt
 	}
 	if !IsNil(o.AutoStopInterval) {
 		toSerialize["autoStopInterval"] = o.AutoStopInterval

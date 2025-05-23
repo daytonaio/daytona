@@ -1315,9 +1315,9 @@ paths:
       summary: Replace workspace labels
       tags:
         - workspace
-  /workspace/{workspaceId}/snapshot:
+  /workspace/{workspaceId}/backup:
     post:
-      operationId: createSnapshot
+      operationId: createBackup
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -1341,14 +1341,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Workspace'
-          description: Workspace snapshot has been initiated
+          description: Workspace backup has been initiated
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Create workspace snapshot
+      summary: Create workspace backup
       tags:
         - workspace
   /workspace/{workspaceId}/public/{isPublic}:
@@ -4961,20 +4961,20 @@ components:
         cpu: 2
         env:
           NODE_ENV: production
-        snapshotCreatedAt: 2024-10-01T12:00:00Z
         gpu: 0
+        backupCreatedAt: 2024-10-01T12:00:00Z
         autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
         target: local
         organizationId: organization123
         disk: 10
-        snapshotState: None
         public: false
         errorReason: The workspace is not running
         name: MyWorkspace
         id: workspace123
         state: creating
+        backupState: None
         user: daytona
         info: ''
       properties:
@@ -5051,8 +5051,8 @@ components:
           description: The error reason of the workspace
           example: The workspace is not running
           type: string
-        snapshotState:
-          description: The state of the snapshot
+        backupState:
+          description: The state of the backup
           enum:
             - None
             - Pending
@@ -5061,8 +5061,8 @@ components:
             - Error
           example: None
           type: string
-        snapshotCreatedAt:
-          description: The creation timestamp of the last snapshot
+        backupCreatedAt:
+          description: The creation timestamp of the last backup
           example: 2024-10-01T12:00:00Z
           type: string
         autoStopInterval:

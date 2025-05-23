@@ -5,6 +5,6 @@
 
 import { Workspace } from '../entities/workspace.entity'
 
-export class WorkspaceSnapshotCreatedEvent {
+export class WorkspaceBackupCreatedEvent {
   constructor(public readonly workspace: Workspace) {}
 }

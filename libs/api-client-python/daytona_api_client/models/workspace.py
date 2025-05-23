@@ -46,15 +46,15 @@ class Workspace(BaseModel):
     disk: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk quota for the workspace")
     state: Optional[WorkspaceState] = Field(default=None, description="The state of the workspace")
     error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the workspace", alias="errorReason")
-    snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
-    snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
+    backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
+    backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes attached to the workspace")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "snapshotState", "snapshotCreatedAt", "autoStopInterval", "volumes"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "volumes"]
 
-    @field_validator('snapshot_state')
-    def snapshot_state_validate_enum(cls, value):
+    @field_validator('backup_state')
+    def backup_state_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
@@ -147,8 +147,8 @@ class Workspace(BaseModel):
             "disk": obj.get("disk"),
             "state": obj.get("state"),
             "errorReason": obj.get("errorReason"),
-            "snapshotState": obj.get("snapshotState"),
-            "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
+            "backupState": obj.get("backupState"),
+            "backupCreatedAt": obj.get("backupCreatedAt"),
             "autoStopInterval": obj.get("autoStopInterval"),
             "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None
         })
