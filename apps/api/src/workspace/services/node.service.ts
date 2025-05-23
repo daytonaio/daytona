@@ -74,6 +74,7 @@ export class NodeService {
   async findAvailableNodes(params: GetNodeParams): Promise<Node[]> {
     const imageNodeFilter: FindOptionsWhere<ImageNode> = {
       state: ImageNodeState.READY,
+      nodeId: Not(In(params.excludedNodeIds || [])),
     }
 
     if (params.imageRef !== undefined) {
@@ -101,8 +102,9 @@ export class NodeService {
     const nodes = await this.nodeRepository.find({
       where: nodeFilter,
     })
+
     return nodes
-      .filter((node) => node.used < node.capacity && !params.excludedNodeIds?.has(node.id))
+      .filter((node) => node.used < node.capacity)
       .sort((a, b) => a.used / a.capacity - b.used / b.capacity)
       .slice(0, 10)
   }
@@ -242,7 +244,7 @@ export class NodeService {
     await this.imageNodeRepository.save(imageNode)
   }
 
-  async getNodesWithMultipleImagesBuilding(maxImageCount = 2): Promise<Set<string>> {
+  async getNodesWithMultipleImagesBuilding(maxImageCount = 2): Promise<string[]> {
     const nodes = await this.workspaceRepository
       .createQueryBuilder('workspace')
       .select('workspace.nodeId')
@@ -252,7 +254,7 @@ export class NodeService {
       .having('COUNT(DISTINCT workspace.buildInfoImageRef) > :maxImageCount', { maxImageCount })
       .getRawMany()
 
-    return new Set(nodes.map((item) => item.nodeId))
+    return nodes.map((item) => item.nodeId)
   }
 }
 
@@ -260,5 +262,5 @@ export class GetNodeParams {
   region?: NodeRegion
   workspaceClass?: WorkspaceClass
   imageRef?: string
-  excludedNodeIds?: Set<string>
+  excludedNodeIds?: string[]
 }
