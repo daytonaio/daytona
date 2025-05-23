@@ -85,13 +85,13 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error parsing provider metadata: %v", err)
 	}
 
-	nodeDomain, ok := metadata["nodeDomain"].(string)
+	runnerDomain, ok := metadata["runnerDomain"].(string)
 	if !ok {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("node domain not found in metadata")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("runner domain not found in metadata")
 	}
 
 	// Format preview URL
-	previewURL := fmt.Sprintf("http://%d-%s.%s", port, sandboxId, nodeDomain)
+	previewURL := fmt.Sprintf("http://%d-%s.%s", port, sandboxId, runnerDomain)
 
 	// Test URL accessibility if requested
 	var accessible bool

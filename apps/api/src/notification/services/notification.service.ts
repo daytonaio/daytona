@@ -10,7 +10,7 @@ import { WorkspaceEvents } from '../../workspace/constants/workspace-events.cons
 import { WorkspaceDto } from '../../workspace/dto/workspace.dto'
 import { WorkspaceCreatedEvent } from '../../workspace/events/workspace-create.event'
 import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
-import { NodeService } from '../../workspace/services/node.service'
+import { RunnerService } from '../../workspace/services/runner.service'
 import { ImageCreatedEvent } from '../../workspace/events/image-created.event'
 import { ImageEvents } from '../../workspace/constants/image-events'
 import { ImageDto } from '../../workspace/dto/image.dto'
@@ -27,20 +27,20 @@ import { VolumeLastUsedAtUpdatedEvent } from '../../workspace/events/volume-last
 export class NotificationService {
   constructor(
     private readonly notificationGateway: NotificationGateway,
-    private readonly nodeService: NodeService,
+    private readonly runnerService: RunnerService,
   ) {}
 
   @OnEvent(WorkspaceEvents.CREATED)
   async handleWorkspaceCreated(event: WorkspaceCreatedEvent) {
-    const node = await this.nodeService.findOne(event.workspace.nodeId)
-    const dto = WorkspaceDto.fromWorkspace(event.workspace, node.domain)
+    const runner = await this.runnerService.findOne(event.workspace.runnerId)
+    const dto = WorkspaceDto.fromWorkspace(event.workspace, runner.domain)
     this.notificationGateway.emitWorkspaceCreated(dto)
   }
 
   @OnEvent(WorkspaceEvents.STATE_UPDATED)
   async handleWorkspaceStateUpdated(event: WorkspaceStateUpdatedEvent) {
-    const node = await this.nodeService.findOne(event.workspace.nodeId)
-    const dto = WorkspaceDto.fromWorkspace(event.workspace, node.domain)
+    const runner = await this.runnerService.findOne(event.workspace.runnerId)
+    const dto = WorkspaceDto.fromWorkspace(event.workspace, runner.domain)
     this.notificationGateway.emitWorkspaceStateUpdated(dto, event.oldState, event.newState)
   }
 

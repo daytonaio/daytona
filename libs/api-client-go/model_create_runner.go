@@ -17,11 +17,11 @@ import (
 	"fmt"
 )
 
-// checks if the CreateNode type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &CreateNode{}
+// checks if the CreateRunner type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &CreateRunner{}
 
-// CreateNode struct for CreateNode
-type CreateNode struct {
+// CreateRunner struct for CreateRunner
+type CreateRunner struct {
 	Domain   string  `json:"domain"`
 	ApiUrl   string  `json:"apiUrl"`
 	ApiKey   string  `json:"apiKey"`
@@ -35,14 +35,14 @@ type CreateNode struct {
 	Region   string  `json:"region"`
 }
 
-type _CreateNode CreateNode
+type _CreateRunner CreateRunner
 
-// NewCreateNode instantiates a new CreateNode object
+// NewCreateRunner instantiates a new CreateRunner object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateNode(domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class string, capacity float32, region string) *CreateNode {
-	this := CreateNode{}
+func NewCreateRunner(domain string, apiUrl string, apiKey string, cpu float32, memory float32, disk float32, gpu float32, gpuType string, class string, capacity float32, region string) *CreateRunner {
+	this := CreateRunner{}
 	this.Domain = domain
 	this.ApiUrl = apiUrl
 	this.ApiKey = apiKey
@@ -57,16 +57,16 @@ func NewCreateNode(domain string, apiUrl string, apiKey string, cpu float32, mem
 	return &this
 }
 
-// NewCreateNodeWithDefaults instantiates a new CreateNode object
+// NewCreateRunnerWithDefaults instantiates a new CreateRunner object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewCreateNodeWithDefaults() *CreateNode {
-	this := CreateNode{}
+func NewCreateRunnerWithDefaults() *CreateRunner {
+	this := CreateRunner{}
 	return &this
 }
 
 // GetDomain returns the Domain field value
-func (o *CreateNode) GetDomain() string {
+func (o *CreateRunner) GetDomain() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -77,7 +77,7 @@ func (o *CreateNode) GetDomain() string {
 
 // GetDomainOk returns a tuple with the Domain field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetDomainOk() (*string, bool) {
+func (o *CreateRunner) GetDomainOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -85,12 +85,12 @@ func (o *CreateNode) GetDomainOk() (*string, bool) {
 }
 
 // SetDomain sets field value
-func (o *CreateNode) SetDomain(v string) {
+func (o *CreateRunner) SetDomain(v string) {
 	o.Domain = v
 }
 
 // GetApiUrl returns the ApiUrl field value
-func (o *CreateNode) GetApiUrl() string {
+func (o *CreateRunner) GetApiUrl() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -101,7 +101,7 @@ func (o *CreateNode) GetApiUrl() string {
 
 // GetApiUrlOk returns a tuple with the ApiUrl field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetApiUrlOk() (*string, bool) {
+func (o *CreateRunner) GetApiUrlOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -109,12 +109,12 @@ func (o *CreateNode) GetApiUrlOk() (*string, bool) {
 }
 
 // SetApiUrl sets field value
-func (o *CreateNode) SetApiUrl(v string) {
+func (o *CreateRunner) SetApiUrl(v string) {
 	o.ApiUrl = v
 }
 
 // GetApiKey returns the ApiKey field value
-func (o *CreateNode) GetApiKey() string {
+func (o *CreateRunner) GetApiKey() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -125,7 +125,7 @@ func (o *CreateNode) GetApiKey() string {
 
 // GetApiKeyOk returns a tuple with the ApiKey field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetApiKeyOk() (*string, bool) {
+func (o *CreateRunner) GetApiKeyOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -133,12 +133,12 @@ func (o *CreateNode) GetApiKeyOk() (*string, bool) {
 }
 
 // SetApiKey sets field value
-func (o *CreateNode) SetApiKey(v string) {
+func (o *CreateRunner) SetApiKey(v string) {
 	o.ApiKey = v
 }
 
 // GetCpu returns the Cpu field value
-func (o *CreateNode) GetCpu() float32 {
+func (o *CreateRunner) GetCpu() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -149,7 +149,7 @@ func (o *CreateNode) GetCpu() float32 {
 
 // GetCpuOk returns a tuple with the Cpu field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetCpuOk() (*float32, bool) {
+func (o *CreateRunner) GetCpuOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -157,12 +157,12 @@ func (o *CreateNode) GetCpuOk() (*float32, bool) {
 }
 
 // SetCpu sets field value
-func (o *CreateNode) SetCpu(v float32) {
+func (o *CreateRunner) SetCpu(v float32) {
 	o.Cpu = v
 }
 
 // GetMemory returns the Memory field value
-func (o *CreateNode) GetMemory() float32 {
+func (o *CreateRunner) GetMemory() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -173,7 +173,7 @@ func (o *CreateNode) GetMemory() float32 {
 
 // GetMemoryOk returns a tuple with the Memory field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetMemoryOk() (*float32, bool) {
+func (o *CreateRunner) GetMemoryOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -181,12 +181,12 @@ func (o *CreateNode) GetMemoryOk() (*float32, bool) {
 }
 
 // SetMemory sets field value
-func (o *CreateNode) SetMemory(v float32) {
+func (o *CreateRunner) SetMemory(v float32) {
 	o.Memory = v
 }
 
 // GetDisk returns the Disk field value
-func (o *CreateNode) GetDisk() float32 {
+func (o *CreateRunner) GetDisk() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -197,7 +197,7 @@ func (o *CreateNode) GetDisk() float32 {
 
 // GetDiskOk returns a tuple with the Disk field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetDiskOk() (*float32, bool) {
+func (o *CreateRunner) GetDiskOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -205,12 +205,12 @@ func (o *CreateNode) GetDiskOk() (*float32, bool) {
 }
 
 // SetDisk sets field value
-func (o *CreateNode) SetDisk(v float32) {
+func (o *CreateRunner) SetDisk(v float32) {
 	o.Disk = v
 }
 
 // GetGpu returns the Gpu field value
-func (o *CreateNode) GetGpu() float32 {
+func (o *CreateRunner) GetGpu() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -221,7 +221,7 @@ func (o *CreateNode) GetGpu() float32 {
 
 // GetGpuOk returns a tuple with the Gpu field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetGpuOk() (*float32, bool) {
+func (o *CreateRunner) GetGpuOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -229,12 +229,12 @@ func (o *CreateNode) GetGpuOk() (*float32, bool) {
 }
 
 // SetGpu sets field value
-func (o *CreateNode) SetGpu(v float32) {
+func (o *CreateRunner) SetGpu(v float32) {
 	o.Gpu = v
 }
 
 // GetGpuType returns the GpuType field value
-func (o *CreateNode) GetGpuType() string {
+func (o *CreateRunner) GetGpuType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -245,7 +245,7 @@ func (o *CreateNode) GetGpuType() string {
 
 // GetGpuTypeOk returns a tuple with the GpuType field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetGpuTypeOk() (*string, bool) {
+func (o *CreateRunner) GetGpuTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -253,12 +253,12 @@ func (o *CreateNode) GetGpuTypeOk() (*string, bool) {
 }
 
 // SetGpuType sets field value
-func (o *CreateNode) SetGpuType(v string) {
+func (o *CreateRunner) SetGpuType(v string) {
 	o.GpuType = v
 }
 
 // GetClass returns the Class field value
-func (o *CreateNode) GetClass() string {
+func (o *CreateRunner) GetClass() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -269,7 +269,7 @@ func (o *CreateNode) GetClass() string {
 
 // GetClassOk returns a tuple with the Class field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetClassOk() (*string, bool) {
+func (o *CreateRunner) GetClassOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -277,12 +277,12 @@ func (o *CreateNode) GetClassOk() (*string, bool) {
 }
 
 // SetClass sets field value
-func (o *CreateNode) SetClass(v string) {
+func (o *CreateRunner) SetClass(v string) {
 	o.Class = v
 }
 
 // GetCapacity returns the Capacity field value
-func (o *CreateNode) GetCapacity() float32 {
+func (o *CreateRunner) GetCapacity() float32 {
 	if o == nil {
 		var ret float32
 		return ret
@@ -293,7 +293,7 @@ func (o *CreateNode) GetCapacity() float32 {
 
 // GetCapacityOk returns a tuple with the Capacity field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetCapacityOk() (*float32, bool) {
+func (o *CreateRunner) GetCapacityOk() (*float32, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -301,12 +301,12 @@ func (o *CreateNode) GetCapacityOk() (*float32, bool) {
 }
 
 // SetCapacity sets field value
-func (o *CreateNode) SetCapacity(v float32) {
+func (o *CreateRunner) SetCapacity(v float32) {
 	o.Capacity = v
 }
 
 // GetRegion returns the Region field value
-func (o *CreateNode) GetRegion() string {
+func (o *CreateRunner) GetRegion() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -317,7 +317,7 @@ func (o *CreateNode) GetRegion() string {
 
 // GetRegionOk returns a tuple with the Region field value
 // and a boolean to check if the value has been set.
-func (o *CreateNode) GetRegionOk() (*string, bool) {
+func (o *CreateRunner) GetRegionOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -325,11 +325,11 @@ func (o *CreateNode) GetRegionOk() (*string, bool) {
 }
 
 // SetRegion sets field value
-func (o *CreateNode) SetRegion(v string) {
+func (o *CreateRunner) SetRegion(v string) {
 	o.Region = v
 }
 
-func (o CreateNode) MarshalJSON() ([]byte, error) {
+func (o CreateRunner) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -337,7 +337,7 @@ func (o CreateNode) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o CreateNode) ToMap() (map[string]interface{}, error) {
+func (o CreateRunner) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["domain"] = o.Domain
 	toSerialize["apiUrl"] = o.ApiUrl
@@ -353,7 +353,7 @@ func (o CreateNode) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *CreateNode) UnmarshalJSON(data []byte) (err error) {
+func (o *CreateRunner) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -385,53 +385,53 @@ func (o *CreateNode) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varCreateNode := _CreateNode{}
+	varCreateRunner := _CreateRunner{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varCreateNode)
+	err = decoder.Decode(&varCreateRunner)
 
 	if err != nil {
 		return err
 	}
 
-	*o = CreateNode(varCreateNode)
+	*o = CreateRunner(varCreateRunner)
 
 	return err
 }
 
-type NullableCreateNode struct {
-	value *CreateNode
+type NullableCreateRunner struct {
+	value *CreateRunner
 	isSet bool
 }
 
-func (v NullableCreateNode) Get() *CreateNode {
+func (v NullableCreateRunner) Get() *CreateRunner {
 	return v.value
 }
 
-func (v *NullableCreateNode) Set(val *CreateNode) {
+func (v *NullableCreateRunner) Set(val *CreateRunner) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableCreateNode) IsSet() bool {
+func (v NullableCreateRunner) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableCreateNode) Unset() {
+func (v *NullableCreateRunner) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableCreateNode(val *CreateNode) *NullableCreateNode {
-	return &NullableCreateNode{value: val, isSet: true}
+func NewNullableCreateRunner(val *CreateRunner) *NullableCreateRunner {
+	return &NullableCreateRunner{value: val, isSet: true}
 }
 
-func (v NullableCreateNode) MarshalJSON() ([]byte, error) {
+func (v NullableCreateRunner) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableCreateNode) UnmarshalJSON(src []byte) error {
+func (v *NullableCreateRunner) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -4,10 +4,10 @@ daytona_api_client_async/api/__init__.py
 daytona_api_client_async/api/api_keys_api.py
 daytona_api_client_async/api/docker_registry_api.py
 daytona_api_client_async/api/images_api.py
-daytona_api_client_async/api/nodes_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
 daytona_api_client_async/api/preview_api.py
+daytona_api_client_async/api/runners_api.py
 daytona_api_client_async/api/toolbox_api.py
 daytona_api_client_async/api/users_api.py
 daytona_api_client_async/api/volumes_api.py
@@ -30,11 +30,11 @@ daytona_api_client_async/models/create_build_info.py
 daytona_api_client_async/models/create_docker_registry.py
 daytona_api_client_async/models/create_image.py
 daytona_api_client_async/models/create_linked_account.py
-daytona_api_client_async/models/create_node.py
 daytona_api_client_async/models/create_organization.py
 daytona_api_client_async/models/create_organization_invitation.py
 daytona_api_client_async/models/create_organization_quota.py
 daytona_api_client_async/models/create_organization_role.py
+daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_session_request.py
 daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py

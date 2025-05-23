@@ -13,7 +13,7 @@ import { User } from '../../user/user.entity'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 
 const workspaceArray: Workspace[] = [
   {
@@ -23,7 +23,7 @@ const workspaceArray: Workspace[] = [
     desiredState: WorkspaceDesiredState.STARTED,
     state: WorkspaceState.UNKNOWN,
     class: WorkspaceClass.SMALL,
-    region: NodeRegion.US,
+    region: RunnerRegion.US,
   },
   {
     id: '2',
@@ -32,7 +32,7 @@ const workspaceArray: Workspace[] = [
     desiredState: WorkspaceDesiredState.STARTED,
     state: WorkspaceState.UNKNOWN,
     class: WorkspaceClass.SMALL,
-    region: NodeRegion.US,
+    region: RunnerRegion.US,
   },
 ]
 
@@ -43,7 +43,7 @@ const oneWorkspace: Workspace = {
   desiredState: WorkspaceDesiredState.STARTED,
   state: WorkspaceState.UNKNOWN,
   class: WorkspaceClass.SMALL,
-  region: NodeRegion.US,
+  region: RunnerRegion.US,
 }
 
 describe('WorkspaceService', () => {
@@ -90,7 +90,7 @@ describe('WorkspaceService', () => {
         desiredState: WorkspaceDesiredState.STARTED,
         state: WorkspaceState.UNKNOWN,
         class: WorkspaceClass.SMALL,
-        region: NodeRegion.US,
+        region: RunnerRegion.US,
       }
 
       expect(
@@ -98,7 +98,7 @@ describe('WorkspaceService', () => {
           name: oneWorkspace.name,
           userId: oneWorkspace.userId,
           class: WorkspaceClass.SMALL,
-          region: NodeRegion.US,
+          region: RunnerRegion.US,
         }),
       ).resolves.toEqual(oneWorkspace)
     })

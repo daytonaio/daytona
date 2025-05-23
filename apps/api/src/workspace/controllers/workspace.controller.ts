@@ -39,12 +39,12 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger'
 import { WorkspaceDto, WorkspaceLabelsDto } from '../dto/workspace.dto'
-import { NodeService } from '../services/node.service'
+import { RunnerService } from '../services/runner.service'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { Workspace as WorkspaceEntity } from '../entities/workspace.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { Throttle } from '@nestjs/throttler'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Workspace } from '../decorators/workspace.decorator'
 import { WorkspaceAccessGuard } from '../guards/workspace-access.guard'
@@ -70,7 +70,7 @@ export class WorkspaceController {
 
   constructor(
     @InjectRedis() private readonly redis: Redis,
-    private readonly nodeService: NodeService,
+    private readonly runnerService: RunnerService,
     private readonly workspaceService: WorkspaceService,
   ) {}
 
@@ -105,8 +105,8 @@ export class WorkspaceController {
     const labels = labelsQuery ? JSON.parse(labelsQuery) : {}
     const workspaces = await this.workspaceService.findAll(authContext.organizationId, labels)
     const dtos = workspaces.map(async (workspace) => {
-      const node = await this.nodeService.findOne(workspace.nodeId)
-      const dto = WorkspaceDto.fromWorkspace(workspace, node.domain)
+      const runner = await this.runnerService.findOne(workspace.runnerId)
+      const dto = WorkspaceDto.fromWorkspace(workspace, runner.domain)
       return dto
     })
     return await Promise.all(dtos)
@@ -134,8 +134,8 @@ export class WorkspaceController {
 
     const workspace = await this.workspaceService.create(organization.id, createWorkspaceDto, organization)
 
-    // If the workspace has no node, it means it is still building - return the ID to the client so they can fetch logs
-    if (workspace.nodeId) {
+    // If the workspace has no runner, it means it is still building - return the ID to the client so they can fetch logs
+    if (workspace.runnerId) {
       // Wait for workspace to be started
       const workspaceState = await this.waitForWorkspaceState(
         workspace.id,
@@ -146,8 +146,8 @@ export class WorkspaceController {
       workspace.state = workspaceState
     }
 
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    const dto = WorkspaceDto.fromWorkspace(workspace, node.domain)
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    const dto = WorkspaceDto.fromWorkspace(workspace, runner.domain)
     return dto
   }
 
@@ -178,12 +178,12 @@ export class WorkspaceController {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     @Query('verbose') verbose?: boolean,
   ): Promise<WorkspaceDto> {
-    let node: Node
-    if (workspace.nodeId) {
-      node = await this.nodeService.findOne(workspace.nodeId)
+    let runner: Runner
+    if (workspace.runnerId) {
+      runner = await this.runnerService.findOne(workspace.runnerId)
     }
 
-    return WorkspaceDto.fromWorkspace(workspace, node?.domain)
+    return WorkspaceDto.fromWorkspace(workspace, runner?.domain)
   }
 
   @Delete(':workspaceId')
@@ -459,23 +459,23 @@ export class WorkspaceController {
     @Query('follow', new ParseBoolPipe({ optional: true })) follow?: boolean,
   ): Promise<void> {
     const workspace = await this.workspaceService.findOne(workspaceId)
-    if (!workspace || !workspace.nodeId) {
-      throw new NotFoundException(`Workspace with ID ${workspaceId} not found or has no node assigned`)
+    if (!workspace || !workspace.runnerId) {
+      throw new NotFoundException(`Workspace with ID ${workspaceId} not found or has no runner assigned`)
     }
 
     if (!workspace.buildInfo) {
       throw new NotFoundException(`Workspace with ID ${workspaceId} has no build info`)
     }
 
-    const node = await this.nodeService.findOne(workspace.nodeId)
-    if (!node) {
-      throw new NotFoundException(`Node for workspace ${workspaceId} not found`)
+    const runner = await this.runnerService.findOne(workspace.runnerId)
+    if (!runner) {
+      throw new NotFoundException(`Runner for workspace ${workspaceId} not found`)
     }
 
     const logProxy = new LogProxy(
-      node.apiUrl,
+      runner.apiUrl,
       workspace.buildInfo.imageRef.split(':')[0],
-      node.apiKey,
+      runner.apiKey,
       follow === true,
       req,
       res,
