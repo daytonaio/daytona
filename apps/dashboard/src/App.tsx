@@ -11,7 +11,7 @@ import Keys from './pages/Keys'
 import { ThemeProvider } from './contexts/ThemeContext'
 import { useAuth } from 'react-oidc-context'
 import LoadingFallback from './components/LoadingFallback'
-import Images from './pages/Images'
+import Snapshots from './pages/Snapshots'
 import Registries from './pages/Registries'
 import { usePostHog } from 'posthog-js/react'
 import {
@@ -131,7 +131,7 @@ function App() {
           />
           <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
           <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Workspaces />} />
-          <Route path={getRouteSubPath(RoutePath.IMAGES)} element={<Images />} />
+          <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
           <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
           <Route
             path={getRouteSubPath(RoutePath.VOLUMES)}

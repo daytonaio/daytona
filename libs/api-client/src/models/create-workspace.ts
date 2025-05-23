@@ -26,11 +26,11 @@ import type { WorkspaceVolume } from './workspace-volume'
  */
 export interface CreateWorkspace {
   /**
-   * The image used for the workspace
+   * The snapshot used for the workspace
    * @type {string}
    * @memberof CreateWorkspace
    */
-  image?: string
+  snapshot?: string
   /**
    * The user associated with the project
    * @type {string}

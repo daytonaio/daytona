@@ -43,7 +43,7 @@ const configuration = {
     secure: process.env.SMTP_SECURE === 'true',
     from: process.env.SMTP_EMAIL_FROM || 'noreply@mail.daytona.io',
   },
-  defaultImage: process.env.DEFAULT_IMAGE,
+  defaultSnapshot: process.env.DEFAULT_SNAPSHOT,
   dashboardUrl: process.env.DASHBOARD_URL,
   transientRegistry: {
     url: process.env.TRANSIENT_REGISTRY_URL,

@@ -59,8 +59,7 @@ class CreateRunner(BaseModel):
     def var_class_validate_enum(cls, value):
         """Validates the enum"""
         if value not in set(["small", "medium", "large"]):
-            raise ValueError(
-                "must be one of enum values ('small', 'medium', 'large')")
+            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
     @field_validator("region")

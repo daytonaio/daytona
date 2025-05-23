@@ -29,7 +29,7 @@ class ToggleState(BaseModel):
     ToggleState
     """  # noqa: E501
 
-    enabled: StrictBool = Field(description="Enable or disable the image/tag")
+    enabled: StrictBool = Field(description="Enable or disable the snapshot/tag")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["enabled"]
 

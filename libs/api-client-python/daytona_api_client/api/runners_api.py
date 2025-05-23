@@ -44,8 +44,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -90,8 +89,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "201": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -105,8 +103,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -151,8 +148,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "201": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -166,8 +162,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -212,8 +207,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "201": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
     def _create_runner_serialize(
@@ -233,8 +227,7 @@ class RunnersApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str],
-                                List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -249,8 +242,7 @@ class RunnersApi:
         if _content_type:
             _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = self.api_client.select_header_content_type([
-                                                                               "application/json"])
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
                 _header_params["Content-Type"] = _default_content_type
 
@@ -278,8 +270,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -318,8 +309,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -332,8 +322,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -372,8 +361,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -386,8 +374,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -426,8 +413,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
     def _list_runners_serialize(
@@ -446,8 +432,7 @@ class RunnersApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str],
-                                List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
@@ -481,8 +466,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -523,8 +507,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -538,8 +521,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -580,8 +562,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
@@ -595,8 +576,7 @@ class RunnersApi:
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(
-                gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -637,8 +617,7 @@ class RunnersApi:
         _response_types_map: Dict[str, Optional[str]] = {
             "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param, _request_timeout=_request_timeout)
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
     def _update_runner_scheduling_serialize(
@@ -658,8 +637,7 @@ class RunnersApi:
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str],
-                                List[bytes], List[Tuple[str, bytes]]]] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters

@@ -11,9 +11,9 @@ import { OrganizationService } from '../../organization/services/organization.se
 import { WorkspaceEvents } from '../../workspace/constants/workspace-events.constants'
 import { WorkspaceState } from '../../workspace/enums/workspace-state.enum'
 import { WorkspaceDto } from '../../workspace/dto/workspace.dto'
-import { ImageDto } from '../../workspace/dto/image.dto'
-import { ImageEvents } from '../../workspace/constants/image-events'
-import { ImageState } from '../../workspace/enums/image-state.enum'
+import { SnapshotDto } from '../../workspace/dto/snapshot.dto'
+import { SnapshotEvents } from '../../workspace/constants/snapshot-events'
+import { SnapshotState } from '../../workspace/enums/snapshot-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { JwtStrategy } from '../../auth/jwt.strategy'
@@ -76,20 +76,22 @@ export class NotificationGateway implements OnGatewayInit, OnModuleInit {
     this.server.to(workspace.organizationId).emit(WorkspaceEvents.STATE_UPDATED, { workspace, oldState, newState })
   }
 
-  emitImageCreated(image: ImageDto) {
-    this.server.to(image.organizationId).emit(ImageEvents.CREATED, image)
+  emitSnapshotCreated(snapshot: SnapshotDto) {
+    this.server.to(snapshot.organizationId).emit(SnapshotEvents.CREATED, snapshot)
   }
 
-  emitImageStateUpdated(image: ImageDto, oldState: ImageState, newState: ImageState) {
-    this.server.to(image.organizationId).emit(ImageEvents.STATE_UPDATED, { image, oldState, newState })
+  emitSnapshotStateUpdated(snapshot: SnapshotDto, oldState: SnapshotState, newState: SnapshotState) {
+    this.server
+      .to(snapshot.organizationId)
+      .emit(SnapshotEvents.STATE_UPDATED, { snapshot: snapshot, oldState, newState })
   }
 
-  emitImageEnabledToggled(image: ImageDto) {
-    this.server.to(image.organizationId).emit(ImageEvents.ENABLED_TOGGLED, image)
+  emitSnapshotEnabledToggled(snapshot: SnapshotDto) {
+    this.server.to(snapshot.organizationId).emit(SnapshotEvents.ENABLED_TOGGLED, snapshot)
   }
 
-  emitImageRemoved(image: ImageDto) {
-    this.server.to(image.organizationId).emit(ImageEvents.REMOVED, image.id)
+  emitSnapshotRemoved(snapshot: SnapshotDto) {
+    this.server.to(snapshot.organizationId).emit(SnapshotEvents.REMOVED, snapshot.id)
   }
 
   emitVolumeCreated(volume: VolumeDto) {

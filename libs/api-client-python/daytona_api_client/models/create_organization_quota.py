@@ -37,8 +37,8 @@ class CreateOrganizationQuota(BaseModel):
         default=None, alias="maxMemoryPerWorkspace"
     )
     max_disk_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxDiskPerWorkspace")
-    image_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="imageQuota")
-    max_image_size: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxImageSize")
+    snapshot_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="snapshotQuota")
+    max_snapshot_size: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="maxSnapshotSize")
     volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
@@ -48,8 +48,8 @@ class CreateOrganizationQuota(BaseModel):
         "maxCpuPerWorkspace",
         "maxMemoryPerWorkspace",
         "maxDiskPerWorkspace",
-        "imageQuota",
-        "maxImageSize",
+        "snapshotQuota",
+        "maxSnapshotSize",
         "volumeQuota",
     ]
 
@@ -119,8 +119,8 @@ class CreateOrganizationQuota(BaseModel):
                 "maxCpuPerWorkspace": obj.get("maxCpuPerWorkspace"),
                 "maxMemoryPerWorkspace": obj.get("maxMemoryPerWorkspace"),
                 "maxDiskPerWorkspace": obj.get("maxDiskPerWorkspace"),
-                "imageQuota": obj.get("imageQuota"),
-                "maxImageSize": obj.get("maxImageSize"),
+                "snapshotQuota": obj.get("snapshotQuota"),
+                "maxSnapshotSize": obj.get("maxSnapshotSize"),
                 "volumeQuota": obj.get("volumeQuota"),
             }
         )

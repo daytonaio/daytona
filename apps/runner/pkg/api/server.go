@@ -110,13 +110,13 @@ func (a *ApiServer) Start() error {
 		sandboxController.Any("/:workspaceId/:projectId/toolbox/*path", controllers.ProxyRequest)
 	}
 
-	imageController := protected.Group("/images")
+	snapshotController := protected.Group("/snapshots")
 	{
-		imageController.POST("/pull", controllers.PullImage)
-		imageController.POST("/build", controllers.BuildImage)
-		imageController.GET("/exists", controllers.ImageExists)
-		imageController.POST("/remove", controllers.RemoveImage)
-		imageController.GET("/logs", controllers.GetBuildLogs)
+		snapshotController.POST("/pull", controllers.PullSnapshot)
+		snapshotController.POST("/build", controllers.BuildSnapshot)
+		snapshotController.GET("/exists", controllers.SnapshotExists)
+		snapshotController.POST("/remove", controllers.RemoveSnapshot)
+		snapshotController.GET("/logs", controllers.GetBuildLogs)
 	}
 
 	a.httpServer = &http.Server{

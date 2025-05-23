@@ -18,8 +18,8 @@ import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BackupState } from '../enums/backup-state.enum'
-import { Image } from '../entities/image.entity'
-import { ImageState } from '../enums/image-state.enum'
+import { Snapshot } from '../entities/snapshot.entity'
+import { SnapshotState } from '../enums/snapshot-state.enum'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { WorkspaceWarmPoolService } from './workspace-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
@@ -31,7 +31,7 @@ import { Organization } from '../../organization/entities/organization.entity'
 import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceStateUpdatedEvent } from '../events/workspace-state-updated.event'
 import { BuildInfo } from '../entities/build-info.entity'
-import { generateBuildInfoHash as generateBuildImageRef } from '../entities/build-info.entity'
+import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
 import { WorkspaceBackupCreatedEvent } from '../events/workspace-backup-created.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceStartedEvent } from '../events/workspace-started.event'
@@ -54,8 +54,8 @@ export class WorkspaceService {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(Image)
-    private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
     @InjectRepository(BuildInfo)
@@ -65,7 +65,7 @@ export class WorkspaceService {
     private readonly warmPoolService: WorkspaceWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
-  ) { }
+  ) {}
 
   private async validateOrganizationQuotas(
     organization: Organization,
@@ -208,29 +208,31 @@ export class WorkspaceService {
       await this.validateOrganizationQuotas(organization, cpu, mem, disk)
     }
 
-    //  validate image
-    let workspaceImage = createWorkspaceDto.image
+    //  validate snapshot
+    let workspaceSnapshot = createWorkspaceDto.snapshot
 
-    if ((!createWorkspaceDto.image || createWorkspaceDto.image.trim() === '') && !createWorkspaceDto.buildInfo) {
-      workspaceImage = this.configService.getOrThrow('defaultImage')
+    if ((!createWorkspaceDto.snapshot || createWorkspaceDto.snapshot.trim() === '') && !createWorkspaceDto.buildInfo) {
+      workspaceSnapshot = this.configService.getOrThrow('defaultSnapshot')
     }
 
-    const image = await this.imageRepository.findOne({
+    const snapshot = await this.snapshotRepository.findOne({
       where: [
-        { organizationId, name: workspaceImage, state: ImageState.ACTIVE },
-        { general: true, name: workspaceImage, state: ImageState.ACTIVE },
+        { organizationId, name: workspaceSnapshot, state: SnapshotState.ACTIVE },
+        { general: true, name: workspaceSnapshot, state: SnapshotState.ACTIVE },
       ],
     })
 
     if (!createWorkspaceDto.buildInfo && (createWorkspaceDto.volumes || []).length === 0) {
-      if (!image) {
-        throw new BadRequestError(`Image ${workspaceImage} not found. Did you add it through the Daytona Dashboard?`)
+      if (!snapshot) {
+        throw new BadRequestError(
+          `Snapshot ${workspaceSnapshot} not found. Did you add it through the Daytona Dashboard?`,
+        )
       }
 
       if (organizationId !== WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION) {
         const warmPoolWorkspace = await this.warmPoolService.fetchWarmPoolWorkspace({
           organizationId: organizationId,
-          image: workspaceImage,
+          snapshot: workspaceSnapshot,
           target: createWorkspaceDto.target,
           class: createWorkspaceDto.class,
           cpu,
@@ -273,7 +275,7 @@ export class WorkspaceService {
     //  TODO: make configurable
     workspace.region = region
     workspace.class = workspaceClass
-    workspace.image = workspaceImage
+    workspace.snapshot = workspaceSnapshot
     //  TODO: default user should be configurable
     workspace.osUser = createWorkspaceDto.user || 'daytona'
     workspace.env = createWorkspaceDto.env || {}
@@ -288,19 +290,19 @@ export class WorkspaceService {
     workspace.public = createWorkspaceDto.public || false
 
     if (createWorkspaceDto.buildInfo) {
-      const buildInfoImageRef = generateBuildImageRef(
+      const buildInfoSnapshotRef = generateBuildSnapshotRef(
         createWorkspaceDto.buildInfo.dockerfileContent,
         createWorkspaceDto.buildInfo.contextHashes,
       )
 
-      // Check if buildInfo with the same imageRef already exists
+      // Check if buildInfo with the same snapshotRef already exists
       const existingBuildInfo = await this.buildInfoRepository.findOne({
-        where: { imageRef: buildInfoImageRef },
+        where: { snapshotRef: buildInfoSnapshotRef },
       })
 
       if (existingBuildInfo) {
         workspace.buildInfo = existingBuildInfo
-        await this.buildInfoRepository.update(workspace.buildInfo.imageRef, { lastUsedAt: new Date() })
+        await this.buildInfoRepository.update(workspace.buildInfo.snapshotRef, { lastUsedAt: new Date() })
       } else {
         const buildInfoEntity = this.buildInfoRepository.create({
           ...createWorkspaceDto.buildInfo,
@@ -318,13 +320,13 @@ export class WorkspaceService {
       workspace.autoArchiveInterval = this.resolveAutoArchiveInterval(createWorkspaceDto.autoArchiveInterval)
     }
 
-    const imageRef = workspace.buildInfo ? workspace.buildInfo.imageRef : image.internalName
+    const snapshotRef = workspace.buildInfo ? workspace.buildInfo.snapshotRef : snapshot.internalName
 
     try {
       workspace.runnerId = await this.runnerService.getRandomAvailableRunner({
         region: workspace.region,
         workspaceClass: workspace.class,
-        imageRef,
+        snapshotRef,
       })
     } catch (error) {
       if (
@@ -603,7 +605,7 @@ export class WorkspaceService {
   private async createWarmPoolWorkspace(event: WarmPoolTopUpRequested) {
     const warmPoolItem = event.warmPool
     await this.create(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION, {
-      image: warmPoolItem.image,
+      snapshot: warmPoolItem.snapshot,
       cpu: warmPoolItem.cpu,
       gpu: warmPoolItem.gpu,
       memory: warmPoolItem.mem,
