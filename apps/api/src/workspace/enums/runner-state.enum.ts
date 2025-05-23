@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export enum NodeState {
+export enum RunnerState {
   INITIALIZING = 'initializing',
   READY = 'ready',
   DISABLED = 'disabled',

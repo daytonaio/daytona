@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Node } from './node.entity'
+import { Runner } from './runner.entity'
 
-describe('Node', () => {
+describe('Runner', () => {
   it('should be defined', () => {
-    expect(new Node()).toBeDefined()
+    expect(new Runner()).toBeDefined()
   })
 })
