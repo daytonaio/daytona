@@ -86,28 +86,28 @@ func Destroy(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "Sandbox destroyed")
 }
 
-// CreateSnapshot godoc
+// CreateBackup godoc
 //
 //	@Tags			sandbox
-//	@Summary		Create sandbox snapshot
-//	@Description	Create sandbox snapshot
+//	@Summary		Create sandbox backup
+//	@Description	Create sandbox backup
 //	@Produce		json
-//	@Param			workspaceId	path		string					true	"Sandbox ID"
-//	@Param			sandbox		body		dto.CreateSnapshotDTO	true	"Create snapshot"
-//	@Success		201			{string}	string					"Snapshot created"
+//	@Param			workspaceId	path		string				true	"Sandbox ID"
+//	@Param			sandbox		body		dto.CreateBackupDTO	true	"Create backup"
+//	@Success		201			{string}	string				"Backup created"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/snapshot [post]
+//	@Router			/workspaces/{workspaceId}/backup [post]
 //
-//	@id				CreateSnapshot
-func CreateSnapshot(ctx *gin.Context) {
+//	@id				CreateBackup
+func CreateBackup(ctx *gin.Context) {
 	sandboxId := ctx.Param("workspaceId")
 
-	var createSnapshotDTO dto.CreateSnapshotDTO
-	err := ctx.ShouldBindJSON(&createSnapshotDTO)
+	var createBackupDTO dto.CreateBackupDTO
+	err := ctx.ShouldBindJSON(&createBackupDTO)
 	if err != nil {
 		ctx.Error(common.NewInvalidBodyRequestError(err))
 		return
@@ -115,14 +115,14 @@ func CreateSnapshot(ctx *gin.Context) {
 
 	runner := runner.GetInstance(nil)
 
-	err = runner.Docker.CreateSnapshot(ctx.Request.Context(), sandboxId, createSnapshotDTO)
+	err = runner.Docker.CreateBackup(ctx.Request.Context(), sandboxId, createBackupDTO)
 	if err != nil {
-		runner.Cache.SetSnapshotState(ctx, sandboxId, enums.SnapshotStateFailed)
+		runner.Cache.SetBackupState(ctx, sandboxId, enums.BackupStateFailed)
 		ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, "Snapshot created")
+	ctx.JSON(http.StatusCreated, "Backup created")
 }
 
 // Resize 			godoc
@@ -250,14 +250,14 @@ func Info(ctx *gin.Context) {
 	info := runner.SandboxService.GetSandboxStatesInfo(ctx.Request.Context(), sandboxId)
 
 	ctx.JSON(http.StatusOK, SandboxInfoResponse{
-		State:         info.SandboxState,
-		SnapshotState: info.SnapshotState,
+		State:       info.SandboxState,
+		BackupState: info.BackupState,
 	})
 }
 
 type SandboxInfoResponse struct {
-	State         enums.SandboxState  `json:"state"`
-	SnapshotState enums.SnapshotState `json:"snapshotState"`
+	State       enums.SandboxState `json:"state"`
+	BackupState enums.BackupState  `json:"backupState"`
 } //	@name	SandboxInfoResponse
 
 // RemoveDestroyed godoc

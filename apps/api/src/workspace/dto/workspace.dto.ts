@@ -6,7 +6,7 @@
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { IsEnum, IsOptional } from 'class-validator'
-import { SnapshotState } from '../enums/snapshot-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
 import { Workspace } from '../entities/workspace.entity'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 
@@ -172,22 +172,22 @@ export class WorkspaceDto {
   errorReason?: string
 
   @ApiPropertyOptional({
-    description: 'The state of the snapshot',
-    enum: SnapshotState,
-    example: Object.values(SnapshotState)[0],
+    description: 'The state of the backup',
+    enum: BackupState,
+    example: Object.values(BackupState)[0],
     required: false,
   })
-  @IsEnum(SnapshotState)
+  @IsEnum(BackupState)
   @IsOptional()
-  snapshotState?: SnapshotState
+  backupState?: BackupState
 
   @ApiPropertyOptional({
-    description: 'The creation timestamp of the last snapshot',
+    description: 'The creation timestamp of the last backup',
     example: '2024-10-01T12:00:00Z',
     required: false,
   })
   @IsOptional()
-  snapshotCreatedAt?: string
+  backupCreatedAt?: string
 
   @ApiPropertyOptional({
     description: 'Auto-stop interval in minutes (0 means disabled)',
@@ -237,8 +237,8 @@ export class WorkspaceDto {
       volumes: workspace.volumes,
       state: this.getWorkspaceState(workspace),
       errorReason: workspace.errorReason,
-      snapshotState: workspace.snapshotState,
-      snapshotCreatedAt: workspace.lastSnapshotAt?.toISOString(),
+      backupState: workspace.backupState,
+      backupCreatedAt: workspace.lastBackupAt?.toISOString(),
       autoStopInterval: workspace.autoStopInterval,
       autoArchiveInterval: workspace.autoArchiveInterval,
       info: {
@@ -250,7 +250,7 @@ export class WorkspaceDto {
           region: workspace.region,
           class: workspace.class,
           updatedAt: workspace.updatedAt?.toISOString(),
-          lastSnapshot: workspace.lastSnapshotAt,
+          lastBackup: workspace.lastBackupAt,
           cpu: workspace.cpu,
           gpu: workspace.gpu,
           memory: workspace.mem,

@@ -101,7 +101,7 @@ func (a *ApiServer) Start() error {
 		sandboxController.POST("/:workspaceId/destroy", controllers.Destroy)
 		sandboxController.POST("/:workspaceId/start", controllers.Start)
 		sandboxController.POST("/:workspaceId/stop", controllers.Stop)
-		sandboxController.POST("/:workspaceId/snapshot", controllers.CreateSnapshot)
+		sandboxController.POST("/:workspaceId/backup", controllers.CreateBackup)
 		sandboxController.POST("/:workspaceId/resize", controllers.Resize)
 		sandboxController.DELETE("/:workspaceId", controllers.RemoveDestroyed)
 

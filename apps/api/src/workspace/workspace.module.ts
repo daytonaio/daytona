@@ -38,7 +38,7 @@ import { VolumeService } from './services/volume.service'
 import { VolumeManager } from './managers/volume.manager'
 import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
-import { SnapshotManager } from './managers/snapshot.manager'
+import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
 
 @Module({
@@ -60,7 +60,7 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
   providers: [
     WorkspaceService,
     WorkspaceManager,
-    SnapshotManager,
+    BackupManager,
     WorkspaceWarmPoolService,
     NodeService,
     NodeApiFactory,
