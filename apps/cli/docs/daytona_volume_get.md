@@ -1,13 +1,9 @@
-## daytona image list
+## daytona volume get
 
-List all images
-
-### Synopsis
-
-List all available Daytona images
+Get volume details
 
 ```
-daytona image list [flags]
+daytona volume get [VOLUME_ID] [flags]
 ```
 
 ### Options
@@ -24,4 +20,4 @@ daytona image list [flags]
 
 ### SEE ALSO
 
-- [daytona image](daytona_image.md) - Manage Daytona images
+* [daytona volume](daytona_volume.md)  - Manage Daytona volumes

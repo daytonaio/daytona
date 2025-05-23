@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ImageDto, ImageState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
+import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
   flexRender,
@@ -29,11 +29,11 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
 
 interface DataTableProps {
-  data: ImageDto[]
+  data: SnapshotDto[]
   loading: boolean
-  loadingImages: Record<string, boolean>
-  onDelete: (image: ImageDto) => void
-  onToggleEnabled: (image: ImageDto, enabled: boolean) => void
+  loadingSnapshots: Record<string, boolean>
+  onDelete: (snapshot: SnapshotDto) => void
+  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
   pagination: {
     pageIndex: number
     pageSize: number
@@ -42,10 +42,10 @@ interface DataTableProps {
   onPaginationChange: (pagination: { pageIndex: number; pageSize: number }) => void
 }
 
-export function ImageTable({
+export function SnapshotTable({
   data,
   loading,
-  loadingImages,
+  loadingSnapshots,
   onDelete,
   onToggleEnabled,
   pagination,
@@ -55,19 +55,19 @@ export function ImageTable({
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
-    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_IMAGES),
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
     [authenticatedUserHasPermission],
   )
 
   const deletePermitted = useMemo(
-    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_IMAGES),
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SNAPSHOTS),
     [authenticatedUserHasPermission],
   )
 
   const [sorting, setSorting] = useState<SortingState>([])
   const columns = useMemo(
-    () => getColumns({ onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted }),
-    [onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted],
+    () => getColumns({ onDelete, onToggleEnabled, loadingSnapshots, writePermitted, deletePermitted }),
+    [onDelete, onToggleEnabled, loadingSnapshots, writePermitted, deletePermitted],
   )
   const table = useReactTable({
     data,
@@ -122,7 +122,7 @@ export function ImageTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingImages[row.original.id] || row.original.state === ImageState.REMOVING ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`${loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -149,17 +149,17 @@ export function ImageTable({
 const getColumns = ({
   onDelete,
   onToggleEnabled,
-  loadingImages,
+  loadingSnapshots,
   writePermitted,
   deletePermitted,
 }: {
-  onDelete: (image: ImageDto) => void
-  onToggleEnabled: (image: ImageDto, enabled: boolean) => void
-  loadingImages: Record<string, boolean>
+  onDelete: (snapshot: SnapshotDto) => void
+  onToggleEnabled: (snapshot: SnapshotDto, enabled: boolean) => void
+  loadingSnapshots: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
-}): ColumnDef<ImageDto>[] => {
-  const columns: ColumnDef<ImageDto>[] = [
+}): ColumnDef<SnapshotDto>[] => {
+  const columns: ColumnDef<SnapshotDto>[] = [
     {
       accessorKey: 'name',
       header: 'Name',
@@ -167,13 +167,13 @@ const getColumns = ({
     {
       header: 'Status',
       cell: ({ row }) => {
-        const image = row.original
-        const color = image.enabled ? 'text-green-500' : 'text-red-500'
+        const snapshot = row.original
+        const color = snapshot.enabled ? 'text-green-500' : 'text-red-500'
 
         return (
           <div className={`flex items-center gap-2 ${color}`}>
-            {image.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-            {image.enabled ? 'Enabled' : 'Disabled'}
+            {snapshot.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+            {snapshot.enabled ? 'Enabled' : 'Disabled'}
           </div>
         )
       },
@@ -182,21 +182,21 @@ const getColumns = ({
       accessorKey: 'state',
       header: 'State',
       cell: ({ row }) => {
-        const image = row.original
-        const color = getStateColor(image.state)
+        const snapshot = row.original
+        const color = getStateColor(snapshot.state)
 
-        if (image.state === ImageState.ERROR && !!image.errorReason) {
+        if (snapshot.state === SnapshotState.ERROR && !!snapshot.errorReason) {
           return (
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
                   <div className={`flex items-center gap-2 ${color}`}>
-                    {getStateIcon(image.state)}
-                    {getStateLabel(image.state)}
+                    {getStateIcon(snapshot.state)}
+                    {getStateLabel(snapshot.state)}
                   </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p className="max-w-[300px]">{image.errorReason}</p>
+                  <p className="max-w-[300px]">{snapshot.errorReason}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
@@ -205,8 +205,8 @@ const getColumns = ({
 
         return (
           <div className={`flex items-center gap-2 ${color}`}>
-            {getStateIcon(image.state)}
-            {getStateLabel(image.state)}
+            {getStateIcon(snapshot.state)}
+            {getStateLabel(snapshot.state)}
           </div>
         )
       },
@@ -254,7 +254,7 @@ const getColumns = ({
                 <DropdownMenuItem
                   onClick={() => onToggleEnabled(row.original, !row.original.enabled)}
                   className="cursor-pointer"
-                  disabled={loadingImages[row.original.id]}
+                  disabled={loadingSnapshots[row.original.id]}
                 >
                   {row.original.enabled ? 'Disable' : 'Enable'}
                 </DropdownMenuItem>
@@ -265,7 +265,7 @@ const getColumns = ({
                   <DropdownMenuItem
                     onClick={() => onDelete(row.original)}
                     className="cursor-pointer text-red-600 dark:text-red-400"
-                    disabled={loadingImages[row.original.id]}
+                    disabled={loadingSnapshots[row.original.id]}
                   >
                     Delete
                   </DropdownMenuItem>
@@ -281,31 +281,31 @@ const getColumns = ({
   return columns
 }
 
-const getStateIcon = (state: ImageState) => {
+const getStateIcon = (state: SnapshotState) => {
   switch (state) {
-    case ImageState.ACTIVE:
+    case SnapshotState.ACTIVE:
       return <CheckCircle className="w-4 h-4 flex-shrink-0" />
-    case ImageState.ERROR:
+    case SnapshotState.ERROR:
       return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
     default:
       return <Timer className="w-4 h-4 flex-shrink-0" />
   }
 }
 
-const getStateColor = (state: ImageState) => {
+const getStateColor = (state: SnapshotState) => {
   switch (state) {
-    case ImageState.ACTIVE:
+    case SnapshotState.ACTIVE:
       return 'text-green-500'
-    case ImageState.ERROR:
+    case SnapshotState.ERROR:
       return 'text-red-500'
     default:
       return 'text-gray-600 dark:text-gray-400'
   }
 }
 
-const getStateLabel = (state: ImageState) => {
+const getStateLabel = (state: SnapshotState) => {
   // TODO: remove when removing is migrated to deleted
-  if (state === ImageState.REMOVING) {
+  if (state === SnapshotState.REMOVING) {
     return 'Deleting'
   }
   return state

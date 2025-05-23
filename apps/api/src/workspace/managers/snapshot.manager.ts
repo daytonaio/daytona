@@ -285,7 +285,7 @@ export class SnapshotManager {
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshotRunner.createdAt.getTime() > timeoutMs) {
       snapshotRunner.state = SnapshotRunnerState.ERROR
-      snapshotRunner.errorReason = 'Timeout while pulling image'
+      snapshotRunner.errorReason = 'Timeout while pulling snapshot'
       await this.snapshotRunnerRepository.save(snapshotRunner)
       return
     }
@@ -419,9 +419,9 @@ export class SnapshotManager {
   }
 
   @Cron(CronExpression.EVERY_30_MINUTES, {
-    name: 'cleanup-local-images',
+    name: 'cleanup-local-snapshots',
   })
-  async cleanupLocalImages() {
+  async cleanupLocalSnapshots() {
     await this.dockerProvider.imagePrune()
   }
 
@@ -509,7 +509,7 @@ export class SnapshotManager {
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while building image')
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while building snapshot')
       return
     }
 
@@ -522,12 +522,12 @@ export class SnapshotManager {
     try {
       const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
 
-      // Find a runner to build the image on
+      // Find a runner to build the snapshot on
       const runnerId = await this.runnerService.getRandomAvailableRunner({
         excludedRunnerIds: excludedRunnerIds,
       })
 
-      // TODO: get only runners where the base image is available (extract from buildInfo)
+      // TODO: get only runners where the base snapshot is available (extract from buildInfo)
 
       if (!runnerId) {
         // No ready runners available, retry later
@@ -536,7 +536,7 @@ export class SnapshotManager {
 
       const runner = await this.runnerService.findOne(runnerId)
 
-      // Assign the runner ID to the image for tracking build progress
+      // Assign the runner ID to the snapshot for tracking build progress
       snapshot.buildRunnerId = runner.id
       await this.snapshotRepository.save(snapshot)
 
@@ -548,7 +548,7 @@ export class SnapshotManager {
       const snapshotIdWithTag = `${snapshot.id}:${tag}`
 
       await runnerSnapshotApi.buildSnapshot({
-        snapshot: snapshotIdWithTag, // Name doesn't matter for runner, it uses the image ID when pushing to internal registry
+        snapshot: snapshotIdWithTag, // Name doesn't matter for runner, it uses the snapshot ID when pushing to internal registry
         registry: {
           url: registry.url,
           project: registry.project,
@@ -563,12 +563,12 @@ export class SnapshotManager {
 
       // save snapshotRunner
 
-      const internalImageName = `${registry.url}/${registry.project}/${snapshotIdWithTag}`
+      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshotIdWithTag}`
 
-      snapshot.internalName = internalImageName
+      snapshot.internalName = internalSnapshotName
       await this.snapshotRepository.save(snapshot)
 
-      // Wait for 30 seconds because of Harbor's delay at making newly created images available
+      // Wait for 30 seconds because of Harbor's delay at making newly created snapshots available
       await new Promise((resolve) => setTimeout(resolve, 30000))
 
       // Move to next state
@@ -579,7 +579,7 @@ export class SnapshotManager {
         return
       }
 
-      this.logger.error(`Error building image ${snapshot.name}: ${fromAxiosError(err)}`)
+      this.logger.error(`Error building snapshot ${snapshot.name}: ${fromAxiosError(err)}`)
       await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, fromAxiosError(err).message)
     }
   }
@@ -589,138 +589,138 @@ export class SnapshotManager {
 
     await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
 
-    let localImageName = snapshot.name
+    let localSnapshotName = snapshot.name
 
     if (snapshot.buildInfo) {
       //  get the default internal registry
       dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      localImageName = snapshot.internalName
+      localSnapshotName = snapshot.internalName
     } else {
-      //  find docker registry based on image name and organization id
+      //  find docker registry based on snapshot name and organization id
       dockerRegistry = await this.dockerRegistryService.findOneBySnapshotName(snapshot.name, snapshot.organizationId)
     }
 
-    // Use the dockerRegistry for pulling the image
-    await this.dockerProvider.pullImage(localImageName, dockerRegistry)
+    // Use the dockerRegistry for pulling the snapshot
+    await this.dockerProvider.pullImage(localSnapshotName, dockerRegistry)
   }
 
-  async handleSnapshotStatePulling(image: Snapshot) {
-    const localImageName = image.buildInfo ? image.internalName : image.name
+  async handleSnapshotStatePulling(snapshot: Snapshot) {
+    const localSnapshotName = snapshot.buildInfo ? snapshot.internalName : snapshot.name
     // Check timeout first
     const timeoutMinutes = 15
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - image.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(image.id, SnapshotState.ERROR, 'Timeout while pulling image')
+    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while pulling snapshot')
       return
     }
 
-    const imageExists = await this.dockerProvider.imageExists(localImageName)
-    if (!imageExists) {
-      //  retry until the image exists (or eventually timeout)
+    const snapshotExists = await this.dockerProvider.imageExists(localSnapshotName)
+    if (!snapshotExists) {
+      //  retry until the snapshot exists (or eventually timeout)
       return
     }
 
     //  sleep for 30 seconds
-    //  workaround for docker image not being ready, but exists
+    //  workaround for docker snapshot not being ready, but exists
     await new Promise((resolve) => setTimeout(resolve, 30000))
 
     //  get the organization
-    const organization = await this.organizationService.findOne(image.organizationId)
+    const organization = await this.organizationService.findOne(snapshot.organizationId)
     if (!organization) {
-      throw new NotFoundException(`Organization with ID ${image.organizationId} not found`)
+      throw new NotFoundException(`Organization with ID ${snapshot.organizationId} not found`)
     }
 
-    // Check image size
-    const imageInfo = await this.dockerProvider.getImageInfo(localImageName)
+    // Check snapshot size
+    const snapshotInfo = await this.dockerProvider.getImageInfo(localSnapshotName)
     const MAX_SIZE_GB = organization.maxSnapshotSize
 
-    if (imageInfo.sizeGB > MAX_SIZE_GB) {
+    if (snapshotInfo.sizeGB > MAX_SIZE_GB) {
       await this.updateSnapshotState(
-        image.id,
+        snapshot.id,
         SnapshotState.ERROR,
-        `Image size (${imageInfo.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
+        `Snapshot size (${snapshotInfo.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
       )
       return
     }
 
-    image.size = imageInfo.sizeGB
-    image.state = SnapshotState.PENDING_VALIDATION
+    snapshot.size = snapshotInfo.sizeGB
+    snapshot.state = SnapshotState.PENDING_VALIDATION
 
     // Ensure entrypoint is set
-    if (!image.entrypoint) {
-      if (imageInfo.entrypoint) {
-        if (Array.isArray(imageInfo.entrypoint)) {
-          image.entrypoint = imageInfo.entrypoint
+    if (!snapshot.entrypoint) {
+      if (snapshotInfo.entrypoint) {
+        if (Array.isArray(snapshotInfo.entrypoint)) {
+          snapshot.entrypoint = snapshotInfo.entrypoint
         } else {
-          image.entrypoint = [imageInfo.entrypoint]
+          snapshot.entrypoint = [snapshotInfo.entrypoint]
         }
       } else {
-        image.entrypoint = ['sleep', 'infinity']
+        snapshot.entrypoint = ['sleep', 'infinity']
       }
     }
 
-    await this.snapshotRepository.save(image)
+    await this.snapshotRepository.save(snapshot)
   }
 
-  async handleSnapshotStatePendingValidation(image: Snapshot) {
+  async handleSnapshotStatePendingValidation(snapshot: Snapshot) {
     try {
-      await this.updateSnapshotState(image.id, SnapshotState.VALIDATING)
+      await this.updateSnapshotState(snapshot.id, SnapshotState.VALIDATING)
 
-      await this.validateImageRuntime(image.id)
+      await this.validateSnapshotRuntime(snapshot.id)
 
-      if (!image.buildInfo) {
-        // Imanges that went through the build process are already in the internal registry
-        await this.pushImageToInternalRegistry(image.id)
+      if (!snapshot.buildInfo) {
+        // Snapshots that have gone through the build process are already in the internal registry
+        await this.pushSnapshotToInternalRegistry(snapshot.id)
       }
-      await this.propagateSnapshotToRunners(image.internalName)
-      await this.updateSnapshotState(image.id, SnapshotState.ACTIVE)
+      await this.propagateSnapshotToRunners(snapshot.internalName)
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
 
-      // Best effort removal of old image from transient registry
-      const registry = await this.dockerRegistryService.findOneBySnapshotName(image.name, image.organizationId)
+      // Best effort removal of old snapshot from transient registry
+      const registry = await this.dockerRegistryService.findOneBySnapshotName(snapshot.name, snapshot.organizationId)
       if (registry && registry.registryType === RegistryType.TRANSIENT) {
         try {
-          await this.dockerRegistryService.removeImage(image.name, registry.id)
+          await this.dockerRegistryService.removeImage(snapshot.name, registry.id)
         } catch (error) {
           if (error.statusCode === 404) {
-            //  image not found, just return
+            //  snapshot not found, just return
             return
           }
-          this.logger.error('Failed to remove old image:', fromAxiosError(error))
+          this.logger.error('Failed to remove old snapshot:', fromAxiosError(error))
         }
       }
     } catch (error) {
       // workaround when app runners don't use a single docker host instance
-      if (error.statusCode === 404 || error.message?.toLowerCase().includes('no such image')) {
+      if (error.statusCode === 404 || error.message?.toLowerCase().includes('no such snapshot')) {
         return
       }
-      await this.updateSnapshotState(image.id, SnapshotState.ERROR, error.message)
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, error.message)
     }
   }
 
-  async handleSnapshotStateValidating(image: Snapshot) {
+  async handleSnapshotStateValidating(snapshot: Snapshot) {
     //  check the timeout
     const timeoutMinutes = 10
     const timeoutMs = timeoutMinutes * 60 * 1000
-    if (Date.now() - image.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(image.id, SnapshotState.ERROR, 'Timeout while validating image')
+    if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
+      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while validating snapshot')
       return
     }
   }
 
-  async validateImageRuntime(imageId: string): Promise<void> {
-    const image = await this.snapshotRepository.findOneOrFail({
+  async validateSnapshotRuntime(snapshotId: string): Promise<void> {
+    const snapshot = await this.snapshotRepository.findOneOrFail({
       where: {
-        id: imageId,
+        id: snapshotId,
       },
     })
 
     let containerId: string | null = null
 
     try {
-      const localImageName = image.buildInfo ? image.internalName : image.name
+      const localSnapshotName = snapshot.buildInfo ? snapshot.internalName : snapshot.name
 
       // Create and start the container
-      containerId = await this.dockerProvider.create(localImageName, image.entrypoint)
+      containerId = await this.dockerProvider.create(localSnapshotName, snapshot.entrypoint)
 
       // Wait for 1 minute while checking container state
       const startTime = Date.now()
@@ -734,7 +734,7 @@ export class SnapshotManager {
         await new Promise((resolve) => setTimeout(resolve, 2000))
       }
     } catch (error) {
-      this.logger.debug('Error validating image runtime:', error)
+      this.logger.debug('Error validating snapshot runtime:', error)
       throw error
     } finally {
       // Cleanup: Destroy the container
@@ -748,10 +748,10 @@ export class SnapshotManager {
     }
   }
 
-  async pushImageToInternalRegistry(imageId: string) {
-    const image = await this.snapshotRepository.findOneOrFail({
+  async pushSnapshotToInternalRegistry(snapshotId: string) {
+    const snapshot = await this.snapshotRepository.findOneOrFail({
       where: {
-        id: imageId,
+        id: snapshotId,
       },
     })
 
@@ -760,34 +760,34 @@ export class SnapshotManager {
       throw new Error('No default internal registry configured')
     }
 
-    //  get tag from image name
-    const tag = image.name.split(':')[1]
-    const internalImageName = `${registry.url}/${registry.project}/${image.id}:${tag}`
+    //  get tag from snapshot name
+    const tag = snapshot.name.split(':')[1]
+    const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.id}:${tag}`
 
-    image.internalName = internalImageName
-    await this.snapshotRepository.save(image)
+    snapshot.internalName = internalSnapshotName
+    await this.snapshotRepository.save(snapshot)
 
-    // Tag the image with the internal registry name
-    await this.dockerProvider.tagImage(image.name, internalImageName)
+    // Tag the snapshot with the internal registry name
+    await this.dockerProvider.tagImage(snapshot.name, internalSnapshotName)
 
-    // Push the newly tagged image
-    await this.dockerProvider.pushImage(internalImageName, registry)
+    // Push the newly tagged snapshot
+    await this.dockerProvider.pushImage(internalSnapshotName, registry)
   }
 
-  async retrySnapshotRunnerPull(imageRunner: SnapshotRunner) {
+  async retrySnapshotRunnerPull(snapshotRunner: SnapshotRunner) {
     const runner = await this.runnerRepository.findOneOrFail({
       where: {
-        id: imageRunner.runnerId,
+        id: snapshotRunner.runnerId,
       },
     })
 
-    const imageApi = this.runnerApiFactory.createSnapshotApi(runner)
+    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await imageApi.pullSnapshot({
-      snapshot: imageRunner.snapshotRef,
+    await snapshotApi.pullSnapshot({
+      snapshot: snapshotRunner.snapshotRef,
       registry: {
         url: dockerRegistry.url,
         username: dockerRegistry.username,
@@ -796,22 +796,22 @@ export class SnapshotManager {
     })
   }
 
-  private async updateSnapshotState(imageId: string, state: SnapshotState, errorReason?: string) {
-    const image = await this.snapshotRepository.findOneOrFail({
+  private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
+    const snapshot = await this.snapshotRepository.findOneOrFail({
       where: {
-        id: imageId,
+        id: snapshotId,
       },
     })
-    image.state = state
+    snapshot.state = state
     if (errorReason) {
-      image.errorReason = errorReason
+      snapshot.errorReason = errorReason
     }
-    await this.snapshotRepository.save(image)
+    await this.snapshotRepository.save(snapshot)
   }
 
   @Cron(CronExpression.EVERY_HOUR)
-  async cleanupOldBuildInfoImageRunners() {
-    const lockKey = 'cleanup-old-buildinfo-images-lock'
+  async cleanupOldBuildInfoSnapshotRunners() {
+    const lockKey = 'cleanup-old-buildinfo-snapshots-lock'
     if (!(await this.redisLockProvider.lock(lockKey, 300))) {
       return
     }
@@ -831,18 +831,18 @@ export class SnapshotManager {
         return
       }
 
-      const imageRefs = oldBuildInfos.map((buildInfo) => buildInfo.snapshotRef)
+      const snapshotRefs = oldBuildInfos.map((buildInfo) => buildInfo.snapshotRef)
 
       const result = await this.snapshotRunnerRepository.update(
-        { snapshotRef: In(imageRefs) },
+        { snapshotRef: In(snapshotRefs) },
         { state: SnapshotRunnerState.REMOVING },
       )
 
       if (result.affected > 0) {
-        this.logger.debug(`Marked ${result.affected} ImageRunners for removal due to unused BuildInfo`)
+        this.logger.debug(`Marked ${result.affected} SnapshotRunners for removal due to unused BuildInfo`)
       }
     } catch (error) {
-      this.logger.error(`Failed to mark old BuildInfo ImageRunners for removal: ${fromAxiosError(error)}`)
+      this.logger.error(`Failed to mark old BuildInfo SnapshotRunners for removal: ${fromAxiosError(error)}`)
     } finally {
       await this.redisLockProvider.unlock(lockKey)
     }

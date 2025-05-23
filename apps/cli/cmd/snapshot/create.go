@@ -17,8 +17,8 @@ import (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:     "create [IMAGE]",
-	Short:   "Create an image",
+	Use:     "create [SNAPSHOT]",
+	Short:   "Create an snapshot",
 	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("create"),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -42,21 +42,21 @@ var CreateCmd = &cobra.Command{
 			createSnapshotDto.Entrypoint = strings.Split(entrypointFlag, " ")
 		}
 
-		image, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(createSnapshotDto).Execute()
+		snapshot, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(createSnapshotDto).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, image.Name, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
+		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
+			return common.AwaitSnapshotState(ctx, apiClient, snapshot.Name, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s successfully created", image.Name))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s successfully created", snapshot.Name))
 
-		view_common.RenderInfoMessage(fmt.Sprintf("%s Run 'daytona sandbox create --image %s' to create a new sandbox using this image", view_common.Checkmark, image.Name))
+		view_common.RenderInfoMessage(fmt.Sprintf("%s Run 'daytona sandbox create --snapshot %s' to create a new sandbox using this snapshot", view_common.Checkmark, snapshot.Name))
 		return nil
 	},
 }
@@ -64,5 +64,5 @@ var CreateCmd = &cobra.Command{
 var entrypointFlag string
 
 func init() {
-	CreateCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the image")
+	CreateCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the snapshot")
 }

@@ -14,38 +14,38 @@ import (
 )
 
 var DeleteCmd = &cobra.Command{
-	Use:     "delete [IMAGE_ID]",
-	Short:   "Delete an image",
+	Use:     "delete [SNAPSHOT_ID]",
+	Short:   "Delete a snapshot",
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
-		var imageId string
-		var imageName string
+		var snapshotId string
+		var snapshotName string
 
 		apiClient, err := apiclient.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
-		imageList, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Execute()
+		snapshotList, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if len(imageList.Items) == 0 {
-			view_common.RenderInfoMessageBold("No images to delete")
+		if len(snapshotList.Items) == 0 {
+			view_common.RenderInfoMessageBold("No snapshots to delete")
 			return nil
 		}
 
 		if len(args) == 0 {
 			if allFlag {
-				for _, image := range imageList.Items {
-					res, err := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, image.Id).Execute()
+				for _, snapshot := range snapshotList.Items {
+					res, err := apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshot.Id).Execute()
 					if err != nil {
-						view_common.RenderInfoMessageBold(fmt.Sprintf("Failed to delete image %s: %s", image.Id, apiclient.HandleErrorResponse(res, err)))
+						view_common.RenderInfoMessageBold(fmt.Sprintf("Failed to delete snapshot %s: %s", snapshot.Id, apiclient.HandleErrorResponse(res, err)))
 					} else {
-						view_common.RenderInfoMessageBold(fmt.Sprintf("Image %s deleted", image.Id))
+						view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshot.Id))
 					}
 				}
 
@@ -54,20 +54,20 @@ var DeleteCmd = &cobra.Command{
 			return cmd.Help()
 		}
 
-		for _, image := range imageList.Items {
-			if image.Id == args[0] || image.Name == args[0] {
-				imageId = image.Id
-				imageName = image.Name
+		for _, snapshot := range snapshotList.Items {
+			if snapshot.Id == args[0] || snapshot.Name == args[0] {
+				snapshotId = snapshot.Id
+				snapshotName = snapshot.Name
 				break
 			}
 		}
 
-		res, err = apiClient.SnapshotsAPI.RemoveSnapshot(ctx, imageId).Execute()
+		res, err = apiClient.SnapshotsAPI.RemoveSnapshot(ctx, snapshotId).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", imageName))
+		view_common.RenderInfoMessageBold(fmt.Sprintf("Snapshot %s deleted", snapshotName))
 		return nil
 	},
 }
@@ -75,5 +75,5 @@ var DeleteCmd = &cobra.Command{
 var allFlag bool
 
 func init() {
-	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all images")
+	DeleteCmd.Flags().BoolVarP(&allFlag, "all", "a", false, "Delete all snapshots")
 }

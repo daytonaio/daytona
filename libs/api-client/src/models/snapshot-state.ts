@@ -22,7 +22,7 @@ export const SnapshotState = {
   BUILD_PENDING: 'build_pending',
   BUILDING: 'building',
   PENDING: 'pending',
-  PULLING_IMAGE: 'pulling_image',
+  PULLING: 'pulling',
   PENDING_VALIDATION: 'pending_validation',
   VALIDATING: 'validating',
   ACTIVE: 'active',

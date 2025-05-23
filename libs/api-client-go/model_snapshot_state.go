@@ -24,7 +24,7 @@ const (
 	SNAPSHOTSTATE_BUILD_PENDING      SnapshotState = "build_pending"
 	SNAPSHOTSTATE_BUILDING           SnapshotState = "building"
 	SNAPSHOTSTATE_PENDING            SnapshotState = "pending"
-	SNAPSHOTSTATE_PULLING_IMAGE      SnapshotState = "pulling_image"
+	SNAPSHOTSTATE_PULLING            SnapshotState = "pulling"
 	SNAPSHOTSTATE_PENDING_VALIDATION SnapshotState = "pending_validation"
 	SNAPSHOTSTATE_VALIDATING         SnapshotState = "validating"
 	SNAPSHOTSTATE_ACTIVE             SnapshotState = "active"
@@ -37,7 +37,7 @@ var AllowedSnapshotStateEnumValues = []SnapshotState{
 	"build_pending",
 	"building",
 	"pending",
-	"pulling_image",
+	"pulling",
 	"pending_validation",
 	"validating",
 	"active",

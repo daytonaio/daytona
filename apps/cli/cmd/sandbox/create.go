@@ -132,7 +132,7 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
-			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_IMAGE)
+			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_SNAPSHOT)
 			if err != nil {
 				return err
 			}

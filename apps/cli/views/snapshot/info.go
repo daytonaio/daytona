@@ -14,23 +14,23 @@ import (
 	"golang.org/x/term"
 )
 
-func RenderInfo(image *daytonaapiclient.SnapshotDto, forceUnstyled bool) {
+func RenderInfo(snapshot *daytonaapiclient.SnapshotDto, forceUnstyled bool) {
 	var output string
-	nameLabel := "Image"
+	nameLabel := "Snapshot"
 
 	output += "\n"
-	output += getInfoLine(nameLabel, image.Name) + "\n"
-	output += getInfoLine("State", getStateLabel(image.State)) + "\n"
-	output += getInfoLine("Enabled", fmt.Sprintf("%v", image.Enabled)) + "\n"
+	output += getInfoLine(nameLabel, snapshot.Name) + "\n"
+	output += getInfoLine("State", getStateLabel(snapshot.State)) + "\n"
+	output += getInfoLine("Enabled", fmt.Sprintf("%v", snapshot.Enabled)) + "\n"
 
-	if image.Size.IsSet() {
-		output += getInfoLine("Size", fmt.Sprintf("%.2f GB", *image.Size.Get())) + "\n"
+	if snapshot.Size.IsSet() {
+		output += getInfoLine("Size", fmt.Sprintf("%.2f GB", *snapshot.Size.Get())) + "\n"
 	} else {
 		output += getInfoLine("Size", "-") + "\n"
 	}
-	output += getInfoLine("Created", util.GetTimeSinceLabel(image.CreatedAt)) + "\n"
+	output += getInfoLine("Created", util.GetTimeSinceLabel(snapshot.CreatedAt)) + "\n"
 
-	output += getInfoLine("ID", image.Id) + "\n"
+	output += getInfoLine("ID", snapshot.Id) + "\n"
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err != nil {
@@ -42,7 +42,7 @@ func RenderInfo(image *daytonaapiclient.SnapshotDto, forceUnstyled bool) {
 		return
 	}
 
-	output = common.GetStyledMainTitle("Image Info") + "\n" + output
+	output = common.GetStyledMainTitle("Snapshot Info") + "\n" + output
 
 	renderTUIView(output, common.GetContainerBreakpointWidth(terminalWidth))
 }
@@ -69,8 +69,8 @@ func getStateLabel(state daytonaapiclient.SnapshotState) string {
 	switch state {
 	case daytonaapiclient.SNAPSHOTSTATE_PENDING:
 		return common.CreatingStyle.Render("PENDING")
-	case daytonaapiclient.SNAPSHOTSTATE_PULLING_IMAGE:
-		return common.CreatingStyle.Render("PULLING IMAGE")
+	case daytonaapiclient.SNAPSHOTSTATE_PULLING:
+		return common.CreatingStyle.Render("PULLING SNAPSHOT")
 	case daytonaapiclient.SNAPSHOTSTATE_VALIDATING:
 		return common.CreatingStyle.Render("VALIDATING")
 	case daytonaapiclient.SNAPSHOTSTATE_ACTIVE:

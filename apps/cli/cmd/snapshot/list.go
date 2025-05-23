@@ -21,8 +21,8 @@ var (
 
 var ListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "List all images",
-	Long:    "List all available Daytona images",
+	Short:   "List all snapshots",
+	Long:    "List all available Daytona snapshots",
 	Aliases: common.GetAliases("list"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

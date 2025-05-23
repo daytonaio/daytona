@@ -118,10 +118,10 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.SnapshotState) (int,
 
 // snapshots that have actions being performed on them have a higher priority when listing
 var snapshotListStatePriorities = map[daytonaapiclient.SnapshotState]int{
-	daytonaapiclient.SNAPSHOTSTATE_PENDING:       1,
-	daytonaapiclient.SNAPSHOTSTATE_PULLING_IMAGE: 1,
-	daytonaapiclient.SNAPSHOTSTATE_VALIDATING:    1,
-	daytonaapiclient.SNAPSHOTSTATE_ERROR:         2,
-	daytonaapiclient.SNAPSHOTSTATE_ACTIVE:        3,
-	daytonaapiclient.SNAPSHOTSTATE_REMOVING:      4,
+	daytonaapiclient.SNAPSHOTSTATE_PENDING:    1,
+	daytonaapiclient.SNAPSHOTSTATE_PULLING:    1,
+	daytonaapiclient.SNAPSHOTSTATE_VALIDATING: 1,
+	daytonaapiclient.SNAPSHOTSTATE_ERROR:      2,
+	daytonaapiclient.SNAPSHOTSTATE_ACTIVE:     3,
+	daytonaapiclient.SNAPSHOTSTATE_REMOVING:   4,
 }

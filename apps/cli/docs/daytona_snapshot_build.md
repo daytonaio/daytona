@@ -1,9 +1,9 @@
-## daytona image build
+## daytona snapshot build
 
-Build an image from a Dockerfile
+Build an snapshot from a Dockerfile
 
 ```
-daytona image build [IMAGE] [flags]
+daytona snapshot build [SNAPSHOT] [flags]
 ```
 
 ### Options
@@ -21,4 +21,4 @@ daytona image build [IMAGE] [flags]
 
 ### SEE ALSO
 
-- [daytona image](daytona_image.md) - Manage Daytona images
+* [daytona snapshot](daytona_snapshot.md)  - Manage Daytona snapshots

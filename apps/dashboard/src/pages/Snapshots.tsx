@@ -6,8 +6,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { Plus } from 'lucide-react'
-import { ImageDto, ImageState, OrganizationRolePermissionsEnum, PaginatedImagesDto } from '@daytonaio/api-client'
-import { ImageTable } from '@/components/ImageTable'
+import {
+  SnapshotDto,
+  SnapshotState,
+  OrganizationRolePermissionsEnum,
+  PaginatedSnapshotsDto,
+} from '@daytonaio/api-client'
+import { SnapshotTable } from '@/components/SnapshotTable'
 import {
   Dialog,
   DialogClose,
@@ -27,21 +32,21 @@ import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
-const Images: React.FC = () => {
+const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
-  const { imageApi } = useApi()
-  const [imagesData, setImagesData] = useState<PaginatedImagesDto>({
+  const { snapshotApi } = useApi()
+  const [snapshotsData, setSnapshotsData] = useState<PaginatedSnapshotsDto>({
     items: [],
     total: 0,
     page: 1,
     totalPages: 0,
   })
-  const [loadingImages, setLoadingImages] = useState<Record<string, boolean>>({})
+  const [loadingSnapshots, setLoadingSnapshots] = useState<Record<string, boolean>>({})
   const [loadingTable, setLoadingTable] = useState(true)
-  const [imageToDelete, setImageToDelete] = useState<ImageDto | null>(null)
+  const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
-  const [newImageName, setNewImageName] = useState('')
+  const [newSnapshotName, setNewSnapshotName] = useState('')
   const [newEntrypoint, setNewEntrypoint] = useState('')
   const [loadingCreate, setLoadingCreate] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
@@ -53,7 +58,7 @@ const Images: React.FC = () => {
     pageSize: DEFAULT_PAGE_SIZE,
   })
 
-  const fetchImages = useCallback(
+  const fetchSnapshots = useCallback(
     async (showTableLoadingState = true) => {
       if (!selectedOrganization) {
         return
@@ -63,20 +68,20 @@ const Images: React.FC = () => {
       }
       try {
         const response = (
-          await imageApi.getAllImages(
+          await snapshotApi.getAllSnapshots(
             selectedOrganization.id,
             paginationParams.pageSize,
             paginationParams.pageIndex + 1,
           )
         ).data
-        setImagesData(response)
+        setSnapshotsData(response)
       } catch (error) {
-        handleApiError(error, 'Failed to fetch images')
+        handleApiError(error, 'Failed to fetch snapshots')
       } finally {
         setLoadingTable(false)
       }
     },
-    [imageApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
+    [snapshotApi, selectedOrganization, paginationParams.pageIndex, paginationParams.pageSize],
   )
 
   const handlePaginationChange = useCallback(({ pageIndex, pageSize }: { pageIndex: number; pageSize: number }) => {
@@ -84,28 +89,28 @@ const Images: React.FC = () => {
   }, [])
 
   useEffect(() => {
-    fetchImages()
-  }, [fetchImages])
+    fetchSnapshots()
+  }, [fetchSnapshots])
 
   useEffect(() => {
-    const handleImageCreatedEvent = (image: ImageDto) => {
+    const handleSnapshotCreatedEvent = (snapshot: SnapshotDto) => {
       if (paginationParams.pageIndex === 0) {
-        setImagesData((prev) => {
-          if (prev.items.some((i) => i.id === image.id)) {
+        setSnapshotsData((prev) => {
+          if (prev.items.some((i) => i.id === snapshot.id)) {
             return prev
           }
 
-          // Find the insertion point - used images should remain at the top
+          // Find the insertion point - used snapshots should remain at the top
           const insertIndex =
-            prev.items.findIndex((i) => !i.lastUsedAt && i.createdAt <= image.createdAt) || prev.items.length
+            prev.items.findIndex((i) => !i.lastUsedAt && i.createdAt <= snapshot.createdAt) || prev.items.length
 
-          const newImages = [...prev.items]
-          newImages.splice(insertIndex, 0, image)
+          const newSnapshots = [...prev.items]
+          newSnapshots.splice(insertIndex, 0, snapshot)
 
           const newTotal = prev.total + 1
           return {
             ...prev,
-            items: newImages.slice(0, paginationParams.pageSize),
+            items: newSnapshots.slice(0, paginationParams.pageSize),
             total: newTotal,
             totalPages: Math.ceil(newTotal / paginationParams.pageSize),
           }
@@ -113,24 +118,28 @@ const Images: React.FC = () => {
       }
     }
 
-    const handleImageStateUpdatedEvent = (data: { image: ImageDto; oldState: ImageState; newState: ImageState }) => {
-      setImagesData((prev) => ({
+    const handleSnapshotStateUpdatedEvent = (data: {
+      snapshot: SnapshotDto
+      oldState: SnapshotState
+      newState: SnapshotState
+    }) => {
+      setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === data.image.id ? data.image : i)),
+        items: prev.items.map((i) => (i.id === data.snapshot.id ? data.snapshot : i)),
       }))
     }
 
-    const handleImageEnabledToggledEvent = (image: ImageDto) => {
-      setImagesData((prev) => ({
+    const handleSnapshotEnabledToggledEvent = (snapshot: SnapshotDto) => {
+      setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? image : i)),
+        items: prev.items.map((i) => (i.id === snapshot.id ? snapshot : i)),
       }))
     }
 
-    const handleImageRemovedEvent = (imageId: string) => {
-      setImagesData((prev) => {
+    const handleSnapshotRemovedEvent = (snapshotId: string) => {
+      setSnapshotsData((prev) => {
         const newTotal = Math.max(0, prev.total - 1)
-        const newItems = prev.items.filter((i) => i.id !== imageId)
+        const newItems = prev.items.filter((i) => i.id !== snapshotId)
 
         return {
           ...prev,
@@ -141,50 +150,50 @@ const Images: React.FC = () => {
       })
     }
 
-    notificationSocket.on('image.created', handleImageCreatedEvent)
-    notificationSocket.on('image.state.updated', handleImageStateUpdatedEvent)
-    notificationSocket.on('image.enabled.toggled', handleImageEnabledToggledEvent)
-    notificationSocket.on('image.removed', handleImageRemovedEvent)
+    notificationSocket.on('snapshot.created', handleSnapshotCreatedEvent)
+    notificationSocket.on('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
+    notificationSocket.on('snapshot.enabled.toggled', handleSnapshotEnabledToggledEvent)
+    notificationSocket.on('snapshot.removed', handleSnapshotRemovedEvent)
 
     return () => {
-      notificationSocket.off('image.created', handleImageCreatedEvent)
-      notificationSocket.off('image.state.updated', handleImageStateUpdatedEvent)
-      notificationSocket.off('image.enabled.toggled', handleImageEnabledToggledEvent)
-      notificationSocket.off('image.removed', handleImageRemovedEvent)
+      notificationSocket.off('snapshot.created', handleSnapshotCreatedEvent)
+      notificationSocket.off('snapshot.state.updated', handleSnapshotStateUpdatedEvent)
+      notificationSocket.off('snapshot.enabled.toggled', handleSnapshotEnabledToggledEvent)
+      notificationSocket.off('snapshot.removed', handleSnapshotRemovedEvent)
     }
   }, [notificationSocket, paginationParams.pageIndex, paginationParams.pageSize])
 
   useEffect(() => {
-    if (imagesData.items.length === 0 && paginationParams.pageIndex > 0) {
+    if (snapshotsData.items.length === 0 && paginationParams.pageIndex > 0) {
       setPaginationParams((prev) => ({
         ...prev,
         pageIndex: prev.pageIndex - 1,
       }))
     }
-  }, [imagesData.items.length, paginationParams.pageIndex])
+  }, [snapshotsData.items.length, paginationParams.pageIndex])
 
-  const validateImageName = (name: string): string | null => {
+  const validateSnapshotName = (name: string): string | null => {
     // Basic format check
-    const imageNameRegex =
+    const snapshotNameRegex =
       /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
 
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+      return 'Snapshot name must include a tag (e.g., ubuntu:22.04)'
     }
 
     if (name.endsWith(':latest')) {
-      return 'Images with tag ":latest" are not allowed'
+      return 'Snapshots with tag ":latest" are not allowed'
     }
 
-    if (!imageNameRegex.test(name)) {
-      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+    if (!snapshotNameRegex.test(name)) {
+      return 'Invalid snapshot name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
     }
 
     return null
   }
 
   const handleCreate = async () => {
-    const validationError = validateImageName(newImageName)
+    const validationError = validateSnapshotName(newSnapshotName)
     if (validationError) {
       toast.warning(validationError)
       return
@@ -192,17 +201,17 @@ const Images: React.FC = () => {
 
     setLoadingCreate(true)
     try {
-      await imageApi.createImage(
+      await snapshotApi.createSnapshot(
         {
-          name: newImageName,
+          name: newSnapshotName,
           entrypoint: newEntrypoint.trim() ? newEntrypoint.trim().split(' ') : undefined,
         },
         selectedOrganization?.id,
       )
       setShowCreateDialog(false)
-      setNewImageName('')
+      setNewSnapshotName('')
       setNewEntrypoint('')
-      toast.success(`Creating image ${newImageName}`)
+      toast.success(`Creating snapshot ${newSnapshotName}`)
 
       if (paginationParams.pageIndex !== 0) {
         setPaginationParams((prev) => ({
@@ -211,64 +220,64 @@ const Images: React.FC = () => {
         }))
       }
     } catch (error) {
-      handleApiError(error, 'Failed to create image')
+      handleApiError(error, 'Failed to create snapshot')
     } finally {
       setLoadingCreate(false)
     }
   }
 
-  const handleDelete = async (image: ImageDto) => {
-    setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+  const handleDelete = async (snapshot: SnapshotDto) => {
+    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
 
-    // Optimistically update the image state
-    setImagesData((prev) => ({
+    // Optimistically update the snapshot state
+    setSnapshotsData((prev) => ({
       ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
     }))
 
     try {
-      await imageApi.removeImage(image.id, selectedOrganization?.id)
-      setImageToDelete(null)
+      await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
+      setSnapshotToDelete(null)
       setShowDeleteDialog(false)
-      toast.success(`Deleting image ${image.name}`)
+      toast.success(`Deleting snapshot ${snapshot.name}`)
     } catch (error) {
-      handleApiError(error, 'Failed to delete image')
+      handleApiError(error, 'Failed to delete snapshot')
       // Revert the optimistic update
-      setImagesData((prev) => ({
+      setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
       }))
     } finally {
-      setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
   }
 
-  const handleToggleEnabled = async (image: ImageDto, enabled: boolean) => {
-    setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
+  const handleToggleEnabled = async (snapshot: SnapshotDto, enabled: boolean) => {
+    setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: true }))
 
-    // Optimistically update the image enabled flag
-    setImagesData((prev) => ({
+    // Optimistically update the snapshot enabled flag
+    setSnapshotsData((prev) => ({
       ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled } : i)),
+      items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, enabled } : i)),
     }))
 
     try {
-      await imageApi.toggleImageState(image.id, { enabled }, selectedOrganization?.id)
-      toast.success(`${enabled ? 'Enabling' : 'Disabling'} image ${image.name}`)
+      await snapshotApi.toggleSnapshotState(snapshot.id, { enabled }, selectedOrganization?.id)
+      toast.success(`${enabled ? 'Enabling' : 'Disabling'} snapshot ${snapshot.name}`)
     } catch (error) {
-      handleApiError(error, enabled ? 'Failed to enable image' : 'Failed to disable image')
+      handleApiError(error, enabled ? 'Failed to enable snapshot' : 'Failed to disable snapshot')
       // Revert the optimistic update
-      setImagesData((prev) => ({
+      setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled: image.enabled } : i)),
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, enabled: snapshot.enabled } : i)),
       }))
     } finally {
-      setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+      setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
     }
   }
 
   const writePermitted = useMemo(
-    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_IMAGES),
+    () => authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SNAPSHOTS),
     [authenticatedUserHasPermission],
   )
 
@@ -281,12 +290,12 @@ const Images: React.FC = () => {
           if (isOpen) {
             return
           }
-          setNewImageName('')
+          setNewSnapshotName('')
           setNewEntrypoint('')
         }}
       >
         <div className="mb-6 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Images</h1>
+          <h1 className="text-2xl font-bold">Snapshots</h1>
           {writePermitted && (
             <DialogTrigger asChild>
               <Button
@@ -294,22 +303,22 @@ const Images: React.FC = () => {
                 size="icon"
                 disabled={loadingTable}
                 className="w-auto px-4"
-                title="Create Image"
+                title="Create Snapshot"
               >
                 <Plus className="w-4 h-4" />
-                Create Image
+                Create Snapshot
               </Button>
             </DialogTrigger>
           )}
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Image</DialogTitle>
+              <DialogTitle>Create New Snapshot</DialogTitle>
               <DialogDescription>
-                Register a new image to be used for spinning up sandboxes in your organization.
+                Register a new snapshot to be used for spinning up sandboxes in your organization.
               </DialogDescription>
             </DialogHeader>
             <form
-              id="create-image-form"
+              id="create-snapshot-form"
               className="space-y-6 overflow-y-auto px-1 pb-1"
               onSubmit={async (e) => {
                 e.preventDefault()
@@ -317,11 +326,11 @@ const Images: React.FC = () => {
               }}
             >
               <div className="space-y-3">
-                <Label htmlFor="name">Image Name</Label>
+                <Label htmlFor="name">Snapshot Name</Label>
                 <Input
                   id="name"
-                  value={newImageName}
-                  onChange={(e) => setNewImageName(e.target.value)}
+                  value={newSnapshotName}
+                  onChange={(e) => setNewSnapshotName(e.target.value)}
                   placeholder="ubuntu:22.04"
                 />
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
@@ -337,8 +346,8 @@ const Images: React.FC = () => {
                   placeholder="sleep infinity"
                 />
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Ensure that the entrypoint is a long running command. If not provided, or if the image does not have
-                  an entrypoint, 'sleep infinity' will be used as the default.
+                  Ensure that the entrypoint is a long running command. If not provided, or if the snapshot does not
+                  have an entrypoint, 'sleep infinity' will be used as the default.
                 </p>
               </div>
             </form>
@@ -355,9 +364,9 @@ const Images: React.FC = () => {
               ) : (
                 <Button
                   type="submit"
-                  form="create-image-form"
+                  form="create-snapshot-form"
                   variant="default"
-                  disabled={!newImageName.trim() || validateImageName(newImageName) !== null}
+                  disabled={!newSnapshotName.trim() || validateSnapshotName(newSnapshotName) !== null}
                 >
                   Create
                 </Button>
@@ -366,16 +375,16 @@ const Images: React.FC = () => {
           </DialogContent>
         </div>
 
-        <ImageTable
-          data={imagesData.items}
+        <SnapshotTable
+          data={snapshotsData.items}
           loading={loadingTable}
-          loadingImages={loadingImages}
-          onDelete={(image) => {
-            setImageToDelete(image)
+          loadingSnapshots={loadingSnapshots}
+          onDelete={(snapshot) => {
+            setSnapshotToDelete(snapshot)
             setShowDeleteDialog(true)
           }}
           onToggleEnabled={handleToggleEnabled}
-          pageCount={imagesData.totalPages}
+          pageCount={snapshotsData.totalPages}
           onPaginationChange={handlePaginationChange}
           pagination={{
             pageIndex: paginationParams.pageIndex,
@@ -384,21 +393,21 @@ const Images: React.FC = () => {
         />
       </Dialog>
 
-      {imageToDelete && (
+      {snapshotToDelete && (
         <Dialog
           open={showDeleteDialog}
           onOpenChange={(isOpen) => {
             setShowDeleteDialog(isOpen)
             if (!isOpen) {
-              setImageToDelete(null)
+              setSnapshotToDelete(null)
             }
           }}
         >
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Confirm Image Deletion</DialogTitle>
+              <DialogTitle>Confirm Snapshot Deletion</DialogTitle>
               <DialogDescription>
-                Are you sure you want to delete this image? This action cannot be undone.
+                Are you sure you want to delete this snapshot? This action cannot be undone.
               </DialogDescription>
             </DialogHeader>
             <DialogFooter>
@@ -409,10 +418,10 @@ const Images: React.FC = () => {
               </DialogClose>
               <Button
                 variant="destructive"
-                onClick={() => handleDelete(imageToDelete)}
-                disabled={loadingImages[imageToDelete.id]}
+                onClick={() => handleDelete(snapshotToDelete)}
+                disabled={loadingSnapshots[snapshotToDelete.id]}
               >
-                {loadingImages[imageToDelete.id] ? 'Deleting...' : 'Delete'}
+                {loadingSnapshots[snapshotToDelete.id] ? 'Deleting...' : 'Delete'}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -422,4 +431,4 @@ const Images: React.FC = () => {
   )
 }
 
-export default Images
+export default Snapshots

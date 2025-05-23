@@ -538,7 +538,7 @@ export class WorkspaceManager {
         break
       }
       case WorkspaceState.BUILDING_SNAPSHOT: {
-        await this.handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart(workspace)
+        await this.handleRunnerWorkspaceBuildingSnapshotStateOnDesiredStateStart(workspace)
         break
       }
       case WorkspaceState.UNKNOWN: {
@@ -554,7 +554,7 @@ export class WorkspaceManager {
       // eslint-disable-next-line no-fallthrough
       case WorkspaceState.RESTORING:
       case WorkspaceState.CREATING:
-        if (await this.handleRunnerWorkspacePullingImageStateCheck(workspace)) {
+        if (await this.handleRunnerWorkspacePullingSnapshotStateCheck(workspace)) {
           break
         }
       //  fallthrough to check if workspace is already started
@@ -652,7 +652,7 @@ export class WorkspaceManager {
     }
   }
 
-  private async handleRunnerWorkspaceBuildingImageStateOnDesiredStateStart(workspace: Workspace) {
+  private async handleRunnerWorkspaceBuildingSnapshotStateOnDesiredStateStart(workspace: Workspace) {
     const snapshotRunner = await this.runnerService.getSnapshotRunner(
       workspace.runnerId,
       workspace.buildInfo.snapshotRef,
@@ -953,8 +953,8 @@ export class WorkspaceManager {
     return false
   }
 
-  //  used to check if workspace is pulling image on runner and update workspace state accordingly
-  private async handleRunnerWorkspacePullingImageStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
+  //  used to check if workspace is pulling snapshot on runner and update workspace state accordingly
+  private async handleRunnerWorkspacePullingSnapshotStateCheck(workspace: Workspace): Promise<BreakFromSwitch> {
     //  edge case when workspace is being transferred to a new runner
     if (!workspace.runnerId) {
       return true

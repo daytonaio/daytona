@@ -5991,7 +5991,7 @@ components:
         - build_pending
         - building
         - pending
-        - pulling_image
+        - pulling
         - pending_validation
         - validating
         - active

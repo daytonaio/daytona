@@ -25,9 +25,9 @@ func AwaitSnapshotState(ctx context.Context, apiClient *daytonaapiclient.APIClie
 					return nil
 				} else if snapshot.State == daytonaapiclient.SNAPSHOTSTATE_ERROR {
 					if !snapshot.ErrorReason.IsSet() {
-						return fmt.Errorf("image processing failed")
+						return fmt.Errorf("snapshot processing failed")
 					}
-					return fmt.Errorf("image processing failed: %s", *snapshot.ErrorReason.Get())
+					return fmt.Errorf("snapshot processing failed: %s", *snapshot.ErrorReason.Get())
 				}
 			}
 		}

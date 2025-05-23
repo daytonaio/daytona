@@ -25,9 +25,9 @@ import (
 )
 
 var PushCmd = &cobra.Command{
-	Use:   "push [IMAGE]",
-	Short: "Push local image",
-	Long:  "Push a local image image to Daytona. To securely build it on our infastructure, use 'daytona image build'",
+	Use:   "push [SNAPSHOT]",
+	Short: "Push local snapshot",
+	Long:  "Push a local Docker image to Daytona. To securely build it on our infrastructure, use 'daytona snapshot build'",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -125,14 +125,14 @@ var PushCmd = &cobra.Command{
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
-		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
+		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
 			return common.AwaitSnapshotState(ctx, apiClient, targetImage, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
 		}
 
-		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this image", views_common.Checkmark, targetImage))
+		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this snapshot", views_common.Checkmark, targetImage))
 		return nil
 	},
 }

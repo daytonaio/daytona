@@ -228,8 +228,8 @@ export class RunnerService {
         snapshotRef: snapshotRef,
       },
       order: {
-        state: 'ASC', // Sorts state BUILDING_IMAGE before ERROR
-        createdAt: 'ASC', // Sorts first runner to start building image on top
+        state: 'ASC', // Sorts state BUILDING_SNAPSHOT before ERROR
+        createdAt: 'ASC', // Sorts first runner to start building snapshot on top
       },
     })
   }

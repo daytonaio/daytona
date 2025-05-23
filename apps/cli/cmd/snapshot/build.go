@@ -19,8 +19,8 @@ import (
 )
 
 var BuildCmd = &cobra.Command{
-	Use:   "build [IMAGE]",
-	Short: "Build an image from a Dockerfile",
+	Use:   "build [SNAPSHOT]",
+	Short: "Build an snapshot from a Dockerfile",
 	Args:  cobra.ExactArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if dockerfilePathFlag == "" {
@@ -28,9 +28,9 @@ var BuildCmd = &cobra.Command{
 		}
 
 		ctx := context.Background()
-		imageName := args[0]
+		snapshotName := args[0]
 
-		err := common.ValidateSnapshotName(imageName)
+		err := common.ValidateSnapshotName(snapshotName)
 		if err != nil {
 			return err
 		}
@@ -46,8 +46,8 @@ var BuildCmd = &cobra.Command{
 		}
 
 		// Send build request
-		image, res, err := apiClient.SnapshotsAPI.BuildSnapshot(ctx).BuildSnapshot(daytonaapiclient.BuildSnapshot{
-			Name:      imageName,
+		snapshot, res, err := apiClient.SnapshotsAPI.BuildSnapshot(ctx).BuildSnapshot(daytonaapiclient.BuildSnapshot{
+			Name:      snapshotName,
 			BuildInfo: *createBuildInfoDto,
 		}).Execute()
 		if err != nil {
@@ -68,15 +68,15 @@ var BuildCmd = &cobra.Command{
 		defer stopLogs()
 
 		go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-			Id:                   image.Id,
+			Id:                   snapshot.Id,
 			ServerUrl:            activeProfile.Api.Url,
 			ServerApi:            activeProfile.Api,
 			ActiveOrganizationId: activeProfile.ActiveOrganizationId,
 			Follow:               util.Pointer(true),
-			ResourceType:         common.ResourceTypeImage,
+			ResourceType:         common.ResourceTypeSnapshot,
 		})
 
-		err = common.AwaitSnapshotState(ctx, apiClient, imageName, daytonaapiclient.SNAPSHOTSTATE_PENDING)
+		err = common.AwaitSnapshotState(ctx, apiClient, snapshotName, daytonaapiclient.SNAPSHOTSTATE_PENDING)
 		if err != nil {
 			return err
 		}
@@ -85,14 +85,14 @@ var BuildCmd = &cobra.Command{
 		time.Sleep(250 * time.Millisecond)
 		stopLogs()
 
-		err = views_util.WithInlineSpinner("Waiting for the image to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, imageName, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
+		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
+			return common.AwaitSnapshotState(ctx, apiClient, snapshotName, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
 		}
 
-		views_common.RenderInfoMessageBold(fmt.Sprintf("Use 'daytona sandbox create --image %s' to create a new sandbox using this image", imageName))
+		views_common.RenderInfoMessageBold(fmt.Sprintf("Use 'daytona sandbox create --snapshot %s' to create a new sandbox using this snapshot", snapshotName))
 		return nil
 	},
 }
