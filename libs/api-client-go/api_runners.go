@@ -20,94 +20,94 @@ import (
 	"strings"
 )
 
-type NodesAPI interface {
+type RunnersAPI interface {
 
 	/*
-		CreateNode Create node
+		CreateRunner Create runner
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return NodesAPICreateNodeRequest
+		@return RunnersAPICreateRunnerRequest
 	*/
-	CreateNode(ctx context.Context) NodesAPICreateNodeRequest
+	CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest
 
-	// CreateNodeExecute executes the request
-	CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.Response, error)
+	// CreateRunnerExecute executes the request
+	CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error)
 
 	/*
-		ListNodes List all nodes
+		ListRunners List all runners
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return NodesAPIListNodesRequest
+		@return RunnersAPIListRunnersRequest
 	*/
-	ListNodes(ctx context.Context) NodesAPIListNodesRequest
+	ListRunners(ctx context.Context) RunnersAPIListRunnersRequest
 
-	// ListNodesExecute executes the request
-	ListNodesExecute(r NodesAPIListNodesRequest) (*http.Response, error)
+	// ListRunnersExecute executes the request
+	ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error)
 
 	/*
-		UpdateNodeScheduling Update node scheduling status
+		UpdateRunnerScheduling Update runner scheduling status
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param id
-		@return NodesAPIUpdateNodeSchedulingRequest
+		@return RunnersAPIUpdateRunnerSchedulingRequest
 	*/
-	UpdateNodeScheduling(ctx context.Context, id string) NodesAPIUpdateNodeSchedulingRequest
+	UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest
 
-	// UpdateNodeSchedulingExecute executes the request
-	UpdateNodeSchedulingExecute(r NodesAPIUpdateNodeSchedulingRequest) (*http.Response, error)
+	// UpdateRunnerSchedulingExecute executes the request
+	UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*http.Response, error)
 }
 
-// NodesAPIService NodesAPI service
-type NodesAPIService service
+// RunnersAPIService RunnersAPI service
+type RunnersAPIService service
 
-type NodesAPICreateNodeRequest struct {
-	ctx        context.Context
-	ApiService NodesAPI
-	createNode *CreateNode
+type RunnersAPICreateRunnerRequest struct {
+	ctx          context.Context
+	ApiService   RunnersAPI
+	createRunner *CreateRunner
 }
 
-func (r NodesAPICreateNodeRequest) CreateNode(createNode CreateNode) NodesAPICreateNodeRequest {
-	r.createNode = &createNode
+func (r RunnersAPICreateRunnerRequest) CreateRunner(createRunner CreateRunner) RunnersAPICreateRunnerRequest {
+	r.createRunner = &createRunner
 	return r
 }
 
-func (r NodesAPICreateNodeRequest) Execute() (*http.Response, error) {
-	return r.ApiService.CreateNodeExecute(r)
+func (r RunnersAPICreateRunnerRequest) Execute() (*http.Response, error) {
+	return r.ApiService.CreateRunnerExecute(r)
 }
 
 /*
-CreateNode Create node
+CreateRunner Create runner
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return NodesAPICreateNodeRequest
+	@return RunnersAPICreateRunnerRequest
 */
-func (a *NodesAPIService) CreateNode(ctx context.Context) NodesAPICreateNodeRequest {
-	return NodesAPICreateNodeRequest{
+func (a *RunnersAPIService) CreateRunner(ctx context.Context) RunnersAPICreateRunnerRequest {
+	return RunnersAPICreateRunnerRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-func (a *NodesAPIService) CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.Response, error) {
+func (a *RunnersAPIService) CreateRunnerExecute(r RunnersAPICreateRunnerRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPost
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.CreateNode")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.CreateRunner")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/nodes"
+	localVarPath := localBasePath + "/runners"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.createNode == nil {
-		return nil, reportError("createNode is required and must be specified")
+	if r.createRunner == nil {
+		return nil, reportError("createRunner is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -128,7 +128,7 @@ func (a *NodesAPIService) CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.createNode
+	localVarPostBody = r.createRunner
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -157,42 +157,42 @@ func (a *NodesAPIService) CreateNodeExecute(r NodesAPICreateNodeRequest) (*http.
 	return localVarHTTPResponse, nil
 }
 
-type NodesAPIListNodesRequest struct {
+type RunnersAPIListRunnersRequest struct {
 	ctx        context.Context
-	ApiService NodesAPI
+	ApiService RunnersAPI
 }
 
-func (r NodesAPIListNodesRequest) Execute() (*http.Response, error) {
-	return r.ApiService.ListNodesExecute(r)
+func (r RunnersAPIListRunnersRequest) Execute() (*http.Response, error) {
+	return r.ApiService.ListRunnersExecute(r)
 }
 
 /*
-ListNodes List all nodes
+ListRunners List all runners
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return NodesAPIListNodesRequest
+	@return RunnersAPIListRunnersRequest
 */
-func (a *NodesAPIService) ListNodes(ctx context.Context) NodesAPIListNodesRequest {
-	return NodesAPIListNodesRequest{
+func (a *RunnersAPIService) ListRunners(ctx context.Context) RunnersAPIListRunnersRequest {
+	return RunnersAPIListRunnersRequest{
 		ApiService: a,
 		ctx:        ctx,
 	}
 }
 
 // Execute executes the request
-func (a *NodesAPIService) ListNodesExecute(r NodesAPIListNodesRequest) (*http.Response, error) {
+func (a *RunnersAPIService) ListRunnersExecute(r RunnersAPIListRunnersRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.ListNodes")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.ListRunners")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/nodes"
+	localVarPath := localBasePath + "/runners"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -243,25 +243,25 @@ func (a *NodesAPIService) ListNodesExecute(r NodesAPIListNodesRequest) (*http.Re
 	return localVarHTTPResponse, nil
 }
 
-type NodesAPIUpdateNodeSchedulingRequest struct {
+type RunnersAPIUpdateRunnerSchedulingRequest struct {
 	ctx        context.Context
-	ApiService NodesAPI
+	ApiService RunnersAPI
 	id         string
 }
 
-func (r NodesAPIUpdateNodeSchedulingRequest) Execute() (*http.Response, error) {
-	return r.ApiService.UpdateNodeSchedulingExecute(r)
+func (r RunnersAPIUpdateRunnerSchedulingRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UpdateRunnerSchedulingExecute(r)
 }
 
 /*
-UpdateNodeScheduling Update node scheduling status
+UpdateRunnerScheduling Update runner scheduling status
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param id
-	@return NodesAPIUpdateNodeSchedulingRequest
+	@return RunnersAPIUpdateRunnerSchedulingRequest
 */
-func (a *NodesAPIService) UpdateNodeScheduling(ctx context.Context, id string) NodesAPIUpdateNodeSchedulingRequest {
-	return NodesAPIUpdateNodeSchedulingRequest{
+func (a *RunnersAPIService) UpdateRunnerScheduling(ctx context.Context, id string) RunnersAPIUpdateRunnerSchedulingRequest {
+	return RunnersAPIUpdateRunnerSchedulingRequest{
 		ApiService: a,
 		ctx:        ctx,
 		id:         id,
@@ -269,19 +269,19 @@ func (a *NodesAPIService) UpdateNodeScheduling(ctx context.Context, id string) N
 }
 
 // Execute executes the request
-func (a *NodesAPIService) UpdateNodeSchedulingExecute(r NodesAPIUpdateNodeSchedulingRequest) (*http.Response, error) {
+func (a *RunnersAPIService) UpdateRunnerSchedulingExecute(r RunnersAPIUpdateRunnerSchedulingRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPatch
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "NodesAPIService.UpdateNodeScheduling")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "RunnersAPIService.UpdateRunnerScheduling")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/nodes/{id}/scheduling"
+	localVarPath := localBasePath + "/runners/{id}/scheduling"
 	localVarPath = strings.Replace(localVarPath, "{"+"id"+"}", url.PathEscape(parameterValueToString(r.id, "id")), -1)
 
 	localVarHeaderParams := make(map[string]string)

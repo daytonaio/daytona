@@ -15,88 +15,88 @@
 /**
  *
  * @export
- * @interface CreateNode
+ * @interface CreateRunner
  */
-export interface CreateNode {
+export interface CreateRunner {
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   domain: string
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   apiUrl: string
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   apiKey: string
   /**
    *
    * @type {number}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   cpu: number
   /**
    *
    * @type {number}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   memory: number
   /**
    *
    * @type {number}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   disk: number
   /**
    *
    * @type {number}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   gpu: number
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   gpuType: string
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
-  class: CreateNodeClassEnum
+  class: CreateRunnerClassEnum
   /**
    *
    * @type {number}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
   capacity: number
   /**
    *
    * @type {string}
-   * @memberof CreateNode
+   * @memberof CreateRunner
    */
-  region: CreateNodeRegionEnum
+  region: CreateRunnerRegionEnum
 }
 
-export const CreateNodeClassEnum = {
+export const CreateRunnerClassEnum = {
   SMALL: 'small',
   MEDIUM: 'medium',
   LARGE: 'large',
 } as const
 
-export type CreateNodeClassEnum = (typeof CreateNodeClassEnum)[keyof typeof CreateNodeClassEnum]
-export const CreateNodeRegionEnum = {
+export type CreateRunnerClassEnum = (typeof CreateRunnerClassEnum)[keyof typeof CreateRunnerClassEnum]
+export const CreateRunnerRegionEnum = {
   EU: 'eu',
   US: 'us',
   ASIA: 'asia',
 } as const
 
-export type CreateNodeRegionEnum = (typeof CreateNodeRegionEnum)[keyof typeof CreateNodeRegionEnum]
+export type CreateRunnerRegionEnum = (typeof CreateRunnerRegionEnum)[keyof typeof CreateRunnerRegionEnum]

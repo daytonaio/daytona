@@ -32,24 +32,24 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { CreateNode } from '../models'
+import type { CreateRunner } from '../models'
 /**
- * NodesApi - axios parameter creator
+ * RunnersApi - axios parameter creator
  * @export
  */
-export const NodesApiAxiosParamCreator = function (configuration?: Configuration) {
+export const RunnersApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @summary Create node
-     * @param {CreateNode} createNode
+     * @summary Create runner
+     * @param {CreateRunner} createRunner
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createNode: async (createNode: CreateNode, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'createNode' is not null or undefined
-      assertParamExists('createNode', 'createNode', createNode)
-      const localVarPath = `/nodes`
+    createRunner: async (createRunner: CreateRunner, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'createRunner' is not null or undefined
+      assertParamExists('createRunner', 'createRunner', createRunner)
+      const localVarPath = `/runners`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -72,7 +72,7 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createNode, localVarRequestOptions, configuration)
+      localVarRequestOptions.data = serializeDataIfNeeded(createRunner, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -81,12 +81,12 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
     },
     /**
      *
-     * @summary List all nodes
+     * @summary List all runners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listNodes: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      const localVarPath = `/nodes`
+    listRunners: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/runners`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -115,15 +115,15 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
     },
     /**
      *
-     * @summary Update node scheduling status
+     * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    updateNodeScheduling: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+    updateRunnerScheduling: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       // verify required parameter 'id' is not null or undefined
-      assertParamExists('updateNodeScheduling', 'id', id)
-      const localVarPath = `/nodes/{id}/scheduling`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      assertParamExists('updateRunnerScheduling', 'id', id)
+      const localVarPath = `/runners/{id}/scheduling`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -154,27 +154,27 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
 }
 
 /**
- * NodesApi - functional programming interface
+ * RunnersApi - functional programming interface
  * @export
  */
-export const NodesApiFp = function (configuration?: Configuration) {
-  const localVarAxiosParamCreator = NodesApiAxiosParamCreator(configuration)
+export const RunnersApiFp = function (configuration?: Configuration) {
+  const localVarAxiosParamCreator = RunnersApiAxiosParamCreator(configuration)
   return {
     /**
      *
-     * @summary Create node
-     * @param {CreateNode} createNode
+     * @summary Create runner
+     * @param {CreateRunner} createRunner
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async createNode(
-      createNode: CreateNode,
+    async createRunner(
+      createRunner: CreateRunner,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createNode(createNode, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createRunner(createRunner, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['NodesApi.createNode']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.createRunner']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -185,17 +185,17 @@ export const NodesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary List all nodes
+     * @summary List all runners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async listNodes(
+    async listRunners(
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listNodes(options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listRunners(options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['NodesApi.listNodes']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.listRunners']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -206,19 +206,19 @@ export const NodesApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Update node scheduling status
+     * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async updateNodeScheduling(
+    async updateRunnerScheduling(
       id: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updateNodeScheduling(id, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.updateRunnerScheduling(id, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['NodesApi.updateNodeScheduling']?.[localVarOperationServerIndex]?.url
+        operationServerMap['RunnersApi.updateRunnerScheduling']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -231,89 +231,89 @@ export const NodesApiFp = function (configuration?: Configuration) {
 }
 
 /**
- * NodesApi - factory interface
+ * RunnersApi - factory interface
  * @export
  */
-export const NodesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
-  const localVarFp = NodesApiFp(configuration)
+export const RunnersApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+  const localVarFp = RunnersApiFp(configuration)
   return {
     /**
      *
-     * @summary Create node
-     * @param {CreateNode} createNode
+     * @summary Create runner
+     * @param {CreateRunner} createRunner
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createNode(createNode: CreateNode, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.createNode(createNode, options).then((request) => request(axios, basePath))
+    createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.createRunner(createRunner, options).then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary List all nodes
+     * @summary List all runners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    listNodes(options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.listNodes(options).then((request) => request(axios, basePath))
+    listRunners(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.listRunners(options).then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Update node scheduling status
+     * @summary Update runner scheduling status
      * @param {string} id
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    updateNodeScheduling(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.updateNodeScheduling(id, options).then((request) => request(axios, basePath))
+    updateRunnerScheduling(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.updateRunnerScheduling(id, options).then((request) => request(axios, basePath))
     },
   }
 }
 
 /**
- * NodesApi - object-oriented interface
+ * RunnersApi - object-oriented interface
  * @export
- * @class NodesApi
+ * @class RunnersApi
  * @extends {BaseAPI}
  */
-export class NodesApi extends BaseAPI {
+export class RunnersApi extends BaseAPI {
   /**
    *
-   * @summary Create node
-   * @param {CreateNode} createNode
+   * @summary Create runner
+   * @param {CreateRunner} createRunner
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NodesApi
+   * @memberof RunnersApi
    */
-  public createNode(createNode: CreateNode, options?: RawAxiosRequestConfig) {
-    return NodesApiFp(this.configuration)
-      .createNode(createNode, options)
+  public createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .createRunner(createRunner, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary List all nodes
+   * @summary List all runners
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NodesApi
+   * @memberof RunnersApi
    */
-  public listNodes(options?: RawAxiosRequestConfig) {
-    return NodesApiFp(this.configuration)
-      .listNodes(options)
+  public listRunners(options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .listRunners(options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Update node scheduling status
+   * @summary Update runner scheduling status
    * @param {string} id
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
-   * @memberof NodesApi
+   * @memberof RunnersApi
    */
-  public updateNodeScheduling(id: string, options?: RawAxiosRequestConfig) {
-    return NodesApiFp(this.configuration)
-      .updateNodeScheduling(id, options)
+  public updateRunnerScheduling(id: string, options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .updateRunnerScheduling(id, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

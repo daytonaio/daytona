@@ -10,7 +10,7 @@ import { IsString } from 'class-validator'
 export class PortPreviewUrlDto {
   @ApiProperty({
     description: 'Preview url',
-    example: 'https://123456-myworkspace.node.com',
+    example: 'https://123456-myworkspace.runner.com',
   })
   @IsString()
   url: string

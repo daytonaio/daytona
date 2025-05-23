@@ -8,5 +8,5 @@ export interface Workspace {
   name: string
   state: string
   region: string
-  nodeDomain: string
+  runnerDomain: string
 }

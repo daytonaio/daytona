@@ -4,19 +4,19 @@
  */
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { ImageNodeState } from '../enums/image-node-state.enum'
+import { ImageRunnerState } from '../enums/image-runner-state.enum'
 
 @Entity()
-export class ImageNode {
+export class ImageRunner {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column({
     type: 'enum',
-    enum: ImageNodeState,
-    default: ImageNodeState.PULLING_IMAGE,
+    enum: ImageRunnerState,
+    default: ImageRunnerState.PULLING_IMAGE,
   })
-  state: ImageNodeState
+  state: ImageRunnerState
 
   @Column({ nullable: true })
   errorReason?: string
@@ -28,7 +28,7 @@ export class ImageNode {
   imageRef: string
 
   @Column()
-  nodeId: string
+  runnerId: string
 
   @CreateDateColumn()
   createdAt: Date

@@ -211,7 +211,7 @@ export class WorkspaceDto {
     }
   }
 
-  static fromWorkspace(workspace: Workspace, nodeDomain: string): WorkspaceDto {
+  static fromWorkspace(workspace: Workspace, runnerDomain: string): WorkspaceDto {
     return {
       id: workspace.id,
       name: workspace.id,
@@ -237,7 +237,7 @@ export class WorkspaceDto {
         created: workspace.createdAt?.toISOString(),
         providerMetadata: JSON.stringify({
           state: this.getWorkspaceState(workspace),
-          nodeDomain,
+          runnerDomain: runnerDomain,
           region: workspace.region,
           class: workspace.class,
           updatedAt: workspace.updatedAt?.toISOString(),

@@ -4,20 +4,20 @@
  */
 
 import { Test, TestingModule } from '@nestjs/testing'
-import { NodeService } from './node.service'
+import { RunnerService } from './runner.service'
 import { getRepositoryToken } from '@nestjs/typeorm'
-import { Node } from '../entities/node.entity'
+import { Runner } from '../entities/runner.entity'
 import { Repository } from 'typeorm'
 import { UserService } from '../../user/user.service'
 import { User } from '../../user/user.entity'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 
-const nodeArray: Node[] = [
+const runnerArray: Runner[] = [
   {
     id: '1',
     class: WorkspaceClass.SMALL,
-    region: NodeRegion.US,
+    region: RunnerRegion.US,
     cpu: 1,
     disk: 1,
     memory: 1,
@@ -30,7 +30,7 @@ const nodeArray: Node[] = [
   {
     id: '2',
     class: WorkspaceClass.SMALL,
-    region: NodeRegion.US,
+    region: RunnerRegion.US,
     cpu: 1,
     disk: 1,
     memory: 1,
@@ -42,10 +42,10 @@ const nodeArray: Node[] = [
   },
 ]
 
-const oneNode: Node = {
+const oneRunner: Runner = {
   id: '1',
   class: WorkspaceClass.SMALL,
-  region: NodeRegion.US,
+  region: RunnerRegion.US,
   cpu: 1,
   disk: 1,
   memory: 1,
@@ -56,20 +56,20 @@ const oneNode: Node = {
   limit: 1,
 }
 
-describe('NodeService', () => {
-  let service: NodeService
-  let repository: Repository<Node>
+describe('RunnerService', () => {
+  let service: RunnerService
+  let repository: Repository<Runner>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        NodeService,
+        RunnerService,
         {
-          provide: getRepositoryToken(Node),
+          provide: getRepositoryToken(Runner),
           useValue: {
-            find: jest.fn().mockResolvedValue(nodeArray),
-            findOneBy: jest.fn().mockResolvedValue(oneNode),
-            save: jest.fn().mockResolvedValue(oneNode),
+            find: jest.fn().mockResolvedValue(runnerArray),
+            findOneBy: jest.fn().mockResolvedValue(oneRunner),
+            save: jest.fn().mockResolvedValue(oneRunner),
             remove: jest.fn(),
             delete: jest.fn(),
           },
@@ -83,8 +83,8 @@ describe('NodeService', () => {
       ],
     }).compile()
 
-    service = module.get<NodeService>(NodeService)
-    repository = module.get<Repository<Node>>(getRepositoryToken(Node))
+    service = module.get<RunnerService>(RunnerService)
+    repository = module.get<Repository<Runner>>(getRepositoryToken(Runner))
   })
 
   it('should be defined', () => {
@@ -92,11 +92,11 @@ describe('NodeService', () => {
   })
 
   describe('create()', () => {
-    it('should successfully insert a node', () => {
-      const oneNode: Node = {
+    it('should successfully insert a runner', () => {
+      const oneRunner: Runner = {
         id: '1',
         class: WorkspaceClass.SMALL,
-        region: NodeRegion.US,
+        region: RunnerRegion.US,
         cpu: 1,
         disk: 1,
         memory: 1,
@@ -110,7 +110,7 @@ describe('NodeService', () => {
       expect(
         service.create({
           class: WorkspaceClass.SMALL,
-          region: NodeRegion.US,
+          region: RunnerRegion.US,
           cpu: 1,
           disk: 1,
           memory: 1,
@@ -120,21 +120,21 @@ describe('NodeService', () => {
           domain: 'test',
           limit: 1,
         }),
-      ).resolves.toEqual(oneNode)
+      ).resolves.toEqual(oneRunner)
     })
   })
 
   describe('findAll()', () => {
-    it('should return an array of nodes', async () => {
-      const nodes = await service.findAll()
-      expect(nodes).toEqual(nodeArray)
+    it('should return an array of runners', async () => {
+      const runners = await service.findAll()
+      expect(runners).toEqual(runnerArray)
     })
   })
 
   describe('findOne()', () => {
-    it('should get a single node', () => {
+    it('should get a single runner', () => {
       const repoSpy = jest.spyOn(repository, 'findOneBy')
-      expect(service.findOne('6d225ef9-b6e1-4061-81c6-a9cf639a8897')).resolves.toEqual(oneNode)
+      expect(service.findOne('6d225ef9-b6e1-4061-81c6-a9cf639a8897')).resolves.toEqual(oneRunner)
       expect(repoSpy).toHaveBeenCalledWith({ id: '6d225ef9-b6e1-4061-81c6-a9cf639a8897' })
     })
   })

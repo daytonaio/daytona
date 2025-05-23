@@ -4,7 +4,6 @@
  */
 
 import {
-  BeforeInsert,
   BeforeUpdate,
   Column,
   CreateDateColumn,
@@ -18,8 +17,8 @@ import {
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { WorkspaceDesiredState } from '../enums/workspace-desired-state.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeRegion } from '../enums/node-region.enum'
 import { BackupState } from '../enums/backup-state.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { nanoid } from 'nanoid'
 import { WorkspaceVolume } from '../dto/workspace.dto'
 import { BuildInfo } from './build-info.entity'
@@ -37,24 +36,24 @@ export class Workspace {
 
   @Column({
     type: 'enum',
-    enum: NodeRegion,
-    default: NodeRegion.EU,
+    enum: RunnerRegion,
+    default: RunnerRegion.EU,
   })
-  region: NodeRegion
+  region: RunnerRegion
 
   @Column({
     type: 'uuid',
     nullable: true,
   })
-  nodeId?: string
+  runnerId?: string
 
-  //  this is the nodeId of the node that was previously assigned to the workspace
-  //  if something goes wrong with new node assignment, we can revert to the previous node
+  //  this is the runnerId of the runner that was previously assigned to the workspace
+  //  if something goes wrong with new runner assignment, we can revert to the previous runner
   @Column({
     type: 'uuid',
     nullable: true,
   })
-  prevNodeId?: string
+  prevRunnerId?: string
 
   @Column({
     type: 'enum',
