@@ -56,12 +56,11 @@ export class WorkspaceManager {
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
   async autostopCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
-    const backupCheckWorkerSelected = await this.redis.get('auto-stop-check-worker-selected')
-    if (backupCheckWorkerSelected) {
+    //  keep the worker selected for 1 minute
+
+    if (!(await this.redisLockProvider.lock('auto-stop-check-worker-selected', 60))) {
       return
     }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex('auto-stop-check-worker-selected', 60, '1')
 
     // Get all ready nodes
     const allNodes = await this.nodeService.findAll()
