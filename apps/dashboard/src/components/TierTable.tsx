@@ -93,7 +93,7 @@ export function TierTable({
                   variant="outline"
                   className="ml-4"
                   onClick={() => {
-                    navigate(RoutePath.BILLING)
+                    navigate(RoutePath.LINKED_ACCOUNTS)
                   }}
                 >
                   Linked Accounts

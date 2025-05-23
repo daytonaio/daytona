@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApi } from '@/hooks/useApi'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -17,6 +17,7 @@ import { handleApiError } from '@/lib/error-handling'
 import QuotaLine from '@/components/QuotaLine'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrganizationTier } from '@/billing-api/billingApiClient'
+import { UserProfileIdentity } from './LinkedAccounts'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
@@ -98,6 +99,15 @@ const Limits: React.FC = () => {
     )
   }
 
+  const githubConnected = useMemo(() => {
+    if (!user?.profile?.identities) {
+      return false
+    }
+    return (user.profile.identities as UserProfileIdentity[]).some(
+      (identity: UserProfileIdentity) => identity.provider === 'github',
+    )
+  }, [user])
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold">Limits</h1>
@@ -169,7 +179,7 @@ const Limits: React.FC = () => {
               creditCardConnected={!!wallet?.creditCardConnected}
               walletToppedUp={!!organizationTier?.didTopUpTenDollars}
               emailVerified={!!user?.profile?.email_verified}
-              githubConnected={false}
+              githubConnected={githubConnected}
             />
           </CardContent>
         </Card>
