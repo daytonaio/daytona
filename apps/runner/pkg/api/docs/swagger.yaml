@@ -20,6 +20,16 @@ definitions:
       - dockerfile
       - organizationId
     type: object
+  CreateBackupDTO:
+    properties:
+      image:
+        type: string
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+    required:
+      - image
+      - registry
+    type: object
   CreateSandboxDTO:
     properties:
       cpuQuota:
@@ -63,16 +73,6 @@ definitions:
       - image
       - osUser
       - userId
-    type: object
-  CreateSnapshotDTO:
-    properties:
-      image:
-        type: string
-      registry:
-        $ref: '#/definitions/RegistryDTO'
-    required:
-      - image
-      - registry
     type: object
   ErrorResponse:
     description: Error response
@@ -147,8 +147,8 @@ definitions:
     type: object
   SandboxInfoResponse:
     properties:
-      snapshotState:
-        $ref: '#/definitions/enums.SnapshotState'
+      backupState:
+        $ref: '#/definitions/enums.BackupState'
       state:
         $ref: '#/definitions/enums.SandboxState'
     type: object
@@ -159,6 +159,20 @@ definitions:
       volumeId:
         type: string
     type: object
+  enums.BackupState:
+    enum:
+      - NONE
+      - PENDING
+      - IN_PROGRESS
+      - COMPLETED
+      - FAILED
+    type: string
+    x-enum-varnames:
+      - BackupStateNone
+      - BackupStatePending
+      - BackupStateInProgress
+      - BackupStateCompleted
+      - BackupStateFailed
   enums.SandboxState:
     enum:
       - creating
@@ -187,20 +201,6 @@ definitions:
       - SandboxStateError
       - SandboxStateUnknown
       - SandboxStatePullingImage
-  enums.SnapshotState:
-    enum:
-      - NONE
-      - PENDING
-      - IN_PROGRESS
-      - COMPLETED
-      - FAILED
-    type: string
-    x-enum-varnames:
-      - SnapshotStateNone
-      - SnapshotStatePending
-      - SnapshotStateInProgress
-      - SnapshotStateCompleted
-      - SnapshotStateFailed
 info:
   contact: {}
   description: Daytona Runner API
@@ -584,6 +584,52 @@ paths:
       summary: Proxy requests to the sandbox toolbox
       tags:
         - toolbox
+  /workspaces/{workspaceId}/backup:
+    post:
+      description: Create sandbox backup
+      operationId: CreateBackup
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: workspaceId
+          required: true
+          type: string
+        - description: Create backup
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateBackupDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Backup created
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create sandbox backup
+      tags:
+        - sandbox
   /workspaces/{workspaceId}/destroy:
     post:
       description: Destroy sandbox
@@ -668,52 +714,6 @@ paths:
           schema:
             $ref: '#/definitions/ErrorResponse'
       summary: Resize sandbox
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/snapshot:
-    post:
-      description: Create sandbox snapshot
-      operationId: CreateSnapshot
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-        - description: Create snapshot
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateSnapshotDTO'
-      produces:
-        - application/json
-      responses:
-        '201':
-          description: Snapshot created
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Create sandbox snapshot
       tags:
         - sandbox
   /workspaces/{workspaceId}/start:
