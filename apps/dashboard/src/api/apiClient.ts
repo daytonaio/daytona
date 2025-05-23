@@ -8,7 +8,7 @@ import {
   ApiKeysApi,
   Configuration,
   DockerRegistryApi,
-  ImagesApi,
+  SnapshotsApi,
   OrganizationsApi,
   UsersApi,
   VolumesApi,
@@ -19,7 +19,7 @@ import { DaytonaError } from './errors'
 
 export class ApiClient {
   private config: Configuration
-  private _imageApi: ImagesApi
+  private _snapshotApi: SnapshotsApi
   private _workspaceApi: WorkspaceApi
   private _userApi: UsersApi
   private _apiKeyApi: ApiKeysApi
@@ -53,7 +53,7 @@ export class ApiClient {
     )
 
     // Initialize APIs
-    this._imageApi = new ImagesApi(this.config, undefined, axiosInstance)
+    this._snapshotApi = new SnapshotsApi(this.config, undefined, axiosInstance)
     this._workspaceApi = new WorkspaceApi(this.config, undefined, axiosInstance)
     this._userApi = new UsersApi(this.config, undefined, axiosInstance)
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
@@ -67,8 +67,8 @@ export class ApiClient {
     this.config.accessToken = accessToken
   }
 
-  public get imageApi() {
-    return this._imageApi
+  public get snapshotApi() {
+    return this._snapshotApi
   }
 
   public get workspaceApi() {

@@ -41,9 +41,9 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	createSandbox := daytonaapiclient.NewCreateWorkspace()
 
-	if image, ok := request.Params.Arguments["image"]; ok && image != nil {
-		if imageStr, ok := image.(string); ok && imageStr != "" {
-			createSandbox.SetImage(imageStr)
+	if snapshot, ok := request.Params.Arguments["snapshot"]; ok && snapshot != nil {
+		if snapshotStr, ok := snapshot.(string); ok && snapshotStr != "" {
+			createSandbox.SetSnapshot(snapshotStr)
 		}
 	}
 

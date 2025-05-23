@@ -474,7 +474,7 @@ export class WorkspaceController {
 
     const logProxy = new LogProxy(
       runner.apiUrl,
-      workspace.buildInfo.imageRef.split(':')[0],
+      workspace.buildInfo.snapshotRef.split(':')[0],
       runner.apiKey,
       follow === true,
       req,

@@ -12,22 +12,22 @@ import (
 	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
 )
 
-func AwaitImageState(ctx context.Context, apiClient *daytonaapiclient.APIClient, targetImage string, state daytonaapiclient.ImageState) error {
+func AwaitSnapshotState(ctx context.Context, apiClient *daytonaapiclient.APIClient, targetImage string, state daytonaapiclient.SnapshotState) error {
 	for {
-		images, res, err := apiClient.ImagesAPI.GetAllImages(ctx).Execute()
+		snapshots, res, err := apiClient.SnapshotsAPI.GetAllSnapshots(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		for _, image := range images.Items {
-			if image.Name == targetImage {
-				if image.State == state {
+		for _, snapshot := range snapshots.Items {
+			if snapshot.Name == targetImage {
+				if snapshot.State == state {
 					return nil
-				} else if image.State == daytonaapiclient.IMAGESTATE_ERROR {
-					if !image.ErrorReason.IsSet() {
-						return fmt.Errorf("image processing failed")
+				} else if snapshot.State == daytonaapiclient.SNAPSHOTSTATE_ERROR {
+					if !snapshot.ErrorReason.IsSet() {
+						return fmt.Errorf("snapshot processing failed")
 					}
-					return fmt.Errorf("image processing failed: %s", *image.ErrorReason.Get())
+					return fmt.Errorf("snapshot processing failed: %s", *snapshot.ErrorReason.Get())
 				}
 			}
 		}

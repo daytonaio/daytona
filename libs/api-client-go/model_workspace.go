@@ -29,8 +29,8 @@ type Workspace struct {
 	Name string `json:"name"`
 	// The organization ID of the workspace
 	OrganizationId string `json:"organizationId"`
-	// The image used for the workspace
-	Image *string `json:"image,omitempty"`
+	// The snapshot used for the workspace
+	Snapshot *string `json:"snapshot,omitempty"`
 	// The user associated with the project
 	User string `json:"user"`
 	// Environment variables for the workspace
@@ -171,36 +171,36 @@ func (o *Workspace) SetOrganizationId(v string) {
 	o.OrganizationId = v
 }
 
-// GetImage returns the Image field value if set, zero value otherwise.
-func (o *Workspace) GetImage() string {
-	if o == nil || IsNil(o.Image) {
+// GetSnapshot returns the Snapshot field value if set, zero value otherwise.
+func (o *Workspace) GetSnapshot() string {
+	if o == nil || IsNil(o.Snapshot) {
 		var ret string
 		return ret
 	}
-	return *o.Image
+	return *o.Snapshot
 }
 
-// GetImageOk returns a tuple with the Image field value if set, nil otherwise
+// GetSnapshotOk returns a tuple with the Snapshot field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *Workspace) GetImageOk() (*string, bool) {
-	if o == nil || IsNil(o.Image) {
+func (o *Workspace) GetSnapshotOk() (*string, bool) {
+	if o == nil || IsNil(o.Snapshot) {
 		return nil, false
 	}
-	return o.Image, true
+	return o.Snapshot, true
 }
 
-// HasImage returns a boolean if a field has been set.
-func (o *Workspace) HasImage() bool {
-	if o != nil && !IsNil(o.Image) {
+// HasSnapshot returns a boolean if a field has been set.
+func (o *Workspace) HasSnapshot() bool {
+	if o != nil && !IsNil(o.Snapshot) {
 		return true
 	}
 
 	return false
 }
 
-// SetImage gets a reference to the given string and assigns it to the Image field.
-func (o *Workspace) SetImage(v string) {
-	o.Image = &v
+// SetSnapshot gets a reference to the given string and assigns it to the Snapshot field.
+func (o *Workspace) SetSnapshot(v string) {
+	o.Snapshot = &v
 }
 
 // GetUser returns the User field value
@@ -720,8 +720,8 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
 	toSerialize["organizationId"] = o.OrganizationId
-	if !IsNil(o.Image) {
-		toSerialize["image"] = o.Image
+	if !IsNil(o.Snapshot) {
+		toSerialize["snapshot"] = o.Snapshot
 	}
 	toSerialize["user"] = o.User
 	toSerialize["env"] = o.Env

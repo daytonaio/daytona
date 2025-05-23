@@ -18,8 +18,8 @@ import { WorkspaceDto } from '../workspace/dto/workspace.dto'
 import { DockerRegistryDto } from '../docker-registry/dto/docker-registry.dto'
 import { CreateWorkspaceDto } from '../workspace/dto/create-workspace.dto'
 import { Request } from 'express'
-import { CreateImageDto } from '../workspace/dto/create-image.dto'
-import { ImageDto } from '../workspace/dto/image.dto'
+import { CreateSnapshotDto } from '../workspace/dto/create-snapshot.dto'
+import { SnapshotDto } from '../workspace/dto/snapshot.dto'
 import { ToggleStateDto } from '../workspace/dto/toggle-state.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
 import { UpdateOrganizationQuotaDto } from '../organization/dto/update-organization-quota.dto'
@@ -31,7 +31,7 @@ import { UpdateOrganizationRoleDto } from '../organization/dto/update-organizati
 import { CreateOrganizationInvitationDto } from '../organization/dto/create-organization-invitation.dto'
 import { UpdateOrganizationInvitationDto } from '../organization/dto/update-organization-invitation.dto'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { BuildImageDto } from '../workspace/dto/build-image.dto'
+import { BuildSnapshotDto } from '../workspace/dto/build-snapshot.dto'
 import { CreateVolumeDto } from '../workspace/dto/create-volume.dto'
 import { VolumeDto } from '../workspace/dto/volume.dto'
 
@@ -119,11 +119,11 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/api-keys':
             this.captureCreateApiKey(props)
             break
-          case '/api/images':
-            this.captureCreateImage(props, request.body, response)
+          case '/api/snapshots':
+            this.captureCreateSnapshot(props, request.body, response)
             break
-          case '/api/images/build':
-            this.captureBuildImage(props, request.body, response)
+          case '/api/snapshots/build':
+            this.captureBuildSnapshot(props, request.body, response)
             break
           case '/api/docker-registry':
             this.captureCreateDockerRegistry(props, response)
@@ -196,8 +196,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/workspace/:workspaceId':
             this.captureDeleteWorkspace(props, request.params.workspaceId)
             break
-          case '/api/images/:imageId':
-            this.captureDeleteImage(props, request.params.imageId)
+          case '/api/snapshots/:snapshotId':
+            this.captureDeleteSnapshot(props, request.params.snapshotId)
             break
           case '/api/organizations/:organizationId':
             this.captureDeleteOrganization(props, request.params.organizationId)
@@ -237,8 +237,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PATCH':
         switch (request.route.path) {
-          case '/api/images/:imageId/toggle':
-            this.captureToggleImageState(props, request.params.imageId, request.body)
+          case '/api/snapshots/:snapshotId/toggle':
+            this.captureToggleSnapshotState(props, request.params.snapshotId, request.body)
             break
           case '/api/organizations/:organizationId/quota':
             this.captureUpdateOrganizationQuota(props, request.params.organizationId, request.body)
@@ -420,32 +420,32 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureCreateImage(props: CommonCaptureProps, request: CreateImageDto, response: ImageDto) {
-    this.capture('api_image_created', props, 'api_image_creation_failed', {
-      image_id: response.id,
-      image_name: request.name,
-      image_entrypoint: request.entrypoint,
+  private captureCreateSnapshot(props: CommonCaptureProps, request: CreateSnapshotDto, response: SnapshotDto) {
+    this.capture('api_snapshot_created', props, 'api_snapshot_creation_failed', {
+      snapshot_id: response.id,
+      snapshot_name: request.name,
+      snapshot_entrypoint: request.entrypoint,
     })
   }
 
-  private captureBuildImage(props: CommonCaptureProps, request: BuildImageDto, response: ImageDto) {
-    this.capture('api_image_built', props, 'api_image_build_failed', {
-      image_id: response.id,
-      image_name: request.name,
-      image_build_info_context_hashes_length: request.buildInfo.contextHashes?.length,
+  private captureBuildSnapshot(props: CommonCaptureProps, request: BuildSnapshotDto, response: SnapshotDto) {
+    this.capture('api_snapshot_built', props, 'api_snapshot_build_failed', {
+      snapshot_id: response.id,
+      snapshot_name: request.name,
+      snapshot_build_info_context_hashes_length: request.buildInfo.contextHashes?.length,
     })
   }
 
-  private captureDeleteImage(props: CommonCaptureProps, imageId: string) {
-    this.capture('api_image_deleted', props, 'api_image_deletion_failed', {
-      image_id: imageId,
+  private captureDeleteSnapshot(props: CommonCaptureProps, snapshotId: string) {
+    this.capture('api_snapshot_deleted', props, 'api_snapshot_deletion_failed', {
+      snapshot_id: snapshotId,
     })
   }
 
-  private captureToggleImageState(props: CommonCaptureProps, imageId: string, request: ToggleStateDto) {
-    this.capture('api_image_state_toggled', props, 'api_image_state_toggle_failed', {
-      image_id: imageId,
-      image_enabled: request.enabled,
+  private captureToggleSnapshotState(props: CommonCaptureProps, snapshotId: string, request: ToggleStateDto) {
+    this.capture('api_snapshot_state_toggled', props, 'api_snapshot_state_toggle_failed', {
+      snapshot_id: snapshotId,
+      snapshot_enabled: request.enabled,
     })
   }
 
@@ -454,8 +454,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
 
     const records = {
       sandbox_id: response.id,
-      sandbox_image_request: request.image,
-      sandbox_image: response.image,
+      sandbox_snapshot_request: request.snapshot,
+      sandbox_snapshot: response.snapshot,
       sandbox_user_request: request.user,
       sandbox_user: response.user,
       sandbox_cpu_request: request.cpu,
@@ -598,8 +598,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         ? request.maxMemoryPerWorkspace * 1024
         : null,
       organization_max_disk_per_workspace_gb: request.maxDiskPerWorkspace,
-      organization_image_quota: request.imageQuota,
-      organization_max_image_size_mb: request.maxImageSize ? request.maxImageSize * 1024 : null,
+      organization_snapshot_quota: request.snapshotQuota,
+      organization_max_snapshot_size_mb: request.maxSnapshotSize ? request.maxSnapshotSize * 1024 : null,
       organization_volume_quota: request.volumeQuota,
     })
   }
