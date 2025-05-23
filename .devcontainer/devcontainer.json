@@ -9,7 +9,8 @@
   },
   "remoteEnv": {
     "NX_DAEMON": "true",
-    "NODE_ENV": "development"
+    "NODE_ENV": "development",
+    "PYTHONPATH": "${containerWorkspaceFolder}/libs/sdk-python/src:${containerWorkspaceFolder}/libs/api-client-python:${containerEnv:PYTHONPATH}"
   },
   "customizations": {
     // Configure properties specific to VS Code.
@@ -23,7 +24,9 @@
         "unifiedjs.vscode-mdx",
         "timonwong.shellcheck",
         "foxundermoon.shell-format",
-        "cschlosser.doxdocgen"
+        "cschlosser.doxdocgen",
+        "ms-python.python",
+        "ms-toolsai.jupyter"
       ],
       "settings": {
         "editor.defaultFormatter": "esbenp.prettier-vscode"
@@ -51,13 +54,19 @@
       "version": "22.14.0",
       "installYarnUsingApt": false
     },
-    "ghcr.io/devcontainers/features/python:1": {},
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.10"
+    },
     "./tools-feature": {
       "pipPackages": ["build", "twine"],
       "goTools": ["github.com/swaggo/swag/cmd/swag@v1.16.4", "github.com/mitranim/gow@latest"]
     }
   },
-  "postStartCommand": "yarn",
+  "onCreateCommand": {
+    // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
+    "env": "test -f .env.local || touch .env.local"
+  },
+  "postStartCommand": "yarn && yarn --cwd libs/sdk-typescript install && pip install --upgrade pip && pip install -e ./libs/sdk-python[dev]",
   "postAttachCommand": "",
   "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

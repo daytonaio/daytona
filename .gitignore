@@ -58,3 +58,11 @@ vitest.config.*.timestamp*
 .eslintcache
 .tmp/
 .env.local
+
+# Python package metadata
+*.egg-info/
+*.egg
+*.pyc
+__pycache__/
+
+examples/**/*.png

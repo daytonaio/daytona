@@ -1,0 +1,47 @@
+{
+  "name": "@daytonaio/sdk",
+  "version": "0.0.0-dev",
+  "description": "TypeScript SDK for Daytona",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/daytonaio/daytona.git"
+  },
+  "author": "Daytona Platforms Inc.",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/daytonaio/sdk/issues"
+  },
+  "homepage": "https://github.com/daytonaio/sdk#readme",
+  "config": {
+    "docsDir": "../../apps/docs/content/sdk-typescript"
+  },
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "prepare": "npm run build",
+    "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && typedoc && rm -f $npm_package_config_docsDir/readme.mdx"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "devDependencies": {
+    "@babel/preset-env": "^7.22.0",
+    "@babel/preset-typescript": "^7.22.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.10.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
+    "typedoc": "~0.27.7",
+    "typedoc-plugin-markdown": "~4.4.2",
+    "typedoc-plugin-merge-modules": "~6.1.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.25.1",
+    "axios": "^1.6.1",
+    "form-data": "^4.0.0",
+    "uuid": "^11.0.3"
+  }
+}

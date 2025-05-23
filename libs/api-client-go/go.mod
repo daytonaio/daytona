@@ -1,4 +1,4 @@
-module github.com/daytonaio/sdk
+module github.com/daytonaio/daytona
 
 go 1.18
 
