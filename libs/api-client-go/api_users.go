@@ -84,11 +84,11 @@ type UsersAPI interface {
 		UnlinkAccount Unlink account
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param providerId
-		@param userId
+		@param provider
+		@param providerUserId
 		@return UsersAPIUnlinkAccountRequest
 	*/
-	UnlinkAccount(ctx context.Context, providerId string, userId string) UsersAPIUnlinkAccountRequest
+	UnlinkAccount(ctx context.Context, provider string, providerUserId string) UsersAPIUnlinkAccountRequest
 
 	// UnlinkAccountExecute executes the request
 	UnlinkAccountExecute(r UsersAPIUnlinkAccountRequest) (*http.Response, error)
@@ -567,10 +567,10 @@ func (a *UsersAPIService) RegenerateKeyPairExecute(r UsersAPIRegenerateKeyPairRe
 }
 
 type UsersAPIUnlinkAccountRequest struct {
-	ctx        context.Context
-	ApiService UsersAPI
-	providerId string
-	userId     string
+	ctx            context.Context
+	ApiService     UsersAPI
+	provider       string
+	providerUserId string
 }
 
 func (r UsersAPIUnlinkAccountRequest) Execute() (*http.Response, error) {
@@ -581,16 +581,16 @@ func (r UsersAPIUnlinkAccountRequest) Execute() (*http.Response, error) {
 UnlinkAccount Unlink account
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param providerId
-	@param userId
+	@param provider
+	@param providerUserId
 	@return UsersAPIUnlinkAccountRequest
 */
-func (a *UsersAPIService) UnlinkAccount(ctx context.Context, providerId string, userId string) UsersAPIUnlinkAccountRequest {
+func (a *UsersAPIService) UnlinkAccount(ctx context.Context, provider string, providerUserId string) UsersAPIUnlinkAccountRequest {
 	return UsersAPIUnlinkAccountRequest{
-		ApiService: a,
-		ctx:        ctx,
-		providerId: providerId,
-		userId:     userId,
+		ApiService:     a,
+		ctx:            ctx,
+		provider:       provider,
+		providerUserId: providerUserId,
 	}
 }
 
@@ -607,9 +607,9 @@ func (a *UsersAPIService) UnlinkAccountExecute(r UsersAPIUnlinkAccountRequest) (
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/users/linked-accounts/{providerId}/{userId}"
-	localVarPath = strings.Replace(localVarPath, "{"+"providerId"+"}", url.PathEscape(parameterValueToString(r.providerId, "providerId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"userId"+"}", url.PathEscape(parameterValueToString(r.userId, "userId")), -1)
+	localVarPath := localBasePath + "/users/linked-accounts/{provider}/{providerUserId}"
+	localVarPath = strings.Replace(localVarPath, "{"+"provider"+"}", url.PathEscape(parameterValueToString(r.provider, "provider")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"providerUserId"+"}", url.PathEscape(parameterValueToString(r.providerUserId, "providerUserId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}

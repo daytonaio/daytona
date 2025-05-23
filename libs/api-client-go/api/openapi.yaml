@@ -1017,27 +1017,27 @@ paths:
       summary: Get available account providers
       tags:
         - users
-  /users/linked-accounts/{providerId}/{userId}:
+  /users/linked-accounts/{provider}/{providerUserId}:
     delete:
       operationId: unlinkAccount
       parameters:
         - explode: false
           in: path
-          name: providerId
+          name: provider
           required: true
           schema:
             type: string
           style: simple
         - explode: false
           in: path
-          name: userId
+          name: providerUserId
           required: true
           schema:
             type: string
           style: simple
       responses:
-        '200':
-          description: ''
+        '204':
+          description: Account unlinked successfully
       security:
         - bearer: []
         - oauth2:
@@ -3270,9 +3270,9 @@ paths:
       summary: Call Lsp WorkspaceSymbols
       tags:
         - toolbox
-  /images:
+  /snapshots:
     get:
-      operationId: getAllImages
+      operationId: getAllSnapshots
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3303,19 +3303,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PaginatedImagesDto'
-          description: List of all images with pagination
+                $ref: '#/components/schemas/PaginatedSnapshotsDto'
+          description: List of all snapshots with pagination
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: List all images
+      summary: List all snapshots
       tags:
-        - images
+        - snapshots
     post:
-      operationId: createImage
+      operationId: createSnapshot
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3329,29 +3329,29 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateImage'
+              $ref: '#/components/schemas/CreateSnapshot'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageDto'
-          description: The image has been successfully created.
+                $ref: '#/components/schemas/SnapshotDto'
+          description: The snapshot has been successfully created.
         '400':
-          description: Bad request - Images with tag ":latest" are not allowed
+          description: Bad request - Snapshots with tag ":latest" are not allowed
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Create a new image
+      summary: Create a new snapshot
       tags:
-        - images
-  /images/{id}:
+        - snapshots
+  /snapshots/{id}:
     delete:
-      operationId: removeImage
+      operationId: removeSnapshot
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3361,7 +3361,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Image ID
+        - description: Snapshot ID
           explode: false
           in: path
           name: id
@@ -3371,18 +3371,18 @@ paths:
           style: simple
       responses:
         '200':
-          description: Image has been deleted
+          description: Snapshot has been deleted
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Delete image
+      summary: Delete snapshot
       tags:
-        - images
+        - snapshots
     get:
-      operationId: getImage
+      operationId: getSnapshot
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3392,7 +3392,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Image ID
+        - description: Snapshot ID
           explode: false
           in: path
           name: id
@@ -3405,22 +3405,22 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageDto'
-          description: The image
+                $ref: '#/components/schemas/SnapshotDto'
+          description: The snapshot
         '404':
-          description: Image not found
+          description: Snapshot not found
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Get image by ID
+      summary: Get snapshot by ID
       tags:
-        - images
-  /images/build:
+        - snapshots
+  /snapshots/build:
     post:
-      operationId: buildImage
+      operationId: buildSnapshot
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3434,15 +3434,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BuildImage'
+              $ref: '#/components/schemas/BuildSnapshot'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageDto'
-          description: The image has been successfully built.
+                $ref: '#/components/schemas/SnapshotDto'
+          description: The snapshot has been successfully built.
         '400':
           description: Bad request - Invalid build parameters
       security:
@@ -3451,12 +3451,12 @@ paths:
             - openid
             - profile
             - email
-      summary: Build a Docker image
+      summary: Build a snapshot
       tags:
-        - images
-  /images/{id}/toggle:
+        - snapshots
+  /snapshots/{id}/toggle:
     patch:
-      operationId: toggleImageState
+      operationId: toggleSnapshotState
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3466,7 +3466,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Image ID
+        - description: Snapshot ID
           explode: false
           in: path
           name: id
@@ -3485,20 +3485,20 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageDto'
-          description: Image state has been toggled
+                $ref: '#/components/schemas/SnapshotDto'
+          description: Snapshot state has been toggled
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Toggle image state
+      summary: Toggle snapshot state
       tags:
-        - images
-  /images/{id}/general:
+        - snapshots
+  /snapshots/{id}/general:
     patch:
-      operationId: setImageGeneralStatus
+      operationId: setSnapshotGeneralStatus
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3508,7 +3508,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Image ID
+        - description: Snapshot ID
           explode: false
           in: path
           name: id
@@ -3520,27 +3520,27 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/SetImageGeneralStatus'
+              $ref: '#/components/schemas/SetSnapshotGeneralStatusDto'
         required: true
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ImageDto'
-          description: Image general status has been set
+                $ref: '#/components/schemas/SnapshotDto'
+          description: Snapshot general status has been set
       security:
         - bearer: []
         - oauth2:
             - openid
             - profile
             - email
-      summary: Set image general status
+      summary: Set snapshot general status
       tags:
-        - images
-  /images/{id}/build-logs:
+        - snapshots
+  /snapshots/{id}/build-logs:
     get:
-      operationId: getImageBuildLogs
+      operationId: getSnapshotBuildLogs
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3550,7 +3550,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Image ID
+        - description: Snapshot ID
           explode: false
           in: path
           name: id
@@ -3575,9 +3575,9 @@ paths:
             - openid
             - profile
             - email
-      summary: Get image build logs
+      summary: Get snapshot build logs
       tags:
-        - images
+        - snapshots
   /preview/{workspaceId}/public:
     get:
       operationId: isWorkspacePublic
@@ -3915,7 +3915,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get temporary registry access for pushing images
+      summary: Get temporary registry access for pushing snapshots
       tags:
         - docker-registry
   /docker-registry/{id}:
@@ -4109,8 +4109,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4151,8 +4151,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4196,8 +4196,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4243,8 +4243,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4468,13 +4468,13 @@ components:
       type: object
     UpdateOrganizationQuota:
       example:
+        snapshotQuota: 7.061401241503109
         totalCpuQuota: 0.8008281904610115
-        imageQuota: 7.061401241503109
         maxCpuPerWorkspace: 5.962133916683182
         maxDiskPerWorkspace: 2.3021358869347655
         volumeQuota: 3.616076749251911
-        maxImageSize: 9.301444243932576
         totalMemoryQuota: 6.027456183070403
+        maxSnapshotSize: 9.301444243932576
         totalDiskQuota: 1.4658129805029452
         maxMemoryPerWorkspace: 5.637376656633329
       properties:
@@ -4496,21 +4496,21 @@ components:
         maxDiskPerWorkspace:
           nullable: true
           type: number
-        imageQuota:
+        snapshotQuota:
           nullable: true
           type: number
-        maxImageSize:
+        maxSnapshotSize:
           nullable: true
           type: number
         volumeQuota:
           nullable: true
           type: number
       required:
-        - imageQuota
         - maxCpuPerWorkspace
         - maxDiskPerWorkspace
-        - maxImageSize
         - maxMemoryPerWorkspace
+        - maxSnapshotSize
+        - snapshotQuota
         - totalCpuQuota
         - totalDiskQuota
         - totalMemoryQuota
@@ -4554,8 +4554,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4590,8 +4590,8 @@ components:
             enum:
               - write:registries
               - delete:registries
-              - write:images
-              - delete:images
+              - write:snapshots
+              - delete:snapshots
               - write:sandboxes
               - delete:sandboxes
               - read:volumes
@@ -4814,13 +4814,13 @@ components:
       type: object
     CreateOrganizationQuota:
       example:
+        snapshotQuota: 7.061401241503109
         totalCpuQuota: 0.8008281904610115
-        imageQuota: 7.061401241503109
         maxCpuPerWorkspace: 5.962133916683182
         maxDiskPerWorkspace: 2.3021358869347655
         volumeQuota: 3.616076749251911
-        maxImageSize: 9.301444243932576
         totalMemoryQuota: 6.027456183070403
+        maxSnapshotSize: 9.301444243932576
         totalDiskQuota: 1.4658129805029452
         maxMemoryPerWorkspace: 5.637376656633329
       properties:
@@ -4836,9 +4836,9 @@ components:
           type: number
         maxDiskPerWorkspace:
           type: number
-        imageQuota:
+        snapshotQuota:
           type: number
-        maxImageSize:
+        maxSnapshotSize:
           type: number
         volumeQuota:
           type: number
@@ -4850,13 +4850,13 @@ components:
         name: name
         id: id
         personalOrganizationQuota:
+          snapshotQuota: 7.061401241503109
           totalCpuQuota: 0.8008281904610115
-          imageQuota: 7.061401241503109
           maxCpuPerWorkspace: 5.962133916683182
           maxDiskPerWorkspace: 2.3021358869347655
           volumeQuota: 3.616076749251911
-          maxImageSize: 9.301444243932576
           totalMemoryQuota: 6.027456183070403
+          maxSnapshotSize: 9.301444243932576
           totalDiskQuota: 1.4658129805029452
           maxMemoryPerWorkspace: 5.637376656633329
         email: email
@@ -4926,9 +4926,9 @@ components:
         - stopping
         - error
         - pending_build
-        - building_image
+        - building_snapshot
         - unknown
-        - pulling_image
+        - pulling_snapshot
         - archiving
         - archived
       type: string
@@ -4951,7 +4951,6 @@ components:
       type: object
     Workspace:
       example:
-        image: daytonaio/workspace:latest
         memory: 4
         volumes:
           - mountPath: /data
@@ -4976,6 +4975,7 @@ components:
         state: creating
         backupState: None
         user: daytona
+        snapshot: daytonaio/workspace:latest
         info: ''
       properties:
         id:
@@ -4992,8 +4992,8 @@ components:
           description: The organization ID of the workspace
           example: organization123
           type: string
-        image:
-          description: The image used for the workspace
+        snapshot:
+          description: The snapshot used for the workspace
           example: daytonaio/workspace:latest
           type: string
         user:
@@ -5108,7 +5108,6 @@ components:
       type: object
     CreateWorkspace:
       example:
-        image: daytonaio/workspace:latest
         memory: 4096
         buildInfo: ''
         volumes:
@@ -5128,9 +5127,10 @@ components:
         public: false
         user: daytona
         class: small
+        snapshot: daytonaio/workspace:latest
       properties:
-        image:
-          description: The image used for the workspace
+        snapshot:
+          description: The snapshot used for the workspace
           example: daytonaio/workspace:latest
           type: string
         user:
@@ -5964,41 +5964,41 @@ components:
         - languageId
         - pathToProject
       type: object
-    CreateImage:
+    CreateSnapshot:
       example:
         general: true
         entrypoint: sleep infinity
-        name: my-docker-image:8.0.1-alpha
+        name: my-docker-snapshot:8.0.1-alpha
       properties:
         name:
-          description: The name of the image
-          example: my-docker-image:8.0.1-alpha
+          description: The name of the snapshot
+          example: my-docker-snapshot:8.0.1-alpha
           type: string
         entrypoint:
-          description: The entrypoint command for the image
+          description: The entrypoint command for the snapshot
           example: sleep infinity
           items:
             type: string
           type: array
         general:
-          description: Whether the image is general
+          description: Whether the snapshot is general
           type: boolean
       required:
         - name
       type: object
-    ImageState:
+    SnapshotState:
       enum:
         - build_pending
         - building
         - pending
-        - pulling_image
+        - pulling
         - pending_validation
         - validating
         - active
         - error
         - removing
       type: string
-    ImageDto:
+    SnapshotDto:
       example:
         organizationId: organizationId
         general: true
@@ -6027,7 +6027,7 @@ components:
           type: boolean
         state:
           allOf:
-            - $ref: '#/components/schemas/ImageState'
+            - $ref: '#/components/schemas/SnapshotState'
         size:
           nullable: true
           type: number
@@ -6062,19 +6062,19 @@ components:
         - state
         - updatedAt
       type: object
-    BuildImage:
+    BuildSnapshot:
       example:
         buildInfo: ''
-        name: my-custom-image:1.0.0
+        name: my-custom-snapshot:1.0.0
       properties:
         name:
-          description: The name of the image to build
-          example: my-custom-image:1.0.0
+          description: The name of the snapshot to build
+          example: my-custom-snapshot:1.0.0
           type: string
         buildInfo:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'
-          description: Build information for the image
+          description: Build information for the snapshot
       required:
         - buildInfo
         - name
@@ -6084,13 +6084,13 @@ components:
         enabled: true
       properties:
         enabled:
-          description: Enable or disable the image/tag
+          description: Enable or disable the snapshot/tag
           example: true
           type: boolean
       required:
         - enabled
       type: object
-    PaginatedImagesDto:
+    PaginatedSnapshotsDto:
       example:
         total: 6.027456183070403
         totalPages: 5.962133916683182
@@ -6127,7 +6127,7 @@ components:
       properties:
         items:
           items:
-            $ref: '#/components/schemas/ImageDto'
+            $ref: '#/components/schemas/SnapshotDto'
           type: array
         total:
           type: number
@@ -6141,12 +6141,12 @@ components:
         - total
         - totalPages
       type: object
-    SetImageGeneralStatus:
+    SetSnapshotGeneralStatusDto:
       example:
         general: true
       properties:
         general:
-          description: Whether the image is general
+          description: Whether the snapshot is general
           example: true
           type: boolean
       required:

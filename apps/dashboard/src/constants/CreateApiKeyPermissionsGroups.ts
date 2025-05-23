@@ -11,8 +11,8 @@ export const CREATE_API_KEY_PERMISSIONS_GROUPS: { name: string; permissions: Cre
     permissions: [CreateApiKeyPermissionsEnum.WRITE_SANDBOXES, CreateApiKeyPermissionsEnum.DELETE_SANDBOXES],
   },
   {
-    name: 'Images',
-    permissions: [CreateApiKeyPermissionsEnum.WRITE_IMAGES, CreateApiKeyPermissionsEnum.DELETE_IMAGES],
+    name: 'Snapshots',
+    permissions: [CreateApiKeyPermissionsEnum.WRITE_SNAPSHOTS, CreateApiKeyPermissionsEnum.DELETE_SNAPSHOTS],
   },
   {
     name: 'Registries',

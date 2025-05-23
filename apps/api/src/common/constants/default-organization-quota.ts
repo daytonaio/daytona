@@ -12,7 +12,7 @@ export const DEFAULT_ORGANIZATION_QUOTA: CreateOrganizationQuotaDto = {
   maxCpuPerWorkspace: 4,
   maxMemoryPerWorkspace: 8,
   maxDiskPerWorkspace: 10,
-  imageQuota: 100,
-  maxImageSize: 20,
-  volumeQuota: 100,
+  snapshotQuota: 5,
+  maxSnapshotSize: 5,
+  volumeQuota: 10,
 }

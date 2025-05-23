@@ -200,34 +200,34 @@ export class BackupManager {
       throw new BadRequestError('No default registry configured')
     }
 
-    // Generate backup image name
+    // Generate backup snapshot name
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-    const backupImage = `${registry.url}/${registry.project}/backup-${workspace.id}:${timestamp}`
+    const backupSnapshot = `${registry.url}/${registry.project}/backup-${workspace.id}:${timestamp}`
 
-    //  if workspace has a backup image, add it to the existingBackupImages array
+    //  if workspace has a backup snapshot, add it to the existingBackupSnapshots array
     if (
       workspace.lastBackupAt &&
-      workspace.backupImage &&
+      workspace.backupSnapshot &&
       [BackupState.NONE, BackupState.COMPLETED].includes(workspace.backupState)
     ) {
-      workspace.existingBackupImages.push({
-        imageName: workspace.backupImage,
+      workspace.existingBackupSnapshots.push({
+        snapshotName: workspace.backupSnapshot,
         createdAt: workspace.lastBackupAt,
       })
     }
-    const existingBackupImages = workspace.existingBackupImages
-    existingBackupImages.push({
-      imageName: backupImage,
+    const existingBackupSnapshots = workspace.existingBackupSnapshots
+    existingBackupSnapshots.push({
+      snapshotName: backupSnapshot,
       createdAt: new Date(),
     })
 
     const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
       id: workspace.id,
     })
-    workspaceToUpdate.existingBackupImages = existingBackupImages
+    workspaceToUpdate.existingBackupSnapshots = existingBackupSnapshots
     workspaceToUpdate.backupState = BackupState.PENDING
     workspaceToUpdate.backupRegistryId = registry.id
-    workspaceToUpdate.backupImage = backupImage
+    workspaceToUpdate.backupSnapshot = backupSnapshot
     await this.workspaceRepository.save(workspaceToUpdate)
   }
 
@@ -302,7 +302,7 @@ export class BackupManager {
           username: registry.username,
           password: registry.password,
         },
-        image: workspace.backupImage,
+        snapshot: workspace.backupSnapshot,
       })
 
       await this.updateWorkspacBackupState(workspace.id, BackupState.IN_PROGRESS)

@@ -76,10 +76,10 @@ func GetRunnerEnv() string {
 	return config.RunnerEnv
 }
 
-func GetBuildLogFilePath(imageRef string) (string, error) {
-	buildId := imageRef
-	if colonIndex := strings.Index(imageRef, ":"); colonIndex != -1 {
-		buildId = imageRef[:colonIndex]
+func GetBuildLogFilePath(snapshotRef string) (string, error) {
+	buildId := snapshotRef
+	if colonIndex := strings.Index(snapshotRef, ":"); colonIndex != -1 {
+		buildId = snapshotRef[:colonIndex]
 	}
 
 	c, err := GetConfig()

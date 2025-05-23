@@ -33,7 +33,7 @@ class Workspace(BaseModel):
     id: StrictStr = Field(description="The ID of the workspace")
     name: StrictStr = Field(description="The name of the workspace")
     organization_id: StrictStr = Field(description="The organization ID of the workspace", alias="organizationId")
-    image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
+    snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the workspace")
     user: StrictStr = Field(description="The user associated with the project")
     env: Dict[str, StrictStr] = Field(description="Environment variables for the workspace")
     labels: Dict[str, StrictStr] = Field(description="Labels for the workspace")
@@ -51,7 +51,7 @@ class Workspace(BaseModel):
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes attached to the workspace")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "volumes"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "volumes"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -134,7 +134,7 @@ class Workspace(BaseModel):
             "id": obj.get("id"),
             "name": obj.get("name") if obj.get("name") is not None else '',
             "organizationId": obj.get("organizationId"),
-            "image": obj.get("image"),
+            "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),
             "labels": obj.get("labels"),
