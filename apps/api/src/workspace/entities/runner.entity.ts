@@ -4,12 +4,12 @@
  */
 
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm'
-import { NodeRegion } from '../enums/node-region.enum'
+import { RunnerRegion } from '../enums/runner-region.enum'
 import { WorkspaceClass } from '../enums/workspace-class.enum'
-import { NodeState } from '../enums/node-state.enum'
+import { RunnerState } from '../enums/runner-state.enum'
 
 @Entity()
-export class Node {
+export class Runner {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
@@ -54,16 +54,16 @@ export class Node {
 
   @Column({
     type: 'enum',
-    enum: NodeRegion,
+    enum: RunnerRegion,
   })
-  region: NodeRegion
+  region: RunnerRegion
 
   @Column({
     type: 'enum',
-    enum: NodeState,
-    default: NodeState.INITIALIZING,
+    enum: RunnerState,
+    default: RunnerState.INITIALIZING,
   })
-  state: NodeState
+  state: RunnerState
 
   @Column({
     nullable: true,
