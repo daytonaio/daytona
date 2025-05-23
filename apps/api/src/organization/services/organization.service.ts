@@ -17,7 +17,7 @@ import { UserEvents } from '../../user/constants/user-events.constant'
 import { UserCreatedEvent } from '../../user/events/user-created.event'
 import { UserDeletedEvent } from '../../user/events/user-deleted.event'
 import { Workspace } from '../../workspace/entities/workspace.entity'
-import { Image } from '../../workspace/entities/image.entity'
+import { Snapshot } from '../../workspace/entities/snapshot.entity'
 import { WorkspaceState } from '../../workspace/enums/workspace-state.enum'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
@@ -43,8 +43,8 @@ export class OrganizationService implements OnModuleInit {
     private readonly organizationRepository: Repository<Organization>,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(Image)
-    private readonly imageRepository: Repository<Image>,
+    @InjectRepository(Snapshot)
+    private readonly snapshotRepository: Repository<Snapshot>,
     @InjectRepository(Volume)
     private readonly volumeRepository: Repository<Volume>,
     private readonly eventEmitter: EventEmitter2,
@@ -164,9 +164,9 @@ export class OrganizationService implements OnModuleInit {
       updateOrganizationQuotaDto.maxMemoryPerWorkspace ?? organization.maxMemoryPerWorkspace
     organization.maxDiskPerWorkspace =
       updateOrganizationQuotaDto.maxDiskPerWorkspace ?? organization.maxDiskPerWorkspace
-    organization.maxImageSize = updateOrganizationQuotaDto.maxImageSize ?? organization.maxImageSize
+    organization.maxSnapshotSize = updateOrganizationQuotaDto.maxSnapshotSize ?? organization.maxSnapshotSize
     organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
-    organization.imageQuota = updateOrganizationQuotaDto.imageQuota ?? organization.imageQuota
+    organization.snapshotQuota = updateOrganizationQuotaDto.snapshotQuota ?? organization.snapshotQuota
     return this.organizationRepository.save(organization)
   }
 
@@ -234,8 +234,8 @@ export class OrganizationService implements OnModuleInit {
     organization.maxCpuPerWorkspace = quota.maxCpuPerWorkspace
     organization.maxMemoryPerWorkspace = quota.maxMemoryPerWorkspace
     organization.maxDiskPerWorkspace = quota.maxDiskPerWorkspace
-    organization.imageQuota = quota.imageQuota
-    organization.maxImageSize = quota.maxImageSize
+    organization.snapshotQuota = quota.snapshotQuota
+    organization.maxSnapshotSize = quota.maxSnapshotSize
     organization.volumeQuota = quota.volumeQuota
 
     if (!creatorEmailVerified) {

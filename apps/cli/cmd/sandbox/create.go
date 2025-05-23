@@ -37,8 +37,8 @@ var CreateCmd = &cobra.Command{
 		createWorkspace := daytonaapiclient.NewCreateWorkspace()
 
 		// Add non-zero values to the request
-		if imageFlag != "" {
-			createWorkspace.SetImage(imageFlag)
+		if snapshotFlag != "" {
+			createWorkspace.SetSnapshot(snapshotFlag)
 		}
 		if userFlag != "" {
 			createWorkspace.SetUser(userFlag)
@@ -132,7 +132,7 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
-			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_IMAGE)
+			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_SNAPSHOT)
 			if err != nil {
 				return err
 			}
@@ -177,7 +177,7 @@ var CreateCmd = &cobra.Command{
 }
 
 var (
-	imageFlag      string
+	snapshotFlag   string
 	userFlag       string
 	envFlag        []string
 	labelsFlag     []string
@@ -195,7 +195,7 @@ var (
 )
 
 func init() {
-	CreateCmd.Flags().StringVar(&imageFlag, "image", "", "Image to use for the sandbox")
+	CreateCmd.Flags().StringVar(&snapshotFlag, "snapshot", "", "Snapshot to use for the sandbox")
 	CreateCmd.Flags().StringVar(&userFlag, "user", "", "User associated with the sandbox")
 	CreateCmd.Flags().StringArrayVarP(&envFlag, "env", "e", []string{}, "Environment variables (format: KEY=VALUE)")
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
@@ -208,6 +208,6 @@ func init() {
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space allocated to the sandbox in GB")
 	CreateCmd.Flags().Int32Var(&autoStopFlag, "auto-stop", 0, "Auto-stop interval in minutes (0 means disabled)")
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
-	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox image")
+	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
 }

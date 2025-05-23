@@ -27,10 +27,10 @@ export class UpdateOrganizationQuotaDto {
   maxDiskPerWorkspace?: number
 
   @ApiProperty({ nullable: true })
-  imageQuota?: number
+  snapshotQuota?: number
 
   @ApiProperty({ nullable: true })
-  maxImageSize?: number
+  maxSnapshotSize?: number
 
   @ApiProperty({ nullable: true })
   volumeQuota?: number

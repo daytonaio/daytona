@@ -19,8 +19,8 @@ import { OnEvent } from '@nestjs/event-emitter'
 import { WorkspaceStateUpdatedEvent } from '../events/workspace-state-updated.event'
 import { WorkspaceState } from '../enums/workspace-state.enum'
 import { Workspace } from '../entities/workspace.entity'
-import { ImageRunner } from '../entities/image-runner.entity'
-import { ImageRunnerState } from '../enums/image-runner-state.enum'
+import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 
 @Injectable()
 export class RunnerService {
@@ -33,8 +33,8 @@ export class RunnerService {
     private readonly runnerApiFactory: RunnerApiFactory,
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
-    @InjectRepository(ImageRunner)
-    private readonly imageRunnerRepository: Repository<ImageRunner>,
+    @InjectRepository(SnapshotRunner)
+    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
   ) {}
 
   async create(createRunnerDto: CreateRunnerDto): Promise<Runner> {
@@ -78,15 +78,15 @@ export class RunnerService {
       used: Raw((alias) => `${alias} < capacity`),
     }
 
-    if (params.imageRef !== undefined) {
-      const imageRunners = await this.imageRunnerRepository.find({
+    if (params.snapshotRef !== undefined) {
+      const snapshotRunners = await this.snapshotRunnerRepository.find({
         where: {
-          state: ImageRunnerState.READY,
-          imageRef: params.imageRef,
+          state: SnapshotRunnerState.READY,
+          snapshotRef: params.snapshotRef,
         },
       })
 
-      let runnerIds = imageRunners.map((imageRunner) => imageRunner.runnerId)
+      let runnerIds = snapshotRunners.map((snapshotRunner) => snapshotRunner.runnerId)
 
       if (params.excludedRunnerIds?.length) {
         runnerIds = runnerIds.filter((id) => !params.excludedRunnerIds.includes(id))
@@ -219,51 +219,51 @@ export class RunnerService {
     return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)].id
   }
 
-  async getImageRunner(runnerId, imageRef: string): Promise<ImageRunner> {
-    return this.imageRunnerRepository.findOne({
+  async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {
+    return this.snapshotRunnerRepository.findOne({
       where: {
         runnerId: runnerId,
-        imageRef,
+        snapshotRef: snapshotRef,
       },
     })
   }
 
-  async getImageRunners(imageRef: string): Promise<ImageRunner[]> {
-    return this.imageRunnerRepository.find({
+  async getSnapshotRunners(snapshotRef: string): Promise<SnapshotRunner[]> {
+    return this.snapshotRunnerRepository.find({
       where: {
-        imageRef,
+        snapshotRef: snapshotRef,
       },
       order: {
-        state: 'ASC', // Sorts state BUILDING_IMAGE before ERROR
-        createdAt: 'ASC', // Sorts first runner to start building image on top
+        state: 'ASC', // Sorts state BUILDING_SNAPSHOT before ERROR
+        createdAt: 'ASC', // Sorts first runner to start building snapshot on top
       },
     })
   }
 
-  async createImageRunner(
+  async createSnapshotRunner(
     runnerId: string,
-    imageRef: string,
-    state: ImageRunnerState,
+    snapshotRef: string,
+    state: SnapshotRunnerState,
     errorReason?: string,
   ): Promise<void> {
-    const imageRunner = new ImageRunner()
-    imageRunner.runnerId = runnerId
-    imageRunner.imageRef = imageRef
-    imageRunner.state = state
+    const snapshotRunner = new SnapshotRunner()
+    snapshotRunner.runnerId = runnerId
+    snapshotRunner.snapshotRef = snapshotRef
+    snapshotRunner.state = state
     if (errorReason) {
-      imageRunner.errorReason = errorReason
+      snapshotRunner.errorReason = errorReason
     }
-    await this.imageRunnerRepository.save(imageRunner)
+    await this.snapshotRunnerRepository.save(snapshotRunner)
   }
 
-  async getRunnersWithMultipleImagesBuilding(maxImageCount = 2): Promise<string[]> {
+  async getRunnersWithMultipleSnapshotsBuilding(maxSnapshotCount = 2): Promise<string[]> {
     const runners = await this.workspaceRepository
       .createQueryBuilder('workspace')
       .select('workspace.runnerId')
-      .where('workspace.state = :state', { state: WorkspaceState.BUILDING_IMAGE })
-      .andWhere('workspace.buildInfoImageRef IS NOT NULL')
+      .where('workspace.state = :state', { state: WorkspaceState.BUILDING_SNAPSHOT })
+      .andWhere('workspace.buildInfoSnapshotRef IS NOT NULL')
       .groupBy('workspace.runnerId')
-      .having('COUNT(DISTINCT workspace.buildInfoImageRef) > :maxImageCount', { maxImageCount })
+      .having('COUNT(DISTINCT workspace.buildInfoSnapshotRef) > :maxSnapshotCount', { maxSnapshotCount })
       .getRawMany()
 
     return runners.map((item) => item.runnerId)
@@ -273,6 +273,6 @@ export class RunnerService {
 export class GetRunnerParams {
   region?: RunnerRegion
   workspaceClass?: WorkspaceClass
-  imageRef?: string
+  snapshotRef?: string
   excludedRunnerIds?: string[]
 }

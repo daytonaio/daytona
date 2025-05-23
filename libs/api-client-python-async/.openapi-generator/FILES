@@ -3,11 +3,11 @@ daytona_api_client_async/__init__.py
 daytona_api_client_async/api/__init__.py
 daytona_api_client_async/api/api_keys_api.py
 daytona_api_client_async/api/docker_registry_api.py
-daytona_api_client_async/api/images_api.py
-daytona_api_client_async/api/nodes_api.py
 daytona_api_client_async/api/object_storage_api.py
 daytona_api_client_async/api/organizations_api.py
 daytona_api_client_async/api/preview_api.py
+daytona_api_client_async/api/runners_api.py
+daytona_api_client_async/api/snapshots_api.py
 daytona_api_client_async/api/toolbox_api.py
 daytona_api_client_async/api/users_api.py
 daytona_api_client_async/api/volumes_api.py
@@ -20,7 +20,7 @@ daytona_api_client_async/models/__init__.py
 daytona_api_client_async/models/account_provider.py
 daytona_api_client_async/models/api_key_list.py
 daytona_api_client_async/models/api_key_response.py
-daytona_api_client_async/models/build_image.py
+daytona_api_client_async/models/build_snapshot.py
 daytona_api_client_async/models/command.py
 daytona_api_client_async/models/completion_context.py
 daytona_api_client_async/models/completion_item.py
@@ -28,13 +28,13 @@ daytona_api_client_async/models/completion_list.py
 daytona_api_client_async/models/create_api_key.py
 daytona_api_client_async/models/create_build_info.py
 daytona_api_client_async/models/create_docker_registry.py
-daytona_api_client_async/models/create_image.py
-daytona_api_client_async/models/create_node.py
 daytona_api_client_async/models/create_organization.py
 daytona_api_client_async/models/create_organization_invitation.py
 daytona_api_client_async/models/create_organization_quota.py
 daytona_api_client_async/models/create_organization_role.py
+daytona_api_client_async/models/create_runner.py
 daytona_api_client_async/models/create_session_request.py
+daytona_api_client_async/models/create_snapshot.py
 daytona_api_client_async/models/create_user.py
 daytona_api_client_async/models/create_volume.py
 daytona_api_client_async/models/create_workspace.py
@@ -53,8 +53,6 @@ daytona_api_client_async/models/git_commit_response.py
 daytona_api_client_async/models/git_delete_branch_request.py
 daytona_api_client_async/models/git_repo_request.py
 daytona_api_client_async/models/git_status.py
-daytona_api_client_async/models/image_dto.py
-daytona_api_client_async/models/image_state.py
 daytona_api_client_async/models/list_branch_response.py
 daytona_api_client_async/models/lsp_completion_params.py
 daytona_api_client_async/models/lsp_document_request.py
@@ -67,7 +65,7 @@ daytona_api_client_async/models/organization_invitation.py
 daytona_api_client_async/models/organization_role.py
 daytona_api_client_async/models/organization_suspension.py
 daytona_api_client_async/models/organization_user.py
-daytona_api_client_async/models/paginated_images_dto.py
+daytona_api_client_async/models/paginated_snapshots_dto.py
 daytona_api_client_async/models/port_preview_url.py
 daytona_api_client_async/models/position.py
 daytona_api_client_async/models/project_dir_response.py
@@ -79,7 +77,9 @@ daytona_api_client_async/models/search_files_response.py
 daytona_api_client_async/models/session.py
 daytona_api_client_async/models/session_execute_request.py
 daytona_api_client_async/models/session_execute_response.py
-daytona_api_client_async/models/set_image_general_status.py
+daytona_api_client_async/models/set_snapshot_general_status_dto.py
+daytona_api_client_async/models/snapshot_dto.py
+daytona_api_client_async/models/snapshot_state.py
 daytona_api_client_async/models/storage_access_dto.py
 daytona_api_client_async/models/toggle_state.py
 daytona_api_client_async/models/update_assigned_organization_roles.py

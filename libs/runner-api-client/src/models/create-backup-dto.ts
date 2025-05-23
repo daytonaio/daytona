@@ -24,14 +24,14 @@ import type { RegistryDTO } from './registry-dto'
 export interface CreateBackupDTO {
   /**
    *
-   * @type {string}
-   * @memberof CreateBackupDTO
-   */
-  image: string
-  /**
-   *
    * @type {RegistryDTO}
    * @memberof CreateBackupDTO
    */
   registry: RegistryDTO
+  /**
+   *
+   * @type {string}
+   * @memberof CreateBackupDTO
+   */
+  snapshot: string
 }

@@ -32,7 +32,7 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 
 	case "running":
 		if d.isContainerPullingImage(container.ID) {
-			return enums.SandboxStatePullingImage, nil
+			return enums.SandboxStatePullingSnapshot, nil
 		}
 		return enums.SandboxStateStarted, nil
 

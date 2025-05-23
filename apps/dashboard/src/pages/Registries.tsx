@@ -143,7 +143,7 @@ const Registries: React.FC = () => {
       <DialogHeader>
         <DialogTitle>{registryToEdit ? 'Edit Registry' : 'Add Registry'}</DialogTitle>
         <DialogDescription>
-          Registry details must be provided for images that are not publicly available.
+          Registry details must be provided for snapshots that are not publicly available.
         </DialogDescription>
       </DialogHeader>
       <form

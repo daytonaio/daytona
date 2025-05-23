@@ -65,7 +65,7 @@ export class DockerRegistryController {
   @Get('registry-push-access')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get temporary registry access for pushing images',
+    summary: 'Get temporary registry access for pushing snapshots',
     operationId: 'getTransientPushAccess',
   })
   @ApiResponse({

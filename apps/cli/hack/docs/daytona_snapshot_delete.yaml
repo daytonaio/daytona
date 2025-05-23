@@ -1,0 +1,14 @@
+name: daytona snapshot delete
+synopsis: Delete a snapshot
+usage: daytona snapshot delete [SNAPSHOT_ID] [flags]
+options:
+  - name: all
+    shorthand: a
+    default_value: 'false'
+    usage: Delete all snapshots
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona snapshot - Manage Daytona snapshots

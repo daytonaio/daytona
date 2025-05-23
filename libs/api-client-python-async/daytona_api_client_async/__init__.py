@@ -20,11 +20,11 @@ __version__ = "0.0.0-dev"
 # import apis into sdk package
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
-from daytona_api_client_async.api.images_api import ImagesApi
-from daytona_api_client_async.api.nodes_api import NodesApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
 from daytona_api_client_async.api.preview_api import PreviewApi
+from daytona_api_client_async.api.runners_api import RunnersApi
+from daytona_api_client_async.api.snapshots_api import SnapshotsApi
 from daytona_api_client_async.api.toolbox_api import ToolboxApi
 from daytona_api_client_async.api.users_api import UsersApi
 from daytona_api_client_async.api.volumes_api import VolumesApi
@@ -45,7 +45,7 @@ from daytona_api_client_async.exceptions import ApiException
 from daytona_api_client_async.models.account_provider import AccountProvider
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
-from daytona_api_client_async.models.build_image import BuildImage
+from daytona_api_client_async.models.build_snapshot import BuildSnapshot
 from daytona_api_client_async.models.command import Command
 from daytona_api_client_async.models.completion_context import CompletionContext
 from daytona_api_client_async.models.completion_item import CompletionItem
@@ -53,13 +53,13 @@ from daytona_api_client_async.models.completion_list import CompletionList
 from daytona_api_client_async.models.create_api_key import CreateApiKey
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
 from daytona_api_client_async.models.create_docker_registry import CreateDockerRegistry
-from daytona_api_client_async.models.create_image import CreateImage
-from daytona_api_client_async.models.create_node import CreateNode
 from daytona_api_client_async.models.create_organization import CreateOrganization
 from daytona_api_client_async.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client_async.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client_async.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client_async.models.create_runner import CreateRunner
 from daytona_api_client_async.models.create_session_request import CreateSessionRequest
+from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
@@ -78,8 +78,6 @@ from daytona_api_client_async.models.git_commit_response import GitCommitRespons
 from daytona_api_client_async.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_api_client_async.models.git_repo_request import GitRepoRequest
 from daytona_api_client_async.models.git_status import GitStatus
-from daytona_api_client_async.models.image_dto import ImageDto
-from daytona_api_client_async.models.image_state import ImageState
 from daytona_api_client_async.models.list_branch_response import ListBranchResponse
 from daytona_api_client_async.models.lsp_completion_params import LspCompletionParams
 from daytona_api_client_async.models.lsp_document_request import LspDocumentRequest
@@ -92,7 +90,7 @@ from daytona_api_client_async.models.organization_invitation import Organization
 from daytona_api_client_async.models.organization_role import OrganizationRole
 from daytona_api_client_async.models.organization_suspension import OrganizationSuspension
 from daytona_api_client_async.models.organization_user import OrganizationUser
-from daytona_api_client_async.models.paginated_images_dto import PaginatedImagesDto
+from daytona_api_client_async.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.position import Position
 from daytona_api_client_async.models.project_dir_response import ProjectDirResponse
@@ -104,7 +102,9 @@ from daytona_api_client_async.models.search_files_response import SearchFilesRes
 from daytona_api_client_async.models.session import Session
 from daytona_api_client_async.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client_async.models.session_execute_response import SessionExecuteResponse
-from daytona_api_client_async.models.set_image_general_status import SetImageGeneralStatus
+from daytona_api_client_async.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
+from daytona_api_client_async.models.snapshot_dto import SnapshotDto
+from daytona_api_client_async.models.snapshot_state import SnapshotState
 from daytona_api_client_async.models.storage_access_dto import StorageAccessDto
 from daytona_api_client_async.models.toggle_state import ToggleState
 from daytona_api_client_async.models.update_assigned_organization_roles import UpdateAssignedOrganizationRoles

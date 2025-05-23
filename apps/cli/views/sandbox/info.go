@@ -27,8 +27,8 @@ func RenderInfo(sandbox *daytonaapiclient.Workspace, forceUnstyled bool) {
 		output += getInfoLine("State", getStateLabel(*sandbox.State)) + "\n"
 	}
 
-	if sandbox.Image != nil {
-		output += getInfoLine("Image", *sandbox.Image) + "\n"
+	if sandbox.Snapshot != nil {
+		output += getInfoLine("Snapshot", *sandbox.Snapshot) + "\n"
 	}
 
 	providerMetadataString := sandbox.Info.GetProviderMetadata()
@@ -119,8 +119,8 @@ func getStateLabel(state daytonaapiclient.WorkspaceState) string {
 		return common.StartingStyle.Render("STARTING")
 	case daytonaapiclient.WORKSPACESTATE_STOPPING:
 		return common.StoppingStyle.Render("STOPPING")
-	case daytonaapiclient.WORKSPACESTATE_PULLING_IMAGE:
-		return common.CreatingStyle.Render("PULLING IMAGE")
+	case daytonaapiclient.WORKSPACESTATE_PULLING_SNAPSHOT:
+		return common.CreatingStyle.Render("PULLING SNAPSHOT")
 	case daytonaapiclient.WORKSPACESTATE_ARCHIVING:
 		return common.CreatingStyle.Render("ARCHIVING")
 	case daytonaapiclient.WORKSPACESTATE_ARCHIVED:
