@@ -242,13 +242,14 @@ export class NodeService {
     await this.imageNodeRepository.save(imageNode)
   }
 
-  async getNodesWithMultipleImagesBuilding(minImageCount = 2): Promise<Set<string>> {
-    const nodes = await this.imageNodeRepository
-      .createQueryBuilder('imageNode')
-      .select('imageNode.nodeId')
-      .where('imageNode.state = :state', { state: ImageNodeState.BUILDING_IMAGE })
-      .groupBy('imageNode.nodeId')
-      .having('COUNT(DISTINCT imageNode.imageRef) > :minImageCount', { minImageCount })
+  async getNodesWithMultipleImagesBuilding(maxImageCount = 2): Promise<Set<string>> {
+    const nodes = await this.workspaceRepository
+      .createQueryBuilder('workspace')
+      .select('workspace.nodeId')
+      .where('workspace.state = :state', { state: WorkspaceState.BUILDING_IMAGE })
+      .andWhere('workspace.buildInfoImageRef IS NOT NULL')
+      .groupBy('workspace.nodeId')
+      .having('COUNT(DISTINCT workspace.buildInfoImageRef) > :maxImageCount', { maxImageCount })
       .getRawMany()
 
     return new Set(nodes.map((item) => item.nodeId))
