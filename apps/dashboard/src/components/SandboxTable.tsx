@@ -49,7 +49,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
-import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: Sandbox[]
@@ -95,6 +94,9 @@ export function SandboxTable({
     },
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [selectAllConfirmationOpen, setSelectAllConfirmationOpen] = useState(false)
+  const [isGlobalSelectionActive, setIsGlobalSelectionActive] = useState(false)
+  const [deselectedGlobalRowIds, setDeselectedGlobalRowIds] = useState<Set<string>>(new Set())
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -114,7 +116,11 @@ export function SandboxTable({
     loadingSandboxes,
     writePermitted,
     deletePermitted,
+    isGlobalSelectionActive,
+    deselectedGlobalRowIds,
+    setDeselectedGlobalRowIds,
   })
+
   const table = useReactTable({
     data,
     columns,
@@ -138,16 +144,87 @@ export function SandboxTable({
       },
     },
   })
+
+  // Calculate total selectable sandboxes across all pages
+  const totalSelectableSandboxes = useMemo(
+    () => data.filter((sandbox) => !loadingSandboxes[sandbox.id]),
+    [data, loadingSandboxes],
+  )
+  const totalSelectableCount = totalSelectableSandboxes.length
+
+  const performSelectAll = () => {
+    // Select all sandboxes globally, not just current page
+    setIsGlobalSelectionActive(true)
+    // Clear any previously deselected rows
+    setDeselectedGlobalRowIds(new Set())
+    // Also select all visible rows on current page for immediate visual feedback
+    for (const row of table.getRowModel().rows) {
+      if (!loadingSandboxes[row.original.id]) {
+        row.toggleSelected(true)
+      }
+    }
+    setSelectAllConfirmationOpen(false)
+  }
+
+  const handleUndoSelectAll = () => {
+    setIsGlobalSelectionActive(false)
+    setDeselectedGlobalRowIds(new Set())
+    // Clear all row selections across all pages, not just current page
+    table.resetRowSelection()
+  }
+
+  const handleHeaderCheckboxChange = (value: boolean | 'indeterminate') => {
+    if (value) {
+      // First select all visible rows on current page
+      for (const row of table.getRowModel().rows) {
+        if (!loadingSandboxes[row.original.id]) {
+          row.toggleSelected(true)
+        }
+      }
+
+      // Check if we need to show the "select all" confirmation popup
+      const visibleSelectableRows = table.getRowModel().rows.filter((row) => !loadingSandboxes[row.original.id])
+      const visibleRowCount = visibleSelectableRows.length
+
+      // Get the total number of filterable rows - these are the rows that match any active filters
+      const totalFilterableCount = table.getFilteredRowModel().rows.length
+
+      if (visibleRowCount < totalFilterableCount) {
+        setSelectAllConfirmationOpen(true)
+      } else {
+        // just select them all without showing a popup
+        setSelectAllConfirmationOpen(false)
+      }
+    } else {
+      // Uncheck both page selection and global selection
+      setIsGlobalSelectionActive(false)
+      setDeselectedGlobalRowIds(new Set())
+      for (const row of table.getRowModel().rows) {
+        row.toggleSelected(false)
+      }
+      // Don't show confirmation popup when unchecking
+      setSelectAllConfirmationOpen(false)
+    }
+  }
+
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
+
+  const handleSelectAllConfirmationChange = (open: boolean) => {
+    setSelectAllConfirmationOpen(open)
+    // When closing the popup, we don't need to do anything special
+    // The current page selection should remain as is
+    // Users can deselect using the header checkbox or the Undo button
+  }
 
   return (
     <div>
-      <div className="flex items-center mb-4">
+      {/* Filter section */}
+      <div className="flex items-center gap-4 mb-4">
         <DebouncedInput
           value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('id')?.setFilterValue(value)}
           placeholder="Search..."
-          className="max-w-sm mr-4"
+          className="max-w-sm"
         />
         {table.getColumn('state') && (
           <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
@@ -161,12 +238,55 @@ export function SandboxTable({
           />
         )}
       </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  // Special handling for the select column header
+                  if (header.id === 'select') {
+                    const isAllSelected = table.getIsAllPageRowsSelected() || isGlobalSelectionActive
+                    const isSomeSelected = table.getIsSomePageRowsSelected() && !isGlobalSelectionActive
+
+                    return (
+                      <TableHead key={header.id}>
+                        <Popover open={selectAllConfirmationOpen} onOpenChange={handleSelectAllConfirmationChange}>
+                          <PopoverTrigger asChild>
+                            <Checkbox
+                              checked={isAllSelected || (isSomeSelected && 'indeterminate')}
+                              onCheckedChange={handleHeaderCheckboxChange}
+                              className="translate-y-[2px]"
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent side="bottom" align="start" className="w-auto">
+                            <div className="flex flex-col gap-3">
+                              <p className="text-sm font-medium">
+                                {table.getSelectedRowModel().rows.length} sandboxes selected on the current page.
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                Do you want to select all {totalSelectableCount} sandboxes?
+                              </p>
+                              <div className="flex items-center space-x-2">
+                                <Button size="sm" onClick={performSelectAll}>
+                                  Select All {totalSelectableCount}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleSelectAllConfirmationChange(false)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TableHead>
+                    )
+                  }
+
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -187,7 +307,10 @@ export function SandboxTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={
+                    (row.getIsSelected() || (isGlobalSelectionActive && !deselectedGlobalRowIds.has(row.id))) &&
+                    'selected'
+                  }
                   className={`${loadingSandboxes[row.original.id] || row.original.state === SandboxState.DESTROYING ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -196,14 +319,20 @@ export function SandboxTable({
                 </TableRow>
               ))
             ) : (
-              <TableEmptyState colSpan={columns.length} message="No Sandboxes found." />
+              !loading && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )
             )}
           </TableBody>
         </Table>
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
+          {(table.getRowModel().rows.some((row) => row.getIsSelected()) || isGlobalSelectionActive) && (
             <div className="flex items-center space-x-2">
               <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
                 <PopoverTrigger>
@@ -213,17 +342,42 @@ export function SandboxTable({
                 </PopoverTrigger>
                 <PopoverContent side="top">
                   <div className="flex flex-col gap-4">
-                    <p>Are you sure you want to delete these sandboxes?</p>
+                    <p>
+                      Are you sure you want to delete{' '}
+                      {isGlobalSelectionActive
+                        ? `all ${totalSelectableCount - deselectedGlobalRowIds.size} sandboxes`
+                        : `these ${table.getRowModel().rows.filter((row) => row.getIsSelected()).length} sandboxes`}
+                      ?
+                    </p>
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
+                          if (isGlobalSelectionActive) {
+                            // Delete all selectable sandboxes globally, except those explicitly deselected
+                            handleBulkDelete(
+                              totalSelectableSandboxes
+                                .filter((sandbox) => !deselectedGlobalRowIds.has(sandbox.id))
+                                .map((sandbox) => sandbox.id),
+                            )
+                          } else {
+                            // Delete only selected rows on current page
+                            handleBulkDelete(
+                              table
+                                .getRowModel()
+                                .rows.filter((row) => row.getIsSelected())
+                                .map((row) => row.original.id),
+                            )
+                          }
+
+                          // Clear all selection states after bulk delete
+                          setIsGlobalSelectionActive(false)
+                          setDeselectedGlobalRowIds(new Set())
+                          // Clear individual row selections
+                          for (const row of table.getRowModel().rows) {
+                            row.toggleSelected(false)
+                          }
+
                           setBulkDeleteConfirmationOpen(false)
                         }}
                       >
@@ -239,7 +393,17 @@ export function SandboxTable({
             </div>
           )}
         </div>
-        <Pagination table={table} selectionEnabled entityName="Sandboxes" />
+        <Pagination
+          table={table}
+          selectionEnabled
+          entityName="Sandboxes"
+          onUndoSelection={isGlobalSelectionActive ? handleUndoSelectAll : undefined}
+          customSelectionText={
+            isGlobalSelectionActive
+              ? `${totalSelectableCount - deselectedGlobalRowIds.size} out of ${totalSelectableCount} Sandboxes selected.`
+              : undefined
+          }
+        />
       </div>
     </div>
   )
@@ -323,6 +487,9 @@ const getColumns = ({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  isGlobalSelectionActive,
+  deselectedGlobalRowIds,
+  setDeselectedGlobalRowIds,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -331,34 +498,35 @@ const getColumns = ({
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  isGlobalSelectionActive: boolean
+  deselectedGlobalRowIds: Set<string>
+  setDeselectedGlobalRowIds: (ids: Set<string>) => void
 }): ColumnDef<Sandbox>[] => {
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingSandboxes[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
+      header: ({ table }) => null, // Header is handled separately in the table
       cell: ({ row }) => {
         if (loadingSandboxes[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
         }
         return (
           <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            checked={row.getIsSelected() || (isGlobalSelectionActive && !deselectedGlobalRowIds.has(row.id))}
+            onCheckedChange={(value) => {
+              if (isGlobalSelectionActive) {
+                // When global selection is active, we track deselected rows
+                const newDeselected = new Set(deselectedGlobalRowIds)
+                if (!value) {
+                  newDeselected.add(row.id)
+                } else {
+                  newDeselected.delete(row.id)
+                }
+                setDeselectedGlobalRowIds(newDeselected)
+              }
+              // Regular row selection for table state
+              row.toggleSelected(!!value)
+            }}
             aria-label="Select row"
             className="translate-y-[2px]"
           />
@@ -374,7 +542,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             ID
             {column.getIsSorted() === 'asc' ? (
@@ -389,7 +557,7 @@ const getColumns = ({
       },
       accessorKey: 'id',
       cell: ({ row }) => {
-        return <span className="px-2">{row.original.id}</span>
+        return <span className="px-2 whitespace-nowrap">{row.original.id}</span>
       },
     },
     {
@@ -537,7 +705,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             Last Event
             {column.getIsSorted() === 'asc' ? (
@@ -552,7 +720,7 @@ const getColumns = ({
       },
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
-        return <span className="px-2">{getLastEvent(row.original).relativeTimeString}</span>
+        return <span className="px-2 whitespace-nowrap">{getLastEvent(row.original).relativeTimeString}</span>
       },
     },
     {
@@ -562,7 +730,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             Created
             {column.getIsSorted() === 'asc' ? (
@@ -577,7 +745,7 @@ const getColumns = ({
       },
       accessorFn: (row) => getCreatedAt(row).date,
       cell: ({ row }) => {
-        return <span className="px-2">{getCreatedAt(row.original).relativeTimeString}</span>
+        return <span className="px-2 whitespace-nowrap">{getCreatedAt(row.original).relativeTimeString}</span>
       },
     },
     {
