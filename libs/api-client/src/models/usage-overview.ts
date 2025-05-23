@@ -47,18 +47,6 @@ export interface UsageOverview {
    * @type {number}
    * @memberof UsageOverview
    */
-  totalWorkspaceQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  concurrentWorkspaceQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
   currentCpuUsage: number
   /**
    *
@@ -72,52 +60,4 @@ export interface UsageOverview {
    * @memberof UsageOverview
    */
   currentDiskUsage: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  currentWorkspaces: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  concurrentWorkspaces: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  currentImageNumber: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  imageQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  totalImageSizeQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  totalImageSizeUsed: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  maxVolumes: number
-  /**
-   *
-   * @type {number}
-   * @memberof UsageOverview
-   */
-  usedVolumes: number
 }

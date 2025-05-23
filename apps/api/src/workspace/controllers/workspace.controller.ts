@@ -132,21 +132,6 @@ export class WorkspaceController {
   ): Promise<WorkspaceDto> {
     const organization = authContext.organization
 
-    //  optimistic quota guard
-    //  protect against race condition on workspace create abuse
-    //  not 100% correct when close to quota limit
-    const workspaceQuotaKey = `workspace-quota-${organization.id}`
-    let workspaceQuota = parseInt(await this.redis.get(workspaceQuotaKey)) || 0
-    workspaceQuota++
-    await this.redis.setex(workspaceQuotaKey, 1, workspaceQuota)
-
-    // Get current workspace count for organization
-    const workspaceCount = await this.workspaceService.count(organization.id)
-
-    if (workspaceCount + workspaceQuota > organization.workspaceQuota) {
-      throw new ForbiddenException(`Workspace quota exceeded. Maximum allowed: ${organization.workspaceQuota}`)
-    }
-
     const workspace = await this.workspaceService.create(organization.id, createWorkspaceDto, organization)
 
     // If the workspace has no node, it means it is still building - return the ID to the client so they can fetch logs

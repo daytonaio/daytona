@@ -136,42 +136,14 @@ export class OrganizationService implements OnModuleInit {
     const currentMemoryUsage = runningWorkspaces.reduce((sum, w) => sum + w.mem, 0)
     const currentDiskUsage = workspaces.reduce((sum, w) => sum + w.disk, 0)
 
-    const currentImageNumber =
-      (await this.imageRepository.count({
-        where: {
-          organizationId,
-        },
-      })) || 0
-    const totalImageSizeUsed =
-      (await this.imageRepository.sum('size', {
-        organizationId,
-      })) || 0
-
-    const activeVolumesCount = await this.volumeRepository.count({
-      where: {
-        organizationId,
-        state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
-      },
-    })
-
     return {
       totalCpuQuota: organization.totalCpuQuota,
       totalGpuQuota: 0,
       totalMemoryQuota: organization.totalMemoryQuota,
       totalDiskQuota: organization.totalDiskQuota,
-      totalWorkspaceQuota: organization.workspaceQuota,
-      concurrentWorkspaceQuota: organization.maxConcurrentWorkspaces,
       currentCpuUsage,
       currentMemoryUsage,
       currentDiskUsage,
-      currentWorkspaces: workspaces.length,
-      concurrentWorkspaces: runningWorkspaces.length,
-      currentImageNumber,
-      imageQuota: organization.imageQuota,
-      totalImageSizeQuota: organization.totalImageSize,
-      totalImageSizeUsed,
-      maxVolumes: organization.volumeQuota,
-      usedVolumes: activeVolumesCount,
     }
   }
 
@@ -184,19 +156,17 @@ export class OrganizationService implements OnModuleInit {
       throw new NotFoundException(`Organization with ID ${organizationId} not found`)
     }
 
-    organization.totalCpuQuota = updateOrganizationQuotaDto.totalCpuQuota
-    organization.totalMemoryQuota = updateOrganizationQuotaDto.totalMemoryQuota
-    organization.totalDiskQuota = updateOrganizationQuotaDto.totalDiskQuota
-    organization.maxCpuPerWorkspace = updateOrganizationQuotaDto.maxCpuPerWorkspace
-    organization.maxMemoryPerWorkspace = updateOrganizationQuotaDto.maxMemoryPerWorkspace
-    organization.maxDiskPerWorkspace = updateOrganizationQuotaDto.maxDiskPerWorkspace
-    organization.maxConcurrentWorkspaces = updateOrganizationQuotaDto.maxConcurrentWorkspaces
-    organization.workspaceQuota = updateOrganizationQuotaDto.workspaceQuota
-    organization.imageQuota = updateOrganizationQuotaDto.imageQuota
-    organization.maxImageSize = updateOrganizationQuotaDto.maxImageSize
-    organization.totalImageSize = updateOrganizationQuotaDto.totalImageSize
-    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota
-
+    organization.totalCpuQuota = updateOrganizationQuotaDto.totalCpuQuota ?? organization.totalCpuQuota
+    organization.totalMemoryQuota = updateOrganizationQuotaDto.totalMemoryQuota ?? organization.totalMemoryQuota
+    organization.totalDiskQuota = updateOrganizationQuotaDto.totalDiskQuota ?? organization.totalDiskQuota
+    organization.maxCpuPerWorkspace = updateOrganizationQuotaDto.maxCpuPerWorkspace ?? organization.maxCpuPerWorkspace
+    organization.maxMemoryPerWorkspace =
+      updateOrganizationQuotaDto.maxMemoryPerWorkspace ?? organization.maxMemoryPerWorkspace
+    organization.maxDiskPerWorkspace =
+      updateOrganizationQuotaDto.maxDiskPerWorkspace ?? organization.maxDiskPerWorkspace
+    organization.maxImageSize = updateOrganizationQuotaDto.maxImageSize ?? organization.maxImageSize
+    organization.volumeQuota = updateOrganizationQuotaDto.volumeQuota ?? organization.volumeQuota
+    organization.imageQuota = updateOrganizationQuotaDto.imageQuota ?? organization.imageQuota
     return this.organizationRepository.save(organization)
   }
 
@@ -264,11 +234,8 @@ export class OrganizationService implements OnModuleInit {
     organization.maxCpuPerWorkspace = quota.maxCpuPerWorkspace
     organization.maxMemoryPerWorkspace = quota.maxMemoryPerWorkspace
     organization.maxDiskPerWorkspace = quota.maxDiskPerWorkspace
-    organization.maxConcurrentWorkspaces = quota.maxConcurrentWorkspaces
-    organization.workspaceQuota = quota.workspaceQuota
     organization.imageQuota = quota.imageQuota
     organization.maxImageSize = quota.maxImageSize
-    organization.totalImageSize = quota.totalImageSize
     organization.volumeQuota = quota.volumeQuota
 
     if (!creatorEmailVerified) {
