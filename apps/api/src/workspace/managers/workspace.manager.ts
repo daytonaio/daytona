@@ -15,7 +15,7 @@ import { NodeService } from '../services/node.service'
 import { EnumsSandboxState as NodeWorkspaceState } from '@daytonaio/runner-api-client'
 import { NodeState } from '../enums/node-state.enum'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
-import { SnapshotState } from '../enums/snapshot-state.enum'
+import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { ImageService } from '../services/image.service'
@@ -64,12 +64,11 @@ export class WorkspaceManager {
   @OtelSpan()
   async autostopCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
-    const snapshotCheckWorkerSelected = await this.redis.get('auto-stop-check-worker-selected')
-    if (snapshotCheckWorkerSelected) {
+    //  keep the worker selected for 1 minute
+
+    if (!(await this.redisLockProvider.lock('auto-stop-check-worker-selected', 60))) {
       return
     }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex('auto-stop-check-worker-selected', 60, '1')
 
     // Get all ready nodes
     const allNodes = await this.nodeService.findAll()
@@ -89,7 +88,7 @@ export class WorkspaceManager {
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoStopInterval"`),
           },
           order: {
-            lastSnapshotAt: 'ASC',
+            lastBackupAt: 'ASC',
           },
           //  todo: increase this number when auto-stop is stable
           take: 10,
@@ -147,7 +146,7 @@ export class WorkspaceManager {
             lastActivityAt: Raw((alias) => `${alias} < NOW() - INTERVAL '1 minute' * "autoArchiveInterval"`),
           },
           order: {
-            lastSnapshotAt: 'ASC',
+            lastBackupAt: 'ASC',
           },
           //  max 3 workspaces can be archived at the same time on the same node
           //  this is to prevent the node from being overloaded
@@ -438,8 +437,8 @@ export class WorkspaceManager {
       case WorkspaceState.ARCHIVING: {
         await this.redisLockProvider.unlock(lockKey)
 
-        //  if the snapshot state is error, we need to retry the snapshot
-        if (workspace.snapshotState === SnapshotState.ERROR) {
+        //  if the backup state is error, we need to retry the backup
+        if (workspace.backupState === BackupState.ERROR) {
           const archiveErrorRetryKey = 'archive-error-retry-' + workspace.id
           const archiveErrorRetryCountRaw = await this.redis.get(archiveErrorRetryKey)
           const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
@@ -451,9 +450,9 @@ export class WorkspaceManager {
           }
           await this.redis.setex('archive-error-retry-' + workspace.id, 720, String(archiveErrorRetryCount + 1))
 
-          //  reset the snapshot state to pending to retry the snapshot
+          //  reset the backup state to pending to retry the backup
           await this.workspaceRepository.update(workspace.id, {
-            snapshotState: SnapshotState.PENDING,
+            backupState: BackupState.PENDING,
           })
 
           return DONT_SYNC_AGAIN
@@ -466,11 +465,11 @@ export class WorkspaceManager {
           return DONT_SYNC_AGAIN
         }
 
-        if (workspace.snapshotState !== SnapshotState.COMPLETED) {
+        if (workspace.backupState !== BackupState.COMPLETED) {
           return DONT_SYNC_AGAIN
         }
 
-        //  when the snapshot is completed, destroy the workspace on the node
+        //  when the backup is completed, destroy the workspace on the node
         //  and deassociate the workspace from the node
         const node = await this.nodeService.findOne(workspace.nodeId)
         const nodeWorkspaceApi = this.nodeApiFactory.createWorkspaceApi(node)
@@ -613,7 +612,7 @@ export class WorkspaceManager {
             id: workspace.id,
           })
           workspaceToUpdate.state = WorkspaceState.STARTED
-          workspaceToUpdate.snapshotState = SnapshotState.NONE
+          workspaceToUpdate.backupState = BackupState.NONE
           await this.workspaceRepository.save(workspaceToUpdate)
         }
       }
@@ -652,7 +651,7 @@ export class WorkspaceManager {
               id: workspace.id,
             })
             workspaceToUpdate.state = WorkspaceState.STOPPED
-            workspaceToUpdate.snapshotState = SnapshotState.NONE
+            workspaceToUpdate.backupState = BackupState.NONE
             await this.workspaceRepository.save(workspaceToUpdate)
             return SYNC_AGAIN
           }
@@ -805,12 +804,12 @@ export class WorkspaceManager {
   ): Promise<ShouldSyncAgain> => {
     //  check if workspace is assigned to a node and if that node is unschedulable
     //  if it is, move workspace to prevNodeId, and set nodeId to null
-    //  this will assign a new node to the workspace and restore the workspace from the latest snapshot
+    //  this will assign a new node to the workspace and restore the workspace from the latest backup
     if (workspace.nodeId) {
       const node = await this.nodeService.findOne(workspace.nodeId)
       if (node.unschedulable) {
-        //  check if workspace has a valid snapshot
-        if (workspace.snapshotState !== SnapshotState.COMPLETED) {
+        //  check if workspace has a valid backup
+        if (workspace.backupState !== BackupState.COMPLETED) {
           //  if not, keep workspace on the same node
         } else {
           workspace.prevNodeId = workspace.nodeId
@@ -825,7 +824,7 @@ export class WorkspaceManager {
         }
       }
 
-      if (workspace.snapshotState === SnapshotState.COMPLETED) {
+      if (workspace.backupState === BackupState.COMPLETED) {
         const usageThreshold = 35
         const runningWorkspacesCount = await this.workspaceRepository.count({
           where: {
@@ -867,49 +866,49 @@ export class WorkspaceManager {
     }
 
     if (workspace.nodeId === null) {
-      //  if workspace has no node, check if snapshot is completed
+      //  if workspace has no node, check if backup is completed
       //  if not, set workspace to error
-      //  if snapshot is completed, get random available node and start workspace
-      //  use the snapshot image to start the workspace
+      //  if backup is completed, get random available node and start workspace
+      //  use the backup image to start the workspace
 
-      if (workspace.snapshotState !== SnapshotState.COMPLETED) {
-        await this.updateWorkspaceErrorState(workspace.id, 'Workspace has no node and snapshot is not completed')
+      if (workspace.backupState !== BackupState.COMPLETED) {
+        await this.updateWorkspaceErrorState(workspace.id, 'Workspace has no node and backup is not completed')
         return true
       }
 
-      const registry = await this.dockerRegistryService.findOne(workspace.snapshotRegistryId)
+      const registry = await this.dockerRegistryService.findOne(workspace.backupRegistryId)
       if (!registry) {
         throw new Error('No registry found for image')
       }
 
-      const existingImages = workspace.existingSnapshotImages.map((existingImage) => existingImage.imageName)
-      let validSnapshotImage
+      const existingImages = workspace.existingBackupImages.map((existingImage) => existingImage.imageName)
+      let validBackupImage
       let exists = false
 
       while (existingImages.length > 0) {
         try {
-          if (!validSnapshotImage) {
+          if (!validBackupImage) {
             //  last image is the current image, so we don't need to check it
-            //  just in case, we'll use the value from the snapshotImage property
-            validSnapshotImage = workspace.snapshotImage
+            //  just in case, we'll use the value from the backupImage property
+            validBackupImage = workspace.backupImage
             existingImages.pop()
           } else {
-            validSnapshotImage = existingImages.pop()
+            validBackupImage = existingImages.pop()
           }
-          if (await this.dockerProvider.checkImageExistsInRegistry(validSnapshotImage, registry)) {
+          if (await this.dockerProvider.checkImageExistsInRegistry(validBackupImage, registry)) {
             exists = true
             break
           }
         } catch (error) {
           this.logger.error(
-            `Failed to check if snapshot image ${workspace.snapshotImage} exists in registry ${registry.id}:`,
+            `Failed to check if backup image ${workspace.backupImage} exists in registry ${registry.id}:`,
             fromAxiosError(error),
           )
         }
       }
 
       if (!exists) {
-        await this.updateWorkspaceErrorState(workspace.id, 'No valid snapshot image found')
+        await this.updateWorkspaceErrorState(workspace.id, 'No valid backup image found')
         return SYNC_AGAIN
       }
 
@@ -934,7 +933,7 @@ export class WorkspaceManager {
 
       await nodeWorkspaceApi.create({
         id: workspace.id,
-        image: validSnapshotImage,
+        image: validBackupImage,
         osUser: workspace.osUser,
         // TODO: organizationId: workspace.organizationId,
         userId: workspace.organizationId,
@@ -1004,15 +1003,15 @@ export class WorkspaceManager {
 
     switch (workspaceInfo.state) {
       case NodeWorkspaceState.SandboxStateStarted: {
-        //  if previous snapshot state is error or completed, set snapshot state to none
-        if ([SnapshotState.ERROR, SnapshotState.COMPLETED].includes(workspace.snapshotState)) {
-          workspace.snapshotState = SnapshotState.NONE
+        //  if previous backup state is error or completed, set backup state to none
+        if ([BackupState.ERROR, BackupState.COMPLETED].includes(workspace.backupState)) {
+          workspace.backupState = BackupState.NONE
 
           const workspaceToUpdate = await this.workspaceRepository.findOneByOrFail({
             id: workspace.id,
           })
           workspaceToUpdate.state = WorkspaceState.STARTED
-          workspaceToUpdate.snapshotState = SnapshotState.NONE
+          workspaceToUpdate.backupState = BackupState.NONE
           await this.workspaceRepository.save(workspaceToUpdate)
         } else {
           await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTED)

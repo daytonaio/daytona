@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-export enum SnapshotState {
+export enum BackupState {
   NONE = 'None',
   PENDING = 'Pending',
   IN_PROGRESS = 'InProgress',

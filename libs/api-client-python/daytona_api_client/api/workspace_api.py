@@ -282,7 +282,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_snapshot(
+    def create_backup(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -298,7 +298,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> Workspace:
-        """Create workspace snapshot
+        """Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -327,7 +327,7 @@ class WorkspaceApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -347,7 +347,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def create_snapshot_with_http_info(
+    def create_backup_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -363,7 +363,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[Workspace]:
-        """Create workspace snapshot
+        """Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -392,7 +392,7 @@ class WorkspaceApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -412,7 +412,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_snapshot_without_preload_content(
+    def create_backup_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -428,7 +428,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create workspace snapshot
+        """Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -457,7 +457,7 @@ class WorkspaceApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -472,7 +472,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _create_snapshot_serialize(
+    def _create_backup_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -511,7 +511,7 @@ class WorkspaceApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/workspace/{workspaceId}/snapshot",
+            resource_path="/workspace/{workspaceId}/backup",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
