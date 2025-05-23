@@ -329,7 +329,11 @@ export class WorkspaceService {
     const imageRef = workspace.buildInfo ? workspace.buildInfo.imageRef : image.internalName
 
     try {
-      workspace.nodeId = await this.nodeService.getRandomAvailableNode(workspace.region, workspace.class, imageRef)
+      workspace.nodeId = await this.nodeService.getRandomAvailableNode({
+        region: workspace.region,
+        workspaceClass: workspace.class,
+        imageRef,
+      })
     } catch (error) {
       if (error instanceof BadRequestError == false || error.message !== 'No available nodes' || !workspace.buildInfo) {
         throw error
