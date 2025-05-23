@@ -2,8 +2,8 @@
   "name": "@daytonaio/sdk",
   "version": "0.0.0-dev",
   "description": "TypeScript SDK for Daytona",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/daytonaio/daytona.git"
