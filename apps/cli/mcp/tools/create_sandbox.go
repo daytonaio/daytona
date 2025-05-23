@@ -43,7 +43,7 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	if image, ok := request.Params.Arguments["image"]; ok && image != nil {
 		if imageStr, ok := image.(string); ok && imageStr != "" {
-			createSandbox.SetImage(imageStr)
+			createSandbox.SetSnapshot(imageStr)
 		}
 	}
 

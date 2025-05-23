@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func ValidateImageName(imageName string) error {
+func ValidateSnapshotName(imageName string) error {
 	parts := strings.Split(imageName, ":")
 	if len(parts) != 2 {
 		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'myimage:1.0')")

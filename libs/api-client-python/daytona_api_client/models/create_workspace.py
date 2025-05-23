@@ -29,7 +29,7 @@ class CreateWorkspace(BaseModel):
     """
     CreateWorkspace
     """ # noqa: E501
-    image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
+    snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the workspace")
     user: Optional[StrictStr] = Field(default=None, description="The user associated with the project")
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the workspace")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the workspace")
@@ -44,7 +44,7 @@ class CreateWorkspace(BaseModel):
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["snapshot", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "volumes", "buildInfo"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -134,7 +134,7 @@ class CreateWorkspace(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "image": obj.get("image"),
+            "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),
             "labels": obj.get("labels"),
