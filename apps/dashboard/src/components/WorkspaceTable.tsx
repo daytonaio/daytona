@@ -85,6 +85,7 @@ export function WorkspaceTable({
 
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [selectAllConfirmationOpen, setSelectAllConfirmationOpen] = useState(false)
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -105,6 +106,7 @@ export function WorkspaceTable({
     writePermitted,
     deletePermitted,
   })
+
   const table = useReactTable({
     data,
     columns,
@@ -128,16 +130,59 @@ export function WorkspaceTable({
       },
     },
   })
+
+  const selectableRows = table.getRowModel().rows.filter((row) => !loadingWorkspaces[row.original.id])
+  const totalSelectableCount = selectableRows.length
+  const showConfirmation = totalSelectableCount > 15
+
+  const handleSelectAll = () => {
+    if (showConfirmation) {
+      setSelectAllConfirmationOpen(true)
+    } else {
+      performSelectAll()
+    }
+  }
+
+  const performSelectAll = () => {
+    for (const row of table.getRowModel().rows) {
+      if (!loadingWorkspaces[row.original.id]) {
+        row.toggleSelected(true)
+      }
+    }
+    setSelectAllConfirmationOpen(false)
+  }
+
+  const handleUndoSelectAll = () => {
+    for (const row of table.getRowModel().rows) {
+      row.toggleSelected(false)
+    }
+  }
+
+  const handleHeaderCheckboxChange = (value: boolean | 'indeterminate') => {
+    if (value && showConfirmation) {
+      setSelectAllConfirmationOpen(true)
+    } else {
+      for (const row of table.getRowModel().rows) {
+        if (loadingWorkspaces[row.original.id]) {
+          row.toggleSelected(false)
+        } else {
+          row.toggleSelected(!!value)
+        }
+      }
+    }
+  }
+
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 
   return (
     <div>
-      <div className="flex items-center mb-4">
+      {/* Filter section */}
+      <div className="flex items-center gap-4 mb-4">
         <DebouncedInput
           value={(table.getColumn('id')?.getFilterValue() as string) ?? ''}
           onChange={(value) => table.getColumn('id')?.setFilterValue(value)}
           placeholder="Search..."
-          className="max-w-sm mr-4"
+          className="max-w-sm"
         />
         {table.getColumn('state') && (
           <DataTableFacetedFilter column={table.getColumn('state')} title="State" options={statuses} />
@@ -151,12 +196,101 @@ export function WorkspaceTable({
           />
         )}
       </div>
+
+      {/* Selection header */}
+      <div className="flex items-center gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          {table.getSelectedRowModel().rows.length > 0 ? (
+            <>
+              <span className="text-sm text-muted-foreground">
+                {table.getSelectedRowModel().rows.length}{' '}
+                {table.getSelectedRowModel().rows.length === 1 ? 'sandbox' : 'sandboxes'} selected
+              </span>
+              <span
+                className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                onClick={handleUndoSelectAll}
+              >
+                Undo
+              </span>
+            </>
+          ) : (
+            <>
+              {showConfirmation ? (
+                <Popover open={selectAllConfirmationOpen} onOpenChange={setSelectAllConfirmationOpen}>
+                  <PopoverTrigger asChild>
+                    <span
+                      className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                      onClick={handleSelectAll}
+                    >
+                      Select all sandboxes
+                    </span>
+                  </PopoverTrigger>
+                  <PopoverContent side="right" align="start" className="w-auto ml-2">
+                    <div className="flex flex-col gap-3">
+                      <p className="text-sm font-medium">Select ALL {totalSelectableCount} Sandboxes?</p>
+                      <p className="text-xs text-muted-foreground">
+                        This will select all selectable sandboxes in the current view.
+                      </p>
+                      <div className="flex items-center space-x-2">
+                        <Button size="sm" onClick={performSelectAll}>
+                          Select All
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setSelectAllConfirmationOpen(false)}>
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <span
+                  className="text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 cursor-pointer"
+                  onClick={handleSelectAll}
+                >
+                  Select all sandboxes
+                </span>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  // Special handling for the select column header
+                  if (header.id === 'select') {
+                    const isAllSelected = table.getIsAllPageRowsSelected()
+                    const isSomeSelected = table.getIsSomePageRowsSelected()
+
+                    return (
+                      <TableHead key={header.id}>
+                        {showConfirmation ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Checkbox
+                                  checked={isAllSelected || (isSomeSelected && 'indeterminate')}
+                                  onCheckedChange={handleHeaderCheckboxChange}
+                                  className="translate-y-[2px]"
+                                />
+                              </TooltipTrigger>
+                            </Tooltip>
+                          </TooltipProvider>
+                        ) : (
+                          <Checkbox
+                            checked={isAllSelected || (isSomeSelected && 'indeterminate')}
+                            onCheckedChange={handleHeaderCheckboxChange}
+                            className="translate-y-[2px]"
+                          />
+                        )}
+                      </TableHead>
+                    )
+                  }
+
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -346,22 +480,7 @@ const getColumns = ({
   const columns: ColumnDef<Workspace>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingWorkspaces[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
+      header: ({ table }) => null,
       cell: ({ row }) => {
         if (loadingWorkspaces[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
@@ -385,7 +504,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             ID
             {column.getIsSorted() === 'asc' ? (
@@ -400,7 +519,7 @@ const getColumns = ({
       },
       accessorKey: 'id',
       cell: ({ row }) => {
-        return <span className="px-2">{row.original.id}</span>
+        return <span className="px-2 whitespace-nowrap">{row.original.id}</span>
       },
     },
     {
@@ -483,31 +602,6 @@ const getColumns = ({
       },
       accessorKey: 'target',
     },
-    // {
-    //   id: 'class',
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         variant="ghost"
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    //         className="px-2 hover:bg-muted/50"
-    //       >
-    //         Class
-    //         {column.getIsSorted() === 'asc' ? (
-    //           <ArrowUp className="ml-2 h-4 w-4" />
-    //         ) : column.getIsSorted() === 'desc' ? (
-    //           <ArrowDown className="ml-2 h-4 w-4" />
-    //         ) : (
-    //           <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         )}
-    //       </Button>
-    //     )
-    //   },
-    //   cell: ({ row }) => {
-    //     return <span className="px-2">{getProviderClass(row.original)}</span>
-    //   },
-    //   accessorFn: (row) => getProviderClass(row),
-    // },
     {
       id: 'labels',
       header: () => {
@@ -544,7 +638,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             Last Event
             {column.getIsSorted() === 'asc' ? (
@@ -559,7 +653,7 @@ const getColumns = ({
       },
       accessorFn: (row) => getLastEvent(row).date,
       cell: ({ row }) => {
-        return <span className="px-2">{getLastEvent(row.original).relativeTimeString}</span>
+        return <span className="px-2 whitespace-nowrap">{getLastEvent(row.original).relativeTimeString}</span>
       },
     },
     {
@@ -569,7 +663,7 @@ const getColumns = ({
           <Button
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-            className="px-2 hover:bg-muted/50"
+            className="px-2 hover:bg-muted/50 whitespace-nowrap"
           >
             Created
             {column.getIsSorted() === 'asc' ? (
@@ -584,7 +678,7 @@ const getColumns = ({
       },
       accessorFn: (row) => getCreatedAt(row).date,
       cell: ({ row }) => {
-        return <span className="px-2">{getCreatedAt(row.original).relativeTimeString}</span>
+        return <span className="px-2 whitespace-nowrap">{getCreatedAt(row.original).relativeTimeString}</span>
       },
     },
     {
