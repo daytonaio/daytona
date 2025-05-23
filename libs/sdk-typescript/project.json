@@ -1,0 +1,26 @@
+{
+  "name": "sdk-typescript",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-typescript",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/sdk-typescript",
+        "tsConfig": "{projectRoot}/tsconfig.lib.json",
+        "packageJson": "libs/sdk-typescript/package.json",
+        "main": "{projectRoot}/index.ts",
+        "updateBuildableProjectDepsInPackageJson": true
+      }
+    },
+    "docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npm run docs"
+      }
+    }
+  }
+}

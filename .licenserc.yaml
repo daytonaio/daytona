@@ -20,5 +20,6 @@ header:
     - 'libs/api-client-python/**'
     - 'apps/api/src/generate-openapi.ts'
     - 'apps/runner/pkg/api/docs/docs.go'
+    - 'examples/**'
 
   comment: on-failure

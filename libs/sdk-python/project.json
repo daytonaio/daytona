@@ -1,0 +1,23 @@
+{
+  "name": "sdk-python",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/sdk-python",
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "outputs": ["{workspaceRoot}/dist/libs/sdk-python"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npm run build -- --outdir ../../dist/libs/sdk-python"
+      }
+    },
+    "docs": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "npm run docs"
+      }
+    }
+  }
+}
