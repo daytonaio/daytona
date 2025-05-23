@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { Suspense, useEffect, useState } from 'react'
+import React, { Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Dashboard from './pages/Dashboard'
 import Workspaces from './pages/Workspaces'
@@ -14,7 +14,14 @@ import LoadingFallback from './components/LoadingFallback'
 import Images from './pages/Images'
 import Registries from './pages/Registries'
 import { usePostHog } from 'posthog-js/react'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from './components/ui/dialog'
 import { OrganizationsProvider } from '@/providers/OrganizationsProvider'
 import { SelectedOrganizationProvider } from '@/providers/SelectedOrganizationProvider'
 import { UserOrganizationInvitationsProvider } from '@/providers/UserOrganizationInvitationsProvider'
@@ -32,6 +39,8 @@ import Logout from './pages/Logout'
 import { RoutePath, getRouteSubPath } from './enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from './constants/ExternalLinks'
 import Onboarding from '@/pages/Onboarding'
+import LinkedAccounts from '@/pages/LinkedAccounts'
+import { Button } from './components/ui/button'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -53,8 +62,7 @@ const SlackRedirect = () => {
 function App() {
   const location = useLocation()
   const posthog = usePostHog()
-  const { error, isAuthenticated, user } = useAuth()
-  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+  const { error: authError, isAuthenticated, user, signoutRedirect } = useAuth()
 
   useEffect(() => {
     if (import.meta.env.PROD && isAuthenticated && user && posthog?.get_distinct_id() !== user.profile.sub) {
@@ -74,31 +82,24 @@ function App() {
     }
   }, [location, posthog])
 
-  useEffect(() => {
-    if (error) {
-      if (error.message === 'User not found in waitlist.') {
-        window.location.href = 'https://www.daytona.io/failed-signup'
-        return
-      }
-
-      setErrorDialogOpen(true)
-    }
-  }, [error])
-
-  const [errorTitle, errorDescription] = error?.message.startsWith(`You're currently`)
-    ? [error.message.split('\n')[0], error.message.split('\n').slice(1).join('\n')]
-    : ['Authentication Error', error?.message]
+  if (authError) {
+    return (
+      <Dialog open>
+        <DialogContent className="[&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle>Authentication Error</DialogTitle>
+            <DialogDescription>{authError.message}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => signoutRedirect()}>Go Back</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+  }
 
   return (
     <ThemeProvider>
-      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{errorTitle}</DialogTitle>
-            <DialogDescription>{errorDescription}</DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
       <Routes>
         <Route path={RoutePath.LANDING} element={<LandingPage />} />
         <Route path={RoutePath.LOGOUT} element={<Logout />} />
@@ -163,6 +164,9 @@ function App() {
           /> */
           }
           <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+          {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
+            <Route path={getRouteSubPath(RoutePath.LINKED_ACCOUNTS)} element={<LinkedAccounts />} />
+          )}
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
         </Route>

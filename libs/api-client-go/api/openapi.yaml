@@ -927,6 +927,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: User details
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -942,6 +943,7 @@ paths:
         '200':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -962,6 +964,7 @@ paths:
         '201':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -984,11 +987,64 @@ paths:
         '201':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
             - email
       summary: Regenerate user key pair
+      tags:
+        - users
+  /users/account-providers:
+    get:
+      operationId: getAvailableAccountProviders
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AccountProvider'
+                type: array
+          description: Available account providers
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get available account providers
+      tags:
+        - users
+  /users/linked-accounts/{providerId}/{userId}:
+    delete:
+      operationId: unlinkAccount
+      parameters:
+        - explode: false
+          in: path
+          name: providerId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Unlink account
       tags:
         - users
   /workspace:
@@ -4877,6 +4933,19 @@ components:
           type: boolean
       required:
         - id
+        - name
+      type: object
+    AccountProvider:
+      example:
+        displayName: displayName
+        name: name
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+      required:
+        - displayName
         - name
       type: object
     WorkspaceInfo:

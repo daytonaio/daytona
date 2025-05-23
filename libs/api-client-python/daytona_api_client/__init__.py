@@ -42,6 +42,7 @@ from daytona_api_client.exceptions import ApiAttributeError
 from daytona_api_client.exceptions import ApiException
 
 # import models into sdk package
+from daytona_api_client.models.account_provider import AccountProvider
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
 from daytona_api_client.models.build_image import BuildImage

@@ -18,6 +18,7 @@ interface ImportMetaEnv {
   readonly VITE_BILLING_API_URL: string | undefined
   readonly VITE_POSTHOG_KEY: string | undefined
   readonly VITE_POSTHOG_HOST: string | undefined
+  readonly VITE_LINKED_ACCOUNTS_ENABLED: string | undefined
 }
 
 interface ImportMeta {
