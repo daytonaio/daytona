@@ -157,7 +157,7 @@ const LinkedAccounts: React.FC = () => {
                   ? provider.isPrimary
                     ? `This is your primary account used for authentication.`
                     : `Your ${provider.displayName} account is linked as a secondary login method.`
-                  : `Linking your ${provider.displayName} account allows for seamless login.`}
+                  : `Link your ${provider.displayName} account with the same email for a seamless login.`}
               </p>
             </CardContent>
             <CardFooter>
