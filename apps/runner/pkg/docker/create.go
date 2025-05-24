@@ -5,10 +5,7 @@ package docker
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"strings"
 	"time"
 
@@ -85,39 +82,6 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 	err = d.Start(ctx, sandboxDto.Id)
 	if err != nil {
 		return "", err
-	}
-
-	// wait for the daemon to start listening on port 2280
-	container, err := d.ContainerInspect(ctx, c.ID)
-	if err != nil {
-		return "", common.NewNotFoundError(fmt.Errorf("sandbox container not found: %w", err))
-	}
-
-	var containerIP string
-	for _, network := range container.NetworkSettings.Networks {
-		containerIP = network.IPAddress
-		break
-	}
-
-	if containerIP == "" {
-		return "", errors.New("container has no IP address, it might not be running")
-	}
-
-	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		return "", common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
-	}
-
-	for i := 0; i < 10; i++ {
-		conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
-		if err != nil {
-			time.Sleep(50 * time.Millisecond)
-			continue
-		}
-		conn.Close()
-		break
 	}
 
 	return c.ID, nil
