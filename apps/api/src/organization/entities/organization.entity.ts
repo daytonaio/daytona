@@ -53,23 +53,23 @@ export class Organization {
   @Column({
     type: 'int',
     default: 4,
-    name: 'max_cpu_per_workspace',
+    name: 'max_cpu_per_sandbox',
   })
-  maxCpuPerWorkspace: number
+  maxCpuPerSandbox: number
 
   @Column({
     type: 'int',
     default: 8,
-    name: 'max_memory_per_workspace',
+    name: 'max_memory_per_sandbox',
   })
-  maxMemoryPerWorkspace: number
+  maxMemoryPerSandbox: number
 
   @Column({
     type: 'int',
     default: 10,
-    name: 'max_disk_per_workspace',
+    name: 'max_disk_per_sandbox',
   })
-  maxDiskPerWorkspace: number
+  maxDiskPerSandbox: number
 
   @Column({
     type: 'int',

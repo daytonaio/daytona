@@ -62,7 +62,7 @@ var proxyClient = &http.Client{
 //	@Tags			toolbox
 //	@Summary		Proxy requests to the sandbox toolbox
 //	@Description	Forwards the request to the specified sandbox's container
-//	@Param			workspaceId	path		string	true	"Sandbox ID"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Param			projectId	path		string	true	"Project ID"
 //	@Param			path		path		string	true	"Path to forward"
 //	@Success		200			{object}	string	"Proxied response"
@@ -71,7 +71,7 @@ var proxyClient = &http.Client{
 //	@Failure		404			{object}	string	"Sandbox container not found"
 //	@Failure		409			{object}	string	"Sandbox container conflict"
 //	@Failure		500			{object}	string	"Internal server error"
-//	@Router			/workspaces/{workspaceId}/{projectId}/toolbox/{path} [get]
+//	@Router			/sandboxes/{sandboxId}/{projectId}/toolbox/{path} [get]
 func ProxyRequest(ctx *gin.Context) {
 	target, fullTargetURL, err := getProxyTarget(ctx)
 	if err != nil {
@@ -142,7 +142,7 @@ func ProxyRequest(ctx *gin.Context) {
 func getProxyTarget(ctx *gin.Context) (*url.URL, string, error) {
 	runner := runner.GetInstance(nil)
 
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 	if sandboxId == "" {
 		ctx.Error(common.NewBadRequestError(errors.New("sandbox ID is required")))
 		return nil, "", errors.New("sandbox ID is required")

@@ -60,7 +60,7 @@ export class NotFoundExceptionFilter implements ExceptionFilter {
     errorType: string
   } {
     switch (errorMessage) {
-      case 'Workspace not found':
+      case 'Sandbox not found':
         return {
           statusCode: HttpStatus.NOT_FOUND,
           errorType: 'Not Found',

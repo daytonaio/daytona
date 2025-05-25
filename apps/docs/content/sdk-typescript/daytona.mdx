@@ -297,17 +297,17 @@ console.log(`Current sandbox state: ${sandbox.instance.state}`)
 
 ---
 
-#### ~~getCurrentWorkspace()~~
+#### ~~getCurrentSandbox()~~
 
 ```ts
-getCurrentWorkspace(workspaceId: string): Promise<Sandbox>
+getCurrentSandbox(sandboxId: string): Promise<Sandbox>
 ```
 
 Gets the Sandbox by ID.
 
 **Parameters**:
 
-- `workspaceId` _string_ - The ID of the Sandbox to retrieve
+- `sandboxId` _string_ - The ID of the Sandbox to retrieve
 
 **Returns**:
 
@@ -455,7 +455,7 @@ Configuration options for initializing the Daytona client.
 - `organizationId?` _string_ - Organization ID used for JWT-based authentication. Required if a JWT token
   is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
 - ~~`serverUrl?`~~ _string_ - **_Deprecated_** - Use `apiUrl` instead. This property will be removed in future versions.
-- `target?` _CreateWorkspaceTargetEnum_ - Target location for Sandboxes
+- `target?` _CreateSandboxTargetEnum_ - Target location for Sandboxes
 
 **Example:**
 
@@ -509,4 +509,4 @@ Represents a volume mount for a Sandbox.
 
 **Extends:**
 
-- `WorkspaceVolume`
+- `SandboxVolume`

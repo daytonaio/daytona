@@ -70,7 +70,7 @@ class ToolboxApi:
     @validate_call
     def create_folder(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -88,10 +88,10 @@ class ToolboxApi:
     ) -> None:
         """Create folder
 
-        Create folder inside workspace
+        Create folder inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param mode: (required)
@@ -121,7 +121,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_folder_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             mode=mode,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -144,7 +144,7 @@ class ToolboxApi:
     @validate_call
     def create_folder_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -162,10 +162,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Create folder
 
-        Create folder inside workspace
+        Create folder inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param mode: (required)
@@ -195,7 +195,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_folder_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             mode=mode,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -218,7 +218,7 @@ class ToolboxApi:
     @validate_call
     def create_folder_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -236,10 +236,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Create folder
 
-        Create folder inside workspace
+        Create folder inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param mode: (required)
@@ -269,7 +269,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_folder_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             mode=mode,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -287,7 +287,7 @@ class ToolboxApi:
 
     def _create_folder_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         mode,
         x_daytona_organization_id,
@@ -308,8 +308,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -328,7 +328,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/folder",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/folder",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -344,7 +344,7 @@ class ToolboxApi:
     @validate_call
     def create_session(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -361,10 +361,10 @@ class ToolboxApi:
     ) -> None:
         """Create session
 
-        Create a new session in the workspace
+        Create a new session in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param create_session_request: (required)
         :type create_session_request: CreateSessionRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -392,7 +392,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -414,7 +414,7 @@ class ToolboxApi:
     @validate_call
     def create_session_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -431,10 +431,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Create session
 
-        Create a new session in the workspace
+        Create a new session in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param create_session_request: (required)
         :type create_session_request: CreateSessionRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -462,7 +462,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -484,7 +484,7 @@ class ToolboxApi:
     @validate_call
     def create_session_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         create_session_request: CreateSessionRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -501,10 +501,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Create session
 
-        Create a new session in the workspace
+        Create a new session in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param create_session_request: (required)
         :type create_session_request: CreateSessionRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -532,7 +532,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._create_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             create_session_request=create_session_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -549,7 +549,7 @@ class ToolboxApi:
 
     def _create_session_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         create_session_request,
         x_daytona_organization_id,
         _request_auth,
@@ -569,8 +569,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -593,7 +593,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -609,7 +609,7 @@ class ToolboxApi:
     @validate_call
     def delete_file(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -626,10 +626,10 @@ class ToolboxApi:
     ) -> None:
         """Delete file
 
-        Delete file inside workspace
+        Delete file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -657,7 +657,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -679,7 +679,7 @@ class ToolboxApi:
     @validate_call
     def delete_file_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -696,10 +696,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Delete file
 
-        Delete file inside workspace
+        Delete file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -727,7 +727,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -749,7 +749,7 @@ class ToolboxApi:
     @validate_call
     def delete_file_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -766,10 +766,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Delete file
 
-        Delete file inside workspace
+        Delete file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -797,7 +797,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -814,7 +814,7 @@ class ToolboxApi:
 
     def _delete_file_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -834,8 +834,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -851,7 +851,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="DELETE",
-            resource_path="/toolbox/{workspaceId}/toolbox/files",
+            resource_path="/toolbox/{sandboxId}/toolbox/files",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -867,7 +867,7 @@ class ToolboxApi:
     @validate_call
     def delete_session(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -886,8 +886,8 @@ class ToolboxApi:
 
         Delete a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -915,7 +915,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -937,7 +937,7 @@ class ToolboxApi:
     @validate_call
     def delete_session_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -956,8 +956,8 @@ class ToolboxApi:
 
         Delete a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -985,7 +985,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1007,7 +1007,7 @@ class ToolboxApi:
     @validate_call
     def delete_session_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1026,8 +1026,8 @@ class ToolboxApi:
 
         Delete a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1055,7 +1055,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._delete_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1072,7 +1072,7 @@ class ToolboxApi:
 
     def _delete_session_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         session_id,
         x_daytona_organization_id,
         _request_auth,
@@ -1092,8 +1092,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         if session_id is not None:
             _path_params["sessionId"] = session_id
         # process the query parameters
@@ -1108,7 +1108,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="DELETE",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session/{sessionId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1124,7 +1124,7 @@ class ToolboxApi:
     @validate_call
     def download_file(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1141,10 +1141,10 @@ class ToolboxApi:
     ) -> bytearray:
         """Download file
 
-        Download file from workspace
+        Download file from sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1172,7 +1172,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._download_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1194,7 +1194,7 @@ class ToolboxApi:
     @validate_call
     def download_file_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1211,10 +1211,10 @@ class ToolboxApi:
     ) -> ApiResponse[bytearray]:
         """Download file
 
-        Download file from workspace
+        Download file from sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1242,7 +1242,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._download_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1264,7 +1264,7 @@ class ToolboxApi:
     @validate_call
     def download_file_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1281,10 +1281,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Download file
 
-        Download file from workspace
+        Download file from sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1312,7 +1312,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._download_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1329,7 +1329,7 @@ class ToolboxApi:
 
     def _download_file_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -1349,8 +1349,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -1370,7 +1370,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/download",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/download",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1386,7 +1386,7 @@ class ToolboxApi:
     @validate_call
     def execute_command(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1403,10 +1403,10 @@ class ToolboxApi:
     ) -> ExecuteResponse:
         """Execute command
 
-        Execute command synchronously inside workspace
+        Execute command synchronously inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param execute_request: (required)
         :type execute_request: ExecuteRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1434,7 +1434,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1456,7 +1456,7 @@ class ToolboxApi:
     @validate_call
     def execute_command_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1473,10 +1473,10 @@ class ToolboxApi:
     ) -> ApiResponse[ExecuteResponse]:
         """Execute command
 
-        Execute command synchronously inside workspace
+        Execute command synchronously inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param execute_request: (required)
         :type execute_request: ExecuteRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1504,7 +1504,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1526,7 +1526,7 @@ class ToolboxApi:
     @validate_call
     def execute_command_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         execute_request: ExecuteRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1543,10 +1543,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Execute command
 
-        Execute command synchronously inside workspace
+        Execute command synchronously inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param execute_request: (required)
         :type execute_request: ExecuteRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1574,7 +1574,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             execute_request=execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -1591,7 +1591,7 @@ class ToolboxApi:
 
     def _execute_command_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         execute_request,
         x_daytona_organization_id,
         _request_auth,
@@ -1611,8 +1611,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -1639,7 +1639,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/execute",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/execute",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1655,7 +1655,7 @@ class ToolboxApi:
     @validate_call
     def execute_session_command(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
         x_daytona_organization_id: Annotated[
@@ -1675,8 +1675,8 @@ class ToolboxApi:
 
         Execute a command in a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param session_execute_request: (required)
@@ -1706,7 +1706,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1730,7 +1730,7 @@ class ToolboxApi:
     @validate_call
     def execute_session_command_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
         x_daytona_organization_id: Annotated[
@@ -1750,8 +1750,8 @@ class ToolboxApi:
 
         Execute a command in a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param session_execute_request: (required)
@@ -1781,7 +1781,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1805,7 +1805,7 @@ class ToolboxApi:
     @validate_call
     def execute_session_command_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
         x_daytona_organization_id: Annotated[
@@ -1825,8 +1825,8 @@ class ToolboxApi:
 
         Execute a command in a specific session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param session_execute_request: (required)
@@ -1856,7 +1856,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             session_execute_request=session_execute_request,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1875,7 +1875,7 @@ class ToolboxApi:
 
     def _execute_session_command_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         session_id,
         session_execute_request,
         x_daytona_organization_id,
@@ -1896,8 +1896,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         if session_id is not None:
             _path_params["sessionId"] = session_id
         # process the query parameters
@@ -1926,7 +1926,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1942,7 +1942,7 @@ class ToolboxApi:
     @validate_call
     def find_in_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -1960,10 +1960,10 @@ class ToolboxApi:
     ) -> List[Match]:
         """Search for text/pattern in files
 
-        Search for text/pattern inside workspace files
+        Search for text/pattern inside sandbox files
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -1993,7 +1993,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._find_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2016,7 +2016,7 @@ class ToolboxApi:
     @validate_call
     def find_in_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -2034,10 +2034,10 @@ class ToolboxApi:
     ) -> ApiResponse[List[Match]]:
         """Search for text/pattern in files
 
-        Search for text/pattern inside workspace files
+        Search for text/pattern inside sandbox files
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -2067,7 +2067,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._find_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2090,7 +2090,7 @@ class ToolboxApi:
     @validate_call
     def find_in_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -2108,10 +2108,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Search for text/pattern in files
 
-        Search for text/pattern inside workspace files
+        Search for text/pattern inside sandbox files
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -2141,7 +2141,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._find_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2159,7 +2159,7 @@ class ToolboxApi:
 
     def _find_in_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         pattern,
         x_daytona_organization_id,
@@ -2180,8 +2180,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -2204,7 +2204,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/find",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/find",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2220,7 +2220,7 @@ class ToolboxApi:
     @validate_call
     def get_file_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2237,10 +2237,10 @@ class ToolboxApi:
     ) -> FileInfo:
         """Get file info
 
-        Get file info inside workspace
+        Get file info inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2268,7 +2268,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_file_info_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2290,7 +2290,7 @@ class ToolboxApi:
     @validate_call
     def get_file_info_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2307,10 +2307,10 @@ class ToolboxApi:
     ) -> ApiResponse[FileInfo]:
         """Get file info
 
-        Get file info inside workspace
+        Get file info inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2338,7 +2338,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_file_info_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2360,7 +2360,7 @@ class ToolboxApi:
     @validate_call
     def get_file_info_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2377,10 +2377,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Get file info
 
-        Get file info inside workspace
+        Get file info inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2408,7 +2408,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_file_info_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2425,7 +2425,7 @@ class ToolboxApi:
 
     def _get_file_info_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -2445,8 +2445,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -2466,7 +2466,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/info",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/info",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2482,7 +2482,7 @@ class ToolboxApi:
     @validate_call
     def get_project_dir(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2496,11 +2496,11 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProjectDirResponse:
-        """Get workspace project dir
+        """Get sandbox project dir
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2526,7 +2526,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2547,7 +2547,7 @@ class ToolboxApi:
     @validate_call
     def get_project_dir_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2561,11 +2561,11 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProjectDirResponse]:
-        """Get workspace project dir
+        """Get sandbox project dir
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2591,7 +2591,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2612,7 +2612,7 @@ class ToolboxApi:
     @validate_call
     def get_project_dir_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2626,11 +2626,11 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get workspace project dir
+        """Get sandbox project dir
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2656,7 +2656,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2672,7 +2672,7 @@ class ToolboxApi:
 
     def _get_project_dir_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -2691,8 +2691,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -2709,7 +2709,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/project-dir",
+            resource_path="/toolbox/{sandboxId}/toolbox/project-dir",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2725,7 +2725,7 @@ class ToolboxApi:
     @validate_call
     def get_session(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2744,8 +2744,8 @@ class ToolboxApi:
 
         Get session by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2773,7 +2773,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2795,7 +2795,7 @@ class ToolboxApi:
     @validate_call
     def get_session_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2814,8 +2814,8 @@ class ToolboxApi:
 
         Get session by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2843,7 +2843,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2865,7 +2865,7 @@ class ToolboxApi:
     @validate_call
     def get_session_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -2884,8 +2884,8 @@ class ToolboxApi:
 
         Get session by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -2913,7 +2913,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2930,7 +2930,7 @@ class ToolboxApi:
 
     def _get_session_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         session_id,
         x_daytona_organization_id,
         _request_auth,
@@ -2950,8 +2950,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         if session_id is not None:
             _path_params["sessionId"] = session_id
         # process the query parameters
@@ -2970,7 +2970,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session/{sessionId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2986,7 +2986,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3006,8 +3006,8 @@ class ToolboxApi:
 
         Get session command by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3037,7 +3037,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3060,7 +3060,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3080,8 +3080,8 @@ class ToolboxApi:
 
         Get session command by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3111,7 +3111,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3134,7 +3134,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3154,8 +3154,8 @@ class ToolboxApi:
 
         Get session command by ID
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3185,7 +3185,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3203,7 +3203,7 @@ class ToolboxApi:
 
     def _get_session_command_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         session_id,
         command_id,
         x_daytona_organization_id,
@@ -3224,8 +3224,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         if session_id is not None:
             _path_params["sessionId"] = session_id
         if command_id is not None:
@@ -3246,7 +3246,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3262,7 +3262,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command_logs(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3283,8 +3283,8 @@ class ToolboxApi:
 
         Get logs for a specific command in a session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3316,7 +3316,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3340,7 +3340,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command_logs_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3361,8 +3361,8 @@ class ToolboxApi:
 
         Get logs for a specific command in a session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3394,7 +3394,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3418,7 +3418,7 @@ class ToolboxApi:
     @validate_call
     def get_session_command_logs_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -3439,8 +3439,8 @@ class ToolboxApi:
 
         Get logs for a specific command in a session
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param session_id: (required)
         :type session_id: str
         :param command_id: (required)
@@ -3472,7 +3472,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3491,7 +3491,7 @@ class ToolboxApi:
 
     def _get_session_command_logs_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         session_id,
         command_id,
         x_daytona_organization_id,
@@ -3513,8 +3513,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         if session_id is not None:
             _path_params["sessionId"] = session_id
         if command_id is not None:
@@ -3538,7 +3538,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3554,7 +3554,7 @@ class ToolboxApi:
     @validate_call
     def git_add_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3573,8 +3573,8 @@ class ToolboxApi:
 
         Add files to git commit
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_add_request: (required)
         :type git_add_request: GitAddRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3602,7 +3602,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_add_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3624,7 +3624,7 @@ class ToolboxApi:
     @validate_call
     def git_add_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3643,8 +3643,8 @@ class ToolboxApi:
 
         Add files to git commit
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_add_request: (required)
         :type git_add_request: GitAddRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3672,7 +3672,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_add_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3694,7 +3694,7 @@ class ToolboxApi:
     @validate_call
     def git_add_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_add_request: GitAddRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3713,8 +3713,8 @@ class ToolboxApi:
 
         Add files to git commit
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_add_request: (required)
         :type git_add_request: GitAddRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3742,7 +3742,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_add_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_add_request=git_add_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3759,7 +3759,7 @@ class ToolboxApi:
 
     def _git_add_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_add_request,
         x_daytona_organization_id,
         _request_auth,
@@ -3779,8 +3779,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -3803,7 +3803,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/add",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/add",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3819,7 +3819,7 @@ class ToolboxApi:
     @validate_call
     def git_checkout_branch(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3838,8 +3838,8 @@ class ToolboxApi:
 
         Checkout branch or commit in git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_checkout_request: (required)
         :type git_checkout_request: GitCheckoutRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3867,7 +3867,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3889,7 +3889,7 @@ class ToolboxApi:
     @validate_call
     def git_checkout_branch_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3908,8 +3908,8 @@ class ToolboxApi:
 
         Checkout branch or commit in git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_checkout_request: (required)
         :type git_checkout_request: GitCheckoutRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -3937,7 +3937,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3959,7 +3959,7 @@ class ToolboxApi:
     @validate_call
     def git_checkout_branch_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -3978,8 +3978,8 @@ class ToolboxApi:
 
         Checkout branch or commit in git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_checkout_request: (required)
         :type git_checkout_request: GitCheckoutRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4007,7 +4007,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_checkout_request=git_checkout_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4024,7 +4024,7 @@ class ToolboxApi:
 
     def _git_checkout_branch_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_checkout_request,
         x_daytona_organization_id,
         _request_auth,
@@ -4044,8 +4044,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4068,7 +4068,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/checkout",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/checkout",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4084,7 +4084,7 @@ class ToolboxApi:
     @validate_call
     def git_clone_repository(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4103,8 +4103,8 @@ class ToolboxApi:
 
         Clone git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_clone_request: (required)
         :type git_clone_request: GitCloneRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4132,7 +4132,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4154,7 +4154,7 @@ class ToolboxApi:
     @validate_call
     def git_clone_repository_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4173,8 +4173,8 @@ class ToolboxApi:
 
         Clone git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_clone_request: (required)
         :type git_clone_request: GitCloneRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4202,7 +4202,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4224,7 +4224,7 @@ class ToolboxApi:
     @validate_call
     def git_clone_repository_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_clone_request: GitCloneRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4243,8 +4243,8 @@ class ToolboxApi:
 
         Clone git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_clone_request: (required)
         :type git_clone_request: GitCloneRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4272,7 +4272,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_clone_request=git_clone_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4289,7 +4289,7 @@ class ToolboxApi:
 
     def _git_clone_repository_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_clone_request,
         x_daytona_organization_id,
         _request_auth,
@@ -4309,8 +4309,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4333,7 +4333,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/clone",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/clone",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4349,7 +4349,7 @@ class ToolboxApi:
     @validate_call
     def git_commit_changes(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4368,8 +4368,8 @@ class ToolboxApi:
 
         Commit changes to git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_commit_request: (required)
         :type git_commit_request: GitCommitRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4397,7 +4397,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4419,7 +4419,7 @@ class ToolboxApi:
     @validate_call
     def git_commit_changes_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4438,8 +4438,8 @@ class ToolboxApi:
 
         Commit changes to git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_commit_request: (required)
         :type git_commit_request: GitCommitRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4467,7 +4467,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4489,7 +4489,7 @@ class ToolboxApi:
     @validate_call
     def git_commit_changes_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_commit_request: GitCommitRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4508,8 +4508,8 @@ class ToolboxApi:
 
         Commit changes to git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_commit_request: (required)
         :type git_commit_request: GitCommitRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4537,7 +4537,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_commit_request=git_commit_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4554,7 +4554,7 @@ class ToolboxApi:
 
     def _git_commit_changes_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_commit_request,
         x_daytona_organization_id,
         _request_auth,
@@ -4574,8 +4574,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4602,7 +4602,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/commit",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/commit",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4618,7 +4618,7 @@ class ToolboxApi:
     @validate_call
     def git_create_branch(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4637,8 +4637,8 @@ class ToolboxApi:
 
         Create branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_branch_request: (required)
         :type git_branch_request: GitBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4666,7 +4666,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4688,7 +4688,7 @@ class ToolboxApi:
     @validate_call
     def git_create_branch_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4707,8 +4707,8 @@ class ToolboxApi:
 
         Create branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_branch_request: (required)
         :type git_branch_request: GitBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4736,7 +4736,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4758,7 +4758,7 @@ class ToolboxApi:
     @validate_call
     def git_create_branch_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_branch_request: GitBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4777,8 +4777,8 @@ class ToolboxApi:
 
         Create branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_branch_request: (required)
         :type git_branch_request: GitBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4806,7 +4806,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_branch_request=git_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4823,7 +4823,7 @@ class ToolboxApi:
 
     def _git_create_branch_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_branch_request,
         x_daytona_organization_id,
         _request_auth,
@@ -4843,8 +4843,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -4867,7 +4867,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4883,7 +4883,7 @@ class ToolboxApi:
     @validate_call
     def git_delete_branch(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4902,8 +4902,8 @@ class ToolboxApi:
 
         Delete branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_delete_branch_request: (required)
         :type git_delete_branch_request: GitDeleteBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -4931,7 +4931,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -4953,7 +4953,7 @@ class ToolboxApi:
     @validate_call
     def git_delete_branch_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -4972,8 +4972,8 @@ class ToolboxApi:
 
         Delete branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_delete_branch_request: (required)
         :type git_delete_branch_request: GitDeleteBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5001,7 +5001,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5023,7 +5023,7 @@ class ToolboxApi:
     @validate_call
     def git_delete_branch_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5042,8 +5042,8 @@ class ToolboxApi:
 
         Delete branch on git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_delete_branch_request: (required)
         :type git_delete_branch_request: GitDeleteBranchRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5071,7 +5071,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_delete_branch_request=git_delete_branch_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5088,7 +5088,7 @@ class ToolboxApi:
 
     def _git_delete_branch_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_delete_branch_request,
         x_daytona_organization_id,
         _request_auth,
@@ -5108,8 +5108,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -5132,7 +5132,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="DELETE",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5148,7 +5148,7 @@ class ToolboxApi:
     @validate_call
     def git_get_history(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5167,8 +5167,8 @@ class ToolboxApi:
 
         Get commit history from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5196,7 +5196,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_history_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5218,7 +5218,7 @@ class ToolboxApi:
     @validate_call
     def git_get_history_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5237,8 +5237,8 @@ class ToolboxApi:
 
         Get commit history from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5266,7 +5266,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_history_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5288,7 +5288,7 @@ class ToolboxApi:
     @validate_call
     def git_get_history_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5307,8 +5307,8 @@ class ToolboxApi:
 
         Get commit history from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5336,7 +5336,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_history_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5353,7 +5353,7 @@ class ToolboxApi:
 
     def _git_get_history_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -5373,8 +5373,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -5394,7 +5394,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/history",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/history",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5410,7 +5410,7 @@ class ToolboxApi:
     @validate_call
     def git_get_status(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5429,8 +5429,8 @@ class ToolboxApi:
 
         Get status from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5458,7 +5458,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_status_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5480,7 +5480,7 @@ class ToolboxApi:
     @validate_call
     def git_get_status_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5499,8 +5499,8 @@ class ToolboxApi:
 
         Get status from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5528,7 +5528,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_status_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5550,7 +5550,7 @@ class ToolboxApi:
     @validate_call
     def git_get_status_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5569,8 +5569,8 @@ class ToolboxApi:
 
         Get status from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5598,7 +5598,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_get_status_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5615,7 +5615,7 @@ class ToolboxApi:
 
     def _git_get_status_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -5635,8 +5635,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -5656,7 +5656,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/status",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/status",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5672,7 +5672,7 @@ class ToolboxApi:
     @validate_call
     def git_list_branches(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5691,8 +5691,8 @@ class ToolboxApi:
 
         Get branch list from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5720,7 +5720,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5742,7 +5742,7 @@ class ToolboxApi:
     @validate_call
     def git_list_branches_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5761,8 +5761,8 @@ class ToolboxApi:
 
         Get branch list from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5790,7 +5790,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5812,7 +5812,7 @@ class ToolboxApi:
     @validate_call
     def git_list_branches_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5831,8 +5831,8 @@ class ToolboxApi:
 
         Get branch list from git repository
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5860,7 +5860,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -5877,7 +5877,7 @@ class ToolboxApi:
 
     def _git_list_branches_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         _request_auth,
@@ -5897,8 +5897,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -5918,7 +5918,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5934,7 +5934,7 @@ class ToolboxApi:
     @validate_call
     def git_pull_changes(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -5953,8 +5953,8 @@ class ToolboxApi:
 
         Pull changes from remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -5982,7 +5982,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6004,7 +6004,7 @@ class ToolboxApi:
     @validate_call
     def git_pull_changes_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6023,8 +6023,8 @@ class ToolboxApi:
 
         Pull changes from remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6052,7 +6052,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6074,7 +6074,7 @@ class ToolboxApi:
     @validate_call
     def git_pull_changes_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6093,8 +6093,8 @@ class ToolboxApi:
 
         Pull changes from remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6122,7 +6122,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6139,7 +6139,7 @@ class ToolboxApi:
 
     def _git_pull_changes_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_repo_request,
         x_daytona_organization_id,
         _request_auth,
@@ -6159,8 +6159,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -6183,7 +6183,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/pull",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/pull",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6199,7 +6199,7 @@ class ToolboxApi:
     @validate_call
     def git_push_changes(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6218,8 +6218,8 @@ class ToolboxApi:
 
         Push changes to remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6247,7 +6247,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6269,7 +6269,7 @@ class ToolboxApi:
     @validate_call
     def git_push_changes_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6288,8 +6288,8 @@ class ToolboxApi:
 
         Push changes to remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6317,7 +6317,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6339,7 +6339,7 @@ class ToolboxApi:
     @validate_call
     def git_push_changes_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         git_repo_request: GitRepoRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6358,8 +6358,8 @@ class ToolboxApi:
 
         Push changes to remote
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param git_repo_request: (required)
         :type git_repo_request: GitRepoRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -6387,7 +6387,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             git_repo_request=git_repo_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -6404,7 +6404,7 @@ class ToolboxApi:
 
     def _git_push_changes_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         git_repo_request,
         x_daytona_organization_id,
         _request_auth,
@@ -6424,8 +6424,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -6448,7 +6448,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/git/push",
+            resource_path="/toolbox/{sandboxId}/toolbox/git/push",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6464,7 +6464,7 @@ class ToolboxApi:
     @validate_call
     def list_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6482,8 +6482,8 @@ class ToolboxApi:
         """List files
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param path:
@@ -6511,7 +6511,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
             _request_auth=_request_auth,
@@ -6533,7 +6533,7 @@ class ToolboxApi:
     @validate_call
     def list_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6551,8 +6551,8 @@ class ToolboxApi:
         """List files
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param path:
@@ -6580,7 +6580,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
             _request_auth=_request_auth,
@@ -6602,7 +6602,7 @@ class ToolboxApi:
     @validate_call
     def list_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6620,8 +6620,8 @@ class ToolboxApi:
         """List files
 
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param path:
@@ -6649,7 +6649,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             path=path,
             _request_auth=_request_auth,
@@ -6666,7 +6666,7 @@ class ToolboxApi:
 
     def _list_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         x_daytona_organization_id,
         path,
         _request_auth,
@@ -6686,8 +6686,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -6707,7 +6707,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/files",
+            resource_path="/toolbox/{sandboxId}/toolbox/files",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6723,7 +6723,7 @@ class ToolboxApi:
     @validate_call
     def list_sessions(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6739,10 +6739,10 @@ class ToolboxApi:
     ) -> List[Session]:
         """List sessions
 
-        List all active sessions in the workspace
+        List all active sessions in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -6768,7 +6768,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_sessions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -6789,7 +6789,7 @@ class ToolboxApi:
     @validate_call
     def list_sessions_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6805,10 +6805,10 @@ class ToolboxApi:
     ) -> ApiResponse[List[Session]]:
         """List sessions
 
-        List all active sessions in the workspace
+        List all active sessions in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -6834,7 +6834,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_sessions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -6855,7 +6855,7 @@ class ToolboxApi:
     @validate_call
     def list_sessions_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -6871,10 +6871,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """List sessions
 
-        List all active sessions in the workspace
+        List all active sessions in the sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -6900,7 +6900,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._list_sessions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -6916,7 +6916,7 @@ class ToolboxApi:
 
     def _list_sessions_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -6935,8 +6935,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -6953,7 +6953,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/process/session",
+            resource_path="/toolbox/{sandboxId}/toolbox/process/session",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6969,7 +6969,7 @@ class ToolboxApi:
     @validate_call
     def lsp_completions(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -6988,8 +6988,8 @@ class ToolboxApi:
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_completion_params: (required)
         :type lsp_completion_params: LspCompletionParams
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7017,7 +7017,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7039,7 +7039,7 @@ class ToolboxApi:
     @validate_call
     def lsp_completions_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7058,8 +7058,8 @@ class ToolboxApi:
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_completion_params: (required)
         :type lsp_completion_params: LspCompletionParams
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7087,7 +7087,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7109,7 +7109,7 @@ class ToolboxApi:
     @validate_call
     def lsp_completions_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7128,8 +7128,8 @@ class ToolboxApi:
 
         The Completion request is sent from the client to the server to compute completion items at a given cursor position.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_completion_params: (required)
         :type lsp_completion_params: LspCompletionParams
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7157,7 +7157,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_completion_params=lsp_completion_params,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7174,7 +7174,7 @@ class ToolboxApi:
 
     def _lsp_completions_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         lsp_completion_params,
         x_daytona_organization_id,
         _request_auth,
@@ -7194,8 +7194,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -7222,7 +7222,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/completions",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/completions",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7238,7 +7238,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_close(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7257,8 +7257,8 @@ class ToolboxApi:
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7286,7 +7286,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7308,7 +7308,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_close_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7327,8 +7327,8 @@ class ToolboxApi:
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7356,7 +7356,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7378,7 +7378,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_close_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7397,8 +7397,8 @@ class ToolboxApi:
 
         The document close notification is sent from the client to the server when the document got closed in the client.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7426,7 +7426,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7443,7 +7443,7 @@ class ToolboxApi:
 
     def _lsp_did_close_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         lsp_document_request,
         x_daytona_organization_id,
         _request_auth,
@@ -7463,8 +7463,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -7487,7 +7487,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/did-close",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/did-close",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7503,7 +7503,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_open(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7522,8 +7522,8 @@ class ToolboxApi:
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7551,7 +7551,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7573,7 +7573,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_open_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7592,8 +7592,8 @@ class ToolboxApi:
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7621,7 +7621,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7643,7 +7643,7 @@ class ToolboxApi:
     @validate_call
     def lsp_did_open_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -7662,8 +7662,8 @@ class ToolboxApi:
 
         The document open notification is sent from the client to the server to signal newly opened text documents.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param lsp_document_request: (required)
         :type lsp_document_request: LspDocumentRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -7691,7 +7691,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             lsp_document_request=lsp_document_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -7708,7 +7708,7 @@ class ToolboxApi:
 
     def _lsp_did_open_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         lsp_document_request,
         x_daytona_organization_id,
         _request_auth,
@@ -7728,8 +7728,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -7752,7 +7752,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/did-open",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/did-open",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7768,7 +7768,7 @@ class ToolboxApi:
     @validate_call
     def lsp_document_symbols(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
@@ -7789,8 +7789,8 @@ class ToolboxApi:
 
         The document symbol request is sent from the client to the server.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -7822,7 +7822,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             uri=uri,
@@ -7846,7 +7846,7 @@ class ToolboxApi:
     @validate_call
     def lsp_document_symbols_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
@@ -7867,8 +7867,8 @@ class ToolboxApi:
 
         The document symbol request is sent from the client to the server.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -7900,7 +7900,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             uri=uri,
@@ -7924,7 +7924,7 @@ class ToolboxApi:
     @validate_call
     def lsp_document_symbols_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
@@ -7945,8 +7945,8 @@ class ToolboxApi:
 
         The document symbol request is sent from the client to the server.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -7978,7 +7978,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             uri=uri,
@@ -7997,7 +7997,7 @@ class ToolboxApi:
 
     def _lsp_document_symbols_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         language_id,
         path_to_project,
         uri,
@@ -8019,8 +8019,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if language_id is not None:
             _query_params.append(("languageId", language_id))
@@ -8046,7 +8046,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/document-symbols",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/document-symbols",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -8060,539 +8060,9 @@ class ToolboxApi:
         )
 
     @validate_call
-    def lsp_start(
+    def lsp_sandbox_symbols(
         self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Start Lsp server
-
-        Start Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_start_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-    @validate_call
-    def lsp_start_with_http_info(
-        self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Start Lsp server
-
-        Start Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_start_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-    @validate_call
-    def lsp_start_without_preload_content(
-        self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Start Lsp server
-
-        Start Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_start_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        return response_data.response
-
-    def _lsp_start_serialize(
-        self,
-        workspace_id,
-        lsp_server_request,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-        _host = None
-
-        _collection_formats: Dict[str, str] = {}
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-        if lsp_server_request is not None:
-            _body_params = lsp_server_request
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params["Content-Type"] = _content_type
-        else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
-            if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
-
-        # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
-
-        return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/start",
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth,
-        )
-
-    @validate_call
-    def lsp_stop(
-        self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> None:
-        """Stop Lsp server
-
-        Stop Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_stop_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-    @validate_call
-    def lsp_stop_with_http_info(
-        self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[None]:
-        """Stop Lsp server
-
-        Stop Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_stop_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-    @validate_call
-    def lsp_stop_without_preload_content(
-        self,
-        workspace_id: StrictStr,
-        lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[
-            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
-        ] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Stop Lsp server
-
-        Stop Lsp server process inside workspace project
-
-        :param workspace_id: (required)
-        :type workspace_id: str
-        :param lsp_server_request: (required)
-        :type lsp_server_request: LspServerRequest
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """  # noqa: E501
-
-        _param = self._lsp_stop_serialize(
-            workspace_id=workspace_id,
-            lsp_server_request=lsp_server_request,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index,
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            "200": None,
-        }
-        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
-        return response_data.response
-
-    def _lsp_stop_serialize(
-        self,
-        workspace_id,
-        lsp_server_request,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-        _host = None
-
-        _collection_formats: Dict[str, str] = {}
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
-        # process the query parameters
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-        if lsp_server_request is not None:
-            _body_params = lsp_server_request
-
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params["Content-Type"] = _content_type
-        else:
-            _default_content_type = self.api_client.select_header_content_type(["application/json"])
-            if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
-
-        # authentication setting
-        _auth_settings: List[str] = ["bearer", "oauth2"]
-
-        return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/stop",
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth,
-        )
-
-    @validate_call
-    def lsp_workspace_symbols(
-        self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
@@ -8609,12 +8079,12 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[LspSymbol]:
-        """Call Lsp WorkspaceSymbols
+        """Call Lsp SandboxSymbols
 
-        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -8645,8 +8115,8 @@ class ToolboxApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._lsp_workspace_symbols_serialize(
-            workspace_id=workspace_id,
+        _param = self._lsp_sandbox_symbols_serialize(
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             query=query,
@@ -8668,9 +8138,9 @@ class ToolboxApi:
         ).data
 
     @validate_call
-    def lsp_workspace_symbols_with_http_info(
+    def lsp_sandbox_symbols_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
@@ -8687,12 +8157,12 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[LspSymbol]]:
-        """Call Lsp WorkspaceSymbols
+        """Call Lsp SandboxSymbols
 
-        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -8723,8 +8193,8 @@ class ToolboxApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._lsp_workspace_symbols_serialize(
-            workspace_id=workspace_id,
+        _param = self._lsp_sandbox_symbols_serialize(
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             query=query,
@@ -8746,9 +8216,9 @@ class ToolboxApi:
         )
 
     @validate_call
-    def lsp_workspace_symbols_without_preload_content(
+    def lsp_sandbox_symbols_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
@@ -8765,12 +8235,12 @@ class ToolboxApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Call Lsp WorkspaceSymbols
+        """Call Lsp SandboxSymbols
 
-        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param language_id: (required)
         :type language_id: str
         :param path_to_project: (required)
@@ -8801,8 +8271,8 @@ class ToolboxApi:
         :return: Returns the result object.
         """  # noqa: E501
 
-        _param = self._lsp_workspace_symbols_serialize(
-            workspace_id=workspace_id,
+        _param = self._lsp_sandbox_symbols_serialize(
+            sandbox_id=sandbox_id,
             language_id=language_id,
             path_to_project=path_to_project,
             query=query,
@@ -8819,9 +8289,9 @@ class ToolboxApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _lsp_workspace_symbols_serialize(
+    def _lsp_sandbox_symbols_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         language_id,
         path_to_project,
         query,
@@ -8843,8 +8313,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if language_id is not None:
             _query_params.append(("languageId", language_id))
@@ -8870,7 +8340,537 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/lsp/workspace-symbols",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def lsp_start(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> None:
+        """Start Lsp server
+
+        Start Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_start_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def lsp_start_with_http_info(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[None]:
+        """Start Lsp server
+
+        Start Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_start_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def lsp_start_without_preload_content(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Start Lsp server
+
+        Start Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_start_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _lsp_start_serialize(
+        self,
+        sandbox_id,
+        lsp_server_request,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+        if lsp_server_request is not None:
+            _body_params = lsp_server_request
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = ["bearer", "oauth2"]
+
+        return self.api_client.param_serialize(
+            method="POST",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/start",
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth,
+        )
+
+    @validate_call
+    def lsp_stop(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> None:
+        """Stop Lsp server
+
+        Stop Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_stop_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+    @validate_call
+    def lsp_stop_with_http_info(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[None]:
+        """Stop Lsp server
+
+        Stop Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_stop_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+    @validate_call
+    def lsp_stop_without_preload_content(
+        self,
+        sandbox_id: StrictStr,
+        lsp_server_request: LspServerRequest,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Stop Lsp server
+
+        Stop Lsp server process inside sandbox project
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param lsp_server_request: (required)
+        :type lsp_server_request: LspServerRequest
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """  # noqa: E501
+
+        _param = self._lsp_stop_serialize(
+            sandbox_id=sandbox_id,
+            lsp_server_request=lsp_server_request,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index,
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            "200": None,
+        }
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
+        return response_data.response
+
+    def _lsp_stop_serialize(
+        self,
+        sandbox_id,
+        lsp_server_request,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+        _host = None
+
+        _collection_formats: Dict[str, str] = {}
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
+        # process the query parameters
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+        if lsp_server_request is not None:
+            _body_params = lsp_server_request
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params["Content-Type"] = _content_type
+        else:
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
+            if _default_content_type is not None:
+                _header_params["Content-Type"] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = ["bearer", "oauth2"]
+
+        return self.api_client.param_serialize(
+            method="POST",
+            resource_path="/toolbox/{sandboxId}/toolbox/lsp/stop",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -8886,7 +8886,7 @@ class ToolboxApi:
     @validate_call
     def move_file(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -8904,10 +8904,10 @@ class ToolboxApi:
     ) -> None:
         """Move file
 
-        Move file inside workspace
+        Move file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param source: (required)
         :type source: str
         :param destination: (required)
@@ -8937,7 +8937,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._move_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             source=source,
             destination=destination,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -8960,7 +8960,7 @@ class ToolboxApi:
     @validate_call
     def move_file_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -8978,10 +8978,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Move file
 
-        Move file inside workspace
+        Move file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param source: (required)
         :type source: str
         :param destination: (required)
@@ -9011,7 +9011,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._move_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             source=source,
             destination=destination,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9034,7 +9034,7 @@ class ToolboxApi:
     @validate_call
     def move_file_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -9052,10 +9052,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Move file
 
-        Move file inside workspace
+        Move file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param source: (required)
         :type source: str
         :param destination: (required)
@@ -9085,7 +9085,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._move_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             source=source,
             destination=destination,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9103,7 +9103,7 @@ class ToolboxApi:
 
     def _move_file_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         source,
         destination,
         x_daytona_organization_id,
@@ -9124,8 +9124,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if source is not None:
             _query_params.append(("source", source))
@@ -9144,7 +9144,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/move",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/move",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9160,7 +9160,7 @@ class ToolboxApi:
     @validate_call
     def replace_in_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9177,10 +9177,10 @@ class ToolboxApi:
     ) -> List[ReplaceResult]:
         """Replace in files
 
-        Replace text/pattern in multiple files inside workspace
+        Replace text/pattern in multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param replace_request: (required)
         :type replace_request: ReplaceRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9208,7 +9208,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -9230,7 +9230,7 @@ class ToolboxApi:
     @validate_call
     def replace_in_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9247,10 +9247,10 @@ class ToolboxApi:
     ) -> ApiResponse[List[ReplaceResult]]:
         """Replace in files
 
-        Replace text/pattern in multiple files inside workspace
+        Replace text/pattern in multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param replace_request: (required)
         :type replace_request: ReplaceRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9278,7 +9278,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -9300,7 +9300,7 @@ class ToolboxApi:
     @validate_call
     def replace_in_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         replace_request: ReplaceRequest,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9317,10 +9317,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Replace in files
 
-        Replace text/pattern in multiple files inside workspace
+        Replace text/pattern in multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param replace_request: (required)
         :type replace_request: ReplaceRequest
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9348,7 +9348,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             replace_request=replace_request,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -9365,7 +9365,7 @@ class ToolboxApi:
 
     def _replace_in_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         replace_request,
         x_daytona_organization_id,
         _request_auth,
@@ -9385,8 +9385,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -9413,7 +9413,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/replace",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/replace",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9429,7 +9429,7 @@ class ToolboxApi:
     @validate_call
     def search_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -9447,10 +9447,10 @@ class ToolboxApi:
     ) -> SearchFilesResponse:
         """Search files
 
-        Search for files inside workspace
+        Search for files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -9480,7 +9480,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._search_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9503,7 +9503,7 @@ class ToolboxApi:
     @validate_call
     def search_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -9521,10 +9521,10 @@ class ToolboxApi:
     ) -> ApiResponse[SearchFilesResponse]:
         """Search files
 
-        Search for files inside workspace
+        Search for files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -9554,7 +9554,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._search_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9577,7 +9577,7 @@ class ToolboxApi:
     @validate_call
     def search_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -9595,10 +9595,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Search files
 
-        Search for files inside workspace
+        Search for files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param pattern: (required)
@@ -9628,7 +9628,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._search_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             pattern=pattern,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -9646,7 +9646,7 @@ class ToolboxApi:
 
     def _search_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         pattern,
         x_daytona_organization_id,
@@ -9667,8 +9667,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -9691,7 +9691,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="GET",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/search",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/search",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9707,7 +9707,7 @@ class ToolboxApi:
     @validate_call
     def set_file_permissions(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9727,10 +9727,10 @@ class ToolboxApi:
     ) -> None:
         """Set file permissions
 
-        Set file owner/group/permissions inside workspace
+        Set file owner/group/permissions inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9764,7 +9764,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             owner=owner,
@@ -9789,7 +9789,7 @@ class ToolboxApi:
     @validate_call
     def set_file_permissions_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9809,10 +9809,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Set file permissions
 
-        Set file owner/group/permissions inside workspace
+        Set file owner/group/permissions inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9846,7 +9846,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             owner=owner,
@@ -9871,7 +9871,7 @@ class ToolboxApi:
     @validate_call
     def set_file_permissions_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -9891,10 +9891,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Set file permissions
 
-        Set file owner/group/permissions inside workspace
+        Set file owner/group/permissions inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -9928,7 +9928,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             owner=owner,
@@ -9948,7 +9948,7 @@ class ToolboxApi:
 
     def _set_file_permissions_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         owner,
@@ -9971,8 +9971,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -9997,7 +9997,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/permissions",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/permissions",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -10013,7 +10013,7 @@ class ToolboxApi:
     @validate_call
     def upload_file(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -10031,10 +10031,10 @@ class ToolboxApi:
     ) -> None:
         """(Deprecated) Upload file
 
-        Upload file inside workspace
+        Upload file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -10062,10 +10062,10 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
-        warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             file=file,
@@ -10088,7 +10088,7 @@ class ToolboxApi:
     @validate_call
     def upload_file_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -10106,10 +10106,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """(Deprecated) Upload file
 
-        Upload file inside workspace
+        Upload file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -10137,10 +10137,10 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
-        warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             file=file,
@@ -10163,7 +10163,7 @@ class ToolboxApi:
     @validate_call
     def upload_file_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         path: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -10181,10 +10181,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """(Deprecated) Upload file
 
-        Upload file inside workspace
+        Upload file inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param path: (required)
         :type path: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -10212,10 +10212,10 @@ class ToolboxApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
-        warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
+        warnings.warn("POST /toolbox/{sandboxId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             path=path,
             x_daytona_organization_id=x_daytona_organization_id,
             file=file,
@@ -10233,7 +10233,7 @@ class ToolboxApi:
 
     def _upload_file_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         path,
         x_daytona_organization_id,
         file,
@@ -10254,8 +10254,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         if path is not None:
             _query_params.append(("path", path))
@@ -10281,7 +10281,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/upload",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/upload",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -10297,7 +10297,7 @@ class ToolboxApi:
     @validate_call
     def upload_files(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -10313,10 +10313,10 @@ class ToolboxApi:
     ) -> None:
         """Upload multiple files
 
-        Upload multiple files inside workspace
+        Upload multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -10342,7 +10342,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._upload_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -10363,7 +10363,7 @@ class ToolboxApi:
     @validate_call
     def upload_files_with_http_info(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -10379,10 +10379,10 @@ class ToolboxApi:
     ) -> ApiResponse[None]:
         """Upload multiple files
 
-        Upload multiple files inside workspace
+        Upload multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -10408,7 +10408,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._upload_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -10429,7 +10429,7 @@ class ToolboxApi:
     @validate_call
     def upload_files_without_preload_content(
         self,
-        workspace_id: StrictStr,
+        sandbox_id: StrictStr,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -10445,10 +10445,10 @@ class ToolboxApi:
     ) -> RESTResponseType:
         """Upload multiple files
 
-        Upload multiple files inside workspace
+        Upload multiple files inside sandbox
 
-        :param workspace_id: (required)
-        :type workspace_id: str
+        :param sandbox_id: (required)
+        :type sandbox_id: str
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -10474,7 +10474,7 @@ class ToolboxApi:
         """  # noqa: E501
 
         _param = self._upload_files_serialize(
-            workspace_id=workspace_id,
+            sandbox_id=sandbox_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -10490,7 +10490,7 @@ class ToolboxApi:
 
     def _upload_files_serialize(
         self,
-        workspace_id,
+        sandbox_id,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -10509,8 +10509,8 @@ class ToolboxApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if workspace_id is not None:
-            _path_params["workspaceId"] = workspace_id
+        if sandbox_id is not None:
+            _path_params["sandboxId"] = sandbox_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
@@ -10531,7 +10531,7 @@ class ToolboxApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/toolbox/{workspaceId}/toolbox/files/bulk-upload",
+            resource_path="/toolbox/{sandboxId}/toolbox/files/bulk-upload",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

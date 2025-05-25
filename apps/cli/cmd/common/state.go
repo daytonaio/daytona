@@ -36,9 +36,9 @@ func AwaitSnapshotState(ctx context.Context, apiClient *daytonaapiclient.APIClie
 	}
 }
 
-func AwaitSandboxState(ctx context.Context, apiClient *daytonaapiclient.APIClient, targetSandbox string, state daytonaapiclient.WorkspaceState) error {
+func AwaitSandboxState(ctx context.Context, apiClient *daytonaapiclient.APIClient, targetSandbox string, state daytonaapiclient.SandboxState) error {
 	for {
-		sandboxes, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		sandboxes, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -47,7 +47,7 @@ func AwaitSandboxState(ctx context.Context, apiClient *daytonaapiclient.APIClien
 			if sandbox.Id == targetSandbox {
 				if sandbox.State != nil && *sandbox.State == state {
 					return nil
-				} else if sandbox.State != nil && *sandbox.State == daytonaapiclient.WORKSPACESTATE_ERROR {
+				} else if sandbox.State != nil && *sandbox.State == daytonaapiclient.SANDBOXSTATE_ERROR {
 					if sandbox.ErrorReason == nil {
 						return fmt.Errorf("sandbox processing failed")
 					}

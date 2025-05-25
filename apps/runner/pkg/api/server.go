@@ -94,20 +94,20 @@ func (a *ApiServer) Start() error {
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
-	sandboxController := protected.Group("/workspaces")
+	sandboxController := protected.Group("/sandboxes")
 	{
 		sandboxController.POST("", controllers.Create)
-		sandboxController.GET("/:workspaceId", controllers.Info)
-		sandboxController.POST("/:workspaceId/destroy", controllers.Destroy)
-		sandboxController.POST("/:workspaceId/start", controllers.Start)
-		sandboxController.POST("/:workspaceId/stop", controllers.Stop)
-		sandboxController.POST("/:workspaceId/backup", controllers.CreateBackup)
-		sandboxController.POST("/:workspaceId/resize", controllers.Resize)
-		sandboxController.DELETE("/:workspaceId", controllers.RemoveDestroyed)
+		sandboxController.GET("/:sandboxId", controllers.Info)
+		sandboxController.POST("/:sandboxId/destroy", controllers.Destroy)
+		sandboxController.POST("/:sandboxId/start", controllers.Start)
+		sandboxController.POST("/:sandboxId/stop", controllers.Stop)
+		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup)
+		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
+		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 
-		// Add proxy endpoint within the workspace controller for toolbox
+		// Add proxy endpoint within the sandbox controller for toolbox
 		// Using Any() to handle all HTTP methods for the toolbox proxy
-		sandboxController.Any("/:workspaceId/:projectId/toolbox/*path", controllers.ProxyRequest)
+		sandboxController.Any("/:sandboxId/:projectId/toolbox/*path", controllers.ProxyRequest)
 	}
 
 	snapshotController := protected.Group("/snapshots")

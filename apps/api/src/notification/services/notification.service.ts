@@ -6,22 +6,22 @@
 import { Injectable } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
 import { NotificationGateway } from '../gateways/notification.gateway'
-import { WorkspaceEvents } from '../../workspace/constants/workspace-events.constants'
-import { WorkspaceDto } from '../../workspace/dto/workspace.dto'
-import { WorkspaceCreatedEvent } from '../../workspace/events/workspace-create.event'
-import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
-import { RunnerService } from '../../workspace/services/runner.service'
-import { SnapshotCreatedEvent } from '../../workspace/events/snapshot-created.event'
-import { SnapshotEvents } from '../../workspace/constants/snapshot-events'
-import { SnapshotDto } from '../../workspace/dto/snapshot.dto'
-import { SnapshotStateUpdatedEvent } from '../../workspace/events/snapshot-state-updated.event'
-import { SnapshotRemovedEvent } from '../../workspace/events/snapshot-removed.event'
-import { SnapshotEnabledToggledEvent } from '../../workspace/events/snapshot-enabled-toggled.event'
-import { VolumeEvents } from '../../workspace/constants/volume-events'
-import { VolumeCreatedEvent } from '../../workspace/events/volume-created.event'
-import { VolumeDto } from '../../workspace/dto/volume.dto'
-import { VolumeStateUpdatedEvent } from '../../workspace/events/volume-state-updated.event'
-import { VolumeLastUsedAtUpdatedEvent } from '../../workspace/events/volume-last-used-at-updated.event'
+import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
+import { SandboxDto } from '../../sandbox/dto/sandbox.dto'
+import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
+import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { RunnerService } from '../../sandbox/services/runner.service'
+import { SnapshotCreatedEvent } from '../../sandbox/events/snapshot-created.event'
+import { SnapshotEvents } from '../../sandbox/constants/snapshot-events'
+import { SnapshotDto } from '../../sandbox/dto/snapshot.dto'
+import { SnapshotStateUpdatedEvent } from '../../sandbox/events/snapshot-state-updated.event'
+import { SnapshotRemovedEvent } from '../../sandbox/events/snapshot-removed.event'
+import { SnapshotEnabledToggledEvent } from '../../sandbox/events/snapshot-enabled-toggled.event'
+import { VolumeEvents } from '../../sandbox/constants/volume-events'
+import { VolumeCreatedEvent } from '../../sandbox/events/volume-created.event'
+import { VolumeDto } from '../../sandbox/dto/volume.dto'
+import { VolumeStateUpdatedEvent } from '../../sandbox/events/volume-state-updated.event'
+import { VolumeLastUsedAtUpdatedEvent } from '../../sandbox/events/volume-last-used-at-updated.event'
 
 @Injectable()
 export class NotificationService {
@@ -30,18 +30,18 @@ export class NotificationService {
     private readonly runnerService: RunnerService,
   ) {}
 
-  @OnEvent(WorkspaceEvents.CREATED)
-  async handleWorkspaceCreated(event: WorkspaceCreatedEvent) {
-    const runner = await this.runnerService.findOne(event.workspace.runnerId)
-    const dto = WorkspaceDto.fromWorkspace(event.workspace, runner.domain)
-    this.notificationGateway.emitWorkspaceCreated(dto)
+  @OnEvent(SandboxEvents.CREATED)
+  async handleSandboxCreated(event: SandboxCreatedEvent) {
+    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    this.notificationGateway.emitSandboxCreated(dto)
   }
 
-  @OnEvent(WorkspaceEvents.STATE_UPDATED)
-  async handleWorkspaceStateUpdated(event: WorkspaceStateUpdatedEvent) {
-    const runner = await this.runnerService.findOne(event.workspace.runnerId)
-    const dto = WorkspaceDto.fromWorkspace(event.workspace, runner.domain)
-    this.notificationGateway.emitWorkspaceStateUpdated(dto, event.oldState, event.newState)
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  async handleSandboxStateUpdated(event: SandboxStateUpdatedEvent) {
+    const runner = await this.runnerService.findOne(event.sandbox.runnerId)
+    const dto = SandboxDto.fromSandbox(event.sandbox, runner.domain)
+    this.notificationGateway.emitSandboxStateUpdated(dto, event.oldState, event.newState)
   }
 
   @OnEvent(SnapshotEvents.CREATED)
