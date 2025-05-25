@@ -12,7 +12,7 @@ import {
   OrganizationsApi,
   UsersApi,
   VolumesApi,
-  WorkspaceApi,
+  SandboxApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
@@ -20,7 +20,7 @@ import { DaytonaError } from './errors'
 export class ApiClient {
   private config: Configuration
   private _snapshotApi: SnapshotsApi
-  private _workspaceApi: WorkspaceApi
+  private _sandboxApi: SandboxApi
   private _userApi: UsersApi
   private _apiKeyApi: ApiKeysApi
   private _dockerRegistryApi: DockerRegistryApi
@@ -54,7 +54,7 @@ export class ApiClient {
 
     // Initialize APIs
     this._snapshotApi = new SnapshotsApi(this.config, undefined, axiosInstance)
-    this._workspaceApi = new WorkspaceApi(this.config, undefined, axiosInstance)
+    this._sandboxApi = new SandboxApi(this.config, undefined, axiosInstance)
     this._userApi = new UsersApi(this.config, undefined, axiosInstance)
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
@@ -71,8 +71,8 @@ export class ApiClient {
     return this._snapshotApi
   }
 
-  public get workspaceApi() {
-    return this._workspaceApi
+  public get sandboxApi() {
+    return this._sandboxApi
   }
 
   public get userApi() {

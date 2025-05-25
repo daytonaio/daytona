@@ -17,9 +17,9 @@ import { MetricsInterceptor } from './interceptors/metrics.interceptor'
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface'
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
-import { RunnerService } from './workspace/services/runner.service'
-import { RunnerRegion } from './workspace/enums/runner-region.enum'
-import { WorkspaceClass } from './workspace/enums/workspace-class.enum'
+import { RunnerService } from './sandbox/services/runner.service'
+import { RunnerRegion } from './sandbox/enums/runner-region.enum'
+import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 
@@ -109,7 +109,7 @@ async function bootstrap() {
         gpuType: 'none',
         capacity: 100,
         region: RunnerRegion.US,
-        class: WorkspaceClass.SMALL,
+        class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
       })
     }

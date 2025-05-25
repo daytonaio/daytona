@@ -5,14 +5,14 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { OnEvent } from '@nestjs/event-emitter'
-import { WorkspaceEvents } from '../../workspace/constants/workspace-events.constants'
-import { WorkspaceCreatedEvent } from '../../workspace/events/workspace-create.event'
-import { WorkspaceDesiredStateUpdatedEvent } from '../../workspace/events/workspace-desired-state-updated.event'
-import { WorkspaceDestroyedEvent } from '../../workspace/events/workspace-destroyed.event'
-import { WorkspacePublicStatusUpdatedEvent } from '../../workspace/events/workspace-public-status-updated.event'
-import { WorkspaceStartedEvent } from '../../workspace/events/workspace-started.event'
-import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
-import { WorkspaceStoppedEvent } from '../../workspace/events/workspace-stopped.event'
+import { SandboxEvents } from '../../sandbox/constants/sandbox-events.constants'
+import { SandboxCreatedEvent } from '../../sandbox/events/sandbox-create.event'
+import { SandboxDesiredStateUpdatedEvent } from '../../sandbox/events/sandbox-desired-state-updated.event'
+import { SandboxDestroyedEvent } from '../../sandbox/events/sandbox-destroyed.event'
+import { SandboxPublicStatusUpdatedEvent } from '../../sandbox/events/sandbox-public-status-updated.event'
+import { SandboxStartedEvent } from '../../sandbox/events/sandbox-started.event'
+import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { SandboxStoppedEvent } from '../../sandbox/events/sandbox-stopped.event'
 import { PostHog } from 'posthog-node'
 import { OnAsyncEvent } from '../../common/decorators/on-async-event.decorator'
 import { Organization } from '../../organization/entities/organization.entity'
@@ -39,39 +39,39 @@ export class AnalyticsService {
     })
   }
 
-  @OnEvent(WorkspaceEvents.CREATED)
-  async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
-    this.logger.debug(`Workspace created: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.CREATED)
+  async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
+    this.logger.debug(`Sandbox created: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.STARTED)
-  async handleWorkspaceStartedEvent(event: WorkspaceStartedEvent) {
-    this.logger.debug(`Workspace started: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.STARTED)
+  async handleSandboxStartedEvent(event: SandboxStartedEvent) {
+    this.logger.debug(`Sandbox started: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.STOPPED)
-  async handleWorkspaceStoppedEvent(event: WorkspaceStoppedEvent) {
-    this.logger.debug(`Workspace stopped: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.STOPPED)
+  async handleSandboxStoppedEvent(event: SandboxStoppedEvent) {
+    this.logger.debug(`Sandbox stopped: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.DESTROYED)
-  async handleWorkspaceDestroyedEvent(event: WorkspaceDestroyedEvent) {
-    this.logger.debug(`Workspace destroyed: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.DESTROYED)
+  async handleSandboxDestroyedEvent(event: SandboxDestroyedEvent) {
+    this.logger.debug(`Sandbox destroyed: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.PUBLIC_STATUS_UPDATED)
-  async handleWorkspacePublicStatusUpdatedEvent(event: WorkspacePublicStatusUpdatedEvent) {
-    this.logger.debug(`Workspace public status updated: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.PUBLIC_STATUS_UPDATED)
+  async handleSandboxPublicStatusUpdatedEvent(event: SandboxPublicStatusUpdatedEvent) {
+    this.logger.debug(`Sandbox public status updated: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.DESIRED_STATE_UPDATED)
-  async handleWorkspaceDesiredStateUpdatedEvent(event: WorkspaceDesiredStateUpdatedEvent) {
-    this.logger.debug(`Workspace desired state updated: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.DESIRED_STATE_UPDATED)
+  async handleSandboxDesiredStateUpdatedEvent(event: SandboxDesiredStateUpdatedEvent) {
+    this.logger.debug(`Sandbox desired state updated: ${JSON.stringify(event)}`)
   }
 
-  @OnEvent(WorkspaceEvents.STATE_UPDATED)
-  async handleWorkspaceStateUpdatedEvent(event: WorkspaceStateUpdatedEvent) {
-    this.logger.debug(`Workspace state updated: ${JSON.stringify(event)}`)
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  async handleSandboxStateUpdatedEvent(event: SandboxStateUpdatedEvent) {
+    this.logger.debug(`Sandbox state updated: ${JSON.stringify(event)}`)
   }
 
   @OnAsyncEvent({

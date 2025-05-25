@@ -135,7 +135,7 @@ func (s *DaytonaMCPServer) addTools() {
 	s.AddTool(moveFileTool, tools.MoveFile)
 
 	deleteFileTool := mcp.NewTool("delete_file",
-		mcp.WithDescription("Delete a file or directory in the Daytona workspace."),
+		mcp.WithDescription("Delete a file or directory in the Daytona sandbox."),
 		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to delete the file in.")),
 	)

@@ -26,7 +26,7 @@ var DeleteCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -36,7 +36,7 @@ var DeleteCmd = &cobra.Command{
 				var deletedCount int
 
 				for _, w := range sandboxList {
-					res, err := apiClient.WorkspaceAPI.DeleteWorkspace(ctx, w.Id).Force(forceFlag).Execute()
+					res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, w.Id).Force(forceFlag).Execute()
 					if err != nil {
 						fmt.Printf("Failed to delete sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
@@ -65,7 +65,7 @@ var DeleteCmd = &cobra.Command{
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:
-			res, err := apiClient.WorkspaceAPI.DeleteWorkspace(ctx, deletionArg).Force(forceFlag).Execute()
+			res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, deletionArg).Force(forceFlag).Execute()
 			if err != nil {
 				return apiclient.HandleErrorResponse(res, err)
 			}
