@@ -57,7 +57,7 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     create: async (sandbox: CreateSandboxDTO, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
       // verify required parameter 'sandbox' is not null or undefined
       assertParamExists('create', 'sandbox', sandbox)
-      const localVarPath = `/workspaces`
+      const localVarPath = `/sandboxes`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -87,23 +87,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Create sandbox backup
      * @summary Create sandbox backup
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createBackup: async (
-      workspaceId: string,
+      sandboxId: string,
       sandbox: CreateBackupDTO,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createBackup', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('createBackup', 'sandboxId', sandboxId)
       // verify required parameter 'sandbox' is not null or undefined
       assertParamExists('createBackup', 'sandbox', sandbox)
-      const localVarPath = `/workspaces/{workspaceId}/backup`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/sandboxes/{sandboxId}/backup`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -134,16 +134,16 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Destroy sandbox
      * @summary Destroy sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    destroy: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('destroy', 'workspaceId', workspaceId)
-      const localVarPath = `/workspaces/{workspaceId}/destroy`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+    destroy: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('destroy', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}/destroy`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -171,17 +171,14 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get sandbox info
      * @summary Get sandbox info
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    info: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('info', 'workspaceId', workspaceId)
-      const localVarPath = `/workspaces/{workspaceId}`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
+    info: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('info', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}`.replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -208,17 +205,14 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Remove a sandbox that has been previously destroyed
      * @summary Remove a destroyed sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    removeDestroyed: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('removeDestroyed', 'workspaceId', workspaceId)
-      const localVarPath = `/workspaces/{workspaceId}`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
+    removeDestroyed: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('removeDestroyed', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}`.replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -245,23 +239,23 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Resize sandbox
      * @summary Resize sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {ResizeSandboxDTO} sandbox Resize sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     resize: async (
-      workspaceId: string,
+      sandboxId: string,
       sandbox: ResizeSandboxDTO,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('resize', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('resize', 'sandboxId', sandboxId)
       // verify required parameter 'sandbox' is not null or undefined
       assertParamExists('resize', 'sandbox', sandbox)
-      const localVarPath = `/workspaces/{workspaceId}/resize`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/sandboxes/{sandboxId}/resize`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -292,16 +286,16 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Start sandbox
      * @summary Start sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    start: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('start', 'workspaceId', workspaceId)
-      const localVarPath = `/workspaces/{workspaceId}/start`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+    start: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('start', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}/start`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -329,16 +323,16 @@ export const SandboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Stop sandbox
      * @summary Stop sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    stop: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('stop', 'workspaceId', workspaceId)
-      const localVarPath = `/workspaces/{workspaceId}/stop`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+    stop: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('stop', 'sandboxId', sandboxId)
+      const localVarPath = `/sandboxes/{sandboxId}/stop`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -399,17 +393,17 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Create sandbox backup
      * @summary Create sandbox backup
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createBackup(
-      workspaceId: string,
+      sandboxId: string,
       sandbox: CreateBackupDTO,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(workspaceId, sandbox, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackup(sandboxId, sandbox, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.createBackup']?.[localVarOperationServerIndex]?.url
@@ -424,15 +418,15 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Destroy sandbox
      * @summary Destroy sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async destroy(
-      workspaceId: string,
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.destroy(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.destroy(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.destroy']?.[localVarOperationServerIndex]?.url
@@ -447,15 +441,15 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Get sandbox info
      * @summary Get sandbox info
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async info(
-      workspaceId: string,
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SandboxInfoResponse>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.info(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.info(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath = operationServerMap['SandboxApi.info']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
@@ -469,15 +463,15 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Remove a sandbox that has been previously destroyed
      * @summary Remove a destroyed sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async removeDestroyed(
-      workspaceId: string,
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.removeDestroyed(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.removeDestroyed(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.removeDestroyed']?.[localVarOperationServerIndex]?.url
@@ -492,17 +486,17 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Resize sandbox
      * @summary Resize sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {ResizeSandboxDTO} sandbox Resize sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async resize(
-      workspaceId: string,
+      sandboxId: string,
       sandbox: ResizeSandboxDTO,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.resize(workspaceId, sandbox, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.resize(sandboxId, sandbox, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.resize']?.[localVarOperationServerIndex]?.url
@@ -517,15 +511,15 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Start sandbox
      * @summary Start sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async start(
-      workspaceId: string,
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.start(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.start(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['SandboxApi.start']?.[localVarOperationServerIndex]?.url
@@ -540,15 +534,15 @@ export const SandboxApiFp = function (configuration?: Configuration) {
     /**
      * Stop sandbox
      * @summary Stop sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async stop(
-      workspaceId: string,
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.stop(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stop(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath = operationServerMap['SandboxApi.stop']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
@@ -582,74 +576,74 @@ export const SandboxApiFactory = function (configuration?: Configuration, basePa
     /**
      * Create sandbox backup
      * @summary Create sandbox backup
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {CreateBackupDTO} sandbox Create backup
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    createBackup(workspaceId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.createBackup(workspaceId, sandbox, options).then((request) => request(axios, basePath))
+    createBackup(sandboxId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.createBackup(sandboxId, sandbox, options).then((request) => request(axios, basePath))
     },
     /**
      * Destroy sandbox
      * @summary Destroy sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    destroy(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.destroy(workspaceId, options).then((request) => request(axios, basePath))
+    destroy(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.destroy(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      * Get sandbox info
      * @summary Get sandbox info
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    info(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<SandboxInfoResponse> {
-      return localVarFp.info(workspaceId, options).then((request) => request(axios, basePath))
+    info(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<SandboxInfoResponse> {
+      return localVarFp.info(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      * Remove a sandbox that has been previously destroyed
      * @summary Remove a destroyed sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    removeDestroyed(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.removeDestroyed(workspaceId, options).then((request) => request(axios, basePath))
+    removeDestroyed(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.removeDestroyed(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      * Resize sandbox
      * @summary Resize sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {ResizeSandboxDTO} sandbox Resize sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    resize(workspaceId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.resize(workspaceId, sandbox, options).then((request) => request(axios, basePath))
+    resize(sandboxId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.resize(sandboxId, sandbox, options).then((request) => request(axios, basePath))
     },
     /**
      * Start sandbox
      * @summary Start sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    start(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.start(workspaceId, options).then((request) => request(axios, basePath))
+    start(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.start(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      * Stop sandbox
      * @summary Stop sandbox
-     * @param {string} workspaceId Sandbox ID
+     * @param {string} sandboxId Sandbox ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    stop(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
-      return localVarFp.stop(workspaceId, options).then((request) => request(axios, basePath))
+    stop(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<string> {
+      return localVarFp.stop(sandboxId, options).then((request) => request(axios, basePath))
     },
   }
 }
@@ -678,100 +672,100 @@ export class SandboxApi extends BaseAPI {
   /**
    * Create sandbox backup
    * @summary Create sandbox backup
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {CreateBackupDTO} sandbox Create backup
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public createBackup(workspaceId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig) {
+  public createBackup(sandboxId: string, sandbox: CreateBackupDTO, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .createBackup(workspaceId, sandbox, options)
+      .createBackup(sandboxId, sandbox, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Destroy sandbox
    * @summary Destroy sandbox
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public destroy(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public destroy(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .destroy(workspaceId, options)
+      .destroy(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get sandbox info
    * @summary Get sandbox info
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public info(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public info(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .info(workspaceId, options)
+      .info(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Remove a sandbox that has been previously destroyed
    * @summary Remove a destroyed sandbox
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public removeDestroyed(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public removeDestroyed(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .removeDestroyed(workspaceId, options)
+      .removeDestroyed(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Resize sandbox
    * @summary Resize sandbox
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {ResizeSandboxDTO} sandbox Resize sandbox
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public resize(workspaceId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig) {
+  public resize(sandboxId: string, sandbox: ResizeSandboxDTO, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .resize(workspaceId, sandbox, options)
+      .resize(sandboxId, sandbox, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Start sandbox
    * @summary Start sandbox
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public start(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public start(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .start(workspaceId, options)
+      .start(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Stop sandbox
    * @summary Stop sandbox
-   * @param {string} workspaceId Sandbox ID
+   * @param {string} sandboxId Sandbox ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof SandboxApi
    */
-  public stop(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public stop(sandboxId: string, options?: RawAxiosRequestConfig) {
     return SandboxApiFp(this.configuration)
-      .stop(workspaceId, options)
+      .stop(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

@@ -11,7 +11,7 @@ daytona sandbox create [flags]
 ```
       --auto-archive int32    Auto-archive interval in minutes (0 means the maximum interval will be used) (default 10080)
       --auto-stop int32       Auto-stop interval in minutes (0 means disabled)
-      --class string          Workspace class type (small, medium, large)
+      --class string          Sandbox class type (small, medium, large)
   -c, --context stringArray   Files or directories to include in the build context (can be specified multiple times)
       --cpu int32             CPU cores allocated to the sandbox
       --disk int32            Disk space allocated to the sandbox in GB

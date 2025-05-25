@@ -32,7 +32,7 @@ var ListCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Verbose(verboseFlag).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Verbose(verboseFlag).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}

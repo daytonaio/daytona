@@ -221,6 +221,385 @@ paths:
               type: string
             type: object
       summary: Health check
+  /sandboxes:
+    post:
+      description: Create a sandbox
+      operationId: Create
+      parameters:
+        - description: Create sandbox
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Created
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create a sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}:
+    delete:
+      description: Remove a sandbox that has been previously destroyed
+      operationId: RemoveDestroyed
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox removed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Remove a destroyed sandbox
+      tags:
+        - sandbox
+    get:
+      description: Get sandbox info
+      operationId: Info
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox info
+          schema:
+            $ref: '#/definitions/SandboxInfoResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get sandbox info
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/{projectId}/toolbox/{path}:
+    get:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Project ID
+          in: path
+          name: projectId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema:
+            type: string
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+  /sandboxes/{sandboxId}/backup:
+    post:
+      description: Create sandbox backup
+      operationId: CreateBackup
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Create backup
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/CreateBackupDTO'
+      produces:
+        - application/json
+      responses:
+        '201':
+          description: Backup created
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create sandbox backup
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/destroy:
+    post:
+      description: Destroy sandbox
+      operationId: Destroy
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox destroyed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Destroy sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/resize:
+    post:
+      description: Resize sandbox
+      operationId: Resize
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Resize sandbox
+          in: body
+          name: sandbox
+          required: true
+          schema:
+            $ref: '#/definitions/ResizeSandboxDTO'
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox resized
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Resize sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/start:
+    post:
+      description: Start sandbox
+      operationId: Start
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox started
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Start sandbox
+      tags:
+        - sandbox
+  /sandboxes/{sandboxId}/stop:
+    post:
+      description: Stop sandbox
+      operationId: Stop
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Sandbox stopped
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Stop sandbox
+      tags:
+        - sandbox
   /snapshots/build:
     post:
       description: Build a snapshot from a Dockerfile and context hashes
@@ -417,385 +796,6 @@ paths:
       summary: Remove a snapshot
       tags:
         - snapshots
-  /workspaces:
-    post:
-      description: Create a sandbox
-      operationId: Create
-      parameters:
-        - description: Create sandbox
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateSandboxDTO'
-      produces:
-        - application/json
-      responses:
-        '201':
-          description: Created
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Create a sandbox
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}:
-    delete:
-      description: Remove a sandbox that has been previously destroyed
-      operationId: RemoveDestroyed
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox removed
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Remove a destroyed sandbox
-      tags:
-        - sandbox
-    get:
-      description: Get sandbox info
-      operationId: Info
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox info
-          schema:
-            $ref: '#/definitions/SandboxInfoResponse'
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Get sandbox info
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/{projectId}/toolbox/{path}:
-    get:
-      description: Forwards the request to the specified sandbox's container
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-        - description: Project ID
-          in: path
-          name: projectId
-          required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Proxied response
-          schema:
-            type: string
-        '400':
-          description: Bad request
-          schema:
-            type: string
-        '401':
-          description: Unauthorized
-          schema:
-            type: string
-        '404':
-          description: Sandbox container not found
-          schema:
-            type: string
-        '409':
-          description: Sandbox container conflict
-          schema:
-            type: string
-        '500':
-          description: Internal server error
-          schema:
-            type: string
-      summary: Proxy requests to the sandbox toolbox
-      tags:
-        - toolbox
-  /workspaces/{workspaceId}/backup:
-    post:
-      description: Create sandbox backup
-      operationId: CreateBackup
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-        - description: Create backup
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateBackupDTO'
-      produces:
-        - application/json
-      responses:
-        '201':
-          description: Backup created
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Create sandbox backup
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/destroy:
-    post:
-      description: Destroy sandbox
-      operationId: Destroy
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox destroyed
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Destroy sandbox
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/resize:
-    post:
-      description: Resize sandbox
-      operationId: Resize
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-        - description: Resize sandbox
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/ResizeSandboxDTO'
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox resized
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Resize sandbox
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/start:
-    post:
-      description: Start sandbox
-      operationId: Start
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox started
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Start sandbox
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/stop:
-    post:
-      description: Stop sandbox
-      operationId: Stop
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Sandbox stopped
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Stop sandbox
-      tags:
-        - sandbox
 security:
   - Bearer: []
 securityDefinitions:

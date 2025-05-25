@@ -14,7 +14,7 @@ Represents a Daytona Sandbox.
 - `id` _string_ - Unique identifier for the Sandbox
 - `instance` _SandboxInstance_ - The underlying Sandbox instance
 - `process` _Process_ - Process execution interface
-- `sandboxApi` _WorkspaceApi_ - API client for Sandbox operations
+- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `toolboxApi` _ToolboxApi_ - API client for toolbox operations
 
 ### Constructors
@@ -25,7 +25,7 @@ Represents a Daytona Sandbox.
 new Sandbox(
    id: string,
    instance: SandboxInstance,
-   sandboxApi: WorkspaceApi,
+   sandboxApi: SandboxApi,
    toolboxApi: ToolboxApi,
    codeToolbox: SandboxCodeToolbox): Sandbox
 ```
@@ -36,7 +36,7 @@ Creates a new Sandbox instance
 
 - `id` _string_ - Unique identifier for the Sandbox
 - `instance` _SandboxInstance_ - The underlying Sandbox instance
-- `sandboxApi` _WorkspaceApi_ - API client for Sandbox operations
+- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `toolboxApi` _ToolboxApi_ - API client for toolbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
 
@@ -49,14 +49,14 @@ Creates a new Sandbox instance
 #### toSandboxInfo()
 
 ```ts
-static toSandboxInfo(instance: Workspace): SandboxInfo
+static toSandboxInfo(instance: Sandbox): SandboxInfo
 ```
 
 Converts an API sandbox instance to a SandboxInfo object.
 
 **Parameters**:
 
-- `instance` _Workspace_ - The API sandbox instance to convert
+- `instance` _Sandbox_ - The API sandbox instance to convert
 
 **Returns**:
 
@@ -64,21 +64,21 @@ Converts an API sandbox instance to a SandboxInfo object.
 
 ---
 
-#### ~~toWorkspaceInfo()~~
+#### ~~toSandboxInfo()~~
 
 ```ts
-static toWorkspaceInfo(instance: Workspace): SandboxInfo
+static toSandboxInfo(instance: Sandbox): SandboxInfo
 ```
 
-Converts an API workspace instance to a WorkspaceInfo object.
+Converts an API sandbox instance to a SandboxInfo object.
 
 **Parameters**:
 
-- `instance` _Workspace_ - The API workspace instance to convert
+- `instance` _Sandbox_ - The API sandbox instance to convert
 
 **Returns**:
 
-- `SandboxInfo` - The converted WorkspaceInfo object
+- `SandboxInfo` - The converted SandboxInfo object
 
 ##### Deprecated
 
@@ -127,7 +127,7 @@ diagnostics, and more.
 **Example:**
 
 ```ts
-const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+const lsp = await sandbox.createLspServer('typescript', 'sandbox/project')
 ```
 
 ---
@@ -196,10 +196,10 @@ console.log(`Sandbox root: ${rootDir}`)
 
 ---
 
-#### ~~getWorkspaceRootDir()~~
+#### ~~getSandboxRootDir()~~
 
 ```ts
-getWorkspaceRootDir(): Promise<undefined | string>
+getSandboxRootDir(): Promise<undefined | string>
 ```
 
 **Returns**:
@@ -487,7 +487,7 @@ Structured information about a Sandbox
 
   ##### Memberof
 
-  WorkspaceInfo
+  SandboxInfo
 
   ##### Inherited from
 
@@ -508,7 +508,7 @@ Structured information about a Sandbox
 - `resources` _SandboxResources_ - Resource allocations for the Sandbox
 - `snapshotCreatedAt` _null \| string_ - When the snapshot was created
 - `snapshotState` _null \| string_ - Current state of Sandbox snapshot
-- `state` _WorkspaceState_ - Current state of the Sandbox (e.g., "started", "stopped")
+- `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
 - `target` _string_ - Target environment where the Sandbox runs
 - `updatedAt` _string_ - When the Sandbox was last updated
 - `user` _string_ - OS user running in the Sandbox
@@ -551,7 +551,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -559,11 +559,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.autoStopInterval
   ```
 
-- `cpu?` _number_ - The CPU quota for the workspace
+- `cpu?` _number_ - The CPU quota for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -571,11 +571,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.cpu
   ```
 
-- `disk?` _number_ - The disk quota for the workspace
+- `disk?` _number_ - The disk quota for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -583,7 +583,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.disk
   ```
 
-- `env` _{}_ - Environment variables for the workspace
+- `env` _{}_ - Environment variables for the sandbox
 
   ##### Index Signature
 
@@ -593,7 +593,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -601,11 +601,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.env
   ```
 
-- `errorReason?` _string_ - The error reason of the workspace
+- `errorReason?` _string_ - The error reason of the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -613,11 +613,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.errorReason
   ```
 
-- `gpu?` _number_ - The GPU quota for the workspace
+- `gpu?` _number_ - The GPU quota for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -625,11 +625,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.gpu
   ```
 
-- `id` _string_ - The ID of the workspace
+- `id` _string_ - The ID of the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -637,11 +637,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.id
   ```
 
-- `image?` _string_ - The image used for the workspace
+- `image?` _string_ - The image used for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -650,7 +650,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   ```
 
 - `info?` _SandboxInfo_
-- `labels` _{}_ - Labels for the workspace
+- `labels` _{}_ - Labels for the sandbox
 
   ##### Index Signature
 
@@ -660,7 +660,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -668,11 +668,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.labels
   ```
 
-- `memory?` _number_ - The memory quota for the workspace
+- `memory?` _number_ - The memory quota for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -680,22 +680,23 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.memory
   ```
 
-- `~~name~~` _string_ - The name of the workspace
+- `~~name~~` _string_ - The name of the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ```ts
   Omit.name
   ```
 
   - **_Deprecated_** - ##### Inherited from
-- `organizationId` _string_ - The organization ID of the workspace
+
+- `organizationId` _string_ - The organization ID of the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -703,11 +704,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.organizationId
   ```
 
-- `public` _boolean_ - Whether the workspace http preview is public
+- `public` _boolean_ - Whether the sandbox http preview is public
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -719,7 +720,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -727,11 +728,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.snapshotCreatedAt
   ```
 
-- `snapshotState?` _WorkspaceSnapshotStateEnum_ - The state of the snapshot
+- `snapshotState?` _SandboxSnapshotStateEnum_ - The state of the snapshot
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -739,11 +740,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.snapshotState
   ```
 
-- `state?` _WorkspaceState_ - The state of the workspace
+- `state?` _SandboxState_ - The state of the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -751,11 +752,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.state
   ```
 
-- `target` _string_ - The target environment for the workspace
+- `target` _string_ - The target environment for the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -767,7 +768,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 
@@ -775,11 +776,11 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   Omit.user
   ```
 
-- `volumes?` _WorkspaceVolume\[\]_ - Array of volumes attached to the workspace
+- `volumes?` _SandboxVolume\[\]_ - Array of volumes attached to the sandbox
 
   ##### Memberof
 
-  Workspace
+  Sandbox
 
   ##### Inherited from
 

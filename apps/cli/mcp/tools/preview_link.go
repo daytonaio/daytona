@@ -45,7 +45,7 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	log.Infof("Generating preview link - port: %d", port)
 
 	// Get the sandbox using sandbox ID
-	sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxId).Execute()
+	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to get sandbox: %v", err)
 	}

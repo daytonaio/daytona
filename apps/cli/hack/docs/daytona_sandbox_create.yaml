@@ -10,7 +10,7 @@ options:
     default_value: '0'
     usage: Auto-stop interval in minutes (0 means disabled)
   - name: class
-    usage: Workspace class type (small, medium, large)
+    usage: Sandbox class type (small, medium, large)
   - name: context
     shorthand: c
     default_value: '[]'
