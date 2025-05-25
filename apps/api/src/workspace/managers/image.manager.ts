@@ -26,6 +26,7 @@ import { BuildInfo } from '../entities/build-info.entity'
 import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
+import { NodeService } from '../services/node.service'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)
@@ -43,6 +44,7 @@ export class ImageManager {
     private readonly nodeRepository: Repository<Node>,
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
+    private readonly nodeService: NodeService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
     private readonly nodeApiFactory: NodeApiFactory,
@@ -376,9 +378,15 @@ export class ImageManager {
               break
             case ImageState.PENDING_VALIDATION:
               //  temp workaround to avoid race condition between api instances
-              if (!(await this.dockerProvider.imageExists(image.name))) {
-                await this.redisLockProvider.unlock(lockKey)
-                return
+              {
+                let imageName = image.name
+                if (image.buildInfo) {
+                  imageName = image.internalName
+                }
+                if (!(await this.dockerProvider.imageExists(imageName))) {
+                  await this.redisLockProvider.unlock(lockKey)
+                  return
+                }
               }
 
               await this.handleImageTagStatePendingValidation(image)
@@ -508,18 +516,21 @@ export class ImageManager {
     }
 
     try {
+      const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
+
       // Find a node to build the image on
-      const node = await this.nodeRepository.findOne({
-        where: { state: NodeState.READY, unschedulable: Not(true) },
-        order: { createdAt: 'ASC' },
+      const nodeId = await this.nodeService.getRandomAvailableNode({
+        excludedNodeIds: excludedNodeIds,
       })
 
       // TODO: get only nodes where the base image is available (extract from buildInfo)
 
-      if (!node) {
+      if (!nodeId) {
         // No ready nodes available, retry later
         return
       }
+
+      const node = await this.nodeService.findOne(nodeId)
 
       // Assign the node ID to the image for tracking build progress
       image.buildNodeId = node.id
@@ -624,19 +635,6 @@ export class ImageManager {
         image.id,
         ImageState.ERROR,
         `Image size (${imageInfo.sizeGB.toFixed(2)}GB) exceeds maximum allowed size of ${MAX_SIZE_GB}GB`,
-      )
-      return
-    }
-
-    //  check if the organization has reached the image size quota
-    const totalImageSizeUsed = await this.imageRepository.sum('size', {
-      organizationId: image.organizationId,
-    })
-    if (totalImageSizeUsed + imageInfo.sizeGB > organization.totalImageSize) {
-      await this.updateImageState(
-        image.id,
-        ImageState.ERROR,
-        `Total image size quota (${organization.totalImageSize.toFixed(2)}GB) exceeded`,
       )
       return
     }

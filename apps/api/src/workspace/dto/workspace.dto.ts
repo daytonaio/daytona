@@ -269,6 +269,9 @@ export class WorkspaceDto {
         if (workspace.desiredState === WorkspaceDesiredState.DESTROYED) {
           return WorkspaceState.DESTROYING
         }
+        if (workspace.desiredState === WorkspaceDesiredState.ARCHIVED) {
+          return WorkspaceState.ARCHIVING
+        }
         break
       case WorkspaceState.UNKNOWN:
         if (workspace.desiredState === WorkspaceDesiredState.STARTED) {

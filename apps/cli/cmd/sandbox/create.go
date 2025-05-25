@@ -132,15 +132,21 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
+			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_IMAGE)
+			if err != nil {
+				return err
+			}
+
 			logsContext, stopLogs := context.WithCancel(context.Background())
 			defer stopLogs()
 
 			go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-				Id:           workspace.Id,
-				ServerUrl:    activeProfile.Api.Url,
-				ServerApi:    activeProfile.Api,
-				Follow:       util.Pointer(true),
-				ResourceType: common.ResourceTypeWorkspace,
+				Id:                   workspace.Id,
+				ServerUrl:            activeProfile.Api.Url,
+				ServerApi:            activeProfile.Api,
+				ActiveOrganizationId: activeProfile.ActiveOrganizationId,
+				Follow:               util.Pointer(true),
+				ResourceType:         common.ResourceTypeWorkspace,
 			})
 
 			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_STARTED)

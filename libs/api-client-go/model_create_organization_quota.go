@@ -20,18 +20,15 @@ var _ MappedNullable = &CreateOrganizationQuota{}
 
 // CreateOrganizationQuota struct for CreateOrganizationQuota
 type CreateOrganizationQuota struct {
-	TotalCpuQuota           *float32 `json:"totalCpuQuota,omitempty"`
-	TotalMemoryQuota        *float32 `json:"totalMemoryQuota,omitempty"`
-	TotalDiskQuota          *float32 `json:"totalDiskQuota,omitempty"`
-	MaxCpuPerWorkspace      *float32 `json:"maxCpuPerWorkspace,omitempty"`
-	MaxMemoryPerWorkspace   *float32 `json:"maxMemoryPerWorkspace,omitempty"`
-	MaxDiskPerWorkspace     *float32 `json:"maxDiskPerWorkspace,omitempty"`
-	MaxConcurrentWorkspaces *float32 `json:"maxConcurrentWorkspaces,omitempty"`
-	WorkspaceQuota          *float32 `json:"workspaceQuota,omitempty"`
-	ImageQuota              *float32 `json:"imageQuota,omitempty"`
-	MaxImageSize            *float32 `json:"maxImageSize,omitempty"`
-	TotalImageSize          *float32 `json:"totalImageSize,omitempty"`
-	VolumeQuota             *float32 `json:"volumeQuota,omitempty"`
+	TotalCpuQuota         *float32 `json:"totalCpuQuota,omitempty"`
+	TotalMemoryQuota      *float32 `json:"totalMemoryQuota,omitempty"`
+	TotalDiskQuota        *float32 `json:"totalDiskQuota,omitempty"`
+	MaxCpuPerWorkspace    *float32 `json:"maxCpuPerWorkspace,omitempty"`
+	MaxMemoryPerWorkspace *float32 `json:"maxMemoryPerWorkspace,omitempty"`
+	MaxDiskPerWorkspace   *float32 `json:"maxDiskPerWorkspace,omitempty"`
+	ImageQuota            *float32 `json:"imageQuota,omitempty"`
+	MaxImageSize          *float32 `json:"maxImageSize,omitempty"`
+	VolumeQuota           *float32 `json:"volumeQuota,omitempty"`
 }
 
 // NewCreateOrganizationQuota instantiates a new CreateOrganizationQuota object
@@ -243,70 +240,6 @@ func (o *CreateOrganizationQuota) SetMaxDiskPerWorkspace(v float32) {
 	o.MaxDiskPerWorkspace = &v
 }
 
-// GetMaxConcurrentWorkspaces returns the MaxConcurrentWorkspaces field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetMaxConcurrentWorkspaces() float32 {
-	if o == nil || IsNil(o.MaxConcurrentWorkspaces) {
-		var ret float32
-		return ret
-	}
-	return *o.MaxConcurrentWorkspaces
-}
-
-// GetMaxConcurrentWorkspacesOk returns a tuple with the MaxConcurrentWorkspaces field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetMaxConcurrentWorkspacesOk() (*float32, bool) {
-	if o == nil || IsNil(o.MaxConcurrentWorkspaces) {
-		return nil, false
-	}
-	return o.MaxConcurrentWorkspaces, true
-}
-
-// HasMaxConcurrentWorkspaces returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasMaxConcurrentWorkspaces() bool {
-	if o != nil && !IsNil(o.MaxConcurrentWorkspaces) {
-		return true
-	}
-
-	return false
-}
-
-// SetMaxConcurrentWorkspaces gets a reference to the given float32 and assigns it to the MaxConcurrentWorkspaces field.
-func (o *CreateOrganizationQuota) SetMaxConcurrentWorkspaces(v float32) {
-	o.MaxConcurrentWorkspaces = &v
-}
-
-// GetWorkspaceQuota returns the WorkspaceQuota field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetWorkspaceQuota() float32 {
-	if o == nil || IsNil(o.WorkspaceQuota) {
-		var ret float32
-		return ret
-	}
-	return *o.WorkspaceQuota
-}
-
-// GetWorkspaceQuotaOk returns a tuple with the WorkspaceQuota field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetWorkspaceQuotaOk() (*float32, bool) {
-	if o == nil || IsNil(o.WorkspaceQuota) {
-		return nil, false
-	}
-	return o.WorkspaceQuota, true
-}
-
-// HasWorkspaceQuota returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasWorkspaceQuota() bool {
-	if o != nil && !IsNil(o.WorkspaceQuota) {
-		return true
-	}
-
-	return false
-}
-
-// SetWorkspaceQuota gets a reference to the given float32 and assigns it to the WorkspaceQuota field.
-func (o *CreateOrganizationQuota) SetWorkspaceQuota(v float32) {
-	o.WorkspaceQuota = &v
-}
-
 // GetImageQuota returns the ImageQuota field value if set, zero value otherwise.
 func (o *CreateOrganizationQuota) GetImageQuota() float32 {
 	if o == nil || IsNil(o.ImageQuota) {
@@ -371,38 +304,6 @@ func (o *CreateOrganizationQuota) SetMaxImageSize(v float32) {
 	o.MaxImageSize = &v
 }
 
-// GetTotalImageSize returns the TotalImageSize field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetTotalImageSize() float32 {
-	if o == nil || IsNil(o.TotalImageSize) {
-		var ret float32
-		return ret
-	}
-	return *o.TotalImageSize
-}
-
-// GetTotalImageSizeOk returns a tuple with the TotalImageSize field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetTotalImageSizeOk() (*float32, bool) {
-	if o == nil || IsNil(o.TotalImageSize) {
-		return nil, false
-	}
-	return o.TotalImageSize, true
-}
-
-// HasTotalImageSize returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasTotalImageSize() bool {
-	if o != nil && !IsNil(o.TotalImageSize) {
-		return true
-	}
-
-	return false
-}
-
-// SetTotalImageSize gets a reference to the given float32 and assigns it to the TotalImageSize field.
-func (o *CreateOrganizationQuota) SetTotalImageSize(v float32) {
-	o.TotalImageSize = &v
-}
-
 // GetVolumeQuota returns the VolumeQuota field value if set, zero value otherwise.
 func (o *CreateOrganizationQuota) GetVolumeQuota() float32 {
 	if o == nil || IsNil(o.VolumeQuota) {
@@ -463,20 +364,11 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.MaxDiskPerWorkspace) {
 		toSerialize["maxDiskPerWorkspace"] = o.MaxDiskPerWorkspace
 	}
-	if !IsNil(o.MaxConcurrentWorkspaces) {
-		toSerialize["maxConcurrentWorkspaces"] = o.MaxConcurrentWorkspaces
-	}
-	if !IsNil(o.WorkspaceQuota) {
-		toSerialize["workspaceQuota"] = o.WorkspaceQuota
-	}
 	if !IsNil(o.ImageQuota) {
 		toSerialize["imageQuota"] = o.ImageQuota
 	}
 	if !IsNil(o.MaxImageSize) {
 		toSerialize["maxImageSize"] = o.MaxImageSize
-	}
-	if !IsNil(o.TotalImageSize) {
-		toSerialize["totalImageSize"] = o.TotalImageSize
 	}
 	if !IsNil(o.VolumeQuota) {
 		toSerialize["volumeQuota"] = o.VolumeQuota

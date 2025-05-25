@@ -2584,7 +2584,7 @@ func (a *OrganizationsAPIService) UpdateOrganizationQuota(ctx context.Context, o
 //	@return Organization
 func (a *OrganizationsAPIService) UpdateOrganizationQuotaExecute(r OrganizationsAPIUpdateOrganizationQuotaRequest) (*Organization, *http.Response, error) {
 	var (
-		localVarHTTPMethod  = http.MethodPut
+		localVarHTTPMethod  = http.MethodPatch
 		localVarPostBody    interface{}
 		formFiles           []formFile
 		localVarReturnValue *Organization

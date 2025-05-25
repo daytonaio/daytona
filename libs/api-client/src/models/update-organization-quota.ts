@@ -23,71 +23,53 @@ export interface UpdateOrganizationQuota {
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalCpuQuota: number
+  totalCpuQuota: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalMemoryQuota: number
+  totalMemoryQuota: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  totalDiskQuota: number
+  totalDiskQuota: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxCpuPerWorkspace: number
+  maxCpuPerWorkspace: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxMemoryPerWorkspace: number
+  maxMemoryPerWorkspace: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxDiskPerWorkspace: number
+  maxDiskPerWorkspace: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  maxConcurrentWorkspaces: number
+  imageQuota: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  workspaceQuota: number
+  maxImageSize: number | null
   /**
    *
    * @type {number}
    * @memberof UpdateOrganizationQuota
    */
-  imageQuota: number
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  maxImageSize: number
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  totalImageSize: number
-  /**
-   *
-   * @type {number}
-   * @memberof UpdateOrganizationQuota
-   */
-  volumeQuota: number
+  volumeQuota: number | null
 }

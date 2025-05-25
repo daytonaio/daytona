@@ -385,7 +385,7 @@ paths:
       tags:
         - organizations
   /organizations/{organizationId}/quota:
-    put:
+    patch:
       operationId: updateOrganizationQuota
       parameters:
         - description: Organization ID
@@ -927,6 +927,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: User details
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -942,6 +943,7 @@ paths:
         '200':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -962,6 +964,7 @@ paths:
         '201':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
@@ -984,11 +987,64 @@ paths:
         '201':
           description: ''
       security:
+        - bearer: []
         - oauth2:
             - openid
             - profile
             - email
       summary: Regenerate user key pair
+      tags:
+        - users
+  /users/account-providers:
+    get:
+      operationId: getAvailableAccountProviders
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/AccountProvider'
+                type: array
+          description: Available account providers
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get available account providers
+      tags:
+        - users
+  /users/linked-accounts/{providerId}/{userId}:
+    delete:
+      operationId: unlinkAccount
+      parameters:
+        - explode: false
+          in: path
+          name: providerId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Unlink account
       tags:
         - users
   /workspace:
@@ -2054,6 +2110,7 @@ paths:
         - toolbox
   /toolbox/{workspaceId}/toolbox/files/upload:
     post:
+      deprecated: true
       description: Upload file inside workspace
       operationId: uploadFile
       parameters:
@@ -2095,6 +2152,46 @@ paths:
             - profile
             - email
       summary: Upload file
+      tags:
+        - toolbox
+  /toolbox/{workspaceId}/toolbox/files/bulk-upload:
+    post:
+      description: Upload multiple files inside workspace
+      operationId: uploadFiles
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              items:
+                $ref: '#/components/schemas/UploadFile'
+              type: array
+        required: true
+      responses:
+        '200':
+          description: Files uploaded successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Upload multiple files
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/add:
@@ -4339,22 +4436,12 @@ components:
     UsageOverview:
       example:
         totalCpuQuota: 0.8008281904610115
-        imageQuota: 1.2315135367772556
-        totalImageSizeQuota: 1.0246457001441578
-        currentWorkspaces: 2.027123023002322
+        currentDiskUsage: 7.061401241503109
+        currentMemoryUsage: 2.3021358869347655
+        currentCpuUsage: 5.637376656633329
         totalGpuQuota: 6.027456183070403
-        totalImageSizeUsed: 1.4894159098541704
-        concurrentWorkspaces: 4.145608029883936
-        concurrentWorkspaceQuota: 2.3021358869347655
-        currentImageNumber: 7.386281948385884
-        totalWorkspaceQuota: 5.637376656633329
-        currentDiskUsage: 3.616076749251911
-        currentMemoryUsage: 9.301444243932576
-        currentCpuUsage: 7.061401241503109
         totalMemoryQuota: 1.4658129805029452
         totalDiskQuota: 5.962133916683182
-        maxVolumes: 6.84685269835264
-        usedVolumes: 7.457744773683766
       properties:
         totalCpuQuota:
           type: number
@@ -4364,103 +4451,70 @@ components:
           type: number
         totalDiskQuota:
           type: number
-        totalWorkspaceQuota:
-          type: number
-        concurrentWorkspaceQuota:
-          type: number
         currentCpuUsage:
           type: number
         currentMemoryUsage:
           type: number
         currentDiskUsage:
           type: number
-        currentWorkspaces:
-          type: number
-        concurrentWorkspaces:
-          type: number
-        currentImageNumber:
-          type: number
-        imageQuota:
-          type: number
-        totalImageSizeQuota:
-          type: number
-        totalImageSizeUsed:
-          type: number
-        maxVolumes:
-          type: number
-        usedVolumes:
-          type: number
       required:
-        - concurrentWorkspaceQuota
-        - concurrentWorkspaces
         - currentCpuUsage
         - currentDiskUsage
-        - currentImageNumber
         - currentMemoryUsage
-        - currentWorkspaces
-        - imageQuota
-        - maxVolumes
         - totalCpuQuota
         - totalDiskQuota
         - totalGpuQuota
-        - totalImageSizeQuota
-        - totalImageSizeUsed
         - totalMemoryQuota
-        - totalWorkspaceQuota
-        - usedVolumes
       type: object
     UpdateOrganizationQuota:
       example:
         totalCpuQuota: 0.8008281904610115
-        imageQuota: 3.616076749251911
+        imageQuota: 7.061401241503109
         maxCpuPerWorkspace: 5.962133916683182
-        maxConcurrentWorkspaces: 7.061401241503109
-        totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
-        volumeQuota: 7.386281948385884
-        workspaceQuota: 9.301444243932576
-        maxImageSize: 2.027123023002322
+        volumeQuota: 3.616076749251911
+        maxImageSize: 9.301444243932576
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
         maxMemoryPerWorkspace: 5.637376656633329
       properties:
         totalCpuQuota:
+          nullable: true
           type: number
         totalMemoryQuota:
+          nullable: true
           type: number
         totalDiskQuota:
+          nullable: true
           type: number
         maxCpuPerWorkspace:
+          nullable: true
           type: number
         maxMemoryPerWorkspace:
+          nullable: true
           type: number
         maxDiskPerWorkspace:
-          type: number
-        maxConcurrentWorkspaces:
-          type: number
-        workspaceQuota:
+          nullable: true
           type: number
         imageQuota:
+          nullable: true
           type: number
         maxImageSize:
-          type: number
-        totalImageSize:
+          nullable: true
           type: number
         volumeQuota:
+          nullable: true
           type: number
       required:
         - imageQuota
-        - maxConcurrentWorkspaces
         - maxCpuPerWorkspace
         - maxDiskPerWorkspace
         - maxImageSize
         - maxMemoryPerWorkspace
         - totalCpuQuota
         - totalDiskQuota
-        - totalImageSize
         - totalMemoryQuota
         - volumeQuota
-        - workspaceQuota
       type: object
     OrganizationSuspension:
       example:
@@ -4761,14 +4815,11 @@ components:
     CreateOrganizationQuota:
       example:
         totalCpuQuota: 0.8008281904610115
-        imageQuota: 3.616076749251911
+        imageQuota: 7.061401241503109
         maxCpuPerWorkspace: 5.962133916683182
-        maxConcurrentWorkspaces: 7.061401241503109
-        totalImageSize: 4.145608029883936
         maxDiskPerWorkspace: 2.3021358869347655
-        volumeQuota: 7.386281948385884
-        workspaceQuota: 9.301444243932576
-        maxImageSize: 2.027123023002322
+        volumeQuota: 3.616076749251911
+        maxImageSize: 9.301444243932576
         totalMemoryQuota: 6.027456183070403
         totalDiskQuota: 1.4658129805029452
         maxMemoryPerWorkspace: 5.637376656633329
@@ -4785,15 +4836,9 @@ components:
           type: number
         maxDiskPerWorkspace:
           type: number
-        maxConcurrentWorkspaces:
-          type: number
-        workspaceQuota:
-          type: number
         imageQuota:
           type: number
         maxImageSize:
-          type: number
-        totalImageSize:
           type: number
         volumeQuota:
           type: number
@@ -4806,14 +4851,11 @@ components:
         id: id
         personalOrganizationQuota:
           totalCpuQuota: 0.8008281904610115
-          imageQuota: 3.616076749251911
+          imageQuota: 7.061401241503109
           maxCpuPerWorkspace: 5.962133916683182
-          maxConcurrentWorkspaces: 7.061401241503109
-          totalImageSize: 4.145608029883936
           maxDiskPerWorkspace: 2.3021358869347655
-          volumeQuota: 7.386281948385884
-          workspaceQuota: 9.301444243932576
-          maxImageSize: 2.027123023002322
+          volumeQuota: 3.616076749251911
+          maxImageSize: 9.301444243932576
           totalMemoryQuota: 6.027456183070403
           totalDiskQuota: 1.4658129805029452
           maxMemoryPerWorkspace: 5.637376656633329
@@ -4836,6 +4878,19 @@ components:
           type: boolean
       required:
         - id
+        - name
+      type: object
+    AccountProvider:
+      example:
+        displayName: displayName
+        name: name
+      properties:
+        name:
+          type: string
+        displayName:
+          type: string
+      required:
+        - displayName
         - name
       type: object
     WorkspaceInfo:
@@ -5346,6 +5401,17 @@ components:
           type: array
       required:
         - files
+      type: object
+    UploadFile:
+      properties:
+        file:
+          format: binary
+          type: string
+        path:
+          type: string
+      required:
+        - file
+        - path
       type: object
     GitAddRequest:
       example:

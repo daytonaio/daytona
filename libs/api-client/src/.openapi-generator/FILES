@@ -17,6 +17,7 @@ common.ts
 configuration.ts
 git_push.sh
 index.ts
+models/account-provider.ts
 models/api-key-list.ts
 models/api-key-response.ts
 models/build-image.ts

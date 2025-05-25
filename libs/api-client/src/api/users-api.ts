@@ -32,6 +32,8 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
+import type { AccountProvider } from '../models'
+// @ts-ignore
 import type { CreateUser } from '../models'
 // @ts-ignore
 import type { User } from '../models'
@@ -62,6 +64,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
       const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
 
@@ -96,6 +102,44 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
 
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get available account providers
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getAvailableAccountProviders: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      const localVarPath = `/users/account-providers`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
       // authentication oauth2 required
 
       setSearchParams(localVarUrlObj, localVarQueryParameter)
@@ -125,6 +169,10 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
       const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
 
@@ -158,6 +206,56 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
       const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
       const localVarHeaderParameter = {} as any
       const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Unlink account
+     * @param {string} providerId
+     * @param {string} userId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    unlinkAccount: async (
+      providerId: string,
+      userId: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'providerId' is not null or undefined
+      assertParamExists('unlinkAccount', 'providerId', providerId)
+      // verify required parameter 'userId' is not null or undefined
+      assertParamExists('unlinkAccount', 'userId', userId)
+      const localVarPath = `/users/linked-accounts/{providerId}/{userId}`
+        .replace(`{${'providerId'}}`, encodeURIComponent(String(providerId)))
+        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
       // authentication oauth2 required
 
@@ -226,6 +324,27 @@ export const UsersApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get available account providers
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getAvailableAccountProviders(
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<AccountProvider>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getAvailableAccountProviders(options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['UsersApi.getAvailableAccountProviders']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary List all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -268,6 +387,31 @@ export const UsersApiFp = function (configuration?: Configuration) {
           configuration,
         )(axios, localVarOperationServerBasePath || basePath)
     },
+    /**
+     *
+     * @summary Unlink account
+     * @param {string} providerId
+     * @param {string} userId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async unlinkAccount(
+      providerId: string,
+      userId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.unlinkAccount(providerId, userId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['UsersApi.unlinkAccount']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
   }
 }
 
@@ -299,6 +443,15 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     },
     /**
      *
+     * @summary Get available account providers
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getAvailableAccountProviders(options?: RawAxiosRequestConfig): AxiosPromise<Array<AccountProvider>> {
+      return localVarFp.getAvailableAccountProviders(options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary List all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -315,6 +468,17 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
      */
     regenerateKeyPair(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
       return localVarFp.regenerateKeyPair(id, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Unlink account
+     * @param {string} providerId
+     * @param {string} userId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    unlinkAccount(providerId: string, userId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.unlinkAccount(providerId, userId, options).then((request) => request(axios, basePath))
     },
   }
 }
@@ -355,6 +519,19 @@ export class UsersApi extends BaseAPI {
 
   /**
    *
+   * @summary Get available account providers
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof UsersApi
+   */
+  public getAvailableAccountProviders(options?: RawAxiosRequestConfig) {
+    return UsersApiFp(this.configuration)
+      .getAvailableAccountProviders(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
    * @summary List all users
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
@@ -377,6 +554,21 @@ export class UsersApi extends BaseAPI {
   public regenerateKeyPair(id: string, options?: RawAxiosRequestConfig) {
     return UsersApiFp(this.configuration)
       .regenerateKeyPair(id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Unlink account
+   * @param {string} providerId
+   * @param {string} userId
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof UsersApi
+   */
+  public unlinkAccount(providerId: string, userId: string, options?: RawAxiosRequestConfig) {
+    return UsersApiFp(this.configuration)
+      .unlinkAccount(providerId, userId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

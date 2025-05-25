@@ -6141,7 +6141,7 @@ class OrganizationsApi:
         ]
 
         return self.api_client.param_serialize(
-            method='PUT',
+            method='PATCH',
             resource_path='/organizations/{organizationId}/quota',
             path_params=_path_params,
             query_params=_query_params,

@@ -8,51 +8,30 @@ import { IsNumber } from 'class-validator'
 
 @ApiSchema({ name: 'UpdateOrganizationQuota' })
 export class UpdateOrganizationQuotaDto {
-  @ApiProperty()
-  @IsNumber()
-  totalCpuQuota: number
+  @ApiProperty({ nullable: true })
+  totalCpuQuota?: number
 
-  @ApiProperty()
-  @IsNumber()
-  totalMemoryQuota: number
+  @ApiProperty({ nullable: true })
+  totalMemoryQuota?: number
 
-  @ApiProperty()
-  @IsNumber()
-  totalDiskQuota: number
+  @ApiProperty({ nullable: true })
+  totalDiskQuota?: number
 
-  @ApiProperty()
-  @IsNumber()
-  maxCpuPerWorkspace: number
+  @ApiProperty({ nullable: true })
+  maxCpuPerWorkspace?: number
 
-  @ApiProperty()
-  @IsNumber()
-  maxMemoryPerWorkspace: number
+  @ApiProperty({ nullable: true })
+  maxMemoryPerWorkspace?: number
 
-  @ApiProperty()
-  @IsNumber()
-  maxDiskPerWorkspace: number
+  @ApiProperty({ nullable: true })
+  maxDiskPerWorkspace?: number
 
-  @ApiProperty()
-  @IsNumber()
-  maxConcurrentWorkspaces: number
+  @ApiProperty({ nullable: true })
+  imageQuota?: number
 
-  @ApiProperty()
-  @IsNumber()
-  workspaceQuota: number
+  @ApiProperty({ nullable: true })
+  maxImageSize?: number
 
-  @ApiProperty()
-  @IsNumber()
-  imageQuota: number
-
-  @ApiProperty()
-  @IsNumber()
-  maxImageSize: number
-
-  @ApiProperty()
-  @IsNumber()
-  totalImageSize: number
-
-  @ApiProperty()
-  @IsNumber()
-  volumeQuota: number
+  @ApiProperty({ nullable: true })
+  volumeQuota?: number
 }

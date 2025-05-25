@@ -33,6 +33,7 @@ import { WorkspaceStartedEvent } from '../events/workspace-started.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
+import { ImageNode } from '../entities/image-node.entity'
 
 type BreakFromSwitch = boolean
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
@@ -44,6 +45,8 @@ export class WorkspaceManager {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
+    @InjectRepository(ImageNode)
+    private readonly imageNodeRepository: Repository<ImageNode>,
     private readonly nodeService: NodeService,
     private readonly nodeApiFactory: NodeApiFactory,
     private readonly dockerRegistryService: DockerRegistryService,
@@ -120,8 +123,52 @@ export class WorkspaceManager {
     const workspaces = await this.workspaceRepository.find({
       where: {
         state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
-        desiredState: Raw(() => '"Workspace"."desiredState"::text != "Workspace"."state"::text'),
+        desiredState: Raw(
+          () =>
+            `"Workspace"."desiredState"::text != "Workspace"."state"::text AND "Workspace"."desiredState"::text != 'archived'`,
+        ),
       },
+      take: 100,
+      order: {
+        lastActivityAt: 'DESC',
+      },
+    })
+
+    await Promise.all(
+      workspaces.map(async (workspace) => {
+        this.syncInstanceState(workspace.id)
+      }),
+    )
+    await this.redisLockProvider.unlock(lockKey)
+  }
+
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  async syncArchivedDesiredStates(): Promise<void> {
+    const lockKey = 'sync-archived-desired-states'
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
+      return
+    }
+
+    const nodesWith3InProgress = await this.workspaceRepository
+      .createQueryBuilder('workspace')
+      .select('"nodeId"')
+      .where('"workspace"."state" = :state', { state: WorkspaceState.ARCHIVING })
+      .groupBy('"nodeId"')
+      .having('COUNT(*) >= 3')
+      .getRawMany()
+
+    const workspaces = await this.workspaceRepository.find({
+      where: [
+        {
+          state: WorkspaceState.ARCHIVING,
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+        },
+        {
+          state: Not(In([WorkspaceState.ARCHIVED, WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+          nodeId: Not(In(nodesWith3InProgress.map((node) => node.nodeId))),
+        },
+      ],
       take: 100,
       order: {
         lastActivityAt: 'DESC',
@@ -193,11 +240,11 @@ export class WorkspaceManager {
     // Try to assign an available node with the image build
     let nodeId: string
     try {
-      nodeId = await this.nodeService.getRandomAvailableNode(
-        workspace.region,
-        workspace.class,
-        workspace.buildInfo.imageRef,
-      )
+      nodeId = await this.nodeService.getRandomAvailableNode({
+        region: workspace.region,
+        workspaceClass: workspace.class,
+        imageRef: workspace.buildInfo.imageRef,
+      })
     } catch (error) {
       // Continue to next assignment method
     }
@@ -229,8 +276,14 @@ export class WorkspaceManager {
       }
     }
 
+    const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
+
     // Try to assign a new available node
-    nodeId = await this.nodeService.getRandomAvailableNode(workspace.region, workspace.class)
+    nodeId = await this.nodeService.getRandomAvailableNode({
+      region: workspace.region,
+      workspaceClass: workspace.class,
+      excludedNodeIds: excludedNodeIds,
+    })
 
     this.buildOnNode(workspace.buildInfo, nodeId, workspace.organizationId)
 
@@ -270,7 +323,13 @@ export class WorkspaceManager {
       return
     }
 
-    await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, ImageNodeState.BUILDING_IMAGE)
+    const response = (await nodeImageApi.imageExists(buildInfo.imageRef)).data
+    let state = ImageNodeState.BUILDING_IMAGE
+    if (response && response.exists) {
+      state = ImageNodeState.READY
+    }
+
+    await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, state)
   }
 
   private async handleWorkspaceDesiredStateArchived(workspaceId: string): Promise<void> {
@@ -430,6 +489,7 @@ export class WorkspaceManager {
         }
 
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYED)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         //  sync states again immediately for workspace
         this.syncInstanceState(workspace.id)
         break
@@ -451,6 +511,7 @@ export class WorkspaceManager {
           }
         }
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYING)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -591,6 +652,7 @@ export class WorkspaceManager {
           await this.workspaceRepository.update(workspace.id, {
             state: WorkspaceState.UNKNOWN,
           })
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           this.syncInstanceState(workspace.id)
           return
         }
@@ -606,6 +668,7 @@ export class WorkspaceManager {
     if (!imageNode || imageNode.state === ImageNodeState.BUILDING_IMAGE) {
       // Sleep for a second and go back to syncing instance state
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return
     }
@@ -741,11 +804,11 @@ export class WorkspaceManager {
           //  TODO: usage should be based on compute usage
 
           const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
-          const availableNodes = await this.nodeService.findAvailableNodes(
-            workspace.region,
-            workspace.class,
-            image.internalName,
-          )
+          const availableNodes = await this.nodeService.findAvailableNodes({
+            region: workspace.region,
+            workspaceClass: workspace.class,
+            imageRef: image.internalName,
+          })
           const lessUsedNodes = availableNodes.filter((node) => node.id !== workspace.nodeId)
 
           //  temp workaround to move workspaces to less used node
@@ -821,7 +884,11 @@ export class WorkspaceManager {
 
       //  exclude the node that the last node workspace was on
       const availableNodes = (
-        await this.nodeService.findAvailableNodes(workspace.region, workspace.class, image.internalName)
+        await this.nodeService.findAvailableNodes({
+          region: workspace.region,
+          workspaceClass: workspace.class,
+          imageRef: image.internalName,
+        })
       ).filter((node) => node.id != workspace.prevNodeId)
 
       //  get random node from available nodes

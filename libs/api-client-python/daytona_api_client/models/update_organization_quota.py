@@ -19,7 +19,7 @@ import re  # noqa: F401
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -27,20 +27,17 @@ class UpdateOrganizationQuota(BaseModel):
     """
     UpdateOrganizationQuota
     """ # noqa: E501
-    total_cpu_quota: Union[StrictFloat, StrictInt] = Field(alias="totalCpuQuota")
-    total_memory_quota: Union[StrictFloat, StrictInt] = Field(alias="totalMemoryQuota")
-    total_disk_quota: Union[StrictFloat, StrictInt] = Field(alias="totalDiskQuota")
-    max_cpu_per_workspace: Union[StrictFloat, StrictInt] = Field(alias="maxCpuPerWorkspace")
-    max_memory_per_workspace: Union[StrictFloat, StrictInt] = Field(alias="maxMemoryPerWorkspace")
-    max_disk_per_workspace: Union[StrictFloat, StrictInt] = Field(alias="maxDiskPerWorkspace")
-    max_concurrent_workspaces: Union[StrictFloat, StrictInt] = Field(alias="maxConcurrentWorkspaces")
-    workspace_quota: Union[StrictFloat, StrictInt] = Field(alias="workspaceQuota")
-    image_quota: Union[StrictFloat, StrictInt] = Field(alias="imageQuota")
-    max_image_size: Union[StrictFloat, StrictInt] = Field(alias="maxImageSize")
-    total_image_size: Union[StrictFloat, StrictInt] = Field(alias="totalImageSize")
-    volume_quota: Union[StrictFloat, StrictInt] = Field(alias="volumeQuota")
+    total_cpu_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalCpuQuota")
+    total_memory_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalMemoryQuota")
+    total_disk_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="totalDiskQuota")
+    max_cpu_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxCpuPerWorkspace")
+    max_memory_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxMemoryPerWorkspace")
+    max_disk_per_workspace: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxDiskPerWorkspace")
+    image_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="imageQuota")
+    max_image_size: Optional[Union[StrictFloat, StrictInt]] = Field(alias="maxImageSize")
+    volume_quota: Optional[Union[StrictFloat, StrictInt]] = Field(alias="volumeQuota")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "maxConcurrentWorkspaces", "workspaceQuota", "imageQuota", "maxImageSize", "totalImageSize", "volumeQuota"]
+    __properties: ClassVar[List[str]] = ["totalCpuQuota", "totalMemoryQuota", "totalDiskQuota", "maxCpuPerWorkspace", "maxMemoryPerWorkspace", "maxDiskPerWorkspace", "imageQuota", "maxImageSize", "volumeQuota"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -88,6 +85,51 @@ class UpdateOrganizationQuota(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if total_cpu_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_cpu_quota is None and "total_cpu_quota" in self.model_fields_set:
+            _dict['totalCpuQuota'] = None
+
+        # set to None if total_memory_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_memory_quota is None and "total_memory_quota" in self.model_fields_set:
+            _dict['totalMemoryQuota'] = None
+
+        # set to None if total_disk_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.total_disk_quota is None and "total_disk_quota" in self.model_fields_set:
+            _dict['totalDiskQuota'] = None
+
+        # set to None if max_cpu_per_workspace (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_cpu_per_workspace is None and "max_cpu_per_workspace" in self.model_fields_set:
+            _dict['maxCpuPerWorkspace'] = None
+
+        # set to None if max_memory_per_workspace (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_memory_per_workspace is None and "max_memory_per_workspace" in self.model_fields_set:
+            _dict['maxMemoryPerWorkspace'] = None
+
+        # set to None if max_disk_per_workspace (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_disk_per_workspace is None and "max_disk_per_workspace" in self.model_fields_set:
+            _dict['maxDiskPerWorkspace'] = None
+
+        # set to None if image_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.image_quota is None and "image_quota" in self.model_fields_set:
+            _dict['imageQuota'] = None
+
+        # set to None if max_image_size (nullable) is None
+        # and model_fields_set contains the field
+        if self.max_image_size is None and "max_image_size" in self.model_fields_set:
+            _dict['maxImageSize'] = None
+
+        # set to None if volume_quota (nullable) is None
+        # and model_fields_set contains the field
+        if self.volume_quota is None and "volume_quota" in self.model_fields_set:
+            _dict['volumeQuota'] = None
+
         return _dict
 
     @classmethod
@@ -106,11 +148,8 @@ class UpdateOrganizationQuota(BaseModel):
             "maxCpuPerWorkspace": obj.get("maxCpuPerWorkspace"),
             "maxMemoryPerWorkspace": obj.get("maxMemoryPerWorkspace"),
             "maxDiskPerWorkspace": obj.get("maxDiskPerWorkspace"),
-            "maxConcurrentWorkspaces": obj.get("maxConcurrentWorkspaces"),
-            "workspaceQuota": obj.get("workspaceQuota"),
             "imageQuota": obj.get("imageQuota"),
             "maxImageSize": obj.get("maxImageSize"),
-            "totalImageSize": obj.get("totalImageSize"),
             "volumeQuota": obj.get("volumeQuota")
         })
         # store additional fields in additional_properties

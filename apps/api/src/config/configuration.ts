@@ -28,6 +28,12 @@ const configuration = {
     clientId: process.env.OIDC_CLIENT_ID || process.env.OID_CLIENT_ID,
     issuer: process.env.OIDC_ISSUER_BASE_URL || process.env.OID_ISSUER_BASE_URL,
     audience: process.env.OIDC_AUDIENCE || process.env.OID_AUDIENCE,
+    managementApi: {
+      enabled: process.env.OIDC_MANAGEMENT_API_ENABLED === 'true',
+      clientId: process.env.OIDC_MANAGEMENT_API_CLIENT_ID,
+      clientSecret: process.env.OIDC_MANAGEMENT_API_CLIENT_SECRET,
+      audience: process.env.OIDC_MANAGEMENT_API_AUDIENCE,
+    },
   },
   smtp: {
     host: process.env.SMTP_HOST,
