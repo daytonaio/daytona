@@ -10,7 +10,7 @@ import { DockerRegistry } from '../entities/docker-registry.entity'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { ApiOAuth2 } from '@nestjs/swagger'
-import { RegistryPushAccessDto } from '../../workspace/dto/registry-push-access-dto'
+import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import {
   DOCKER_REGISTRY_PROVIDER,
   IDockerRegistryProvider,
