@@ -24,7 +24,7 @@ var StartCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -34,7 +34,7 @@ var StartCmd = &cobra.Command{
 				var startedCount int
 
 				for _, w := range sandboxList {
-					res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, w.Id).Execute()
+					res, err := apiClient.SandboxAPI.StartSandbox(ctx, w.Id).Execute()
 					if err != nil {
 						fmt.Printf("Failed to start sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
@@ -62,7 +62,7 @@ var StartCmd = &cobra.Command{
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:
-			res, err := apiClient.WorkspaceAPI.StartWorkspace(ctx, startArg).Execute()
+			res, err := apiClient.SandboxAPI.StartSandbox(ctx, startArg).Execute()
 			if err != nil {
 				return apiclient.HandleErrorResponse(res, err)
 			}

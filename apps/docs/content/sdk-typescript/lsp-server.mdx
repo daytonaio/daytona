@@ -64,7 +64,7 @@ Gets completion suggestions at a position in a file.
 
 ```ts
 // Get completions at a specific position
-const completions = await lsp.completions('workspace/project/src/index.ts', {
+const completions = await lsp.completions('sandbox/project/src/index.ts', {
   line: 10,
   character: 15,
 })
@@ -97,7 +97,7 @@ in the editor to allow the language server to clean up any resources associated 
 
 ```ts
 // When done editing a file
-await lsp.didClose('workspace/project/src/index.ts')
+await lsp.didClose('sandbox/project/src/index.ts')
 ```
 
 ---
@@ -125,7 +125,7 @@ will begin tracking the file's contents and providing language features.
 
 ```ts
 // When opening a file for editing
-await lsp.didOpen('workspace/project/src/index.ts')
+await lsp.didOpen('sandbox/project/src/index.ts')
 // Now can get completions, symbols, etc. for this file
 ```
 
@@ -155,7 +155,7 @@ Get symbol information (functions, classes, variables, etc.) from a document.
 
 ```ts
 // Get all symbols in a file
-const symbols = await lsp.documentSymbols('workspace/project/src/index.ts')
+const symbols = await lsp.documentSymbols('sandbox/project/src/index.ts')
 symbols.forEach((symbol) => {
   console.log(`${symbol.kind} ${symbol.name}: ${symbol.location}`)
 })
@@ -210,7 +210,7 @@ It initializes the language server for the specified language and project.
 **Example:**
 
 ```ts
-const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+const lsp = await sandbox.createLspServer('typescript', 'sandbox/project')
 await lsp.start() // Initialize the server
 // Now ready for LSP operations
 ```
@@ -239,10 +239,10 @@ await lsp.stop() // Clean up resources
 
 ---
 
-#### ~~workspaceSymbols()~~
+#### ~~sandboxSymbols()~~
 
 ```ts
-workspaceSymbols(query: string): Promise<LspSymbol[]>
+sandboxSymbols(query: string): Promise<LspSymbol[]>
 ```
 
 Searches for symbols matching the query string across the entire Sandbox.

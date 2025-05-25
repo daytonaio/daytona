@@ -2,52 +2,52 @@
 
 All URIs are relative to _http://localhost_
 
-| Method                                                                 | HTTP request                                                                                | Description                      |
-| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | -------------------------------- |
-| [**create_folder**](ToolboxApi.md#create_folder)                       | **POST** /toolbox/{workspaceId}/toolbox/files/folder                                        | Create folder                    |
-| [**create_session**](ToolboxApi.md#create_session)                     | **POST** /toolbox/{workspaceId}/toolbox/process/session                                     | Create session                   |
-| [**delete_file**](ToolboxApi.md#delete_file)                           | **DELETE** /toolbox/{workspaceId}/toolbox/files                                             | Delete file                      |
-| [**delete_session**](ToolboxApi.md#delete_session)                     | **DELETE** /toolbox/{workspaceId}/toolbox/process/session/{sessionId}                       | Delete session                   |
-| [**download_file**](ToolboxApi.md#download_file)                       | **GET** /toolbox/{workspaceId}/toolbox/files/download                                       | Download file                    |
-| [**execute_command**](ToolboxApi.md#execute_command)                   | **POST** /toolbox/{workspaceId}/toolbox/process/execute                                     | Execute command                  |
-| [**execute_session_command**](ToolboxApi.md#execute_session_command)   | **POST** /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec                    | Execute command in session       |
-| [**find_in_files**](ToolboxApi.md#find_in_files)                       | **GET** /toolbox/{workspaceId}/toolbox/files/find                                           | Search for text/pattern in files |
-| [**get_file_info**](ToolboxApi.md#get_file_info)                       | **GET** /toolbox/{workspaceId}/toolbox/files/info                                           | Get file info                    |
-| [**get_project_dir**](ToolboxApi.md#get_project_dir)                   | **GET** /toolbox/{workspaceId}/toolbox/project-dir                                          | Get workspace project dir        |
-| [**get_session**](ToolboxApi.md#get_session)                           | **GET** /toolbox/{workspaceId}/toolbox/process/session/{sessionId}                          | Get session                      |
-| [**get_session_command**](ToolboxApi.md#get_session_command)           | **GET** /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}      | Get session command              |
-| [**get_session_command_logs**](ToolboxApi.md#get_session_command_logs) | **GET** /toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get command logs                 |
-| [**git_add_files**](ToolboxApi.md#git_add_files)                       | **POST** /toolbox/{workspaceId}/toolbox/git/add                                             | Add files                        |
-| [**git_clone_repository**](ToolboxApi.md#git_clone_repository)         | **POST** /toolbox/{workspaceId}/toolbox/git/clone                                           | Clone repository                 |
-| [**git_commit_changes**](ToolboxApi.md#git_commit_changes)             | **POST** /toolbox/{workspaceId}/toolbox/git/commit                                          | Commit changes                   |
-| [**git_create_branch**](ToolboxApi.md#git_create_branch)               | **POST** /toolbox/{workspaceId}/toolbox/git/branches                                        | Create branch                    |
-| [**git_get_history**](ToolboxApi.md#git_get_history)                   | **GET** /toolbox/{workspaceId}/toolbox/git/history                                          | Get commit history               |
-| [**git_get_status**](ToolboxApi.md#git_get_status)                     | **GET** /toolbox/{workspaceId}/toolbox/git/status                                           | Get git status                   |
-| [**git_list_branches**](ToolboxApi.md#git_list_branches)               | **GET** /toolbox/{workspaceId}/toolbox/git/branches                                         | Get branch list                  |
-| [**git_pull_changes**](ToolboxApi.md#git_pull_changes)                 | **POST** /toolbox/{workspaceId}/toolbox/git/pull                                            | Pull changes                     |
-| [**git_push_changes**](ToolboxApi.md#git_push_changes)                 | **POST** /toolbox/{workspaceId}/toolbox/git/push                                            | Push changes                     |
-| [**list_files**](ToolboxApi.md#list_files)                             | **GET** /toolbox/{workspaceId}/toolbox/files                                                | List files                       |
-| [**list_sessions**](ToolboxApi.md#list_sessions)                       | **GET** /toolbox/{workspaceId}/toolbox/process/session                                      | List sessions                    |
-| [**lsp_completions**](ToolboxApi.md#lsp_completions)                   | **POST** /toolbox/{workspaceId}/toolbox/lsp/completions                                     | Get Lsp Completions              |
-| [**lsp_did_close**](ToolboxApi.md#lsp_did_close)                       | **POST** /toolbox/{workspaceId}/toolbox/lsp/did-close                                       | Call Lsp DidClose                |
-| [**lsp_did_open**](ToolboxApi.md#lsp_did_open)                         | **POST** /toolbox/{workspaceId}/toolbox/lsp/did-open                                        | Call Lsp DidOpen                 |
-| [**lsp_document_symbols**](ToolboxApi.md#lsp_document_symbols)         | **GET** /toolbox/{workspaceId}/toolbox/lsp/document-symbols                                 | Call Lsp DocumentSymbols         |
-| [**lsp_start**](ToolboxApi.md#lsp_start)                               | **POST** /toolbox/{workspaceId}/toolbox/lsp/start                                           | Start Lsp server                 |
-| [**lsp_stop**](ToolboxApi.md#lsp_stop)                                 | **POST** /toolbox/{workspaceId}/toolbox/lsp/stop                                            | Stop Lsp server                  |
-| [**lsp_workspace_symbols**](ToolboxApi.md#lsp_workspace_symbols)       | **GET** /toolbox/{workspaceId}/toolbox/lsp/workspace-symbols                                | Call Lsp WorkspaceSymbols        |
-| [**move_file**](ToolboxApi.md#move_file)                               | **POST** /toolbox/{workspaceId}/toolbox/files/move                                          | Move file                        |
-| [**replace_in_files**](ToolboxApi.md#replace_in_files)                 | **POST** /toolbox/{workspaceId}/toolbox/files/replace                                       | Replace in files                 |
-| [**search_files**](ToolboxApi.md#search_files)                         | **GET** /toolbox/{workspaceId}/toolbox/files/search                                         | Search files                     |
-| [**set_file_permissions**](ToolboxApi.md#set_file_permissions)         | **POST** /toolbox/{workspaceId}/toolbox/files/permissions                                   | Set file permissions             |
-| [**upload_file**](ToolboxApi.md#upload_file)                           | **POST** /toolbox/{workspaceId}/toolbox/files/upload                                        | Upload file                      |
+| Method                                                                 | HTTP request                                                                              | Description                      |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | -------------------------------- |
+| [**create_folder**](ToolboxApi.md#create_folder)                       | **POST** /toolbox/{sandboxId}/toolbox/files/folder                                        | Create folder                    |
+| [**create_session**](ToolboxApi.md#create_session)                     | **POST** /toolbox/{sandboxId}/toolbox/process/session                                     | Create session                   |
+| [**delete_file**](ToolboxApi.md#delete_file)                           | **DELETE** /toolbox/{sandboxId}/toolbox/files                                             | Delete file                      |
+| [**delete_session**](ToolboxApi.md#delete_session)                     | **DELETE** /toolbox/{sandboxId}/toolbox/process/session/{sessionId}                       | Delete session                   |
+| [**download_file**](ToolboxApi.md#download_file)                       | **GET** /toolbox/{sandboxId}/toolbox/files/download                                       | Download file                    |
+| [**execute_command**](ToolboxApi.md#execute_command)                   | **POST** /toolbox/{sandboxId}/toolbox/process/execute                                     | Execute command                  |
+| [**execute_session_command**](ToolboxApi.md#execute_session_command)   | **POST** /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec                    | Execute command in session       |
+| [**find_in_files**](ToolboxApi.md#find_in_files)                       | **GET** /toolbox/{sandboxId}/toolbox/files/find                                           | Search for text/pattern in files |
+| [**get_file_info**](ToolboxApi.md#get_file_info)                       | **GET** /toolbox/{sandboxId}/toolbox/files/info                                           | Get file info                    |
+| [**get_project_dir**](ToolboxApi.md#get_project_dir)                   | **GET** /toolbox/{sandboxId}/toolbox/project-dir                                          | Get sandbox project dir          |
+| [**get_session**](ToolboxApi.md#get_session)                           | **GET** /toolbox/{sandboxId}/toolbox/process/session/{sessionId}                          | Get session                      |
+| [**get_session_command**](ToolboxApi.md#get_session_command)           | **GET** /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}      | Get session command              |
+| [**get_session_command_logs**](ToolboxApi.md#get_session_command_logs) | **GET** /toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs | Get command logs                 |
+| [**git_add_files**](ToolboxApi.md#git_add_files)                       | **POST** /toolbox/{sandboxId}/toolbox/git/add                                             | Add files                        |
+| [**git_clone_repository**](ToolboxApi.md#git_clone_repository)         | **POST** /toolbox/{sandboxId}/toolbox/git/clone                                           | Clone repository                 |
+| [**git_commit_changes**](ToolboxApi.md#git_commit_changes)             | **POST** /toolbox/{sandboxId}/toolbox/git/commit                                          | Commit changes                   |
+| [**git_create_branch**](ToolboxApi.md#git_create_branch)               | **POST** /toolbox/{sandboxId}/toolbox/git/branches                                        | Create branch                    |
+| [**git_get_history**](ToolboxApi.md#git_get_history)                   | **GET** /toolbox/{sandboxId}/toolbox/git/history                                          | Get commit history               |
+| [**git_get_status**](ToolboxApi.md#git_get_status)                     | **GET** /toolbox/{sandboxId}/toolbox/git/status                                           | Get git status                   |
+| [**git_list_branches**](ToolboxApi.md#git_list_branches)               | **GET** /toolbox/{sandboxId}/toolbox/git/branches                                         | Get branch list                  |
+| [**git_pull_changes**](ToolboxApi.md#git_pull_changes)                 | **POST** /toolbox/{sandboxId}/toolbox/git/pull                                            | Pull changes                     |
+| [**git_push_changes**](ToolboxApi.md#git_push_changes)                 | **POST** /toolbox/{sandboxId}/toolbox/git/push                                            | Push changes                     |
+| [**list_files**](ToolboxApi.md#list_files)                             | **GET** /toolbox/{sandboxId}/toolbox/files                                                | List files                       |
+| [**list_sessions**](ToolboxApi.md#list_sessions)                       | **GET** /toolbox/{sandboxId}/toolbox/process/session                                      | List sessions                    |
+| [**lsp_completions**](ToolboxApi.md#lsp_completions)                   | **POST** /toolbox/{sandboxId}/toolbox/lsp/completions                                     | Get Lsp Completions              |
+| [**lsp_did_close**](ToolboxApi.md#lsp_did_close)                       | **POST** /toolbox/{sandboxId}/toolbox/lsp/did-close                                       | Call Lsp DidClose                |
+| [**lsp_did_open**](ToolboxApi.md#lsp_did_open)                         | **POST** /toolbox/{sandboxId}/toolbox/lsp/did-open                                        | Call Lsp DidOpen                 |
+| [**lsp_document_symbols**](ToolboxApi.md#lsp_document_symbols)         | **GET** /toolbox/{sandboxId}/toolbox/lsp/document-symbols                                 | Call Lsp DocumentSymbols         |
+| [**lsp_start**](ToolboxApi.md#lsp_start)                               | **POST** /toolbox/{sandboxId}/toolbox/lsp/start                                           | Start Lsp server                 |
+| [**lsp_stop**](ToolboxApi.md#lsp_stop)                                 | **POST** /toolbox/{sandboxId}/toolbox/lsp/stop                                            | Stop Lsp server                  |
+| [**lsp_sandbox_symbols**](ToolboxApi.md#lsp_sandbox_symbols)           | **GET** /toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols                                  | Call Lsp SandboxSymbols          |
+| [**move_file**](ToolboxApi.md#move_file)                               | **POST** /toolbox/{sandboxId}/toolbox/files/move                                          | Move file                        |
+| [**replace_in_files**](ToolboxApi.md#replace_in_files)                 | **POST** /toolbox/{sandboxId}/toolbox/files/replace                                       | Replace in files                 |
+| [**search_files**](ToolboxApi.md#search_files)                         | **GET** /toolbox/{sandboxId}/toolbox/files/search                                         | Search files                     |
+| [**set_file_permissions**](ToolboxApi.md#set_file_permissions)         | **POST** /toolbox/{sandboxId}/toolbox/files/permissions                                   | Set file permissions             |
+| [**upload_file**](ToolboxApi.md#upload_file)                           | **POST** /toolbox/{sandboxId}/toolbox/files/upload                                        | Upload file                      |
 
 # **create_folder**
 
-> create_folder(workspace_id, path, mode, x_daytona_organization_id=x_daytona_organization_id)
+> create_folder(sandbox_id, path, mode, x_daytona_organization_id=x_daytona_organization_id)
 
 Create folder
 
-Create folder inside workspace
+Create folder inside sandbox
 
 ### Example
 
@@ -75,14 +75,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     mode = 'mode_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Create folder
-        api_instance.create_folder(workspace_id, path, mode, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.create_folder(sandbox_id, path, mode, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->create_folder: %s\n" % e)
 ```
@@ -91,7 +91,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **mode**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
@@ -119,11 +119,11 @@ void (empty response body)
 
 # **create_session**
 
-> create_session(workspace_id, create_session_request, x_daytona_organization_id=x_daytona_organization_id)
+> create_session(sandbox_id, create_session_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Create session
 
-Create a new session in the workspace
+Create a new session in the sandbox
 
 ### Example
 
@@ -152,13 +152,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     create_session_request = daytona_api_client.CreateSessionRequest() # CreateSessionRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Create session
-        api_instance.create_session(workspace_id, create_session_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.create_session(sandbox_id, create_session_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->create_session: %s\n" % e)
 ```
@@ -167,7 +167,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                                | Description                                 | Notes      |
 | ----------------------------- | --------------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                             |                                             |
+| **sandbox_id**                | **str**                                             |                                             |
 | **create_session_request**    | [**CreateSessionRequest**](CreateSessionRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                             | Use with JWT to specify the organization ID | [optional] |
 
@@ -194,11 +194,11 @@ void (empty response body)
 
 # **delete_file**
 
-> delete_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> delete_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Delete file
 
-Delete file inside workspace
+Delete file inside sandbox
 
 ### Example
 
@@ -226,13 +226,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Delete file
-        api_instance.delete_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.delete_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->delete_file: %s\n" % e)
 ```
@@ -241,7 +241,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -268,7 +268,7 @@ void (empty response body)
 
 # **delete_session**
 
-> delete_session(workspace_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
+> delete_session(sandbox_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
 
 Delete session
 
@@ -300,13 +300,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     session_id = 'session_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Delete session
-        api_instance.delete_session(workspace_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.delete_session(sandbox_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->delete_session: %s\n" % e)
 ```
@@ -315,7 +315,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **session_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -342,11 +342,11 @@ void (empty response body)
 
 # **download_file**
 
-> bytearray download_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> bytearray download_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Download file
 
-Download file from workspace
+Download file from sandbox
 
 ### Example
 
@@ -374,13 +374,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Download file
-        api_response = api_instance.download_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.download_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->download_file:\n")
         pprint(api_response)
     except Exception as e:
@@ -391,7 +391,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -418,11 +418,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **execute_command**
 
-> ExecuteResponse execute_command(workspace_id, execute_request, x_daytona_organization_id=x_daytona_organization_id)
+> ExecuteResponse execute_command(sandbox_id, execute_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Execute command
 
-Execute command synchronously inside workspace
+Execute command synchronously inside sandbox
 
 ### Example
 
@@ -452,13 +452,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     execute_request = daytona_api_client.ExecuteRequest() # ExecuteRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Execute command
-        api_response = api_instance.execute_command(workspace_id, execute_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.execute_command(sandbox_id, execute_request, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->execute_command:\n")
         pprint(api_response)
     except Exception as e:
@@ -469,7 +469,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                    | Description                                 | Notes      |
 | ----------------------------- | --------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                 |                                             |
+| **sandbox_id**                | **str**                                 |                                             |
 | **execute_request**           | [**ExecuteRequest**](ExecuteRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                 | Use with JWT to specify the organization ID | [optional] |
 
@@ -496,7 +496,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **execute_session_command**
 
-> SessionExecuteResponse execute_session_command(workspace_id, session_id, session_execute_request, x_daytona_organization_id=x_daytona_organization_id)
+> SessionExecuteResponse execute_session_command(sandbox_id, session_id, session_execute_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Execute command in session
 
@@ -530,14 +530,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     session_id = 'session_id_example' # str |
     session_execute_request = daytona_api_client.SessionExecuteRequest() # SessionExecuteRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Execute command in session
-        api_response = api_instance.execute_session_command(workspace_id, session_id, session_execute_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.execute_session_command(sandbox_id, session_id, session_execute_request, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->execute_session_command:\n")
         pprint(api_response)
     except Exception as e:
@@ -548,7 +548,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                                  | Description                                 | Notes      |
 | ----------------------------- | ----------------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                               |                                             |
+| **sandbox_id**                | **str**                                               |                                             |
 | **session_id**                | **str**                                               |                                             |
 | **session_execute_request**   | [**SessionExecuteRequest**](SessionExecuteRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                               | Use with JWT to specify the organization ID | [optional] |
@@ -577,11 +577,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **find_in_files**
 
-> List[Match] find_in_files(workspace_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
+> List[Match] find_in_files(sandbox_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
 
 Search for text/pattern in files
 
-Search for text/pattern inside workspace files
+Search for text/pattern inside sandbox files
 
 ### Example
 
@@ -610,14 +610,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     pattern = 'pattern_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Search for text/pattern in files
-        api_response = api_instance.find_in_files(workspace_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.find_in_files(sandbox_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->find_in_files:\n")
         pprint(api_response)
     except Exception as e:
@@ -628,7 +628,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **pattern**                   | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
@@ -656,11 +656,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **get_file_info**
 
-> FileInfo get_file_info(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> FileInfo get_file_info(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Get file info
 
-Get file info inside workspace
+Get file info inside sandbox
 
 ### Example
 
@@ -689,13 +689,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get file info
-        api_response = api_instance.get_file_info(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.get_file_info(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->get_file_info:\n")
         pprint(api_response)
     except Exception as e:
@@ -706,7 +706,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -733,9 +733,9 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **get_project_dir**
 
-> ProjectDirResponse get_project_dir(workspace_id, x_daytona_organization_id=x_daytona_organization_id)
+> ProjectDirResponse get_project_dir(sandbox_id, x_daytona_organization_id=x_daytona_organization_id)
 
-Get workspace project dir
+Get sandbox project dir
 
 ### Example
 
@@ -764,12 +764,12 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
-        # Get workspace project dir
-        api_response = api_instance.get_project_dir(workspace_id, x_daytona_organization_id=x_daytona_organization_id)
+        # Get sandbox project dir
+        api_response = api_instance.get_project_dir(sandbox_id, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->get_project_dir:\n")
         pprint(api_response)
     except Exception as e:
@@ -780,7 +780,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
 ### Return type
@@ -806,7 +806,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **get_session**
 
-> Session get_session(workspace_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
+> Session get_session(sandbox_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
 
 Get session
 
@@ -839,13 +839,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     session_id = 'session_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get session
-        api_response = api_instance.get_session(workspace_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.get_session(sandbox_id, session_id, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->get_session:\n")
         pprint(api_response)
     except Exception as e:
@@ -856,7 +856,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **session_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -883,7 +883,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **get_session_command**
 
-> Command get_session_command(workspace_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id)
+> Command get_session_command(sandbox_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id)
 
 Get session command
 
@@ -916,14 +916,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     session_id = 'session_id_example' # str |
     command_id = 'command_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get session command
-        api_response = api_instance.get_session_command(workspace_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.get_session_command(sandbox_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->get_session_command:\n")
         pprint(api_response)
     except Exception as e:
@@ -934,7 +934,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **session_id**                | **str** |                                             |
 | **command_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
@@ -962,7 +962,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **get_session_command_logs**
 
-> str get_session_command_logs(workspace_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id, follow=follow)
+> str get_session_command_logs(sandbox_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id, follow=follow)
 
 Get command logs
 
@@ -994,7 +994,7 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     session_id = 'session_id_example' # str |
     command_id = 'command_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
@@ -1002,7 +1002,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
     try:
         # Get command logs
-        api_response = api_instance.get_session_command_logs(workspace_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id, follow=follow)
+        api_response = api_instance.get_session_command_logs(sandbox_id, session_id, command_id, x_daytona_organization_id=x_daytona_organization_id, follow=follow)
         print("The response of ToolboxApi->get_session_command_logs:\n")
         pprint(api_response)
     except Exception as e:
@@ -1013,7 +1013,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type     | Description                                 | Notes      |
 | ----------------------------- | -------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**  |                                             |
+| **sandbox_id**                | **str**  |                                             |
 | **session_id**                | **str**  |                                             |
 | **command_id**                | **str**  |                                             |
 | **x_daytona_organization_id** | **str**  | Use with JWT to specify the organization ID | [optional] |
@@ -1042,7 +1042,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **git_add_files**
 
-> git_add_files(workspace_id, git_add_request, x_daytona_organization_id=x_daytona_organization_id)
+> git_add_files(sandbox_id, git_add_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Add files
 
@@ -1075,13 +1075,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_add_request = daytona_api_client.GitAddRequest() # GitAddRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Add files
-        api_instance.git_add_files(workspace_id, git_add_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.git_add_files(sandbox_id, git_add_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->git_add_files: %s\n" % e)
 ```
@@ -1090,7 +1090,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                  | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                               |                                             |
+| **sandbox_id**                | **str**                               |                                             |
 | **git_add_request**           | [**GitAddRequest**](GitAddRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                               | Use with JWT to specify the organization ID | [optional] |
 
@@ -1117,7 +1117,7 @@ void (empty response body)
 
 # **git_clone_repository**
 
-> git_clone_repository(workspace_id, git_clone_request, x_daytona_organization_id=x_daytona_organization_id)
+> git_clone_repository(sandbox_id, git_clone_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Clone repository
 
@@ -1150,13 +1150,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_clone_request = daytona_api_client.GitCloneRequest() # GitCloneRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Clone repository
-        api_instance.git_clone_repository(workspace_id, git_clone_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.git_clone_repository(sandbox_id, git_clone_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->git_clone_repository: %s\n" % e)
 ```
@@ -1165,7 +1165,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                      | Description                                 | Notes      |
 | ----------------------------- | ----------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                   |                                             |
+| **sandbox_id**                | **str**                                   |                                             |
 | **git_clone_request**         | [**GitCloneRequest**](GitCloneRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                   | Use with JWT to specify the organization ID | [optional] |
 
@@ -1192,7 +1192,7 @@ void (empty response body)
 
 # **git_commit_changes**
 
-> GitCommitResponse git_commit_changes(workspace_id, git_commit_request, x_daytona_organization_id=x_daytona_organization_id)
+> GitCommitResponse git_commit_changes(sandbox_id, git_commit_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Commit changes
 
@@ -1226,13 +1226,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_commit_request = daytona_api_client.GitCommitRequest() # GitCommitRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Commit changes
-        api_response = api_instance.git_commit_changes(workspace_id, git_commit_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.git_commit_changes(sandbox_id, git_commit_request, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->git_commit_changes:\n")
         pprint(api_response)
     except Exception as e:
@@ -1243,7 +1243,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                        | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                     |                                             |
+| **sandbox_id**                | **str**                                     |                                             |
 | **git_commit_request**        | [**GitCommitRequest**](GitCommitRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                     | Use with JWT to specify the organization ID | [optional] |
 
@@ -1270,7 +1270,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **git_create_branch**
 
-> git_create_branch(workspace_id, git_branch_request, x_daytona_organization_id=x_daytona_organization_id)
+> git_create_branch(sandbox_id, git_branch_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Create branch
 
@@ -1303,13 +1303,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_branch_request = daytona_api_client.GitBranchRequest() # GitBranchRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Create branch
-        api_instance.git_create_branch(workspace_id, git_branch_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.git_create_branch(sandbox_id, git_branch_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->git_create_branch: %s\n" % e)
 ```
@@ -1318,7 +1318,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                        | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                     |                                             |
+| **sandbox_id**                | **str**                                     |                                             |
 | **git_branch_request**        | [**GitBranchRequest**](GitBranchRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                     | Use with JWT to specify the organization ID | [optional] |
 
@@ -1345,7 +1345,7 @@ void (empty response body)
 
 # **git_get_history**
 
-> List[GitCommitInfo] git_get_history(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> List[GitCommitInfo] git_get_history(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Get commit history
 
@@ -1378,13 +1378,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get commit history
-        api_response = api_instance.git_get_history(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.git_get_history(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->git_get_history:\n")
         pprint(api_response)
     except Exception as e:
@@ -1395,7 +1395,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -1422,7 +1422,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **git_get_status**
 
-> GitStatus git_get_status(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> GitStatus git_get_status(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Get git status
 
@@ -1455,13 +1455,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get git status
-        api_response = api_instance.git_get_status(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.git_get_status(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->git_get_status:\n")
         pprint(api_response)
     except Exception as e:
@@ -1472,7 +1472,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -1499,7 +1499,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **git_list_branches**
 
-> ListBranchResponse git_list_branches(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+> ListBranchResponse git_list_branches(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
 
 Get branch list
 
@@ -1532,13 +1532,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get branch list
-        api_response = api_instance.git_list_branches(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.git_list_branches(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->git_list_branches:\n")
         pprint(api_response)
     except Exception as e:
@@ -1549,7 +1549,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
@@ -1576,7 +1576,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **git_pull_changes**
 
-> git_pull_changes(workspace_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
+> git_pull_changes(sandbox_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Pull changes
 
@@ -1609,13 +1609,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_repo_request = daytona_api_client.GitRepoRequest() # GitRepoRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Pull changes
-        api_instance.git_pull_changes(workspace_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.git_pull_changes(sandbox_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->git_pull_changes: %s\n" % e)
 ```
@@ -1624,7 +1624,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                    | Description                                 | Notes      |
 | ----------------------------- | --------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                 |                                             |
+| **sandbox_id**                | **str**                                 |                                             |
 | **git_repo_request**          | [**GitRepoRequest**](GitRepoRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                 | Use with JWT to specify the organization ID | [optional] |
 
@@ -1651,7 +1651,7 @@ void (empty response body)
 
 # **git_push_changes**
 
-> git_push_changes(workspace_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
+> git_push_changes(sandbox_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Push changes
 
@@ -1684,13 +1684,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     git_repo_request = daytona_api_client.GitRepoRequest() # GitRepoRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Push changes
-        api_instance.git_push_changes(workspace_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.git_push_changes(sandbox_id, git_repo_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->git_push_changes: %s\n" % e)
 ```
@@ -1699,7 +1699,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                    | Description                                 | Notes      |
 | ----------------------------- | --------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                 |                                             |
+| **sandbox_id**                | **str**                                 |                                             |
 | **git_repo_request**          | [**GitRepoRequest**](GitRepoRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                 | Use with JWT to specify the organization ID | [optional] |
 
@@ -1726,7 +1726,7 @@ void (empty response body)
 
 # **list_files**
 
-> List[FileInfo] list_files(workspace_id, x_daytona_organization_id=x_daytona_organization_id, path=path)
+> List[FileInfo] list_files(sandbox_id, x_daytona_organization_id=x_daytona_organization_id, path=path)
 
 List files
 
@@ -1757,13 +1757,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
     path = 'path_example' # str |  (optional)
 
     try:
         # List files
-        api_response = api_instance.list_files(workspace_id, x_daytona_organization_id=x_daytona_organization_id, path=path)
+        api_response = api_instance.list_files(sandbox_id, x_daytona_organization_id=x_daytona_organization_id, path=path)
         print("The response of ToolboxApi->list_files:\n")
         pprint(api_response)
     except Exception as e:
@@ -1774,7 +1774,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 | **path**                      | **str** |                                             | [optional] |
 
@@ -1801,11 +1801,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **list_sessions**
 
-> List[Session] list_sessions(workspace_id, x_daytona_organization_id=x_daytona_organization_id)
+> List[Session] list_sessions(sandbox_id, x_daytona_organization_id=x_daytona_organization_id)
 
 List sessions
 
-List all active sessions in the workspace
+List all active sessions in the sandbox
 
 ### Example
 
@@ -1834,12 +1834,12 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # List sessions
-        api_response = api_instance.list_sessions(workspace_id, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.list_sessions(sandbox_id, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->list_sessions:\n")
         pprint(api_response)
     except Exception as e:
@@ -1850,7 +1850,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 
 ### Return type
@@ -1876,7 +1876,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **lsp_completions**
 
-> CompletionList lsp_completions(workspace_id, lsp_completion_params, x_daytona_organization_id=x_daytona_organization_id)
+> CompletionList lsp_completions(sandbox_id, lsp_completion_params, x_daytona_organization_id=x_daytona_organization_id)
 
 Get Lsp Completions
 
@@ -1910,13 +1910,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     lsp_completion_params = daytona_api_client.LspCompletionParams() # LspCompletionParams |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Get Lsp Completions
-        api_response = api_instance.lsp_completions(workspace_id, lsp_completion_params, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.lsp_completions(sandbox_id, lsp_completion_params, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->lsp_completions:\n")
         pprint(api_response)
     except Exception as e:
@@ -1927,7 +1927,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                              | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                           |                                             |
+| **sandbox_id**                | **str**                                           |                                             |
 | **lsp_completion_params**     | [**LspCompletionParams**](LspCompletionParams.md) |                                             |
 | **x_daytona_organization_id** | **str**                                           | Use with JWT to specify the organization ID | [optional] |
 
@@ -1954,7 +1954,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **lsp_did_close**
 
-> lsp_did_close(workspace_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
+> lsp_did_close(sandbox_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Call Lsp DidClose
 
@@ -1987,13 +1987,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     lsp_document_request = daytona_api_client.LspDocumentRequest() # LspDocumentRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Call Lsp DidClose
-        api_instance.lsp_did_close(workspace_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.lsp_did_close(sandbox_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->lsp_did_close: %s\n" % e)
 ```
@@ -2002,7 +2002,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                            | Description                                 | Notes      |
 | ----------------------------- | ----------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                         |                                             |
+| **sandbox_id**                | **str**                                         |                                             |
 | **lsp_document_request**      | [**LspDocumentRequest**](LspDocumentRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                         | Use with JWT to specify the organization ID | [optional] |
 
@@ -2029,7 +2029,7 @@ void (empty response body)
 
 # **lsp_did_open**
 
-> lsp_did_open(workspace_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
+> lsp_did_open(sandbox_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Call Lsp DidOpen
 
@@ -2062,13 +2062,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     lsp_document_request = daytona_api_client.LspDocumentRequest() # LspDocumentRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Call Lsp DidOpen
-        api_instance.lsp_did_open(workspace_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.lsp_did_open(sandbox_id, lsp_document_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->lsp_did_open: %s\n" % e)
 ```
@@ -2077,7 +2077,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                            | Description                                 | Notes      |
 | ----------------------------- | ----------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                         |                                             |
+| **sandbox_id**                | **str**                                         |                                             |
 | **lsp_document_request**      | [**LspDocumentRequest**](LspDocumentRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                         | Use with JWT to specify the organization ID | [optional] |
 
@@ -2104,7 +2104,7 @@ void (empty response body)
 
 # **lsp_document_symbols**
 
-> List[LspSymbol] lsp_document_symbols(workspace_id, language_id, path_to_project, uri, x_daytona_organization_id=x_daytona_organization_id)
+> List[LspSymbol] lsp_document_symbols(sandbox_id, language_id, path_to_project, uri, x_daytona_organization_id=x_daytona_organization_id)
 
 Call Lsp DocumentSymbols
 
@@ -2137,7 +2137,7 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     language_id = 'language_id_example' # str |
     path_to_project = 'path_to_project_example' # str |
     uri = 'uri_example' # str |
@@ -2145,7 +2145,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
     try:
         # Call Lsp DocumentSymbols
-        api_response = api_instance.lsp_document_symbols(workspace_id, language_id, path_to_project, uri, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.lsp_document_symbols(sandbox_id, language_id, path_to_project, uri, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->lsp_document_symbols:\n")
         pprint(api_response)
     except Exception as e:
@@ -2156,7 +2156,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **language_id**               | **str** |                                             |
 | **path_to_project**           | **str** |                                             |
 | **uri**                       | **str** |                                             |
@@ -2185,11 +2185,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **lsp_start**
 
-> lsp_start(workspace_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
+> lsp_start(sandbox_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Start Lsp server
 
-Start Lsp server process inside workspace project
+Start Lsp server process inside sandbox project
 
 ### Example
 
@@ -2218,13 +2218,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     lsp_server_request = daytona_api_client.LspServerRequest() # LspServerRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Start Lsp server
-        api_instance.lsp_start(workspace_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.lsp_start(sandbox_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->lsp_start: %s\n" % e)
 ```
@@ -2233,7 +2233,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                        | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                     |                                             |
+| **sandbox_id**                | **str**                                     |                                             |
 | **lsp_server_request**        | [**LspServerRequest**](LspServerRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                     | Use with JWT to specify the organization ID | [optional] |
 
@@ -2260,11 +2260,11 @@ void (empty response body)
 
 # **lsp_stop**
 
-> lsp_stop(workspace_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
+> lsp_stop(sandbox_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Stop Lsp server
 
-Stop Lsp server process inside workspace project
+Stop Lsp server process inside sandbox project
 
 ### Example
 
@@ -2293,13 +2293,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     lsp_server_request = daytona_api_client.LspServerRequest() # LspServerRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Stop Lsp server
-        api_instance.lsp_stop(workspace_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.lsp_stop(sandbox_id, lsp_server_request, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->lsp_stop: %s\n" % e)
 ```
@@ -2308,7 +2308,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                        | Description                                 | Notes      |
 | ----------------------------- | ------------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                     |                                             |
+| **sandbox_id**                | **str**                                     |                                             |
 | **lsp_server_request**        | [**LspServerRequest**](LspServerRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                     | Use with JWT to specify the organization ID | [optional] |
 
@@ -2333,13 +2333,13 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
-# **lsp_workspace_symbols**
+# **lsp_sandbox_symbols**
 
-> List[LspSymbol] lsp_workspace_symbols(workspace_id, language_id, path_to_project, query, x_daytona_organization_id=x_daytona_organization_id)
+> List[LspSymbol] lsp_sandbox_symbols(sandbox_id, language_id, path_to_project, query, x_daytona_organization_id=x_daytona_organization_id)
 
-Call Lsp WorkspaceSymbols
+Call Lsp SandboxSymbols
 
-The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
 
 ### Example
 
@@ -2368,26 +2368,26 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     language_id = 'language_id_example' # str |
     path_to_project = 'path_to_project_example' # str |
     query = 'query_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
-        # Call Lsp WorkspaceSymbols
-        api_response = api_instance.lsp_workspace_symbols(workspace_id, language_id, path_to_project, query, x_daytona_organization_id=x_daytona_organization_id)
-        print("The response of ToolboxApi->lsp_workspace_symbols:\n")
+        # Call Lsp SandboxSymbols
+        api_response = api_instance.lsp_sandbox_symbols(sandbox_id, language_id, path_to_project, query, x_daytona_organization_id=x_daytona_organization_id)
+        print("The response of ToolboxApi->lsp_sandbox_symbols:\n")
         pprint(api_response)
     except Exception as e:
-        print("Exception when calling ToolboxApi->lsp_workspace_symbols: %s\n" % e)
+        print("Exception when calling ToolboxApi->lsp_sandbox_symbols: %s\n" % e)
 ```
 
 ### Parameters
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **language_id**               | **str** |                                             |
 | **path_to_project**           | **str** |                                             |
 | **query**                     | **str** |                                             |
@@ -2416,11 +2416,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **move_file**
 
-> move_file(workspace_id, source, destination, x_daytona_organization_id=x_daytona_organization_id)
+> move_file(sandbox_id, source, destination, x_daytona_organization_id=x_daytona_organization_id)
 
 Move file
 
-Move file inside workspace
+Move file inside sandbox
 
 ### Example
 
@@ -2448,14 +2448,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     source = 'source_example' # str |
     destination = 'destination_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Move file
-        api_instance.move_file(workspace_id, source, destination, x_daytona_organization_id=x_daytona_organization_id)
+        api_instance.move_file(sandbox_id, source, destination, x_daytona_organization_id=x_daytona_organization_id)
     except Exception as e:
         print("Exception when calling ToolboxApi->move_file: %s\n" % e)
 ```
@@ -2464,7 +2464,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **source**                    | **str** |                                             |
 | **destination**               | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
@@ -2492,11 +2492,11 @@ void (empty response body)
 
 # **replace_in_files**
 
-> List[ReplaceResult] replace_in_files(workspace_id, replace_request, x_daytona_organization_id=x_daytona_organization_id)
+> List[ReplaceResult] replace_in_files(sandbox_id, replace_request, x_daytona_organization_id=x_daytona_organization_id)
 
 Replace in files
 
-Replace text/pattern in multiple files inside workspace
+Replace text/pattern in multiple files inside sandbox
 
 ### Example
 
@@ -2526,13 +2526,13 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     replace_request = daytona_api_client.ReplaceRequest() # ReplaceRequest |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Replace in files
-        api_response = api_instance.replace_in_files(workspace_id, replace_request, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.replace_in_files(sandbox_id, replace_request, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->replace_in_files:\n")
         pprint(api_response)
     except Exception as e:
@@ -2543,7 +2543,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type                                    | Description                                 | Notes      |
 | ----------------------------- | --------------------------------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**                                 |                                             |
+| **sandbox_id**                | **str**                                 |                                             |
 | **replace_request**           | [**ReplaceRequest**](ReplaceRequest.md) |                                             |
 | **x_daytona_organization_id** | **str**                                 | Use with JWT to specify the organization ID | [optional] |
 
@@ -2570,11 +2570,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **search_files**
 
-> SearchFilesResponse search_files(workspace_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
+> SearchFilesResponse search_files(sandbox_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
 
 Search files
 
-Search for files inside workspace
+Search for files inside sandbox
 
 ### Example
 
@@ -2603,14 +2603,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     pattern = 'pattern_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
 
     try:
         # Search files
-        api_response = api_instance.search_files(workspace_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
+        api_response = api_instance.search_files(sandbox_id, path, pattern, x_daytona_organization_id=x_daytona_organization_id)
         print("The response of ToolboxApi->search_files:\n")
         pprint(api_response)
     except Exception as e:
@@ -2621,7 +2621,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **pattern**                   | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
@@ -2649,11 +2649,11 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 # **set_file_permissions**
 
-> set_file_permissions(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id, owner=owner, group=group, mode=mode)
+> set_file_permissions(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id, owner=owner, group=group, mode=mode)
 
 Set file permissions
 
-Set file owner/group/permissions inside workspace
+Set file owner/group/permissions inside sandbox
 
 ### Example
 
@@ -2681,7 +2681,7 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
     owner = 'owner_example' # str |  (optional)
@@ -2690,7 +2690,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
     try:
         # Set file permissions
-        api_instance.set_file_permissions(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id, owner=owner, group=group, mode=mode)
+        api_instance.set_file_permissions(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id, owner=owner, group=group, mode=mode)
     except Exception as e:
         print("Exception when calling ToolboxApi->set_file_permissions: %s\n" % e)
 ```
@@ -2699,7 +2699,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type    | Description                                 | Notes      |
 | ----------------------------- | ------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str** |                                             |
+| **sandbox_id**                | **str** |                                             |
 | **path**                      | **str** |                                             |
 | **x_daytona_organization_id** | **str** | Use with JWT to specify the organization ID | [optional] |
 | **owner**                     | **str** |                                             | [optional] |
@@ -2729,11 +2729,11 @@ void (empty response body)
 
 # **upload_file**
 
-> upload_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id, file=file)
+> upload_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id, file=file)
 
 Upload file
 
-Upload file inside workspace
+Upload file inside sandbox
 
 ### Example
 
@@ -2761,14 +2761,14 @@ configuration.access_token = os.environ["ACCESS_TOKEN"]
 with daytona_api_client.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = daytona_api_client.ToolboxApi(api_client)
-    workspace_id = 'workspace_id_example' # str |
+    sandbox_id = 'sandbox_id_example' # str |
     path = 'path_example' # str |
     x_daytona_organization_id = 'x_daytona_organization_id_example' # str | Use with JWT to specify the organization ID (optional)
     file = None # bytearray |  (optional)
 
     try:
         # Upload file
-        api_instance.upload_file(workspace_id, path, x_daytona_organization_id=x_daytona_organization_id, file=file)
+        api_instance.upload_file(sandbox_id, path, x_daytona_organization_id=x_daytona_organization_id, file=file)
     except Exception as e:
         print("Exception when calling ToolboxApi->upload_file: %s\n" % e)
 ```
@@ -2777,7 +2777,7 @@ with daytona_api_client.ApiClient(configuration) as api_client:
 
 | Name                          | Type          | Description                                 | Notes      |
 | ----------------------------- | ------------- | ------------------------------------------- | ---------- |
-| **workspace_id**              | **str**       |                                             |
+| **sandbox_id**                | **str**       |                                             |
 | **path**                      | **str**       |                                             |
 | **x_daytona_organization_id** | **str**       | Use with JWT to specify the organization ID | [optional] |
 | **file**                      | **bytearray** |                                             | [optional] |

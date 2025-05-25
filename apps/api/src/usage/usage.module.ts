@@ -5,11 +5,11 @@
 
 import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { WorkspaceUsagePeriod } from './entities/workspace-usage-period.entity'
+import { SandboxUsagePeriod } from './entities/sandbox-usage-period.entity'
 import { UsageService } from './services/usage.service'
 
 @Module({
-  imports: [TypeOrmModule.forFeature([WorkspaceUsagePeriod])],
+  imports: [TypeOrmModule.forFeature([SandboxUsagePeriod])],
   providers: [UsageService],
   exports: [UsageService],
 })

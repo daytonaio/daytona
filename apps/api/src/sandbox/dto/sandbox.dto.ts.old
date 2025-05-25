@@ -1,0 +1,48 @@
+import { SandboxState } from "../enums/sandbox-state.enum";
+import { SandboxDesiredState } from "../enums/sandbox-desired-state.enum";
+import { SandboxClass } from "../enums/sandbox-class.enum";
+import { RunnerRegion } from "../enums/runner-region.enum";
+import { ApiProperty } from "@nestjs/swagger";
+
+export class SandboxDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  userId: string;
+
+  @ApiProperty({
+    enum: RunnerRegion,
+  })
+  region: RunnerRegion;
+
+  @ApiProperty()
+  runnerId: string;
+
+  @ApiProperty()
+  runnerDomain: string;
+
+  @ApiProperty({
+    enum: SandboxClass,
+  })
+  class: SandboxClass;
+
+  @ApiProperty({
+    enum: SandboxState,
+  })
+  state: SandboxState;
+
+  @ApiProperty({
+    enum: SandboxDesiredState,
+  })
+  desiredState: SandboxDesiredState;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
+}

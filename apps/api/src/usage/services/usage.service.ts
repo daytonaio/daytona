@@ -6,65 +6,65 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { WorkspaceUsagePeriod } from '../entities/workspace-usage-period.entity'
+import { SandboxUsagePeriod } from '../entities/sandbox-usage-period.entity'
 import { OnEvent } from '@nestjs/event-emitter'
-import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
-import { WorkspaceState } from '../../workspace/enums/workspace-state.enum'
-import { WorkspaceEvents } from './../../workspace/constants/workspace-events.constants'
+import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
+import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constants'
 
 @Injectable()
 export class UsageService {
   constructor(
-    @InjectRepository(WorkspaceUsagePeriod)
-    private workspaceUsagePeriodRepository: Repository<WorkspaceUsagePeriod>,
+    @InjectRepository(SandboxUsagePeriod)
+    private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
   ) {}
 
-  @OnEvent(WorkspaceEvents.STATE_UPDATED)
-  async handleWorkspaceStateUpdate(event: WorkspaceStateUpdatedEvent) {
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  async handleSandboxStateUpdate(event: SandboxStateUpdatedEvent) {
     switch (event.newState) {
-      case WorkspaceState.STARTED: {
-        await this.closeUsagePeriod(event.workspace.id)
+      case SandboxState.STARTED: {
+        await this.closeUsagePeriod(event.sandbox.id)
         await this.createUsagePeriod(event)
         break
       }
-      case WorkspaceState.STOPPED:
-        await this.closeUsagePeriod(event.workspace.id)
+      case SandboxState.STOPPED:
+        await this.closeUsagePeriod(event.sandbox.id)
         await this.createUsagePeriod(event, true)
         break
-      case WorkspaceState.ERROR:
-      case WorkspaceState.ARCHIVED:
-      case WorkspaceState.DESTROYED: {
-        await this.closeUsagePeriod(event.workspace.id)
+      case SandboxState.ERROR:
+      case SandboxState.ARCHIVED:
+      case SandboxState.DESTROYED: {
+        await this.closeUsagePeriod(event.sandbox.id)
         break
       }
     }
   }
 
-  private async createUsagePeriod(event: WorkspaceStateUpdatedEvent, diskOnly = false) {
-    const usagePeriod = new WorkspaceUsagePeriod()
-    usagePeriod.workspaceId = event.workspace.id
+  private async createUsagePeriod(event: SandboxStateUpdatedEvent, diskOnly = false) {
+    const usagePeriod = new SandboxUsagePeriod()
+    usagePeriod.sandboxId = event.sandbox.id
     usagePeriod.startAt = new Date()
     usagePeriod.endAt = null
     if (!diskOnly) {
-      usagePeriod.cpu = event.workspace.cpu
-      usagePeriod.gpu = event.workspace.gpu
-      usagePeriod.mem = event.workspace.mem
+      usagePeriod.cpu = event.sandbox.cpu
+      usagePeriod.gpu = event.sandbox.gpu
+      usagePeriod.mem = event.sandbox.mem
     } else {
       usagePeriod.cpu = 0
       usagePeriod.gpu = 0
       usagePeriod.mem = 0
     }
-    usagePeriod.disk = event.workspace.disk
-    usagePeriod.organizationId = event.workspace.organizationId
-    usagePeriod.region = event.workspace.region
+    usagePeriod.disk = event.sandbox.disk
+    usagePeriod.organizationId = event.sandbox.organizationId
+    usagePeriod.region = event.sandbox.region
 
-    await this.workspaceUsagePeriodRepository.save(usagePeriod)
+    await this.sandboxUsagePeriodRepository.save(usagePeriod)
   }
 
-  private async closeUsagePeriod(workspaceId: string) {
-    const lastUsagePeriod = await this.workspaceUsagePeriodRepository.findOne({
+  private async closeUsagePeriod(sandboxId: string) {
+    const lastUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
       where: {
-        workspaceId,
+        sandboxId,
         endAt: null,
       },
       order: {
@@ -74,7 +74,7 @@ export class UsageService {
 
     if (lastUsagePeriod) {
       lastUsagePeriod.endAt = new Date()
-      await this.workspaceUsagePeriodRepository.save(lastUsagePeriod)
+      await this.sandboxUsagePeriodRepository.save(lastUsagePeriod)
     }
   }
 }

@@ -94,9 +94,9 @@ import type { SessionExecuteResponse } from '../models'
 export const ToolboxApiAxiosParamCreator = function (configuration?: Configuration) {
   return {
     /**
-     * Create folder inside workspace
+     * Create folder inside sandbox
      * @summary Create folder
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -104,21 +104,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     createFolder: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       mode: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createFolder', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('createFolder', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('createFolder', 'path', path)
       // verify required parameter 'mode' is not null or undefined
       assertParamExists('createFolder', 'mode', mode)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/folder`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/folder`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -158,27 +158,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Create a new session in the workspace
+     * Create a new session in the sandbox
      * @summary Create session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createSession: async (
-      workspaceId: string,
+      sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createSession', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('createSession', 'sandboxId', sandboxId)
       // verify required parameter 'createSessionRequest' is not null or undefined
       assertParamExists('createSession', 'createSessionRequest', createSessionRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -213,27 +213,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Delete file inside workspace
+     * Delete file inside sandbox
      * @summary Delete file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteFile: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('deleteFile', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('deleteFile', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('deleteFile', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -271,24 +271,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Delete a specific session
      * @summary Delete session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSession: async (
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('deleteSession', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('deleteSession', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
       assertParamExists('deleteSession', 'sessionId', sessionId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session/{sessionId}`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -320,27 +320,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Download file from workspace
+     * Download file from sandbox
      * @summary Download file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     downloadFile: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('downloadFile', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('downloadFile', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('downloadFile', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/download`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/download`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -376,27 +376,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Execute command synchronously inside workspace
+     * Execute command synchronously inside sandbox
      * @summary Execute command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     executeCommand: async (
-      workspaceId: string,
+      sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('executeCommand', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('executeCommand', 'sandboxId', sandboxId)
       // verify required parameter 'executeRequest' is not null or undefined
       assertParamExists('executeCommand', 'executeRequest', executeRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/execute`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/execute`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -433,7 +433,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Execute a command in a specific session
      * @summary Execute command in session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -441,20 +441,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     executeSessionCommand: async (
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('executeSessionCommand', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('executeSessionCommand', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
       assertParamExists('executeSessionCommand', 'sessionId', sessionId)
       // verify required parameter 'sessionExecuteRequest' is not null or undefined
       assertParamExists('executeSessionCommand', 'sessionExecuteRequest', sessionExecuteRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/exec`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -489,9 +489,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Search for text/pattern inside workspace files
+     * Search for text/pattern inside sandbox files
      * @summary Search for text/pattern in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -499,21 +499,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     findInFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('findInFiles', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('findInFiles', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('findInFiles', 'path', path)
       // verify required parameter 'pattern' is not null or undefined
       assertParamExists('findInFiles', 'pattern', pattern)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/find`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/find`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -553,27 +553,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Get file info inside workspace
+     * Get file info inside sandbox
      * @summary Get file info
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getFileInfo: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getFileInfo', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getFileInfo', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('getFileInfo', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/info`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/info`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -610,22 +610,22 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Get workspace project dir
-     * @param {string} workspaceId
+     * @summary Get sandbox project dir
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getProjectDir: async (
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getProjectDir', 'workspaceId', workspaceId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/project-dir`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getProjectDir', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/project-dir`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -659,24 +659,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get session by ID
      * @summary Get session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSession: async (
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getSession', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSession', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
       assertParamExists('getSession', 'sessionId', sessionId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session/{sessionId}`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -710,7 +710,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get session command by ID
      * @summary Get session command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -718,20 +718,20 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     getSessionCommand: async (
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getSessionCommand', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSessionCommand', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
       assertParamExists('getSessionCommand', 'sessionId', sessionId)
       // verify required parameter 'commandId' is not null or undefined
       assertParamExists('getSessionCommand', 'commandId', commandId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
         .replace(`{${'commandId'}}`, encodeURIComponent(String(commandId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -766,7 +766,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get logs for a specific command in a session
      * @summary Get command logs
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -775,21 +775,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     getSessionCommandLogs: async (
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getSessionCommandLogs', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getSessionCommandLogs', 'sandboxId', sandboxId)
       // verify required parameter 'sessionId' is not null or undefined
       assertParamExists('getSessionCommandLogs', 'sessionId', sessionId)
       // verify required parameter 'commandId' is not null or undefined
       assertParamExists('getSessionCommandLogs', 'commandId', commandId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session/{sessionId}/command/{commandId}/logs`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
         .replace(`{${'sessionId'}}`, encodeURIComponent(String(sessionId)))
         .replace(`{${'commandId'}}`, encodeURIComponent(String(commandId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -828,25 +828,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Add files to git commit
      * @summary Add files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitAddFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitAddFiles', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitAddFiles', 'sandboxId', sandboxId)
       // verify required parameter 'gitAddRequest' is not null or undefined
       assertParamExists('gitAddFiles', 'gitAddRequest', gitAddRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/add`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/add`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -883,25 +883,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Checkout branch or commit in git repository
      * @summary Checkout branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCheckoutBranch: async (
-      workspaceId: string,
+      sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitCheckoutBranch', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitCheckoutBranch', 'sandboxId', sandboxId)
       // verify required parameter 'gitCheckoutRequest' is not null or undefined
       assertParamExists('gitCheckoutBranch', 'gitCheckoutRequest', gitCheckoutRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/checkout`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/checkout`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -938,25 +938,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Clone git repository
      * @summary Clone repository
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCloneRepository: async (
-      workspaceId: string,
+      sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitCloneRepository', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitCloneRepository', 'sandboxId', sandboxId)
       // verify required parameter 'gitCloneRequest' is not null or undefined
       assertParamExists('gitCloneRepository', 'gitCloneRequest', gitCloneRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/clone`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/clone`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -993,25 +993,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Commit changes to git repository
      * @summary Commit changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCommitChanges: async (
-      workspaceId: string,
+      sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitCommitChanges', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitCommitChanges', 'sandboxId', sandboxId)
       // verify required parameter 'gitCommitRequest' is not null or undefined
       assertParamExists('gitCommitChanges', 'gitCommitRequest', gitCommitRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/commit`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/commit`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1048,25 +1048,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Create branch on git repository
      * @summary Create branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCreateBranch: async (
-      workspaceId: string,
+      sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitCreateBranch', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitCreateBranch', 'sandboxId', sandboxId)
       // verify required parameter 'gitBranchRequest' is not null or undefined
       assertParamExists('gitCreateBranch', 'gitBranchRequest', gitBranchRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/branches`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/branches`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1103,25 +1103,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get commit history from git repository
      * @summary Get commit history
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitGetHistory: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitGetHistory', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitGetHistory', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('gitGetHistory', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/history`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/history`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1159,25 +1159,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get status from git repository
      * @summary Get git status
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitGetStatus: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitGetStatus', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitGetStatus', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('gitGetStatus', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/status`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/status`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1215,25 +1215,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Get branch list from git repository
      * @summary Get branch list
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitListBranches: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitListBranches', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitListBranches', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('gitListBranches', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/branches`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/branches`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1271,25 +1271,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Pull changes from remote
      * @summary Pull changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitPullChanges: async (
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitPullChanges', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitPullChanges', 'sandboxId', sandboxId)
       // verify required parameter 'gitRepoRequest' is not null or undefined
       assertParamExists('gitPullChanges', 'gitRepoRequest', gitRepoRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/pull`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/pull`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1326,25 +1326,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * Push changes to remote
      * @summary Push changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitPushChanges: async (
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('gitPushChanges', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('gitPushChanges', 'sandboxId', sandboxId)
       // verify required parameter 'gitRepoRequest' is not null or undefined
       assertParamExists('gitPushChanges', 'gitRepoRequest', gitRepoRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/push`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/git/push`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1381,23 +1381,23 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      *
      * @summary List files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('listFiles', 'workspaceId', workspaceId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('listFiles', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1433,23 +1433,23 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * List all active sessions in the workspace
+     * List all active sessions in the sandbox
      * @summary List sessions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listSessions: async (
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('listSessions', 'workspaceId', workspaceId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/process/session`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('listSessions', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/process/session`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1483,25 +1483,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
      * @summary Get Lsp Completions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspCompletions: async (
-      workspaceId: string,
+      sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspCompletions', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspCompletions', 'sandboxId', sandboxId)
       // verify required parameter 'lspCompletionParams' is not null or undefined
       assertParamExists('lspCompletions', 'lspCompletionParams', lspCompletionParams)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/completions`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/completions`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1538,25 +1538,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
      * @summary Call Lsp DidClose
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspDidClose: async (
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspDidClose', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspDidClose', 'sandboxId', sandboxId)
       // verify required parameter 'lspDocumentRequest' is not null or undefined
       assertParamExists('lspDidClose', 'lspDocumentRequest', lspDocumentRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/did-close`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/did-close`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1593,25 +1593,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
      * @summary Call Lsp DidOpen
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspDidOpen: async (
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspDidOpen', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspDidOpen', 'sandboxId', sandboxId)
       // verify required parameter 'lspDocumentRequest' is not null or undefined
       assertParamExists('lspDidOpen', 'lspDocumentRequest', lspDocumentRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/did-open`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/did-open`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1648,7 +1648,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
     /**
      * The document symbol request is sent from the client to the server.
      * @summary Call Lsp DocumentSymbols
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
@@ -1657,24 +1657,24 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     lspDocumentSymbols: async (
-      workspaceId: string,
+      sandboxId: string,
       languageId: string,
       pathToProject: string,
       uri: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspDocumentSymbols', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspDocumentSymbols', 'sandboxId', sandboxId)
       // verify required parameter 'languageId' is not null or undefined
       assertParamExists('lspDocumentSymbols', 'languageId', languageId)
       // verify required parameter 'pathToProject' is not null or undefined
       assertParamExists('lspDocumentSymbols', 'pathToProject', pathToProject)
       // verify required parameter 'uri' is not null or undefined
       assertParamExists('lspDocumentSymbols', 'uri', uri)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/document-symbols`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/document-symbols`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1718,119 +1718,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Start Lsp server process inside workspace project
-     * @summary Start Lsp server
-     * @param {string} workspaceId
-     * @param {LspServerRequest} lspServerRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    lspStart: async (
-      workspaceId: string,
-      lspServerRequest: LspServerRequest,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspStart', 'workspaceId', workspaceId)
-      // verify required parameter 'lspServerRequest' is not null or undefined
-      assertParamExists('lspStart', 'lspServerRequest', lspServerRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/start`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(lspServerRequest, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * Stop Lsp server process inside workspace project
-     * @summary Stop Lsp server
-     * @param {string} workspaceId
-     * @param {LspServerRequest} lspServerRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    lspStop: async (
-      workspaceId: string,
-      lspServerRequest: LspServerRequest,
-      xDaytonaOrganizationID?: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspStop', 'workspaceId', workspaceId)
-      // verify required parameter 'lspServerRequest' is not null or undefined
-      assertParamExists('lspStop', 'lspServerRequest', lspServerRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/stop`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
-      // use dummy base URL string because the URL constructor only accepts absolute URLs.
-      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
-      let baseOptions
-      if (configuration) {
-        baseOptions = configuration.baseOptions
-      }
-
-      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
-      const localVarHeaderParameter = {} as any
-      const localVarQueryParameter = {} as any
-
-      // authentication bearer required
-      // http bearer authentication required
-      await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-      // authentication oauth2 required
-
-      localVarHeaderParameter['Content-Type'] = 'application/json'
-
-      if (xDaytonaOrganizationID != null) {
-        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
-      }
-      setSearchParams(localVarUrlObj, localVarQueryParameter)
-      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
-      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(lspServerRequest, localVarRequestOptions, configuration)
-
-      return {
-        url: toPathString(localVarUrlObj),
-        options: localVarRequestOptions,
-      }
-    },
-    /**
-     * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
-     * @param {string} workspaceId
+     * The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+     * @summary Call Lsp SandboxSymbols
+     * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} query
@@ -1838,25 +1728,25 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    lspWorkspaceSymbols: async (
-      workspaceId: string,
+    lspSandboxSymbols: async (
+      sandboxId: string,
       languageId: string,
       pathToProject: string,
       query: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspSandboxSymbols', 'sandboxId', sandboxId)
       // verify required parameter 'languageId' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'languageId', languageId)
+      assertParamExists('lspSandboxSymbols', 'languageId', languageId)
       // verify required parameter 'pathToProject' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'pathToProject', pathToProject)
+      assertParamExists('lspSandboxSymbols', 'pathToProject', pathToProject)
       // verify required parameter 'query' is not null or undefined
-      assertParamExists('lspWorkspaceSymbols', 'query', query)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/lsp/workspace-symbols`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      assertParamExists('lspSandboxSymbols', 'query', query)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1900,9 +1790,119 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Move file inside workspace
+     * Start Lsp server process inside sandbox project
+     * @summary Start Lsp server
+     * @param {string} sandboxId
+     * @param {LspServerRequest} lspServerRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    lspStart: async (
+      sandboxId: string,
+      lspServerRequest: LspServerRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspStart', 'sandboxId', sandboxId)
+      // verify required parameter 'lspServerRequest' is not null or undefined
+      assertParamExists('lspStart', 'lspServerRequest', lspServerRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/start`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(lspServerRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Stop Lsp server process inside sandbox project
+     * @summary Stop Lsp server
+     * @param {string} sandboxId
+     * @param {LspServerRequest} lspServerRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    lspStop: async (
+      sandboxId: string,
+      lspServerRequest: LspServerRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('lspStop', 'sandboxId', sandboxId)
+      // verify required parameter 'lspServerRequest' is not null or undefined
+      assertParamExists('lspStop', 'lspServerRequest', lspServerRequest)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/lsp/stop`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(lspServerRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Move file inside sandbox
      * @summary Move file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -1910,21 +1910,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     moveFile: async (
-      workspaceId: string,
+      sandboxId: string,
       source: string,
       destination: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('moveFile', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('moveFile', 'sandboxId', sandboxId)
       // verify required parameter 'source' is not null or undefined
       assertParamExists('moveFile', 'source', source)
       // verify required parameter 'destination' is not null or undefined
       assertParamExists('moveFile', 'destination', destination)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/move`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/move`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -1964,27 +1964,27 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Replace text/pattern in multiple files inside workspace
+     * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     replaceInFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('replaceInFiles', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('replaceInFiles', 'sandboxId', sandboxId)
       // verify required parameter 'replaceRequest' is not null or undefined
       assertParamExists('replaceInFiles', 'replaceRequest', replaceRequest)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/replace`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/replace`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -2019,9 +2019,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Search for files inside workspace
+     * Search for files inside sandbox
      * @summary Search files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2029,21 +2029,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     searchFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('searchFiles', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('searchFiles', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('searchFiles', 'path', path)
       // verify required parameter 'pattern' is not null or undefined
       assertParamExists('searchFiles', 'pattern', pattern)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/search`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/search`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -2083,9 +2083,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Set file owner/group/permissions inside workspace
+     * Set file owner/group/permissions inside sandbox
      * @summary Set file permissions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [owner]
@@ -2095,7 +2095,7 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     setFilePermissions: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       owner?: string,
@@ -2103,13 +2103,13 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       mode?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('setFilePermissions', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('setFilePermissions', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('setFilePermissions', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/permissions`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/permissions`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -2157,9 +2157,9 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Upload file inside workspace
+     * Upload file inside sandbox
      * @summary Upload file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
@@ -2168,19 +2168,19 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * @throws {RequiredError}
      */
     uploadFile: async (
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       file?: File,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('uploadFile', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('uploadFile', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
       assertParamExists('uploadFile', 'path', path)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/upload`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/upload`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -2224,23 +2224,23 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       }
     },
     /**
-     * Upload multiple files inside workspace
+     * Upload multiple files inside sandbox
      * @summary Upload multiple files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     uploadFiles: async (
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('uploadFiles', 'workspaceId', workspaceId)
-      const localVarPath = `/toolbox/{workspaceId}/toolbox/files/bulk-upload`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('uploadFiles', 'sandboxId', sandboxId)
+      const localVarPath = `/toolbox/{sandboxId}/toolbox/files/bulk-upload`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -2282,9 +2282,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
   const localVarAxiosParamCreator = ToolboxApiAxiosParamCreator(configuration)
   return {
     /**
-     * Create folder inside workspace
+     * Create folder inside sandbox
      * @summary Create folder
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2292,14 +2292,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async createFolder(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       mode: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createFolder(
-        workspaceId,
+        sandboxId,
         path,
         mode,
         xDaytonaOrganizationID,
@@ -2317,22 +2317,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Create a new session in the workspace
+     * Create a new session in the sandbox
      * @summary Create session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async createSession(
-      workspaceId: string,
+      sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createSession(
-        workspaceId,
+        sandboxId,
         createSessionRequest,
         xDaytonaOrganizationID,
         options,
@@ -2349,22 +2349,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Delete file inside workspace
+     * Delete file inside sandbox
      * @summary Delete file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async deleteFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.deleteFile(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2383,20 +2383,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Delete a specific session
      * @summary Delete session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async deleteSession(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.deleteSession(
-        workspaceId,
+        sandboxId,
         sessionId,
         xDaytonaOrganizationID,
         options,
@@ -2413,22 +2413,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Download file from workspace
+     * Download file from sandbox
      * @summary Download file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async downloadFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<File>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.downloadFile(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2445,22 +2445,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Execute command synchronously inside workspace
+     * Execute command synchronously inside sandbox
      * @summary Execute command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async executeCommand(
-      workspaceId: string,
+      sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ExecuteResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.executeCommand(
-        workspaceId,
+        sandboxId,
         executeRequest,
         xDaytonaOrganizationID,
         options,
@@ -2479,7 +2479,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Execute a command in a specific session
      * @summary Execute command in session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2487,14 +2487,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async executeSessionCommand(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SessionExecuteResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.executeSessionCommand(
-        workspaceId,
+        sandboxId,
         sessionId,
         sessionExecuteRequest,
         xDaytonaOrganizationID,
@@ -2512,9 +2512,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Search for text/pattern inside workspace files
+     * Search for text/pattern inside sandbox files
      * @summary Search for text/pattern in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2522,14 +2522,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async findInFiles(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Match>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.findInFiles(
-        workspaceId,
+        sandboxId,
         path,
         pattern,
         xDaytonaOrganizationID,
@@ -2547,22 +2547,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Get file info inside workspace
+     * Get file info inside sandbox
      * @summary Get file info
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getFileInfo(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FileInfo>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getFileInfo(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2580,19 +2580,19 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get workspace project dir
-     * @param {string} workspaceId
+     * @summary Get sandbox project dir
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getProjectDir(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectDirResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getProjectDir(
-        workspaceId,
+        sandboxId,
         xDaytonaOrganizationID,
         options,
       )
@@ -2610,20 +2610,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get session by ID
      * @summary Get session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async getSession(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Session>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSession(
-        workspaceId,
+        sandboxId,
         sessionId,
         xDaytonaOrganizationID,
         options,
@@ -2642,7 +2642,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get session command by ID
      * @summary Get session command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2650,14 +2650,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async getSessionCommand(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Command>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommand(
-        workspaceId,
+        sandboxId,
         sessionId,
         commandId,
         xDaytonaOrganizationID,
@@ -2677,7 +2677,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get logs for a specific command in a session
      * @summary Get command logs
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -2686,7 +2686,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async getSessionCommandLogs(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
@@ -2694,7 +2694,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getSessionCommandLogs(
-        workspaceId,
+        sandboxId,
         sessionId,
         commandId,
         xDaytonaOrganizationID,
@@ -2715,20 +2715,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Add files to git commit
      * @summary Add files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitAddFiles(
-      workspaceId: string,
+      sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitAddFiles(
-        workspaceId,
+        sandboxId,
         gitAddRequest,
         xDaytonaOrganizationID,
         options,
@@ -2747,20 +2747,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Checkout branch or commit in git repository
      * @summary Checkout branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitCheckoutBranch(
-      workspaceId: string,
+      sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitCheckoutBranch(
-        workspaceId,
+        sandboxId,
         gitCheckoutRequest,
         xDaytonaOrganizationID,
         options,
@@ -2779,20 +2779,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Clone git repository
      * @summary Clone repository
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitCloneRepository(
-      workspaceId: string,
+      sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitCloneRepository(
-        workspaceId,
+        sandboxId,
         gitCloneRequest,
         xDaytonaOrganizationID,
         options,
@@ -2811,20 +2811,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Commit changes to git repository
      * @summary Commit changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitCommitChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitCommitResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitCommitChanges(
-        workspaceId,
+        sandboxId,
         gitCommitRequest,
         xDaytonaOrganizationID,
         options,
@@ -2843,20 +2843,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Create branch on git repository
      * @summary Create branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitCreateBranch(
-      workspaceId: string,
+      sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitCreateBranch(
-        workspaceId,
+        sandboxId,
         gitBranchRequest,
         xDaytonaOrganizationID,
         options,
@@ -2875,20 +2875,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get commit history from git repository
      * @summary Get commit history
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitGetHistory(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<GitCommitInfo>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetHistory(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2907,20 +2907,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get status from git repository
      * @summary Get git status
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitGetStatus(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GitStatus>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitGetStatus(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2939,20 +2939,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Get branch list from git repository
      * @summary Get branch list
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitListBranches(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ListBranchResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitListBranches(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         options,
@@ -2971,20 +2971,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Pull changes from remote
      * @summary Pull changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitPullChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitPullChanges(
-        workspaceId,
+        sandboxId,
         gitRepoRequest,
         xDaytonaOrganizationID,
         options,
@@ -3003,20 +3003,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * Push changes to remote
      * @summary Push changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async gitPushChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.gitPushChanges(
-        workspaceId,
+        sandboxId,
         gitRepoRequest,
         xDaytonaOrganizationID,
         options,
@@ -3035,20 +3035,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary List files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listFiles(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<FileInfo>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listFiles(
-        workspaceId,
+        sandboxId,
         xDaytonaOrganizationID,
         path,
         options,
@@ -3065,23 +3065,19 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * List all active sessions in the workspace
+     * List all active sessions in the sandbox
      * @summary List sessions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async listSessions(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Session>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listSessions(
-        workspaceId,
-        xDaytonaOrganizationID,
-        options,
-      )
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listSessions(sandboxId, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.listSessions']?.[localVarOperationServerIndex]?.url
@@ -3096,20 +3092,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
      * @summary Get Lsp Completions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async lspCompletions(
-      workspaceId: string,
+      sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<CompletionList>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspCompletions(
-        workspaceId,
+        sandboxId,
         lspCompletionParams,
         xDaytonaOrganizationID,
         options,
@@ -3128,20 +3124,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
      * @summary Call Lsp DidClose
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async lspDidClose(
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidClose(
-        workspaceId,
+        sandboxId,
         lspDocumentRequest,
         xDaytonaOrganizationID,
         options,
@@ -3160,20 +3156,20 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
      * @summary Call Lsp DidOpen
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async lspDidOpen(
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspDidOpen(
-        workspaceId,
+        sandboxId,
         lspDocumentRequest,
         xDaytonaOrganizationID,
         options,
@@ -3192,7 +3188,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
     /**
      * The document symbol request is sent from the client to the server.
      * @summary Call Lsp DocumentSymbols
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
@@ -3201,7 +3197,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async lspDocumentSymbols(
-      workspaceId: string,
+      sandboxId: string,
       languageId: string,
       pathToProject: string,
       uri: string,
@@ -3209,7 +3205,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LspSymbol>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspDocumentSymbols(
-        workspaceId,
+        sandboxId,
         languageId,
         pathToProject,
         uri,
@@ -3228,22 +3224,60 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Start Lsp server process inside workspace project
+     * The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+     * @summary Call Lsp SandboxSymbols
+     * @param {string} sandboxId
+     * @param {string} languageId
+     * @param {string} pathToProject
+     * @param {string} query
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async lspSandboxSymbols(
+      sandboxId: string,
+      languageId: string,
+      pathToProject: string,
+      query: string,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LspSymbol>>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.lspSandboxSymbols(
+        sandboxId,
+        languageId,
+        pathToProject,
+        query,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.lspSandboxSymbols']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     * Start Lsp server process inside sandbox project
      * @summary Start Lsp server
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async lspStart(
-      workspaceId: string,
+      sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspStart(
-        workspaceId,
+        sandboxId,
         lspServerRequest,
         xDaytonaOrganizationID,
         options,
@@ -3260,22 +3294,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Stop Lsp server process inside workspace project
+     * Stop Lsp server process inside sandbox project
      * @summary Stop Lsp server
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspServerRequest} lspServerRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async lspStop(
-      workspaceId: string,
+      sandboxId: string,
       lspServerRequest: LspServerRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.lspStop(
-        workspaceId,
+        sandboxId,
         lspServerRequest,
         xDaytonaOrganizationID,
         options,
@@ -3292,47 +3326,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
-     * @param {string} workspaceId
-     * @param {string} languageId
-     * @param {string} pathToProject
-     * @param {string} query
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async lspWorkspaceSymbols(
-      workspaceId: string,
-      languageId: string,
-      pathToProject: string,
-      query: string,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<LspSymbol>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.lspWorkspaceSymbols(
-        workspaceId,
-        languageId,
-        pathToProject,
-        query,
-        xDaytonaOrganizationID,
-        options,
-      )
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.lspWorkspaceSymbols']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     * Move file inside workspace
+     * Move file inside sandbox
      * @summary Move file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3340,14 +3336,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async moveFile(
-      workspaceId: string,
+      sandboxId: string,
       source: string,
       destination: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.moveFile(
-        workspaceId,
+        sandboxId,
         source,
         destination,
         xDaytonaOrganizationID,
@@ -3365,22 +3361,22 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Replace text/pattern in multiple files inside workspace
+     * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async replaceInFiles(
-      workspaceId: string,
+      sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<ReplaceResult>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.replaceInFiles(
-        workspaceId,
+        sandboxId,
         replaceRequest,
         xDaytonaOrganizationID,
         options,
@@ -3397,9 +3393,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Search for files inside workspace
+     * Search for files inside sandbox
      * @summary Search files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3407,14 +3403,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async searchFiles(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SearchFilesResponse>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.searchFiles(
-        workspaceId,
+        sandboxId,
         path,
         pattern,
         xDaytonaOrganizationID,
@@ -3432,9 +3428,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Set file owner/group/permissions inside workspace
+     * Set file owner/group/permissions inside sandbox
      * @summary Set file permissions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [owner]
@@ -3444,7 +3440,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async setFilePermissions(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       owner?: string,
@@ -3453,7 +3449,7 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.setFilePermissions(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         owner,
@@ -3473,9 +3469,9 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Upload file inside workspace
+     * Upload file inside sandbox
      * @summary Upload file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
@@ -3484,14 +3480,14 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * @throws {RequiredError}
      */
     async uploadFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       file?: File,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFile(
-        workspaceId,
+        sandboxId,
         path,
         xDaytonaOrganizationID,
         file,
@@ -3509,23 +3505,19 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
-     * Upload multiple files inside workspace
+     * Upload multiple files inside sandbox
      * @summary Upload multiple files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async uploadFiles(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFiles(
-        workspaceId,
-        xDaytonaOrganizationID,
-        options,
-      )
+      const localVarAxiosArgs = await localVarAxiosParamCreator.uploadFiles(sandboxId, xDaytonaOrganizationID, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['ToolboxApi.uploadFiles']?.[localVarOperationServerIndex]?.url
@@ -3548,9 +3540,9 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
   const localVarFp = ToolboxApiFp(configuration)
   return {
     /**
-     * Create folder inside workspace
+     * Create folder inside sandbox
      * @summary Create folder
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} mode
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3558,115 +3550,115 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     createFolder(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       mode: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .createFolder(workspaceId, path, mode, xDaytonaOrganizationID, options)
+        .createFolder(sandboxId, path, mode, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Create a new session in the workspace
+     * Create a new session in the sandbox
      * @summary Create session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {CreateSessionRequest} createSessionRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     createSession(
-      workspaceId: string,
+      sandboxId: string,
       createSessionRequest: CreateSessionRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .createSession(workspaceId, createSessionRequest, xDaytonaOrganizationID, options)
+        .createSession(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Delete file inside workspace
+     * Delete file inside sandbox
      * @summary Delete file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteFile(workspaceId, path, xDaytonaOrganizationID, options)
+        .deleteFile(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Delete a specific session
      * @summary Delete session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     deleteSession(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteSession(workspaceId, sessionId, xDaytonaOrganizationID, options)
+        .deleteSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Download file from workspace
+     * Download file from sandbox
      * @summary Download file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     downloadFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<File> {
       return localVarFp
-        .downloadFile(workspaceId, path, xDaytonaOrganizationID, options)
+        .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Execute command synchronously inside workspace
+     * Execute command synchronously inside sandbox
      * @summary Execute command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ExecuteRequest} executeRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     executeCommand(
-      workspaceId: string,
+      sandboxId: string,
       executeRequest: ExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ExecuteResponse> {
       return localVarFp
-        .executeCommand(workspaceId, executeRequest, xDaytonaOrganizationID, options)
+        .executeCommand(sandboxId, executeRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Execute a command in a specific session
      * @summary Execute command in session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {SessionExecuteRequest} sessionExecuteRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3674,20 +3666,20 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     executeSessionCommand(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       sessionExecuteRequest: SessionExecuteRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SessionExecuteResponse> {
       return localVarFp
-        .executeSessionCommand(workspaceId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
+        .executeSessionCommand(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Search for text/pattern inside workspace files
+     * Search for text/pattern inside sandbox files
      * @summary Search for text/pattern in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3695,75 +3687,75 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     findInFiles(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Match>> {
       return localVarFp
-        .findInFiles(workspaceId, path, pattern, xDaytonaOrganizationID, options)
+        .findInFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Get file info inside workspace
+     * Get file info inside sandbox
      * @summary Get file info
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getFileInfo(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<FileInfo> {
       return localVarFp
-        .getFileInfo(workspaceId, path, xDaytonaOrganizationID, options)
+        .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get workspace project dir
-     * @param {string} workspaceId
+     * @summary Get sandbox project dir
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getProjectDir(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ProjectDirResponse> {
       return localVarFp
-        .getProjectDir(workspaceId, xDaytonaOrganizationID, options)
+        .getProjectDir(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get session by ID
      * @summary Get session
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     getSession(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Session> {
       return localVarFp
-        .getSession(workspaceId, sessionId, xDaytonaOrganizationID, options)
+        .getSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get session command by ID
      * @summary Get session command
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3771,20 +3763,20 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     getSessionCommand(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Command> {
       return localVarFp
-        .getSessionCommand(workspaceId, sessionId, commandId, xDaytonaOrganizationID, options)
+        .getSessionCommand(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get logs for a specific command in a session
      * @summary Get command logs
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} sessionId
      * @param {string} commandId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -3793,7 +3785,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     getSessionCommandLogs(
-      workspaceId: string,
+      sandboxId: string,
       sessionId: string,
       commandId: string,
       xDaytonaOrganizationID?: string,
@@ -3801,296 +3793,296 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<string> {
       return localVarFp
-        .getSessionCommandLogs(workspaceId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+        .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Add files to git commit
      * @summary Add files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitAddRequest} gitAddRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitAddFiles(
-      workspaceId: string,
+      sandboxId: string,
       gitAddRequest: GitAddRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitAddFiles(workspaceId, gitAddRequest, xDaytonaOrganizationID, options)
+        .gitAddFiles(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Checkout branch or commit in git repository
      * @summary Checkout branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCheckoutRequest} gitCheckoutRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCheckoutBranch(
-      workspaceId: string,
+      sandboxId: string,
       gitCheckoutRequest: GitCheckoutRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCheckoutBranch(workspaceId, gitCheckoutRequest, xDaytonaOrganizationID, options)
+        .gitCheckoutBranch(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Clone git repository
      * @summary Clone repository
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCloneRequest} gitCloneRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCloneRepository(
-      workspaceId: string,
+      sandboxId: string,
       gitCloneRequest: GitCloneRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCloneRepository(workspaceId, gitCloneRequest, xDaytonaOrganizationID, options)
+        .gitCloneRepository(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Commit changes to git repository
      * @summary Commit changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitCommitRequest} gitCommitRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCommitChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitCommitRequest: GitCommitRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<GitCommitResponse> {
       return localVarFp
-        .gitCommitChanges(workspaceId, gitCommitRequest, xDaytonaOrganizationID, options)
+        .gitCommitChanges(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Create branch on git repository
      * @summary Create branch
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitBranchRequest} gitBranchRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitCreateBranch(
-      workspaceId: string,
+      sandboxId: string,
       gitBranchRequest: GitBranchRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitCreateBranch(workspaceId, gitBranchRequest, xDaytonaOrganizationID, options)
+        .gitCreateBranch(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get commit history from git repository
      * @summary Get commit history
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitGetHistory(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<GitCommitInfo>> {
       return localVarFp
-        .gitGetHistory(workspaceId, path, xDaytonaOrganizationID, options)
+        .gitGetHistory(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get status from git repository
      * @summary Get git status
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitGetStatus(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<GitStatus> {
       return localVarFp
-        .gitGetStatus(workspaceId, path, xDaytonaOrganizationID, options)
+        .gitGetStatus(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Get branch list from git repository
      * @summary Get branch list
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitListBranches(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<ListBranchResponse> {
       return localVarFp
-        .gitListBranches(workspaceId, path, xDaytonaOrganizationID, options)
+        .gitListBranches(sandboxId, path, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Pull changes from remote
      * @summary Pull changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitPullChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitPullChanges(workspaceId, gitRepoRequest, xDaytonaOrganizationID, options)
+        .gitPullChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * Push changes to remote
      * @summary Push changes
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {GitRepoRequest} gitRepoRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     gitPushChanges(
-      workspaceId: string,
+      sandboxId: string,
       gitRepoRequest: GitRepoRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .gitPushChanges(workspaceId, gitRepoRequest, xDaytonaOrganizationID, options)
+        .gitPushChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
      * @summary List files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [path]
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listFiles(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       path?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<FileInfo>> {
       return localVarFp
-        .listFiles(workspaceId, xDaytonaOrganizationID, path, options)
+        .listFiles(sandboxId, xDaytonaOrganizationID, path, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * List all active sessions in the workspace
+     * List all active sessions in the sandbox
      * @summary List sessions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     listSessions(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Session>> {
       return localVarFp
-        .listSessions(workspaceId, xDaytonaOrganizationID, options)
+        .listSessions(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
      * @summary Get Lsp Completions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspCompletionParams} lspCompletionParams
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspCompletions(
-      workspaceId: string,
+      sandboxId: string,
       lspCompletionParams: LspCompletionParams,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<CompletionList> {
       return localVarFp
-        .lspCompletions(workspaceId, lspCompletionParams, xDaytonaOrganizationID, options)
+        .lspCompletions(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document close notification is sent from the client to the server when the document got closed in the client.
      * @summary Call Lsp DidClose
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspDidClose(
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspDidClose(workspaceId, lspDocumentRequest, xDaytonaOrganizationID, options)
+        .lspDidClose(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document open notification is sent from the client to the server to signal newly opened text documents.
      * @summary Call Lsp DidOpen
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {LspDocumentRequest} lspDocumentRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     lspDidOpen(
-      workspaceId: string,
+      sandboxId: string,
       lspDocumentRequest: LspDocumentRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .lspDidOpen(workspaceId, lspDocumentRequest, xDaytonaOrganizationID, options)
+        .lspDidOpen(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      * The document symbol request is sent from the client to the server.
      * @summary Call Lsp DocumentSymbols
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} uri
@@ -4099,7 +4091,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     lspDocumentSymbols(
-      workspaceId: string,
+      sandboxId: string,
       languageId: string,
       pathToProject: string,
       uri: string,
@@ -4107,51 +4099,13 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<LspSymbol>> {
       return localVarFp
-        .lspDocumentSymbols(workspaceId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
+        .lspDocumentSymbols(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Start Lsp server process inside workspace project
-     * @summary Start Lsp server
-     * @param {string} workspaceId
-     * @param {LspServerRequest} lspServerRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    lspStart(
-      workspaceId: string,
-      lspServerRequest: LspServerRequest,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .lspStart(workspaceId, lspServerRequest, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * Stop Lsp server process inside workspace project
-     * @summary Stop Lsp server
-     * @param {string} workspaceId
-     * @param {LspServerRequest} lspServerRequest
-     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    lspStop(
-      workspaceId: string,
-      lspServerRequest: LspServerRequest,
-      xDaytonaOrganizationID?: string,
-      options?: RawAxiosRequestConfig,
-    ): AxiosPromise<void> {
-      return localVarFp
-        .lspStop(workspaceId, lspServerRequest, xDaytonaOrganizationID, options)
-        .then((request) => request(axios, basePath))
-    },
-    /**
-     * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-     * @summary Call Lsp WorkspaceSymbols
-     * @param {string} workspaceId
+     * The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+     * @summary Call Lsp SandboxSymbols
+     * @param {string} sandboxId
      * @param {string} languageId
      * @param {string} pathToProject
      * @param {string} query
@@ -4159,8 +4113,8 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    lspWorkspaceSymbols(
-      workspaceId: string,
+    lspSandboxSymbols(
+      sandboxId: string,
       languageId: string,
       pathToProject: string,
       query: string,
@@ -4168,13 +4122,51 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<LspSymbol>> {
       return localVarFp
-        .lspWorkspaceSymbols(workspaceId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
+        .lspSandboxSymbols(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Move file inside workspace
+     * Start Lsp server process inside sandbox project
+     * @summary Start Lsp server
+     * @param {string} sandboxId
+     * @param {LspServerRequest} lspServerRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    lspStart(
+      sandboxId: string,
+      lspServerRequest: LspServerRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .lspStart(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Stop Lsp server process inside sandbox project
+     * @summary Stop Lsp server
+     * @param {string} sandboxId
+     * @param {LspServerRequest} lspServerRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    lspStop(
+      sandboxId: string,
+      lspServerRequest: LspServerRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .lspStop(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
+     * Move file inside sandbox
      * @summary Move file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} source
      * @param {string} destination
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4182,39 +4174,39 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     moveFile(
-      workspaceId: string,
+      sandboxId: string,
       source: string,
       destination: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .moveFile(workspaceId, source, destination, xDaytonaOrganizationID, options)
+        .moveFile(sandboxId, source, destination, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Replace text/pattern in multiple files inside workspace
+     * Replace text/pattern in multiple files inside sandbox
      * @summary Replace in files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {ReplaceRequest} replaceRequest
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     replaceInFiles(
-      workspaceId: string,
+      sandboxId: string,
       replaceRequest: ReplaceRequest,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<ReplaceResult>> {
       return localVarFp
-        .replaceInFiles(workspaceId, replaceRequest, xDaytonaOrganizationID, options)
+        .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Search for files inside workspace
+     * Search for files inside sandbox
      * @summary Search files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} pattern
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4222,20 +4214,20 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     searchFiles(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       pattern: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<SearchFilesResponse> {
       return localVarFp
-        .searchFiles(workspaceId, path, pattern, xDaytonaOrganizationID, options)
+        .searchFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Set file owner/group/permissions inside workspace
+     * Set file owner/group/permissions inside sandbox
      * @summary Set file permissions
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {string} [owner]
@@ -4245,7 +4237,7 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     setFilePermissions(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       owner?: string,
@@ -4254,13 +4246,13 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .setFilePermissions(workspaceId, path, xDaytonaOrganizationID, owner, group, mode, options)
+        .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Upload file inside workspace
+     * Upload file inside sandbox
      * @summary Upload file
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} path
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {File} [file]
@@ -4269,31 +4261,31 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * @throws {RequiredError}
      */
     uploadFile(
-      workspaceId: string,
+      sandboxId: string,
       path: string,
       xDaytonaOrganizationID?: string,
       file?: File,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .uploadFile(workspaceId, path, xDaytonaOrganizationID, file, options)
+        .uploadFile(sandboxId, path, xDaytonaOrganizationID, file, options)
         .then((request) => request(axios, basePath))
     },
     /**
-     * Upload multiple files inside workspace
+     * Upload multiple files inside sandbox
      * @summary Upload multiple files
-     * @param {string} workspaceId
+     * @param {string} sandboxId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     uploadFiles(
-      workspaceId: string,
+      sandboxId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .uploadFiles(workspaceId, xDaytonaOrganizationID, options)
+        .uploadFiles(sandboxId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -4307,9 +4299,9 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
  */
 export class ToolboxApi extends BaseAPI {
   /**
-   * Create folder inside workspace
+   * Create folder inside sandbox
    * @summary Create folder
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} mode
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4318,21 +4310,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public createFolder(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     mode: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .createFolder(workspaceId, path, mode, xDaytonaOrganizationID, options)
+      .createFolder(sandboxId, path, mode, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Create a new session in the workspace
+   * Create a new session in the sandbox
    * @summary Create session
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {CreateSessionRequest} createSessionRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4340,41 +4332,36 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public createSession(
-    workspaceId: string,
+    sandboxId: string,
     createSessionRequest: CreateSessionRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .createSession(workspaceId, createSessionRequest, xDaytonaOrganizationID, options)
+      .createSession(sandboxId, createSessionRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Delete file inside workspace
+   * Delete file inside sandbox
    * @summary Delete file
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public deleteFile(
-    workspaceId: string,
-    path: string,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
+  public deleteFile(sandboxId: string, path: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .deleteFile(workspaceId, path, xDaytonaOrganizationID, options)
+      .deleteFile(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Delete a specific session
    * @summary Delete session
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4382,20 +4369,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public deleteSession(
-    workspaceId: string,
+    sandboxId: string,
     sessionId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .deleteSession(workspaceId, sessionId, xDaytonaOrganizationID, options)
+      .deleteSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Download file from workspace
+   * Download file from sandbox
    * @summary Download file
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4403,20 +4390,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public downloadFile(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .downloadFile(workspaceId, path, xDaytonaOrganizationID, options)
+      .downloadFile(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Execute command synchronously inside workspace
+   * Execute command synchronously inside sandbox
    * @summary Execute command
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {ExecuteRequest} executeRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4424,20 +4411,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public executeCommand(
-    workspaceId: string,
+    sandboxId: string,
     executeRequest: ExecuteRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .executeCommand(workspaceId, executeRequest, xDaytonaOrganizationID, options)
+      .executeCommand(sandboxId, executeRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Execute a command in a specific session
    * @summary Execute command in session
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} sessionId
    * @param {SessionExecuteRequest} sessionExecuteRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4446,21 +4433,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public executeSessionCommand(
-    workspaceId: string,
+    sandboxId: string,
     sessionId: string,
     sessionExecuteRequest: SessionExecuteRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .executeSessionCommand(workspaceId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
+      .executeSessionCommand(sandboxId, sessionId, sessionExecuteRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Search for text/pattern inside workspace files
+   * Search for text/pattern inside sandbox files
    * @summary Search for text/pattern in files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} pattern
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4469,21 +4456,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public findInFiles(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     pattern: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .findInFiles(workspaceId, path, pattern, xDaytonaOrganizationID, options)
+      .findInFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Get file info inside workspace
+   * Get file info inside sandbox
    * @summary Get file info
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4491,35 +4478,35 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public getFileInfo(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getFileInfo(workspaceId, path, xDaytonaOrganizationID, options)
+      .getFileInfo(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get workspace project dir
-   * @param {string} workspaceId
+   * @summary Get sandbox project dir
+   * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public getProjectDir(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public getProjectDir(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .getProjectDir(workspaceId, xDaytonaOrganizationID, options)
+      .getProjectDir(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get session by ID
    * @summary Get session
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4527,20 +4514,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public getSession(
-    workspaceId: string,
+    sandboxId: string,
     sessionId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSession(workspaceId, sessionId, xDaytonaOrganizationID, options)
+      .getSession(sandboxId, sessionId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get session command by ID
    * @summary Get session command
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4549,21 +4536,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public getSessionCommand(
-    workspaceId: string,
+    sandboxId: string,
     sessionId: string,
     commandId: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSessionCommand(workspaceId, sessionId, commandId, xDaytonaOrganizationID, options)
+      .getSessionCommand(sandboxId, sessionId, commandId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get logs for a specific command in a session
    * @summary Get command logs
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} sessionId
    * @param {string} commandId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4573,7 +4560,7 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public getSessionCommandLogs(
-    workspaceId: string,
+    sandboxId: string,
     sessionId: string,
     commandId: string,
     xDaytonaOrganizationID?: string,
@@ -4581,14 +4568,14 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .getSessionCommandLogs(workspaceId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
+      .getSessionCommandLogs(sandboxId, sessionId, commandId, xDaytonaOrganizationID, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Add files to git commit
    * @summary Add files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitAddRequest} gitAddRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4596,20 +4583,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitAddFiles(
-    workspaceId: string,
+    sandboxId: string,
     gitAddRequest: GitAddRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitAddFiles(workspaceId, gitAddRequest, xDaytonaOrganizationID, options)
+      .gitAddFiles(sandboxId, gitAddRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Checkout branch or commit in git repository
    * @summary Checkout branch
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitCheckoutRequest} gitCheckoutRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4617,20 +4604,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitCheckoutBranch(
-    workspaceId: string,
+    sandboxId: string,
     gitCheckoutRequest: GitCheckoutRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCheckoutBranch(workspaceId, gitCheckoutRequest, xDaytonaOrganizationID, options)
+      .gitCheckoutBranch(sandboxId, gitCheckoutRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Clone git repository
    * @summary Clone repository
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitCloneRequest} gitCloneRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4638,20 +4625,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitCloneRepository(
-    workspaceId: string,
+    sandboxId: string,
     gitCloneRequest: GitCloneRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCloneRepository(workspaceId, gitCloneRequest, xDaytonaOrganizationID, options)
+      .gitCloneRepository(sandboxId, gitCloneRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Commit changes to git repository
    * @summary Commit changes
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitCommitRequest} gitCommitRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4659,20 +4646,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitCommitChanges(
-    workspaceId: string,
+    sandboxId: string,
     gitCommitRequest: GitCommitRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCommitChanges(workspaceId, gitCommitRequest, xDaytonaOrganizationID, options)
+      .gitCommitChanges(sandboxId, gitCommitRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Create branch on git repository
    * @summary Create branch
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitBranchRequest} gitBranchRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4680,20 +4667,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitCreateBranch(
-    workspaceId: string,
+    sandboxId: string,
     gitBranchRequest: GitBranchRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitCreateBranch(workspaceId, gitBranchRequest, xDaytonaOrganizationID, options)
+      .gitCreateBranch(sandboxId, gitBranchRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get commit history from git repository
    * @summary Get commit history
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4701,20 +4688,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitGetHistory(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitGetHistory(workspaceId, path, xDaytonaOrganizationID, options)
+      .gitGetHistory(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get status from git repository
    * @summary Get git status
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4722,20 +4709,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitGetStatus(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitGetStatus(workspaceId, path, xDaytonaOrganizationID, options)
+      .gitGetStatus(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Get branch list from git repository
    * @summary Get branch list
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4743,20 +4730,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitListBranches(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitListBranches(workspaceId, path, xDaytonaOrganizationID, options)
+      .gitListBranches(sandboxId, path, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Pull changes from remote
    * @summary Pull changes
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitRepoRequest} gitRepoRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4764,20 +4751,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitPullChanges(
-    workspaceId: string,
+    sandboxId: string,
     gitRepoRequest: GitRepoRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitPullChanges(workspaceId, gitRepoRequest, xDaytonaOrganizationID, options)
+      .gitPullChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * Push changes to remote
    * @summary Push changes
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {GitRepoRequest} gitRepoRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4785,56 +4772,51 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public gitPushChanges(
-    workspaceId: string,
+    sandboxId: string,
     gitRepoRequest: GitRepoRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .gitPushChanges(workspaceId, gitRepoRequest, xDaytonaOrganizationID, options)
+      .gitPushChanges(sandboxId, gitRepoRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
    * @summary List files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {string} [path]
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public listFiles(
-    workspaceId: string,
-    xDaytonaOrganizationID?: string,
-    path?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
+  public listFiles(sandboxId: string, xDaytonaOrganizationID?: string, path?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .listFiles(workspaceId, xDaytonaOrganizationID, path, options)
+      .listFiles(sandboxId, xDaytonaOrganizationID, path, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * List all active sessions in the workspace
+   * List all active sessions in the sandbox
    * @summary List sessions
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public listSessions(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public listSessions(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .listSessions(workspaceId, xDaytonaOrganizationID, options)
+      .listSessions(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The Completion request is sent from the client to the server to compute completion items at a given cursor position.
    * @summary Get Lsp Completions
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {LspCompletionParams} lspCompletionParams
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4842,20 +4824,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public lspCompletions(
-    workspaceId: string,
+    sandboxId: string,
     lspCompletionParams: LspCompletionParams,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspCompletions(workspaceId, lspCompletionParams, xDaytonaOrganizationID, options)
+      .lspCompletions(sandboxId, lspCompletionParams, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document close notification is sent from the client to the server when the document got closed in the client.
    * @summary Call Lsp DidClose
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {LspDocumentRequest} lspDocumentRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4863,20 +4845,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public lspDidClose(
-    workspaceId: string,
+    sandboxId: string,
     lspDocumentRequest: LspDocumentRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDidClose(workspaceId, lspDocumentRequest, xDaytonaOrganizationID, options)
+      .lspDidClose(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document open notification is sent from the client to the server to signal newly opened text documents.
    * @summary Call Lsp DidOpen
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {LspDocumentRequest} lspDocumentRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -4884,20 +4866,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public lspDidOpen(
-    workspaceId: string,
+    sandboxId: string,
     lspDocumentRequest: LspDocumentRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDidOpen(workspaceId, lspDocumentRequest, xDaytonaOrganizationID, options)
+      .lspDidOpen(sandboxId, lspDocumentRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    * The document symbol request is sent from the client to the server.
    * @summary Call Lsp DocumentSymbols
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} languageId
    * @param {string} pathToProject
    * @param {string} uri
@@ -4907,7 +4889,7 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public lspDocumentSymbols(
-    workspaceId: string,
+    sandboxId: string,
     languageId: string,
     pathToProject: string,
     uri: string,
@@ -4915,56 +4897,14 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspDocumentSymbols(workspaceId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
+      .lspDocumentSymbols(sandboxId, languageId, pathToProject, uri, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Start Lsp server process inside workspace project
-   * @summary Start Lsp server
-   * @param {string} workspaceId
-   * @param {LspServerRequest} lspServerRequest
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public lspStart(
-    workspaceId: string,
-    lspServerRequest: LspServerRequest,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .lspStart(workspaceId, lspServerRequest, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * Stop Lsp server process inside workspace project
-   * @summary Stop Lsp server
-   * @param {string} workspaceId
-   * @param {LspServerRequest} lspServerRequest
-   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
-   * @param {*} [options] Override http request option.
-   * @throws {RequiredError}
-   * @memberof ToolboxApi
-   */
-  public lspStop(
-    workspaceId: string,
-    lspServerRequest: LspServerRequest,
-    xDaytonaOrganizationID?: string,
-    options?: RawAxiosRequestConfig,
-  ) {
-    return ToolboxApiFp(this.configuration)
-      .lspStop(workspaceId, lspServerRequest, xDaytonaOrganizationID, options)
-      .then((request) => request(this.axios, this.basePath))
-  }
-
-  /**
-   * The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-   * @summary Call Lsp WorkspaceSymbols
-   * @param {string} workspaceId
+   * The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+   * @summary Call Lsp SandboxSymbols
+   * @param {string} sandboxId
    * @param {string} languageId
    * @param {string} pathToProject
    * @param {string} query
@@ -4973,8 +4913,8 @@ export class ToolboxApi extends BaseAPI {
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public lspWorkspaceSymbols(
-    workspaceId: string,
+  public lspSandboxSymbols(
+    sandboxId: string,
     languageId: string,
     pathToProject: string,
     query: string,
@@ -4982,14 +4922,56 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .lspWorkspaceSymbols(workspaceId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
+      .lspSandboxSymbols(sandboxId, languageId, pathToProject, query, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Move file inside workspace
+   * Start Lsp server process inside sandbox project
+   * @summary Start Lsp server
+   * @param {string} sandboxId
+   * @param {LspServerRequest} lspServerRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public lspStart(
+    sandboxId: string,
+    lspServerRequest: LspServerRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .lspStart(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Stop Lsp server process inside sandbox project
+   * @summary Stop Lsp server
+   * @param {string} sandboxId
+   * @param {LspServerRequest} lspServerRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public lspStop(
+    sandboxId: string,
+    lspServerRequest: LspServerRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .lspStop(sandboxId, lspServerRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Move file inside sandbox
    * @summary Move file
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} source
    * @param {string} destination
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -4998,21 +4980,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public moveFile(
-    workspaceId: string,
+    sandboxId: string,
     source: string,
     destination: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .moveFile(workspaceId, source, destination, xDaytonaOrganizationID, options)
+      .moveFile(sandboxId, source, destination, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Replace text/pattern in multiple files inside workspace
+   * Replace text/pattern in multiple files inside sandbox
    * @summary Replace in files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {ReplaceRequest} replaceRequest
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
@@ -5020,20 +5002,20 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public replaceInFiles(
-    workspaceId: string,
+    sandboxId: string,
     replaceRequest: ReplaceRequest,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .replaceInFiles(workspaceId, replaceRequest, xDaytonaOrganizationID, options)
+      .replaceInFiles(sandboxId, replaceRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Search for files inside workspace
+   * Search for files inside sandbox
    * @summary Search files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} pattern
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
@@ -5042,21 +5024,21 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public searchFiles(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     pattern: string,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .searchFiles(workspaceId, path, pattern, xDaytonaOrganizationID, options)
+      .searchFiles(sandboxId, path, pattern, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Set file owner/group/permissions inside workspace
+   * Set file owner/group/permissions inside sandbox
    * @summary Set file permissions
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {string} [owner]
@@ -5067,7 +5049,7 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public setFilePermissions(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     owner?: string,
@@ -5076,14 +5058,14 @@ export class ToolboxApi extends BaseAPI {
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .setFilePermissions(workspaceId, path, xDaytonaOrganizationID, owner, group, mode, options)
+      .setFilePermissions(sandboxId, path, xDaytonaOrganizationID, owner, group, mode, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Upload file inside workspace
+   * Upload file inside sandbox
    * @summary Upload file
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} path
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {File} [file]
@@ -5093,29 +5075,29 @@ export class ToolboxApi extends BaseAPI {
    * @memberof ToolboxApi
    */
   public uploadFile(
-    workspaceId: string,
+    sandboxId: string,
     path: string,
     xDaytonaOrganizationID?: string,
     file?: File,
     options?: RawAxiosRequestConfig,
   ) {
     return ToolboxApiFp(this.configuration)
-      .uploadFile(workspaceId, path, xDaytonaOrganizationID, file, options)
+      .uploadFile(sandboxId, path, xDaytonaOrganizationID, file, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
-   * Upload multiple files inside workspace
+   * Upload multiple files inside sandbox
    * @summary Upload multiple files
-   * @param {string} workspaceId
+   * @param {string} sandboxId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public uploadFiles(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public uploadFiles(sandboxId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .uploadFiles(workspaceId, xDaytonaOrganizationID, options)
+      .uploadFiles(sandboxId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

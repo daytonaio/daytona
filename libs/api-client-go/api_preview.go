@@ -23,88 +23,88 @@ import (
 type PreviewAPI interface {
 
 	/*
-		HasWorkspaceAccess Check if user has access to the workspace
+		HasSandboxAccess Check if user has access to the sandbox
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param workspaceId
-		@return PreviewAPIHasWorkspaceAccessRequest
+		@param sandboxId
+		@return PreviewAPIHasSandboxAccessRequest
 	*/
-	HasWorkspaceAccess(ctx context.Context, workspaceId string) PreviewAPIHasWorkspaceAccessRequest
+	HasSandboxAccess(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessRequest
 
-	// HasWorkspaceAccessExecute executes the request
-	HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAccessRequest) (*http.Response, error)
+	// HasSandboxAccessExecute executes the request
+	HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (*http.Response, error)
 
 	/*
-		IsValidAuthToken Check if workspace auth token is valid
+		IsSandboxPublic Check if sandbox is public
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param workspaceId ID of the workspace
-		@param authToken Auth token of the workspace
+		@param sandboxId ID of the sandbox
+		@return PreviewAPIIsSandboxPublicRequest
+	*/
+	IsSandboxPublic(ctx context.Context, sandboxId string) PreviewAPIIsSandboxPublicRequest
+
+	// IsSandboxPublicExecute executes the request
+	//  @return bool
+	IsSandboxPublicExecute(r PreviewAPIIsSandboxPublicRequest) (bool, *http.Response, error)
+
+	/*
+		IsValidAuthToken Check if sandbox auth token is valid
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId ID of the sandbox
+		@param authToken Auth token of the sandbox
 		@return PreviewAPIIsValidAuthTokenRequest
 	*/
-	IsValidAuthToken(ctx context.Context, workspaceId string, authToken string) PreviewAPIIsValidAuthTokenRequest
+	IsValidAuthToken(ctx context.Context, sandboxId string, authToken string) PreviewAPIIsValidAuthTokenRequest
 
 	// IsValidAuthTokenExecute executes the request
 	//  @return bool
 	IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error)
-
-	/*
-		IsWorkspacePublic Check if workspace is public
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param workspaceId ID of the workspace
-		@return PreviewAPIIsWorkspacePublicRequest
-	*/
-	IsWorkspacePublic(ctx context.Context, workspaceId string) PreviewAPIIsWorkspacePublicRequest
-
-	// IsWorkspacePublicExecute executes the request
-	//  @return bool
-	IsWorkspacePublicExecute(r PreviewAPIIsWorkspacePublicRequest) (bool, *http.Response, error)
 }
 
 // PreviewAPIService PreviewAPI service
 type PreviewAPIService service
 
-type PreviewAPIHasWorkspaceAccessRequest struct {
-	ctx         context.Context
-	ApiService  PreviewAPI
-	workspaceId string
+type PreviewAPIHasSandboxAccessRequest struct {
+	ctx        context.Context
+	ApiService PreviewAPI
+	sandboxId  string
 }
 
-func (r PreviewAPIHasWorkspaceAccessRequest) Execute() (*http.Response, error) {
-	return r.ApiService.HasWorkspaceAccessExecute(r)
+func (r PreviewAPIHasSandboxAccessRequest) Execute() (*http.Response, error) {
+	return r.ApiService.HasSandboxAccessExecute(r)
 }
 
 /*
-HasWorkspaceAccess Check if user has access to the workspace
+HasSandboxAccess Check if user has access to the sandbox
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId
-	@return PreviewAPIHasWorkspaceAccessRequest
+	@param sandboxId
+	@return PreviewAPIHasSandboxAccessRequest
 */
-func (a *PreviewAPIService) HasWorkspaceAccess(ctx context.Context, workspaceId string) PreviewAPIHasWorkspaceAccessRequest {
-	return PreviewAPIHasWorkspaceAccessRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
+func (a *PreviewAPIService) HasSandboxAccess(ctx context.Context, sandboxId string) PreviewAPIHasSandboxAccessRequest {
+	return PreviewAPIHasSandboxAccessRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
-func (a *PreviewAPIService) HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAccessRequest) (*http.Response, error) {
+func (a *PreviewAPIService) HasSandboxAccessExecute(r PreviewAPIHasSandboxAccessRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodGet
 		localVarPostBody   interface{}
 		formFiles          []formFile
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.HasWorkspaceAccess")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.HasSandboxAccess")
 	if err != nil {
 		return nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/preview/{workspaceId}/access"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath := localBasePath + "/preview/{sandboxId}/access"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -155,38 +155,35 @@ func (a *PreviewAPIService) HasWorkspaceAccessExecute(r PreviewAPIHasWorkspaceAc
 	return localVarHTTPResponse, nil
 }
 
-type PreviewAPIIsValidAuthTokenRequest struct {
-	ctx         context.Context
-	ApiService  PreviewAPI
-	workspaceId string
-	authToken   string
+type PreviewAPIIsSandboxPublicRequest struct {
+	ctx        context.Context
+	ApiService PreviewAPI
+	sandboxId  string
 }
 
-func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, error) {
-	return r.ApiService.IsValidAuthTokenExecute(r)
+func (r PreviewAPIIsSandboxPublicRequest) Execute() (bool, *http.Response, error) {
+	return r.ApiService.IsSandboxPublicExecute(r)
 }
 
 /*
-IsValidAuthToken Check if workspace auth token is valid
+IsSandboxPublic Check if sandbox is public
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@param authToken Auth token of the workspace
-	@return PreviewAPIIsValidAuthTokenRequest
+	@param sandboxId ID of the sandbox
+	@return PreviewAPIIsSandboxPublicRequest
 */
-func (a *PreviewAPIService) IsValidAuthToken(ctx context.Context, workspaceId string, authToken string) PreviewAPIIsValidAuthTokenRequest {
-	return PreviewAPIIsValidAuthTokenRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
-		authToken:   authToken,
+func (a *PreviewAPIService) IsSandboxPublic(ctx context.Context, sandboxId string) PreviewAPIIsSandboxPublicRequest {
+	return PreviewAPIIsSandboxPublicRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
 	}
 }
 
 // Execute executes the request
 //
 //	@return bool
-func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error) {
+func (a *PreviewAPIService) IsSandboxPublicExecute(r PreviewAPIIsSandboxPublicRequest) (bool, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -194,14 +191,13 @@ func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthToken
 		localVarReturnValue bool
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsValidAuthToken")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsSandboxPublic")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/preview/{workspaceId}/validate/{authToken}"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
-	localVarPath = strings.Replace(localVarPath, "{"+"authToken"+"}", url.PathEscape(parameterValueToString(r.authToken, "authToken")), -1)
+	localVarPath := localBasePath + "/preview/{sandboxId}/public"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -261,35 +257,38 @@ func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthToken
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type PreviewAPIIsWorkspacePublicRequest struct {
-	ctx         context.Context
-	ApiService  PreviewAPI
-	workspaceId string
+type PreviewAPIIsValidAuthTokenRequest struct {
+	ctx        context.Context
+	ApiService PreviewAPI
+	sandboxId  string
+	authToken  string
 }
 
-func (r PreviewAPIIsWorkspacePublicRequest) Execute() (bool, *http.Response, error) {
-	return r.ApiService.IsWorkspacePublicExecute(r)
+func (r PreviewAPIIsValidAuthTokenRequest) Execute() (bool, *http.Response, error) {
+	return r.ApiService.IsValidAuthTokenExecute(r)
 }
 
 /*
-IsWorkspacePublic Check if workspace is public
+IsValidAuthToken Check if sandbox auth token is valid
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param workspaceId ID of the workspace
-	@return PreviewAPIIsWorkspacePublicRequest
+	@param sandboxId ID of the sandbox
+	@param authToken Auth token of the sandbox
+	@return PreviewAPIIsValidAuthTokenRequest
 */
-func (a *PreviewAPIService) IsWorkspacePublic(ctx context.Context, workspaceId string) PreviewAPIIsWorkspacePublicRequest {
-	return PreviewAPIIsWorkspacePublicRequest{
-		ApiService:  a,
-		ctx:         ctx,
-		workspaceId: workspaceId,
+func (a *PreviewAPIService) IsValidAuthToken(ctx context.Context, sandboxId string, authToken string) PreviewAPIIsValidAuthTokenRequest {
+	return PreviewAPIIsValidAuthTokenRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+		authToken:  authToken,
 	}
 }
 
 // Execute executes the request
 //
 //	@return bool
-func (a *PreviewAPIService) IsWorkspacePublicExecute(r PreviewAPIIsWorkspacePublicRequest) (bool, *http.Response, error) {
+func (a *PreviewAPIService) IsValidAuthTokenExecute(r PreviewAPIIsValidAuthTokenRequest) (bool, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
@@ -297,13 +296,14 @@ func (a *PreviewAPIService) IsWorkspacePublicExecute(r PreviewAPIIsWorkspacePubl
 		localVarReturnValue bool
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsWorkspacePublic")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "PreviewAPIService.IsValidAuthToken")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/preview/{workspaceId}/public"
-	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath := localBasePath + "/preview/{sandboxId}/validate/{authToken}"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"authToken"+"}", url.PathEscape(parameterValueToString(r.authToken, "authToken")), -1)
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
