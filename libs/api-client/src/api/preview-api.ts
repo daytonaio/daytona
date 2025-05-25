@@ -39,17 +39,17 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
   return {
     /**
      *
-     * @summary Check if user has access to the workspace
-     * @param {string} workspaceId
+     * @summary Check if user has access to the sandbox
+     * @param {string} sandboxId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    hasWorkspaceAccess: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('hasWorkspaceAccess', 'workspaceId', workspaceId)
-      const localVarPath = `/preview/{workspaceId}/access`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
+    hasSandboxAccess: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('hasSandboxAccess', 'sandboxId', sandboxId)
+      const localVarPath = `/preview/{sandboxId}/access`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
       )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -79,24 +79,18 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Check if workspace auth token is valid
-     * @param {string} workspaceId ID of the workspace
-     * @param {string} authToken Auth token of the workspace
+     * @summary Check if sandbox is public
+     * @param {string} sandboxId ID of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    isValidAuthToken: async (
-      workspaceId: string,
-      authToken: string,
-      options: RawAxiosRequestConfig = {},
-    ): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('isValidAuthToken', 'workspaceId', workspaceId)
-      // verify required parameter 'authToken' is not null or undefined
-      assertParamExists('isValidAuthToken', 'authToken', authToken)
-      const localVarPath = `/preview/{workspaceId}/validate/{authToken}`
-        .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
-        .replace(`{${'authToken'}}`, encodeURIComponent(String(authToken)))
+    isSandboxPublic: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('isSandboxPublic', 'sandboxId', sandboxId)
+      const localVarPath = `/preview/{sandboxId}/public`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -119,18 +113,24 @@ export const PreviewApiAxiosParamCreator = function (configuration?: Configurati
     },
     /**
      *
-     * @summary Check if workspace is public
-     * @param {string} workspaceId ID of the workspace
+     * @summary Check if sandbox auth token is valid
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} authToken Auth token of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    isWorkspacePublic: async (workspaceId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-      // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('isWorkspacePublic', 'workspaceId', workspaceId)
-      const localVarPath = `/preview/{workspaceId}/public`.replace(
-        `{${'workspaceId'}}`,
-        encodeURIComponent(String(workspaceId)),
-      )
+    isValidAuthToken: async (
+      sandboxId: string,
+      authToken: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('isValidAuthToken', 'sandboxId', sandboxId)
+      // verify required parameter 'authToken' is not null or undefined
+      assertParamExists('isValidAuthToken', 'authToken', authToken)
+      const localVarPath = `/preview/{sandboxId}/validate/{authToken}`
+        .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
+        .replace(`{${'authToken'}}`, encodeURIComponent(String(authToken)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -163,19 +163,19 @@ export const PreviewApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @summary Check if user has access to the workspace
-     * @param {string} workspaceId
+     * @summary Check if user has access to the sandbox
+     * @param {string} sandboxId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async hasWorkspaceAccess(
-      workspaceId: string,
+    async hasSandboxAccess(
+      sandboxId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.hasWorkspaceAccess(workspaceId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.hasSandboxAccess(sandboxId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['PreviewApi.hasWorkspaceAccess']?.[localVarOperationServerIndex]?.url
+        operationServerMap['PreviewApi.hasSandboxAccess']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -186,44 +186,44 @@ export const PreviewApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Check if workspace auth token is valid
-     * @param {string} workspaceId ID of the workspace
-     * @param {string} authToken Auth token of the workspace
+     * @summary Check if sandbox is public
+     * @param {string} sandboxId ID of the sandbox
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async isSandboxPublic(
+      sandboxId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.isSandboxPublic(sandboxId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['PreviewApi.isSandboxPublic']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Check if sandbox auth token is valid
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} authToken Auth token of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async isValidAuthToken(
-      workspaceId: string,
+      sandboxId: string,
       authToken: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.isValidAuthToken(workspaceId, authToken, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.isValidAuthToken(sandboxId, authToken, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['PreviewApi.isValidAuthToken']?.[localVarOperationServerIndex]?.url
-      return (axios, basePath) =>
-        createRequestFunction(
-          localVarAxiosArgs,
-          globalAxios,
-          BASE_PATH,
-          configuration,
-        )(axios, localVarOperationServerBasePath || basePath)
-    },
-    /**
-     *
-     * @summary Check if workspace is public
-     * @param {string} workspaceId ID of the workspace
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     */
-    async isWorkspacePublic(
-      workspaceId: string,
-      options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<boolean>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.isWorkspacePublic(workspaceId, options)
-      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
-      const localVarOperationServerBasePath =
-        operationServerMap['PreviewApi.isWorkspacePublic']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -244,34 +244,34 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
   return {
     /**
      *
-     * @summary Check if user has access to the workspace
-     * @param {string} workspaceId
+     * @summary Check if user has access to the sandbox
+     * @param {string} sandboxId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    hasWorkspaceAccess(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.hasWorkspaceAccess(workspaceId, options).then((request) => request(axios, basePath))
+    hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.hasSandboxAccess(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Check if workspace auth token is valid
-     * @param {string} workspaceId ID of the workspace
-     * @param {string} authToken Auth token of the workspace
+     * @summary Check if sandbox is public
+     * @param {string} sandboxId ID of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    isValidAuthToken(workspaceId: string, authToken: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-      return localVarFp.isValidAuthToken(workspaceId, authToken, options).then((request) => request(axios, basePath))
+    isSandboxPublic(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+      return localVarFp.isSandboxPublic(sandboxId, options).then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Check if workspace is public
-     * @param {string} workspaceId ID of the workspace
+     * @summary Check if sandbox auth token is valid
+     * @param {string} sandboxId ID of the sandbox
+     * @param {string} authToken Auth token of the sandbox
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    isWorkspacePublic(workspaceId: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
-      return localVarFp.isWorkspacePublic(workspaceId, options).then((request) => request(axios, basePath))
+    isValidAuthToken(sandboxId: string, authToken: string, options?: RawAxiosRequestConfig): AxiosPromise<boolean> {
+      return localVarFp.isValidAuthToken(sandboxId, authToken, options).then((request) => request(axios, basePath))
     },
   }
 }
@@ -285,44 +285,44 @@ export const PreviewApiFactory = function (configuration?: Configuration, basePa
 export class PreviewApi extends BaseAPI {
   /**
    *
-   * @summary Check if user has access to the workspace
-   * @param {string} workspaceId
+   * @summary Check if user has access to the sandbox
+   * @param {string} sandboxId
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof PreviewApi
    */
-  public hasWorkspaceAccess(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public hasSandboxAccess(sandboxId: string, options?: RawAxiosRequestConfig) {
     return PreviewApiFp(this.configuration)
-      .hasWorkspaceAccess(workspaceId, options)
+      .hasSandboxAccess(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Check if workspace auth token is valid
-   * @param {string} workspaceId ID of the workspace
-   * @param {string} authToken Auth token of the workspace
+   * @summary Check if sandbox is public
+   * @param {string} sandboxId ID of the sandbox
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof PreviewApi
    */
-  public isValidAuthToken(workspaceId: string, authToken: string, options?: RawAxiosRequestConfig) {
+  public isSandboxPublic(sandboxId: string, options?: RawAxiosRequestConfig) {
     return PreviewApiFp(this.configuration)
-      .isValidAuthToken(workspaceId, authToken, options)
+      .isSandboxPublic(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Check if workspace is public
-   * @param {string} workspaceId ID of the workspace
+   * @summary Check if sandbox auth token is valid
+   * @param {string} sandboxId ID of the sandbox
+   * @param {string} authToken Auth token of the sandbox
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof PreviewApi
    */
-  public isWorkspacePublic(workspaceId: string, options?: RawAxiosRequestConfig) {
+  public isValidAuthToken(sandboxId: string, authToken: string, options?: RawAxiosRequestConfig) {
     return PreviewApiFp(this.configuration)
-      .isWorkspacePublic(workspaceId, options)
+      .isValidAuthToken(sandboxId, authToken, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

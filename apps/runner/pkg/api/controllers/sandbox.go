@@ -26,7 +26,7 @@ import (
 //	@Failure		404	{object}	common.ErrorResponse
 //	@Failure		409	{object}	common.ErrorResponse
 //	@Failure		500	{object}	common.ErrorResponse
-//	@Router			/workspaces [post]
+//	@Router			/sandboxes [post]
 //
 //	@id				Create
 func Create(ctx *gin.Context) {
@@ -58,18 +58,18 @@ func Create(ctx *gin.Context) {
 //	@Summary		Destroy sandbox
 //	@Description	Destroy sandbox
 //	@Produce		json
-//	@Param			workspaceId	path		string	true	"Sandbox ID"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox destroyed"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/destroy [post]
+//	@Router			/sandboxes/{sandboxId}/destroy [post]
 //
 //	@id				Destroy
 func Destroy(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 
@@ -92,7 +92,7 @@ func Destroy(ctx *gin.Context) {
 //	@Summary		Create sandbox backup
 //	@Description	Create sandbox backup
 //	@Produce		json
-//	@Param			workspaceId	path		string				true	"Sandbox ID"
+//	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Param			sandbox		body		dto.CreateBackupDTO	true	"Create backup"
 //	@Success		201			{string}	string				"Backup created"
 //	@Failure		400			{object}	common.ErrorResponse
@@ -100,11 +100,11 @@ func Destroy(ctx *gin.Context) {
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/backup [post]
+//	@Router			/sandboxes/{sandboxId}/backup [post]
 //
 //	@id				CreateBackup
 func CreateBackup(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	var createBackupDTO dto.CreateBackupDTO
 	err := ctx.ShouldBindJSON(&createBackupDTO)
@@ -131,7 +131,7 @@ func CreateBackup(ctx *gin.Context) {
 //	@Summary		Resize sandbox
 //	@Description	Resize sandbox
 //	@Produce		json
-//	@Param			workspaceId	path		string					true	"Sandbox ID"
+//	@Param			sandboxId	path		string					true	"Sandbox ID"
 //	@Param			sandbox		body		dto.ResizeSandboxDTO	true	"Resize sandbox"
 //	@Success		200			{string}	string					"Sandbox resized"
 //	@Failure		400			{object}	common.ErrorResponse
@@ -139,7 +139,7 @@ func CreateBackup(ctx *gin.Context) {
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/resize [post]
+//	@Router			/sandboxes/{sandboxId}/resize [post]
 //
 //	@id				Resize
 func Resize(ctx *gin.Context) {
@@ -150,7 +150,7 @@ func Resize(ctx *gin.Context) {
 		return
 	}
 
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 
@@ -170,18 +170,18 @@ func Resize(ctx *gin.Context) {
 //	@Summary		Start sandbox
 //	@Description	Start sandbox
 //	@Produce		json
-//	@Param			workspaceId	path		string	true	"Sandbox ID"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox started"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/start [post]
+//	@Router			/sandboxes/{sandboxId}/start [post]
 //
 //	@id				Start
 func Start(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 
@@ -201,18 +201,18 @@ func Start(ctx *gin.Context) {
 //	@Summary		Stop sandbox
 //	@Description	Stop sandbox
 //	@Produce		json
-//	@Param			workspaceId	path		string	true	"Sandbox ID"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox stopped"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId}/stop [post]
+//	@Router			/sandboxes/{sandboxId}/stop [post]
 //
 //	@id				Stop
 func Stop(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 
@@ -232,18 +232,18 @@ func Stop(ctx *gin.Context) {
 //	@Summary		Get sandbox info
 //	@Description	Get sandbox info
 //	@Produce		json
-//	@Param			workspaceId	path		string				true	"Sandbox ID"
+//	@Param			sandboxId	path		string				true	"Sandbox ID"
 //	@Success		200			{object}	SandboxInfoResponse	"Sandbox info"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId} [get]
+//	@Router			/sandboxes/{sandboxId} [get]
 //
 //	@id				Info
 func Info(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 
@@ -266,18 +266,18 @@ type SandboxInfoResponse struct {
 //	@Summary		Remove a destroyed sandbox
 //	@Description	Remove a sandbox that has been previously destroyed
 //	@Produce		json
-//	@Param			workspaceId	path		string	true	"Sandbox ID"
+//	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Success		200			{string}	string	"Sandbox removed"
 //	@Failure		400			{object}	common.ErrorResponse
 //	@Failure		401			{object}	common.ErrorResponse
 //	@Failure		404			{object}	common.ErrorResponse
 //	@Failure		409			{object}	common.ErrorResponse
 //	@Failure		500			{object}	common.ErrorResponse
-//	@Router			/workspaces/{workspaceId} [delete]
+//	@Router			/sandboxes/{sandboxId} [delete]
 //
 //	@id				RemoveDestroyed
 func RemoveDestroyed(ctx *gin.Context) {
-	sandboxId := ctx.Param("workspaceId")
+	sandboxId := ctx.Param("sandboxId")
 
 	runner := runner.GetInstance(nil)
 

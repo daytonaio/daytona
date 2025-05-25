@@ -24,7 +24,7 @@ var StopCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -34,7 +34,7 @@ var StopCmd = &cobra.Command{
 				var stoppedCount int
 
 				for _, w := range sandboxList {
-					res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, w.Id).Execute()
+					res, err := apiClient.SandboxAPI.StopSandbox(ctx, w.Id).Execute()
 					if err != nil {
 						fmt.Printf("Failed to stop sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
@@ -62,7 +62,7 @@ var StopCmd = &cobra.Command{
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:
-			res, err := apiClient.WorkspaceAPI.StopWorkspace(ctx, stopArg).Execute()
+			res, err := apiClient.SandboxAPI.StopSandbox(ctx, stopArg).Execute()
 			if err != nil {
 				return apiclient.HandleErrorResponse(res, err)
 			}
