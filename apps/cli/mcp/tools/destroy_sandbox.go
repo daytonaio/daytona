@@ -37,7 +37,7 @@ func DestroySandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.Call
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		_, err := apiClient.WorkspaceAPI.DeleteWorkspace(ctx, sandboxId).Force(true).Execute()
+		_, err := apiClient.SandboxAPI.DeleteSandbox(ctx, sandboxId).Force(true).Execute()
 		if err != nil {
 			if retry == maxRetries-1 {
 				return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to destroy sandbox after %d retries: %v", maxRetries, err)

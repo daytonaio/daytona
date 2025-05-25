@@ -14,13 +14,13 @@ import {
 import { Observable } from 'rxjs'
 import { tap } from 'rxjs/operators'
 import { PostHog } from 'posthog-node'
-import { WorkspaceDto } from '../workspace/dto/workspace.dto'
+import { SandboxDto } from '../sandbox/dto/sandbox.dto'
 import { DockerRegistryDto } from '../docker-registry/dto/docker-registry.dto'
-import { CreateWorkspaceDto } from '../workspace/dto/create-workspace.dto'
+import { CreateSandboxDto } from '../sandbox/dto/create-sandbox.dto'
 import { Request } from 'express'
-import { CreateSnapshotDto } from '../workspace/dto/create-snapshot.dto'
-import { SnapshotDto } from '../workspace/dto/snapshot.dto'
-import { ToggleStateDto } from '../workspace/dto/toggle-state.dto'
+import { CreateSnapshotDto } from '../sandbox/dto/create-snapshot.dto'
+import { SnapshotDto } from '../sandbox/dto/snapshot.dto'
+import { ToggleStateDto } from '../sandbox/dto/toggle-state.dto'
 import { CreateOrganizationDto } from '../organization/dto/create-organization.dto'
 import { UpdateOrganizationQuotaDto } from '../organization/dto/update-organization-quota.dto'
 import { OrganizationDto } from '../organization/dto/organization.dto'
@@ -31,9 +31,9 @@ import { UpdateOrganizationRoleDto } from '../organization/dto/update-organizati
 import { CreateOrganizationInvitationDto } from '../organization/dto/create-organization-invitation.dto'
 import { UpdateOrganizationInvitationDto } from '../organization/dto/update-organization-invitation.dto'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { BuildSnapshotDto } from '../workspace/dto/build-snapshot.dto'
-import { CreateVolumeDto } from '../workspace/dto/create-volume.dto'
-import { VolumeDto } from '../workspace/dto/volume.dto'
+import { BuildSnapshotDto } from '../sandbox/dto/build-snapshot.dto'
+import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
+import { VolumeDto } from '../sandbox/dto/volume.dto'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -128,26 +128,26 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/docker-registry':
             this.captureCreateDockerRegistry(props, response)
             break
-          case '/api/workspace':
-            this.captureCreateWorkspace(props, request.body, response)
+          case '/api/sandbox':
+            this.captureCreateSandbox(props, request.body, response)
             break
-          case '/api/workspace/:workspaceId/start':
-            this.captureStartWorkspace(props, request.params.workspaceId)
+          case '/api/sandbox/:sandboxId/start':
+            this.captureStartSandbox(props, request.params.sandboxId)
             break
-          case '/api/workspace/:workspaceId/stop':
-            this.captureStopWorkspace(props, request.params.workspaceId)
+          case '/api/sandbox/:sandboxId/stop':
+            this.captureStopSandbox(props, request.params.sandboxId)
             break
-          case '/api/workspace/:workspaceId/backup':
-            this.captureCreateBackup(props, request.params.workspaceId)
+          case '/api/sandbox/:sandboxId/backup':
+            this.captureCreateBackup(props, request.params.sandboxId)
             break
-          case '/api/workspace/:workspaceId/public/:isPublic':
-            this.captureUpdatePublicStatus(props, request.params.workspaceId, request.params.isPublic === 'true')
+          case '/api/sandbox/:sandboxId/public/:isPublic':
+            this.captureUpdatePublicStatus(props, request.params.sandboxId, request.params.isPublic === 'true')
             break
-          case '/api/workspace/:workspaceId/autostop/:interval':
-            this.captureSetAutostopInterval(props, request.params.workspaceId, parseInt(request.params.interval))
+          case '/api/sandbox/:sandboxId/autostop/:interval':
+            this.captureSetAutostopInterval(props, request.params.sandboxId, parseInt(request.params.interval))
             break
-          case '/api/workspace/:workspaceId/autoarchive/:interval':
-            this.captureSetAutoArchiveInterval(props, request.params.workspaceId, parseInt(request.params.interval))
+          case '/api/sandbox/:sandboxId/autoarchive/:interval':
+            this.captureSetAutoArchiveInterval(props, request.params.sandboxId, parseInt(request.params.interval))
             break
           case '/api/organizations/invitations/:invitationId/accept':
             this.captureAcceptInvitation(props, request.params.invitationId)
@@ -193,8 +193,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'DELETE':
         switch (request.route.path) {
-          case '/api/workspace/:workspaceId':
-            this.captureDeleteWorkspace(props, request.params.workspaceId)
+          case '/api/sandbox/:sandboxId':
+            this.captureDeleteSandbox(props, request.params.sandboxId)
             break
           case '/api/snapshots/:snapshotId':
             this.captureDeleteSnapshot(props, request.params.snapshotId)
@@ -215,8 +215,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
       case 'PUT':
         switch (request.route.path) {
-          case '/api/workspace/:workspaceId/labels':
-            this.captureUpdateWorkspaceLabels(props, request.params.workspaceId)
+          case '/api/sandbox/:sandboxId/labels':
+            this.captureUpdateSandboxLabels(props, request.params.sandboxId)
             break
           case '/api/organizations/:organizationId/roles/:roleId':
             this.captureUpdateOrganizationRole(
@@ -247,86 +247,86 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
         break
     }
 
-    if (!request.route.path.startsWith('/api/toolbox/:workspaceId/toolbox')) {
+    if (!request.route.path.startsWith('/api/toolbox/:sandboxId/toolbox')) {
       return
     }
 
-    const path = request.route.path.replace('/api/toolbox/:workspaceId/toolbox', '')
+    const path = request.route.path.replace('/api/toolbox/:sandboxId/toolbox', '')
 
     switch (path) {
       case '/project-dir':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'project-dir_get')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'project-dir_get')
         break
       case '/files':
         switch (request.method) {
           case 'GET':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'files_list')
+            this.captureToolboxCommand(props, request.params.sandboxId, 'files_list')
             break
           case 'DELETE':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'files_delete')
+            this.captureToolboxCommand(props, request.params.sandboxId, 'files_delete')
             break
         }
         break
       case '/files/download':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_download')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_download')
         break
       case '/files/find':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_find')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_find')
         break
       case '/files/folder':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_folder_create')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_folder_create')
         break
       case '/files/info':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_info')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_info')
         break
       case '/files/move':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_move')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_move')
         break
       case '/files/permissions':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_permissions')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_permissions')
         break
       case '/files/replace':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_replace')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_replace')
         break
       case '/files/search':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_search')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_search')
         break
       case '/files/upload':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'files_upload')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'files_upload')
         break
       case '/git/add':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_add')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_add')
         break
       case '/git/branches':
         switch (request.method) {
           case 'GET':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'git_branches_list')
+            this.captureToolboxCommand(props, request.params.sandboxId, 'git_branches_list')
             break
           case 'POST':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'git_branches_create')
+            this.captureToolboxCommand(props, request.params.sandboxId, 'git_branches_create')
             break
         }
         break
       case '/git/clone':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_clone')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_clone')
         break
       case '/git/commit':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_commit')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_commit')
         break
       case '/git/history':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_history')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_history')
         break
       case '/git/pull':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_pull')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_pull')
         break
       case '/git/push':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_push')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_push')
         break
       case '/git/status':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'git_status')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'git_status')
         break
       case '/process/execute':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'process_execute', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'process_execute', {
           command: request.body.command,
           cwd: request.body.cwd,
           exit_code: response.exitCode,
@@ -336,10 +336,10 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case '/process/session':
         switch (request.method) {
           case 'GET':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_list')
+            this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_list')
             break
           case 'POST':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_create', {
+            this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_create', {
               session_id: request.body.sessionId,
             })
             break
@@ -348,59 +348,59 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case '/process/session/:sessionId':
         switch (request.method) {
           case 'GET':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_get', {
+            this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_get', {
               session_id: request.params.sessionId,
             })
             break
           case 'DELETE':
-            this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_delete', {
+            this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_delete', {
               session_id: request.params.sessionId,
             })
             break
         }
         break
       case '/process/session/:sessionId/exec':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_execute', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_execute', {
           session_id: request.params.sessionId,
           command: request.body.command,
         })
         break
       case '/process/session/:sessionId/command/:commandId':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_command_get', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_command_get', {
           session_id: request.params.sessionId,
           command_id: request.params.commandId,
         })
         break
       case '/process/session/:sessionId/command/:commandId/logs':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'process_session_command_logs', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'process_session_command_logs', {
           session_id: request.params.sessionId,
           command_id: request.params.commandId,
         })
         break
       case '/lsp/completions':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_completions')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_completions')
         break
       case '/lsp/did-close':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_did_close')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_did_close')
         break
       case '/lsp/did-open':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_did_open')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_did_open')
         break
       case '/lsp/document-symbols':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_document_symbols')
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_document_symbols')
         break
       case '/lsp/start':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_start', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_start', {
           language_id: request.body.languageId,
         })
         break
       case '/lsp/stop':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_stop', {
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_stop', {
           language_id: request.body.languageId,
         })
         break
-      case '/lsp/workspace-symbols':
-        this.captureToolboxCommand(props, request.params.workspaceId, 'lsp_workspace_symbols', {
+      case '/lsp/sandbox-symbols':
+        this.captureToolboxCommand(props, request.params.sandboxId, 'lsp_sandbox_symbols', {
           language_id: request.query.languageId,
           path_to_project: request.query.pathToProject,
           query: request.query.query,
@@ -449,7 +449,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureCreateWorkspace(props: CommonCaptureProps, request: CreateWorkspaceDto, response: WorkspaceDto) {
+  private captureCreateSandbox(props: CommonCaptureProps, request: CreateSandboxDto, response: SandboxDto) {
     const envVarsLength = request.env ? Object.keys(request.env).length : 0
 
     const records = {
@@ -488,19 +488,19 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_sandbox_created', props, 'api_sandbox_creation_failed', records)
   }
 
-  private captureDeleteWorkspace(props: CommonCaptureProps, sandboxId: string) {
+  private captureDeleteSandbox(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_deleted', props, 'api_sandbox_deletion_failed', {
       sandbox_id: sandboxId,
     })
   }
 
-  private captureStartWorkspace(props: CommonCaptureProps, sandboxId: string) {
+  private captureStartSandbox(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_started', props, 'api_sandbox_start_failed', {
       sandbox_id: sandboxId,
     })
   }
 
-  private captureStopWorkspace(props: CommonCaptureProps, sandboxId: string) {
+  private captureStopSandbox(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_stopped', props, 'api_sandbox_stop_failed', {
       sandbox_id: sandboxId,
     })
@@ -533,7 +533,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     })
   }
 
-  private captureUpdateWorkspaceLabels(props: CommonCaptureProps, sandboxId: string) {
+  private captureUpdateSandboxLabels(props: CommonCaptureProps, sandboxId: string) {
     this.capture('api_sandbox_labels_update', props, 'api_sandbox_labels_update_failed', {
       sandbox_id: sandboxId,
     })
@@ -593,11 +593,9 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       organization_total_cpu_quota: request.totalCpuQuota,
       organization_total_memory_quota_mb: request.totalMemoryQuota ? request.totalMemoryQuota * 1024 : null,
       organization_total_disk_quota_gb: request.totalDiskQuota,
-      organization_max_cpu_per_workspace: request.maxCpuPerWorkspace,
-      organization_max_memory_per_workspace_mb: request.maxMemoryPerWorkspace
-        ? request.maxMemoryPerWorkspace * 1024
-        : null,
-      organization_max_disk_per_workspace_gb: request.maxDiskPerWorkspace,
+      organization_max_cpu_per_sandbox: request.maxCpuPerSandbox,
+      organization_max_memory_per_sandbox_mb: request.maxMemoryPerSandbox ? request.maxMemoryPerSandbox * 1024 : null,
+      organization_max_disk_per_sandbox_gb: request.maxDiskPerSandbox,
       organization_snapshot_quota: request.snapshotQuota,
       organization_max_snapshot_size_mb: request.maxSnapshotSize ? request.maxSnapshotSize * 1024 : null,
       organization_volume_quota: request.volumeQuota,

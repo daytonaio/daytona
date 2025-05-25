@@ -39,7 +39,7 @@ func FileUpload(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallTool
 	overwrite := request.Params.Arguments["overwrite"].(bool)
 
 	// Get the sandbox using sandbox ID
-	sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxId).Execute()
+	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to get sandbox: %v", err)
 	}

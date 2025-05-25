@@ -10,7 +10,7 @@ import { OrganizationService } from './organization/services/organization.servic
 import { UserService } from './user/user.service'
 import { ApiKeyService } from './api-key/api-key.service'
 import { EventEmitterReadinessWatcher } from '@nestjs/event-emitter'
-import { SnapshotService } from './workspace/services/snapshot.service'
+import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 
@@ -50,9 +50,9 @@ export class AppService implements OnApplicationBootstrap {
         totalCpuQuota: 0,
         totalMemoryQuota: 0,
         totalDiskQuota: 0,
-        maxCpuPerWorkspace: 0,
-        maxMemoryPerWorkspace: 0,
-        maxDiskPerWorkspace: 0,
+        maxCpuPerSandbox: 0,
+        maxMemoryPerSandbox: 0,
+        maxDiskPerSandbox: 0,
         snapshotQuota: 100,
         maxSnapshotSize: 100,
         volumeQuota: 0,
