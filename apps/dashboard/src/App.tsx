@@ -142,7 +142,14 @@ function App() {
               </RequiredPermissionsOrganizationPageWrapper>
             }
           />
-          <Route path={getRouteSubPath(RoutePath.LIMITS)} element={<Limits />} />
+          <Route
+            path={getRouteSubPath(RoutePath.LIMITS)}
+            element={
+              <OwnerAccessOrganizationPageWrapper>
+                <Limits />
+              </OwnerAccessOrganizationPageWrapper>
+            }
+          />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
               path={getRouteSubPath(RoutePath.BILLING)}
