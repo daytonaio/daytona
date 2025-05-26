@@ -61,14 +61,14 @@ func (d *DockerClient) DeduceSandboxState(ctx context.Context, sandboxId string)
 }
 
 // isContainerPullingImage checks if the container is still in image pulling phase
-func (d *DockerClient) isContainerPullingImage(containerId string) bool {
+func (d *DockerClient) isContainerPullingImage(containerName string) bool {
 	options := container.LogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
 		Tail:       "10", // Look at last 10 lines
 	}
 
-	logs, err := d.apiClient.ContainerLogs(context.Background(), containerId, options)
+	logs, err := d.apiClient.ContainerLogs(context.Background(), containerName, options)
 	if err != nil {
 		return false
 	}
