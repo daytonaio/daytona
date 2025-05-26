@@ -2233,6 +2233,43 @@ paths:
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/branches:
+    delete:
+      description: Delete branch on git repository
+      operationId: gitDeleteBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitDeleteBranchRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete branch
+      tags:
+        - toolbox
     get:
       description: Get branch list from git repository
       operationId: gitListBranches
@@ -5445,6 +5482,19 @@ components:
         - branches
       type: object
     GitBranchRequest:
+      example:
+        path: path
+        name: name
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - path
+      type: object
+    GitDeleteBranchRequest:
       example:
         path: path
         name: name

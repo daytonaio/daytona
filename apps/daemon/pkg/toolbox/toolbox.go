@@ -115,6 +115,7 @@ func (s *Server) Start() error {
 		gitController.POST("/add", git.AddFiles)
 		gitController.POST("/branches", git.CreateBranch)
 		gitController.POST("/checkout", git.CheckoutBranch)
+		gitController.DELETE("/branches", git.DeleteBranch)
 		gitController.POST("/clone", git.CloneRepository)
 		gitController.POST("/commit", git.CommitChanges)
 		gitController.POST("/pull", git.PullChanges)
