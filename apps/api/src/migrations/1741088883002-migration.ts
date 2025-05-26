@@ -51,8 +51,8 @@ export class Migration1741088883002 implements MigrationInterface {
           'Images Admin', 
           'Grants admin access to images in the organization', 
           ARRAY[
-            '${OrganizationResourcePermission.WRITE_SNAPSHOTS}',
-            '${OrganizationResourcePermission.DELETE_SNAPSHOTS}'
+            'write:images',
+            'delete:images'
           ]::organization_role_permissions_enum[],
           TRUE
         )
@@ -85,8 +85,8 @@ export class Migration1741088883002 implements MigrationInterface {
           ARRAY[
             '${OrganizationResourcePermission.WRITE_REGISTRIES}',
             '${OrganizationResourcePermission.DELETE_REGISTRIES}',
-            '${OrganizationResourcePermission.WRITE_SNAPSHOTS}',
-            '${OrganizationResourcePermission.DELETE_SNAPSHOTS}',
+            'write:images',
+            'delete:images',
             '${OrganizationResourcePermission.WRITE_SANDBOXES}',
             '${OrganizationResourcePermission.DELETE_SANDBOXES}'
           ]::organization_role_permissions_enum[],

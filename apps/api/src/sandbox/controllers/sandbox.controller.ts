@@ -58,6 +58,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -131,24 +132,29 @@ export class SandboxController {
     @Body() createSandboxDto: CreateSandboxDto,
   ): Promise<SandboxDto> {
     const organization = authContext.organization
+    let sandbox: SandboxDto
 
-    const sandbox = await this.sandboxService.create(organization.id, createSandboxDto, organization)
+    if (createSandboxDto.buildInfo) {
+      if (createSandboxDto.snapshot) {
+        throw new BadRequestError('Cannot specify a snapshot when using a build info entry')
+      }
+      sandbox = await this.sandboxService.createFromBuildInfo(createSandboxDto, organization)
+    } else {
+      if (createSandboxDto.cpu || createSandboxDto.gpu || createSandboxDto.memory || createSandboxDto.disk) {
+        throw new BadRequestError('Cannot specify Sandbox resources when using a snapshot')
+      }
+      sandbox = await this.sandboxService.createFromSnapshot(createSandboxDto, organization)
 
-    // If the sandbox has no runner, it means it is still building - return the ID to the client so they can fetch logs
-    if (sandbox.runnerId) {
-      // Wait for sandbox to be started
+      // Wait for the sandbox to start
       const sandboxState = await this.waitForSandboxState(
         sandbox.id,
         SandboxState.STARTED,
         30000, // 30 seconds timeout
       )
-
       sandbox.state = sandboxState
     }
 
-    const runner = await this.runnerService.findOne(sandbox.runnerId)
-    const dto = SandboxDto.fromSandbox(sandbox, runner.domain)
-    return dto
+    return sandbox
   }
 
   @Get(':sandboxId')

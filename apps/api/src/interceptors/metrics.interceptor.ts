@@ -44,6 +44,7 @@ type CommonCaptureProps = {
   userAgent: string
   error?: string
   source: string
+  isDeprecated?: boolean
 }
 
 @Injectable()
@@ -111,6 +112,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       userAgent,
       error,
       source: Array.isArray(source) ? source[0] : source,
+      isDeprecated: request.route.path.contains('/workspace') || request.route.path.contains('/images'),
     }
 
     switch (request.method) {
@@ -424,7 +426,12 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_snapshot_created', props, 'api_snapshot_creation_failed', {
       snapshot_id: response.id,
       snapshot_name: request.name,
+      snapshot_image_name: request.imageName,
       snapshot_entrypoint: request.entrypoint,
+      snapshot_cpu: request.cpu,
+      snapshot_gpu: request.gpu,
+      snapshot_memory: request.memory,
+      snapshot_disk: request.disk,
     })
   }
 
@@ -763,6 +770,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       user_agent: props.userAgent,
       error: props.error,
       source: props.source,
+      is_deprecated: props.isDeprecated,
     }
   }
 

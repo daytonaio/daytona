@@ -32,21 +32,31 @@ export class SnapshotService {
     private readonly buildInfoRepository: Repository<BuildInfo>,
   ) {}
 
-  private validateSnapshotName(name: string): string | null {
+  private validateImageName(name: string): string | null {
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Snapshot name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag (e.g., ubuntu:22.04)'
     }
 
     if (name.endsWith(':latest')) {
-      return 'Snapshots with tag ":latest" are not allowed'
+      return 'Images with tag ":latest" are not allowed'
     }
 
     // Basic format check
-    const snapshotNameRegex =
+    const imageNameRegex =
       /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
 
+    if (!imageNameRegex.test(name)) {
+      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+    }
+
+    return null
+  }
+
+  private validateSnapshotName(name: string): string | null {
+    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
+
     if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
     }
 
     return null
@@ -58,9 +68,14 @@ export class SnapshotService {
     buildInfo?: CreateBuildInfoDto,
     general = false,
   ) {
-    const validationError = this.validateSnapshotName(createSnapshotDto.name)
-    if (validationError) {
-      throw new BadRequestException(validationError)
+    const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+    if (imageValidationError) {
+      throw new BadRequestException(imageValidationError)
+    }
+
+    const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
+    if (nameValidationError) {
+      throw new BadRequestException(nameValidationError)
     }
 
     // check if the organization has reached the snapshot quota
@@ -71,6 +86,13 @@ export class SnapshotService {
     if (snapshots.length >= organization.snapshotQuota) {
       throw new ForbiddenException('Reached the maximum number of snapshots in the organization')
     }
+
+    await this.validateOrganizationMaxQuotas(
+      organization,
+      createSnapshotDto.cpu,
+      createSnapshotDto.memory,
+      createSnapshotDto.disk,
+    )
 
     try {
       const snapshot = this.snapshotRepository.create({
@@ -144,8 +166,10 @@ export class SnapshotService {
     const limitNum = Number(limit)
 
     const [items, total] = await this.snapshotRepository.findAndCount({
-      where: { organizationId },
+      // Retrieve all snapshots belonging to the organization as well as all general snapshots
+      where: [{ organizationId }, { general: true }],
       order: {
+        general: 'ASC', // Sort general snapshots last
         lastUsedAt: {
           direction: 'DESC',
           nulls: 'LAST',
@@ -176,7 +200,7 @@ export class SnapshotService {
     return snapshot
   }
 
-  async getSnapshotName(snapshotName: string, organizationId: string): Promise<Snapshot> {
+  async getSnapshotByName(snapshotName: string, organizationId: string): Promise<Snapshot> {
     const snapshot = await this.snapshotRepository.findOne({
       where: { name: snapshotName, organizationId },
     })
@@ -209,13 +233,36 @@ export class SnapshotService {
     return await this.snapshotRepository.save(snapshot)
   }
 
+  private async validateOrganizationMaxQuotas(
+    organization: Organization,
+    cpu: number,
+    memory: number,
+    disk: number,
+  ): Promise<void> {
+    if (cpu > organization.maxCpuPerSandbox) {
+      throw new ForbiddenException(
+        `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
+      )
+    }
+    if (memory > organization.maxMemoryPerSandbox) {
+      throw new ForbiddenException(
+        `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
+      )
+    }
+    if (disk > organization.maxDiskPerSandbox) {
+      throw new ForbiddenException(
+        `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
+      )
+    }
+  }
+
   @OnEvent(SandboxEvents.CREATED)
   private async handleSandboxCreatedEvent(event: SandboxCreatedEvent) {
     if (!event.sandbox.snapshot) {
       return
     }
 
-    const snapshot = await this.getSnapshotName(event.sandbox.snapshot, event.sandbox.organizationId)
+    const snapshot = await this.getSnapshotByName(event.sandbox.snapshot, event.sandbox.organizationId)
     snapshot.lastUsedAt = event.sandbox.createdAt
     await this.snapshotRepository.save(snapshot)
   }

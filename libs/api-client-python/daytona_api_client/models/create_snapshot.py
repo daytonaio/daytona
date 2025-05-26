@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
@@ -30,10 +30,15 @@ class CreateSnapshot(BaseModel):
     """  # noqa: E501
 
     name: StrictStr = Field(description="The name of the snapshot")
+    image_name: StrictStr = Field(description="The image name of the snapshot", alias="imageName")
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     general: Optional[StrictBool] = Field(default=None, description="Whether the snapshot is general")
+    cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
+    gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
+    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
+    disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "entrypoint", "general"]
+    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -94,7 +99,16 @@ class CreateSnapshot(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate(
-            {"name": obj.get("name"), "entrypoint": obj.get("entrypoint"), "general": obj.get("general")}
+            {
+                "name": obj.get("name"),
+                "imageName": obj.get("imageName"),
+                "entrypoint": obj.get("entrypoint"),
+                "general": obj.get("general"),
+                "cpu": obj.get("cpu"),
+                "gpu": obj.get("gpu"),
+                "memory": obj.get("memory"),
+                "disk": obj.get("disk"),
+            }
         )
         # store additional fields in additional_properties
         for _key in obj.keys():

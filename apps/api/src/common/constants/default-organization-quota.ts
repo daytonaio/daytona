@@ -12,7 +12,7 @@ export const DEFAULT_ORGANIZATION_QUOTA: CreateOrganizationQuotaDto = {
   maxCpuPerSandbox: 4,
   maxMemoryPerSandbox: 8,
   maxDiskPerSandbox: 10,
-  snapshotQuota: 5,
-  maxSnapshotSize: 5,
-  volumeQuota: 10,
+  snapshotQuota: 100,
+  maxSnapshotSize: 20,
+  volumeQuota: 100,
 }

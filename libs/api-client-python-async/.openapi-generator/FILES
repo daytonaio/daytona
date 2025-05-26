@@ -12,6 +12,7 @@ daytona_api_client_async/api/snapshots_api.py
 daytona_api_client_async/api/toolbox_api.py
 daytona_api_client_async/api/users_api.py
 daytona_api_client_async/api/volumes_api.py
+daytona_api_client_async/api/workspace_api.py
 daytona_api_client_async/api_client.py
 daytona_api_client_async/api_response.py
 daytona_api_client_async/configuration.py

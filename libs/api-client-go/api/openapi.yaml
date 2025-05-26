@@ -3705,6 +3705,518 @@ paths:
       summary: Get snapshot build logs
       tags:
         - snapshots
+  /workspace:
+    get:
+      deprecated: true
+      operationId: listWorkspaces_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: JSON encoded labels to filter by
+          explode: true
+          in: query
+          name: labels
+          required: false
+          schema:
+            example: '{"label1": "value1", "label2": "value2"}'
+            type: string
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Sandbox'
+                type: array
+          description: List of all workspacees
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] List all workspaces'
+      tags:
+        - workspace
+    post:
+      deprecated: true
+      operationId: createWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSandbox'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: The workspace has been successfully created.
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Create a new workspace'
+      tags:
+        - workspace
+  /workspace/{workspaceId}:
+    delete:
+      deprecated: true
+      operationId: deleteWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: force
+          required: true
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          description: Workspace has been deleted
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Delete workspace'
+      tags:
+        - workspace
+    get:
+      deprecated: true
+      operationId: getWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: Include verbose output
+          explode: true
+          in: query
+          name: verbose
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Workspace details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Get workspace details'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/start:
+    post:
+      deprecated: true
+      operationId: startWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been started
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Start workspace'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/stop:
+    post:
+      deprecated: true
+      operationId: stopWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been stopped
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Stop workspace'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/labels:
+    put:
+      deprecated: true
+      operationId: replaceLabelsWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SandboxLabels'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SandboxLabels'
+          description: Labels have been successfully replaced
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Replace workspace labels'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/backup:
+    post:
+      deprecated: true
+      operationId: createBackupWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sandbox'
+          description: Workspace backup has been initiated
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Create workspace backup'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/public/{isPublic}:
+    post:
+      deprecated: true
+      operationId: updatePublicStatusWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Public status to set
+          explode: false
+          in: path
+          name: isPublic
+          required: true
+          schema:
+            type: boolean
+          style: simple
+      responses:
+        '201':
+          description: ''
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Update public status'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/autostop/{interval}:
+    post:
+      deprecated: true
+      operationId: setAutostopIntervalWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auto-stop interval in minutes (0 to disable)
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-stop interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Set workspace auto-stop interval'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/archive:
+    post:
+      deprecated: true
+      operationId: archiveWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Workspace has been archived
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Archive workspace'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/ports/{port}/preview-url:
+    get:
+      deprecated: true
+      operationId: getPortPreviewUrlWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Port number to get preview URL for
+          explode: false
+          in: path
+          name: port
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortPreviewUrl'
+          description: Preview URL for the specified port
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Get preview URL for a workspace port'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/build-logs:
+    get:
+      deprecated: true
+      operationId: getBuildLogsWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Whether to follow the logs stream
+          explode: true
+          in: query
+          name: follow
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          description: Build logs stream
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Get build logs'
+      tags:
+        - workspace
   /preview/{sandboxId}/public:
     get:
       operationId: isSandboxPublic
@@ -5280,7 +5792,7 @@ components:
       type: object
     CreateSandbox:
       example:
-        memory: 4096
+        memory: 1
         buildInfo: ''
         volumes:
           - mountPath: /data
@@ -5295,7 +5807,7 @@ components:
         labels:
           daytona.io/public: 'true'
         target: eu
-        disk: 20
+        disk: 3
         public: false
         user: daytona
         class: small
@@ -5353,12 +5865,12 @@ components:
           example: 1
           type: integer
         memory:
-          description: Memory allocated to the sandbox in MB
-          example: 4096
+          description: Memory allocated to the sandbox in GB
+          example: 1
           type: integer
         disk:
           description: Disk space allocated to the sandbox in GB
-          example: 20
+          example: 3
           type: integer
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
@@ -6158,12 +6670,21 @@ components:
     CreateSnapshot:
       example:
         general: true
+        disk: 3
+        imageName: ubuntu:22.04
+        memory: 1
         entrypoint: sleep infinity
-        name: my-docker-snapshot:8.0.1-alpha
+        name: ubuntu-4vcpu-8ram-100gb
+        cpu: 1
+        gpu: 0
       properties:
         name:
           description: The name of the snapshot
-          example: my-docker-snapshot:8.0.1-alpha
+          example: ubuntu-4vcpu-8ram-100gb
+          type: string
+        imageName:
+          description: The image name of the snapshot
+          example: ubuntu:22.04
           type: string
         entrypoint:
           description: The entrypoint command for the snapshot
@@ -6174,7 +6695,24 @@ components:
         general:
           description: Whether the snapshot is general
           type: boolean
+        cpu:
+          description: CPU cores allocated to the resulting sandbox
+          example: 1
+          type: integer
+        gpu:
+          description: GPU units allocated to the resulting sandbox
+          example: 0
+          type: integer
+        memory:
+          description: Memory allocated to the resulting sandbox in GB
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to the sandbox in GB
+          example: 3
+          type: integer
       required:
+        - imageName
         - name
       type: object
     SnapshotState:
@@ -6191,10 +6729,16 @@ components:
       type: string
     SnapshotDto:
       example:
+        imageName: imageName
+        cpu: 6.027456183070403
+        gpu: 1.4658129805029452
+        enabled: true
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
+        disk: 5.637376656633329
         size: 0.8008281904610115
+        mem: 5.962133916683182
         lastUsedAt: 2000-01-23T04:56:07.000+00:00
         entrypoint:
           - entrypoint
@@ -6203,7 +6747,6 @@ components:
         name: name
         id: id
         state: ''
-        enabled: true
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -6213,6 +6756,8 @@ components:
         general:
           type: boolean
         name:
+          type: string
+        imageName:
           type: string
         enabled:
           type: boolean
@@ -6227,6 +6772,14 @@ components:
             type: string
           nullable: true
           type: array
+        cpu:
+          type: number
+        gpu:
+          type: number
+        mem:
+          type: number
+        disk:
+          type: number
         errorReason:
           nullable: true
           type: string
@@ -6241,13 +6794,18 @@ components:
           nullable: true
           type: string
       required:
+        - cpu
         - createdAt
+        - disk
         - enabled
         - entrypoint
         - errorReason
         - general
+        - gpu
         - id
+        - imageName
         - lastUsedAt
+        - mem
         - name
         - size
         - state
@@ -6256,11 +6814,11 @@ components:
     BuildSnapshot:
       example:
         buildInfo: ''
-        name: my-custom-snapshot:1.0.0
+        name: my-custom-snapshot-v1
       properties:
         name:
           description: The name of the snapshot to build
-          example: my-custom-snapshot:1.0.0
+          example: my-custom-snapshot-v1
           type: string
         buildInfo:
           allOf:
@@ -6283,14 +6841,20 @@ components:
       type: object
     PaginatedSnapshotsDto:
       example:
-        total: 6.027456183070403
-        totalPages: 5.962133916683182
-        page: 1.4658129805029452
+        total: 2.3021358869347655
+        totalPages: 9.301444243932576
+        page: 7.061401241503109
         items:
-          - organizationId: organizationId
+          - imageName: imageName
+            cpu: 6.027456183070403
+            gpu: 1.4658129805029452
+            enabled: true
+            organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            disk: 5.637376656633329
             size: 0.8008281904610115
+            mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
             entrypoint:
               - entrypoint
@@ -6299,12 +6863,17 @@ components:
             name: name
             id: id
             state: ''
-            enabled: true
             updatedAt: 2000-01-23T04:56:07.000+00:00
-          - organizationId: organizationId
+          - imageName: imageName
+            cpu: 6.027456183070403
+            gpu: 1.4658129805029452
+            enabled: true
+            organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            disk: 5.637376656633329
             size: 0.8008281904610115
+            mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
             entrypoint:
               - entrypoint
@@ -6313,7 +6882,6 @@ components:
             name: name
             id: id
             state: ''
-            enabled: true
             updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         items:
