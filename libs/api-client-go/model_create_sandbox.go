@@ -38,7 +38,7 @@ type CreateSandbox struct {
 	Cpu *int32 `json:"cpu,omitempty"`
 	// GPU units allocated to the sandbox
 	Gpu *int32 `json:"gpu,omitempty"`
-	// Memory allocated to the sandbox in MB
+	// Memory allocated to the sandbox in GB
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`

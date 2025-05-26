@@ -383,11 +383,11 @@ export class SnapshotManager {
             case SnapshotState.PENDING_VALIDATION:
               //  temp workaround to avoid race condition between api instances
               {
-                let snapshotName = snapshot.name
+                let imageName = snapshot.imageName
                 if (snapshot.buildInfo) {
-                  snapshotName = snapshot.internalName
+                  imageName = snapshot.internalName
                 }
-                if (!(await this.dockerProvider.imageExists(snapshotName))) {
+                if (!(await this.dockerProvider.imageExists(imageName))) {
                   await this.redisLockProvider.unlock(lockKey)
                   return
                 }
@@ -523,18 +523,16 @@ export class SnapshotManager {
       const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
 
       // Find a runner to build the snapshot on
-      const runnerId = await this.runnerService.getRandomAvailableRunner({
+      const runner = await this.runnerService.getRandomAvailableRunner({
         excludedRunnerIds: excludedRunnerIds,
       })
 
       // TODO: get only runners where the base snapshot is available (extract from buildInfo)
 
-      if (!runnerId) {
+      if (!runner) {
         // No ready runners available, retry later
         return
       }
-
-      const runner = await this.runnerService.findOne(runnerId)
 
       // Assign the runner ID to the snapshot for tracking build progress
       snapshot.buildRunnerId = runner.id
@@ -544,7 +542,7 @@ export class SnapshotManager {
 
       const runnerSnapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
-      const tag = snapshot.name.split(':')[1] // Tag existance had already been validated
+      const tag = snapshot.imageName.split(':')[1] // Tag existance had already been validated
       const snapshotIdWithTag = `${snapshot.id}:${tag}`
 
       await runnerSnapshotApi.buildSnapshot({
@@ -589,23 +587,26 @@ export class SnapshotManager {
 
     await this.updateSnapshotState(snapshot.id, SnapshotState.PULLING)
 
-    let localSnapshotName = snapshot.name
+    let localImageName = snapshot.imageName
 
     if (snapshot.buildInfo) {
       //  get the default internal registry
       dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-      localSnapshotName = snapshot.internalName
+      localImageName = snapshot.internalName
     } else {
       //  find docker registry based on snapshot name and organization id
-      dockerRegistry = await this.dockerRegistryService.findOneBySnapshotName(snapshot.name, snapshot.organizationId)
+      dockerRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(
+        snapshot.imageName,
+        snapshot.organizationId,
+      )
     }
 
     // Use the dockerRegistry for pulling the snapshot
-    await this.dockerProvider.pullImage(localSnapshotName, dockerRegistry)
+    await this.dockerProvider.pullImage(localImageName, dockerRegistry)
   }
 
   async handleSnapshotStatePulling(snapshot: Snapshot) {
-    const localSnapshotName = snapshot.buildInfo ? snapshot.internalName : snapshot.name
+    const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
     // Check timeout first
     const timeoutMinutes = 15
     const timeoutMs = timeoutMinutes * 60 * 1000
@@ -614,7 +615,7 @@ export class SnapshotManager {
       return
     }
 
-    const snapshotExists = await this.dockerProvider.imageExists(localSnapshotName)
+    const snapshotExists = await this.dockerProvider.imageExists(localImageName)
     if (!snapshotExists) {
       //  retry until the snapshot exists (or eventually timeout)
       return
@@ -631,7 +632,7 @@ export class SnapshotManager {
     }
 
     // Check snapshot size
-    const snapshotInfo = await this.dockerProvider.getImageInfo(localSnapshotName)
+    const snapshotInfo = await this.dockerProvider.getImageInfo(localImageName)
     const MAX_SIZE_GB = organization.maxSnapshotSize
 
     if (snapshotInfo.sizeGB > MAX_SIZE_GB) {
@@ -676,10 +677,13 @@ export class SnapshotManager {
       await this.updateSnapshotState(snapshot.id, SnapshotState.ACTIVE)
 
       // Best effort removal of old snapshot from transient registry
-      const registry = await this.dockerRegistryService.findOneBySnapshotName(snapshot.name, snapshot.organizationId)
+      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
+        snapshot.imageName,
+        snapshot.organizationId,
+      )
       if (registry && registry.registryType === RegistryType.TRANSIENT) {
         try {
-          await this.dockerRegistryService.removeImage(snapshot.name, registry.id)
+          await this.dockerRegistryService.removeImage(snapshot.imageName, registry.id)
         } catch (error) {
           if (error.statusCode === 404) {
             //  snapshot not found, just return
@@ -717,10 +721,10 @@ export class SnapshotManager {
     let containerId: string | null = null
 
     try {
-      const localSnapshotName = snapshot.buildInfo ? snapshot.internalName : snapshot.name
+      const localImageName = snapshot.buildInfo ? snapshot.internalName : snapshot.imageName
 
       // Create and start the container
-      containerId = await this.dockerProvider.create(localSnapshotName, snapshot.entrypoint)
+      containerId = await this.dockerProvider.create(localImageName, snapshot.entrypoint)
 
       // Wait for 1 minute while checking container state
       const startTime = Date.now()
@@ -761,14 +765,14 @@ export class SnapshotManager {
     }
 
     //  get tag from snapshot name
-    const tag = snapshot.name.split(':')[1]
+    const tag = snapshot.imageName.split(':')[1]
     const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.id}:${tag}`
 
     snapshot.internalName = internalSnapshotName
     await this.snapshotRepository.save(snapshot)
 
     // Tag the snapshot with the internal registry name
-    await this.dockerProvider.tagImage(snapshot.name, internalSnapshotName)
+    await this.dockerProvider.tagImage(snapshot.imageName, internalSnapshotName)
 
     // Push the newly tagged snapshot
     await this.dockerProvider.pushImage(internalSnapshotName, registry)
