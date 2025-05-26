@@ -40,6 +40,7 @@ import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { BackupManager } from './managers/backup.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
+import { WorkspaceController } from './controllers/workspace.deprecated.controller'
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { VolumeSubscriber } from './subscribers/volume.subscriber'
     RunnerController,
     ToolboxController,
     SnapshotController,
+    WorkspaceController,
     PreviewController,
     VolumeController,
   ],

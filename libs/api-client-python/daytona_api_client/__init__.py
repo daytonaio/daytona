@@ -29,6 +29,7 @@ from daytona_api_client.api.snapshots_api import SnapshotsApi
 from daytona_api_client.api.toolbox_api import ToolboxApi
 from daytona_api_client.api.users_api import UsersApi
 from daytona_api_client.api.volumes_api import VolumesApi
+from daytona_api_client.api.workspace_api import WorkspaceApi
 
 # import ApiClient
 from daytona_api_client.api_response import ApiResponse
