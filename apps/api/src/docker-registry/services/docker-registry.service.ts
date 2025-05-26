@@ -127,15 +127,15 @@ export class DockerRegistryService {
     })
   }
 
-  async findOneBySnapshotName(snapshotname: string, organizationId?: string): Promise<DockerRegistry | null> {
+  async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const registries = await this.dockerRegistryRepository.find({
       where: [...(organizationId && [{ organizationId }]), { organizationId: IsNull() }],
     })
 
-    // Try to find a registry that matches the snapshot name pattern
+    // Try to find a registry that matches the snapshot image name pattern
     for (const registry of registries) {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
-      if (snapshotname.startsWith(strippedUrl)) {
+      if (imageName.startsWith(strippedUrl)) {
         return registry
       }
     }

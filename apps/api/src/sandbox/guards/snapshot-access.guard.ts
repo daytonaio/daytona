@@ -27,7 +27,7 @@ export class SnapshotAccessGuard implements CanActivate {
       request.snapshot = snapshot
       return true
     } catch (error) {
-      throw new NotFoundException(`Image with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
     }
   }
 }

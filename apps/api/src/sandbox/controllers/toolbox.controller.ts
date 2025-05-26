@@ -125,7 +125,7 @@ export class ToolboxController {
         // eslint-disable-next-line no-useless-escape
         const sandboxId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
         const routePath = path.split(`/api/toolbox/${sandboxId}/toolbox`)[1]
-        const newPath = `/sandboxes/${sandboxId}/main/toolbox${routePath}`
+        const newPath = `/sandboxes/${sandboxId}/toolbox${routePath}`
 
         return newPath
       },
