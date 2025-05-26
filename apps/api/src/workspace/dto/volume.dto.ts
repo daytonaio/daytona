@@ -4,7 +4,9 @@
  */
 
 import { ApiProperty } from '@nestjs/swagger'
+import { IsEnum } from 'class-validator'
 import { VolumeState } from '../enums/volume-state.enum'
+import { Volume } from '../entities/volume.entity'
 
 export class VolumeDto {
   @ApiProperty({
@@ -28,8 +30,10 @@ export class VolumeDto {
   @ApiProperty({
     description: 'Volume state',
     enum: VolumeState,
+    enumName: 'VolumeState',
     example: VolumeState.READY,
   })
+  @IsEnum(VolumeState)
   state: VolumeState
 
   @ApiProperty({
@@ -49,4 +53,24 @@ export class VolumeDto {
     example: '2023-01-01T00:00:00.000Z',
   })
   lastUsedAt: string
+
+  @ApiProperty({
+    description: 'The error reason of the volume',
+    example: 'Error processing volume',
+    nullable: true,
+  })
+  errorReason?: string
+
+  static fromVolume(volume: Volume): VolumeDto {
+    return {
+      id: volume.id,
+      name: volume.name,
+      organizationId: volume.organizationId,
+      state: volume.state,
+      createdAt: volume.createdAt?.toISOString(),
+      updatedAt: volume.updatedAt?.toISOString(),
+      lastUsedAt: volume.lastUsedAt?.toISOString(),
+      errorReason: volume.errorReason,
+    }
+  }
 }

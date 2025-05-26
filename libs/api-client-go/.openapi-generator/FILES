@@ -89,6 +89,7 @@ model_usage_overview.go
 model_user.go
 model_user_public_key.go
 model_volume_dto.go
+model_volume_state.go
 model_workspace.go
 model_workspace_info.go
 model_workspace_labels.go
