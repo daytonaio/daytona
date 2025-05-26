@@ -41,7 +41,6 @@ export class Migration1748121897392 implements MigrationInterface {
     await queryRunner.renameTable('image', 'snapshot')
     await queryRunner.renameColumn('snapshot', 'buildInfoImageRef', 'buildInfoSnapshotRef')
     await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME VALUE 'pulling_image' TO 'pulling'`)
-    await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME VALUE 'building_image' TO 'building'`)
 
     await queryRunner.renameColumn('workspace', 'image', 'snapshot')
     await queryRunner.renameColumn('workspace', 'buildInfoImageRef', 'buildInfoSnapshotRef')
@@ -69,7 +68,6 @@ export class Migration1748121897392 implements MigrationInterface {
     await queryRunner.renameColumn('workspace', 'snapshot', 'image')
 
     await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME VALUE 'pulling' TO 'pulling_image'`)
-    await queryRunner.query(`ALTER TYPE "public"."snapshot_state_enum" RENAME VALUE 'building' TO 'building_image'`)
     await queryRunner.renameColumn('snapshot', 'buildInfoSnapshotRef', 'buildInfoImageRef')
     await queryRunner.renameTable('snapshot', 'image')
 
