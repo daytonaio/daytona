@@ -25,18 +25,15 @@ func (d *DockerClient) Destroy(ctx context.Context, containerId string) error {
 		}
 	}()
 
-	state, err := d.DeduceSandboxState(ctx, containerId)
-	if err != nil && state == enums.SandboxStateError {
-		return err
-	}
-
+	// Ignore err because we want to destroy the container even if it exited
+	state, _ := d.DeduceSandboxState(ctx, containerId)
 	if state == enums.SandboxStateDestroyed || state == enums.SandboxStateDestroying {
 		return nil
 	}
 
 	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroying)
 
-	_, err = d.ContainerInspect(ctx, containerId)
+	_, err := d.ContainerInspect(ctx, containerId)
 	if err != nil {
 		if errdefs.IsNotFound(err) {
 			d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateDestroyed)
