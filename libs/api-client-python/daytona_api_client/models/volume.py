@@ -24,9 +24,9 @@ from daytona_api_client.models.volume_state import VolumeState
 from typing import Optional, Set
 from typing_extensions import Self
 
-class VolumeDto(BaseModel):
+class Volume(BaseModel):
     """
-    VolumeDto
+    Volume
     """ # noqa: E501
     id: StrictStr = Field(description="Volume ID")
     name: StrictStr = Field(description="Volume name")
@@ -57,7 +57,7 @@ class VolumeDto(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of VolumeDto from a JSON string"""
+        """Create an instance of Volume from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -94,7 +94,7 @@ class VolumeDto(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of VolumeDto from a dict"""
+        """Create an instance of Volume from a dict"""
         if obj is None:
             return None
 

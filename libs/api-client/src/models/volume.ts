@@ -19,55 +19,55 @@ import type { VolumeState } from './volume-state'
 /**
  *
  * @export
- * @interface VolumeDto
+ * @interface Volume
  */
-export interface VolumeDto {
+export interface Volume {
   /**
    * Volume ID
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   id: string
   /**
    * Volume name
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   name: string
   /**
    * Organization ID
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   organizationId: string
   /**
    * Volume state
    * @type {VolumeState}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   state: VolumeState
   /**
    * Creation timestamp
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   createdAt: string
   /**
    * Last update timestamp
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   updatedAt: string
   /**
    * Last used timestamp
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   lastUsedAt: string
   /**
    * The error reason of the volume
    * @type {string}
-   * @memberof VolumeDto
+   * @memberof Volume
    */
   errorReason: string | null
 }

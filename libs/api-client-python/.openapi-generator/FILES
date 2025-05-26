@@ -92,6 +92,7 @@ daytona_api_client/models/usage_overview.py
 daytona_api_client/models/user.py
 daytona_api_client/models/user_public_key.py
 daytona_api_client/models/volume_dto.py
+daytona_api_client/models/volume_state.py
 daytona_api_client/models/workspace.py
 daytona_api_client/models/workspace_info.py
 daytona_api_client/models/workspace_labels.py

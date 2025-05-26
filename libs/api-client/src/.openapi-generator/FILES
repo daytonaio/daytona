@@ -93,6 +93,7 @@ models/usage-overview.ts
 models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
+models/volume-state.ts
 models/workspace-info.ts
 models/workspace-labels.ts
 models/workspace-state.ts

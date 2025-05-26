@@ -12,6 +12,9 @@ import { CreateVolumeDto } from '../dto/create-volume.dto'
 import { v4 as uuidv4 } from 'uuid'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Organization } from '../../organization/entities/organization.entity'
+import { OnEvent } from '@nestjs/event-emitter'
+import { WorkspaceEvents } from '../constants/workspace-events.constants'
+import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 
 @Injectable()
 export class VolumeService {
@@ -53,7 +56,6 @@ export class VolumeService {
 
     volume.organizationId = organization.id
     volume.state = VolumeState.PENDING_CREATE
-    volume.lastUsedAt = new Date()
 
     const savedVolume = await this.volumeRepository.save(volume)
     this.logger.debug(`Created volume ${savedVolume.id} for organization ${organization.id}`)
@@ -99,6 +101,13 @@ export class VolumeService {
         organizationId,
         ...(includeDeleted ? {} : { state: Not(VolumeState.DELETED) }),
       },
+      order: {
+        lastUsedAt: {
+          direction: 'DESC',
+          nulls: 'LAST',
+        },
+        createdAt: 'DESC',
+      },
     })
   }
 
@@ -125,5 +134,34 @@ export class VolumeService {
         state: Not(In([VolumeState.DELETED, VolumeState.ERROR])),
       },
     })
+  }
+
+  @OnEvent(WorkspaceEvents.CREATED)
+  private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
+    if (!event.workspace.volumes.length) {
+      return
+    }
+
+    try {
+      const volumeIds = event.workspace.volumes.map((vol) => vol.volumeId)
+      const volumes = await this.volumeRepository.find({ where: { id: In(volumeIds) } })
+
+      const results = await Promise.allSettled(
+        volumes.map((volume) => {
+          volume.lastUsedAt = event.workspace.createdAt
+          return this.volumeRepository.save(volume)
+        }),
+      )
+
+      results.forEach((result) => {
+        if (result.status === 'rejected') {
+          this.logger.error(
+            `Failed to update volume lastUsedAt timestamp for workspace ${event.workspace.id}: ${result.reason}`,
+          )
+        }
+      })
+    } catch (err) {
+      this.logger.error(err)
+    }
   }
 }
