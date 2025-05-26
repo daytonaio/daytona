@@ -60,7 +60,7 @@ import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 
 @ApiTags('sandbox')
-@Controller('sandbox')
+@Controller(['sandbox', 'workspace'])
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
 @UseGuards(CombinedAuthGuard, OrganizationResourceActionGuard)
 @ApiOAuth2(['openid', 'profile', 'email'])
