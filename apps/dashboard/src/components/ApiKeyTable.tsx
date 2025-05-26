@@ -30,6 +30,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { Pagination } from './Pagination'
 import { Loader2 } from 'lucide-react'
 import { useTableSorting } from '@/hooks/useTableSorting'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: ApiKeyList[]
