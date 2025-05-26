@@ -17,11 +17,11 @@ import (
 	"fmt"
 )
 
-// checks if the VolumeDto type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &VolumeDto{}
+// checks if the Volume type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Volume{}
 
-// VolumeDto struct for VolumeDto
-type VolumeDto struct {
+// Volume struct for Volume
+type Volume struct {
 	// Volume ID
 	Id string `json:"id"`
 	// Volume name
@@ -40,14 +40,14 @@ type VolumeDto struct {
 	ErrorReason NullableString `json:"errorReason"`
 }
 
-type _VolumeDto VolumeDto
+type _Volume Volume
 
-// NewVolumeDto instantiates a new VolumeDto object
+// NewVolume instantiates a new Volume object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt string, errorReason NullableString) *VolumeDto {
-	this := VolumeDto{}
+func NewVolume(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt string, errorReason NullableString) *Volume {
+	this := Volume{}
 	this.Id = id
 	this.Name = name
 	this.OrganizationId = organizationId
@@ -59,16 +59,16 @@ func NewVolumeDto(id string, name string, organizationId string, state VolumeSta
 	return &this
 }
 
-// NewVolumeDtoWithDefaults instantiates a new VolumeDto object
+// NewVolumeWithDefaults instantiates a new Volume object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewVolumeDtoWithDefaults() *VolumeDto {
-	this := VolumeDto{}
+func NewVolumeWithDefaults() *Volume {
+	this := Volume{}
 	return &this
 }
 
 // GetId returns the Id field value
-func (o *VolumeDto) GetId() string {
+func (o *Volume) GetId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -79,7 +79,7 @@ func (o *VolumeDto) GetId() string {
 
 // GetIdOk returns a tuple with the Id field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetIdOk() (*string, bool) {
+func (o *Volume) GetIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -87,12 +87,12 @@ func (o *VolumeDto) GetIdOk() (*string, bool) {
 }
 
 // SetId sets field value
-func (o *VolumeDto) SetId(v string) {
+func (o *Volume) SetId(v string) {
 	o.Id = v
 }
 
 // GetName returns the Name field value
-func (o *VolumeDto) GetName() string {
+func (o *Volume) GetName() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -103,7 +103,7 @@ func (o *VolumeDto) GetName() string {
 
 // GetNameOk returns a tuple with the Name field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetNameOk() (*string, bool) {
+func (o *Volume) GetNameOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -111,12 +111,12 @@ func (o *VolumeDto) GetNameOk() (*string, bool) {
 }
 
 // SetName sets field value
-func (o *VolumeDto) SetName(v string) {
+func (o *Volume) SetName(v string) {
 	o.Name = v
 }
 
 // GetOrganizationId returns the OrganizationId field value
-func (o *VolumeDto) GetOrganizationId() string {
+func (o *Volume) GetOrganizationId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -127,7 +127,7 @@ func (o *VolumeDto) GetOrganizationId() string {
 
 // GetOrganizationIdOk returns a tuple with the OrganizationId field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetOrganizationIdOk() (*string, bool) {
+func (o *Volume) GetOrganizationIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -135,12 +135,12 @@ func (o *VolumeDto) GetOrganizationIdOk() (*string, bool) {
 }
 
 // SetOrganizationId sets field value
-func (o *VolumeDto) SetOrganizationId(v string) {
+func (o *Volume) SetOrganizationId(v string) {
 	o.OrganizationId = v
 }
 
 // GetState returns the State field value
-func (o *VolumeDto) GetState() VolumeState {
+func (o *Volume) GetState() VolumeState {
 	if o == nil {
 		var ret VolumeState
 		return ret
@@ -151,7 +151,7 @@ func (o *VolumeDto) GetState() VolumeState {
 
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetStateOk() (*VolumeState, bool) {
+func (o *Volume) GetStateOk() (*VolumeState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -159,12 +159,12 @@ func (o *VolumeDto) GetStateOk() (*VolumeState, bool) {
 }
 
 // SetState sets field value
-func (o *VolumeDto) SetState(v VolumeState) {
+func (o *Volume) SetState(v VolumeState) {
 	o.State = v
 }
 
 // GetCreatedAt returns the CreatedAt field value
-func (o *VolumeDto) GetCreatedAt() string {
+func (o *Volume) GetCreatedAt() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -175,7 +175,7 @@ func (o *VolumeDto) GetCreatedAt() string {
 
 // GetCreatedAtOk returns a tuple with the CreatedAt field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetCreatedAtOk() (*string, bool) {
+func (o *Volume) GetCreatedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -183,12 +183,12 @@ func (o *VolumeDto) GetCreatedAtOk() (*string, bool) {
 }
 
 // SetCreatedAt sets field value
-func (o *VolumeDto) SetCreatedAt(v string) {
+func (o *Volume) SetCreatedAt(v string) {
 	o.CreatedAt = v
 }
 
 // GetUpdatedAt returns the UpdatedAt field value
-func (o *VolumeDto) GetUpdatedAt() string {
+func (o *Volume) GetUpdatedAt() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -199,7 +199,7 @@ func (o *VolumeDto) GetUpdatedAt() string {
 
 // GetUpdatedAtOk returns a tuple with the UpdatedAt field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetUpdatedAtOk() (*string, bool) {
+func (o *Volume) GetUpdatedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -207,12 +207,12 @@ func (o *VolumeDto) GetUpdatedAtOk() (*string, bool) {
 }
 
 // SetUpdatedAt sets field value
-func (o *VolumeDto) SetUpdatedAt(v string) {
+func (o *Volume) SetUpdatedAt(v string) {
 	o.UpdatedAt = v
 }
 
 // GetLastUsedAt returns the LastUsedAt field value
-func (o *VolumeDto) GetLastUsedAt() string {
+func (o *Volume) GetLastUsedAt() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -223,7 +223,7 @@ func (o *VolumeDto) GetLastUsedAt() string {
 
 // GetLastUsedAtOk returns a tuple with the LastUsedAt field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetLastUsedAtOk() (*string, bool) {
+func (o *Volume) GetLastUsedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -231,13 +231,13 @@ func (o *VolumeDto) GetLastUsedAtOk() (*string, bool) {
 }
 
 // SetLastUsedAt sets field value
-func (o *VolumeDto) SetLastUsedAt(v string) {
+func (o *Volume) SetLastUsedAt(v string) {
 	o.LastUsedAt = v
 }
 
 // GetErrorReason returns the ErrorReason field value
 // If the value is explicit nil, the zero value for string will be returned
-func (o *VolumeDto) GetErrorReason() string {
+func (o *Volume) GetErrorReason() string {
 	if o == nil || o.ErrorReason.Get() == nil {
 		var ret string
 		return ret
@@ -249,7 +249,7 @@ func (o *VolumeDto) GetErrorReason() string {
 // GetErrorReasonOk returns a tuple with the ErrorReason field value
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *VolumeDto) GetErrorReasonOk() (*string, bool) {
+func (o *Volume) GetErrorReasonOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -257,11 +257,11 @@ func (o *VolumeDto) GetErrorReasonOk() (*string, bool) {
 }
 
 // SetErrorReason sets field value
-func (o *VolumeDto) SetErrorReason(v string) {
+func (o *Volume) SetErrorReason(v string) {
 	o.ErrorReason.Set(&v)
 }
 
-func (o VolumeDto) MarshalJSON() ([]byte, error) {
+func (o Volume) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -269,7 +269,7 @@ func (o VolumeDto) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o VolumeDto) ToMap() (map[string]interface{}, error) {
+func (o Volume) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["name"] = o.Name
@@ -282,7 +282,7 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
+func (o *Volume) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -311,53 +311,53 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 		}
 	}
 
-	varVolumeDto := _VolumeDto{}
+	varVolume := _Volume{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.DisallowUnknownFields()
-	err = decoder.Decode(&varVolumeDto)
+	err = decoder.Decode(&varVolume)
 
 	if err != nil {
 		return err
 	}
 
-	*o = VolumeDto(varVolumeDto)
+	*o = Volume(varVolume)
 
 	return err
 }
 
-type NullableVolumeDto struct {
-	value *VolumeDto
+type NullableVolume struct {
+	value *Volume
 	isSet bool
 }
 
-func (v NullableVolumeDto) Get() *VolumeDto {
+func (v NullableVolume) Get() *Volume {
 	return v.value
 }
 
-func (v *NullableVolumeDto) Set(val *VolumeDto) {
+func (v *NullableVolume) Set(val *Volume) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableVolumeDto) IsSet() bool {
+func (v NullableVolume) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableVolumeDto) Unset() {
+func (v *NullableVolume) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableVolumeDto(val *VolumeDto) *NullableVolumeDto {
-	return &NullableVolumeDto{value: val, isSet: true}
+func NewNullableVolume(val *Volume) *NullableVolume {
+	return &NullableVolume{value: val, isSet: true}
 }
 
-func (v NullableVolumeDto) MarshalJSON() ([]byte, error) {
+func (v NullableVolume) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableVolumeDto) UnmarshalJSON(src []byte) error {
+func (v *NullableVolume) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

@@ -88,7 +88,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 string) (int, int) {
+func getStateSortPriorities(state1, state2 daytonaapiclient.VolumeState) (int, int) {
 	pi, ok := volumeListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -102,9 +102,12 @@ func getStateSortPriorities(state1, state2 string) (int, int) {
 }
 
 // Volumes that have actions being performed on them have a higher priority when listing
-var volumeListStatePriorities = map[string]int{
-	"creating":  1,
-	"deleting":  1,
-	"available": 2,
-	"error":     3,
+var volumeListStatePriorities = map[daytonaapiclient.VolumeState]int{
+	daytonaapiclient.VOLUMESTATE_PENDING_CREATE: 1,
+	daytonaapiclient.VOLUMESTATE_CREATING:       1,
+	daytonaapiclient.VOLUMESTATE_PENDING_DELETE: 1,
+	daytonaapiclient.VOLUMESTATE_DELETING:       1,
+	daytonaapiclient.VOLUMESTATE_READY:          2,
+	daytonaapiclient.VOLUMESTATE_ERROR:          3,
+	daytonaapiclient.VOLUMESTATE_DELETED:        4,
 }

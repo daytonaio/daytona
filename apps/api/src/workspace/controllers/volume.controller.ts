@@ -29,7 +29,6 @@ import {
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { VolumeService } from '../services/volume.service'
 import { CreateVolumeDto } from '../dto/create-volume.dto'
-import { Volume } from '../entities/volume.entity'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import { CustomHeaders } from '../../common/constants/header.constants'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
@@ -78,7 +77,7 @@ export class VolumeController {
     @Query('includeDeleted') includeDeleted = false,
   ): Promise<VolumeDto[]> {
     const volumes = await this.volumeService.findAll(authContext.organizationId, includeDeleted)
-    return volumes.map((volume) => this.toVolumeDto(volume))
+    return volumes.map(VolumeDto.fromVolume)
   }
 
   @Post()
@@ -115,7 +114,7 @@ export class VolumeController {
     }
 
     const volume = await this.volumeService.create(organization, createVolumeDto)
-    return this.toVolumeDto(volume)
+    return VolumeDto.fromVolume(volume)
   }
 
   @Get(':volumeId')
@@ -136,7 +135,7 @@ export class VolumeController {
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.READ_VOLUMES])
   async getVolume(@Param('volumeId') volumeId: string): Promise<VolumeDto> {
     const volume = await this.volumeService.findOne(volumeId)
-    return this.toVolumeDto(volume)
+    return VolumeDto.fromVolume(volume)
   }
 
   @Delete(':volumeId')
@@ -179,18 +178,6 @@ export class VolumeController {
     @Param('name') name: string,
   ): Promise<VolumeDto> {
     const volume = await this.volumeService.findByName(authContext.organizationId, name)
-    return this.toVolumeDto(volume)
-  }
-
-  private toVolumeDto(volume: Volume): VolumeDto {
-    return {
-      id: volume.id,
-      name: volume.name,
-      organizationId: volume.organizationId,
-      state: volume.state,
-      createdAt: volume.createdAt?.toISOString(),
-      updatedAt: volume.updatedAt?.toISOString(),
-      lastUsedAt: volume.lastUsedAt?.toISOString(),
-    }
+    return VolumeDto.fromVolume(volume)
   }
 }
