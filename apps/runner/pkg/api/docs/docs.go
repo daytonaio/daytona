@@ -36,28 +36,28 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/build": {
+        "/snapshots/build": {
             "post": {
-                "description": "Build a Docker image from a Dockerfile and context hashes",
+                "description": "Build a snapshot from a Dockerfile and context hashes",
                 "tags": [
-                    "images"
+                    "snapshots"
                 ],
-                "summary": "Build a Docker image",
-                "operationId": "BuildImage",
+                "summary": "Build a snapshot",
+                "operationId": "BuildSnapshot",
                 "parameters": [
                     {
-                        "description": "Build image request",
+                        "description": "Build snapshot request",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/BuildImageRequestDTO"
+                            "$ref": "#/definitions/BuildSnapshotRequestDTO"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Image successfully built",
+                        "description": "Snapshot successfully built",
                         "schema": {
                             "type": "string"
                         }
@@ -95,22 +95,22 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/exists": {
+        "/snapshots/exists": {
             "get": {
-                "description": "Check if a specified Docker image exists locally",
+                "description": "Check if a specified snapshot exists locally",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "images"
+                    "snapshots"
                 ],
-                "summary": "Check if a Docker image exists",
-                "operationId": "ImageExists",
+                "summary": "Check if a snapshot exists",
+                "operationId": "SnapshotExists",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Image name and tag",
-                        "name": "image",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
                         "in": "query",
                         "required": true
                     }
@@ -119,7 +119,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/ImageExistsResponse"
+                            "$ref": "#/definitions/SnapshotExistsResponse"
                         }
                     },
                     "400": {
@@ -155,19 +155,19 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/logs": {
+        "/snapshots/logs": {
             "get": {
                 "description": "Stream build logs",
                 "tags": [
-                    "images"
+                    "snapshots"
                 ],
                 "summary": "Get build logs",
                 "operationId": "GetBuildLogs",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Image ID or image ref without the tag",
-                        "name": "imageRef",
+                        "description": "Snapshot ID or snapshot ref without the tag",
+                        "name": "snapshotRef",
                         "in": "query",
                         "required": true
                     },
@@ -212,28 +212,28 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/pull": {
+        "/snapshots/pull": {
             "post": {
-                "description": "Pull a Docker image from a registry",
+                "description": "Pull a snapshot from a registry",
                 "tags": [
-                    "images"
+                    "snapshots"
                 ],
-                "summary": "Pull a Docker image",
-                "operationId": "PullImage",
+                "summary": "Pull a snapshot",
+                "operationId": "PullSnapshot",
                 "parameters": [
                     {
-                        "description": "Pull image",
+                        "description": "Pull snapshot",
                         "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/PullImageRequestDTO"
+                            "$ref": "#/definitions/PullSnapshotRequestDTO"
                         }
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Image successfully pulled",
+                        "description": "Snapshot successfully pulled",
                         "schema": {
                             "type": "string"
                         }
@@ -271,29 +271,29 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/remove": {
+        "/snapshots/remove": {
             "post": {
-                "description": "Remove a specified Docker image from the local system",
+                "description": "Remove a specified snapshot from the local system",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "images"
+                    "snapshots"
                 ],
-                "summary": "Remove a Docker image",
-                "operationId": "RemoveImage",
+                "summary": "Remove a snapshot",
+                "operationId": "RemoveSnapshot",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Image name and tag",
-                        "name": "image",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
                         "in": "query",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Image successfully removed",
+                        "description": "Snapshot successfully removed",
                         "schema": {
                             "type": "string"
                         }
@@ -901,7 +901,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "BuildImageRequestDTO": {
+        "BuildSnapshotRequestDTO": {
             "type": "object",
             "required": [
                 "dockerfile",
@@ -917,10 +917,6 @@ const docTemplate = `{
                 "dockerfile": {
                     "type": "string"
                 },
-                "image": {
-                    "description": "Image ID and tag or the build's hash",
-                    "type": "string"
-                },
                 "organizationId": {
                     "type": "string"
                 },
@@ -929,21 +925,25 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "description": "Snapshot ID and tag or the build's hash",
+                    "type": "string"
                 }
             }
         },
         "CreateBackupDTO": {
             "type": "object",
             "required": [
-                "image",
-                "registry"
+                "registry",
+                "snapshot"
             ],
             "properties": {
-                "image": {
-                    "type": "string"
-                },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 }
             }
         },
@@ -951,8 +951,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
-                "image",
                 "osUser",
+                "snapshot",
                 "userId"
             ],
             "properties": {
@@ -982,9 +982,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "image": {
-                    "type": "string"
-                },
                 "memoryQuota": {
                     "type": "integer",
                     "minimum": 1
@@ -994,6 +991,9 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 },
                 "storageQuota": {
                     "type": "integer",
@@ -1048,26 +1048,17 @@ const docTemplate = `{
                 }
             }
         },
-        "ImageExistsResponse": {
-            "type": "object",
-            "properties": {
-                "exists": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "PullImageRequestDTO": {
+        "PullSnapshotRequestDTO": {
             "type": "object",
             "required": [
-                "image"
+                "snapshot"
             ],
             "properties": {
-                "image": {
-                    "type": "string"
-                },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 }
             }
         },
@@ -1121,6 +1112,15 @@ const docTemplate = `{
                 }
             }
         },
+        "SnapshotExistsResponse": {
+            "type": "object",
+            "properties": {
+                "exists": {
+                    "type": "boolean",
+                    "example": true
+                }
+            }
+        },
         "dto.VolumeDTO": {
             "type": "object",
             "properties": {
@@ -1163,7 +1163,7 @@ const docTemplate = `{
                 "resizing",
                 "error",
                 "unknown",
-                "pulling_image"
+                "pulling_snapshot"
             ],
             "x-enum-varnames": [
                 "SandboxStateCreating",
@@ -1177,7 +1177,7 @@ const docTemplate = `{
                 "SandboxStateResizing",
                 "SandboxStateError",
                 "SandboxStateUnknown",
-                "SandboxStatePullingImage"
+                "SandboxStatePullingSnapshot"
             ]
         }
     },

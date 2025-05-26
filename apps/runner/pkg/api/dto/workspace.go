@@ -7,7 +7,7 @@ type CreateSandboxDTO struct {
 	Id           string            `json:"id" validate:"required"`
 	FromVolumeId string            `json:"fromVolumeId,omitempty"`
 	UserId       string            `json:"userId" validate:"required"`
-	Image        string            `json:"image" validate:"required"`
+	Snapshot     string            `json:"snapshot" validate:"required"`
 	OsUser       string            `json:"osUser" validate:"required"`
 	CpuQuota     int64             `json:"cpuQuota" validate:"min=1"`
 	GpuQuota     int64             `json:"gpuQuota" validate:"min=0"`

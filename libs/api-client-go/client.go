@@ -53,8 +53,6 @@ type APIClient struct {
 
 	DockerRegistryAPI DockerRegistryAPI
 
-	ImagesAPI ImagesAPI
-
 	ObjectStorageAPI ObjectStorageAPI
 
 	OrganizationsAPI OrganizationsAPI
@@ -62,6 +60,8 @@ type APIClient struct {
 	PreviewAPI PreviewAPI
 
 	RunnersAPI RunnersAPI
+
+	SnapshotsAPI SnapshotsAPI
 
 	ToolboxAPI ToolboxAPI
 
@@ -90,11 +90,11 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	// API Services
 	c.ApiKeysAPI = (*ApiKeysAPIService)(&c.common)
 	c.DockerRegistryAPI = (*DockerRegistryAPIService)(&c.common)
-	c.ImagesAPI = (*ImagesAPIService)(&c.common)
 	c.ObjectStorageAPI = (*ObjectStorageAPIService)(&c.common)
 	c.OrganizationsAPI = (*OrganizationsAPIService)(&c.common)
 	c.PreviewAPI = (*PreviewAPIService)(&c.common)
 	c.RunnersAPI = (*RunnersAPIService)(&c.common)
+	c.SnapshotsAPI = (*SnapshotsAPIService)(&c.common)
 	c.ToolboxAPI = (*ToolboxAPIService)(&c.common)
 	c.UsersAPI = (*UsersAPIService)(&c.common)
 	c.VolumesAPI = (*VolumesAPIService)(&c.common)

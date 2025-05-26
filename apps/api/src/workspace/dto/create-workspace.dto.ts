@@ -13,12 +13,12 @@ import { CreateBuildInfoDto } from './create-build-info.dto'
 @ApiSchema({ name: 'CreateWorkspace' })
 export class CreateWorkspaceDto {
   @ApiPropertyOptional({
-    description: 'The image used for the workspace',
+    description: 'The snapshot used for the workspace',
     example: 'daytonaio/workspace:latest',
   })
   @IsOptional()
   @IsString()
-  image?: string
+  snapshot?: string
 
   @ApiPropertyOptional({
     description: 'The user associated with the project',

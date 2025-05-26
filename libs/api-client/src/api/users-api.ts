@@ -225,23 +225,23 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
     /**
      *
      * @summary Unlink account
-     * @param {string} providerId
-     * @param {string} userId
+     * @param {string} provider
+     * @param {string} providerUserId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     unlinkAccount: async (
-      providerId: string,
-      userId: string,
+      provider: string,
+      providerUserId: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'providerId' is not null or undefined
-      assertParamExists('unlinkAccount', 'providerId', providerId)
-      // verify required parameter 'userId' is not null or undefined
-      assertParamExists('unlinkAccount', 'userId', userId)
-      const localVarPath = `/users/linked-accounts/{providerId}/{userId}`
-        .replace(`{${'providerId'}}`, encodeURIComponent(String(providerId)))
-        .replace(`{${'userId'}}`, encodeURIComponent(String(userId)))
+      // verify required parameter 'provider' is not null or undefined
+      assertParamExists('unlinkAccount', 'provider', provider)
+      // verify required parameter 'providerUserId' is not null or undefined
+      assertParamExists('unlinkAccount', 'providerUserId', providerUserId)
+      const localVarPath = `/users/linked-accounts/{provider}/{providerUserId}`
+        .replace(`{${'provider'}}`, encodeURIComponent(String(provider)))
+        .replace(`{${'providerUserId'}}`, encodeURIComponent(String(providerUserId)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
       let baseOptions
@@ -390,17 +390,17 @@ export const UsersApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary Unlink account
-     * @param {string} providerId
-     * @param {string} userId
+     * @param {string} provider
+     * @param {string} providerUserId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
     async unlinkAccount(
-      providerId: string,
-      userId: string,
+      provider: string,
+      providerUserId: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.unlinkAccount(providerId, userId, options)
+      const localVarAxiosArgs = await localVarAxiosParamCreator.unlinkAccount(provider, providerUserId, options)
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
         operationServerMap['UsersApi.unlinkAccount']?.[localVarOperationServerIndex]?.url
@@ -472,13 +472,13 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     /**
      *
      * @summary Unlink account
-     * @param {string} providerId
-     * @param {string} userId
+     * @param {string} provider
+     * @param {string} providerUserId
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    unlinkAccount(providerId: string, userId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-      return localVarFp.unlinkAccount(providerId, userId, options).then((request) => request(axios, basePath))
+    unlinkAccount(provider: string, providerUserId: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.unlinkAccount(provider, providerUserId, options).then((request) => request(axios, basePath))
     },
   }
 }
@@ -560,15 +560,15 @@ export class UsersApi extends BaseAPI {
   /**
    *
    * @summary Unlink account
-   * @param {string} providerId
-   * @param {string} userId
+   * @param {string} provider
+   * @param {string} providerUserId
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof UsersApi
    */
-  public unlinkAccount(providerId: string, userId: string, options?: RawAxiosRequestConfig) {
+  public unlinkAccount(provider: string, providerUserId: string, options?: RawAxiosRequestConfig) {
     return UsersApiFp(this.configuration)
-      .unlinkAccount(providerId, userId, options)
+      .unlinkAccount(provider, providerUserId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

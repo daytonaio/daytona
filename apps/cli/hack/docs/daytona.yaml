@@ -13,10 +13,11 @@ options:
 see_also:
   - daytona autocomplete - Adds a completion script for your shell environment
   - daytona docs - Opens the Daytona documentation in your default browser.
-  - daytona image - Manage Daytona images
   - daytona login - Log in to Daytona
   - daytona logout - Logout from Daytona
   - daytona mcp - Manage Daytona MCP Server
   - daytona organization - Manage Daytona organizations
   - daytona sandbox - Manage Daytona sandboxes
+  - daytona snapshot - Manage Daytona snapshots
   - daytona version - Print the version number
+  - daytona volume - Manage Daytona volumes

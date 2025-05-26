@@ -5,6 +5,14 @@ options:
   - name: format
     shorthand: f
     usage: Output format. Must be one of (yaml, json)
+  - name: limit
+    shorthand: l
+    default_value: '100'
+    usage: Maximum number of items per page
+  - name: page
+    shorthand: p
+    default_value: '1'
+    usage: Page number for pagination (starting from 1)
   - name: verbose
     shorthand: v
     default_value: 'false'
