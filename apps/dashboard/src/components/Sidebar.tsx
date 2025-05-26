@@ -81,14 +81,15 @@ export function Sidebar() {
       arr.push({ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES })
     }
 
+    if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
+      arr.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
+    }
+
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
     ) {
-      arr.push(
-        { icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS },
-        { icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING },
-      )
+      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
     }
 
     if (!selectedOrganization?.personal) {
