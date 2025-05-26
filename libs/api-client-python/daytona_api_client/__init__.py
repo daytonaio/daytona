@@ -75,6 +75,7 @@ from daytona_api_client.models.git_clone_request import GitCloneRequest
 from daytona_api_client.models.git_commit_info import GitCommitInfo
 from daytona_api_client.models.git_commit_request import GitCommitRequest
 from daytona_api_client.models.git_commit_response import GitCommitResponse
+from daytona_api_client.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_api_client.models.git_repo_request import GitRepoRequest
 from daytona_api_client.models.git_status import GitStatus
 from daytona_api_client.models.image_dto import ImageDto

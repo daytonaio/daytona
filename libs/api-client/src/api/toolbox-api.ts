@@ -58,6 +58,8 @@ import type { GitCommitRequest } from '../models'
 // @ts-ignore
 import type { GitCommitResponse } from '../models'
 // @ts-ignore
+import type { GitDeleteBranchRequest } from '../models'
+// @ts-ignore
 import type { GitRepoRequest } from '../models'
 // @ts-ignore
 import type { GitStatus } from '../models'
@@ -1094,6 +1096,61 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(gitBranchRequest, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     * Delete branch on git repository
+     * @summary Delete branch
+     * @param {string} workspaceId
+     * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    gitDeleteBranch: async (
+      workspaceId: string,
+      gitDeleteBranchRequest: GitDeleteBranchRequest,
+      xDaytonaOrganizationID?: string,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'workspaceId' is not null or undefined
+      assertParamExists('gitDeleteBranch', 'workspaceId', workspaceId)
+      // verify required parameter 'gitDeleteBranchRequest' is not null or undefined
+      assertParamExists('gitDeleteBranch', 'gitDeleteBranchRequest', gitDeleteBranchRequest)
+      const localVarPath = `/toolbox/{workspaceId}/toolbox/git/branches`.replace(
+        `{${'workspaceId'}}`,
+        encodeURIComponent(String(workspaceId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      if (xDaytonaOrganizationID != null) {
+        localVarHeaderParameter['X-Daytona-Organization-ID'] = String(xDaytonaOrganizationID)
+      }
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(gitDeleteBranchRequest, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -2873,6 +2930,38 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
         )(axios, localVarOperationServerBasePath || basePath)
     },
     /**
+     * Delete branch on git repository
+     * @summary Delete branch
+     * @param {string} workspaceId
+     * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async gitDeleteBranch(
+      workspaceId: string,
+      gitDeleteBranchRequest: GitDeleteBranchRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.gitDeleteBranch(
+        workspaceId,
+        gitDeleteBranchRequest,
+        xDaytonaOrganizationID,
+        options,
+      )
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['ToolboxApi.gitDeleteBranch']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
      * Get commit history from git repository
      * @summary Get commit history
      * @param {string} workspaceId
@@ -3900,6 +3989,25 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
         .then((request) => request(axios, basePath))
     },
     /**
+     * Delete branch on git repository
+     * @summary Delete branch
+     * @param {string} workspaceId
+     * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
+     * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    gitDeleteBranch(
+      workspaceId: string,
+      gitDeleteBranchRequest: GitDeleteBranchRequest,
+      xDaytonaOrganizationID?: string,
+      options?: RawAxiosRequestConfig,
+    ): AxiosPromise<void> {
+      return localVarFp
+        .gitDeleteBranch(workspaceId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
+        .then((request) => request(axios, basePath))
+    },
+    /**
      * Get commit history from git repository
      * @summary Get commit history
      * @param {string} workspaceId
@@ -4687,6 +4795,27 @@ export class ToolboxApi extends BaseAPI {
   ) {
     return ToolboxApiFp(this.configuration)
       .gitCreateBranch(workspaceId, gitBranchRequest, xDaytonaOrganizationID, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   * Delete branch on git repository
+   * @summary Delete branch
+   * @param {string} workspaceId
+   * @param {GitDeleteBranchRequest} gitDeleteBranchRequest
+   * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof ToolboxApi
+   */
+  public gitDeleteBranch(
+    workspaceId: string,
+    gitDeleteBranchRequest: GitDeleteBranchRequest,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
+    return ToolboxApiFp(this.configuration)
+      .gitDeleteBranch(workspaceId, gitDeleteBranchRequest, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

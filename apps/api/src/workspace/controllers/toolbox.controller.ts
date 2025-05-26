@@ -40,6 +40,7 @@ import {
   ReplaceResultDto,
   GitAddRequestDto,
   GitBranchRequestDto,
+  GitDeleteBranchRequestDto,
   GitCloneRequestDto,
   GitCommitRequestDto,
   GitCommitResponseDto,
@@ -524,6 +525,30 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'workspaceId', type: String, required: true })
   async gitCreateBranch(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Delete(':workspaceId/toolbox/git/branches')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Delete branch',
+    description: 'Delete branch on git repository',
+    operationId: 'gitDeleteBranch',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Branch deleted successfully',
+  })
+  @ApiBody({
+    type: GitDeleteBranchRequestDto,
+  })
+  @ApiParam({ name: 'workspaceId', type: String, required: true })
+  async gitDeleteBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,
