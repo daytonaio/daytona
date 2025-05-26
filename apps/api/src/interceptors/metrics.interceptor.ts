@@ -44,6 +44,7 @@ type CommonCaptureProps = {
   userAgent: string
   error?: string
   source: string
+  isDeprecated?: boolean
 }
 
 @Injectable()
@@ -111,6 +112,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       userAgent,
       error,
       source: Array.isArray(source) ? source[0] : source,
+      isDeprecated: request.route.path.contains('/workspace') || request.route.path.contains('/images'),
     }
 
     switch (request.method) {
@@ -751,6 +753,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       user_agent: props.userAgent,
       error: props.error,
       source: props.source,
+      is_deprecated: props.isDeprecated,
     }
   }
 

@@ -11,6 +11,7 @@ api_snapshots.go
 api_toolbox.go
 api_users.go
 api_volumes.go
+api_workspace.go
 client.go
 configuration.go
 go.mod

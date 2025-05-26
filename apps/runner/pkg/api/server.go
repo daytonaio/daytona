@@ -107,7 +107,7 @@ func (a *ApiServer) Start() error {
 
 		// Add proxy endpoint within the sandbox controller for toolbox
 		// Using Any() to handle all HTTP methods for the toolbox proxy
-		sandboxController.Any("/:sandboxId/:projectId/toolbox/*path", controllers.ProxyRequest)
+		sandboxController.Any("/:sandboxId/toolbox/*path", controllers.ProxyRequest)
 	}
 
 	snapshotController := protected.Group("/snapshots")
