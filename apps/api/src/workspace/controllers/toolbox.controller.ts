@@ -47,6 +47,7 @@ import {
   GitStatusDto,
   ListBranchResponseDto,
   GitCommitInfoDto,
+  GitCheckoutRequestDto,
   ExecuteRequestDto,
   ExecuteResponseDto,
   ProjectDirResponseDto,
@@ -65,7 +66,7 @@ import {
   LspSymbolDto,
   LspServerRequestDto,
 } from '../dto/lsp.dto'
-import { createProxyMiddleware, RequestHandler, fixRequestBody } from 'http-proxy-middleware'
+import { createProxyMiddleware, RequestHandler, fixRequestBody, Options } from 'http-proxy-middleware'
 import { IncomingMessage } from 'http'
 import { NextFunction } from 'express'
 import { ServerResponse } from 'http'
@@ -75,6 +76,7 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
+import { UploadFileDto } from '../dto/upload-file.dto'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -93,36 +95,52 @@ export class ToolboxController {
     ServerResponse<IncomingMessage>,
     NextFunction
   >
+  private readonly toolboxStreamProxy: RequestHandler<
+    RawBodyRequest<IncomingMessage>,
+    ServerResponse<IncomingMessage>,
+    NextFunction
+  >
 
   constructor(private readonly toolboxService: ToolboxService) {
-    this.toolboxProxy = createProxyMiddleware({
+    const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-        const node = await this.toolboxService.getNode(workspaceId)
+        try {
+          const node = await this.toolboxService.getNode(workspaceId)
+          // @ts-expect-error - used later to set request headers
+          req._nodeApiKey = node.apiKey
 
-        // @ts-expect-error - used later to set request headers
-        req._nodeApiKey = node.apiKey
+          return node.apiUrl
+        } catch (err) {
+          // @ts-expect-error - used later to throw error
+          req._err = err
+        }
 
-        return node.apiUrl
+        // Must return a valid url
+        return 'http://target-error'
       },
       pathRewrite: (path) => {
         // eslint-disable-next-line no-useless-escape
         const workspaceId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-
         const routePath = path.split(`/api/toolbox/${workspaceId}/toolbox`)[1]
-
         const newPath = `/workspaces/${workspaceId}/main/toolbox${routePath}`
 
         return newPath
       },
       changeOrigin: true,
       autoRewrite: true,
-      followRedirects: true,
       proxyTimeout: 5 * 60 * 1000,
       on: {
-        proxyReq: (proxyReq, req) => {
-          // console.log('headers', proxyReq.getHeaders())
+        proxyReq: (proxyReq, req, res) => {
+          // @ts-expect-error - set when routing
+          if (req._err) {
+            res.writeHead(400, { 'Content-Type': 'application/json' })
+            // @ts-expect-error - set when routing
+            res.end(JSON.stringify(req._err))
+            return
+          }
+
           // @ts-expect-error - set when routing
           const nodeApiKey = req._nodeApiKey
 
@@ -130,6 +148,16 @@ export class ToolboxController {
           fixRequestBody(proxyReq, req)
         },
       },
+    }
+
+    this.toolboxProxy = createProxyMiddleware({
+      ...commonProxyOptions,
+      followRedirects: true,
+    })
+
+    this.toolboxStreamProxy = createProxyMiddleware({
+      ...commonProxyOptions,
+      followRedirects: false,
     })
   }
 
@@ -383,6 +411,7 @@ export class ToolboxController {
     summary: 'Upload file',
     description: 'Upload file inside workspace',
     operationId: 'uploadFile',
+    deprecated: true,
   })
   @ApiResponse({
     status: 200,
@@ -408,6 +437,28 @@ export class ToolboxController {
     @Next() next: NextFunction,
   ): Promise<void> {
     return this.toolboxProxy(req, res, next)
+  }
+
+  @HttpCode(200)
+  @Post(':workspaceId/toolbox/files/bulk-upload')
+  @ApiOperation({
+    summary: 'Upload multiple files',
+    description: 'Upload multiple files inside workspace',
+    operationId: 'uploadFiles',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Files uploaded successfully',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: [UploadFileDto] })
+  @ApiParam({ name: 'workspaceId', type: String, required: true })
+  async uploadFiles(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return this.toolboxStreamProxy(req, res, next)
   }
 
   // Git operations
@@ -591,6 +642,30 @@ export class ToolboxController {
   })
   @ApiParam({ name: 'workspaceId', type: String, required: true })
   async gitPushChanges(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':workspaceId/toolbox/git/checkout')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Checkout branch',
+    description: 'Checkout branch or commit in git repository',
+    operationId: 'gitCheckoutBranch',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Branch checked out successfully',
+  })
+  @ApiBody({
+    type: GitCheckoutRequestDto,
+  })
+  @ApiParam({ name: 'workspaceId', type: String, required: true })
+  async gitCheckoutBranch(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,

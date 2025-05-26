@@ -54,7 +54,6 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
@@ -73,7 +72,6 @@ export class WorkspaceController {
     @InjectRedis() private readonly redis: Redis,
     private readonly nodeService: NodeService,
     private readonly workspaceService: WorkspaceService,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Get()
@@ -132,29 +130,9 @@ export class WorkspaceController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    const organizationId = authContext.organizationId
+    const organization = authContext.organization
 
-    //  optimistic quota guard
-    //  protect against race condition on workspace create abuse
-    //  not 100% correct when close to quota limit
-    const workspaceQuotaKey = `workspace-quota-${organizationId}`
-    let workspaceQuota = parseInt(await this.redis.get(workspaceQuotaKey)) || 0
-    workspaceQuota++
-    await this.redis.setex(workspaceQuotaKey, 1, workspaceQuota)
-
-    // Get current workspace count for organization
-    const workspaceCount = await this.workspaceService.count(organizationId)
-
-    const organization = await this.organizationService.findOne(organizationId)
-    if (!organization) {
-      throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-    }
-
-    if (workspaceCount + workspaceQuota > organization.workspaceQuota) {
-      throw new ForbiddenException(`Workspace quota exceeded. Maximum allowed: ${organization.workspaceQuota}`)
-    }
-
-    const workspace = await this.workspaceService.create(organizationId, createWorkspaceDto)
+    const workspace = await this.workspaceService.create(organization.id, createWorkspaceDto, organization)
 
     // If the workspace has no node, it means it is still building - return the ID to the client so they can fetch logs
     if (workspace.nodeId) {
@@ -251,8 +229,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
-  async startWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
-    return this.workspaceService.start(workspaceId)
+  async startWorkspace(
+    @AuthContext() authContext: OrganizationAuthContext,
+    @Param('workspaceId') workspaceId: string,
+  ): Promise<void> {
+    return this.workspaceService.start(workspaceId, authContext.organization)
   }
 
   @Post(':workspaceId/stop')

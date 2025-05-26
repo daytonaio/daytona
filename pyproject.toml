@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.black]
+target-version = ['py310']
+line-length = 120
+
+[tool.pylint]
+max-line-length = 120
+disable = [
+    "C0111",  # missing-docstring
+    "R0903",  # too-few-public-methods
+    "R0902",  # too-many-instance-attributes
+    "W0702",  # no-exception-type-specified (bare-except)
+    "W0719",  # broad-exception-raised
+    "W0718",  # broad-exception-caught
+    "R0913",  # too-many-arguments
+    "R0917",  # too-many-positional-arguments
+    "R0801",  # duplicate-code
+    "R0911",  # too-many-return-statements
+    "R0915",  # too-many-statements
+    "R0914",  # too-many-locals
+]
+const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
+allowed-redefined-builtins = ["id"]

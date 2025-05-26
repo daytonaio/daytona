@@ -22,23 +22,13 @@ var _ MappedNullable = &UsageOverview{}
 
 // UsageOverview struct for UsageOverview
 type UsageOverview struct {
-	TotalCpuQuota            float32 `json:"totalCpuQuota"`
-	TotalGpuQuota            float32 `json:"totalGpuQuota"`
-	TotalMemoryQuota         float32 `json:"totalMemoryQuota"`
-	TotalDiskQuota           float32 `json:"totalDiskQuota"`
-	TotalWorkspaceQuota      float32 `json:"totalWorkspaceQuota"`
-	ConcurrentWorkspaceQuota float32 `json:"concurrentWorkspaceQuota"`
-	CurrentCpuUsage          float32 `json:"currentCpuUsage"`
-	CurrentMemoryUsage       float32 `json:"currentMemoryUsage"`
-	CurrentDiskUsage         float32 `json:"currentDiskUsage"`
-	CurrentWorkspaces        float32 `json:"currentWorkspaces"`
-	ConcurrentWorkspaces     float32 `json:"concurrentWorkspaces"`
-	CurrentImageNumber       float32 `json:"currentImageNumber"`
-	ImageQuota               float32 `json:"imageQuota"`
-	TotalImageSizeQuota      float32 `json:"totalImageSizeQuota"`
-	TotalImageSizeUsed       float32 `json:"totalImageSizeUsed"`
-	MaxVolumes               float32 `json:"maxVolumes"`
-	UsedVolumes              float32 `json:"usedVolumes"`
+	TotalCpuQuota      float32 `json:"totalCpuQuota"`
+	TotalGpuQuota      float32 `json:"totalGpuQuota"`
+	TotalMemoryQuota   float32 `json:"totalMemoryQuota"`
+	TotalDiskQuota     float32 `json:"totalDiskQuota"`
+	CurrentCpuUsage    float32 `json:"currentCpuUsage"`
+	CurrentMemoryUsage float32 `json:"currentMemoryUsage"`
+	CurrentDiskUsage   float32 `json:"currentDiskUsage"`
 }
 
 type _UsageOverview UsageOverview
@@ -47,25 +37,15 @@ type _UsageOverview UsageOverview
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, totalWorkspaceQuota float32, concurrentWorkspaceQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32, currentWorkspaces float32, concurrentWorkspaces float32, currentImageNumber float32, imageQuota float32, totalImageSizeQuota float32, totalImageSizeUsed float32, maxVolumes float32, usedVolumes float32) *UsageOverview {
+func NewUsageOverview(totalCpuQuota float32, totalGpuQuota float32, totalMemoryQuota float32, totalDiskQuota float32, currentCpuUsage float32, currentMemoryUsage float32, currentDiskUsage float32) *UsageOverview {
 	this := UsageOverview{}
 	this.TotalCpuQuota = totalCpuQuota
 	this.TotalGpuQuota = totalGpuQuota
 	this.TotalMemoryQuota = totalMemoryQuota
 	this.TotalDiskQuota = totalDiskQuota
-	this.TotalWorkspaceQuota = totalWorkspaceQuota
-	this.ConcurrentWorkspaceQuota = concurrentWorkspaceQuota
 	this.CurrentCpuUsage = currentCpuUsage
 	this.CurrentMemoryUsage = currentMemoryUsage
 	this.CurrentDiskUsage = currentDiskUsage
-	this.CurrentWorkspaces = currentWorkspaces
-	this.ConcurrentWorkspaces = concurrentWorkspaces
-	this.CurrentImageNumber = currentImageNumber
-	this.ImageQuota = imageQuota
-	this.TotalImageSizeQuota = totalImageSizeQuota
-	this.TotalImageSizeUsed = totalImageSizeUsed
-	this.MaxVolumes = maxVolumes
-	this.UsedVolumes = usedVolumes
 	return &this
 }
 
@@ -173,54 +153,6 @@ func (o *UsageOverview) SetTotalDiskQuota(v float32) {
 	o.TotalDiskQuota = v
 }
 
-// GetTotalWorkspaceQuota returns the TotalWorkspaceQuota field value
-func (o *UsageOverview) GetTotalWorkspaceQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalWorkspaceQuota
-}
-
-// GetTotalWorkspaceQuotaOk returns a tuple with the TotalWorkspaceQuota field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalWorkspaceQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalWorkspaceQuota, true
-}
-
-// SetTotalWorkspaceQuota sets field value
-func (o *UsageOverview) SetTotalWorkspaceQuota(v float32) {
-	o.TotalWorkspaceQuota = v
-}
-
-// GetConcurrentWorkspaceQuota returns the ConcurrentWorkspaceQuota field value
-func (o *UsageOverview) GetConcurrentWorkspaceQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ConcurrentWorkspaceQuota
-}
-
-// GetConcurrentWorkspaceQuotaOk returns a tuple with the ConcurrentWorkspaceQuota field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetConcurrentWorkspaceQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ConcurrentWorkspaceQuota, true
-}
-
-// SetConcurrentWorkspaceQuota sets field value
-func (o *UsageOverview) SetConcurrentWorkspaceQuota(v float32) {
-	o.ConcurrentWorkspaceQuota = v
-}
-
 // GetCurrentCpuUsage returns the CurrentCpuUsage field value
 func (o *UsageOverview) GetCurrentCpuUsage() float32 {
 	if o == nil {
@@ -293,198 +225,6 @@ func (o *UsageOverview) SetCurrentDiskUsage(v float32) {
 	o.CurrentDiskUsage = v
 }
 
-// GetCurrentWorkspaces returns the CurrentWorkspaces field value
-func (o *UsageOverview) GetCurrentWorkspaces() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.CurrentWorkspaces
-}
-
-// GetCurrentWorkspacesOk returns a tuple with the CurrentWorkspaces field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetCurrentWorkspacesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CurrentWorkspaces, true
-}
-
-// SetCurrentWorkspaces sets field value
-func (o *UsageOverview) SetCurrentWorkspaces(v float32) {
-	o.CurrentWorkspaces = v
-}
-
-// GetConcurrentWorkspaces returns the ConcurrentWorkspaces field value
-func (o *UsageOverview) GetConcurrentWorkspaces() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ConcurrentWorkspaces
-}
-
-// GetConcurrentWorkspacesOk returns a tuple with the ConcurrentWorkspaces field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetConcurrentWorkspacesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ConcurrentWorkspaces, true
-}
-
-// SetConcurrentWorkspaces sets field value
-func (o *UsageOverview) SetConcurrentWorkspaces(v float32) {
-	o.ConcurrentWorkspaces = v
-}
-
-// GetCurrentImageNumber returns the CurrentImageNumber field value
-func (o *UsageOverview) GetCurrentImageNumber() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.CurrentImageNumber
-}
-
-// GetCurrentImageNumberOk returns a tuple with the CurrentImageNumber field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetCurrentImageNumberOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CurrentImageNumber, true
-}
-
-// SetCurrentImageNumber sets field value
-func (o *UsageOverview) SetCurrentImageNumber(v float32) {
-	o.CurrentImageNumber = v
-}
-
-// GetImageQuota returns the ImageQuota field value
-func (o *UsageOverview) GetImageQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.ImageQuota
-}
-
-// GetImageQuotaOk returns a tuple with the ImageQuota field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetImageQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ImageQuota, true
-}
-
-// SetImageQuota sets field value
-func (o *UsageOverview) SetImageQuota(v float32) {
-	o.ImageQuota = v
-}
-
-// GetTotalImageSizeQuota returns the TotalImageSizeQuota field value
-func (o *UsageOverview) GetTotalImageSizeQuota() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalImageSizeQuota
-}
-
-// GetTotalImageSizeQuotaOk returns a tuple with the TotalImageSizeQuota field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalImageSizeQuotaOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalImageSizeQuota, true
-}
-
-// SetTotalImageSizeQuota sets field value
-func (o *UsageOverview) SetTotalImageSizeQuota(v float32) {
-	o.TotalImageSizeQuota = v
-}
-
-// GetTotalImageSizeUsed returns the TotalImageSizeUsed field value
-func (o *UsageOverview) GetTotalImageSizeUsed() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.TotalImageSizeUsed
-}
-
-// GetTotalImageSizeUsedOk returns a tuple with the TotalImageSizeUsed field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetTotalImageSizeUsedOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.TotalImageSizeUsed, true
-}
-
-// SetTotalImageSizeUsed sets field value
-func (o *UsageOverview) SetTotalImageSizeUsed(v float32) {
-	o.TotalImageSizeUsed = v
-}
-
-// GetMaxVolumes returns the MaxVolumes field value
-func (o *UsageOverview) GetMaxVolumes() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.MaxVolumes
-}
-
-// GetMaxVolumesOk returns a tuple with the MaxVolumes field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetMaxVolumesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.MaxVolumes, true
-}
-
-// SetMaxVolumes sets field value
-func (o *UsageOverview) SetMaxVolumes(v float32) {
-	o.MaxVolumes = v
-}
-
-// GetUsedVolumes returns the UsedVolumes field value
-func (o *UsageOverview) GetUsedVolumes() float32 {
-	if o == nil {
-		var ret float32
-		return ret
-	}
-
-	return o.UsedVolumes
-}
-
-// GetUsedVolumesOk returns a tuple with the UsedVolumes field value
-// and a boolean to check if the value has been set.
-func (o *UsageOverview) GetUsedVolumesOk() (*float32, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.UsedVolumes, true
-}
-
-// SetUsedVolumes sets field value
-func (o *UsageOverview) SetUsedVolumes(v float32) {
-	o.UsedVolumes = v
-}
-
 func (o UsageOverview) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -499,19 +239,9 @@ func (o UsageOverview) ToMap() (map[string]interface{}, error) {
 	toSerialize["totalGpuQuota"] = o.TotalGpuQuota
 	toSerialize["totalMemoryQuota"] = o.TotalMemoryQuota
 	toSerialize["totalDiskQuota"] = o.TotalDiskQuota
-	toSerialize["totalWorkspaceQuota"] = o.TotalWorkspaceQuota
-	toSerialize["concurrentWorkspaceQuota"] = o.ConcurrentWorkspaceQuota
 	toSerialize["currentCpuUsage"] = o.CurrentCpuUsage
 	toSerialize["currentMemoryUsage"] = o.CurrentMemoryUsage
 	toSerialize["currentDiskUsage"] = o.CurrentDiskUsage
-	toSerialize["currentWorkspaces"] = o.CurrentWorkspaces
-	toSerialize["concurrentWorkspaces"] = o.ConcurrentWorkspaces
-	toSerialize["currentImageNumber"] = o.CurrentImageNumber
-	toSerialize["imageQuota"] = o.ImageQuota
-	toSerialize["totalImageSizeQuota"] = o.TotalImageSizeQuota
-	toSerialize["totalImageSizeUsed"] = o.TotalImageSizeUsed
-	toSerialize["maxVolumes"] = o.MaxVolumes
-	toSerialize["usedVolumes"] = o.UsedVolumes
 	return toSerialize, nil
 }
 
@@ -524,19 +254,9 @@ func (o *UsageOverview) UnmarshalJSON(data []byte) (err error) {
 		"totalGpuQuota",
 		"totalMemoryQuota",
 		"totalDiskQuota",
-		"totalWorkspaceQuota",
-		"concurrentWorkspaceQuota",
 		"currentCpuUsage",
 		"currentMemoryUsage",
 		"currentDiskUsage",
-		"currentWorkspaces",
-		"concurrentWorkspaces",
-		"currentImageNumber",
-		"imageQuota",
-		"totalImageSizeQuota",
-		"totalImageSizeUsed",
-		"maxVolumes",
-		"usedVolumes",
 	}
 
 	allProperties := make(map[string]interface{})

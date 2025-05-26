@@ -59,18 +59,6 @@ export interface CreateOrganizationQuota {
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  maxConcurrentWorkspaces?: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateOrganizationQuota
-   */
-  workspaceQuota?: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateOrganizationQuota
-   */
   imageQuota?: number
   /**
    *
@@ -78,12 +66,6 @@ export interface CreateOrganizationQuota {
    * @memberof CreateOrganizationQuota
    */
   maxImageSize?: number
-  /**
-   *
-   * @type {number}
-   * @memberof CreateOrganizationQuota
-   */
-  totalImageSize?: number
   /**
    *
    * @type {number}

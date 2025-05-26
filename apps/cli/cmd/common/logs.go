@@ -18,11 +18,12 @@ import (
 )
 
 type ReadLogParams struct {
-	Id           string
-	ServerUrl    string
-	ServerApi    config.ServerApi
-	Follow       *bool
-	ResourceType ResourceType
+	Id                   string
+	ServerUrl            string
+	ServerApi            config.ServerApi
+	ActiveOrganizationId *string
+	Follow               *bool
+	ResourceType         ResourceType
 }
 
 type ResourceType string
@@ -48,6 +49,10 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", *params.ServerApi.Key))
 	} else if params.ServerApi.Token != nil {
 		req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", params.ServerApi.Token.AccessToken))
+
+		if params.ActiveOrganizationId != nil {
+			req.Header.Add("X-Daytona-Organization-ID", *params.ActiveOrganizationId)
+		}
 	}
 
 	req.Header.Add("Accept", "application/octet-stream")
@@ -61,7 +66,7 @@ func ReadBuildLogs(ctx context.Context, params ReadLogParams) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		log.Errorf("Server returned non-OK status: %d", resp.StatusCode)
+		log.Errorf("Server returned a non-OK status while retrieving logs: %d", resp.StatusCode)
 		return
 	}
 

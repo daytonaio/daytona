@@ -234,6 +234,20 @@ type ToolboxAPI interface {
 	GitAddFilesExecute(r ToolboxAPIGitAddFilesRequest) (*http.Response, error)
 
 	/*
+		GitCheckoutBranch Checkout branch
+
+		Checkout branch or commit in git repository
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId
+		@return ToolboxAPIGitCheckoutBranchRequest
+	*/
+	GitCheckoutBranch(ctx context.Context, workspaceId string) ToolboxAPIGitCheckoutBranchRequest
+
+	// GitCheckoutBranchExecute executes the request
+	GitCheckoutBranchExecute(r ToolboxAPIGitCheckoutBranchRequest) (*http.Response, error)
+
+	/*
 		GitCloneRepository Clone repository
 
 		Clone git repository
@@ -544,11 +558,28 @@ type ToolboxAPI interface {
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param workspaceId
 		@return ToolboxAPIUploadFileRequest
+
+		Deprecated
 	*/
 	UploadFile(ctx context.Context, workspaceId string) ToolboxAPIUploadFileRequest
 
 	// UploadFileExecute executes the request
+	// Deprecated
 	UploadFileExecute(r ToolboxAPIUploadFileRequest) (*http.Response, error)
+
+	/*
+		UploadFiles Upload multiple files
+
+		Upload multiple files inside workspace
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId
+		@return ToolboxAPIUploadFilesRequest
+	*/
+	UploadFiles(ctx context.Context, workspaceId string) ToolboxAPIUploadFilesRequest
+
+	// UploadFilesExecute executes the request
+	UploadFilesExecute(r ToolboxAPIUploadFilesRequest) (*http.Response, error)
 }
 
 // ToolboxAPIService ToolboxAPI service
@@ -2211,6 +2242,119 @@ func (a *ToolboxAPIService) GitAddFilesExecute(r ToolboxAPIGitAddFilesRequest) (
 	}
 	// body params
 	localVarPostBody = r.gitAddRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPIGitCheckoutBranchRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	workspaceId            string
+	gitCheckoutRequest     *GitCheckoutRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPIGitCheckoutBranchRequest) GitCheckoutRequest(gitCheckoutRequest GitCheckoutRequest) ToolboxAPIGitCheckoutBranchRequest {
+	r.gitCheckoutRequest = &gitCheckoutRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIGitCheckoutBranchRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIGitCheckoutBranchRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIGitCheckoutBranchRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GitCheckoutBranchExecute(r)
+}
+
+/*
+GitCheckoutBranch Checkout branch
+
+Checkout branch or commit in git repository
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId
+	@return ToolboxAPIGitCheckoutBranchRequest
+*/
+func (a *ToolboxAPIService) GitCheckoutBranch(ctx context.Context, workspaceId string) ToolboxAPIGitCheckoutBranchRequest {
+	return ToolboxAPIGitCheckoutBranchRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *ToolboxAPIService) GitCheckoutBranchExecute(r ToolboxAPIGitCheckoutBranchRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitCheckoutBranch")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{workspaceId}/toolbox/git/checkout"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.gitCheckoutRequest == nil {
+		return nil, reportError("gitCheckoutRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.gitCheckoutRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
@@ -4845,6 +4989,8 @@ Upload file inside workspace
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workspaceId
 	@return ToolboxAPIUploadFileRequest
+
+Deprecated
 */
 func (a *ToolboxAPIService) UploadFile(ctx context.Context, workspaceId string) ToolboxAPIUploadFileRequest {
 	return ToolboxAPIUploadFileRequest{
@@ -4855,6 +5001,7 @@ func (a *ToolboxAPIService) UploadFile(ctx context.Context, workspaceId string) 
 }
 
 // Execute executes the request
+// Deprecated
 func (a *ToolboxAPIService) UploadFileExecute(r ToolboxAPIUploadFileRequest) (*http.Response, error) {
 	var (
 		localVarHTTPMethod = http.MethodPost
@@ -4912,6 +5059,108 @@ func (a *ToolboxAPIService) UploadFileExecute(r ToolboxAPIUploadFileRequest) (*h
 		fileLocalVarFileName = fileLocalVarFile.Name()
 		fileLocalVarFile.Close()
 		formFiles = append(formFiles, formFile{fileBytes: fileLocalVarFileBytes, fileName: fileLocalVarFileName, formFileName: fileLocalVarFormFileName})
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPIUploadFilesRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	workspaceId            string
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIUploadFilesRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIUploadFilesRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIUploadFilesRequest) Execute() (*http.Response, error) {
+	return r.ApiService.UploadFilesExecute(r)
+}
+
+/*
+UploadFiles Upload multiple files
+
+Upload multiple files inside workspace
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId
+	@return ToolboxAPIUploadFilesRequest
+*/
+func (a *ToolboxAPIService) UploadFiles(ctx context.Context, workspaceId string) ToolboxAPIUploadFilesRequest {
+	return ToolboxAPIUploadFilesRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *ToolboxAPIService) UploadFilesExecute(r ToolboxAPIUploadFilesRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.UploadFiles")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{workspaceId}/toolbox/files/bulk-upload"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"multipart/form-data"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {

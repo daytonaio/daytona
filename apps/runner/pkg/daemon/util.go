@@ -14,8 +14,30 @@ func WriteDaemonBinary() (string, error) {
 		return "", err
 	}
 
-	tmpDir := os.TempDir()
-	daemonPath := filepath.Join(tmpDir, "daemon-amd64")
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	tmpBinariesDir := filepath.Join(pwd, ".tmp", "binaries")
+	err = os.MkdirAll(tmpBinariesDir, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	daemonPath := filepath.Join(tmpBinariesDir, "daemon-amd64")
+	_, err = os.Stat(daemonPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+
+	if err == nil {
+		err = os.Remove(daemonPath)
+		if err != nil {
+			return "", err
+		}
+	}
+
 	err = os.WriteFile(daemonPath, daemonBinary, 0755)
 	if err != nil {
 		return "", err

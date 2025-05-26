@@ -94,7 +94,14 @@ const Images: React.FC = () => {
           if (prev.items.some((i) => i.id === image.id)) {
             return prev
           }
-          const newImages = [image, ...prev.items]
+
+          // Find the insertion point - used images should remain at the top
+          const insertIndex =
+            prev.items.findIndex((i) => !i.lastUsedAt && i.createdAt <= image.createdAt) || prev.items.length
+
+          const newImages = [...prev.items]
+          newImages.splice(insertIndex, 0, image)
+
           const newTotal = prev.total + 1
           return {
             ...prev,

@@ -17,6 +17,7 @@ daytona_api_client/api_response.py
 daytona_api_client/configuration.py
 daytona_api_client/exceptions.py
 daytona_api_client/models/__init__.py
+daytona_api_client/models/account_provider.py
 daytona_api_client/models/api_key_list.py
 daytona_api_client/models/api_key_response.py
 daytona_api_client/models/build_image.py
@@ -44,6 +45,7 @@ daytona_api_client/models/file_info.py
 daytona_api_client/models/file_status.py
 daytona_api_client/models/git_add_request.py
 daytona_api_client/models/git_branch_request.py
+daytona_api_client/models/git_checkout_request.py
 daytona_api_client/models/git_clone_request.py
 daytona_api_client/models/git_commit_info.py
 daytona_api_client/models/git_commit_request.py

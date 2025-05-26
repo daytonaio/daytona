@@ -15,6 +15,7 @@ client.go
 configuration.go
 go.mod
 go.sum
+model_account_provider.go
 model_api_key_list.go
 model_api_key_response.go
 model_build_image.go
@@ -42,6 +43,7 @@ model_file_info.go
 model_file_status.go
 model_git_add_request.go
 model_git_branch_request.go
+model_git_checkout_request.go
 model_git_clone_request.go
 model_git_commit_info.go
 model_git_commit_request.go

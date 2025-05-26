@@ -53,11 +53,8 @@ export class AppService implements OnApplicationBootstrap {
         maxCpuPerWorkspace: 0,
         maxMemoryPerWorkspace: 0,
         maxDiskPerWorkspace: 0,
-        maxConcurrentWorkspaces: 0,
-        workspaceQuota: 0,
         imageQuota: 100,
         maxImageSize: 100,
-        totalImageSize: 1000,
         volumeQuota: 0,
       },
       role: SystemRole.ADMIN,
@@ -148,7 +145,7 @@ export class AppService implements OnApplicationBootstrap {
     }
 
     await this.imageService.createImage(
-      adminPersonalOrg.id,
+      adminPersonalOrg,
       {
         name: this.configService.getOrThrow('defaultImage'),
       },

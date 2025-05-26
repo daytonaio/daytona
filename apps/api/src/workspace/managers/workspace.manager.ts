@@ -22,7 +22,6 @@ import { ImageService } from '../services/image.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
 import { DockerProvider } from '../docker/docker-provider'
-import { OrganizationService } from '../../organization/services/organization.service'
 import { ImageNodeState } from '../enums/image-node-state.enum'
 import { BuildInfo } from '../entities/build-info.entity'
 import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
@@ -34,6 +33,7 @@ import { WorkspaceStartedEvent } from '../events/workspace-started.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
+import { ImageNode } from '../entities/image-node.entity'
 
 type BreakFromSwitch = boolean
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
@@ -45,6 +45,8 @@ export class WorkspaceManager {
   constructor(
     @InjectRepository(Workspace)
     private readonly workspaceRepository: Repository<Workspace>,
+    @InjectRepository(ImageNode)
+    private readonly imageNodeRepository: Repository<ImageNode>,
     private readonly nodeService: NodeService,
     private readonly nodeApiFactory: NodeApiFactory,
     private readonly dockerRegistryService: DockerRegistryService,
@@ -52,7 +54,6 @@ export class WorkspaceManager {
     private readonly imageService: ImageService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerProvider: DockerProvider,
-    private readonly organizationService: OrganizationService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
@@ -90,15 +91,15 @@ export class WorkspaceManager {
         await Promise.all(
           workspaces.map(async (workspace) => {
             const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-            const locked = await this.redisLockProvider.lock(lockKey, 30)
-            if (locked) {
+            const acquired = await this.redisLockProvider.lock(lockKey, 30)
+            if (!acquired) {
               return
             }
 
             try {
               workspace.desiredState = WorkspaceDesiredState.STOPPED
               await this.workspaceRepository.save(workspace)
-              await this.redis.del(lockKey)
+              await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(workspace.id)
             } catch (error) {
               this.logger.error(
@@ -115,14 +116,17 @@ export class WorkspaceManager {
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
   async syncStates(): Promise<void> {
     const lockKey = 'sync-states'
-    if (await this.redisLockProvider.lock(lockKey, 30)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
 
     const workspaces = await this.workspaceRepository.find({
       where: {
         state: Not(In([WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
-        desiredState: Raw(() => '"Workspace"."desiredState"::text != "Workspace"."state"::text'),
+        desiredState: Raw(
+          () =>
+            `"Workspace"."desiredState"::text != "Workspace"."state"::text AND "Workspace"."desiredState"::text != 'archived'`,
+        ),
       },
       take: 100,
       order: {
@@ -132,73 +136,60 @@ export class WorkspaceManager {
 
     await Promise.all(
       workspaces.map(async (workspace) => {
-        //  if the workspace is already being processed, skip it
-        const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-        const hasLock = await this.redis.get(lockKey)
-        if (hasLock) {
-          return
-        }
         this.syncInstanceState(workspace.id)
       }),
     )
     await this.redisLockProvider.unlock(lockKey)
   }
 
-  @Cron(CronExpression.EVERY_10_MINUTES, { name: 'stop-suspended-organization-workspaces' })
-  async stopSuspendedOrganizationWorkspaces(): Promise<void> {
-    //  lock the sync to only run one instance at a time
-    const lockKey = 'stop-suspended-organization-workspaces'
-    const hasLock = await this.redis.get(lockKey)
-    if (hasLock) {
+  @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-archived-desired-states' })
+  async syncArchivedDesiredStates(): Promise<void> {
+    const lockKey = 'sync-archived-desired-states'
+    if (!(await this.redisLockProvider.lock(lockKey, 30))) {
       return
     }
-    //  keep the worker selected for 1 minute
-    await this.redis.setex(lockKey, 60, '1')
 
-    const suspendedOrganizations = await this.organizationService.findSuspended(
-      // Find organization suspended more than 24 hours ago
-      new Date(Date.now() - 1 * 1000 * 60 * 60 * 24),
-    )
-
-    const suspendedOrganizationIds = suspendedOrganizations.map((organization) => organization.id)
+    const nodesWith3InProgress = await this.workspaceRepository
+      .createQueryBuilder('workspace')
+      .select('"nodeId"')
+      .where('"workspace"."state" = :state', { state: WorkspaceState.ARCHIVING })
+      .groupBy('"nodeId"')
+      .having('COUNT(*) >= 3')
+      .getRawMany()
 
     const workspaces = await this.workspaceRepository.find({
-      where: {
-        organizationId: In(suspendedOrganizationIds),
-        state: WorkspaceState.STARTED,
+      where: [
+        {
+          state: WorkspaceState.ARCHIVING,
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+        },
+        {
+          state: Not(In([WorkspaceState.ARCHIVED, WorkspaceState.DESTROYED, WorkspaceState.ERROR])),
+          desiredState: WorkspaceDesiredState.ARCHIVED,
+          nodeId: Not(In(nodesWith3InProgress.map((node) => node.nodeId))),
+        },
+      ],
+      take: 100,
+      order: {
+        lastActivityAt: 'DESC',
       },
     })
 
-    await Promise.allSettled(
+    await Promise.all(
       workspaces.map(async (workspace) => {
-        //  if the workspace is already being processed, skip it
-        const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id
-        const hasLock = await this.redisLockProvider.lock(lockKey, 30)
-        if (!hasLock) {
-          return
-        }
-
-        try {
-          await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
-          await this.handleWorkspaceDesiredStateStopped(workspace.id)
-        } catch (error) {
-          this.logger.error(
-            `Error stopping workspace from suspended organization. WorkspaceId: ${workspace.id}: `,
-            fromAxiosError(error),
-          )
-        } finally {
-          await this.redis.del(lockKey)
-        }
+        this.syncInstanceState(workspace.id)
       }),
     )
-
-    await this.redis.del(lockKey)
+    await this.redisLockProvider.unlock(lockKey)
   }
 
   async syncInstanceState(workspaceId: string): Promise<void> {
     //  prevent syncState cron from running multiple instances of the same workspace
     const lockKey = SYNC_INSTANCE_STATE_LOCK_KEY + workspaceId
-    await this.redis.setex(lockKey, 360, '1')
+    const acquired = await this.redisLockProvider.lock(lockKey, 360)
+    if (!acquired) {
+      return
+    }
 
     const workspace = await this.workspaceRepository.findOneByOrFail({
       id: workspaceId,
@@ -225,7 +216,7 @@ export class WorkspaceManager {
       }
     } catch (error) {
       if (error.code === 'ECONNRESET') {
-        await this.redis.del(lockKey)
+        await this.redisLockProvider.unlock(lockKey)
         this.syncInstanceState(workspaceId)
         return
       }
@@ -242,21 +233,18 @@ export class WorkspaceManager {
       await this.updateWorkspaceErrorState(workspace.id, error.message || String(error))
     }
 
-    //  unlock the workspace after 10 seconds
-    //  this will allow the syncState cron to run again, but will allow
-    //  the syncInstanceState to complete any pending state changes
-    await this.redis.setex(lockKey, 10, '1')
+    await this.redisLockProvider.unlock(lockKey)
   }
 
   private async handleUnassignedBuildWorkspace(workspace: Workspace): Promise<void> {
     // Try to assign an available node with the image build
     let nodeId: string
     try {
-      nodeId = await this.nodeService.getRandomAvailableNode(
-        workspace.region,
-        workspace.class,
-        workspace.buildInfo.imageRef,
-      )
+      nodeId = await this.nodeService.getRandomAvailableNode({
+        region: workspace.region,
+        workspaceClass: workspace.class,
+        imageRef: workspace.buildInfo.imageRef,
+      })
     } catch (error) {
       // Continue to next assignment method
     }
@@ -288,8 +276,14 @@ export class WorkspaceManager {
       }
     }
 
+    const excludedNodeIds = await this.nodeService.getNodesWithMultipleImagesBuilding()
+
     // Try to assign a new available node
-    nodeId = await this.nodeService.getRandomAvailableNode(workspace.region, workspace.class)
+    nodeId = await this.nodeService.getRandomAvailableNode({
+      region: workspace.region,
+      workspaceClass: workspace.class,
+      excludedNodeIds: excludedNodeIds,
+    })
 
     this.buildOnNode(workspace.buildInfo, nodeId, workspace.organizationId)
 
@@ -329,7 +323,13 @@ export class WorkspaceManager {
       return
     }
 
-    await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, ImageNodeState.BUILDING_IMAGE)
+    const response = (await nodeImageApi.imageExists(buildInfo.imageRef)).data
+    let state = ImageNodeState.BUILDING_IMAGE
+    if (response && response.exists) {
+      state = ImageNodeState.READY
+    }
+
+    await this.nodeService.createImageNode(nodeId, buildInfo.imageRef, state)
   }
 
   private async handleWorkspaceDesiredStateArchived(workspaceId: string): Promise<void> {
@@ -338,7 +338,7 @@ export class WorkspaceManager {
     })
 
     const lockKey = 'archive-lock-' + workspace.nodeId
-    if (await this.redisLockProvider.lock(lockKey, 10)) {
+    if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return
     }
 
@@ -380,7 +380,7 @@ export class WorkspaceManager {
           if (archiveErrorRetryCount > 3) {
             await this.updateWorkspaceErrorState(workspace.id, 'Failed to archive workspace')
             await this.redis.del(archiveErrorRetryKey)
-            await this.redis.del(workspace.id)
+            await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
             break
           }
           await this.redis.setex('archive-error-retry-' + workspace.id, 720, String(archiveErrorRetryCount + 1))
@@ -390,7 +390,7 @@ export class WorkspaceManager {
             snapshotState: SnapshotState.PENDING,
           })
 
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
@@ -398,12 +398,12 @@ export class WorkspaceManager {
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
         if (workspace.lastActivityAt < thirtyMinutesAgo) {
           await this.updateWorkspaceErrorState(workspace.id, 'Archiving operation timed out')
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
         if (workspace.snapshotState !== SnapshotState.COMPLETED) {
-          await this.redis.del(workspace.id)
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           break
         }
 
@@ -418,7 +418,7 @@ export class WorkspaceManager {
           switch (workspaceInfo.state) {
             case NodeWorkspaceState.SandboxStateDestroying:
               //  wait until workspace is destroyed on node
-              await this.redis.del(workspace.id)
+              await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
             case NodeWorkspaceState.SandboxStateDestroyed:
@@ -426,7 +426,7 @@ export class WorkspaceManager {
               break
             default:
               await nodeWorkspaceApi.destroy(workspace.id)
-              await this.redis.del(workspace.id)
+              await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
               this.syncInstanceState(workspace.id)
               break
           }
@@ -489,6 +489,7 @@ export class WorkspaceManager {
         }
 
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYED)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         //  sync states again immediately for workspace
         this.syncInstanceState(workspace.id)
         break
@@ -510,6 +511,7 @@ export class WorkspaceManager {
           }
         }
         await this.updateWorkspaceState(workspace.id, WorkspaceState.DESTROYING)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -593,7 +595,7 @@ export class WorkspaceManager {
         await nodeWorkspaceApi.stop(workspace.id)
         await this.updateWorkspaceState(workspace.id, WorkspaceState.STOPPING)
         //  sync states again immediately for workspace
-        await this.redis.del(workspace.id)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -621,7 +623,7 @@ export class WorkspaceManager {
             break
         }
         //  sync states again immediately for workspace
-        await this.redis.del(workspace.id)
+        await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
         this.syncInstanceState(workspace.id)
         break
       }
@@ -650,6 +652,7 @@ export class WorkspaceManager {
           await this.workspaceRepository.update(workspace.id, {
             state: WorkspaceState.UNKNOWN,
           })
+          await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           this.syncInstanceState(workspace.id)
           return
         }
@@ -665,6 +668,7 @@ export class WorkspaceManager {
     if (!imageNode || imageNode.state === ImageNodeState.BUILDING_IMAGE) {
       // Sleep for a second and go back to syncing instance state
       await new Promise((resolve) => setTimeout(resolve, 1000))
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return
     }
@@ -724,7 +728,7 @@ export class WorkspaceManager {
     await nodeWorkspaceApi.create(createWorkspaceDto)
     await this.updateWorkspaceState(workspace.id, WorkspaceState.CREATING)
     //  sync states again immediately for workspace
-    await this.redis.del(workspace.id)
+    await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
@@ -800,11 +804,11 @@ export class WorkspaceManager {
           //  TODO: usage should be based on compute usage
 
           const image = await this.imageService.getImageByName(workspace.image, workspace.organizationId)
-          const availableNodes = await this.nodeService.findAvailableNodes(
-            workspace.region,
-            workspace.class,
-            image.internalName,
-          )
+          const availableNodes = await this.nodeService.findAvailableNodes({
+            region: workspace.region,
+            workspaceClass: workspace.class,
+            imageRef: image.internalName,
+          })
           const lessUsedNodes = availableNodes.filter((node) => node.id !== workspace.nodeId)
 
           //  temp workaround to move workspaces to less used node
@@ -880,7 +884,11 @@ export class WorkspaceManager {
 
       //  exclude the node that the last node workspace was on
       const availableNodes = (
-        await this.nodeService.findAvailableNodes(workspace.region, workspace.class, image.internalName)
+        await this.nodeService.findAvailableNodes({
+          region: workspace.region,
+          workspaceClass: workspace.class,
+          imageRef: image.internalName,
+        })
       ).filter((node) => node.id != workspace.prevNodeId)
 
       //  get random node from available nodes
@@ -921,7 +929,7 @@ export class WorkspaceManager {
 
       await this.updateWorkspaceState(workspace.id, WorkspaceState.STARTING)
       //  sync states again immediately for workspace
-      await this.redis.del(workspace.id)
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return true
     }
@@ -943,7 +951,7 @@ export class WorkspaceManager {
     if (workspaceInfo.state === NodeWorkspaceState.SandboxStatePullingImage) {
       await this.updateWorkspaceState(workspace.id, WorkspaceState.PULLING_IMAGE)
 
-      await this.redis.del(workspace.id)
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return true
     }
@@ -1040,7 +1048,7 @@ export class WorkspaceManager {
       }
     }
     //  sync states again immediately for workspace
-    await this.redis.del(workspace.id)
+    await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
@@ -1072,26 +1080,26 @@ export class WorkspaceManager {
 
   @OnEvent(WorkspaceEvents.ARCHIVED)
   private async handleWorkspaceArchivedEvent(event: WorkspaceArchivedEvent) {
-    this.handleWorkspaceDesiredStateArchived(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.DESTROYED)
   private async handleWorkspaceDestroyedEvent(event: WorkspaceDestroyedEvent) {
-    this.handleWorkspaceDesiredStateDestroyed(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.STARTED)
   private async handleWorkspaceStartedEvent(event: WorkspaceStartedEvent) {
-    this.handleWorkspaceDesiredStateStarted(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.STOPPED)
   private async handleWorkspaceStoppedEvent(event: WorkspaceStoppedEvent) {
-    this.handleWorkspaceDesiredStateStopped(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 
   @OnEvent(WorkspaceEvents.CREATED)
   private async handleWorkspaceCreatedEvent(event: WorkspaceCreatedEvent) {
-    this.handleWorkspaceDesiredStateStarted(event.workspace.id)
+    this.syncInstanceState(event.workspace.id).catch(this.logger.error)
   }
 }
