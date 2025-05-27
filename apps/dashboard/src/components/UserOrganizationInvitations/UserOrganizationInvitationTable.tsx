@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { useTableSorting } from '@/hooks/useTableSorting'
-
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: OrganizationInvitation[]

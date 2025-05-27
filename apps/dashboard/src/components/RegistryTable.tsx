@@ -29,7 +29,7 @@ import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useTableSorting } from '@/hooks/useTableSorting'
-
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: DockerRegistry[]
