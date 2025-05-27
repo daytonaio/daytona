@@ -23,6 +23,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
 import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
 import { useTableSorting } from '@/hooks/useTableSorting'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: OrganizationRole[]

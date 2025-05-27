@@ -24,6 +24,7 @@ import { UpdateOrganizationMemberRoleDialog } from '@/components/OrganizationMem
 import { UpdateAssignedOrganizationRolesDialog } from '@/components/OrganizationMembers/UpdateAssignedOrganizationRolesDialog.tsx'
 import { capitalize } from '@/lib/utils'
 import { useTableSorting } from '@/hooks/useTableSorting'
+import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
 interface DataTableProps {
   data: OrganizationUser[]
