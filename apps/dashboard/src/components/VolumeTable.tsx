@@ -31,6 +31,7 @@ import { Pagination } from '@/components/Pagination'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
+import { TableEmptyState } from './TableEmptyState'
 
 interface VolumeTableProps {
   data: VolumeDto[]
@@ -129,13 +130,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState colSpan={columns.length} message="No Volumes found." />
             )}
           </TableBody>
         </Table>
