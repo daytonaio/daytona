@@ -244,7 +244,7 @@ export function WorkspaceTable({
             </div>
           )}
         </div>
-        <Pagination table={table} selectionEnabled />
+        <Pagination table={table} selectionEnabled entityName="Sandboxes" />
       </div>
     </div>
   )

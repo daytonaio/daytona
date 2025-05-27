@@ -113,7 +113,7 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" />
+      <Pagination table={table} className="mt-4" entityName="Registries" />
     </div>
   )
 }
