@@ -32,7 +32,8 @@ const (
 	Runner_ImageExists_FullMethodName            = "/runner.Runner/ImageExists"
 	Runner_RemoveImage_FullMethodName            = "/runner.Runner/RemoveImage"
 	Runner_GetBuildLogs_FullMethodName           = "/runner.Runner/GetBuildLogs"
-	Runner_SendProxy_FullMethodName              = "/runner.Runner/SendProxy"
+	Runner_ProxyRequest_FullMethodName           = "/runner.Runner/ProxyRequest"
+	Runner_ProxyStream_FullMethodName            = "/runner.Runner/ProxyStream"
 )
 
 // RunnerClient is the client API for Runner service.
@@ -55,8 +56,10 @@ type RunnerClient interface {
 	ImageExists(ctx context.Context, in *ImageExistsRequest, opts ...grpc.CallOption) (*ImageExistsResponse, error)
 	RemoveImage(ctx context.Context, in *RemoveImageRequest, opts ...grpc.CallOption) (*RemoveImageResponse, error)
 	GetBuildLogs(ctx context.Context, in *GetBuildLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogLine], error)
-	// Proxy endpoints
-	SendProxy(ctx context.Context, in *ProxyRequest, opts ...grpc.CallOption) (*ProxyResponse, error)
+	// Unified proxy method for all HTTP requests
+	ProxyRequest(ctx context.Context, in *ProxyRequestMsg, opts ...grpc.CallOption) (*ProxyResponseMsg, error)
+	// Unified streaming proxy for WebSocket-like streaming
+	ProxyStream(ctx context.Context, in *ProxyStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProxyStreamResponse], error)
 }
 
 type runnerClient struct {
@@ -206,15 +209,34 @@ func (c *runnerClient) GetBuildLogs(ctx context.Context, in *GetBuildLogsRequest
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Runner_GetBuildLogsClient = grpc.ServerStreamingClient[LogLine]
 
-func (c *runnerClient) SendProxy(ctx context.Context, in *ProxyRequest, opts ...grpc.CallOption) (*ProxyResponse, error) {
+func (c *runnerClient) ProxyRequest(ctx context.Context, in *ProxyRequestMsg, opts ...grpc.CallOption) (*ProxyResponseMsg, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ProxyResponse)
-	err := c.cc.Invoke(ctx, Runner_SendProxy_FullMethodName, in, out, cOpts...)
+	out := new(ProxyResponseMsg)
+	err := c.cc.Invoke(ctx, Runner_ProxyRequest_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
+
+func (c *runnerClient) ProxyStream(ctx context.Context, in *ProxyStreamRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ProxyStreamResponse], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[1], Runner_ProxyStream_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[ProxyStreamRequest, ProxyStreamResponse]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Runner_ProxyStreamClient = grpc.ServerStreamingClient[ProxyStreamResponse]
 
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
@@ -236,8 +258,10 @@ type RunnerServer interface {
 	ImageExists(context.Context, *ImageExistsRequest) (*ImageExistsResponse, error)
 	RemoveImage(context.Context, *RemoveImageRequest) (*RemoveImageResponse, error)
 	GetBuildLogs(*GetBuildLogsRequest, grpc.ServerStreamingServer[LogLine]) error
-	// Proxy endpoints
-	SendProxy(context.Context, *ProxyRequest) (*ProxyResponse, error)
+	// Unified proxy method for all HTTP requests
+	ProxyRequest(context.Context, *ProxyRequestMsg) (*ProxyResponseMsg, error)
+	// Unified streaming proxy for WebSocket-like streaming
+	ProxyStream(*ProxyStreamRequest, grpc.ServerStreamingServer[ProxyStreamResponse]) error
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -287,8 +311,11 @@ func (UnimplementedRunnerServer) RemoveImage(context.Context, *RemoveImageReques
 func (UnimplementedRunnerServer) GetBuildLogs(*GetBuildLogsRequest, grpc.ServerStreamingServer[LogLine]) error {
 	return status.Errorf(codes.Unimplemented, "method GetBuildLogs not implemented")
 }
-func (UnimplementedRunnerServer) SendProxy(context.Context, *ProxyRequest) (*ProxyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendProxy not implemented")
+func (UnimplementedRunnerServer) ProxyRequest(context.Context, *ProxyRequestMsg) (*ProxyResponseMsg, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProxyRequest not implemented")
+}
+func (UnimplementedRunnerServer) ProxyStream(*ProxyStreamRequest, grpc.ServerStreamingServer[ProxyStreamResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method ProxyStream not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 func (UnimplementedRunnerServer) testEmbeddedByValue()                {}
@@ -538,23 +565,34 @@ func _Runner_GetBuildLogs_Handler(srv interface{}, stream grpc.ServerStream) err
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Runner_GetBuildLogsServer = grpc.ServerStreamingServer[LogLine]
 
-func _Runner_SendProxy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ProxyRequest)
+func _Runner_ProxyRequest_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProxyRequestMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(RunnerServer).SendProxy(ctx, in)
+		return srv.(RunnerServer).ProxyRequest(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Runner_SendProxy_FullMethodName,
+		FullMethod: Runner_ProxyRequest_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RunnerServer).SendProxy(ctx, req.(*ProxyRequest))
+		return srv.(RunnerServer).ProxyRequest(ctx, req.(*ProxyRequestMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
+
+func _Runner_ProxyStream_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ProxyStreamRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(RunnerServer).ProxyStream(m, &grpc.GenericServerStream[ProxyStreamRequest, ProxyStreamResponse]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Runner_ProxyStreamServer = grpc.ServerStreamingServer[ProxyStreamResponse]
 
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -612,14 +650,19 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Runner_RemoveImage_Handler,
 		},
 		{
-			MethodName: "SendProxy",
-			Handler:    _Runner_SendProxy_Handler,
+			MethodName: "ProxyRequest",
+			Handler:    _Runner_ProxyRequest_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "GetBuildLogs",
 			Handler:       _Runner_GetBuildLogs_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "ProxyStream",
+			Handler:       _Runner_ProxyStream_Handler,
 			ServerStreams: true,
 		},
 	},

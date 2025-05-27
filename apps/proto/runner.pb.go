@@ -1428,34 +1428,33 @@ func (x *LogLine) GetContent() string {
 	return ""
 }
 
-// Proxy messages
-type ProxyRequest struct {
+// Generic proxy request that can handle any HTTP request
+type ProxyRequestMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
-	ProjectId     string                 `protobuf:"bytes,2,opt,name=project_id,json=projectId,proto3" json:"project_id,omitempty"`
-	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
-	Headers       map[string]string      `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Body          []byte                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`
-	Method        string                 `protobuf:"bytes,6,opt,name=method,proto3" json:"method,omitempty"`
-	Follow        bool                   `protobuf:"varint,7,opt,name=follow,proto3" json:"follow,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`                                                                                                            // The path after /toolbox/
+	Method        string                 `protobuf:"bytes,3,opt,name=method,proto3" json:"method,omitempty"`                                                                                                        // HTTP method (GET, POST, etc.)
+	Headers       map[string]string      `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`                            // HTTP headers
+	Body          []byte                 `protobuf:"bytes,5,opt,name=body,proto3" json:"body,omitempty"`                                                                                                            // Request body
+	QueryParams   map[string]string      `protobuf:"bytes,6,rep,name=query_params,json=queryParams,proto3" json:"query_params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Query parameters
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProxyRequest) Reset() {
-	*x = ProxyRequest{}
+func (x *ProxyRequestMsg) Reset() {
+	*x = ProxyRequestMsg{}
 	mi := &file_apps_proto_runner_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProxyRequest) String() string {
+func (x *ProxyRequestMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProxyRequest) ProtoMessage() {}
+func (*ProxyRequestMsg) ProtoMessage() {}
 
-func (x *ProxyRequest) ProtoReflect() protoreflect.Message {
+func (x *ProxyRequestMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_apps_proto_runner_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1467,83 +1466,77 @@ func (x *ProxyRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProxyRequest.ProtoReflect.Descriptor instead.
-func (*ProxyRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProxyRequestMsg.ProtoReflect.Descriptor instead.
+func (*ProxyRequestMsg) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{27}
 }
 
-func (x *ProxyRequest) GetSandboxId() string {
+func (x *ProxyRequestMsg) GetSandboxId() string {
 	if x != nil {
 		return x.SandboxId
 	}
 	return ""
 }
 
-func (x *ProxyRequest) GetProjectId() string {
-	if x != nil {
-		return x.ProjectId
-	}
-	return ""
-}
-
-func (x *ProxyRequest) GetPath() string {
+func (x *ProxyRequestMsg) GetPath() string {
 	if x != nil {
 		return x.Path
 	}
 	return ""
 }
 
-func (x *ProxyRequest) GetHeaders() map[string]string {
-	if x != nil {
-		return x.Headers
-	}
-	return nil
-}
-
-func (x *ProxyRequest) GetBody() []byte {
-	if x != nil {
-		return x.Body
-	}
-	return nil
-}
-
-func (x *ProxyRequest) GetMethod() string {
+func (x *ProxyRequestMsg) GetMethod() string {
 	if x != nil {
 		return x.Method
 	}
 	return ""
 }
 
-func (x *ProxyRequest) GetFollow() bool {
+func (x *ProxyRequestMsg) GetHeaders() map[string]string {
 	if x != nil {
-		return x.Follow
+		return x.Headers
 	}
-	return false
+	return nil
 }
 
-type ProxyResponse struct {
+func (x *ProxyRequestMsg) GetBody() []byte {
+	if x != nil {
+		return x.Body
+	}
+	return nil
+}
+
+func (x *ProxyRequestMsg) GetQueryParams() map[string]string {
+	if x != nil {
+		return x.QueryParams
+	}
+	return nil
+}
+
+// Generic proxy response that can handle any HTTP response
+type ProxyResponseMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	StatusCode    int32                  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`
-	Headers       map[string]string      `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Body          []byte                 `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`
+	StatusCode    int32                  `protobuf:"varint,1,opt,name=status_code,json=statusCode,proto3" json:"status_code,omitempty"`                                                  // HTTP status code
+	Headers       map[string]string      `protobuf:"bytes,2,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Response headers
+	Body          []byte                 `protobuf:"bytes,3,opt,name=body,proto3" json:"body,omitempty"`                                                                                 // Response body
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ProxyResponse) Reset() {
-	*x = ProxyResponse{}
+func (x *ProxyResponseMsg) Reset() {
+	*x = ProxyResponseMsg{}
 	mi := &file_apps_proto_runner_proto_msgTypes[28]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ProxyResponse) String() string {
+func (x *ProxyResponseMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ProxyResponse) ProtoMessage() {}
+func (*ProxyResponseMsg) ProtoMessage() {}
 
-func (x *ProxyResponse) ProtoReflect() protoreflect.Message {
+func (x *ProxyResponseMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_apps_proto_runner_proto_msgTypes[28]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1555,30 +1548,354 @@ func (x *ProxyResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ProxyResponse.ProtoReflect.Descriptor instead.
-func (*ProxyResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ProxyResponseMsg.ProtoReflect.Descriptor instead.
+func (*ProxyResponseMsg) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{28}
 }
 
-func (x *ProxyResponse) GetStatusCode() int32 {
+func (x *ProxyResponseMsg) GetStatusCode() int32 {
 	if x != nil {
 		return x.StatusCode
 	}
 	return 0
 }
 
-func (x *ProxyResponse) GetHeaders() map[string]string {
+func (x *ProxyResponseMsg) GetHeaders() map[string]string {
 	if x != nil {
 		return x.Headers
 	}
 	return nil
 }
 
-func (x *ProxyResponse) GetBody() []byte {
+func (x *ProxyResponseMsg) GetBody() []byte {
 	if x != nil {
 		return x.Body
 	}
 	return nil
+}
+
+// Streaming proxy request
+type ProxyStreamRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SandboxId     string                 `protobuf:"bytes,1,opt,name=sandbox_id,json=sandboxId,proto3" json:"sandbox_id,omitempty"`
+	Path          string                 `protobuf:"bytes,2,opt,name=path,proto3" json:"path,omitempty"`                                                                                                            // The path that requires streaming
+	QueryParams   map[string]string      `protobuf:"bytes,3,rep,name=query_params,json=queryParams,proto3" json:"query_params,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Query parameters (like follow=true)
+	Headers       map[string]string      `protobuf:"bytes,4,rep,name=headers,proto3" json:"headers,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`                            // HTTP headers
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProxyStreamRequest) Reset() {
+	*x = ProxyStreamRequest{}
+	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyStreamRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyStreamRequest) ProtoMessage() {}
+
+func (x *ProxyStreamRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyStreamRequest.ProtoReflect.Descriptor instead.
+func (*ProxyStreamRequest) Descriptor() ([]byte, []int) {
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *ProxyStreamRequest) GetSandboxId() string {
+	if x != nil {
+		return x.SandboxId
+	}
+	return ""
+}
+
+func (x *ProxyStreamRequest) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *ProxyStreamRequest) GetQueryParams() map[string]string {
+	if x != nil {
+		return x.QueryParams
+	}
+	return nil
+}
+
+func (x *ProxyStreamRequest) GetHeaders() map[string]string {
+	if x != nil {
+		return x.Headers
+	}
+	return nil
+}
+
+// Streaming proxy response
+type ProxyStreamResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to ResponseType:
+	//
+	//	*ProxyStreamResponse_Data
+	//	*ProxyStreamResponse_Error
+	//	*ProxyStreamResponse_Close
+	ResponseType  isProxyStreamResponse_ResponseType `protobuf_oneof:"response_type"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProxyStreamResponse) Reset() {
+	*x = ProxyStreamResponse{}
+	mi := &file_apps_proto_runner_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyStreamResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyStreamResponse) ProtoMessage() {}
+
+func (x *ProxyStreamResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_proto_runner_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyStreamResponse.ProtoReflect.Descriptor instead.
+func (*ProxyStreamResponse) Descriptor() ([]byte, []int) {
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ProxyStreamResponse) GetResponseType() isProxyStreamResponse_ResponseType {
+	if x != nil {
+		return x.ResponseType
+	}
+	return nil
+}
+
+func (x *ProxyStreamResponse) GetData() *StreamData {
+	if x != nil {
+		if x, ok := x.ResponseType.(*ProxyStreamResponse_Data); ok {
+			return x.Data
+		}
+	}
+	return nil
+}
+
+func (x *ProxyStreamResponse) GetError() *StreamError {
+	if x != nil {
+		if x, ok := x.ResponseType.(*ProxyStreamResponse_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+func (x *ProxyStreamResponse) GetClose() *StreamClose {
+	if x != nil {
+		if x, ok := x.ResponseType.(*ProxyStreamResponse_Close); ok {
+			return x.Close
+		}
+	}
+	return nil
+}
+
+type isProxyStreamResponse_ResponseType interface {
+	isProxyStreamResponse_ResponseType()
+}
+
+type ProxyStreamResponse_Data struct {
+	Data *StreamData `protobuf:"bytes,1,opt,name=data,proto3,oneof"` // Streaming data chunk
+}
+
+type ProxyStreamResponse_Error struct {
+	Error *StreamError `protobuf:"bytes,2,opt,name=error,proto3,oneof"` // Error during streaming
+}
+
+type ProxyStreamResponse_Close struct {
+	Close *StreamClose `protobuf:"bytes,3,opt,name=close,proto3,oneof"` // Stream closed
+}
+
+func (*ProxyStreamResponse_Data) isProxyStreamResponse_ResponseType() {}
+
+func (*ProxyStreamResponse_Error) isProxyStreamResponse_ResponseType() {}
+
+func (*ProxyStreamResponse_Close) isProxyStreamResponse_ResponseType() {}
+
+type StreamData struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Content       []byte                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`      // Raw content chunk
+	Timestamp     int64                  `protobuf:"varint,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"` // Timestamp when received
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamData) Reset() {
+	*x = StreamData{}
+	mi := &file_apps_proto_runner_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamData) ProtoMessage() {}
+
+func (x *StreamData) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_proto_runner_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamData.ProtoReflect.Descriptor instead.
+func (*StreamData) Descriptor() ([]byte, []int) {
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *StreamData) GetContent() []byte {
+	if x != nil {
+		return x.Content
+	}
+	return nil
+}
+
+func (x *StreamData) GetTimestamp() int64 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+type StreamError struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // Error message
+	Code          int32                  `protobuf:"varint,2,opt,name=code,proto3" json:"code,omitempty"`      // Error code
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamError) Reset() {
+	*x = StreamError{}
+	mi := &file_apps_proto_runner_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamError) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamError) ProtoMessage() {}
+
+func (x *StreamError) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_proto_runner_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamError.ProtoReflect.Descriptor instead.
+func (*StreamError) Descriptor() ([]byte, []int) {
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *StreamError) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *StreamError) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+type StreamClose struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Code          int32                  `protobuf:"varint,1,opt,name=code,proto3" json:"code,omitempty"`    // Close code
+	Reason        string                 `protobuf:"bytes,2,opt,name=reason,proto3" json:"reason,omitempty"` // Close reason
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StreamClose) Reset() {
+	*x = StreamClose{}
+	mi := &file_apps_proto_runner_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StreamClose) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StreamClose) ProtoMessage() {}
+
+func (x *StreamClose) ProtoReflect() protoreflect.Message {
+	mi := &file_apps_proto_runner_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StreamClose.ProtoReflect.Descriptor instead.
+func (*StreamClose) Descriptor() ([]byte, []int) {
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *StreamClose) GetCode() int32 {
+	if x != nil {
+		return x.Code
+	}
+	return 0
+}
+
+func (x *StreamClose) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
 }
 
 // Add Volume message for CreateSandboxRequest
@@ -1592,7 +1909,7 @@ type Volume struct {
 
 func (x *Volume) Reset() {
 	*x = Volume{}
-	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	mi := &file_apps_proto_runner_proto_msgTypes[34]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1604,7 +1921,7 @@ func (x *Volume) String() string {
 func (*Volume) ProtoMessage() {}
 
 func (x *Volume) ProtoReflect() protoreflect.Message {
-	mi := &file_apps_proto_runner_proto_msgTypes[29]
+	mi := &file_apps_proto_runner_proto_msgTypes[34]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1617,7 +1934,7 @@ func (x *Volume) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Volume.ProtoReflect.Descriptor instead.
 func (*Volume) Descriptor() ([]byte, []int) {
-	return file_apps_proto_runner_proto_rawDescGZIP(), []int{29}
+	return file_apps_proto_runner_proto_rawDescGZIP(), []int{34}
 }
 
 func (x *Volume) GetVolumeId() string {
@@ -1743,32 +2060,60 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\timage_ref\x18\x01 \x01(\tR\bimageRef\x12\x16\n" +
 	"\x06follow\x18\x02 \x01(\bR\x06follow\"#\n" +
 	"\aLogLine\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\"\x9d\x02\n" +
-	"\fProxyRequest\x12\x1d\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\"\xf9\x02\n" +
+	"\x0fProxyRequestMsg\x12\x1d\n" +
 	"\n" +
-	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x1d\n" +
-	"\n" +
-	"project_id\x18\x02 \x01(\tR\tprojectId\x12\x12\n" +
-	"\x04path\x18\x03 \x01(\tR\x04path\x12;\n" +
-	"\aheaders\x18\x04 \x03(\v2!.runner.ProxyRequest.HeadersEntryR\aheaders\x12\x12\n" +
-	"\x04body\x18\x05 \x01(\fR\x04body\x12\x16\n" +
-	"\x06method\x18\x06 \x01(\tR\x06method\x12\x16\n" +
-	"\x06follow\x18\a \x01(\bR\x06follow\x1a:\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12\x16\n" +
+	"\x06method\x18\x03 \x01(\tR\x06method\x12>\n" +
+	"\aheaders\x18\x04 \x03(\v2$.runner.ProxyRequestMsg.HeadersEntryR\aheaders\x12\x12\n" +
+	"\x04body\x18\x05 \x01(\fR\x04body\x12K\n" +
+	"\fquery_params\x18\x06 \x03(\v2(.runner.ProxyRequestMsg.QueryParamsEntryR\vqueryParams\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xbe\x01\n" +
-	"\rProxyResponse\x12\x1f\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a>\n" +
+	"\x10QueryParamsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xc4\x01\n" +
+	"\x10ProxyResponseMsg\x12\x1f\n" +
 	"\vstatus_code\x18\x01 \x01(\x05R\n" +
-	"statusCode\x12<\n" +
-	"\aheaders\x18\x02 \x03(\v2\".runner.ProxyResponse.HeadersEntryR\aheaders\x12\x12\n" +
+	"statusCode\x12?\n" +
+	"\aheaders\x18\x02 \x03(\v2%.runner.ProxyResponseMsg.HeadersEntryR\aheaders\x12\x12\n" +
 	"\x04body\x18\x03 \x01(\fR\x04body\x1a:\n" +
 	"\fHeadersEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"D\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xd6\x02\n" +
+	"\x12ProxyStreamRequest\x12\x1d\n" +
+	"\n" +
+	"sandbox_id\x18\x01 \x01(\tR\tsandboxId\x12\x12\n" +
+	"\x04path\x18\x02 \x01(\tR\x04path\x12N\n" +
+	"\fquery_params\x18\x03 \x03(\v2+.runner.ProxyStreamRequest.QueryParamsEntryR\vqueryParams\x12A\n" +
+	"\aheaders\x18\x04 \x03(\v2'.runner.ProxyStreamRequest.HeadersEntryR\aheaders\x1a>\n" +
+	"\x10QueryParamsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\x1a:\n" +
+	"\fHeadersEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"\xaa\x01\n" +
+	"\x13ProxyStreamResponse\x12(\n" +
+	"\x04data\x18\x01 \x01(\v2\x12.runner.StreamDataH\x00R\x04data\x12+\n" +
+	"\x05error\x18\x02 \x01(\v2\x13.runner.StreamErrorH\x00R\x05error\x12+\n" +
+	"\x05close\x18\x03 \x01(\v2\x13.runner.StreamCloseH\x00R\x05closeB\x0f\n" +
+	"\rresponse_type\"D\n" +
+	"\n" +
+	"StreamData\x12\x18\n" +
+	"\acontent\x18\x01 \x01(\fR\acontent\x12\x1c\n" +
+	"\ttimestamp\x18\x02 \x01(\x03R\ttimestamp\";\n" +
+	"\vStreamError\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12\x12\n" +
+	"\x04code\x18\x02 \x01(\x05R\x04code\"9\n" +
+	"\vStreamClose\x12\x12\n" +
+	"\x04code\x18\x01 \x01(\x05R\x04code\x12\x16\n" +
+	"\x06reason\x18\x02 \x01(\tR\x06reason\"D\n" +
 	"\x06Volume\x12\x1b\n" +
 	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12\x1d\n" +
 	"\n" +
-	"mount_path\x18\x02 \x01(\tR\tmountPath2\xba\b\n" +
+	"mount_path\x18\x02 \x01(\tR\tmountPath2\x8b\t\n" +
 	"\x06Runner\x12H\n" +
 	"\vHealthCheck\x12\x1a.runner.HealthCheckRequest\x1a\x1b.runner.HealthCheckResponse\"\x00\x12N\n" +
 	"\rCreateSandbox\x12\x1c.runner.CreateSandboxRequest\x1a\x1d.runner.CreateSandboxResponse\"\x00\x12Q\n" +
@@ -1783,8 +2128,9 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"BuildImage\x12\x19.runner.BuildImageRequest\x1a\x1a.runner.BuildImageResponse\"\x00\x12H\n" +
 	"\vImageExists\x12\x1a.runner.ImageExistsRequest\x1a\x1b.runner.ImageExistsResponse\"\x00\x12H\n" +
 	"\vRemoveImage\x12\x1a.runner.RemoveImageRequest\x1a\x1b.runner.RemoveImageResponse\"\x00\x12@\n" +
-	"\fGetBuildLogs\x12\x1b.runner.GetBuildLogsRequest\x1a\x0f.runner.LogLine\"\x000\x01\x12:\n" +
-	"\tSendProxy\x12\x14.runner.ProxyRequest\x1a\x15.runner.ProxyResponse\"\x00B#Z!github.com/daytonaio/runner/protob\x06proto3"
+	"\fGetBuildLogs\x12\x1b.runner.GetBuildLogsRequest\x1a\x0f.runner.LogLine\"\x000\x01\x12A\n" +
+	"\fProxyRequest\x12\x17.runner.ProxyRequestMsg\x1a\x18.runner.ProxyResponseMsg\x12H\n" +
+	"\vProxyStream\x12\x1a.runner.ProxyStreamRequest\x1a\x1b.runner.ProxyStreamResponse0\x01B#Z!github.com/daytonaio/runner/protob\x06proto3"
 
 var (
 	file_apps_proto_runner_proto_rawDescOnce sync.Once
@@ -1798,7 +2144,7 @@ func file_apps_proto_runner_proto_rawDescGZIP() []byte {
 	return file_apps_proto_runner_proto_rawDescData
 }
 
-var file_apps_proto_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 33)
+var file_apps_proto_runner_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
 var file_apps_proto_runner_proto_goTypes = []any{
 	(*HealthCheckRequest)(nil),             // 0: runner.HealthCheckRequest
 	(*HealthCheckResponse)(nil),            // 1: runner.HealthCheckResponse
@@ -1827,55 +2173,71 @@ var file_apps_proto_runner_proto_goTypes = []any{
 	(*RemoveImageResponse)(nil),            // 24: runner.RemoveImageResponse
 	(*GetBuildLogsRequest)(nil),            // 25: runner.GetBuildLogsRequest
 	(*LogLine)(nil),                        // 26: runner.LogLine
-	(*ProxyRequest)(nil),                   // 27: runner.ProxyRequest
-	(*ProxyResponse)(nil),                  // 28: runner.ProxyResponse
-	(*Volume)(nil),                         // 29: runner.Volume
-	nil,                                    // 30: runner.CreateSandboxRequest.EnvEntry
-	nil,                                    // 31: runner.ProxyRequest.HeadersEntry
-	nil,                                    // 32: runner.ProxyResponse.HeadersEntry
+	(*ProxyRequestMsg)(nil),                // 27: runner.ProxyRequestMsg
+	(*ProxyResponseMsg)(nil),               // 28: runner.ProxyResponseMsg
+	(*ProxyStreamRequest)(nil),             // 29: runner.ProxyStreamRequest
+	(*ProxyStreamResponse)(nil),            // 30: runner.ProxyStreamResponse
+	(*StreamData)(nil),                     // 31: runner.StreamData
+	(*StreamError)(nil),                    // 32: runner.StreamError
+	(*StreamClose)(nil),                    // 33: runner.StreamClose
+	(*Volume)(nil),                         // 34: runner.Volume
+	nil,                                    // 35: runner.CreateSandboxRequest.EnvEntry
+	nil,                                    // 36: runner.ProxyRequestMsg.HeadersEntry
+	nil,                                    // 37: runner.ProxyRequestMsg.QueryParamsEntry
+	nil,                                    // 38: runner.ProxyResponseMsg.HeadersEntry
+	nil,                                    // 39: runner.ProxyStreamRequest.QueryParamsEntry
+	nil,                                    // 40: runner.ProxyStreamRequest.HeadersEntry
 }
 var file_apps_proto_runner_proto_depIdxs = []int32{
-	30, // 0: runner.CreateSandboxRequest.env:type_name -> runner.CreateSandboxRequest.EnvEntry
+	35, // 0: runner.CreateSandboxRequest.env:type_name -> runner.CreateSandboxRequest.EnvEntry
 	16, // 1: runner.CreateSandboxRequest.registry:type_name -> runner.Registry
-	29, // 2: runner.CreateSandboxRequest.volumes:type_name -> runner.Volume
+	34, // 2: runner.CreateSandboxRequest.volumes:type_name -> runner.Volume
 	16, // 3: runner.CreateSnapshotRequest.registry:type_name -> runner.Registry
 	16, // 4: runner.PullImageRequest.registry:type_name -> runner.Registry
 	16, // 5: runner.BuildImageRequest.registry:type_name -> runner.Registry
-	31, // 6: runner.ProxyRequest.headers:type_name -> runner.ProxyRequest.HeadersEntry
-	32, // 7: runner.ProxyResponse.headers:type_name -> runner.ProxyResponse.HeadersEntry
-	0,  // 8: runner.Runner.HealthCheck:input_type -> runner.HealthCheckRequest
-	2,  // 9: runner.Runner.CreateSandbox:input_type -> runner.CreateSandboxRequest
-	4,  // 10: runner.Runner.DestroySandbox:input_type -> runner.DestroySandboxRequest
-	6,  // 11: runner.Runner.CreateSnapshot:input_type -> runner.CreateSnapshotRequest
-	8,  // 12: runner.Runner.StartSandbox:input_type -> runner.StartSandboxRequest
-	10, // 13: runner.Runner.StopSandbox:input_type -> runner.StopSandboxRequest
-	12, // 14: runner.Runner.GetSandboxInfo:input_type -> runner.GetSandboxInfoRequest
-	14, // 15: runner.Runner.RemoveDestroyedSandbox:input_type -> runner.RemoveDestroyedSandboxRequest
-	17, // 16: runner.Runner.PullImage:input_type -> runner.PullImageRequest
-	19, // 17: runner.Runner.BuildImage:input_type -> runner.BuildImageRequest
-	21, // 18: runner.Runner.ImageExists:input_type -> runner.ImageExistsRequest
-	23, // 19: runner.Runner.RemoveImage:input_type -> runner.RemoveImageRequest
-	25, // 20: runner.Runner.GetBuildLogs:input_type -> runner.GetBuildLogsRequest
-	27, // 21: runner.Runner.SendProxy:input_type -> runner.ProxyRequest
-	1,  // 22: runner.Runner.HealthCheck:output_type -> runner.HealthCheckResponse
-	3,  // 23: runner.Runner.CreateSandbox:output_type -> runner.CreateSandboxResponse
-	5,  // 24: runner.Runner.DestroySandbox:output_type -> runner.DestroySandboxResponse
-	7,  // 25: runner.Runner.CreateSnapshot:output_type -> runner.CreateSnapshotResponse
-	9,  // 26: runner.Runner.StartSandbox:output_type -> runner.StartSandboxResponse
-	11, // 27: runner.Runner.StopSandbox:output_type -> runner.StopSandboxResponse
-	13, // 28: runner.Runner.GetSandboxInfo:output_type -> runner.GetSandboxInfoResponse
-	15, // 29: runner.Runner.RemoveDestroyedSandbox:output_type -> runner.RemoveDestroyedSandboxResponse
-	18, // 30: runner.Runner.PullImage:output_type -> runner.PullImageResponse
-	20, // 31: runner.Runner.BuildImage:output_type -> runner.BuildImageResponse
-	22, // 32: runner.Runner.ImageExists:output_type -> runner.ImageExistsResponse
-	24, // 33: runner.Runner.RemoveImage:output_type -> runner.RemoveImageResponse
-	26, // 34: runner.Runner.GetBuildLogs:output_type -> runner.LogLine
-	28, // 35: runner.Runner.SendProxy:output_type -> runner.ProxyResponse
-	22, // [22:36] is the sub-list for method output_type
-	8,  // [8:22] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	36, // 6: runner.ProxyRequestMsg.headers:type_name -> runner.ProxyRequestMsg.HeadersEntry
+	37, // 7: runner.ProxyRequestMsg.query_params:type_name -> runner.ProxyRequestMsg.QueryParamsEntry
+	38, // 8: runner.ProxyResponseMsg.headers:type_name -> runner.ProxyResponseMsg.HeadersEntry
+	39, // 9: runner.ProxyStreamRequest.query_params:type_name -> runner.ProxyStreamRequest.QueryParamsEntry
+	40, // 10: runner.ProxyStreamRequest.headers:type_name -> runner.ProxyStreamRequest.HeadersEntry
+	31, // 11: runner.ProxyStreamResponse.data:type_name -> runner.StreamData
+	32, // 12: runner.ProxyStreamResponse.error:type_name -> runner.StreamError
+	33, // 13: runner.ProxyStreamResponse.close:type_name -> runner.StreamClose
+	0,  // 14: runner.Runner.HealthCheck:input_type -> runner.HealthCheckRequest
+	2,  // 15: runner.Runner.CreateSandbox:input_type -> runner.CreateSandboxRequest
+	4,  // 16: runner.Runner.DestroySandbox:input_type -> runner.DestroySandboxRequest
+	6,  // 17: runner.Runner.CreateSnapshot:input_type -> runner.CreateSnapshotRequest
+	8,  // 18: runner.Runner.StartSandbox:input_type -> runner.StartSandboxRequest
+	10, // 19: runner.Runner.StopSandbox:input_type -> runner.StopSandboxRequest
+	12, // 20: runner.Runner.GetSandboxInfo:input_type -> runner.GetSandboxInfoRequest
+	14, // 21: runner.Runner.RemoveDestroyedSandbox:input_type -> runner.RemoveDestroyedSandboxRequest
+	17, // 22: runner.Runner.PullImage:input_type -> runner.PullImageRequest
+	19, // 23: runner.Runner.BuildImage:input_type -> runner.BuildImageRequest
+	21, // 24: runner.Runner.ImageExists:input_type -> runner.ImageExistsRequest
+	23, // 25: runner.Runner.RemoveImage:input_type -> runner.RemoveImageRequest
+	25, // 26: runner.Runner.GetBuildLogs:input_type -> runner.GetBuildLogsRequest
+	27, // 27: runner.Runner.ProxyRequest:input_type -> runner.ProxyRequestMsg
+	29, // 28: runner.Runner.ProxyStream:input_type -> runner.ProxyStreamRequest
+	1,  // 29: runner.Runner.HealthCheck:output_type -> runner.HealthCheckResponse
+	3,  // 30: runner.Runner.CreateSandbox:output_type -> runner.CreateSandboxResponse
+	5,  // 31: runner.Runner.DestroySandbox:output_type -> runner.DestroySandboxResponse
+	7,  // 32: runner.Runner.CreateSnapshot:output_type -> runner.CreateSnapshotResponse
+	9,  // 33: runner.Runner.StartSandbox:output_type -> runner.StartSandboxResponse
+	11, // 34: runner.Runner.StopSandbox:output_type -> runner.StopSandboxResponse
+	13, // 35: runner.Runner.GetSandboxInfo:output_type -> runner.GetSandboxInfoResponse
+	15, // 36: runner.Runner.RemoveDestroyedSandbox:output_type -> runner.RemoveDestroyedSandboxResponse
+	18, // 37: runner.Runner.PullImage:output_type -> runner.PullImageResponse
+	20, // 38: runner.Runner.BuildImage:output_type -> runner.BuildImageResponse
+	22, // 39: runner.Runner.ImageExists:output_type -> runner.ImageExistsResponse
+	24, // 40: runner.Runner.RemoveImage:output_type -> runner.RemoveImageResponse
+	26, // 41: runner.Runner.GetBuildLogs:output_type -> runner.LogLine
+	28, // 42: runner.Runner.ProxyRequest:output_type -> runner.ProxyResponseMsg
+	30, // 43: runner.Runner.ProxyStream:output_type -> runner.ProxyStreamResponse
+	29, // [29:44] is the sub-list for method output_type
+	14, // [14:29] is the sub-list for method input_type
+	14, // [14:14] is the sub-list for extension type_name
+	14, // [14:14] is the sub-list for extension extendee
+	0,  // [0:14] is the sub-list for field type_name
 }
 
 func init() { file_apps_proto_runner_proto_init() }
@@ -1886,13 +2248,18 @@ func file_apps_proto_runner_proto_init() {
 	file_apps_proto_runner_proto_msgTypes[2].OneofWrappers = []any{}
 	file_apps_proto_runner_proto_msgTypes[16].OneofWrappers = []any{}
 	file_apps_proto_runner_proto_msgTypes[19].OneofWrappers = []any{}
+	file_apps_proto_runner_proto_msgTypes[30].OneofWrappers = []any{
+		(*ProxyStreamResponse_Data)(nil),
+		(*ProxyStreamResponse_Error)(nil),
+		(*ProxyStreamResponse_Close)(nil),
+	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_apps_proto_runner_proto_rawDesc), len(file_apps_proto_runner_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   33,
+			NumMessages:   41,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

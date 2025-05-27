@@ -152,31 +152,96 @@ export interface LogLine {
   content: string
 }
 
-/** Proxy messages */
-export interface ProxyRequest {
+/** Generic proxy request that can handle any HTTP request */
+export interface ProxyRequestMsg {
   sandboxId: string
-  projectId: string
+  /** The path after /toolbox/ */
   path: string
-  headers: { [key: string]: string }
-  body: Uint8Array
+  /** HTTP method (GET, POST, etc.) */
   method: string
-  follow: boolean
+  /** HTTP headers */
+  headers: { [key: string]: string }
+  /** Request body */
+  body: Uint8Array
+  /** Query parameters */
+  queryParams: { [key: string]: string }
 }
 
-export interface ProxyRequest_HeadersEntry {
+export interface ProxyRequestMsg_HeadersEntry {
   key: string
   value: string
 }
 
-export interface ProxyResponse {
+export interface ProxyRequestMsg_QueryParamsEntry {
+  key: string
+  value: string
+}
+
+/** Generic proxy response that can handle any HTTP response */
+export interface ProxyResponseMsg {
+  /** HTTP status code */
   statusCode: number
+  /** Response headers */
   headers: { [key: string]: string }
+  /** Response body */
   body: Uint8Array
 }
 
-export interface ProxyResponse_HeadersEntry {
+export interface ProxyResponseMsg_HeadersEntry {
   key: string
   value: string
+}
+
+/** Streaming proxy request */
+export interface ProxyStreamRequest {
+  sandboxId: string
+  /** The path that requires streaming */
+  path: string
+  /** Query parameters (like follow=true) */
+  queryParams: { [key: string]: string }
+  /** HTTP headers */
+  headers: { [key: string]: string }
+}
+
+export interface ProxyStreamRequest_QueryParamsEntry {
+  key: string
+  value: string
+}
+
+export interface ProxyStreamRequest_HeadersEntry {
+  key: string
+  value: string
+}
+
+/** Streaming proxy response */
+export interface ProxyStreamResponse {
+  /** Streaming data chunk */
+  data?: StreamData | undefined
+  /** Error during streaming */
+  error?: StreamError | undefined
+  /** Stream closed */
+  close?: StreamClose | undefined
+}
+
+export interface StreamData {
+  /** Raw content chunk */
+  content: Uint8Array
+  /** Timestamp when received */
+  timestamp: number
+}
+
+export interface StreamError {
+  /** Error message */
+  message: string
+  /** Error code */
+  code: number
+}
+
+export interface StreamClose {
+  /** Close code */
+  code: number
+  /** Close reason */
+  reason: string
 }
 
 /** Add Volume message for CreateSandboxRequest */
@@ -2334,40 +2399,37 @@ export const LogLine: MessageFns<LogLine> = {
   },
 }
 
-function createBaseProxyRequest(): ProxyRequest {
-  return { sandboxId: '', projectId: '', path: '', headers: {}, body: new Uint8Array(0), method: '', follow: false }
+function createBaseProxyRequestMsg(): ProxyRequestMsg {
+  return { sandboxId: '', path: '', method: '', headers: {}, body: new Uint8Array(0), queryParams: {} }
 }
 
-export const ProxyRequest: MessageFns<ProxyRequest> = {
-  encode(message: ProxyRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ProxyRequestMsg: MessageFns<ProxyRequestMsg> = {
+  encode(message: ProxyRequestMsg, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.sandboxId !== '') {
       writer.uint32(10).string(message.sandboxId)
     }
-    if (message.projectId !== '') {
-      writer.uint32(18).string(message.projectId)
-    }
     if (message.path !== '') {
-      writer.uint32(26).string(message.path)
+      writer.uint32(18).string(message.path)
+    }
+    if (message.method !== '') {
+      writer.uint32(26).string(message.method)
     }
     Object.entries(message.headers).forEach(([key, value]) => {
-      ProxyRequest_HeadersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join()
+      ProxyRequestMsg_HeadersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join()
     })
     if (message.body.length !== 0) {
       writer.uint32(42).bytes(message.body)
     }
-    if (message.method !== '') {
-      writer.uint32(50).string(message.method)
-    }
-    if (message.follow !== false) {
-      writer.uint32(56).bool(message.follow)
-    }
+    Object.entries(message.queryParams).forEach(([key, value]) => {
+      ProxyRequestMsg_QueryParamsEntry.encode({ key: key as any, value }, writer.uint32(50).fork()).join()
+    })
     return writer
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ProxyRequest {
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyRequestMsg {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
     let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseProxyRequest()
+    const message = createBaseProxyRequestMsg()
     while (reader.pos < end) {
       const tag = reader.uint32()
       switch (tag >>> 3) {
@@ -2384,7 +2446,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
             break
           }
 
-          message.projectId = reader.string()
+          message.path = reader.string()
           continue
         }
         case 3: {
@@ -2392,7 +2454,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
             break
           }
 
-          message.path = reader.string()
+          message.method = reader.string()
           continue
         }
         case 4: {
@@ -2400,7 +2462,7 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
             break
           }
 
-          const entry4 = ProxyRequest_HeadersEntry.decode(reader, reader.uint32())
+          const entry4 = ProxyRequestMsg_HeadersEntry.decode(reader, reader.uint32())
           if (entry4.value !== undefined) {
             message.headers[entry4.key] = entry4.value
           }
@@ -2419,15 +2481,10 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
             break
           }
 
-          message.method = reader.string()
-          continue
-        }
-        case 7: {
-          if (tag !== 56) {
-            break
+          const entry6 = ProxyRequestMsg_QueryParamsEntry.decode(reader, reader.uint32())
+          if (entry6.value !== undefined) {
+            message.queryParams[entry6.key] = entry6.value
           }
-
-          message.follow = reader.bool()
           continue
         }
       }
@@ -2439,11 +2496,11 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
     return message
   },
 
-  fromJSON(object: any): ProxyRequest {
+  fromJSON(object: any): ProxyRequestMsg {
     return {
       sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '',
-      projectId: isSet(object.projectId) ? globalThis.String(object.projectId) : '',
       path: isSet(object.path) ? globalThis.String(object.path) : '',
+      method: isSet(object.method) ? globalThis.String(object.method) : '',
       headers: isObject(object.headers)
         ? Object.entries(object.headers).reduce<{ [key: string]: string }>((acc, [key, value]) => {
             acc[key] = String(value)
@@ -2451,21 +2508,25 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
           }, {})
         : {},
       body: isSet(object.body) ? bytesFromBase64(object.body) : new Uint8Array(0),
-      method: isSet(object.method) ? globalThis.String(object.method) : '',
-      follow: isSet(object.follow) ? globalThis.Boolean(object.follow) : false,
+      queryParams: isObject(object.queryParams)
+        ? Object.entries(object.queryParams).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+            acc[key] = String(value)
+            return acc
+          }, {})
+        : {},
     }
   },
 
-  toJSON(message: ProxyRequest): unknown {
+  toJSON(message: ProxyRequestMsg): unknown {
     const obj: any = {}
     if (message.sandboxId !== '') {
       obj.sandboxId = message.sandboxId
     }
-    if (message.projectId !== '') {
-      obj.projectId = message.projectId
-    }
     if (message.path !== '') {
       obj.path = message.path
+    }
+    if (message.method !== '') {
+      obj.method = message.method
     }
     if (message.headers) {
       const entries = Object.entries(message.headers)
@@ -2479,23 +2540,26 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
     if (message.body.length !== 0) {
       obj.body = base64FromBytes(message.body)
     }
-    if (message.method !== '') {
-      obj.method = message.method
-    }
-    if (message.follow !== false) {
-      obj.follow = message.follow
+    if (message.queryParams) {
+      const entries = Object.entries(message.queryParams)
+      if (entries.length > 0) {
+        obj.queryParams = {}
+        entries.forEach(([k, v]) => {
+          obj.queryParams[k] = v
+        })
+      }
     }
     return obj
   },
 
-  create<I extends Exact<DeepPartial<ProxyRequest>, I>>(base?: I): ProxyRequest {
-    return ProxyRequest.fromPartial(base ?? ({} as any))
+  create<I extends Exact<DeepPartial<ProxyRequestMsg>, I>>(base?: I): ProxyRequestMsg {
+    return ProxyRequestMsg.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<ProxyRequest>, I>>(object: I): ProxyRequest {
-    const message = createBaseProxyRequest()
+  fromPartial<I extends Exact<DeepPartial<ProxyRequestMsg>, I>>(object: I): ProxyRequestMsg {
+    const message = createBaseProxyRequestMsg()
     message.sandboxId = object.sandboxId ?? ''
-    message.projectId = object.projectId ?? ''
     message.path = object.path ?? ''
+    message.method = object.method ?? ''
     message.headers = Object.entries(object.headers ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
       if (value !== undefined) {
         acc[key] = globalThis.String(value)
@@ -2503,18 +2567,25 @@ export const ProxyRequest: MessageFns<ProxyRequest> = {
       return acc
     }, {})
     message.body = object.body ?? new Uint8Array(0)
-    message.method = object.method ?? ''
-    message.follow = object.follow ?? false
+    message.queryParams = Object.entries(object.queryParams ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = globalThis.String(value)
+        }
+        return acc
+      },
+      {},
+    )
     return message
   },
 }
 
-function createBaseProxyRequest_HeadersEntry(): ProxyRequest_HeadersEntry {
+function createBaseProxyRequestMsg_HeadersEntry(): ProxyRequestMsg_HeadersEntry {
   return { key: '', value: '' }
 }
 
-export const ProxyRequest_HeadersEntry: MessageFns<ProxyRequest_HeadersEntry> = {
-  encode(message: ProxyRequest_HeadersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ProxyRequestMsg_HeadersEntry: MessageFns<ProxyRequestMsg_HeadersEntry> = {
+  encode(message: ProxyRequestMsg_HeadersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.key !== '') {
       writer.uint32(10).string(message.key)
     }
@@ -2524,10 +2595,10 @@ export const ProxyRequest_HeadersEntry: MessageFns<ProxyRequest_HeadersEntry> = 
     return writer
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ProxyRequest_HeadersEntry {
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyRequestMsg_HeadersEntry {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
     let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseProxyRequest_HeadersEntry()
+    const message = createBaseProxyRequestMsg_HeadersEntry()
     while (reader.pos < end) {
       const tag = reader.uint32()
       switch (tag >>> 3) {
@@ -2556,14 +2627,14 @@ export const ProxyRequest_HeadersEntry: MessageFns<ProxyRequest_HeadersEntry> = 
     return message
   },
 
-  fromJSON(object: any): ProxyRequest_HeadersEntry {
+  fromJSON(object: any): ProxyRequestMsg_HeadersEntry {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : '',
       value: isSet(object.value) ? globalThis.String(object.value) : '',
     }
   },
 
-  toJSON(message: ProxyRequest_HeadersEntry): unknown {
+  toJSON(message: ProxyRequestMsg_HeadersEntry): unknown {
     const obj: any = {}
     if (message.key !== '') {
       obj.key = message.key
@@ -2574,28 +2645,108 @@ export const ProxyRequest_HeadersEntry: MessageFns<ProxyRequest_HeadersEntry> = 
     return obj
   },
 
-  create<I extends Exact<DeepPartial<ProxyRequest_HeadersEntry>, I>>(base?: I): ProxyRequest_HeadersEntry {
-    return ProxyRequest_HeadersEntry.fromPartial(base ?? ({} as any))
+  create<I extends Exact<DeepPartial<ProxyRequestMsg_HeadersEntry>, I>>(base?: I): ProxyRequestMsg_HeadersEntry {
+    return ProxyRequestMsg_HeadersEntry.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<ProxyRequest_HeadersEntry>, I>>(object: I): ProxyRequest_HeadersEntry {
-    const message = createBaseProxyRequest_HeadersEntry()
+  fromPartial<I extends Exact<DeepPartial<ProxyRequestMsg_HeadersEntry>, I>>(object: I): ProxyRequestMsg_HeadersEntry {
+    const message = createBaseProxyRequestMsg_HeadersEntry()
     message.key = object.key ?? ''
     message.value = object.value ?? ''
     return message
   },
 }
 
-function createBaseProxyResponse(): ProxyResponse {
+function createBaseProxyRequestMsg_QueryParamsEntry(): ProxyRequestMsg_QueryParamsEntry {
+  return { key: '', value: '' }
+}
+
+export const ProxyRequestMsg_QueryParamsEntry: MessageFns<ProxyRequestMsg_QueryParamsEntry> = {
+  encode(message: ProxyRequestMsg_QueryParamsEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key)
+    }
+    if (message.value !== '') {
+      writer.uint32(18).string(message.value)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyRequestMsg_QueryParamsEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseProxyRequestMsg_QueryParamsEntry()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.key = reader.string()
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.value = reader.string()
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): ProxyRequestMsg_QueryParamsEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      value: isSet(object.value) ? globalThis.String(object.value) : '',
+    }
+  },
+
+  toJSON(message: ProxyRequestMsg_QueryParamsEntry): unknown {
+    const obj: any = {}
+    if (message.key !== '') {
+      obj.key = message.key
+    }
+    if (message.value !== '') {
+      obj.value = message.value
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<ProxyRequestMsg_QueryParamsEntry>, I>>(
+    base?: I,
+  ): ProxyRequestMsg_QueryParamsEntry {
+    return ProxyRequestMsg_QueryParamsEntry.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<ProxyRequestMsg_QueryParamsEntry>, I>>(
+    object: I,
+  ): ProxyRequestMsg_QueryParamsEntry {
+    const message = createBaseProxyRequestMsg_QueryParamsEntry()
+    message.key = object.key ?? ''
+    message.value = object.value ?? ''
+    return message
+  },
+}
+
+function createBaseProxyResponseMsg(): ProxyResponseMsg {
   return { statusCode: 0, headers: {}, body: new Uint8Array(0) }
 }
 
-export const ProxyResponse: MessageFns<ProxyResponse> = {
-  encode(message: ProxyResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ProxyResponseMsg: MessageFns<ProxyResponseMsg> = {
+  encode(message: ProxyResponseMsg, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.statusCode !== 0) {
       writer.uint32(8).int32(message.statusCode)
     }
     Object.entries(message.headers).forEach(([key, value]) => {
-      ProxyResponse_HeadersEntry.encode({ key: key as any, value }, writer.uint32(18).fork()).join()
+      ProxyResponseMsg_HeadersEntry.encode({ key: key as any, value }, writer.uint32(18).fork()).join()
     })
     if (message.body.length !== 0) {
       writer.uint32(26).bytes(message.body)
@@ -2603,10 +2754,10 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
     return writer
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ProxyResponse {
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyResponseMsg {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
     let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseProxyResponse()
+    const message = createBaseProxyResponseMsg()
     while (reader.pos < end) {
       const tag = reader.uint32()
       switch (tag >>> 3) {
@@ -2623,7 +2774,7 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
             break
           }
 
-          const entry2 = ProxyResponse_HeadersEntry.decode(reader, reader.uint32())
+          const entry2 = ProxyResponseMsg_HeadersEntry.decode(reader, reader.uint32())
           if (entry2.value !== undefined) {
             message.headers[entry2.key] = entry2.value
           }
@@ -2646,7 +2797,7 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
     return message
   },
 
-  fromJSON(object: any): ProxyResponse {
+  fromJSON(object: any): ProxyResponseMsg {
     return {
       statusCode: isSet(object.statusCode) ? globalThis.Number(object.statusCode) : 0,
       headers: isObject(object.headers)
@@ -2659,7 +2810,7 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
     }
   },
 
-  toJSON(message: ProxyResponse): unknown {
+  toJSON(message: ProxyResponseMsg): unknown {
     const obj: any = {}
     if (message.statusCode !== 0) {
       obj.statusCode = Math.round(message.statusCode)
@@ -2679,11 +2830,11 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
     return obj
   },
 
-  create<I extends Exact<DeepPartial<ProxyResponse>, I>>(base?: I): ProxyResponse {
-    return ProxyResponse.fromPartial(base ?? ({} as any))
+  create<I extends Exact<DeepPartial<ProxyResponseMsg>, I>>(base?: I): ProxyResponseMsg {
+    return ProxyResponseMsg.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<ProxyResponse>, I>>(object: I): ProxyResponse {
-    const message = createBaseProxyResponse()
+  fromPartial<I extends Exact<DeepPartial<ProxyResponseMsg>, I>>(object: I): ProxyResponseMsg {
+    const message = createBaseProxyResponseMsg()
     message.statusCode = object.statusCode ?? 0
     message.headers = Object.entries(object.headers ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
       if (value !== undefined) {
@@ -2696,12 +2847,12 @@ export const ProxyResponse: MessageFns<ProxyResponse> = {
   },
 }
 
-function createBaseProxyResponse_HeadersEntry(): ProxyResponse_HeadersEntry {
+function createBaseProxyResponseMsg_HeadersEntry(): ProxyResponseMsg_HeadersEntry {
   return { key: '', value: '' }
 }
 
-export const ProxyResponse_HeadersEntry: MessageFns<ProxyResponse_HeadersEntry> = {
-  encode(message: ProxyResponse_HeadersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+export const ProxyResponseMsg_HeadersEntry: MessageFns<ProxyResponseMsg_HeadersEntry> = {
+  encode(message: ProxyResponseMsg_HeadersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
     if (message.key !== '') {
       writer.uint32(10).string(message.key)
     }
@@ -2711,10 +2862,10 @@ export const ProxyResponse_HeadersEntry: MessageFns<ProxyResponse_HeadersEntry> 
     return writer
   },
 
-  decode(input: BinaryReader | Uint8Array, length?: number): ProxyResponse_HeadersEntry {
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyResponseMsg_HeadersEntry {
     const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
     let end = length === undefined ? reader.len : reader.pos + length
-    const message = createBaseProxyResponse_HeadersEntry()
+    const message = createBaseProxyResponseMsg_HeadersEntry()
     while (reader.pos < end) {
       const tag = reader.uint32()
       switch (tag >>> 3) {
@@ -2743,14 +2894,14 @@ export const ProxyResponse_HeadersEntry: MessageFns<ProxyResponse_HeadersEntry> 
     return message
   },
 
-  fromJSON(object: any): ProxyResponse_HeadersEntry {
+  fromJSON(object: any): ProxyResponseMsg_HeadersEntry {
     return {
       key: isSet(object.key) ? globalThis.String(object.key) : '',
       value: isSet(object.value) ? globalThis.String(object.value) : '',
     }
   },
 
-  toJSON(message: ProxyResponse_HeadersEntry): unknown {
+  toJSON(message: ProxyResponseMsg_HeadersEntry): unknown {
     const obj: any = {}
     if (message.key !== '') {
       obj.key = message.key
@@ -2761,13 +2912,644 @@ export const ProxyResponse_HeadersEntry: MessageFns<ProxyResponse_HeadersEntry> 
     return obj
   },
 
-  create<I extends Exact<DeepPartial<ProxyResponse_HeadersEntry>, I>>(base?: I): ProxyResponse_HeadersEntry {
-    return ProxyResponse_HeadersEntry.fromPartial(base ?? ({} as any))
+  create<I extends Exact<DeepPartial<ProxyResponseMsg_HeadersEntry>, I>>(base?: I): ProxyResponseMsg_HeadersEntry {
+    return ProxyResponseMsg_HeadersEntry.fromPartial(base ?? ({} as any))
   },
-  fromPartial<I extends Exact<DeepPartial<ProxyResponse_HeadersEntry>, I>>(object: I): ProxyResponse_HeadersEntry {
-    const message = createBaseProxyResponse_HeadersEntry()
+  fromPartial<I extends Exact<DeepPartial<ProxyResponseMsg_HeadersEntry>, I>>(
+    object: I,
+  ): ProxyResponseMsg_HeadersEntry {
+    const message = createBaseProxyResponseMsg_HeadersEntry()
     message.key = object.key ?? ''
     message.value = object.value ?? ''
+    return message
+  },
+}
+
+function createBaseProxyStreamRequest(): ProxyStreamRequest {
+  return { sandboxId: '', path: '', queryParams: {}, headers: {} }
+}
+
+export const ProxyStreamRequest: MessageFns<ProxyStreamRequest> = {
+  encode(message: ProxyStreamRequest, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.sandboxId !== '') {
+      writer.uint32(10).string(message.sandboxId)
+    }
+    if (message.path !== '') {
+      writer.uint32(18).string(message.path)
+    }
+    Object.entries(message.queryParams).forEach(([key, value]) => {
+      ProxyStreamRequest_QueryParamsEntry.encode({ key: key as any, value }, writer.uint32(26).fork()).join()
+    })
+    Object.entries(message.headers).forEach(([key, value]) => {
+      ProxyStreamRequest_HeadersEntry.encode({ key: key as any, value }, writer.uint32(34).fork()).join()
+    })
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyStreamRequest {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseProxyStreamRequest()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.sandboxId = reader.string()
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.path = reader.string()
+          continue
+        }
+        case 3: {
+          if (tag !== 26) {
+            break
+          }
+
+          const entry3 = ProxyStreamRequest_QueryParamsEntry.decode(reader, reader.uint32())
+          if (entry3.value !== undefined) {
+            message.queryParams[entry3.key] = entry3.value
+          }
+          continue
+        }
+        case 4: {
+          if (tag !== 34) {
+            break
+          }
+
+          const entry4 = ProxyStreamRequest_HeadersEntry.decode(reader, reader.uint32())
+          if (entry4.value !== undefined) {
+            message.headers[entry4.key] = entry4.value
+          }
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): ProxyStreamRequest {
+    return {
+      sandboxId: isSet(object.sandboxId) ? globalThis.String(object.sandboxId) : '',
+      path: isSet(object.path) ? globalThis.String(object.path) : '',
+      queryParams: isObject(object.queryParams)
+        ? Object.entries(object.queryParams).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+            acc[key] = String(value)
+            return acc
+          }, {})
+        : {},
+      headers: isObject(object.headers)
+        ? Object.entries(object.headers).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+            acc[key] = String(value)
+            return acc
+          }, {})
+        : {},
+    }
+  },
+
+  toJSON(message: ProxyStreamRequest): unknown {
+    const obj: any = {}
+    if (message.sandboxId !== '') {
+      obj.sandboxId = message.sandboxId
+    }
+    if (message.path !== '') {
+      obj.path = message.path
+    }
+    if (message.queryParams) {
+      const entries = Object.entries(message.queryParams)
+      if (entries.length > 0) {
+        obj.queryParams = {}
+        entries.forEach(([k, v]) => {
+          obj.queryParams[k] = v
+        })
+      }
+    }
+    if (message.headers) {
+      const entries = Object.entries(message.headers)
+      if (entries.length > 0) {
+        obj.headers = {}
+        entries.forEach(([k, v]) => {
+          obj.headers[k] = v
+        })
+      }
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<ProxyStreamRequest>, I>>(base?: I): ProxyStreamRequest {
+    return ProxyStreamRequest.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<ProxyStreamRequest>, I>>(object: I): ProxyStreamRequest {
+    const message = createBaseProxyStreamRequest()
+    message.sandboxId = object.sandboxId ?? ''
+    message.path = object.path ?? ''
+    message.queryParams = Object.entries(object.queryParams ?? {}).reduce<{ [key: string]: string }>(
+      (acc, [key, value]) => {
+        if (value !== undefined) {
+          acc[key] = globalThis.String(value)
+        }
+        return acc
+      },
+      {},
+    )
+    message.headers = Object.entries(object.headers ?? {}).reduce<{ [key: string]: string }>((acc, [key, value]) => {
+      if (value !== undefined) {
+        acc[key] = globalThis.String(value)
+      }
+      return acc
+    }, {})
+    return message
+  },
+}
+
+function createBaseProxyStreamRequest_QueryParamsEntry(): ProxyStreamRequest_QueryParamsEntry {
+  return { key: '', value: '' }
+}
+
+export const ProxyStreamRequest_QueryParamsEntry: MessageFns<ProxyStreamRequest_QueryParamsEntry> = {
+  encode(message: ProxyStreamRequest_QueryParamsEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key)
+    }
+    if (message.value !== '') {
+      writer.uint32(18).string(message.value)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyStreamRequest_QueryParamsEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseProxyStreamRequest_QueryParamsEntry()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.key = reader.string()
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.value = reader.string()
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): ProxyStreamRequest_QueryParamsEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      value: isSet(object.value) ? globalThis.String(object.value) : '',
+    }
+  },
+
+  toJSON(message: ProxyStreamRequest_QueryParamsEntry): unknown {
+    const obj: any = {}
+    if (message.key !== '') {
+      obj.key = message.key
+    }
+    if (message.value !== '') {
+      obj.value = message.value
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<ProxyStreamRequest_QueryParamsEntry>, I>>(
+    base?: I,
+  ): ProxyStreamRequest_QueryParamsEntry {
+    return ProxyStreamRequest_QueryParamsEntry.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<ProxyStreamRequest_QueryParamsEntry>, I>>(
+    object: I,
+  ): ProxyStreamRequest_QueryParamsEntry {
+    const message = createBaseProxyStreamRequest_QueryParamsEntry()
+    message.key = object.key ?? ''
+    message.value = object.value ?? ''
+    return message
+  },
+}
+
+function createBaseProxyStreamRequest_HeadersEntry(): ProxyStreamRequest_HeadersEntry {
+  return { key: '', value: '' }
+}
+
+export const ProxyStreamRequest_HeadersEntry: MessageFns<ProxyStreamRequest_HeadersEntry> = {
+  encode(message: ProxyStreamRequest_HeadersEntry, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.key !== '') {
+      writer.uint32(10).string(message.key)
+    }
+    if (message.value !== '') {
+      writer.uint32(18).string(message.value)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyStreamRequest_HeadersEntry {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseProxyStreamRequest_HeadersEntry()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.key = reader.string()
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.value = reader.string()
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): ProxyStreamRequest_HeadersEntry {
+    return {
+      key: isSet(object.key) ? globalThis.String(object.key) : '',
+      value: isSet(object.value) ? globalThis.String(object.value) : '',
+    }
+  },
+
+  toJSON(message: ProxyStreamRequest_HeadersEntry): unknown {
+    const obj: any = {}
+    if (message.key !== '') {
+      obj.key = message.key
+    }
+    if (message.value !== '') {
+      obj.value = message.value
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<ProxyStreamRequest_HeadersEntry>, I>>(base?: I): ProxyStreamRequest_HeadersEntry {
+    return ProxyStreamRequest_HeadersEntry.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<ProxyStreamRequest_HeadersEntry>, I>>(
+    object: I,
+  ): ProxyStreamRequest_HeadersEntry {
+    const message = createBaseProxyStreamRequest_HeadersEntry()
+    message.key = object.key ?? ''
+    message.value = object.value ?? ''
+    return message
+  },
+}
+
+function createBaseProxyStreamResponse(): ProxyStreamResponse {
+  return { data: undefined, error: undefined, close: undefined }
+}
+
+export const ProxyStreamResponse: MessageFns<ProxyStreamResponse> = {
+  encode(message: ProxyStreamResponse, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.data !== undefined) {
+      StreamData.encode(message.data, writer.uint32(10).fork()).join()
+    }
+    if (message.error !== undefined) {
+      StreamError.encode(message.error, writer.uint32(18).fork()).join()
+    }
+    if (message.close !== undefined) {
+      StreamClose.encode(message.close, writer.uint32(26).fork()).join()
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): ProxyStreamResponse {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseProxyStreamResponse()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.data = StreamData.decode(reader, reader.uint32())
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.error = StreamError.decode(reader, reader.uint32())
+          continue
+        }
+        case 3: {
+          if (tag !== 26) {
+            break
+          }
+
+          message.close = StreamClose.decode(reader, reader.uint32())
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): ProxyStreamResponse {
+    return {
+      data: isSet(object.data) ? StreamData.fromJSON(object.data) : undefined,
+      error: isSet(object.error) ? StreamError.fromJSON(object.error) : undefined,
+      close: isSet(object.close) ? StreamClose.fromJSON(object.close) : undefined,
+    }
+  },
+
+  toJSON(message: ProxyStreamResponse): unknown {
+    const obj: any = {}
+    if (message.data !== undefined) {
+      obj.data = StreamData.toJSON(message.data)
+    }
+    if (message.error !== undefined) {
+      obj.error = StreamError.toJSON(message.error)
+    }
+    if (message.close !== undefined) {
+      obj.close = StreamClose.toJSON(message.close)
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<ProxyStreamResponse>, I>>(base?: I): ProxyStreamResponse {
+    return ProxyStreamResponse.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<ProxyStreamResponse>, I>>(object: I): ProxyStreamResponse {
+    const message = createBaseProxyStreamResponse()
+    message.data = object.data !== undefined && object.data !== null ? StreamData.fromPartial(object.data) : undefined
+    message.error =
+      object.error !== undefined && object.error !== null ? StreamError.fromPartial(object.error) : undefined
+    message.close =
+      object.close !== undefined && object.close !== null ? StreamClose.fromPartial(object.close) : undefined
+    return message
+  },
+}
+
+function createBaseStreamData(): StreamData {
+  return { content: new Uint8Array(0), timestamp: 0 }
+}
+
+export const StreamData: MessageFns<StreamData> = {
+  encode(message: StreamData, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.content.length !== 0) {
+      writer.uint32(10).bytes(message.content)
+    }
+    if (message.timestamp !== 0) {
+      writer.uint32(16).int64(message.timestamp)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StreamData {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseStreamData()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.content = reader.bytes()
+          continue
+        }
+        case 2: {
+          if (tag !== 16) {
+            break
+          }
+
+          message.timestamp = longToNumber(reader.int64())
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): StreamData {
+    return {
+      content: isSet(object.content) ? bytesFromBase64(object.content) : new Uint8Array(0),
+      timestamp: isSet(object.timestamp) ? globalThis.Number(object.timestamp) : 0,
+    }
+  },
+
+  toJSON(message: StreamData): unknown {
+    const obj: any = {}
+    if (message.content.length !== 0) {
+      obj.content = base64FromBytes(message.content)
+    }
+    if (message.timestamp !== 0) {
+      obj.timestamp = Math.round(message.timestamp)
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<StreamData>, I>>(base?: I): StreamData {
+    return StreamData.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<StreamData>, I>>(object: I): StreamData {
+    const message = createBaseStreamData()
+    message.content = object.content ?? new Uint8Array(0)
+    message.timestamp = object.timestamp ?? 0
+    return message
+  },
+}
+
+function createBaseStreamError(): StreamError {
+  return { message: '', code: 0 }
+}
+
+export const StreamError: MessageFns<StreamError> = {
+  encode(message: StreamError, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.message !== '') {
+      writer.uint32(10).string(message.message)
+    }
+    if (message.code !== 0) {
+      writer.uint32(16).int32(message.code)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StreamError {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseStreamError()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 10) {
+            break
+          }
+
+          message.message = reader.string()
+          continue
+        }
+        case 2: {
+          if (tag !== 16) {
+            break
+          }
+
+          message.code = reader.int32()
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): StreamError {
+    return {
+      message: isSet(object.message) ? globalThis.String(object.message) : '',
+      code: isSet(object.code) ? globalThis.Number(object.code) : 0,
+    }
+  },
+
+  toJSON(message: StreamError): unknown {
+    const obj: any = {}
+    if (message.message !== '') {
+      obj.message = message.message
+    }
+    if (message.code !== 0) {
+      obj.code = Math.round(message.code)
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<StreamError>, I>>(base?: I): StreamError {
+    return StreamError.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<StreamError>, I>>(object: I): StreamError {
+    const message = createBaseStreamError()
+    message.message = object.message ?? ''
+    message.code = object.code ?? 0
+    return message
+  },
+}
+
+function createBaseStreamClose(): StreamClose {
+  return { code: 0, reason: '' }
+}
+
+export const StreamClose: MessageFns<StreamClose> = {
+  encode(message: StreamClose, writer: BinaryWriter = new BinaryWriter()): BinaryWriter {
+    if (message.code !== 0) {
+      writer.uint32(8).int32(message.code)
+    }
+    if (message.reason !== '') {
+      writer.uint32(18).string(message.reason)
+    }
+    return writer
+  },
+
+  decode(input: BinaryReader | Uint8Array, length?: number): StreamClose {
+    const reader = input instanceof BinaryReader ? input : new BinaryReader(input)
+    let end = length === undefined ? reader.len : reader.pos + length
+    const message = createBaseStreamClose()
+    while (reader.pos < end) {
+      const tag = reader.uint32()
+      switch (tag >>> 3) {
+        case 1: {
+          if (tag !== 8) {
+            break
+          }
+
+          message.code = reader.int32()
+          continue
+        }
+        case 2: {
+          if (tag !== 18) {
+            break
+          }
+
+          message.reason = reader.string()
+          continue
+        }
+      }
+      if ((tag & 7) === 4 || tag === 0) {
+        break
+      }
+      reader.skip(tag & 7)
+    }
+    return message
+  },
+
+  fromJSON(object: any): StreamClose {
+    return {
+      code: isSet(object.code) ? globalThis.Number(object.code) : 0,
+      reason: isSet(object.reason) ? globalThis.String(object.reason) : '',
+    }
+  },
+
+  toJSON(message: StreamClose): unknown {
+    const obj: any = {}
+    if (message.code !== 0) {
+      obj.code = Math.round(message.code)
+    }
+    if (message.reason !== '') {
+      obj.reason = message.reason
+    }
+    return obj
+  },
+
+  create<I extends Exact<DeepPartial<StreamClose>, I>>(base?: I): StreamClose {
+    return StreamClose.fromPartial(base ?? ({} as any))
+  },
+  fromPartial<I extends Exact<DeepPartial<StreamClose>, I>>(object: I): StreamClose {
+    const message = createBaseStreamClose()
+    message.code = object.code ?? 0
+    message.reason = object.reason ?? ''
     return message
   },
 }
@@ -2901,8 +3683,13 @@ export interface RunnerServiceImplementation<CallContextExt = {}> {
     request: GetBuildLogsRequest,
     context: CallContext & CallContextExt,
   ): ServerStreamingMethodResult<DeepPartial<LogLine>>
-  /** Proxy endpoints */
-  sendProxy(request: ProxyRequest, context: CallContext & CallContextExt): Promise<DeepPartial<ProxyResponse>>
+  /** Unified proxy method for all HTTP requests */
+  proxyRequest(request: ProxyRequestMsg, context: CallContext & CallContextExt): Promise<DeepPartial<ProxyResponseMsg>>
+  /** Unified streaming proxy for WebSocket-like streaming */
+  proxyStream(
+    request: ProxyStreamRequest,
+    context: CallContext & CallContextExt,
+  ): ServerStreamingMethodResult<DeepPartial<ProxyStreamResponse>>
 }
 
 export interface RunnerClient<CallOptionsExt = {}> {
@@ -2958,8 +3745,13 @@ export interface RunnerClient<CallOptionsExt = {}> {
     request: DeepPartial<GetBuildLogsRequest>,
     options?: CallOptions & CallOptionsExt,
   ): AsyncIterable<LogLine>
-  /** Proxy endpoints */
-  sendProxy(request: DeepPartial<ProxyRequest>, options?: CallOptions & CallOptionsExt): Promise<ProxyResponse>
+  /** Unified proxy method for all HTTP requests */
+  proxyRequest(request: DeepPartial<ProxyRequestMsg>, options?: CallOptions & CallOptionsExt): Promise<ProxyResponseMsg>
+  /** Unified streaming proxy for WebSocket-like streaming */
+  proxyStream(
+    request: DeepPartial<ProxyStreamRequest>,
+    options?: CallOptions & CallOptionsExt,
+  ): AsyncIterable<ProxyStreamResponse>
 }
 
 function bytesFromBase64(b64: string): Uint8Array {

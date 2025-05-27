@@ -20,9 +20,7 @@ import { WorkspaceState } from './../../workspace/enums/workspace-state.enum'
 import { Workspace } from './../../workspace/entities/workspace.entity'
 import { ImageNode } from './../../workspace/entities/image-node.entity'
 import { ImageNodeState } from './../../workspace/enums/image-node-state.enum'
-import { ImageManager } from '../managers/image.manager'
 import { RunnerClientFactory } from '../runner-api/runnerApi'
-import { HealthCheckResponse } from '@daytonaio/runner-grpc-client'
 
 @Injectable()
 export class NodeService {

@@ -58,7 +58,9 @@ import {
   SessionDto,
   CommandDto,
 } from '../dto/toolbox.dto'
-import { ToolboxService } from '../services/toolbox.service'
+import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { NodeService } from '../services/node.service'
+import { WorkspaceService } from '../../workspace/services/workspace.service'
 import { ContentTypeInterceptor } from '../../common/interceptors/content-type.interceptors'
 import {
   CompletionListDto,
@@ -67,7 +69,8 @@ import {
   LspSymbolDto,
   LspServerRequestDto,
 } from '../dto/lsp.dto'
-import { createProxyMiddleware, RequestHandler, fixRequestBody, Options } from 'http-proxy-middleware'
+import { ToolboxService } from '../services/toolbox.service'
+import { createProxyMiddleware, RequestHandler, Options } from 'http-proxy-middleware'
 import { IncomingMessage } from 'http'
 import { NextFunction } from 'express'
 import { ServerResponse } from 'http'
@@ -78,6 +81,7 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
 import { UploadFileDto } from '../dto/upload-file.dto'
+import { log } from 'console'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -102,15 +106,28 @@ export class ToolboxController {
     NextFunction
   >
 
-  constructor(private readonly toolboxService: ToolboxService) {
+  constructor(
+    private readonly runnerClientFactory: RunnerClientFactory,
+    private readonly nodeService: NodeService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly toolboxService: ToolboxService,
+  ) {
     const commonProxyOptions: Options = {
       router: async (req: RawBodyRequest<IncomingMessage>) => {
         // eslint-disable-next-line no-useless-escape
-        const workspaceId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        const sandboxId = req.url.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
         try {
-          const node = await this.toolboxService.getNode(workspaceId)
+          const sandbox = await this.workspaceService.findOne(sandboxId)
+          const node = await this.nodeService.findOne(sandbox.nodeId)
+
+          if (!node) {
+            throw new Error('Node not found for workspace')
+          }
+
+          // Create gRPC client using the factory
+          const runnerClient = this.runnerClientFactory.create(node)
           // @ts-expect-error - used later to set request headers
-          req._nodeApiKey = node.apiKey
+          req._runnerClient = runnerClient
 
           return node.apiUrl
         } catch (err) {
@@ -123,11 +140,15 @@ export class ToolboxController {
       },
       pathRewrite: (path) => {
         // eslint-disable-next-line no-useless-escape
-        const workspaceId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
-        const routePath = path.split(`/api/toolbox/${workspaceId}/toolbox`)[1]
-        const newPath = `/workspaces/${workspaceId}/main/toolbox${routePath}`
+        const sandboxId = path.match(/^\/api\/toolbox\/([^\/]+)\/toolbox/)?.[1]
+        if (!sandboxId) {
+          this.logger.error('Could not extract sandboxId from path:', path)
+          return path
+        }
 
-        return newPath
+        const routePath = path.split(`/api/toolbox/${sandboxId}/toolbox`)[1]
+
+        return routePath
       },
       changeOrigin: true,
       autoRewrite: true,
@@ -136,17 +157,98 @@ export class ToolboxController {
         proxyReq: (proxyReq, req, res) => {
           // @ts-expect-error - set when routing
           if (req._err) {
-            res.writeHead(400, { 'Content-Type': 'application/json' })
-            // @ts-expect-error - set when routing
-            res.end(JSON.stringify(req._err))
+            if (!res.headersSent) {
+              res.writeHead(400, { 'Content-Type': 'application/json' })
+              res.end()
+            }
             return
           }
 
           // @ts-expect-error - set when routing
-          const nodeApiKey = req._nodeApiKey
+          const runnerClient = req._runnerClient
 
-          proxyReq.setHeader('Authorization', `Bearer ${nodeApiKey}`)
-          fixRequestBody(proxyReq, req)
+          // Extract query parameters
+          const queryParams: { [key: string]: string } = {}
+          if (req.url) {
+            const queryString = req.url.split('?')[1]
+            if (queryString) {
+              queryString.split('&').forEach((param) => {
+                const [key, value] = param.split('=')
+                if (key) {
+                  queryParams[key] = decodeURIComponent(value || '')
+                }
+              })
+            }
+          }
+
+          // Copy headers from original request
+          const headers: { [key: string]: string } = {}
+          Object.entries(req.headers).forEach(([key, values]) => {
+            // Skip the Connection header
+            if (key !== 'Connection') {
+              if (Array.isArray(values)) {
+                headers[key] = values.join(', ')
+              } else if (values) {
+                headers[key] = values
+              }
+            }
+          })
+
+          try {
+            // Get the rewritten path
+            const sandboxId = (req as any).params.workspaceId
+            const path = req.url || ''
+
+            // Get the request body
+            let body: Uint8Array
+            if (req.method === 'POST' || req.method === 'PUT' || req.method === 'PATCH') {
+              if ((req as any).rawBody) {
+                body = new Uint8Array((req as any).rawBody)
+              } else {
+                body = new Uint8Array(0)
+              }
+            } else {
+              body = new Uint8Array(0)
+            }
+
+            this.logger.debug('Proxying request:', {
+              sandboxId: sandboxId,
+              path: path,
+              method: req.method,
+              queryParams,
+              bodyLength: body.length,
+              contentType: req.headers['content-type'],
+            })
+
+            // Call gRPC client
+            const response = runnerClient.proxyRequest({
+              sandboxId: sandboxId,
+              path: path,
+              method: req.method || 'GET',
+              headers,
+              body,
+              queryParams,
+            })
+
+            if (!res.headersSent) {
+              // Copy response headers
+              Object.entries(response.headers).forEach(([key, value]) => {
+                res.setHeader(key, value as string | number | string[])
+              })
+
+              // Set the status code
+              res.statusCode = response.statusCode
+
+              // Copy the response body
+              res.end(Buffer.from(response.body))
+            }
+          } catch (error) {
+            this.logger.error('Proxy request failed:', error)
+            if (!res.headersSent) {
+              res.statusCode = 500
+              res.end('Proxy request failed')
+            }
+          }
         },
       },
     }

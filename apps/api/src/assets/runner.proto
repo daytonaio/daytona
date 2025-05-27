@@ -24,8 +24,11 @@ service Runner {
   rpc RemoveImage(RemoveImageRequest) returns (RemoveImageResponse) {}
   rpc GetBuildLogs(GetBuildLogsRequest) returns (stream LogLine) {}
 
-  // Proxy endpoints
-  rpc SendProxy(ProxyRequest) returns (ProxyResponse) {}
+  // Unified proxy method for all HTTP requests
+  rpc ProxyRequest(ProxyRequestMsg) returns (ProxyResponseMsg);
+  
+  // Unified streaming proxy for WebSocket-like streaming
+  rpc ProxyStream(ProxyStreamRequest) returns (stream ProxyStreamResponse);
 }
 
 // Health messages
@@ -165,21 +168,53 @@ message LogLine {
   string content = 1;
 }
 
-// Proxy messages
-message ProxyRequest {
+// Generic proxy request that can handle any HTTP request
+message ProxyRequestMsg {
   string sandbox_id = 1;
-  string project_id = 2;
-  string path = 3;
-  map<string, string> headers = 4;
-  bytes body = 5;
-  string method = 6;
-  bool follow = 7;
+  string path = 2;                           // The path after /toolbox/
+  string method = 3;                         // HTTP method (GET, POST, etc.)
+  map<string, string> headers = 4;           // HTTP headers
+  bytes body = 5;                           // Request body
+  map<string, string> query_params = 6;     // Query parameters
 }
 
-message ProxyResponse {
-  int32 status_code = 1;
-  map<string, string> headers = 2;
-  bytes body = 3;
+// Generic proxy response that can handle any HTTP response
+message ProxyResponseMsg {
+  int32 status_code = 1;                    // HTTP status code
+  map<string, string> headers = 2;          // Response headers
+  bytes body = 3;                          // Response body
+}
+
+// Streaming proxy request
+message ProxyStreamRequest {
+  string sandbox_id = 1;
+  string path = 2;                          // The path that requires streaming
+  map<string, string> query_params = 3;    // Query parameters (like follow=true)
+  map<string, string> headers = 4;          // HTTP headers
+}
+
+// Streaming proxy response
+message ProxyStreamResponse {
+  oneof response_type {
+    StreamData data = 1;                    // Streaming data chunk
+    StreamError error = 2;                  // Error during streaming
+    StreamClose close = 3;                  // Stream closed
+  }
+}
+
+message StreamData {
+  bytes content = 1;                        // Raw content chunk
+  int64 timestamp = 2;                      // Timestamp when received
+}
+
+message StreamError {
+  string message = 1;                       // Error message
+  int32 code = 2;                          // Error code
+}
+
+message StreamClose {
+  int32 code = 1;                          // Close code
+  string reason = 2;                       // Close reason
 }
 
 // Add Volume message for CreateSandboxRequest
