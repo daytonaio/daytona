@@ -1,7 +1,8 @@
 ---
-title: 'Process'
+title: "Process"
 hideTitleOnPage: true
 ---
+
 
 ## CodeRunParams
 
@@ -34,9 +35,9 @@ Handles process and code execution within a Sandbox.
 
 ```ts
 new Process(
-   codeToolbox: SandboxCodeToolbox,
-   toolboxApi: ToolboxApi,
-   instance: SandboxInstance,
+   codeToolbox: SandboxCodeToolbox, 
+   toolboxApi: ToolboxApi, 
+   instance: SandboxInstance, 
    getRootDir: () => Promise<string>): Process
 ```
 
@@ -57,8 +58,8 @@ new Process(
 
 ```ts
 codeRun(
-   code: string,
-   params?: CodeRunParams,
+   code: string, 
+   params?: CodeRunParams, 
 timeout?: number): Promise<ExecuteResponse>
 ```
 
@@ -85,8 +86,8 @@ const response = await process.codeRun(`
   const x = 10;
   const y = 20;
   console.log(\`Sum: \${x + y}\`);
-`)
-console.log(response.artifacts.stdout) // Prints: Sum: 30
+`);
+console.log(response.artifacts.stdout);  // Prints: Sum: 30
 ```
 
 ```ts
@@ -105,13 +106,13 @@ plt.xlabel('X-axis (seconds)')
 plt.ylabel('Y-axis (amplitude)')
 plt.grid(True)
 plt.show()
-`)
+`);
 
 if (response.artifacts?.charts) {
-  const chart = response.artifacts.charts[0]
+  const chart = response.artifacts.charts[0];
 
-  console.log(`Type: ${chart.type}`)
-  console.log(`Title: ${chart.title}`)
+  console.log(`Type: ${chart.type}`);
+  console.log(`Title: ${chart.title}`);
   if (chart.type === ChartType.LINE) {
     const lineChart = chart as LineChart
     console.log('X Label:', lineChart.x_label)
@@ -128,7 +129,7 @@ if (response.artifacts?.charts) {
 }
 ```
 
----
+***
 
 #### createSession()
 
@@ -154,14 +155,14 @@ long-running commands and monitor process status.
 
 ```ts
 // Create a new session
-const sessionId = 'my-session'
-await process.createSession(sessionId)
-const session = await process.getSession(sessionId)
+const sessionId = 'my-session';
+await process.createSession(sessionId);
+const session = await process.getSession(sessionId);
 // Do work...
-await process.deleteSession(sessionId)
+await process.deleteSession(sessionId);
 ```
 
----
+***
 
 #### deleteSession()
 
@@ -183,18 +184,18 @@ Delete a session from the Sandbox.
 
 ```ts
 // Clean up a completed session
-await process.deleteSession('my-session')
+await process.deleteSession('my-session');
 ```
 
----
+***
 
 #### executeCommand()
 
 ```ts
 executeCommand(
-   command: string,
-   cwd?: string,
-   env?: Record<string, string>,
+   command: string, 
+   cwd?: string, 
+   env?: Record<string, string>, 
 timeout?: number): Promise<ExecuteResponse>
 ```
 
@@ -204,7 +205,7 @@ Executes a shell command in the Sandbox.
 
 - `command` _string_ - Shell command to execute
 - `cwd?` _string_ - Working directory for command execution. If not specified, uses the Sandbox root directory.
-  Default is the user's root directory.
+    Default is the user's root directory.
 - `env?` _Record\<string, string\>_ - Environment variables to set for the command
 - `timeout?` _number_ - Maximum time in seconds to wait for the command to complete. 0 means wait indefinitely.
 
@@ -219,28 +220,28 @@ Executes a shell command in the Sandbox.
 
 ```ts
 // Simple command
-const response = await process.executeCommand('echo "Hello"')
-console.log(response.artifacts.stdout) // Prints: Hello
+const response = await process.executeCommand('echo "Hello"');
+console.log(response.artifacts.stdout);  // Prints: Hello
 ```
 
 ```ts
 // Command with working directory
-const result = await process.executeCommand('ls', 'workspace/src')
+const result = await process.executeCommand('ls', 'workspace/src');
 ```
 
 ```ts
 // Command with timeout
-const result = await process.executeCommand('sleep 10', undefined, 5)
+const result = await process.executeCommand('sleep 10', undefined, 5);
 ```
 
----
+***
 
 #### executeSessionCommand()
 
 ```ts
 executeSessionCommand(
-   sessionId: string,
-   req: SessionExecuteRequest,
+   sessionId: string, 
+   req: SessionExecuteRequest, 
 timeout?: number): Promise<SessionExecuteResponse>
 ```
 
@@ -265,21 +266,21 @@ Executes a command in an existing session.
 
 ```ts
 // Execute commands in sequence, maintaining state
-const sessionId = 'my-session'
+const sessionId = 'my-session';
 
 // Change directory
 await process.executeSessionCommand(sessionId, {
-  command: 'cd /home/daytona',
-})
+  command: 'cd /home/daytona'
+});
 
 // Run command in new directory
 const result = await process.executeSessionCommand(sessionId, {
-  command: 'pwd',
-})
-console.log(result.output) // Prints: /home/daytona
+  command: 'pwd'
+});
+console.log(result.output);  // Prints: /home/daytona
 ```
 
----
+***
 
 #### getSession()
 
@@ -302,13 +303,13 @@ Get a session in the sandbox.
 **Example:**
 
 ```ts
-const session = await process.getSession('my-session')
-session.commands.forEach((cmd) => {
-  console.log(`Command: ${cmd.command}`)
-})
+const session = await process.getSession('my-session');
+session.commands.forEach(cmd => {
+  console.log(`Command: ${cmd.command}`);
+});
 ```
 
----
+***
 
 #### getSessionCommand()
 
@@ -333,13 +334,13 @@ Gets information about a specific command executed in a session.
 **Example:**
 
 ```ts
-const cmd = await process.getSessionCommand('my-session', 'cmd-123')
+const cmd = await process.getSessionCommand('my-session', 'cmd-123');
 if (cmd.exitCode === 0) {
-  console.log(`Command ${cmd.command} completed successfully`)
+  console.log(`Command ${cmd.command} completed successfully`);
 }
 ```
 
----
+***
 
 #### getSessionCommandLogs()
 
@@ -363,16 +364,16 @@ Get the logs for a command executed in a session.
 **Example:**
 
 ```ts
-const logs = await process.getSessionCommandLogs('my-session', 'cmd-123')
-console.log('Command output:', logs)
+const logs = await process.getSessionCommandLogs('my-session', 'cmd-123');
+console.log('Command output:', logs);
 ```
 
 ##### Call Signature
 
 ```ts
 getSessionCommandLogs(
-   sessionId: string,
-   commandId: string,
+   sessionId: string, 
+   commandId: string, 
 onLogs: (chunk: string) => void): Promise<void>
 ```
 
@@ -392,11 +393,11 @@ Asynchronously retrieve and process the logs for a command executed in a session
 
 ```ts
 const logs = await process.getSessionCommandLogs('my-session', 'cmd-123', (chunk) => {
-  console.log('Log chunk:', chunk)
-})
+  console.log('Log chunk:', chunk);
+});
 ```
 
----
+***
 
 #### listSessions()
 
@@ -413,11 +414,11 @@ Lists all active sessions in the Sandbox.
 **Example:**
 
 ```ts
-const sessions = await process.listSessions()
-sessions.forEach((session) => {
-  console.log(`Session ${session.sessionId}:`)
-  session.commands.forEach((cmd) => {
-    console.log(`- ${cmd.command} (${cmd.exitCode})`)
-  })
-})
+const sessions = await process.listSessions();
+sessions.forEach(session => {
+  console.log(`Session ${session.sessionId}:`);
+  session.commands.forEach(cmd => {
+    console.log(`- ${cmd.command} (${cmd.exitCode})`);
+  });
+});
 ```

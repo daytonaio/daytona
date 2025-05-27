@@ -1,7 +1,8 @@
 ---
-title: 'Image'
+title: "Image"
 hideTitleOnPage: true
 ---
+
 
 ## Image
 
@@ -25,7 +26,7 @@ get contextList(): Context[]
 
 The list of context files to be added to the image.
 
----
+***
 
 #### dockerfile
 
@@ -63,7 +64,7 @@ Creates an Image from an existing base image.
 const image = Image.base('python:3.12-slim-bookworm')
 ```
 
----
+***
 
 #### debianSlim()
 
@@ -87,7 +88,7 @@ Creates a Debian slim image based on the official Python Docker image.
 const image = Image.debianSlim('3.12')
 ```
 
----
+***
 
 #### fromDockerfile()
 
@@ -111,7 +112,7 @@ Creates an Image from an existing Dockerfile.
 const image = Image.fromDockerfile('Dockerfile')
 ```
 
----
+***
 
 #### addLocalDir()
 
@@ -133,10 +134,12 @@ Adds a local directory to the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').addLocalDir('src', '/home/daytona/src')
+const image = Image
+ .debianSlim('3.12')
+ .addLocalDir('src', '/home/daytona/src')
 ```
 
----
+***
 
 #### addLocalFile()
 
@@ -158,10 +161,12 @@ Adds a local file to the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
+const image = Image
+ .debianSlim('3.12')
+ .addLocalFile('requirements.txt', '/home/daytona/requirements.txt')
 ```
 
----
+***
 
 #### cmd()
 
@@ -182,10 +187,12 @@ Sets the default command for the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
+const image = Image
+ .debianSlim('3.12')
+ .cmd(['/bin/bash'])
 ```
 
----
+***
 
 #### dockerfileCommands()
 
@@ -207,10 +214,12 @@ Extends an image with arbitrary Dockerfile-like commands.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').dockerfileCommands(['RUN echo "Hello, world!"'])
+const image = Image
+ .debianSlim('3.12')
+ .dockerfileCommands(['RUN echo "Hello, world!"'])
 ```
 
----
+***
 
 #### entrypoint()
 
@@ -231,10 +240,12 @@ Sets the entrypoint for the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').entrypoint(['/bin/bash'])
+const image = Image
+ .debianSlim('3.12')
+ .entrypoint(['/bin/bash'])
 ```
 
----
+***
 
 #### env()
 
@@ -255,10 +266,12 @@ Sets environment variables in the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').env({ FOO: 'bar' })
+const image = Image
+ .debianSlim('3.12')
+ .env({ FOO: 'bar' })
 ```
 
----
+***
 
 #### pipInstall()
 
@@ -283,7 +296,7 @@ Adds commands to install packages using pip.
 const image = Image.debianSlim('3.12').pipInstall('numpy', { findLinks: ['https://pypi.org/simple'] })
 ```
 
----
+***
 
 #### pipInstallFromPyproject()
 
@@ -309,7 +322,7 @@ const image = Image.debianSlim('3.12')
 image.pipInstallFromPyproject('pyproject.toml', { optionalDependencies: ['dev'] })
 ```
 
----
+***
 
 #### pipInstallFromRequirements()
 
@@ -335,7 +348,7 @@ const image = Image.debianSlim('3.12')
 image.pipInstallFromRequirements('requirements.txt', { findLinks: ['https://pypi.org/simple'] })
 ```
 
----
+***
 
 #### runCommands()
 
@@ -356,10 +369,12 @@ Runs commands in the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').runCommands('echo "Hello, world!"')
+const image = Image
+ .debianSlim('3.12')
+ .runCommands('echo "Hello, world!"')
 ```
 
----
+***
 
 #### workdir()
 
@@ -380,10 +395,12 @@ Sets the working directory in the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').workdir('/home/daytona')
+const image = Image
+ .debianSlim('3.12')
+ .workdir('/home/daytona')
 ```
 
----
+***
 
 ## Context
 

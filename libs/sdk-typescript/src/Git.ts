@@ -74,6 +74,63 @@ export class Git {
   }
 
   /**
+   * Create branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} name - Name of the new branch to create
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.createBranch('workspace/repo', 'new-feature');
+   */
+  public async createBranch(path: string, name: string): Promise<void> {
+    await this.toolboxApi.gitCreateBranch(this.instance.id, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      name,
+    })
+    return
+  }
+
+  /**
+   * Delete branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} name - Name of the branch to delete
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.deleteBranch('workspace/repo', 'new-feature');
+   */
+  public async deleteBranch(path: string, name: string): Promise<void> {
+    await this.toolboxApi.gitDeleteBranch(this.instance.id, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      name,
+    })
+    return
+  }
+
+  /**
+   * Checkout branche in the repository.
+   *
+   * @param {string} path - Path to the Git repository root. Relative paths are resolved based on the user's
+   * root directory.
+   * @param {string} branch - Name of the branch to checkout
+   * @returns {Promise<void>}
+   *
+   * @example
+   * await git.checkoutBranch('workspace/repo', 'new-feature');
+   */
+  public async checkoutBranch(path: string, branch: string): Promise<void> {
+    await this.toolboxApi.gitCheckoutBranch(this.instance.id, {
+      path: prefixRelativePath(await this.getRootDir(), path),
+      branch,
+    })
+    return
+  }
+
+  /**
    * Clones a Git repository into the specified path. It supports
    * cloning specific branches or commits, and can authenticate with the remote
    * repository if credentials are provided.

@@ -1,5 +1,5 @@
 ---
-title: 'AsyncDaytona'
+title: "AsyncDaytona"
 hideTitleOnPage: true
 ---
 
@@ -20,17 +20,17 @@ It can be initialized either with explicit configuration or using environment va
 - `api_url` _str_ - URL of the Daytona API.
 - `target` _str_ - Default target location for Sandboxes.
 - `volume` _AsyncVolumeService_ - Service for managing volumes.
-
+  
 **Example**:
 
-Using environment variables:
+  Using environment variables:
 
 ```python
 async with AsyncDaytona() as daytona:  # Uses DAYTONA_API_KEY, DAYTONA_API_URL
     sandbox = await daytona.create()
 ```
-
-Using explicit configuration:
+  
+  Using explicit configuration:
 
 ```python
 config = DaytonaConfig(
@@ -62,11 +62,11 @@ If no config is provided, reads from environment variables:
 **Arguments**:
 
 - `config` _Optional[DaytonaConfig]_ - Object containing api_key, api_url, and target.
-
+  
 **Raises**:
 
 - `DaytonaError` - If API key is not provided either through config or environment variables
-
+  
 **Example**:
 
 ```python
@@ -121,8 +121,8 @@ try:
 finally:
     await daytona.close()
 ```
-
-Or better yet, use as async context manager:
+  
+  Or better yet, use as async context manager:
 
 ```python
 async with AsyncDaytona() as daytona:
@@ -154,25 +154,25 @@ including language, image, resources, environment variables, and volumes for the
 - `on_image_build_logs` _Callable[[str], None]_ - This callback function handles image build logs.
   It's invoked only when `params.image` is an instance of `Image` and there's no existing
   image in Daytona with the same configuration.
-
+  
 **Returns**:
 
 - `Sandbox` - The created Sandbox instance.
-
+  
 **Raises**:
 
 - `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
   If sandbox fails to start or times out
-
+  
 **Example**:
 
-Create a default Python Sandbox:
+  Create a default Python Sandbox:
 
 ```python
 sandbox = await daytona.create()
 ```
-
-Create a custom Sandbox:
+  
+  Create a custom Sandbox:
 
 ```python
 params = CreateSandboxParams(
@@ -200,11 +200,11 @@ Deletes a Sandbox.
 - `sandbox` _Sandbox_ - The Sandbox instance to delete.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
   Default is 60 seconds.
-
+  
 **Raises**:
 
 - `DaytonaError` - If sandbox fails to delete or times out
-
+  
 **Example**:
 
 ```python
@@ -213,7 +213,7 @@ sandbox = await daytona.create()
 await daytona.delete(sandbox)  # Clean up when done
 ```
 
-#### AsyncDaytona.get_current_workspace
+#### AsyncDaytona.get\_current\_workspace
 
 ```python
 @deprecated(reason=(
@@ -227,12 +227,12 @@ Gets a Sandbox by its ID.
 **Arguments**:
 
 - `workspace_id` _str_ - The ID of the Sandbox to retrieve.
-
+  
 **Returns**:
 
 - `Workspace` - The Sandbox instance.
 
-#### AsyncDaytona.get_current_sandbox
+#### AsyncDaytona.get\_current\_sandbox
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox: ")
@@ -244,15 +244,15 @@ Gets a Sandbox by its ID.
 **Arguments**:
 
 - `sandbox_id` _str_ - The ID of the Sandbox to retrieve.
-
+  
 **Returns**:
 
 - `Sandbox` - The Sandbox instance.
-
+  
 **Raises**:
 
 - `DaytonaError` - If sandbox_id is not provided.
-
+  
 **Example**:
 
 ```python
@@ -260,7 +260,7 @@ sandbox = await daytona.get_current_sandbox("my-sandbox-id")
 print(sandbox.status)
 ```
 
-#### AsyncDaytona.find_one
+#### AsyncDaytona.find\_one
 
 ```python
 @intercept_errors(message_prefix="Failed to find sandbox: ")
@@ -274,15 +274,15 @@ Finds a Sandbox by its ID or labels.
 
 - `sandbox_id` _Optional[str]_ - The ID of the Sandbox to retrieve.
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
-
+  
 **Returns**:
 
 - `Sandbox` - First Sandbox that matches the ID or labels.
-
+  
 **Raises**:
 
 - `DaytonaError` - If no Sandbox is found.
-
+  
 **Example**:
 
 ```python
@@ -302,11 +302,11 @@ Lists Sandboxes filtered by labels.
 **Arguments**:
 
 - `labels` _Optional[Dict[str, str]]_ - Labels to filter Sandboxes.
-
+  
 **Returns**:
 
 - `List[Sandbox]` - List of Sandbox instances that match the labels.
-
+  
 **Example**:
 
 ```python
@@ -328,7 +328,7 @@ Starts a Sandbox and waits for it to be ready.
 - `sandbox` _Sandbox_ - The Sandbox to start.
 - `timeout` _Optional[float]_ - Optional timeout in seconds to wait for the Sandbox to start.
   0 means no timeout. Default is 60 seconds.
-
+  
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
@@ -346,12 +346,12 @@ Stops a Sandbox and waits for it to be stopped.
 - `sandbox` _Sandbox_ - The sandbox to stop
 - `timeout` _Optional[float]_ - Optional timeout (in seconds) for sandbox stop.
   0 means no timeout. Default is 60 seconds.
-
+  
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to stop or times out
 
-#### AsyncDaytona.create_image
+#### AsyncDaytona.create\_image
 
 ```python
 @intercept_errors(message_prefix="Failed to build image: ")
@@ -389,7 +389,10 @@ class CodeLanguage(Enum)
 
 Programming languages supported by Daytona
 
-**Enum Members**: - `PYTHON` ("python") - `TYPESCRIPT` ("typescript") - `JAVASCRIPT` ("javascript")
+**Enum Members**:
+    - `PYTHON` ("python")
+    - `TYPESCRIPT` ("typescript")
+    - `JAVASCRIPT` ("javascript")
 
 ## DaytonaConfig
 
@@ -413,7 +416,7 @@ Configuration options for initializing the Daytona client.
   in a future version.
 - `target` _Optional[SandboxTargetRegion]_ - Target environment for the Sandbox. Defaults to `'us'` if not set here
   or in the environment variable `DAYTONA_TARGET`.
-
+  
 **Example**:
 
 ```python
@@ -439,7 +442,7 @@ Resources configuration for Sandbox.
 - `memory` _Optional[int]_ - Amount of memory in GB to allocate.
 - `disk` _Optional[int]_ - Amount of disk space in GB to allocate.
 - `gpu` _Optional[int]_ - Number of GPUs to allocate.
-
+  
 **Example**:
 
 ```python
@@ -481,7 +484,7 @@ Parameters for creating a new Sandbox.
 - `auto_archive_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
   automatically archive. Default is 7 days.
   0 means the maximum interval will be used.
-
+  
 **Example**:
 
 ```python

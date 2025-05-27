@@ -1,7 +1,8 @@
 ---
-title: 'Sandbox'
+title: "Sandbox"
 hideTitleOnPage: true
 ---
+
 
 ## Sandbox
 
@@ -23,10 +24,10 @@ Represents a Daytona Sandbox.
 
 ```ts
 new Sandbox(
-   id: string,
-   instance: SandboxInstance,
-   sandboxApi: WorkspaceApi,
-   toolboxApi: ToolboxApi,
+   id: string, 
+   instance: SandboxInstance, 
+   sandboxApi: WorkspaceApi, 
+   toolboxApi: ToolboxApi, 
    codeToolbox: SandboxCodeToolbox): Sandbox
 ```
 
@@ -62,7 +63,7 @@ Converts an API sandbox instance to a SandboxInfo object.
 
 - `SandboxInfo` - The converted SandboxInfo object
 
----
+***
 
 #### ~~toWorkspaceInfo()~~
 
@@ -84,7 +85,7 @@ Converts an API workspace instance to a WorkspaceInfo object.
 
 Use `toSandboxInfo` instead. This method will be removed in a future version.
 
----
+***
 
 #### archive()
 
@@ -101,7 +102,7 @@ Sandbox must be stopped before archiving.
 
 - `Promise<void>`
 
----
+***
 
 #### createLspServer()
 
@@ -118,7 +119,7 @@ diagnostics, and more.
 
 - `languageId` _string_ - The language server type (e.g., "typescript")
 - `pathToProject` _string_ - Path to the project root directory. Relative paths are resolved based on the user's
-  root directory.
+    root directory.
 
 **Returns**:
 
@@ -127,10 +128,10 @@ diagnostics, and more.
 **Example:**
 
 ```ts
-const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
 ```
 
----
+***
 
 #### delete()
 
@@ -144,7 +145,7 @@ Deletes the Sandbox.
 
 - `Promise<void>`
 
----
+***
 
 #### getPreviewLink()
 
@@ -163,17 +164,17 @@ to the URL.
 **Returns**:
 
 - `Promise<PortPreviewUrl>` - The response object for the preview link, which includes the `url`
-  and the `token` (to access private sandboxes).
+    and the `token` (to access private sandboxes).
 
 **Example:**
 
 ```ts
-const previewLink = await sandbox.getPreviewLink(3000)
-console.log(`Preview URL: ${previewLink.url}`)
-console.log(`Token: ${previewLink.token}`)
+const previewLink = await sandbox.getPreviewLink(3000);
+console.log(`Preview URL: ${previewLink.url}`);
+console.log(`Token: ${previewLink.token}`);
 ```
 
----
+***
 
 #### getUserRootDir()
 
@@ -190,11 +191,11 @@ Gets the root directory path for the logged in user inside the Sandbox.
 **Example:**
 
 ```ts
-const rootDir = await sandbox.getUserRootDir()
-console.log(`Sandbox root: ${rootDir}`)
+const rootDir = await sandbox.getUserRootDir();
+console.log(`Sandbox root: ${rootDir}`);
 ```
 
----
+***
 
 #### ~~getWorkspaceRootDir()~~
 
@@ -210,7 +211,7 @@ getWorkspaceRootDir(): Promise<undefined | string>
 
 Use `getUserRootDir` instead. This method will be removed in a future version.
 
----
+***
 
 #### info()
 
@@ -223,18 +224,18 @@ Gets structured information about the Sandbox.
 **Returns**:
 
 - `Promise<SandboxInfo>` - Detailed information about the Sandbox including its
-  configuration, resources, and current state
+    configuration, resources, and current state
 
 **Example:**
 
 ```ts
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id}:`)
-console.log(`State: ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
+const info = await sandbox.info();
+console.log(`Sandbox ${info.id}:`);
+console.log(`State: ${info.state}`);
+console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
 ```
 
----
+***
 
 #### setAutoArchiveInterval()
 
@@ -249,7 +250,7 @@ The Sandbox will automatically archive after being continuously stopped for the 
 **Parameters**:
 
 - `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
-  Set to 0 for the maximum interval. Default is 7 days.
+    Set to 0 for the maximum interval. Default is 7 days.
 
 **Returns**:
 
@@ -263,12 +264,12 @@ The Sandbox will automatically archive after being continuously stopped for the 
 
 ```ts
 // Auto-archive after 1 hour
-await sandbox.setAutoArchiveInterval(60)
+await sandbox.setAutoArchiveInterval(60);
 // Or use the maximum interval
-await sandbox.setAutoArchiveInterval(0)
+await sandbox.setAutoArchiveInterval(0);
 ```
 
----
+***
 
 #### setAutostopInterval()
 
@@ -285,7 +286,7 @@ Interactions using Sandbox Previews are not included.
 **Parameters**:
 
 - `interval` _number_ - Number of minutes of inactivity before auto-stopping.
-  Set to 0 to disable auto-stop. Default is 15 minutes.
+    Set to 0 to disable auto-stop. Default is 15 minutes.
 
 **Returns**:
 
@@ -299,12 +300,12 @@ Interactions using Sandbox Previews are not included.
 
 ```ts
 // Auto-stop after 1 hour
-await sandbox.setAutostopInterval(60)
+await sandbox.setAutostopInterval(60);
 // Or disable auto-stop
-await sandbox.setAutostopInterval(0)
+await sandbox.setAutostopInterval(0);
 ```
 
----
+***
 
 #### setLabels()
 
@@ -331,11 +332,11 @@ Labels are key-value pairs that can be used to organize and identify Sandboxes.
 await sandbox.setLabels({
   project: 'my-project',
   environment: 'development',
-  team: 'backend',
-})
+  team: 'backend'
+});
 ```
 
----
+***
 
 #### start()
 
@@ -350,7 +351,7 @@ This method starts the Sandbox and waits for it to be ready.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60-second timeout.
+    Defaults to 60-second timeout.
 
 **Returns**:
 
@@ -363,12 +364,12 @@ This method starts the Sandbox and waits for it to be ready.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox')
-await sandbox.start(40) // Wait up to 40 seconds
-console.log('Sandbox started successfully')
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.start(40);  // Wait up to 40 seconds
+console.log('Sandbox started successfully');
 ```
 
----
+***
 
 #### stop()
 
@@ -383,7 +384,7 @@ This method stops the Sandbox and waits for it to be fully stopped.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60-second timeout.
+    Defaults to 60-second timeout.
 
 **Returns**:
 
@@ -392,12 +393,12 @@ This method stops the Sandbox and waits for it to be fully stopped.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox')
-await sandbox.stop()
-console.log('Sandbox stopped successfully')
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.stop();
+console.log('Sandbox stopped successfully');
 ```
 
----
+***
 
 #### waitUntilStarted()
 
@@ -413,7 +414,7 @@ or encounters an error.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60 seconds.
+    Defaults to 60 seconds.
 
 **Returns**:
 
@@ -423,7 +424,7 @@ or encounters an error.
 
 - `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
 
----
+***
 
 #### waitUntilStopped()
 
@@ -439,7 +440,7 @@ or encounters an error.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60 seconds.
+    Defaults to 60 seconds.
 
 **Returns**:
 
@@ -472,7 +473,7 @@ Generates a command to run the provided code
 
 - `string`
 
----
+***
 
 ## SandboxInfo
 
@@ -509,10 +510,10 @@ resources, and current state.
 **Example:**
 
 ```ts
-const sandbox = await daytona.create()
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id} is ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
+const sandbox = await daytona.create();
+const info = await sandbox.info();
+console.log(`Sandbox ${info.id} is ${info.state}`);
+console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
 ```
 
 **Extends:**
@@ -534,6 +535,7 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 - `disk?` _number_ - The disk quota for the workspace
   - _Inherited from_: `Workspace.disk`
 - `env` _\[key: string\]: string_ - Environment variables for the workspace
+
   - _Inherited from_: `Workspace.env`
 - `errorReason?` _string_ - The error reason of the workspace
   - _Inherited from_: `Workspace.errorReason`
@@ -545,10 +547,12 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Workspace.image`
 - `info?` _SandboxInfo_
 - `labels` _\[key: string\]: string_ - Labels for the workspace
+
   - _Inherited from_: `Workspace.labels`
 - `memory?` _number_ - The memory quota for the workspace
   - _Inherited from_: `Workspace.memory`
 - `~~name~~` _string_ - The name of the workspace
+
   - _Inherited from_: `Omit.name`
 - `organizationId` _string_ - The organization ID of the workspace
   - _Inherited from_: `Workspace.organizationId`
@@ -585,9 +589,9 @@ Resources allocated to a Sandbox
 
 ```ts
 const resources: SandboxResources = {
-  cpu: '2',
-  gpu: '1',
-  memory: '4Gi',
-  disk: '20Gi',
-}
+  cpu: "2",
+  gpu: "1",
+  memory: "4Gi",
+  disk: "20Gi"
+};
 ```

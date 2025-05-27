@@ -1,7 +1,8 @@
 ---
-title: 'ObjectStorage'
+title: "ObjectStorage"
 hideTitleOnPage: true
 ---
+
 
 ## ObjectStorage
 
@@ -45,14 +46,14 @@ Compute the base path for an archive. Returns normalized path without the root (
 
 - `string` - The base path for the archive.
 
----
+***
 
 #### upload()
 
 ```ts
 upload(
-   path: string,
-   organizationId: string,
+   path: string, 
+   organizationId: string, 
 archiveBasePath?: string): Promise<string>
 ```
 
@@ -68,7 +69,7 @@ Upload a file or directory to object storage.
 
 - `Promise<string>` - The hash of the uploaded file or directory.
 
----
+***
 
 ## ObjectStorageConfig
 
