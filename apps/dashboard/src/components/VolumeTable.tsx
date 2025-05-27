@@ -178,7 +178,7 @@ export function VolumeTable({ data, loading, processingVolumeAction, onDelete, o
             </div>
           )}
         </div>
-        <Pagination table={table} selectionEnabled />
+        <Pagination table={table} selectionEnabled entityName="Volumes" />
       </div>
     </div>
   )

@@ -152,7 +152,7 @@ export function OrganizationInvitationTable({
             </TableBody>
           </Table>
         </div>
-        <Pagination table={table} className="mt-4" />
+        <Pagination table={table} className="mt-4" entityName="Invitations" />
       </div>
 
       {invitationToUpdate && (

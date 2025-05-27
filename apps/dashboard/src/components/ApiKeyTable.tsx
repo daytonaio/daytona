@@ -107,7 +107,7 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" />
+      <Pagination table={table} className="mt-4" entityName="API Keys" />
     </div>
   )
 }

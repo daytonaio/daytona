@@ -171,7 +171,7 @@ export function OrganizationMemberTable({
             </TableBody>
           </Table>
         </div>
-        <Pagination table={table} className="mt-4" />
+        <Pagination table={table} className="mt-4" entityName="Members" />
       </div>
 
       {memberToUpdate && (
