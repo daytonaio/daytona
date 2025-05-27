@@ -16,8 +16,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Pencil, MoreHorizontal, Loader2 } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -105,7 +104,13 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
               !loading && (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <p className="text-muted-foreground">No container registries found.</p>
+                      <p className="text-sm text-muted-foreground">
+                        Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your
+                        Sandboxes.
+                      </p>
+                    </div>
                   </TableCell>
                 </TableRow>
               )
