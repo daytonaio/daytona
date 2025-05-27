@@ -18,6 +18,7 @@ import QuotaLine from '@/components/QuotaLine'
 import { Skeleton } from '@/components/ui/skeleton'
 import { OrganizationTier } from '@/billing-api/billingApiClient'
 import { UserProfileIdentity } from './LinkedAccounts'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 const Limits: React.FC = () => {
   const { user } = useAuth()
@@ -91,8 +92,7 @@ const Limits: React.FC = () => {
     return (
       <div className="flex items-center gap-1">
         <span className={isHighUsage ? 'text-red-500' : undefined}>
-          {current}/{total}
-          {unit}
+          {current} / {total} {unit}
         </span>
         {isHighUsage && <AlertTriangle className="w-4 h-4 text-red-500" />}
       </div>
@@ -118,7 +118,7 @@ const Limits: React.FC = () => {
             Usage Limits{' '}
             {organizationTier && (
               <Badge variant="outline" className="ml-2 text-sm">
-                Current Tier: {organizationTier.tier}
+                Tier {organizationTier.tier}
               </Badge>
             )}
           </CardTitle>
@@ -134,31 +134,74 @@ const Limits: React.FC = () => {
             </div>
           )}
           {usageOverview && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>vCPU:</span>
-                  {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota)}
-                </div>
-                <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
-              </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Resource</TableHead>
+                  <TableHead>Usage</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Compute</TableCell>
+                  <TableCell>
+                    <div className="max-w-80">
+                      <div className="w-full flex justify-end">
+                        {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, 'vCPU')}
+                      </div>
+                      <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Memory</TableCell>
+                  <TableCell>
+                    <div className="max-w-80">
+                      <div className="w-full flex justify-end">
+                        {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GiB')}
+                      </div>
+                      <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell>Storage</TableCell>
+                  <TableCell>
+                    <div className="max-w-80">
+                      <div className="w-full flex justify-end">
+                        {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GiB')}
+                      </div>
+                      <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+            // <div className="grid grid-cols-2 gap-4">
+            //   <div>
+            //     <div className="flex items-center justify-between mb-1 mt-3">
+            //       <span>Compute</span>
+            //       {getUsageDisplay(usageOverview.currentCpuUsage, usageOverview.totalCpuQuota, ' vCPU')}
+            //     </div>
+            //     <QuotaLine current={usageOverview.currentCpuUsage} total={usageOverview.totalCpuQuota} />
+            //   </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Memory:</span>
-                  {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GB')}
-                </div>
-                <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
-              </div>
+            //   <div>
+            //     <div className="flex items-center justify-between mb-1 mt-3">
+            //       <span>Memory:</span>
+            //       {getUsageDisplay(usageOverview.currentMemoryUsage, usageOverview.totalMemoryQuota, 'GB')}
+            //     </div>
+            //     <QuotaLine current={usageOverview.currentMemoryUsage} total={usageOverview.totalMemoryQuota} />
+            //   </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1 mt-3">
-                  <span>Disk:</span>
-                  {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GB')}
-                </div>
-                <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
-              </div>
-            </div>
+            //   <div>
+            //     <div className="flex items-center justify-between mb-1 mt-3">
+            //       <span>Disk:</span>
+            //       {getUsageDisplay(usageOverview.currentDiskUsage, usageOverview.totalDiskQuota, 'GB')}
+            //     </div>
+            //     <QuotaLine current={usageOverview.currentDiskUsage} total={usageOverview.totalDiskQuota} />
+            //   </div>
+            // </div>
           )}
         </CardContent>
       </Card>
