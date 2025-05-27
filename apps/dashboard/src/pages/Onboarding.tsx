@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react'
 import { Check, ClipboardIcon, Eye, EyeOff, Loader2, Plus } from 'lucide-react'
 import { toast } from 'sonner'
+import { useNavigate } from 'react-router-dom'
 import { CreateApiKeyPermissionsEnum, ApiKeyResponse, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import pythonIcon from '@/assets/python.svg'
 import typescriptIcon from '@/assets/typescript.svg'
@@ -14,6 +15,7 @@ import { Input } from '@/components/ui/input'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import CodeBlock from '@/components/CodeBlock'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { RoutePath } from '@/enums/RoutePath'
 import { useApi } from '@/hooks/useApi'
 import { useOrganizations } from '@/hooks/useOrganizations'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
@@ -24,9 +26,11 @@ const Onboarding: React.FC = () => {
   const { apiKeyApi } = useApi()
   const { organizations } = useOrganizations()
   const { selectedOrganization, onSelectOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
+  const navigate = useNavigate()
 
   const [language, setLanguage] = useState<'typescript' | 'python'>('python')
   const [apiKeyName, setApiKeyName] = useState('')
+  const [apiKeyPermissions, setApiKeyPermissions] = useState<CreateApiKeyPermissionsEnum[]>([])
   const [createdApiKey, setCreatedApiKey] = useState<ApiKeyResponse | null>(null)
   const [isApiKeyRevealed, setIsApiKeyRevealed] = useState(false)
   const [isApiKeyCopied, setIsApiKeyCopied] = useState(false)
@@ -38,6 +42,7 @@ const Onboarding: React.FC = () => {
     if (selectedOrganization) {
       setCreatedApiKey(null)
       setHasSufficientPermissions(false)
+      setApiKeyPermissions([])
     }
   }, [selectedOrganization])
 
@@ -46,6 +51,11 @@ const Onboarding: React.FC = () => {
     const ensureOnboardingPermissions = async () => {
       if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.WRITE_SANDBOXES)) {
         setHasSufficientPermissions(true)
+        const permissions: CreateApiKeyPermissionsEnum[] = [CreateApiKeyPermissionsEnum.WRITE_SANDBOXES]
+        if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.DELETE_SANDBOXES)) {
+          permissions.push(CreateApiKeyPermissionsEnum.DELETE_SANDBOXES)
+        }
+        setApiKeyPermissions(permissions)
       } else {
         const personalOrg = organizations.find((org) => org.personal)
 
@@ -78,7 +88,7 @@ const Onboarding: React.FC = () => {
         await apiKeyApi.createApiKey(
           {
             name: apiKeyName,
-            permissions: [CreateApiKeyPermissionsEnum.WRITE_SANDBOXES],
+            permissions: apiKeyPermissions,
           },
           selectedOrganization.id,
         )
@@ -153,7 +163,18 @@ const Onboarding: React.FC = () => {
                 </div>
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Create an API Key</h2>
-                  <p className="mb-4">You need an API Key with sufficient permissions to use the SDK:</p>
+                  <p className="mb-4">
+                    This API key will have permissions to only{' '}
+                    {apiKeyPermissions.includes(CreateApiKeyPermissionsEnum.DELETE_SANDBOXES) ? 'manage' : 'create'}{' '}
+                    Sandboxes. For full API permissions, head to the{' '}
+                    <button
+                      onClick={() => navigate(RoutePath.KEYS)}
+                      className="underline cursor-pointer hover:text-muted-foreground"
+                    >
+                      Keys
+                    </button>{' '}
+                    page.
+                  </p>
                   {createdApiKey ? (
                     <div className="p-4 flex justify-between items-center rounded-md bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-400">
                       <span className="overflow-x-auto pr-2 cursor-text select-all">
