@@ -83,17 +83,13 @@ export function WorkspaceTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'state',
-      desc: false,
-    },
-    {
-      id: 'lastEvent',
-      desc: true,
-    },
-  ])
+  const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  // a prompt to select all confirmation
+  const [selectAllConfirmation, setSelectAllConfirmation] = useState(false)
+  const [globalSelection, setGlobalSelection] = useState(false)
+  // a prompt to deselect all confirmation
+  const [deselectAllConfirmation, setDeselectAllConfirmation] = useState(new Set<string>())
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
@@ -113,7 +109,11 @@ export function WorkspaceTable({
     loadingWorkspaces,
     writePermitted,
     deletePermitted,
+    globalSelection,
+    deselectAllConfirmation,
+    setDeselectAllConfirmation,
   })
+
   const table = useReactTable({
     data,
     columns,
@@ -139,6 +139,79 @@ export function WorkspaceTable({
   })
   const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
 
+  // if all workspaces are selected, show a confirmation prompt
+  const totalWorkspace = useMemo(() => {
+    return data.filter((workspace) => !loadingWorkspaces[workspace.id] && workspace.state !== WorkspaceState.DESTROYING)
+  }, [data, loadingWorkspaces])
+  // get the total count of workspaces
+  const totalSelectCount = totalWorkspace.length
+
+  // make a confirmation if the selected workspaces is as the current
+  const currentPageSize = useMemo(() => {
+    return table.getState().pagination.pageSize
+  }, [table.getState().pagination.pageSize])
+  const promptConfirmation = useMemo(() => {
+    // if the total count of workspaces is less than the current page size, don't show confirmation
+    if (totalSelectCount <= currentPageSize) {
+      return false
+    }
+    // if the total count of workspaces is greater than the current page size, show confirmation
+    return table.getFilteredSelectedRowModel().rows.length >= currentPageSize
+  }, [totalSelectCount, currentPageSize, table.getFilteredSelectedRowModel().rows.length])
+
+  // if all workspaces are selected, show a confirmation prompt
+  const selectAll = () => {
+    setGlobalSelection(true)
+    setDeselectAllConfirmation(new Set())
+    for (const row of table.getRowModel().rows) {
+      if (loadingWorkspaces[row.original.id]) {
+        row.toggleSelected(false)
+      } else {
+        row.toggleSelected(true)
+      }
+    }
+    setSelectAllConfirmation(false)
+  }
+
+  // handle for undoSelection
+  const undoSelectionAll = () => {
+    setGlobalSelection(false)
+    setDeselectAllConfirmation(new Set())
+    for (const row of table.getRowModel().rows) {
+      if (loadingWorkspaces[row.original.id]) {
+        row.toggleSelected(false)
+      }
+    }
+  }
+
+  // make a handler for check box
+  const handleCheckboxChange = (value: boolean | 'indeterminate') => {
+    if (value) {
+      for (const row of table.getRowModel().rows) {
+        if (loadingWorkspaces[row.original.id]) {
+          row.toggleSelected(false)
+        } else {
+          row.toggleSelected(true)
+        }
+      }
+
+      // show confirmation if all workspaces are selected
+      const selectedRows = table.getRowModel().rows.filter((row) => !loadingWorkspaces[row.original.id])
+      if (promptConfirmation && selectedRows.length < totalSelectCount) {
+        setSelectAllConfirmation(true)
+      } else {
+        setGlobalSelection(true)
+        setDeselectAllConfirmation(new Set())
+        for (const row of table.getRowModel().rows) {
+          if (loadingWorkspaces[row.original.id]) {
+            row.toggleSelected(false)
+          } else {
+            row.toggleSelected(true)
+          }
+        }
+      }
+    }
+  }
   return (
     <div>
       <div className="flex items-center mb-4">
@@ -166,6 +239,61 @@ export function WorkspaceTable({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  if (header.id === 'select') {
+                    const allSelect = table.getIsAllPageRowsSelected() || globalSelection
+                    const someSelect = table.getIsSomePageRowsSelected() && !globalSelection
+                    return (
+                      <TableHead key={header.id}>
+                        <Popover open={selectAllConfirmation} onOpenChange={setSelectAllConfirmation}>
+                          <PopoverTrigger asChild>
+                            <Checkbox
+                              checked={allSelect || (someSelect && 'indeterminate')}
+                              onCheckedChange={handleCheckboxChange}
+                              className="translate-y-[2px] cursor-pointer"
+                              aria-label="Select all workspaces"
+                            />
+                          </PopoverTrigger>
+                          <PopoverContent side="bottom" className="w-72">
+                            <div className="flex flex-col gap-2">
+                              <p className="text-sm">
+                                {globalSelection
+                                  ? `You have selected all ${totalSelectCount} workspaces.`
+                                  : `You have selected ${table.getFilteredSelectedRowModel().rows.length} of ${totalSelectCount} workspaces.`}
+                              </p>
+                              {promptConfirmation && (
+                                <p className="text-sm text-red-500">
+                                  Are you sure you want to select all workspaces? This will select {totalSelectCount}{' '}
+                                  workspaces.
+                                </p>
+                              )}
+                              <div className="flex items-center justify-end space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectAllConfirmation(false)
+                                    undoSelectionAll()
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  variant="secondary"
+                                  size="sm"
+                                  onClick={() => {
+                                    selectAll()
+                                    setSelectAllConfirmation(false)
+                                  }}
+                                >
+                                  Select All
+                                </Button>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                      </TableHead>
+                    )
+                  }
                   return (
                     <TableHead key={header.id}>
                       {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -208,7 +336,7 @@ export function WorkspaceTable({
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
+          {table.getRowModel().rows.some((row) => row.getIsSelected() || globalSelection) && (
             <div className="flex items-center space-x-2">
               <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
                 <PopoverTrigger>
@@ -218,17 +346,28 @@ export function WorkspaceTable({
                 </PopoverTrigger>
                 <PopoverContent side="top">
                   <div className="flex flex-col gap-4">
-                    <p>Are you sure you want to delete these workspaces?</p>
+                    <p>
+                      Are you sure you want to delete these workspaces?
+                      {globalSelection
+                        ? ` You are about to delete all ${totalSelectCount} selected workspaces.`
+                        : ` You are about to delete ${table.getFilteredSelectedRowModel().rows.length} workspaces.`}
+                    </p>
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
+                          const selectedIds = table.getFilteredSelectedRowModel().rows.map((row) => row.original.id)
+                          if (globalSelection) {
+                            const allIds = data
+                              .filter(
+                                (workspace) =>
+                                  !loadingWorkspaces[workspace.id] && workspace.state !== WorkspaceState.DESTROYING,
+                              )
+                              .map((workspace) => workspace.id)
+                            handleBulkDelete(allIds)
+                          } else {
+                            handleBulkDelete(selectedIds)
+                          }
                           setBulkDeleteConfirmationOpen(false)
                         }}
                       >
@@ -244,7 +383,17 @@ export function WorkspaceTable({
             </div>
           )}
         </div>
-        <Pagination table={table} selectionEnabled />
+        <Pagination
+          table={table}
+          selectionEnabled
+          onUndoDelete={globalSelection ? undoSelectionAll : undefined}
+          entityName="Sandboxes"
+          onCustomSelect={
+            globalSelection
+              ? `Select all ${totalSelectCount - deselectAllConfirmation.size} Sandboxes of ${totalSelectCount}`
+              : undefined
+          }
+        />
       </div>
     </div>
   )
@@ -288,11 +437,6 @@ const getProviderMetadata = (metadata: string | undefined) => {
     console.error('Error parsing provider metadata:', e)
     return null
   }
-}
-
-const getProviderClass = (workspace: Workspace): string => {
-  const parsed = getProviderMetadata(workspace.info?.providerMetadata)
-  return parsed?.class || 'unknown'
 }
 
 const getNodeDomain = (metadata: string | undefined): string | null => {
@@ -343,6 +487,9 @@ const getColumns = ({
   loadingWorkspaces,
   writePermitted,
   deletePermitted,
+  globalSelection,
+  deselectAllConfirmation,
+  setDeselectAllConfirmation,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -351,34 +498,32 @@ const getColumns = ({
   loadingWorkspaces: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  globalSelection: boolean
+  deselectAllConfirmation: Set<string>
+  setDeselectAllConfirmation: (value: Set<string>) => void
 }): ColumnDef<Workspace>[] => {
   const columns: ColumnDef<Workspace>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingWorkspaces[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
+      header: ({ table }) => null,
       cell: ({ row }) => {
         if (loadingWorkspaces[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
         }
         return (
           <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            checked={row.getIsSelected() || (globalSelection && !deselectAllConfirmation.has(row.original.id))}
+            onCheckedChange={(value) => {
+              if (globalSelection) {
+                const newDeselect = new Set(deselectAllConfirmation)
+                if (value) {
+                  newDeselect.delete(row.original.id)
+                } else {
+                  newDeselect.add(row.original.id)
+                }
+                setDeselectAllConfirmation(newDeselect)
+              }
+            }}
             aria-label="Select row"
             className="translate-y-[2px]"
           />
@@ -520,31 +665,7 @@ const getColumns = ({
       },
       accessorKey: 'target',
     },
-    // {
-    //   id: 'class',
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         variant="ghost"
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    //         className="px-2 hover:bg-muted/50"
-    //       >
-    //         Class
-    //         {column.getIsSorted() === 'asc' ? (
-    //           <ArrowUp className="ml-2 h-4 w-4" />
-    //         ) : column.getIsSorted() === 'desc' ? (
-    //           <ArrowDown className="ml-2 h-4 w-4" />
-    //         ) : (
-    //           <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         )}
-    //       </Button>
-    //     )
-    //   },
-    //   cell: ({ row }) => {
-    //     return <span className="px-2">{getProviderClass(row.original)}</span>
-    //   },
-    //   accessorFn: (row) => getProviderClass(row),
-    // },
+
     {
       id: 'labels',
       header: () => {
