@@ -24,7 +24,6 @@ import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/Del
 import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
 import { useTableSorting } from '@/hooks/useTableSorting'
 
-
 interface DataTableProps {
   data: OrganizationRole[]
   loadingData: boolean
