@@ -41,6 +41,7 @@ async function bootstrap() {
       logLevels,
     }),
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
+    cors: true,
   })
 
   const configService = app.get(TypedConfigService)
