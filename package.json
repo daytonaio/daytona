@@ -195,7 +195,7 @@
     ],
     "!(libs/api-client-python/**/*)*.py": [
       "isort",
-      "black",
+      "black --config pyproject.toml",
       "pylint -sn"
     ],
     "*.ipynb": [
