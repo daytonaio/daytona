@@ -67,7 +67,7 @@ const Billing = () => {
     }
   }, [billingApi, selectedOrganization])
 
-  const handleConnectCreditCard = useCallback(async () => {
+  const handleUpdatePaymentMethod = useCallback(async () => {
     if (!selectedOrganization) {
       return
     }
@@ -205,9 +205,9 @@ const Billing = () => {
                       <>Please connect your credit card to your account to continue using our service.</>
                     )}
                     <div className="mt-2">
-                      <Button variant="secondary" size="icon" className="w-44" onClick={handleConnectCreditCard}>
-                        Connect
+                      <Button variant="secondary" size="icon" className="w-44" onClick={handleUpdatePaymentMethod}>
                         <CreditCard className="w-20 h-20" />
+                        Connect
                       </Button>
                     </div>
                   </div>
@@ -217,12 +217,18 @@ const Billing = () => {
                   (billingPortalUrlLoading || !billingPortalUrl ? (
                     <Skeleton className="max-w-sm h-10" />
                   ) : (
-                    <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
-                      <Button variant="secondary" size="icon" className="w-44">
-                        Top Up
-                        <ArrowUpRight className="w-20 h-20" />
+                    <div className="mt-2 grid grid-cols-1 gap-2">
+                      <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
+                        <Button variant="secondary" size="icon" className="w-full">
+                          <ArrowUpRight className="w-20 h-20" />
+                          Top Up
+                        </Button>
+                      </a>
+                      <Button variant="secondary" size="icon" className="w-full" onClick={handleUpdatePaymentMethod}>
+                        <CreditCard className="w-20 h-20" />
+                        Update Payment Method
                       </Button>
-                    </a>
+                    </div>
                   ))}
               </CardDescription>
             )}
