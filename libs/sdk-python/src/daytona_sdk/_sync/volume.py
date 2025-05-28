@@ -75,9 +75,7 @@ class VolumeService:
             print(f"{volume.name} ({volume.id}); state: {volume.state}")
             ```
         """
-        return Volume.from_dto(
-            self.__volumes_api.create_volume(CreateVolume(name=name))
-        )
+        return Volume.from_dto(self.__volumes_api.create_volume(CreateVolume(name=name)))
 
     def delete(self, volume: Volume) -> None:
         """Delete a Volume.

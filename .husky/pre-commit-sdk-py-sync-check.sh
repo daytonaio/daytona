@@ -21,7 +21,7 @@ if [ -n "$ASYNC_CHANGES" ] || [ -n "$SYNC_CHANGES" ]; then
     # Run the sync generator - will automatically fail the hook if this fails
     yarn sdk-python:generate-sync
     isort libs/sdk-python/src/daytona_sdk/_sync
-    black libs/sdk-python/src/daytona_sdk/_sync
+    black libs/sdk-python/src/daytona_sdk/_sync --config pyproject.toml
     
     # Check if there are any new changes after running the sync generator
     NEW_CHANGES=$(git diff --name-only libs/sdk-python/src/daytona_sdk/_sync)

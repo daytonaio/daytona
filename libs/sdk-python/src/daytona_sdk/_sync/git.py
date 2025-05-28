@@ -94,9 +94,7 @@ class Git:
         """
         self.toolbox_api.git_add_files(
             self.instance.id,
-            git_add_request=GitAddRequest(
-                path=prefix_relative_path(self._get_root_dir(), path), files=files
-            ),
+            git_add_request=GitAddRequest(path=prefix_relative_path(self._get_root_dir(), path), files=files),
         )
 
     @intercept_errors(message_prefix="Failed to list branches: ")
@@ -184,9 +182,7 @@ class Git:
         )
 
     @intercept_errors(message_prefix="Failed to commit changes: ")
-    def commit(
-        self, path: str, message: str, author: str, email: str
-    ) -> GitCommitResponse:
+    def commit(self, path: str, message: str, author: str, email: str) -> GitCommitResponse:
         """Creates a new commit with the staged changes. Make sure to stage
         changes using the add() method before committing.
 

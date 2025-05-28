@@ -196,12 +196,12 @@
     ],
     "!(libs/api-client-python/**/*|libs/api-client-python-async/**/*)*.py": [
       "isort",
-      "black",
+      "black --config pyproject.toml",
       "pylint -sn"
     ],
     "*.ipynb": [
       "nbqa isort",
-      "black",
+      "black --config pyproject.toml",
       "nbqa pylint -sn"
     ]
   }
