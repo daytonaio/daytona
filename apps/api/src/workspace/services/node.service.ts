@@ -72,27 +72,33 @@ export class NodeService {
   }
 
   async findAvailableNodes(params: GetNodeParams): Promise<Node[]> {
-    const imageNodeFilter: FindOptionsWhere<ImageNode> = {
-      state: ImageNodeState.READY,
-    }
-
-    if (params.excludedNodeIds && params.excludedNodeIds.length > 0) {
-      imageNodeFilter.nodeId = Not(In(params.excludedNodeIds))
-    }
-
-    if (params.imageRef !== undefined) {
-      imageNodeFilter.imageRef = params.imageRef
-    }
-
-    const imageNodes = await this.imageNodeRepository.find({
-      where: imageNodeFilter,
-    })
-
     const nodeFilter: FindOptionsWhere<Node> = {
-      id: In(imageNodes.map((imageNode) => imageNode.nodeId)),
       state: NodeState.READY,
       unschedulable: Not(true),
       used: Raw((alias) => `${alias} < capacity`),
+    }
+
+    if (params.imageRef !== undefined) {
+      const imageNodes = await this.imageNodeRepository.find({
+        where: {
+          state: ImageNodeState.READY,
+          imageRef: params.imageRef,
+        },
+      })
+
+      let nodeIds = imageNodes.map((imageNode) => imageNode.nodeId)
+
+      if (params.excludedNodeIds?.length) {
+        nodeIds = nodeIds.filter((id) => !params.excludedNodeIds.includes(id))
+      }
+
+      if (!nodeIds.length) {
+        return []
+      }
+
+      nodeFilter.id = In(nodeIds)
+    } else if (params.excludedNodeIds?.length) {
+      nodeFilter.id = Not(In(params.excludedNodeIds))
     }
 
     if (params.region !== undefined) {

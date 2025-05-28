@@ -17,6 +17,11 @@ import { ImageDto } from '../../workspace/dto/image.dto'
 import { ImageStateUpdatedEvent } from '../../workspace/events/image-state-updated.event'
 import { ImageRemovedEvent } from '../../workspace/events/image-removed.event'
 import { ImageEnabledToggledEvent } from '../../workspace/events/image-enabled-toggled.event'
+import { VolumeEvents } from '../../workspace/constants/volume-events'
+import { VolumeCreatedEvent } from '../../workspace/events/volume-created.event'
+import { VolumeDto } from '../../workspace/dto/volume.dto'
+import { VolumeStateUpdatedEvent } from '../../workspace/events/volume-state-updated.event'
+import { VolumeLastUsedAtUpdatedEvent } from '../../workspace/events/volume-last-used-at-updated.event'
 
 @Injectable()
 export class NotificationService {
@@ -61,5 +66,23 @@ export class NotificationService {
   async handleImageRemoved(event: ImageRemovedEvent) {
     const dto = ImageDto.fromImage(event.image)
     this.notificationGateway.emitImageRemoved(dto)
+  }
+
+  @OnEvent(VolumeEvents.CREATED)
+  async handleVolumeCreated(event: VolumeCreatedEvent) {
+    const dto = VolumeDto.fromVolume(event.volume)
+    this.notificationGateway.emitVolumeCreated(dto)
+  }
+
+  @OnEvent(VolumeEvents.STATE_UPDATED)
+  async handleVolumeStateUpdated(event: VolumeStateUpdatedEvent) {
+    const dto = VolumeDto.fromVolume(event.volume)
+    this.notificationGateway.emitVolumeStateUpdated(dto, event.oldState, event.newState)
+  }
+
+  @OnEvent(VolumeEvents.LAST_USED_AT_UPDATED)
+  async handleVolumeLastUsedAtUpdated(event: VolumeLastUsedAtUpdatedEvent) {
+    const dto = VolumeDto.fromVolume(event.volume)
+    this.notificationGateway.emitVolumeLastUsedAtUpdated(dto)
   }
 }

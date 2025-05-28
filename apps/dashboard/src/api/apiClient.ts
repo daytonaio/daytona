@@ -11,6 +11,7 @@ import {
   ImagesApi,
   OrganizationsApi,
   UsersApi,
+  VolumesApi,
   WorkspaceApi,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
@@ -25,6 +26,7 @@ export class ApiClient {
   private _dockerRegistryApi: DockerRegistryApi
   private _organizationsApi: OrganizationsApi
   private _billingApi: BillingApiClient
+  private _volumeApi: VolumesApi
 
   constructor(accessToken: string) {
     this.config = new Configuration({
@@ -58,6 +60,7 @@ export class ApiClient {
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
     this._billingApi = new BillingApiClient(import.meta.env.VITE_BILLING_API_URL || window.location.origin, accessToken)
+    this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
   }
 
   public setAccessToken(accessToken: string) {
@@ -90,5 +93,9 @@ export class ApiClient {
 
   public get billingApi() {
     return this._billingApi
+  }
+
+  public get volumeApi() {
+    return this._volumeApi
   }
 }

@@ -96,6 +96,15 @@ export class GitBranchRequestDto {
   name: string
 }
 
+@ApiSchema({ name: 'GitDeleteBranchRequest' })
+export class GitDeleteBranchRequestDto {
+  @ApiProperty()
+  path: string
+
+  @ApiProperty()
+  name: string
+}
+
 @ApiSchema({ name: 'GitCloneRequest' })
 export class GitCloneRequestDto {
   @ApiProperty()

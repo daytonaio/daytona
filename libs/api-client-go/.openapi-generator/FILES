@@ -48,6 +48,7 @@ model_git_clone_request.go
 model_git_commit_info.go
 model_git_commit_request.go
 model_git_commit_response.go
+model_git_delete_branch_request.go
 model_git_repo_request.go
 model_git_status.go
 model_image_dto.go
@@ -89,6 +90,7 @@ model_usage_overview.go
 model_user.go
 model_user_public_key.go
 model_volume_dto.go
+model_volume_state.go
 model_workspace.go
 model_workspace_info.go
 model_workspace_labels.go

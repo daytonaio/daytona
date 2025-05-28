@@ -30,6 +30,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
+import { TableEmptyState } from './TableEmptyState'
 
 interface ImageTableProps {
   data: ImageDto[]
@@ -149,16 +150,12 @@ export function ImageTable({
                 </TableRow>
               ))
             ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No images found.
-                </TableCell>
-              </TableRow>
+              <TableEmptyState colSpan={columns.length} message="No Images found." />
             )}
           </TableBody>
         </Table>
       </div>
-
+      
       <div className="flex items-center justify-between py-4">
         {selectedIds.length > 0 && (
           <Popover open={bulkDeleteDialog} onOpenChange={setBulkDeleteDialog}>
@@ -186,7 +183,7 @@ export function ImageTable({
             </PopoverContent>
           </Popover>
         )}
-        <Pagination table={table} />
+        <Pagination table={table} className="mt-4" entityName="Images"/>
       </div>
     </div>
   )

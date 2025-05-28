@@ -29,13 +29,15 @@ type VolumeDto struct {
 	// Organization ID
 	OrganizationId string `json:"organizationId"`
 	// Volume state
-	State string `json:"state"`
+	State VolumeState `json:"state"`
 	// Creation timestamp
 	CreatedAt string `json:"createdAt"`
 	// Last update timestamp
 	UpdatedAt string `json:"updatedAt"`
 	// Last used timestamp
 	LastUsedAt string `json:"lastUsedAt"`
+	// The error reason of the volume
+	ErrorReason NullableString `json:"errorReason"`
 }
 
 type _VolumeDto VolumeDto
@@ -44,7 +46,7 @@ type _VolumeDto VolumeDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeDto(id string, name string, organizationId string, state string, createdAt string, updatedAt string, lastUsedAt string) *VolumeDto {
+func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt string, errorReason NullableString) *VolumeDto {
 	this := VolumeDto{}
 	this.Id = id
 	this.Name = name
@@ -53,6 +55,7 @@ func NewVolumeDto(id string, name string, organizationId string, state string, c
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	this.LastUsedAt = lastUsedAt
+	this.ErrorReason = errorReason
 	return &this
 }
 
@@ -137,9 +140,9 @@ func (o *VolumeDto) SetOrganizationId(v string) {
 }
 
 // GetState returns the State field value
-func (o *VolumeDto) GetState() string {
+func (o *VolumeDto) GetState() VolumeState {
 	if o == nil {
-		var ret string
+		var ret VolumeState
 		return ret
 	}
 
@@ -148,7 +151,7 @@ func (o *VolumeDto) GetState() string {
 
 // GetStateOk returns a tuple with the State field value
 // and a boolean to check if the value has been set.
-func (o *VolumeDto) GetStateOk() (*string, bool) {
+func (o *VolumeDto) GetStateOk() (*VolumeState, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -156,7 +159,7 @@ func (o *VolumeDto) GetStateOk() (*string, bool) {
 }
 
 // SetState sets field value
-func (o *VolumeDto) SetState(v string) {
+func (o *VolumeDto) SetState(v VolumeState) {
 	o.State = v
 }
 
@@ -232,6 +235,32 @@ func (o *VolumeDto) SetLastUsedAt(v string) {
 	o.LastUsedAt = v
 }
 
+// GetErrorReason returns the ErrorReason field value
+// If the value is explicit nil, the zero value for string will be returned
+func (o *VolumeDto) GetErrorReason() string {
+	if o == nil || o.ErrorReason.Get() == nil {
+		var ret string
+		return ret
+	}
+
+	return *o.ErrorReason.Get()
+}
+
+// GetErrorReasonOk returns a tuple with the ErrorReason field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VolumeDto) GetErrorReasonOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ErrorReason.Get(), o.ErrorReason.IsSet()
+}
+
+// SetErrorReason sets field value
+func (o *VolumeDto) SetErrorReason(v string) {
+	o.ErrorReason.Set(&v)
+}
+
 func (o VolumeDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -249,6 +278,7 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["lastUsedAt"] = o.LastUsedAt
+	toSerialize["errorReason"] = o.ErrorReason.Get()
 	return toSerialize, nil
 }
 
@@ -264,6 +294,7 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"updatedAt",
 		"lastUsedAt",
+		"errorReason",
 	}
 
 	allProperties := make(map[string]interface{})

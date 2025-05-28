@@ -58,15 +58,21 @@ func getInfoLine(key, value string) string {
 	return util.PropertyNameStyle.Render(fmt.Sprintf("%-*s", util.PropertyNameWidth, key)) + util.PropertyValueStyle.Render(value) + "\n"
 }
 
-func getStateLabel(state string) string {
+func getStateLabel(state daytonaapiclient.VolumeState) string {
 	switch state {
-	case "creating":
+	case daytonaapiclient.VOLUMESTATE_PENDING_CREATE:
+		return common.CreatingStyle.Render("PENDING CREATE")
+	case daytonaapiclient.VOLUMESTATE_CREATING:
 		return common.CreatingStyle.Render("CREATING")
-	case "available":
-		return common.StartedStyle.Render("AVAILABLE")
-	case "deleting":
+	case daytonaapiclient.VOLUMESTATE_READY:
+		return common.StartedStyle.Render("READY")
+	case daytonaapiclient.VOLUMESTATE_PENDING_DELETE:
+		return common.DeletedStyle.Render("PENDING DELETE")
+	case daytonaapiclient.VOLUMESTATE_DELETING:
 		return common.DeletedStyle.Render("DELETING")
-	case "error":
+	case daytonaapiclient.VOLUMESTATE_DELETED:
+		return common.DeletedStyle.Render("DELETED")
+	case daytonaapiclient.VOLUMESTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
 	default:
 		return common.UndefinedStyle.Render("/")

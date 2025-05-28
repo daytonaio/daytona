@@ -1017,27 +1017,27 @@ paths:
       summary: Get available account providers
       tags:
         - users
-  /users/linked-accounts/{providerId}/{userId}:
+  /users/linked-accounts/{provider}/{providerUserId}:
     delete:
       operationId: unlinkAccount
       parameters:
         - explode: false
           in: path
-          name: providerId
+          name: provider
           required: true
           schema:
             type: string
           style: simple
         - explode: false
           in: path
-          name: userId
+          name: providerUserId
           required: true
           schema:
             type: string
           style: simple
       responses:
-        '200':
-          description: ''
+        '204':
+          description: Account unlinked successfully
       security:
         - bearer: []
         - oauth2:
@@ -2233,6 +2233,43 @@ paths:
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/branches:
+    delete:
+      description: Delete branch on git repository
+      operationId: gitDeleteBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitDeleteBranchRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete branch
+      tags:
+        - toolbox
     get:
       description: Get branch list from git repository
       operationId: gitListBranches
@@ -5457,6 +5494,19 @@ components:
         - name
         - path
       type: object
+    GitDeleteBranchRequest:
+      example:
+        path: path
+        name: name
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - path
+      type: object
     GitCloneRequest:
       example:
         path: path
@@ -6152,11 +6202,23 @@ components:
       required:
         - general
       type: object
+    VolumeState:
+      description: Volume state
+      enum:
+        - creating
+        - ready
+        - pending_create
+        - pending_delete
+        - deleting
+        - deleted
+        - error
+      type: string
     VolumeDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
         createdAt: 2023-01-01T00:00:00.000Z
         lastUsedAt: 2023-01-01T00:00:00.000Z
+        errorReason: Error processing volume
         name: my-volume
         id: vol-12345678
         state: ready
@@ -6175,17 +6237,10 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
           type: string
         state:
+          allOf:
+            - $ref: '#/components/schemas/VolumeState'
           description: Volume state
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
           example: ready
-          type: string
         createdAt:
           description: Creation timestamp
           example: 2023-01-01T00:00:00.000Z
@@ -6198,8 +6253,14 @@ components:
           description: Last used timestamp
           example: 2023-01-01T00:00:00.000Z
           type: string
+        errorReason:
+          description: The error reason of the volume
+          example: Error processing volume
+          nullable: true
+          type: string
       required:
         - createdAt
+        - errorReason
         - id
         - lastUsedAt
         - name

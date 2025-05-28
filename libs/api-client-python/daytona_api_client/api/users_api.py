@@ -1286,8 +1286,8 @@ class UsersApi:
     @validate_call
     def unlink_account(
         self,
-        provider_id: StrictStr,
-        user_id: StrictStr,
+        provider: StrictStr,
+        provider_user_id: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1304,10 +1304,10 @@ class UsersApi:
         """Unlink account
 
 
-        :param provider_id: (required)
-        :type provider_id: str
-        :param user_id: (required)
-        :type user_id: str
+        :param provider: (required)
+        :type provider: str
+        :param provider_user_id: (required)
+        :type provider_user_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1331,8 +1331,8 @@ class UsersApi:
         """ # noqa: E501
 
         _param = self._unlink_account_serialize(
-            provider_id=provider_id,
-            user_id=user_id,
+            provider=provider,
+            provider_user_id=provider_user_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1340,7 +1340,7 @@ class UsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1356,8 +1356,8 @@ class UsersApi:
     @validate_call
     def unlink_account_with_http_info(
         self,
-        provider_id: StrictStr,
-        user_id: StrictStr,
+        provider: StrictStr,
+        provider_user_id: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1374,10 +1374,10 @@ class UsersApi:
         """Unlink account
 
 
-        :param provider_id: (required)
-        :type provider_id: str
-        :param user_id: (required)
-        :type user_id: str
+        :param provider: (required)
+        :type provider: str
+        :param provider_user_id: (required)
+        :type provider_user_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1401,8 +1401,8 @@ class UsersApi:
         """ # noqa: E501
 
         _param = self._unlink_account_serialize(
-            provider_id=provider_id,
-            user_id=user_id,
+            provider=provider,
+            provider_user_id=provider_user_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1410,7 +1410,7 @@ class UsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1426,8 +1426,8 @@ class UsersApi:
     @validate_call
     def unlink_account_without_preload_content(
         self,
-        provider_id: StrictStr,
-        user_id: StrictStr,
+        provider: StrictStr,
+        provider_user_id: StrictStr,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1444,10 +1444,10 @@ class UsersApi:
         """Unlink account
 
 
-        :param provider_id: (required)
-        :type provider_id: str
-        :param user_id: (required)
-        :type user_id: str
+        :param provider: (required)
+        :type provider: str
+        :param provider_user_id: (required)
+        :type provider_user_id: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1471,8 +1471,8 @@ class UsersApi:
         """ # noqa: E501
 
         _param = self._unlink_account_serialize(
-            provider_id=provider_id,
-            user_id=user_id,
+            provider=provider,
+            provider_user_id=provider_user_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1480,7 +1480,7 @@ class UsersApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            '204': None,
         }
         response_data = self.api_client.call_api(
             *_param,
@@ -1491,8 +1491,8 @@ class UsersApi:
 
     def _unlink_account_serialize(
         self,
-        provider_id,
-        user_id,
+        provider,
+        provider_user_id,
         _request_auth,
         _content_type,
         _headers,
@@ -1514,10 +1514,10 @@ class UsersApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if provider_id is not None:
-            _path_params['providerId'] = provider_id
-        if user_id is not None:
-            _path_params['userId'] = user_id
+        if provider is not None:
+            _path_params['provider'] = provider
+        if provider_user_id is not None:
+            _path_params['providerUserId'] = provider_user_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1534,7 +1534,7 @@ class UsersApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/users/linked-accounts/{providerId}/{userId}',
+            resource_path='/users/linked-accounts/{provider}/{providerUserId}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
