@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import { useApi } from '@/hooks/useApi'
-import { DaytonaError, OrganizationSuspendedError } from '@/api/errors'
+import { OrganizationSuspendedError } from '@/api/errors'
 import { OrganizationUserRoleEnum, Workspace, WorkspaceState } from '@daytonaio/api-client'
 import { WorkspaceTable } from '@/components/WorkspaceTable'
 import {

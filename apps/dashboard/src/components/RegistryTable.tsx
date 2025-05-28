@@ -28,6 +28,7 @@ import { DialogTrigger } from './ui/dialog'
 import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: DockerRegistry[]
@@ -101,19 +102,11 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-2">
-                      <p className="text-muted-foreground">No container registries found.</p>
-                      <p className="text-sm text-muted-foreground">
-                        Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your
-                        Sandboxes.
-                      </p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No Container registries found."
+                description="Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your Sandboxes."
+              />
             )}
           </TableBody>
         </Table>
