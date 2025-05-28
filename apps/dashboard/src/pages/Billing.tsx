@@ -177,9 +177,9 @@ const Billing = () => {
             ) : (
               <CardDescription className="flex flex-col justify-between h-full">
                 <div>
-                  <div className="text-2xl font-bold">Balance: ${(wallet.balanceCents / 100).toFixed(2)}</div>
+                  <div className="text-2xl font-bold">Balance: ${(wallet.ongoingBalanceCents / 100).toFixed(2)}</div>
                   <div className="text-xl font-bold my-2">
-                    Spent: ${((wallet.balanceCents - wallet.ongoingBalanceCents) / 100).toFixed(2)}
+                    Spent this month: ${((wallet.balanceCents - wallet.ongoingBalanceCents) / 100).toFixed(2)}
                   </div>
                 </div>
                 {!user?.profile.email_verified && (
@@ -258,16 +258,10 @@ const Billing = () => {
                     </div>
                     <div>
                       <strong>Target</strong> is the amount of credit you want to have in your account after they are
-                      automatically topped up. The target must always be greater than the threshold.
+                      automatically topped up. The target must always be greater than the threshold by{' '}
+                      <strong>at least $10</strong>.
                     </div>
-                    <div>
-                      Setting both values to 0 will disable automatic top ups.
-                      <br />
-                      The threshold must always be less than the target.
-                    </div>
-                    <div>
-                      <strong>Note:</strong> Target must be at least $10 more than the threshold.
-                    </div>
+                    <div>Setting both values to 0 will disable automatic top ups.</div>
                   </div>
                 }
               />
