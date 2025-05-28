@@ -42,6 +42,7 @@ import Onboarding from '@/pages/Onboarding'
 import LinkedAccounts from '@/pages/LinkedAccounts'
 import { Button } from './components/ui/button'
 import Volumes from './pages/Volumes'
+import NotFound from './pages/NotFound'
 
 // Simple redirection components for external URLs
 const DocsRedirect = () => {
@@ -142,7 +143,14 @@ function App() {
               </RequiredPermissionsOrganizationPageWrapper>
             }
           />
-          <Route path={getRouteSubPath(RoutePath.LIMITS)} element={<Limits />} />
+          <Route
+            path={getRouteSubPath(RoutePath.LIMITS)}
+            element={
+              <OwnerAccessOrganizationPageWrapper>
+                <Limits />
+              </OwnerAccessOrganizationPageWrapper>
+            }
+          />
           {import.meta.env.VITE_BILLING_API_URL && (
             <Route
               path={getRouteSubPath(RoutePath.BILLING)}
@@ -181,7 +189,7 @@ function App() {
           <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
           <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
         </Route>
-        {/* Add other routes as needed */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>
   )

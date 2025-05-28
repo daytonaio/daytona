@@ -21,6 +21,15 @@ import { Tooltip } from '@/components/Tooltip'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from 'react-oidc-context'
 
+const formatAmount = (amount: number) => {
+  return Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount / 100)
+}
+
 const Billing = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
@@ -67,7 +76,7 @@ const Billing = () => {
     }
   }, [billingApi, selectedOrganization])
 
-  const handleConnectCreditCard = useCallback(async () => {
+  const handleUpdatePaymentMethod = useCallback(async () => {
     if (!selectedOrganization) {
       return
     }
@@ -177,9 +186,9 @@ const Billing = () => {
             ) : (
               <CardDescription className="flex flex-col justify-between h-full">
                 <div>
-                  <div className="text-2xl font-bold">Balance: ${(wallet.balanceCents / 100).toFixed(2)}</div>
+                  <div className="text-2xl font-bold">Balance: {formatAmount(wallet.ongoingBalanceCents)}</div>
                   <div className="text-xl font-bold my-2">
-                    Spent: ${((wallet.balanceCents - wallet.ongoingBalanceCents) / 100).toFixed(2)}
+                    Spent this month: {formatAmount(wallet.balanceCents - wallet.ongoingBalanceCents)}
                   </div>
                 </div>
                 {!user?.profile.email_verified && (
@@ -205,9 +214,9 @@ const Billing = () => {
                       <>Please connect your credit card to your account to continue using our service.</>
                     )}
                     <div className="mt-2">
-                      <Button variant="secondary" size="icon" className="w-44" onClick={handleConnectCreditCard}>
-                        Connect
+                      <Button variant="secondary" size="icon" className="w-44" onClick={handleUpdatePaymentMethod}>
                         <CreditCard className="w-20 h-20" />
+                        Connect
                       </Button>
                     </div>
                   </div>
@@ -217,12 +226,23 @@ const Billing = () => {
                   (billingPortalUrlLoading || !billingPortalUrl ? (
                     <Skeleton className="max-w-sm h-10" />
                   ) : (
-                    <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
-                      <Button variant="secondary" size="icon" className="w-44">
-                        Top Up
-                        <ArrowUpRight className="w-20 h-20" />
+                    <div className="mt-2 grid grid-cols-1 gap-2">
+                      <a href={billingPortalUrl ?? ''} target="_blank" rel="noopener noreferrer">
+                        <Button variant="secondary" size="icon" className="w-full">
+                          <ArrowUpRight className="w-20 h-20" />
+                          Top Up
+                        </Button>
+                      </a>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="w-full p-2"
+                        onClick={handleUpdatePaymentMethod}
+                      >
+                        <CreditCard className="w-20 h-20" />
+                        Update Payment Method
                       </Button>
-                    </a>
+                    </div>
                   ))}
               </CardDescription>
             )}
@@ -247,7 +267,8 @@ const Billing = () => {
                     </div>
                     <div>
                       <strong>Target</strong> is the amount of credit you want to have in your account after they are
-                      automatically topped up. The target must always be greater than the threshold.
+                      automatically topped up. The target must always be greater than the threshold by{' '}
+                      <strong>at least $10</strong>.
                     </div>
                     <div>Setting both values to 0 will disable automatic top ups.</div>
                   </div>
@@ -261,15 +282,15 @@ const Billing = () => {
                 <CardDescription>
                   <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-end">
-                      <Label>Threshold</Label>
+                      <Label>Threshold ($)</Label>
                       <Input
                         type="number"
                         className="w-24"
                         value={automaticTopUp?.thresholdAmount ?? 0}
                         onChange={(e) => {
                           let targetAmount = automaticTopUp?.targetAmount ?? 0
-                          if (Number(e.target.value) > targetAmount) {
-                            targetAmount = Number(e.target.value)
+                          if (Number(e.target.value) > targetAmount - 10) {
+                            targetAmount = Number(e.target.value) + 10
                           }
 
                           setAutomaticTopUp({
@@ -288,8 +309,8 @@ const Billing = () => {
                       value={automaticTopUp?.thresholdAmount ? [automaticTopUp.thresholdAmount] : undefined}
                       onValueChange={(value) => {
                         let targetAmount = automaticTopUp?.targetAmount ?? 0
-                        if (value[0] > targetAmount) {
-                          targetAmount = value[0]
+                        if (value[0] > targetAmount - 10) {
+                          targetAmount = value[0] + 10
                         }
 
                         setAutomaticTopUp({
@@ -299,7 +320,7 @@ const Billing = () => {
                       }}
                     />
                     <div className="flex justify-between items-end">
-                      <Label>Target</Label>
+                      <Label>Target ($)</Label>
                       <Input
                         type="number"
                         className="w-24"
@@ -330,7 +351,11 @@ const Billing = () => {
                       value={automaticTopUp?.targetAmount ? [automaticTopUp.targetAmount] : undefined}
                       onValueChange={(value) => {
                         const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                        if (value[0] < thresholdAmount) {
+                        if (value[0] <= 10 && value[0] < thresholdAmount) {
+                          return
+                        }
+
+                        if (value[0] > 10 && value[0] < thresholdAmount + 10) {
                           return
                         }
 

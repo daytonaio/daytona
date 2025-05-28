@@ -36,12 +36,12 @@ export function TierTable({
               label={
                 <div className="flex items-center gap-2 max-w-80">
                   <Info size={16} />
-                  Available Compute (vCPU / RAM / Disk)
+                  Available Compute (vCPU / RAM / Storage)
                 </div>
               }
               content={
                 <div className="max-w-80">
-                  Total vCPU, RAM, and Disk available at any moment across all running sandboxes.
+                  Total vCPU, RAM, and Storage available at any moment across all running sandboxes.
                   <br />
                   The number of concurrent sandboxes depends on how much compute each one uses.
                 </div>

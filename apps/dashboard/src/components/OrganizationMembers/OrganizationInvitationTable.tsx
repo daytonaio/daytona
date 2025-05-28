@@ -22,6 +22,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
 import { UpdateOrganizationInvitationDialog } from './UpdateOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -143,16 +144,12 @@ export function OrganizationInvitationTable({
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
               )}
             </TableBody>
           </Table>
         </div>
-        <Pagination table={table} className="mt-4" />
+        <Pagination table={table} className="mt-4" entityName="Invitations" />
       </div>
 
       {invitationToUpdate && (

@@ -27,6 +27,7 @@ import { Pagination } from './Pagination'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { getRelativeTimeString } from '@/lib/utils'
+import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: ImageDto[]
@@ -130,18 +131,12 @@ export function ImageTable({
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState colSpan={columns.length} message="No Images found." />
             )}
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" />
+      <Pagination table={table} className="mt-4" entityName="Images" />
     </div>
   )
 }

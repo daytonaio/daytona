@@ -42,6 +42,11 @@ async function bootstrap() {
     }),
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
   })
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
+  })
 
   const configService = app.get(TypedConfigService)
   const httpAdapter = app.get(HttpAdapterHost)
