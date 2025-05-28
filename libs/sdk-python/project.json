@@ -18,6 +18,13 @@
         "cwd": "{projectRoot}",
         "command": "npm run docs"
       }
+    },
+    "generate-sync": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "python scripts/sync_generator.py"
+      }
     }
   }
 }

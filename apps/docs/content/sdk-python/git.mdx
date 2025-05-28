@@ -1,5 +1,5 @@
 ---
-title: 'Git'
+title: "Git"
 hideTitleOnPage: true
 ---
 
@@ -13,9 +13,9 @@ Provides Git operations within a Sandbox.
 
 **Attributes**:
 
-- `sandbox` _Sandbox_ - The parent Sandbox instance.
+- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
-
+  
 **Example**:
 
 ```python
@@ -42,15 +42,14 @@ sandbox.git.commit(
 #### Git.\_\_init\_\_
 
 ```python
-def __init__(sandbox: "Sandbox", toolbox_api: ToolboxApi,
-             instance: SandboxInstance, get_root_dir: Callable[[], str])
+def __init__(toolbox_api: ToolboxApi, instance: SandboxInstance,
+             get_root_dir: Callable[[], str])
 ```
 
 Initializes a new Git handler instance.
 
 **Arguments**:
 
-- `sandbox` _Sandbox_ - The parent Sandbox instance.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
@@ -70,7 +69,7 @@ running 'git add' on the command line.
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
 - `files` _List[str]_ - List of file paths or directories to stage, relative to the repository root.
-
+  
 **Example**:
 
 ```python
@@ -98,11 +97,11 @@ Lists branches in the repository.
 
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
-
+  
 **Returns**:
 
 - `ListBranchResponse` - List of branches in the repository.
-
+  
 **Example**:
 
 ```python
@@ -137,7 +136,7 @@ repository if credentials are provided.
   the repository will be left in a detached HEAD state at this commit.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
-
+  
 **Example**:
 
 ```python
@@ -182,7 +181,7 @@ changes using the add() method before committing.
 - `message` _str_ - Commit message describing the changes.
 - `author` _str_ - Name of the commit author.
 - `email` _str_ - Email address of the commit author.
-
+  
 **Example**:
 
 ```python
@@ -215,7 +214,7 @@ username and password/token.
   root directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
-
+  
 **Example**:
 
 ```python
@@ -248,7 +247,7 @@ provide username and password/token.
   root directory.
 - `username` _Optional[str]_ - Git username for authentication.
 - `password` _Optional[str]_ - Git password or token for authentication.
-
+  
 **Example**:
 
 ```python
@@ -276,7 +275,7 @@ Gets the current Git repository status.
 
 - `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
   root directory.
-
+  
 **Returns**:
 
 - `GitStatus` - Repository status information including:
@@ -285,7 +284,7 @@ Gets the current Git repository status.
   - ahead: Number of local commits not pushed to remote
   - behind: Number of remote commits not pulled locally
   - branch_published: Whether the branch has been published to the remote repository
-
+  
 **Example**:
 
 ```python

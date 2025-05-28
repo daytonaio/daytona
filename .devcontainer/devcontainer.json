@@ -10,7 +10,7 @@
   "remoteEnv": {
     "NX_DAEMON": "true",
     "NODE_ENV": "development",
-    "PYTHONPATH": "${containerWorkspaceFolder}/libs/sdk-python/src:${containerWorkspaceFolder}/libs/api-client-python:${containerEnv:PYTHONPATH}"
+    "PYTHONPATH": "${containerWorkspaceFolder}/libs/sdk-python/src:${containerWorkspaceFolder}/libs/api-client-python:${containerWorkspaceFolder}/libs/api-client-python-async:${containerEnv:PYTHONPATH}"
   },
   "customizations": {
     // Configure properties specific to VS Code.
