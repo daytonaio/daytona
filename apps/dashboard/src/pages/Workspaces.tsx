@@ -8,6 +8,7 @@ import { useApi } from '@/hooks/useApi'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { OrganizationUserRoleEnum, Workspace, WorkspaceState } from '@daytonaio/api-client'
 import { WorkspaceTable } from '@/components/WorkspaceTable'
+import { SandboxInfoModal } from '@/components/SandboxInfoModal'
 import {
   Dialog,
   DialogClose,
@@ -39,6 +40,8 @@ const Workspaces: React.FC = () => {
   const [loadingTable, setLoadingTable] = useState(true)
   const [workspaceToDelete, setWorkspaceToDelete] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
+  const [showInfoModal, setShowInfoModal] = useState(false)
 
   const navigate = useNavigate()
 
@@ -264,6 +267,11 @@ const Workspaces: React.FC = () => {
     onboardIfNeeded()
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
+  const handleRowClick = (workspace: Workspace) => {
+    setSelectedWorkspace(workspace)
+    setShowInfoModal(true)
+  }
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -294,6 +302,7 @@ const Workspaces: React.FC = () => {
         handleArchive={handleArchive}
         data={workspaces}
         loading={loadingTable}
+        onRowClick={handleRowClick}
       />
 
       {workspaceToDelete && (
@@ -329,6 +338,19 @@ const Workspaces: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {selectedWorkspace && (
+        <SandboxInfoModal
+          open={showInfoModal}
+          onOpenChange={(isOpen) => {
+            setShowInfoModal(isOpen)
+            if (!isOpen) {
+              setSelectedWorkspace(null)
+            }
+          }}
+          sandbox={selectedWorkspace}
+        />
       )}
     </div>
   )
