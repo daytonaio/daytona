@@ -21,6 +21,15 @@ import { Tooltip } from '@/components/Tooltip'
 import { useApi } from '@/hooks/useApi'
 import { useAuth } from 'react-oidc-context'
 
+const formatAmount = (amount: number) => {
+  return Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(amount / 100)
+}
+
 const Billing = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const { billingApi } = useApi()
@@ -177,9 +186,9 @@ const Billing = () => {
             ) : (
               <CardDescription className="flex flex-col justify-between h-full">
                 <div>
-                  <div className="text-2xl font-bold">Balance: ${(wallet.ongoingBalanceCents / 100).toFixed(2)}</div>
+                  <div className="text-2xl font-bold">Balance: {formatAmount(wallet.ongoingBalanceCents)}</div>
                   <div className="text-xl font-bold my-2">
-                    Spent this month: ${((wallet.balanceCents - wallet.ongoingBalanceCents) / 100).toFixed(2)}
+                    Spent this month: {formatAmount(wallet.balanceCents - wallet.ongoingBalanceCents)}
                   </div>
                 </div>
                 {!user?.profile.email_verified && (
