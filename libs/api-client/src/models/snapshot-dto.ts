@@ -48,6 +48,12 @@ export interface SnapshotDto {
   name: string
   /**
    *
+   * @type {string}
+   * @memberof SnapshotDto
+   */
+  imageName: string
+  /**
+   *
    * @type {boolean}
    * @memberof SnapshotDto
    */
@@ -70,6 +76,30 @@ export interface SnapshotDto {
    * @memberof SnapshotDto
    */
   entrypoint: Array<string> | null
+  /**
+   *
+   * @type {number}
+   * @memberof SnapshotDto
+   */
+  cpu: number
+  /**
+   *
+   * @type {number}
+   * @memberof SnapshotDto
+   */
+  gpu: number
+  /**
+   *
+   * @type {number}
+   * @memberof SnapshotDto
+   */
+  mem: number
+  /**
+   *
+   * @type {number}
+   * @memberof SnapshotDto
+   */
+  disk: number
   /**
    *
    * @type {string}

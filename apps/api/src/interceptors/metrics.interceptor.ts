@@ -426,7 +426,12 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     this.capture('api_snapshot_created', props, 'api_snapshot_creation_failed', {
       snapshot_id: response.id,
       snapshot_name: request.name,
+      snapshot_image_name: request.imageName,
       snapshot_entrypoint: request.entrypoint,
+      snapshot_cpu: request.cpu,
+      snapshot_gpu: request.gpu,
+      snapshot_memory: request.memory,
+      snapshot_disk: request.disk,
     })
   }
 

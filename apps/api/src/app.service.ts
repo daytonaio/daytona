@@ -133,7 +133,7 @@ export class AppService implements OnApplicationBootstrap {
     const adminPersonalOrg = await this.organizationService.findPersonal(DAYTONA_ADMIN_USER_ID)
 
     try {
-      const existingSnapshot = await this.snapshotService.getSnapshotName(
+      const existingSnapshot = await this.snapshotService.getSnapshotByName(
         this.configService.getOrThrow('defaultSnapshot'),
         adminPersonalOrg.id,
       )
