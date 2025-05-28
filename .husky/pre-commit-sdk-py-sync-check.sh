@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: AGPL-3.0
+
 set -e  # Exit immediately if any command fails
 
 # Check if there are any staged changes in the _async or _sync folders
