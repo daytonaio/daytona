@@ -44,7 +44,7 @@ class CreateSandbox(BaseModel):
     )
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the sandbox")
-    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the sandbox in MB")
+    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
     auto_stop_interval: Optional[StrictInt] = Field(
         default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"

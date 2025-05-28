@@ -132,25 +132,22 @@ export class WorkspaceController {
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
   ): Promise<WorkspaceDto> {
-    const organization = authContext.organization
-
-    const workspace = await this.workspaceService.create(organization.id, createWorkspaceDto, organization)
-
-    // If the workspace has no runner, it means it is still building - return the ID to the client so they can fetch logs
-    if (workspace.runnerId) {
-      // Wait for workspace to be started
-      const workspaceState = await this.waitForWorkspaceState(
-        workspace.id,
-        WorkspaceState.STARTED,
-        30000, // 30 seconds timeout
-      )
-
-      workspace.state = workspaceState
+    if (createWorkspaceDto.buildInfo) {
+      throw new ForbiddenException('Build info is not supported in this deprecated API - please upgrade your client')
     }
 
-    const runner = await this.runnerService.findOne(workspace.runnerId)
-    const dto = WorkspaceDto.fromSandbox(workspace, runner.domain)
-    return dto
+    const organization = authContext.organization
+    const workspace = await this.workspaceService.createFromSnapshot(createWorkspaceDto, organization, true)
+
+    // Wait for the workspace to start
+    const sandboxState = await this.waitForWorkspaceState(
+      workspace.id,
+      WorkspaceState.STARTED,
+      30000, // 30 seconds timeout
+    )
+    workspace.state = sandboxState
+
+    return workspace
   }
 
   @Get(':workspaceId')

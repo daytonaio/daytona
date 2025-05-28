@@ -47,9 +47,13 @@ const Snapshots: React.FC = () => {
   const [snapshotToDelete, setSnapshotToDelete] = useState<SnapshotDto | null>(null)
   const [showCreateDialog, setShowCreateDialog] = useState(false)
   const [newSnapshotName, setNewSnapshotName] = useState('')
+  const [newImageName, setNewImageName] = useState('')
   const [newEntrypoint, setNewEntrypoint] = useState('')
   const [loadingCreate, setLoadingCreate] = useState(false)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [cpu, setCpu] = useState<number | undefined>(undefined)
+  const [memory, setMemory] = useState<number | undefined>(undefined)
+  const [disk, setDisk] = useState<number | undefined>(undefined)
 
   const { selectedOrganization, authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -173,6 +177,23 @@ const Snapshots: React.FC = () => {
   }, [snapshotsData.items.length, paginationParams.pageIndex])
 
   const validateSnapshotName = (name: string): string | null => {
+    if (name.includes(' ')) {
+      return 'Spaces are not allowed in snapshot names'
+    }
+
+    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
+    if (!snapshotNameRegex.test(name)) {
+      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+    }
+
+    return null
+  }
+
+  const validateImageName = (name: string): string | null => {
+    if (name.includes(' ')) {
+      return 'Spaces are not allowed in image names'
+    }
+
     // Basic format check
     const snapshotNameRegex =
       /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
@@ -193,9 +214,15 @@ const Snapshots: React.FC = () => {
   }
 
   const handleCreate = async () => {
-    const validationError = validateSnapshotName(newSnapshotName)
-    if (validationError) {
-      toast.warning(validationError)
+    const nameValidationError = validateSnapshotName(newSnapshotName)
+    if (nameValidationError) {
+      toast.warning(nameValidationError)
+      return
+    }
+
+    const imageValidationError = validateImageName(newImageName)
+    if (imageValidationError) {
+      toast.warning(imageValidationError)
       return
     }
 
@@ -204,12 +231,17 @@ const Snapshots: React.FC = () => {
       await snapshotApi.createSnapshot(
         {
           name: newSnapshotName,
+          imageName: newImageName,
           entrypoint: newEntrypoint.trim() ? newEntrypoint.trim().split(' ') : undefined,
+          cpu,
+          memory,
+          disk,
         },
         selectedOrganization?.id,
       )
       setShowCreateDialog(false)
       setNewSnapshotName('')
+      setNewImageName('') // Add this line to clear the image name
       setNewEntrypoint('')
       toast.success(`Creating snapshot ${newSnapshotName}`)
 
@@ -291,7 +323,11 @@ const Snapshots: React.FC = () => {
             return
           }
           setNewSnapshotName('')
+          setNewImageName('')
           setNewEntrypoint('')
+          setCpu(undefined)
+          setMemory(undefined)
+          setDisk(undefined)
         }}
       >
         <div className="mb-6 flex justify-between items-center">
@@ -331,6 +367,18 @@ const Snapshots: React.FC = () => {
                   id="name"
                   value={newSnapshotName}
                   onChange={(e) => setNewSnapshotName(e.target.value)}
+                  placeholder="ubuntu-4vcpu-8ram-100gb"
+                />
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  The name you will use in your client app (SDK, CLI) to reference the snapshot.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="name">Image</Label>
+                <Input
+                  id="name"
+                  value={newImageName}
+                  onChange={(e) => setNewImageName(e.target.value)}
                   placeholder="ubuntu:22.04"
                 />
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
@@ -350,6 +398,53 @@ const Snapshots: React.FC = () => {
                   have an entrypoint, 'sleep infinity' will be used as the default.
                 </p>
               </div>
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium">Resources</h3>
+                <div className="space-y-4 px-4 py-2">
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="cpu" className="w-32 flex-shrink-0">
+                      Compute (vCPU):
+                    </Label>
+                    <Input
+                      id="cpu"
+                      type="number"
+                      className="w-full"
+                      min="1"
+                      placeholder="1"
+                      onChange={(e) => setCpu(parseInt(e.target.value) || undefined)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="memory" className="w-32 flex-shrink-0">
+                      Memory (GiB):
+                    </Label>
+                    <Input
+                      id="memory"
+                      type="number"
+                      className="w-full"
+                      min="1"
+                      placeholder="1"
+                      onChange={(e) => setMemory(parseInt(e.target.value) || undefined)}
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <Label htmlFor="disk" className="w-32 flex-shrink-0">
+                      Storage (GiB):
+                    </Label>
+                    <Input
+                      id="disk"
+                      type="number"
+                      className="w-full"
+                      min="1"
+                      placeholder="3"
+                      onChange={(e) => setDisk(parseInt(e.target.value) || undefined)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-1 pl-1">
+                  If not specified, default values will be used (1 vCPU, 1 GiB memory, 3 GiB storage).
+                </p>
+              </div>
             </form>
             <DialogFooter>
               <DialogClose asChild>
@@ -366,7 +461,12 @@ const Snapshots: React.FC = () => {
                   type="submit"
                   form="create-snapshot-form"
                   variant="default"
-                  disabled={!newSnapshotName.trim() || validateSnapshotName(newSnapshotName) !== null}
+                  disabled={
+                    !newSnapshotName.trim() ||
+                    !newImageName.trim() ||
+                    validateSnapshotName(newSnapshotName) !== null ||
+                    validateImageName(newImageName) !== null
+                  }
                 >
                   Create
                 </Button>

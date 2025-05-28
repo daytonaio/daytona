@@ -204,7 +204,7 @@ export class RunnerService {
     return this.runnerRepository.save(runner)
   }
 
-  async getRandomAvailableRunner(params: GetRunnerParams): Promise<string> {
+  async getRandomAvailableRunner(params: GetRunnerParams): Promise<Runner> {
     const availableRunners = await this.findAvailableRunners(params)
 
     //  TODO: implement a better algorithm to get a random available runner based on the runner's usage
@@ -216,7 +216,7 @@ export class RunnerService {
     // Get random runner from available runners using inclusive bounds
     const randomIntFromInterval = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min)
 
-    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)].id
+    return availableRunners[randomIntFromInterval(0, availableRunners.length - 1)]
   }
 
   async getSnapshotRunner(runnerId, snapshotRef: string): Promise<SnapshotRunner> {

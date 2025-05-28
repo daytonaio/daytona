@@ -11,7 +11,7 @@ import { CreateBuildInfoDto as CreateSnapshotInfoDto } from './create-build-info
 export class BuildSnapshotDto {
   @ApiProperty({
     description: 'The name of the snapshot to build',
-    example: 'my-custom-snapshot:1.0.0',
+    example: 'my-custom-snapshot-v1',
   })
   @IsString()
   @IsNotEmpty()
