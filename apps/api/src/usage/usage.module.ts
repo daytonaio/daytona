@@ -7,10 +7,11 @@ import { Module } from '@nestjs/common'
 import { TypeOrmModule } from '@nestjs/typeorm'
 import { WorkspaceUsagePeriod } from './entities/workspace-usage-period.entity'
 import { UsageService } from './services/usage.service'
+import { RedisLockProvider } from '../workspace/common/redis-lock.provider'
 
 @Module({
   imports: [TypeOrmModule.forFeature([WorkspaceUsagePeriod])],
-  providers: [UsageService],
+  providers: [UsageService, RedisLockProvider],
   exports: [UsageService],
 })
 export class UsageModule {}
