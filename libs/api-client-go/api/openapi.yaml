@@ -5792,7 +5792,7 @@ components:
       type: object
     CreateSandbox:
       example:
-        memory: 4096
+        memory: 1
         buildInfo: ''
         volumes:
           - mountPath: /data
@@ -5807,7 +5807,7 @@ components:
         labels:
           daytona.io/public: 'true'
         target: eu
-        disk: 20
+        disk: 3
         public: false
         user: daytona
         class: small
@@ -5865,12 +5865,12 @@ components:
           example: 1
           type: integer
         memory:
-          description: Memory allocated to the sandbox in MB
-          example: 4096
+          description: Memory allocated to the sandbox in GB
+          example: 1
           type: integer
         disk:
           description: Disk space allocated to the sandbox in GB
-          example: 20
+          example: 3
           type: integer
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
@@ -6670,12 +6670,21 @@ components:
     CreateSnapshot:
       example:
         general: true
+        disk: 3
+        imageName: ubuntu:22.04
+        memory: 1
         entrypoint: sleep infinity
-        name: my-docker-snapshot:8.0.1-alpha
+        name: ubuntu-4vcpu-8ram-100gb
+        cpu: 1
+        gpu: 0
       properties:
         name:
           description: The name of the snapshot
-          example: my-docker-snapshot:8.0.1-alpha
+          example: ubuntu-4vcpu-8ram-100gb
+          type: string
+        imageName:
+          description: The image name of the snapshot
+          example: ubuntu:22.04
           type: string
         entrypoint:
           description: The entrypoint command for the snapshot
@@ -6686,7 +6695,24 @@ components:
         general:
           description: Whether the snapshot is general
           type: boolean
+        cpu:
+          description: CPU cores allocated to the resulting sandbox
+          example: 1
+          type: integer
+        gpu:
+          description: GPU units allocated to the resulting sandbox
+          example: 0
+          type: integer
+        memory:
+          description: Memory allocated to the resulting sandbox in GB
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to the sandbox in GB
+          example: 3
+          type: integer
       required:
+        - imageName
         - name
       type: object
     SnapshotState:
@@ -6703,10 +6729,16 @@ components:
       type: string
     SnapshotDto:
       example:
+        imageName: imageName
+        cpu: 6.027456183070403
+        gpu: 1.4658129805029452
+        enabled: true
         organizationId: organizationId
         general: true
         createdAt: 2000-01-23T04:56:07.000+00:00
+        disk: 5.637376656633329
         size: 0.8008281904610115
+        mem: 5.962133916683182
         lastUsedAt: 2000-01-23T04:56:07.000+00:00
         entrypoint:
           - entrypoint
@@ -6715,7 +6747,6 @@ components:
         name: name
         id: id
         state: ''
-        enabled: true
         updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
@@ -6725,6 +6756,8 @@ components:
         general:
           type: boolean
         name:
+          type: string
+        imageName:
           type: string
         enabled:
           type: boolean
@@ -6739,6 +6772,14 @@ components:
             type: string
           nullable: true
           type: array
+        cpu:
+          type: number
+        gpu:
+          type: number
+        mem:
+          type: number
+        disk:
+          type: number
         errorReason:
           nullable: true
           type: string
@@ -6753,13 +6794,18 @@ components:
           nullable: true
           type: string
       required:
+        - cpu
         - createdAt
+        - disk
         - enabled
         - entrypoint
         - errorReason
         - general
+        - gpu
         - id
+        - imageName
         - lastUsedAt
+        - mem
         - name
         - size
         - state
@@ -6768,11 +6814,11 @@ components:
     BuildSnapshot:
       example:
         buildInfo: ''
-        name: my-custom-snapshot:1.0.0
+        name: my-custom-snapshot-v1
       properties:
         name:
           description: The name of the snapshot to build
-          example: my-custom-snapshot:1.0.0
+          example: my-custom-snapshot-v1
           type: string
         buildInfo:
           allOf:
@@ -6795,14 +6841,20 @@ components:
       type: object
     PaginatedSnapshotsDto:
       example:
-        total: 6.027456183070403
-        totalPages: 5.962133916683182
-        page: 1.4658129805029452
+        total: 2.3021358869347655
+        totalPages: 9.301444243932576
+        page: 7.061401241503109
         items:
-          - organizationId: organizationId
+          - imageName: imageName
+            cpu: 6.027456183070403
+            gpu: 1.4658129805029452
+            enabled: true
+            organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            disk: 5.637376656633329
             size: 0.8008281904610115
+            mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
             entrypoint:
               - entrypoint
@@ -6811,12 +6863,17 @@ components:
             name: name
             id: id
             state: ''
-            enabled: true
             updatedAt: 2000-01-23T04:56:07.000+00:00
-          - organizationId: organizationId
+          - imageName: imageName
+            cpu: 6.027456183070403
+            gpu: 1.4658129805029452
+            enabled: true
+            organizationId: organizationId
             general: true
             createdAt: 2000-01-23T04:56:07.000+00:00
+            disk: 5.637376656633329
             size: 0.8008281904610115
+            mem: 5.962133916683182
             lastUsedAt: 2000-01-23T04:56:07.000+00:00
             entrypoint:
               - entrypoint
@@ -6825,7 +6882,6 @@ components:
             name: name
             id: id
             state: ''
-            enabled: true
             updatedAt: 2000-01-23T04:56:07.000+00:00
       properties:
         items:

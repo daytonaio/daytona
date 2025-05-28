@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, XCircle, Trash2 } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, Trash2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -182,7 +182,11 @@ export function SnapshotTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() ? 'selected' : undefined}
-                  className={`${loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`${
+                    loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING
+                      ? 'opacity-50 pointer-events-none'
+                      : ''
+                  } ${row.original.general ? 'opacity-60 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -255,19 +259,30 @@ const getColumns = ({
     {
       accessorKey: 'name',
       header: 'Name',
-    },
-    {
-      header: 'Status',
       cell: ({ row }) => {
         const snapshot = row.original
-        const color = snapshot.enabled ? 'text-green-500' : 'text-red-500'
-
         return (
-          <div className={`flex items-center gap-2 ${color}`}>
-            {snapshot.enabled ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-            {snapshot.enabled ? 'Enabled' : 'Disabled'}
+          <div className="flex items-center gap-2">
+            {snapshot.name}
+            {snapshot.general && (
+              <span className="px-2 py-0.5 text-xs rounded-full bg-green-100 text-blue-800 dark:bg-green-900 dark:text-green-300">
+                System
+              </span>
+            )}
           </div>
         )
+      },
+    },
+    {
+      accessorKey: 'imageName',
+      header: 'Image',
+    },
+    {
+      id: 'resources',
+      header: 'Resources',
+      cell: ({ row }) => {
+        const snapshot = row.original
+        return `${snapshot.cpu}vCPU / ${snapshot.mem}GiB / ${snapshot.disk}GiB`
       },
     },
     {
@@ -329,7 +344,7 @@ const getColumns = ({
     {
       id: 'actions',
       cell: ({ row }) => {
-        if (!writePermitted && !deletePermitted) {
+        if ((!writePermitted && !deletePermitted) || row.original.general) {
           return null
         }
 

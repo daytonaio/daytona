@@ -460,25 +460,25 @@ const getColumns = ({
       accessorKey: 'state',
       sortingFn: (rowA, rowB) => {
         const statePriorityOrder = {
-          [WorkspaceState.STARTED]: 1,
-          [WorkspaceState.BUILDING_IMAGE]: 2,
-          [WorkspaceState.PENDING_BUILD]: 2,
-          [WorkspaceState.RESTORING]: 3,
-          [WorkspaceState.ERROR]: 4,
-          [WorkspaceState.STOPPED]: 5,
-          [WorkspaceState.ARCHIVING]: 6,
-          [WorkspaceState.ARCHIVED]: 6,
-          [WorkspaceState.CREATING]: 7,
-          [WorkspaceState.STARTING]: 7,
-          [WorkspaceState.STOPPING]: 7,
-          [WorkspaceState.DESTROYING]: 7,
-          [WorkspaceState.DESTROYED]: 7,
-          [WorkspaceState.PULLING_IMAGE]: 7,
-          [WorkspaceState.UNKNOWN]: 7,
+          [SandboxState.STARTED]: 1,
+          [SandboxState.BUILDING_SNAPSHOT]: 2,
+          [SandboxState.PENDING_BUILD]: 2,
+          [SandboxState.RESTORING]: 3,
+          [SandboxState.ERROR]: 4,
+          [SandboxState.STOPPED]: 5,
+          [SandboxState.ARCHIVING]: 6,
+          [SandboxState.ARCHIVED]: 6,
+          [SandboxState.CREATING]: 7,
+          [SandboxState.STARTING]: 7,
+          [SandboxState.STOPPING]: 7,
+          [SandboxState.DESTROYING]: 7,
+          [SandboxState.DESTROYED]: 7,
+          [SandboxState.PULLING_SNAPSHOT]: 7,
+          [SandboxState.UNKNOWN]: 7,
         }
 
-        const stateA = rowA.original.state || WorkspaceState.UNKNOWN
-        const stateB = rowB.original.state || WorkspaceState.UNKNOWN
+        const stateA = rowA.original.state || SandboxState.UNKNOWN
+        const stateB = rowB.original.state || SandboxState.UNKNOWN
 
         if (stateA === stateB) {
           return 0

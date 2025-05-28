@@ -35,10 +35,15 @@ class SnapshotDto(BaseModel):
     organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     general: StrictBool
     name: StrictStr
+    image_name: StrictStr = Field(alias="imageName")
     enabled: StrictBool
     state: SnapshotState
     size: Optional[Union[StrictFloat, StrictInt]]
     entrypoint: Optional[List[StrictStr]]
+    cpu: Union[StrictFloat, StrictInt]
+    gpu: Union[StrictFloat, StrictInt]
+    mem: Union[StrictFloat, StrictInt]
+    disk: Union[StrictFloat, StrictInt]
     error_reason: Optional[StrictStr] = Field(alias="errorReason")
     created_at: datetime = Field(alias="createdAt")
     updated_at: datetime = Field(alias="updatedAt")
@@ -49,10 +54,15 @@ class SnapshotDto(BaseModel):
         "organizationId",
         "general",
         "name",
+        "imageName",
         "enabled",
         "state",
         "size",
         "entrypoint",
+        "cpu",
+        "gpu",
+        "mem",
+        "disk",
         "errorReason",
         "createdAt",
         "updatedAt",
@@ -143,10 +153,15 @@ class SnapshotDto(BaseModel):
                 "organizationId": obj.get("organizationId"),
                 "general": obj.get("general"),
                 "name": obj.get("name"),
+                "imageName": obj.get("imageName"),
                 "enabled": obj.get("enabled"),
                 "state": obj.get("state"),
                 "size": obj.get("size"),
                 "entrypoint": obj.get("entrypoint"),
+                "cpu": obj.get("cpu"),
+                "gpu": obj.get("gpu"),
+                "mem": obj.get("mem"),
+                "disk": obj.get("disk"),
                 "errorReason": obj.get("errorReason"),
                 "createdAt": obj.get("createdAt"),
                 "updatedAt": obj.get("updatedAt"),

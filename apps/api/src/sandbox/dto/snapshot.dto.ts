@@ -21,6 +21,9 @@ export class SnapshotDto {
   name: string
 
   @ApiProperty()
+  imageName: string
+
+  @ApiProperty()
   enabled: boolean
 
   @ApiProperty({
@@ -34,6 +37,18 @@ export class SnapshotDto {
 
   @ApiProperty({ nullable: true })
   entrypoint?: string[]
+
+  @ApiProperty()
+  cpu: number
+
+  @ApiProperty()
+  gpu: number
+
+  @ApiProperty()
+  mem: number
+
+  @ApiProperty()
+  disk: number
 
   @ApiProperty({ nullable: true })
   errorReason?: string
@@ -53,10 +68,15 @@ export class SnapshotDto {
       organizationId: snapshot.organizationId,
       general: snapshot.general,
       name: snapshot.name,
+      imageName: snapshot.imageName,
       enabled: snapshot.enabled,
       state: snapshot.state,
       size: snapshot.size,
       entrypoint: snapshot.entrypoint,
+      cpu: snapshot.cpu,
+      gpu: snapshot.gpu,
+      mem: snapshot.mem,
+      disk: snapshot.disk,
       errorReason: snapshot.errorReason,
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,

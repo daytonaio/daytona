@@ -314,11 +314,12 @@ export class SandboxManager {
     // Try to assign an available runner with the snapshot build
     let runnerId: string
     try {
-      runnerId = await this.runnerService.getRandomAvailableRunner({
+      const runner = await this.runnerService.getRandomAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
         snapshotRef: sandbox.buildInfo.snapshotRef,
       })
+      runnerId = runner.id
     } catch (error) {
       // Continue to next assignment method
     }
@@ -347,11 +348,12 @@ export class SandboxManager {
     const excludedRunnerIds = await this.runnerService.getRunnersWithMultipleSnapshotsBuilding()
 
     // Try to assign a new available runner
-    runnerId = await this.runnerService.getRandomAvailableRunner({
+    const runner = await this.runnerService.getRandomAvailableRunner({
       region: sandbox.region,
       sandboxClass: sandbox.class,
       excludedRunnerIds: excludedRunnerIds,
     })
+    runnerId = runner.id
 
     this.buildOnRunner(sandbox.buildInfo, runnerId, sandbox.organizationId)
 
@@ -744,10 +746,10 @@ export class SandboxManager {
 
     if (!sandbox.buildInfo) {
       //  get internal snapshot name
-      const snapshot = await this.snapshotService.getSnapshotName(sandbox.snapshot, sandbox.organizationId)
+      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
       const internalSnapshotName = snapshot.internalName
 
-      const registry = await this.dockerRegistryService.findOneBySnapshotName(
+      const registry = await this.dockerRegistryService.findOneBySnapshotImageName(
         internalSnapshotName,
         sandbox.organizationId,
       )
@@ -851,7 +853,7 @@ export class SandboxManager {
         if (runningSandboxsCount > usageThreshold) {
           //  TODO: usage should be based on compute usage
 
-          const snapshot = await this.snapshotService.getSnapshotName(sandbox.snapshot, sandbox.organizationId)
+          const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
@@ -930,7 +932,7 @@ export class SandboxManager {
         return SYNC_AGAIN
       }
 
-      const snapshot = await this.snapshotService.getSnapshotName(sandbox.snapshot, sandbox.organizationId)
+      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
 
       //  exclude the runner that the last runner sandbox was on
       const availableRunners = (
