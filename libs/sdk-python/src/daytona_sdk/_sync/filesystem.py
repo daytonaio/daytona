@@ -11,7 +11,14 @@ from contextlib import ExitStack
 from typing import Callable, List, Union, overload
 
 import httpx
-from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
+from daytona_api_client import (
+    FileInfo,
+    Match,
+    ReplaceRequest,
+    ReplaceResult,
+    SearchFilesResponse,
+    ToolboxApi,
+)
 from daytona_sdk._utils.errors import intercept_errors
 from daytona_sdk._utils.path import prefix_relative_path
 from daytona_sdk.common.filesystem import FileUpload
@@ -85,7 +92,9 @@ class FileSystem:
             sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        self.toolbox_api.delete_file(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        self.toolbox_api.delete_file(
+            self.instance.id, path=prefix_relative_path(self._get_root_dir(), path)
+        )
 
     @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
@@ -115,7 +124,9 @@ class FileSystem:
         """
 
     @overload
-    def download_file(self, remote_path: str, local_path: str, timeout: int = 30 * 60) -> None:
+    def download_file(
+        self, remote_path: str, local_path: str, timeout: int = 30 * 60
+    ) -> None:
         """Downloads a file from the Sandbox and saves it to a local file using stream.
         This method is useful when you want to download larger files that may not fit into memory.
 
@@ -237,7 +248,9 @@ class FileSystem:
                 print("Path is a directory")
             ```
         """
-        return self.toolbox_api.get_file_info(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self.toolbox_api.get_file_info(
+            self.instance.id, path=prefix_relative_path(self._get_root_dir(), path)
+        )
 
     @intercept_errors(message_prefix="Failed to list files: ")
     def list_files(self, path: str) -> List[FileInfo]:
@@ -266,7 +279,9 @@ class FileSystem:
             print("Subdirectories:", ", ".join(d.name for d in dirs))
             ```
         """
-        return self.toolbox_api.list_files(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self.toolbox_api.list_files(
+            self.instance.id, path=prefix_relative_path(self._get_root_dir(), path)
+        )
 
     @intercept_errors(message_prefix="Failed to move files: ")
     def move_files(self, source: str, destination: str) -> None:
@@ -306,7 +321,9 @@ class FileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to replace in files: ")
-    def replace_in_files(self, files: List[str], pattern: str, new_value: str) -> List[ReplaceResult]:
+    def replace_in_files(
+        self, files: List[str], pattern: str, new_value: str
+    ) -> List[ReplaceResult]:
         """Performs search and replace operations across multiple files.
 
         Args:
@@ -343,9 +360,13 @@ class FileSystem:
         for i, file in enumerate(files):
             files[i] = prefix_relative_path(self._get_root_dir(), file)
 
-        replace_request = ReplaceRequest(files=files, new_value=new_value, pattern=pattern)
+        replace_request = ReplaceRequest(
+            files=files, new_value=new_value, pattern=pattern
+        )
 
-        return self.toolbox_api.replace_in_files(self.instance.id, replace_request=replace_request)
+        return self.toolbox_api.replace_in_files(
+            self.instance.id, replace_request=replace_request
+        )
 
     @intercept_errors(message_prefix="Failed to search files: ")
     def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
@@ -381,7 +402,9 @@ class FileSystem:
         )
 
     @intercept_errors(message_prefix="Failed to set file permissions: ")
-    def set_file_permissions(self, path: str, mode: str = None, owner: str = None, group: str = None) -> None:
+    def set_file_permissions(
+        self, path: str, mode: str = None, owner: str = None, group: str = None
+    ) -> None:
         """Sets permissions and ownership for a file or directory. Any of the parameters can be None
         to leave that attribute unchanged.
 
@@ -418,7 +441,9 @@ class FileSystem:
         )
 
     @overload
-    def upload_file(self, file: bytes, remote_path: str, timeout: int = 30 * 60) -> None:
+    def upload_file(
+        self, file: bytes, remote_path: str, timeout: int = 30 * 60
+    ) -> None:
         """Uploads a file to the specified path in the Sandbox. If a file already exists at
         the destination path, it will be overwritten. This method is useful when you want to upload
         small files that fit into memory.
@@ -449,7 +474,9 @@ class FileSystem:
         """
 
     @overload
-    def upload_file(self, local_path: str, remote_path: str, timeout: int = 30 * 60) -> None:
+    def upload_file(
+        self, local_path: str, remote_path: str, timeout: int = 30 * 60
+    ) -> None:
         """Uploads a file from the local file system to the specified path in the Sandbox.
         If a file already exists at the destination path, it will be overwritten. This method uses
         streaming to upload the file, so it is useful when you want to upload larger files that may
@@ -467,7 +494,9 @@ class FileSystem:
             ```
         """
 
-    def upload_file(self, src: Union[str, bytes], dst: str, timeout: int = 30 * 60) -> None:
+    def upload_file(
+        self, src: Union[str, bytes], dst: str, timeout: int = 30 * 60
+    ) -> None:
         self.upload_files([FileUpload(src, dst)], timeout)
 
     @intercept_errors(message_prefix="Failed to upload files: ")
@@ -525,6 +554,9 @@ class FileSystem:
 
             with httpx.Client(timeout=timeout or None) as client:
                 response = client.post(
-                    url, data=data_fields, files=file_fields, headers=headers  # any non-file form fields
+                    url,
+                    data=data_fields,
+                    files=file_fields,
+                    headers=headers,  # any non-file form fields
                 )
                 response.raise_for_status()

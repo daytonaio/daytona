@@ -22,7 +22,12 @@ from daytona_sdk._utils.path import prefix_relative_path
 from daytona_sdk._utils.timeout import with_timeout
 from daytona_sdk.common.errors import DaytonaError
 from daytona_sdk.common.protocols import SandboxCodeToolbox
-from daytona_sdk.common.sandbox import SandboxInfo, SandboxInstance, SandboxResources, SandboxTargetRegion
+from daytona_sdk.common.sandbox import (
+    SandboxInfo,
+    SandboxInstance,
+    SandboxResources,
+    SandboxTargetRegion,
+)
 from deprecated import deprecated
 
 
@@ -106,7 +111,9 @@ class Sandbox:
     def get_workspace_root_dir(self) -> str:
         return self.get_user_root_dir()
 
-    def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> LspServer:
+    def create_lsp_server(
+        self, language_id: LspLanguageId, path_to_project: str
+    ) -> LspServer:
         """Creates a new Language Server Protocol (LSP) server instance.
 
         The LSP server provides language-specific features like code completion,
@@ -155,7 +162,10 @@ class Sandbox:
             ```
         """
         # Convert all values to strings and create the expected labels structure
-        string_labels = {k: str(v).lower() if isinstance(v, bool) else str(v) for k, v in labels.items()}
+        string_labels = {
+            k: str(v).lower() if isinstance(v, bool) else str(v)
+            for k, v in labels.items()
+        }
         labels_payload = {"labels": string_labels}
         return self.sandbox_api.replace_labels(self.id, labels_payload)
 

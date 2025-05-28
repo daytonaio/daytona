@@ -20,9 +20,16 @@ from daytona_api_client import (
     ToolboxApi,
 )
 from daytona_sdk._utils.errors import intercept_errors
-from daytona_sdk.code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
+from daytona_sdk.code_toolbox.sandbox_python_code_toolbox import (
+    SandboxPythonCodeToolbox,
+)
 from daytona_sdk.common.charts import parse_chart
-from daytona_sdk.common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from daytona_sdk.common.process import (
+    CodeRunParams,
+    ExecuteResponse,
+    ExecutionArtifacts,
+    SessionExecuteRequest,
+)
 from daytona_sdk.common.protocols import SandboxInstance
 
 
@@ -138,9 +145,13 @@ class Process:
             command = f"{safe_env_exports} {command}"
 
         command = f'sh -c "{command}"'
-        execute_request = ExecuteRequest(command=command, cwd=cwd or self._get_root_dir(), timeout=timeout)
+        execute_request = ExecuteRequest(
+            command=command, cwd=cwd or self._get_root_dir(), timeout=timeout
+        )
 
-        response = self.toolbox_api.execute_command(workspace_id=self.instance.id, execute_request=execute_request)
+        response = self.toolbox_api.execute_command(
+            workspace_id=self.instance.id, execute_request=execute_request
+        )
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = Process._parse_output(response.result.splitlines())
@@ -250,7 +261,9 @@ class Process:
             ```
         """
         request = CreateSessionRequest(sessionId=session_id)
-        self.toolbox_api.create_session(self.instance.id, create_session_request=request)
+        self.toolbox_api.create_session(
+            self.instance.id, create_session_request=request
+        )
 
     @intercept_errors(message_prefix="Failed to get session: ")
     def get_session(self, session_id: str) -> Session:
@@ -294,7 +307,9 @@ class Process:
                 print(f"Command {cmd.command} completed successfully")
             ```
         """
-        return self.toolbox_api.get_session_command(self.instance.id, session_id=session_id, command_id=command_id)
+        return self.toolbox_api.get_session_command(
+            self.instance.id, session_id=session_id, command_id=command_id
+        )
 
     @intercept_errors(message_prefix="Failed to execute session command: ")
     def execute_session_command(
@@ -364,7 +379,9 @@ class Process:
             print(f"Command output: {logs}")
             ```
         """
-        return self.toolbox_api.get_session_command_logs(self.instance.id, session_id=session_id, command_id=command_id)
+        return self.toolbox_api.get_session_command_logs(
+            self.instance.id, session_id=session_id, command_id=command_id
+        )
 
     @intercept_errors(message_prefix="Failed to get session command logs: ")
     async def get_session_command_logs_async(
@@ -403,7 +420,9 @@ class Process:
                         next_chunk = asyncio.create_task(anext(stream, None))
                     timeout = asyncio.create_task(asyncio.sleep(2))
 
-                    done, pending = await asyncio.wait([next_chunk, timeout], return_when=asyncio.FIRST_COMPLETED)
+                    done, pending = await asyncio.wait(
+                        [next_chunk, timeout], return_when=asyncio.FIRST_COMPLETED
+                    )
 
                     if next_chunk in done:
                         timeout.cancel()
