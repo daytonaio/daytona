@@ -224,7 +224,12 @@ const Billing = () => {
                           Top Up
                         </Button>
                       </a>
-                      <Button variant="secondary" size="icon" className="w-full" onClick={handleUpdatePaymentMethod}>
+                      <Button
+                        variant="secondary"
+                        size="icon"
+                        className="w-full p-2"
+                        onClick={handleUpdatePaymentMethod}
+                      >
                         <CreditCard className="w-20 h-20" />
                         Update Payment Method
                       </Button>
