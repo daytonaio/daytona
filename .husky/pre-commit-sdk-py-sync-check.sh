@@ -2,8 +2,8 @@
 set -e  # Exit immediately if any command fails
 
 # Check if there are any staged changes in the _async or _sync folders
-ASYNC_CHANGES=$(git diff --cached --name-only | grep "libs/sdk-python/src/daytona_sdk/_async/.*\.py$")
-SYNC_CHANGES=$(git diff --cached --name-only | grep "libs/sdk-python/src/daytona_sdk/_sync/.*\.py$")
+ASYNC_CHANGES=$(git diff --cached --name-only | grep "libs/sdk-python/src/daytona_sdk/_async/.*\.py$" || true)
+SYNC_CHANGES=$(git diff --cached --name-only | grep "libs/sdk-python/src/daytona_sdk/_sync/.*\.py$" || true)
 
 if [ -n "$ASYNC_CHANGES" ] || [ -n "$SYNC_CHANGES" ]; then
     if [ -n "$ASYNC_CHANGES" ] && [ -n "$SYNC_CHANGES" ]; then
@@ -16,7 +16,22 @@ if [ -n "$ASYNC_CHANGES" ] || [ -n "$SYNC_CHANGES" ]; then
     
     # Run the sync generator - will automatically fail the hook if this fails
     yarn sdk-python:generate-sync
-    git add libs/sdk-python/src/daytona_sdk/_sync/
+    
+    # Check if there are any new changes after running the sync generator
+    NEW_CHANGES=$(git diff --name-only libs/sdk-python/src/daytona_sdk/_sync/)
+    
+    if [ -n "$NEW_CHANGES" ]; then
+        echo "The sync generator has created new changes in the _sync folder:"
+        echo "$NEW_CHANGES"
+        echo ""
+        echo "Please review these changes and add them to your commit:"
+        echo "  git add libs/sdk-python/src/daytona_sdk/_sync/"
+        echo ""
+        echo "Then retry your commit."
+        exit 1
+    else
+        echo "Sync generator completed with no new changes."
+    fi
 else
     echo "No changes detected in _async or _sync folders. Skipping sync generation."
 fi 

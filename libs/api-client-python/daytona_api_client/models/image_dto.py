@@ -25,10 +25,12 @@ from daytona_api_client.models.image_state import ImageState
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class ImageDto(BaseModel):
     """
     ImageDto
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr
     organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     general: StrictBool
@@ -42,14 +44,26 @@ class ImageDto(BaseModel):
     updated_at: datetime = Field(alias="updatedAt")
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "organizationId", "general", "name", "enabled", "state", "size", "entrypoint", "errorReason", "createdAt", "updatedAt", "lastUsedAt"]
+    __properties: ClassVar[List[str]] = [
+        "id",
+        "organizationId",
+        "general",
+        "name",
+        "enabled",
+        "state",
+        "size",
+        "entrypoint",
+        "errorReason",
+        "createdAt",
+        "updatedAt",
+        "lastUsedAt",
+    ]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -76,9 +90,11 @@ class ImageDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,22 +109,22 @@ class ImageDto(BaseModel):
         # set to None if size (nullable) is None
         # and model_fields_set contains the field
         if self.size is None and "size" in self.model_fields_set:
-            _dict['size'] = None
+            _dict["size"] = None
 
         # set to None if entrypoint (nullable) is None
         # and model_fields_set contains the field
         if self.entrypoint is None and "entrypoint" in self.model_fields_set:
-            _dict['entrypoint'] = None
+            _dict["entrypoint"] = None
 
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field
         if self.error_reason is None and "error_reason" in self.model_fields_set:
-            _dict['errorReason'] = None
+            _dict["errorReason"] = None
 
         # set to None if last_used_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
-            _dict['lastUsedAt'] = None
+            _dict["lastUsedAt"] = None
 
         return _dict
 
@@ -121,25 +137,25 @@ class ImageDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "organizationId": obj.get("organizationId"),
-            "general": obj.get("general"),
-            "name": obj.get("name"),
-            "enabled": obj.get("enabled"),
-            "state": obj.get("state"),
-            "size": obj.get("size"),
-            "entrypoint": obj.get("entrypoint"),
-            "errorReason": obj.get("errorReason"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "lastUsedAt": obj.get("lastUsedAt")
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "organizationId": obj.get("organizationId"),
+                "general": obj.get("general"),
+                "name": obj.get("name"),
+                "enabled": obj.get("enabled"),
+                "state": obj.get("state"),
+                "size": obj.get("size"),
+                "entrypoint": obj.get("entrypoint"),
+                "errorReason": obj.get("errorReason"),
+                "createdAt": obj.get("createdAt"),
+                "updatedAt": obj.get("updatedAt"),
+                "lastUsedAt": obj.get("lastUsedAt"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

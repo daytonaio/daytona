@@ -24,10 +24,12 @@ from daytona_api_client.models.volume_state import VolumeState
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class VolumeDto(BaseModel):
     """
     VolumeDto
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr = Field(description="Volume ID")
     name: StrictStr = Field(description="Volume name")
     organization_id: StrictStr = Field(description="Organization ID", alias="organizationId")
@@ -44,7 +46,6 @@ class VolumeDto(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -71,9 +72,11 @@ class VolumeDto(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -117,5 +120,3 @@ class VolumeDto(BaseModel):
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

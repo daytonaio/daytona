@@ -1,8 +1,7 @@
 ---
-title: "Daytona"
+title: 'Daytona'
 hideTitleOnPage: true
 ---
-
 
 ## Daytona
 
@@ -19,8 +18,8 @@ Can be initialized either with explicit configuration or using environment varia
 ```ts
 // Using environment variables
 // Uses DAYTONA_API_KEY, DAYTONA_API_URL, DAYTONA_TARGET
-const daytona = new Daytona();
-const sandbox = await daytona.create();
+const daytona = new Daytona()
+const sandbox = await daytona.create()
 ```
 
 ```ts
@@ -81,28 +80,28 @@ including language, image, resources, environment variables, and volumes for the
 
 ```ts
 // Create a default sandbox
-const sandbox = await daytona.create();
+const sandbox = await daytona.create()
 ```
 
 ```ts
 // Create a custom sandbox
 const params: CreateSandboxParams = {
-    language: 'typescript',
-    image: 'node:18',
-    envVars: {
-        NODE_ENV: 'development',
-        DEBUG: 'true'
-    },
-    resources: {
-        cpu: 2,
-        memory: 4 // 4GB RAM
-    },
-    autoStopInterval: 60
-};
-const sandbox = await daytona.create(params, 40);
+  language: 'typescript',
+  image: 'node:18',
+  envVars: {
+    NODE_ENV: 'development',
+    DEBUG: 'true',
+  },
+  resources: {
+    cpu: 2,
+    memory: 4, // 4GB RAM
+  },
+  autoStopInterval: 60,
+}
+const sandbox = await daytona.create(params, 40)
 ```
 
-***
+---
 
 #### delete()
 
@@ -124,11 +123,11 @@ Deletes a Sandbox.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-await daytona.delete(sandbox);
+const sandbox = await daytona.get('my-sandbox-id')
+await daytona.delete(sandbox)
 ```
 
-***
+---
 
 #### findOne()
 
@@ -149,11 +148,11 @@ Finds a Sandbox by its ID or labels.
 **Example:**
 
 ```ts
-const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-console.log(`Sandbox: ${await sandbox.info()}`);
+const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } })
+console.log(`Sandbox: ${await sandbox.info()}`)
 ```
 
-***
+---
 
 #### get()
 
@@ -174,11 +173,11 @@ Gets a Sandbox by its ID.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-console.log(`Sandbox state: ${sandbox.instance.state}`);
+const sandbox = await daytona.get('my-sandbox-id')
+console.log(`Sandbox state: ${sandbox.instance.state}`)
 ```
 
-***
+---
 
 #### getCurrentSandbox()
 
@@ -199,11 +198,11 @@ Gets the Sandbox by ID.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox-id');
-console.log(`Current sandbox state: ${sandbox.instance.state}`);
+const sandbox = await daytona.getCurrentSandbox('my-sandbox-id')
+console.log(`Current sandbox state: ${sandbox.instance.state}`)
 ```
 
-***
+---
 
 #### ~~getCurrentWorkspace()~~
 
@@ -225,7 +224,7 @@ Gets the Sandbox by ID.
 
 Use `getCurrentSandbox` instead. This method will be removed in a future version.
 
-***
+---
 
 #### list()
 
@@ -246,13 +245,13 @@ Lists all Sandboxes filtered by labels.
 **Example:**
 
 ```ts
-const sandboxes = await daytona.list({ 'my-label': 'my-value' });
+const sandboxes = await daytona.list({ 'my-label': 'my-value' })
 for (const sandbox of sandboxes) {
-    console.log(`${sandbox.id}: ${sandbox.instance.state}`);
+  console.log(`${sandbox.id}: ${sandbox.instance.state}`)
 }
 ```
 
-***
+---
 
 #### start()
 
@@ -274,12 +273,12 @@ Starts a Sandbox and waits for it to be ready.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
+const sandbox = await daytona.get('my-sandbox-id')
 // Wait up to 60 seconds for the sandbox to start
-await daytona.start(sandbox, 60);
+await daytona.start(sandbox, 60)
 ```
 
-***
+---
 
 #### stop()
 
@@ -300,8 +299,8 @@ Stops a Sandbox.
 **Example:**
 
 ```ts
-const sandbox = await daytona.get('my-sandbox-id');
-await daytona.stop(sandbox);
+const sandbox = await daytona.get('my-sandbox-id')
+await daytona.stop(sandbox)
 ```
 
 ## CodeLanguage
@@ -336,15 +335,15 @@ Parameters for creating a new Sandbox.
 
 ```ts
 const params: CreateSandboxParams = {
-    language: 'typescript',
-    envVars: { NODE_ENV: 'development' },
-    resources: {
-        cpu: 2,
-        memory: 4 // 4GB RAM
-    },
-    autoStopInterval: 60  // Auto-stop after 1 hour of inactivity
-};
-const sandbox = await daytona.create(params, 50);
+  language: 'typescript',
+  envVars: { NODE_ENV: 'development' },
+  resources: {
+    cpu: 2,
+    memory: 4, // 4GB RAM
+  },
+  autoStopInterval: 60, // Auto-stop after 1 hour of inactivity
+}
+const sandbox = await daytona.create(params, 50)
 ```
 
 ## DaytonaConfig
@@ -355,11 +354,11 @@ Configuration options for initializing the Daytona client.
 
 - `apiKey?` _string_ - API key for authentication with the Daytona API
 - `apiUrl?` _string_ - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
-    if not set here and not set in environment variable DAYTONA_API_URL.
+  if not set here and not set in environment variable DAYTONA_API_URL.
 - `jwtToken?` _string_ - JWT token for authentication with the Daytona API. If not set, it must be provided
-    via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
+  via the environment variable `DAYTONA_JWT_TOKEN`, or an API key must be provided instead.
 - `organizationId?` _string_ - Organization ID used for JWT-based authentication. Required if a JWT token
-    is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
+  is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
 - ~~`serverUrl?`~~ _string_ - **_Deprecated_** - Use `apiUrl` instead. This property will be removed in future versions.
 - `target?` _CreateWorkspaceTargetEnum_ - Target location for Sandboxes
 
@@ -367,11 +366,11 @@ Configuration options for initializing the Daytona client.
 
 ```ts
 const config: DaytonaConfig = {
-    apiKey: "your-api-key",
-    apiUrl: "https://your-api.com",
-    target: "us"
-};
-const daytona = new Daytona(config);
+  apiKey: 'your-api-key',
+  apiUrl: 'https://your-api.com',
+  target: 'us',
+}
+const daytona = new Daytona(config)
 ```
 
 ## SandboxFilter
@@ -398,10 +397,10 @@ Resource allocation for a Sandbox.
 
 ```ts
 const resources: SandboxResources = {
-    cpu: 2,
-    memory: 4,  // 4GB RAM
-    disk: 20    // 20GB disk
-};
+  cpu: 2,
+  memory: 4, // 4GB RAM
+  disk: 20, // 20GB disk
+}
 ```
 
 ## VolumeMount

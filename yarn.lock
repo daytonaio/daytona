@@ -3940,6 +3940,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@daytonaio/api-client@npm:^0.19.1":
+  version: 0.19.1
+  resolution: "@daytonaio/api-client@npm:0.19.1"
+  dependencies:
+    axios: "npm:^1.6.1"
+  checksum: 10c0/ea5493e6478e5f0b8340feff440bc8e8daaf476f36f19ef25a8a549dd544b57e859ec6d88335e84a78059359916bb8652057ab561e59982dee470770ed601a1b
+  languageName: node
+  linkType: hard
+
 "@daytonaio/api-client@workspace:libs/api-client":
   version: 0.0.0-use.local
   resolution: "@daytonaio/api-client@workspace:libs/api-client"
@@ -3966,6 +3975,7 @@ __metadata:
   dependencies:
     "@babel/preset-env": "npm:^7.22.0"
     "@babel/preset-typescript": "npm:^7.22.0"
+    "@daytonaio/api-client": "npm:^0.19.1"
     "@dotenvx/dotenvx": "npm:^1.25.1"
     "@types/jest": "npm:^29.5.0"
     "@types/node": "npm:^22.10.0"

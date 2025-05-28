@@ -1,5 +1,5 @@
 ---
-title: "Process"
+title: 'Process'
 hideTitleOnPage: true
 ---
 
@@ -53,15 +53,15 @@ Execute a shell command in the Sandbox.
 - `env` _Optional[Dict[str, str]]_ - Environment variables to set for the command.
 - `timeout` _Optional[int]_ - Maximum time in seconds to wait for the command
   to complete. 0 means wait indefinitely.
-  
+
 **Returns**:
 
 - `ExecuteResponse` - Command execution results containing:
   - exit_code: The command's exit status
   - result: Standard output from the command
   - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
-  and `charts` (matplotlib charts metadata)
-  
+    and `charts` (matplotlib charts metadata)
+
 **Example**:
 
 ```python
@@ -76,7 +76,7 @@ result = sandbox.process.exec("ls", cwd="workspace/src")
 result = sandbox.process.exec("sleep 10", timeout=5)
 ```
 
-#### Process.code\_run
+#### Process.code_run
 
 ```python
 def code_run(code: str,
@@ -92,15 +92,15 @@ Executes code in the Sandbox using the appropriate language runtime.
 - `params` _Optional[CodeRunParams]_ - Parameters for code execution.
 - `timeout` _Optional[int]_ - Maximum time in seconds to wait for the code
   to complete. 0 means wait indefinitely.
-  
+
 **Returns**:
 
 - `ExecuteResponse` - Code execution result containing:
   - exit_code: The execution's exit status
   - result: Standard output from the code
   - artifacts: ExecutionArtifacts object containing `stdout` (same as result)
-  and `charts` (matplotlib charts metadata)
-  
+    and `charts` (matplotlib charts metadata)
+
 **Example**:
 
 ```python
@@ -112,9 +112,9 @@ response = sandbox.process.code_run('''
 ''')
 print(response.artifacts.stdout)  # Prints: Sum: 30
 ```
-  
-  Matplotlib charts are automatically detected and returned in the `charts` field
-  of the `ExecutionArtifacts` object.
+
+Matplotlib charts are automatically detected and returned in the `charts` field
+of the `ExecutionArtifacts` object.
 
 ```python
            code = '''
@@ -154,7 +154,7 @@ Label: {element.label}")
                    print(f" Points: {element.points}")
 ```
 
-#### Process.create\_session
+#### Process.create_session
 
 ```python
 @intercept_errors(message_prefix="Failed to create session: ")
@@ -170,7 +170,7 @@ long-running commands and monitor process status.
 **Arguments**:
 
 - `session_id` _str_ - Unique identifier for the new session.
-  
+
 **Example**:
 
 ```python
@@ -182,7 +182,7 @@ session = sandbox.process.get_session(session_id)
 sandbox.process.delete_session(session_id)
 ```
 
-#### Process.get\_session
+#### Process.get_session
 
 ```python
 @intercept_errors(message_prefix="Failed to get session: ")
@@ -194,13 +194,13 @@ Gets a session in the Sandbox.
 **Arguments**:
 
 - `session_id` _str_ - Unique identifier of the session to retrieve.
-  
+
 **Returns**:
 
 - `Session` - Session information including:
   - session_id: The session's unique identifier
   - commands: List of commands executed in the session
-  
+
 **Example**:
 
 ```python
@@ -209,7 +209,7 @@ for cmd in session.commands:
     print(f"Command: {cmd.command}")
 ```
 
-#### Process.get\_session\_command
+#### Process.get_session_command
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command: ")
@@ -222,14 +222,14 @@ Gets information about a specific command executed in a session.
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-  
+
 **Returns**:
 
 - `Command` - Command information including:
   - id: The command's unique identifier
   - command: The executed command string
   - exit_code: Command's exit status (if completed)
-  
+
 **Example**:
 
 ```python
@@ -238,7 +238,7 @@ if cmd.exit_code == 0:
     print(f"Command {cmd.command} completed successfully")
 ```
 
-#### Process.execute\_session\_command
+#### Process.execute_session_command
 
 ```python
 @intercept_errors(message_prefix="Failed to execute session command: ")
@@ -256,14 +256,14 @@ Executes a command in the session.
 - `req` _SessionExecuteRequest_ - Command execution request containing:
   - command: The command to execute
   - run_async: Whether to execute
-  
+
 **Returns**:
 
 - `SessionExecuteResponse` - Command execution results containing:
   - cmd_id: Unique identifier for the executed command
   - output: Command output
   - exit_code: Command exit status
-  
+
 **Example**:
 
 ```python
@@ -284,7 +284,7 @@ result = sandbox.process.execute_session_command(session_id, req)
 print(result.output)  # Prints: Hello
 ```
 
-#### Process.get\_session\_command\_logs
+#### Process.get_session_command_logs
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
@@ -298,11 +298,11 @@ Get the logs for a command executed in a session. Retrieves the complete output
 
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
-  
+
 **Returns**:
 
 - `str` - Complete command output including both stdout and stderr.
-  
+
 **Example**:
 
 ```python
@@ -313,7 +313,7 @@ logs = sandbox.process.get_session_command_logs(
 print(f"Command output: {logs}")
 ```
 
-#### Process.get\_session\_command\_logs\_async
+#### Process.get_session_command_logs_async
 
 ```python
 @intercept_errors(message_prefix="Failed to get session command logs: ")
@@ -329,7 +329,7 @@ Asynchronously retrieves and processes the logs for a command executed in a sess
 - `session_id` _str_ - Unique identifier of the session.
 - `command_id` _str_ - Unique identifier of the command.
 - `on_logs` _Callable[[str], None]_ - Callback function to handle log chunks as they arrive.
-  
+
 **Example**:
 
 ```python
@@ -340,7 +340,7 @@ await sandbox.process.get_session_command_logs_async(
 )
 ```
 
-#### Process.list\_sessions
+#### Process.list_sessions
 
 ```python
 @intercept_errors(message_prefix="Failed to list sessions: ")
@@ -352,7 +352,7 @@ Lists all sessions in the Sandbox.
 **Returns**:
 
 - `List[Session]` - List of all sessions in the Sandbox.
-  
+
 **Example**:
 
 ```python
@@ -362,7 +362,7 @@ for session in sessions:
     print(f"  Commands: {len(session.commands)}")
 ```
 
-#### Process.delete\_session
+#### Process.delete_session
 
 ```python
 @intercept_errors(message_prefix="Failed to delete session: ")
@@ -375,7 +375,7 @@ associated with it.
 **Arguments**:
 
 - `session_id` _str_ - Unique identifier of the session to delete.
-  
+
 **Example**:
 
 ```python
