@@ -260,7 +260,14 @@ const Billing = () => {
                       <strong>Target</strong> is the amount of credit you want to have in your account after they are
                       automatically topped up. The target must always be greater than the threshold.
                     </div>
-                    <div>Setting both values to 0 will disable automatic top ups.</div>
+                    <div>
+                      Setting both values to 0 will disable automatic top ups.
+                      <br />
+                      The threshold must always be less than the target.
+                    </div>
+                    <div>
+                      <strong>Note:</strong> Target must be at least $10 more than the threshold.
+                    </div>
                   </div>
                 }
               />
@@ -272,15 +279,15 @@ const Billing = () => {
                 <CardDescription>
                   <div className="flex flex-col gap-6">
                     <div className="flex justify-between items-end">
-                      <Label>Threshold</Label>
+                      <Label>Threshold ($)</Label>
                       <Input
                         type="number"
                         className="w-24"
                         value={automaticTopUp?.thresholdAmount ?? 0}
                         onChange={(e) => {
                           let targetAmount = automaticTopUp?.targetAmount ?? 0
-                          if (Number(e.target.value) > targetAmount) {
-                            targetAmount = Number(e.target.value)
+                          if (Number(e.target.value) > targetAmount - 10) {
+                            targetAmount = Number(e.target.value) + 10
                           }
 
                           setAutomaticTopUp({
@@ -299,8 +306,8 @@ const Billing = () => {
                       value={automaticTopUp?.thresholdAmount ? [automaticTopUp.thresholdAmount] : undefined}
                       onValueChange={(value) => {
                         let targetAmount = automaticTopUp?.targetAmount ?? 0
-                        if (value[0] > targetAmount) {
-                          targetAmount = value[0]
+                        if (value[0] > targetAmount - 10) {
+                          targetAmount = value[0] + 10
                         }
 
                         setAutomaticTopUp({
@@ -310,7 +317,7 @@ const Billing = () => {
                       }}
                     />
                     <div className="flex justify-between items-end">
-                      <Label>Target</Label>
+                      <Label>Target ($)</Label>
                       <Input
                         type="number"
                         className="w-24"
@@ -341,7 +348,11 @@ const Billing = () => {
                       value={automaticTopUp?.targetAmount ? [automaticTopUp.targetAmount] : undefined}
                       onValueChange={(value) => {
                         const thresholdAmount = automaticTopUp?.thresholdAmount ?? 0
-                        if (value[0] < thresholdAmount) {
+                        if (value[0] <= 10 && value[0] < thresholdAmount) {
+                          return
+                        }
+
+                        if (value[0] > 10 && value[0] < thresholdAmount + 10) {
                           return
                         }
 
