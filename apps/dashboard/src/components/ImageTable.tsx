@@ -155,7 +155,6 @@ export function ImageTable({
           </TableBody>
         </Table>
       </div>
-      
       <div className="flex items-center justify-between py-4">
         {selectedIds.length > 0 && (
           <Popover open={bulkDeleteDialog} onOpenChange={setBulkDeleteDialog}>
@@ -183,7 +182,7 @@ export function ImageTable({
             </PopoverContent>
           </Popover>
         )}
-        <Pagination table={table} className="mt-4" entityName="Images"/>
+        <Pagination table={table} className="mt-4" entityName="Images" />
       </div>
     </div>
   )
