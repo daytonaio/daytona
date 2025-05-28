@@ -4,16 +4,24 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsBoolean, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
   @ApiProperty({
     description: 'The name of the snapshot',
-    example: 'my-docker-snapshot:8.0.1-alpha',
+    example: 'ubuntu-4vcpu-8ram-100gb',
   })
   @IsString()
   name: string
+
+  // Not optional from user perspective, but is for internals
+  @ApiProperty({
+    description: 'The image name of the snapshot',
+    example: 'ubuntu:22.04',
+  })
+  @IsString()
+  imageName?: string
 
   @ApiPropertyOptional({
     description: 'The entrypoint command for the snapshot',
@@ -32,4 +40,40 @@ export class CreateSnapshotDto {
   @IsBoolean()
   @IsOptional()
   general?: boolean
+
+  @ApiPropertyOptional({
+    description: 'CPU cores allocated to the resulting sandbox',
+    example: 1,
+    type: 'integer',
+  })
+  @IsOptional()
+  @IsNumber()
+  cpu?: number
+
+  @ApiPropertyOptional({
+    description: 'GPU units allocated to the resulting sandbox',
+    example: 0,
+    type: 'integer',
+  })
+  @IsOptional()
+  @IsNumber()
+  gpu?: number
+
+  @ApiPropertyOptional({
+    description: 'Memory allocated to the resulting sandbox in GB',
+    example: 1,
+    type: 'integer',
+  })
+  @IsOptional()
+  @IsNumber()
+  memory?: number
+
+  @ApiPropertyOptional({
+    description: 'Disk space allocated to the sandbox in GB',
+    example: 3,
+    type: 'integer',
+  })
+  @IsOptional()
+  @IsNumber()
+  disk?: number
 }

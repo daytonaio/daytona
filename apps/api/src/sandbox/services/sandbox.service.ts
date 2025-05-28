@@ -41,6 +41,8 @@ import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedSandboxStoppedEvent } from '../../organization/events/organization-suspended-sandbox-stopped.event'
+import { WarmPool } from '../entities/warm-pool.entity'
+import { SandboxDto } from '../dto/sandbox.dto'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -177,100 +179,124 @@ export class SandboxService {
     })
   }
 
-  async create(
-    organizationId: string,
+  async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
+    const sandbox = new Sandbox()
+
+    sandbox.organizationId = SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION
+
+    sandbox.region = warmPoolItem.target
+    sandbox.class = warmPoolItem.class
+    sandbox.snapshot = warmPoolItem.snapshot
+    //  TODO: default user should be configurable
+    sandbox.osUser = 'daytona'
+    sandbox.env = warmPoolItem.env || {}
+
+    sandbox.cpu = warmPoolItem.cpu
+    sandbox.gpu = warmPoolItem.gpu
+    sandbox.mem = warmPoolItem.mem
+    sandbox.disk = warmPoolItem.disk
+
+    const snapshot = await this.snapshotRepository.findOne({
+      where: [
+        { organizationId: sandbox.organizationId, name: sandbox.snapshot, state: SnapshotState.ACTIVE },
+        { general: true, name: sandbox.snapshot, state: SnapshotState.ACTIVE },
+      ],
+    })
+    if (!snapshot) {
+      throw new BadRequestError(`Snapshot ${sandbox.snapshot} not found while creating warm pool sandbox`)
+    }
+
+    const runner = await this.runnerService.getRandomAvailableRunner({
+      region: sandbox.region,
+      sandboxClass: sandbox.class,
+      snapshotRef: snapshot.internalName,
+    })
+
+    sandbox.runnerId = runner.id
+
+    await this.sandboxRepository.insert(sandbox)
+    return sandbox
+  }
+
+  async createFromSnapshot(
     createSandboxDto: CreateSandboxDto,
-    organization?: Organization,
-  ): Promise<Sandbox> {
-    const cpu = createSandboxDto.cpu || DEFAULT_CPU
-    const mem = createSandboxDto.memory || DEFAULT_MEMORY
-    const disk = createSandboxDto.disk || DEFAULT_DISK
-    const gpu = createSandboxDto.gpu || DEFAULT_GPU
-    // Validate region and class
-    const region = createSandboxDto.target || RunnerRegion.EU
-    if (!this.isValidRegion(region)) {
-      throw new BadRequestError('Invalid region')
-    }
-    const sandboxClass = createSandboxDto.class || SandboxClass.SMALL
-    if (!this.isValidClass(sandboxClass)) {
-      throw new BadRequestError('Invalid class')
-    }
+    organization: Organization,
+    useSandboxResourceParams_deprecated?: boolean,
+  ): Promise<SandboxDto> {
+    const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+    const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
-    // Validate organization quotas before creating sandbox
-    if (organizationId !== SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION) {
-      if (!organization) {
-        organization = await this.organizationService.findOne(organizationId)
-        if (!organization) {
-          throw new NotFoundException(`Organization with ID ${organizationId} not found`)
-        }
-      }
+    let snapshotName = createSandboxDto.snapshot
 
-      await this.validateOrganizationQuotas(organization, cpu, mem, disk)
-    }
-
-    //  validate snapshot
-    let sandboxSnapshot = createSandboxDto.snapshot
-
-    if ((!createSandboxDto.snapshot || createSandboxDto.snapshot.trim() === '') && !createSandboxDto.buildInfo) {
-      sandboxSnapshot = this.configService.get<string>('DEFAULT_SNAPSHOT')
+    if (!createSandboxDto.snapshot?.trim()) {
+      snapshotName = this.configService.get<string>('DEFAULT_SNAPSHOT')
     }
 
     const snapshot = await this.snapshotRepository.findOne({
       where: [
-        { organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-        { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+        { organizationId: organization.id, name: snapshotName, state: SnapshotState.ACTIVE },
+        { general: true, name: snapshotName, state: SnapshotState.ACTIVE },
       ],
     })
 
-    if (!createSandboxDto.buildInfo && (createSandboxDto.volumes || []).length === 0) {
-      if (!snapshot) {
-        throw new BadRequestError(
-          `Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`,
-        )
-      }
+    if (!snapshot) {
+      throw new BadRequestError(`Snapshot ${snapshotName} not found. Did you add it through the Daytona Dashboard?`)
+    }
 
-      if (organizationId !== SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION) {
-        const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
-          organizationId: organizationId,
-          snapshot: sandboxSnapshot,
-          target: createSandboxDto.target,
-          class: createSandboxDto.class,
-          cpu,
-          mem,
-          disk,
-          osUser: createSandboxDto.user,
-          env: createSandboxDto.env,
-          state: SandboxState.STARTED,
-        })
+    let cpu = snapshot.cpu
+    let mem = snapshot.mem
+    let disk = snapshot.disk
+    let gpu = snapshot.gpu
 
-        if (warmPoolSandbox) {
-          warmPoolSandbox.public = createSandboxDto.public || false
-          warmPoolSandbox.labels = createSandboxDto.labels || {}
-          if (createSandboxDto.autoStopInterval !== undefined) {
-            warmPoolSandbox.autoStopInterval = createSandboxDto.autoStopInterval
-          }
-          warmPoolSandbox.organizationId = organizationId
-          warmPoolSandbox.createdAt = new Date()
-          const result = await this.sandboxRepository.save(warmPoolSandbox)
-          // Treat this as a newly started sandbox
-          this.eventEmitter.emit(
-            SandboxEvents.STATE_UPDATED,
-            new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
-          )
-          return result
-        }
+    // Remove the deprecated behavior in a future release
+    if (useSandboxResourceParams_deprecated) {
+      if (createSandboxDto.cpu) {
+        cpu = createSandboxDto.cpu
       }
-      //  [ end of warm pool logic ]
+      if (createSandboxDto.memory) {
+        mem = createSandboxDto.memory
+      }
+      if (createSandboxDto.disk) {
+        disk = createSandboxDto.disk
+      }
+      if (createSandboxDto.gpu) {
+        gpu = createSandboxDto.gpu
+      }
+    }
+
+    await this.validateOrganizationQuotas(organization, cpu, mem, disk)
+
+    const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
+      organizationId: organization.id,
+      snapshot: snapshotName,
+      target: createSandboxDto.target,
+      class: createSandboxDto.class,
+      cpu: cpu,
+      mem: mem,
+      disk: disk,
+      osUser: createSandboxDto.user,
+      env: createSandboxDto.env,
+      state: SandboxState.STARTED,
+    })
+
+    const runner = await this.runnerService.getRandomAvailableRunner({
+      region,
+      sandboxClass,
+      snapshotRef: snapshot.internalName,
+    })
+
+    if (warmPoolSandbox) {
+      return await this.assignWarmPoolSandbox(warmPoolSandbox, createSandboxDto, organization.id, runner.domain)
     }
 
     const sandbox = new Sandbox()
 
-    sandbox.organizationId = organizationId
+    sandbox.organizationId = organization.id
 
     //  TODO: make configurable
     sandbox.region = region
     sandbox.class = sandboxClass
-    sandbox.snapshot = sandboxSnapshot
+    sandbox.snapshot = snapshotName
     //  TODO: default user should be configurable
     sandbox.osUser = createSandboxDto.user || 'daytona'
     sandbox.env = createSandboxDto.env || {}
@@ -284,41 +310,107 @@ export class SandboxService {
 
     sandbox.public = createSandboxDto.public || false
 
-    if (createSandboxDto.buildInfo) {
-      const buildInfoSnapshotRef = generateBuildSnapshotRef(
-        createSandboxDto.buildInfo.dockerfileContent,
-        createSandboxDto.buildInfo.contextHashes,
-      )
-
-      // Check if buildInfo with the same snapshotRef already exists
-      const existingBuildInfo = await this.buildInfoRepository.findOne({
-        where: { snapshotRef: buildInfoSnapshotRef },
-      })
-
-      if (existingBuildInfo) {
-        sandbox.buildInfo = existingBuildInfo
-        await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
-      } else {
-        const buildInfoEntity = this.buildInfoRepository.create({
-          ...createSandboxDto.buildInfo,
-        })
-        await this.buildInfoRepository.save(buildInfoEntity)
-        sandbox.buildInfo = buildInfoEntity
-      }
+    if (createSandboxDto.autoStopInterval !== undefined) {
+      sandbox.autoStopInterval = createSandboxDto.autoStopInterval
     }
+
+    sandbox.runnerId = runner.id
+
+    await this.sandboxRepository.insert(sandbox)
+    return SandboxDto.fromSandbox(sandbox, runner.domain)
+  }
+
+  private async assignWarmPoolSandbox(
+    warmPoolSandbox: Sandbox,
+    createSandboxDto: CreateSandboxDto,
+    organizationId: string,
+    runnerDomain: string,
+  ): Promise<SandboxDto> {
+    warmPoolSandbox.public = createSandboxDto.public || false
+    warmPoolSandbox.labels = createSandboxDto.labels || {}
+    warmPoolSandbox.organizationId = organizationId
+    warmPoolSandbox.createdAt = new Date()
+
+    if (createSandboxDto.autoStopInterval !== undefined) {
+      warmPoolSandbox.autoStopInterval = createSandboxDto.autoStopInterval
+    }
+
+    const result = await this.sandboxRepository.save(warmPoolSandbox)
+
+    // Treat this as a newly started sandbox
+    this.eventEmitter.emit(
+      SandboxEvents.STATE_UPDATED,
+      new SandboxStateUpdatedEvent(warmPoolSandbox, SandboxState.STARTED, SandboxState.STARTED),
+    )
+    return SandboxDto.fromSandbox(result, runnerDomain)
+  }
+
+  async createFromBuildInfo(createSandboxDto: CreateSandboxDto, organization: Organization): Promise<SandboxDto> {
+    const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
+    const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
+
+    const cpu = createSandboxDto.cpu || DEFAULT_CPU
+    const mem = createSandboxDto.memory || DEFAULT_MEMORY
+    const disk = createSandboxDto.disk || DEFAULT_DISK
+    const gpu = createSandboxDto.gpu || DEFAULT_GPU
+
+    await this.validateOrganizationQuotas(organization, cpu, mem, disk)
+
+    const sandbox = new Sandbox()
+
+    // sandbox = from
+
+    sandbox.organizationId = organization.id
+
+    //  TODO: make configurable
+    sandbox.region = region
+    sandbox.class = sandboxClass
+    //  TODO: default user should be configurable
+    sandbox.osUser = createSandboxDto.user || 'daytona'
+    sandbox.env = createSandboxDto.env || {}
+    sandbox.labels = createSandboxDto.labels || {}
+    sandbox.volumes = createSandboxDto.volumes || []
+
+    sandbox.cpu = cpu
+    sandbox.gpu = gpu
+    sandbox.mem = mem
+    sandbox.disk = disk
+    sandbox.public = createSandboxDto.public || false
 
     if (createSandboxDto.autoStopInterval !== undefined) {
       sandbox.autoStopInterval = createSandboxDto.autoStopInterval
     }
 
-    const snapshotRef = sandbox.buildInfo ? sandbox.buildInfo.snapshotRef : snapshot.internalName
+    const buildInfoSnapshotRef = generateBuildSnapshotRef(
+      createSandboxDto.buildInfo.dockerfileContent,
+      createSandboxDto.buildInfo.contextHashes,
+    )
+
+    // Check if buildInfo with the same snapshotRef already exists
+    const existingBuildInfo = await this.buildInfoRepository.findOne({
+      where: { snapshotRef: buildInfoSnapshotRef },
+    })
+
+    if (existingBuildInfo) {
+      sandbox.buildInfo = existingBuildInfo
+      await this.buildInfoRepository.update(sandbox.buildInfo.snapshotRef, { lastUsedAt: new Date() })
+    } else {
+      const buildInfoEntity = this.buildInfoRepository.create({
+        ...createSandboxDto.buildInfo,
+      })
+      await this.buildInfoRepository.save(buildInfoEntity)
+      sandbox.buildInfo = buildInfoEntity
+    }
+
+    let runner: Runner
 
     try {
-      sandbox.runnerId = await this.runnerService.getRandomAvailableRunner({
+      runner = await this.runnerService.getRandomAvailableRunner({
         region: sandbox.region,
         sandboxClass: sandbox.class,
-        snapshotRef,
+        snapshotRef: sandbox.buildInfo.snapshotRef,
       })
+      sandbox.runnerId = runner.id
     } catch (error) {
       if (error instanceof BadRequestError == false || error.message !== 'No available runners' || !sandbox.buildInfo) {
         throw error
@@ -327,7 +419,7 @@ export class SandboxService {
     }
 
     await this.sandboxRepository.insert(sandbox)
-    return sandbox
+    return SandboxDto.fromSandbox(sandbox, runner?.domain)
   }
 
   async createBackup(sandboxId: string): Promise<void> {
@@ -518,12 +610,28 @@ export class SandboxService {
     await this.sandboxRepository.save(sandbox)
   }
 
-  private isValidRegion(region: RunnerRegion): boolean {
-    return Object.values(RunnerRegion).includes(region)
+  private getValidatedOrDefaultRegion(region: RunnerRegion): RunnerRegion {
+    if (!region) {
+      return RunnerRegion.EU
+    }
+
+    if (Object.values(RunnerRegion).includes(region)) {
+      return region
+    } else {
+      throw new BadRequestError('Invalid region')
+    }
   }
 
-  private isValidClass(sandboxClass: SandboxClass): boolean {
-    return Object.values(SandboxClass).includes(sandboxClass)
+  private getValidatedOrDefaultClass(sandboxClass: SandboxClass): SandboxClass {
+    if (!sandboxClass) {
+      return SandboxClass.SMALL
+    }
+
+    if (Object.values(SandboxClass).includes(sandboxClass)) {
+      return sandboxClass
+    } else {
+      throw new BadRequestError('Invalid class')
+    }
   }
 
   async replaceLabels(sandboxId: string, labels: { [key: string]: string }): Promise<{ [key: string]: string }> {
@@ -577,17 +685,18 @@ export class SandboxService {
 
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolSandbox(event: WarmPoolTopUpRequested) {
-    const warmPoolItem = event.warmPool
-    await this.create(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION, {
-      snapshot: warmPoolItem.snapshot,
-      cpu: warmPoolItem.cpu,
-      gpu: warmPoolItem.gpu,
-      memory: warmPoolItem.mem,
-      disk: warmPoolItem.disk,
-      target: warmPoolItem.target,
-      env: warmPoolItem.env,
-      class: warmPoolItem.class,
-    })
+    await this.createForWarmPool(event.warmPool)
+    // const warmPoolItem = event.warmPool
+    // await this.create(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION, {
+    //   snapshot: warmPoolItem.snapshot,
+    //   cpu: warmPoolItem.cpu,
+    //   gpu: warmPoolItem.gpu,
+    //   memory: warmPoolItem.mem,
+    //   disk: warmPoolItem.disk,
+    //   target: warmPoolItem.target,
+    //   env: warmPoolItem.env,
+    //   class: warmPoolItem.class,
+    // })
   }
 
   @Cron(CronExpression.EVERY_MINUTE)

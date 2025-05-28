@@ -37,6 +37,9 @@ export class Snapshot {
   @Column()
   name: string
 
+  @Column()
+  imageName: string
+
   @Column({ nullable: true })
   internalName?: string
 
@@ -55,6 +58,18 @@ export class Snapshot {
 
   @Column({ type: 'float', nullable: true })
   size?: number
+
+  @Column({ type: 'int', default: 1 })
+  cpu: number
+
+  @Column({ type: 'int', default: 0 })
+  gpu: number
+
+  @Column({ type: 'int', default: 1 })
+  mem: number
+
+  @Column({ type: 'int', default: 3 })
+  disk: number
 
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]

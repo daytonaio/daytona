@@ -80,7 +80,7 @@ export interface CreateSandbox {
    */
   gpu?: number
   /**
-   * Memory allocated to the sandbox in MB
+   * Memory allocated to the sandbox in GB
    * @type {number}
    * @memberof CreateSandbox
    */

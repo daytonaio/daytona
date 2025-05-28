@@ -25,6 +25,12 @@ export interface CreateSnapshot {
    */
   name: string
   /**
+   * The image name of the snapshot
+   * @type {string}
+   * @memberof CreateSnapshot
+   */
+  imageName: string
+  /**
    * The entrypoint command for the snapshot
    * @type {Array<string>}
    * @memberof CreateSnapshot
@@ -36,4 +42,28 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   general?: boolean
+  /**
+   * CPU cores allocated to the resulting sandbox
+   * @type {number}
+   * @memberof CreateSnapshot
+   */
+  cpu?: number
+  /**
+   * GPU units allocated to the resulting sandbox
+   * @type {number}
+   * @memberof CreateSnapshot
+   */
+  gpu?: number
+  /**
+   * Memory allocated to the resulting sandbox in GB
+   * @type {number}
+   * @memberof CreateSnapshot
+   */
+  memory?: number
+  /**
+   * Disk space allocated to the sandbox in GB
+   * @type {number}
+   * @memberof CreateSnapshot
+   */
+  disk?: number
 }

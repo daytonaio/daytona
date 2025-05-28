@@ -27,10 +27,15 @@ type SnapshotDto struct {
 	OrganizationId *string         `json:"organizationId,omitempty"`
 	General        bool            `json:"general"`
 	Name           string          `json:"name"`
+	ImageName      string          `json:"imageName"`
 	Enabled        bool            `json:"enabled"`
 	State          SnapshotState   `json:"state"`
 	Size           NullableFloat32 `json:"size"`
 	Entrypoint     []string        `json:"entrypoint"`
+	Cpu            float32         `json:"cpu"`
+	Gpu            float32         `json:"gpu"`
+	Mem            float32         `json:"mem"`
+	Disk           float32         `json:"disk"`
 	ErrorReason    NullableString  `json:"errorReason"`
 	CreatedAt      time.Time       `json:"createdAt"`
 	UpdatedAt      time.Time       `json:"updatedAt"`
@@ -43,15 +48,20 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, imageName string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
 	this.Name = name
+	this.ImageName = imageName
 	this.Enabled = enabled
 	this.State = state
 	this.Size = size
 	this.Entrypoint = entrypoint
+	this.Cpu = cpu
+	this.Gpu = gpu
+	this.Mem = mem
+	this.Disk = disk
 	this.ErrorReason = errorReason
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
@@ -171,6 +181,30 @@ func (o *SnapshotDto) SetName(v string) {
 	o.Name = v
 }
 
+// GetImageName returns the ImageName field value
+func (o *SnapshotDto) GetImageName() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.ImageName
+}
+
+// GetImageNameOk returns a tuple with the ImageName field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetImageNameOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ImageName, true
+}
+
+// SetImageName sets field value
+func (o *SnapshotDto) SetImageName(v string) {
+	o.ImageName = v
+}
+
 // GetEnabled returns the Enabled field value
 func (o *SnapshotDto) GetEnabled() bool {
 	if o == nil {
@@ -269,6 +303,102 @@ func (o *SnapshotDto) GetEntrypointOk() ([]string, bool) {
 // SetEntrypoint sets field value
 func (o *SnapshotDto) SetEntrypoint(v []string) {
 	o.Entrypoint = v
+}
+
+// GetCpu returns the Cpu field value
+func (o *SnapshotDto) GetCpu() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Cpu
+}
+
+// GetCpuOk returns a tuple with the Cpu field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetCpuOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Cpu, true
+}
+
+// SetCpu sets field value
+func (o *SnapshotDto) SetCpu(v float32) {
+	o.Cpu = v
+}
+
+// GetGpu returns the Gpu field value
+func (o *SnapshotDto) GetGpu() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Gpu
+}
+
+// GetGpuOk returns a tuple with the Gpu field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetGpuOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Gpu, true
+}
+
+// SetGpu sets field value
+func (o *SnapshotDto) SetGpu(v float32) {
+	o.Gpu = v
+}
+
+// GetMem returns the Mem field value
+func (o *SnapshotDto) GetMem() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Mem
+}
+
+// GetMemOk returns a tuple with the Mem field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetMemOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Mem, true
+}
+
+// SetMem sets field value
+func (o *SnapshotDto) SetMem(v float32) {
+	o.Mem = v
+}
+
+// GetDisk returns the Disk field value
+func (o *SnapshotDto) GetDisk() float32 {
+	if o == nil {
+		var ret float32
+		return ret
+	}
+
+	return o.Disk
+}
+
+// GetDiskOk returns a tuple with the Disk field value
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetDiskOk() (*float32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Disk, true
+}
+
+// SetDisk sets field value
+func (o *SnapshotDto) SetDisk(v float32) {
+	o.Disk = v
 }
 
 // GetErrorReason returns the ErrorReason field value
@@ -387,12 +517,17 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["general"] = o.General
 	toSerialize["name"] = o.Name
+	toSerialize["imageName"] = o.ImageName
 	toSerialize["enabled"] = o.Enabled
 	toSerialize["state"] = o.State
 	toSerialize["size"] = o.Size.Get()
 	if o.Entrypoint != nil {
 		toSerialize["entrypoint"] = o.Entrypoint
 	}
+	toSerialize["cpu"] = o.Cpu
+	toSerialize["gpu"] = o.Gpu
+	toSerialize["mem"] = o.Mem
+	toSerialize["disk"] = o.Disk
 	toSerialize["errorReason"] = o.ErrorReason.Get()
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
@@ -408,10 +543,15 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"general",
 		"name",
+		"imageName",
 		"enabled",
 		"state",
 		"size",
 		"entrypoint",
+		"cpu",
+		"gpu",
+		"mem",
+		"disk",
 		"errorReason",
 		"createdAt",
 		"updatedAt",

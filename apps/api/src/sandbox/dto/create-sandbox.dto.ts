@@ -93,8 +93,8 @@ export class CreateSandboxDto {
   gpu?: number
 
   @ApiPropertyOptional({
-    description: 'Memory allocated to the sandbox in MB',
-    example: 4096,
+    description: 'Memory allocated to the sandbox in GB',
+    example: 1,
     type: 'integer',
   })
   @IsOptional()
@@ -103,7 +103,7 @@ export class CreateSandboxDto {
 
   @ApiPropertyOptional({
     description: 'Disk space allocated to the sandbox in GB',
-    example: 20,
+    example: 3,
     type: 'integer',
   })
   @IsOptional()
