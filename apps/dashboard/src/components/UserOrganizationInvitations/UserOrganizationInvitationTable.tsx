@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -114,11 +115,7 @@ export function UserOrganizationInvitationTable({
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
               )}
             </TableBody>
           </Table>

@@ -31,6 +31,7 @@ import { Pagination } from './Pagination'
 import { Loader2 } from 'lucide-react'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
+import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -96,13 +97,7 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState colSpan={columns.length} message="No API Keys found." />
             )}
           </TableBody>
         </Table>
