@@ -41,7 +41,11 @@ async function bootstrap() {
       logLevels,
     }),
     httpsOptions: httpsEnabled ? httpsOptions : undefined,
-    cors: true,
+  })
+  app.enableCors({
+    origin: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: true,
   })
 
   const configService = app.get(TypedConfigService)
