@@ -39,7 +39,16 @@ class VolumeDto(BaseModel):
     last_used_at: StrictStr = Field(description="Last used timestamp", alias="lastUsedAt")
     error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", alias="errorReason")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "state", "createdAt", "updatedAt", "lastUsedAt", "errorReason"]
+    __properties: ClassVar[List[str]] = [
+        "id",
+        "name",
+        "organizationId",
+        "state",
+        "createdAt",
+        "updatedAt",
+        "lastUsedAt",
+        "errorReason",
+    ]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,7 +100,7 @@ class VolumeDto(BaseModel):
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field
         if self.error_reason is None and "error_reason" in self.model_fields_set:
-            _dict['errorReason'] = None
+            _dict["errorReason"] = None
 
         return _dict
 
@@ -104,16 +113,18 @@ class VolumeDto(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "organizationId": obj.get("organizationId"),
-            "state": obj.get("state"),
-            "createdAt": obj.get("createdAt"),
-            "updatedAt": obj.get("updatedAt"),
-            "lastUsedAt": obj.get("lastUsedAt"),
-            "errorReason": obj.get("errorReason")
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "name": obj.get("name"),
+                "organizationId": obj.get("organizationId"),
+                "state": obj.get("state"),
+                "createdAt": obj.get("createdAt"),
+                "updatedAt": obj.get("updatedAt"),
+                "lastUsedAt": obj.get("lastUsedAt"),
+                "errorReason": obj.get("errorReason"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:

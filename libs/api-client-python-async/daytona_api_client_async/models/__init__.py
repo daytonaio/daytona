@@ -48,6 +48,7 @@ from daytona_api_client_async.models.git_clone_request import GitCloneRequest
 from daytona_api_client_async.models.git_commit_info import GitCommitInfo
 from daytona_api_client_async.models.git_commit_request import GitCommitRequest
 from daytona_api_client_async.models.git_commit_response import GitCommitResponse
+from daytona_api_client_async.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_api_client_async.models.git_repo_request import GitRepoRequest
 from daytona_api_client_async.models.git_status import GitStatus
 from daytona_api_client_async.models.image_dto import ImageDto
@@ -89,6 +90,7 @@ from daytona_api_client_async.models.usage_overview import UsageOverview
 from daytona_api_client_async.models.user import User
 from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
+from daytona_api_client_async.models.volume_state import VolumeState
 from daytona_api_client_async.models.workspace import Workspace
 from daytona_api_client_async.models.workspace_info import WorkspaceInfo
 from daytona_api_client_async.models.workspace_labels import WorkspaceLabels

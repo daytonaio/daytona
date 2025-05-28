@@ -50,6 +50,7 @@ daytona_api_client_async/models/git_clone_request.py
 daytona_api_client_async/models/git_commit_info.py
 daytona_api_client_async/models/git_commit_request.py
 daytona_api_client_async/models/git_commit_response.py
+daytona_api_client_async/models/git_delete_branch_request.py
 daytona_api_client_async/models/git_repo_request.py
 daytona_api_client_async/models/git_status.py
 daytona_api_client_async/models/image_dto.py
@@ -91,6 +92,7 @@ daytona_api_client_async/models/usage_overview.py
 daytona_api_client_async/models/user.py
 daytona_api_client_async/models/user_public_key.py
 daytona_api_client_async/models/volume_dto.py
+daytona_api_client_async/models/volume_state.py
 daytona_api_client_async/models/workspace.py
 daytona_api_client_async/models/workspace_info.py
 daytona_api_client_async/models/workspace_labels.py
