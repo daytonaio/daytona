@@ -20,4 +20,4 @@ daytona image delete [IMAGE_ID] [flags]
 
 ### SEE ALSO
 
-- [daytona image](daytona_image.md) - Manage Daytona images
+* [daytona image](daytona_image.md)  - Manage Daytona images
