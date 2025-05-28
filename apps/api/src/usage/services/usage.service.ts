@@ -5,7 +5,7 @@
 
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { LessThan, Not, Repository } from 'typeorm'
+import { IsNull, LessThan, Not, Repository } from 'typeorm'
 import { WorkspaceUsagePeriod } from '../entities/workspace-usage-period.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
@@ -93,7 +93,7 @@ export class UsageService {
 
     const usagePeriods = await this.workspaceUsagePeriodRepository.find({
       where: {
-        endAt: null,
+        endAt: IsNull(),
         // 1 day ago
         startAt: LessThan(new Date(Date.now() - 1000 * 60 * 60 * 24)),
         organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
