@@ -9,7 +9,7 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "noPropertyAccessFromIndexSignature": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "files": [],
   "include": [],
