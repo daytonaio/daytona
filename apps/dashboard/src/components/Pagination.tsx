@@ -14,6 +14,20 @@ interface PaginationProps<TData> {
   selectionEnabled?: boolean
   className?: string
   entityName?: string
+  // make option to undo the deletion interface
+  onUndoDelete?: () => void
+  // make option to custom the selection interface
+  onCustomSelect?: string
+}
+
+export function Pagination<TData>({
+  table,
+  selectionEnabled,
+  className,
+  entityName,
+  onUndoDelete,
+  onCustomSelect,
+}: PaginationProps<TData>) {
 }
 
 export function Pagination<TData>({ table, selectionEnabled, className, entityName }: PaginationProps<TData>) {
@@ -23,6 +37,14 @@ export function Pagination<TData>({ table, selectionEnabled, className, entityNa
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s)
           selected.
+          {/* make the undo selection button */}
+          {onCustomSelect ||
+            `${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} row(s) selected.`}
+          {onUndoDelete && (
+            <Button variant="link" className="ml-2" onClick={onUndoDelete}>
+              Undo Delete
+            </Button>
+          )}
         </div>
       ) : (
         <div></div>
