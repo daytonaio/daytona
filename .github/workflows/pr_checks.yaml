@@ -66,9 +66,10 @@ jobs:
           yarn
           mkdir -p dist/apps/api
           yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
+          yarn sdk-python:generate-sync
           yarn lint:fix
           yarn format
-          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix' and commit" && exit 1)
+          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn sdk-python:generate-sync', 'yarn lint:fix' and commit" && exit 1)
 
   build:
     runs-on: ubuntu-latest
