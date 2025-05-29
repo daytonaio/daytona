@@ -45,7 +45,7 @@
 ### Python SDK
 
 ```bash
-pip install daytona-sdk
+pip install daytona
 ```
 
 ### TypeScript SDK
@@ -78,7 +78,7 @@ npm install @daytonaio/sdk
 ### Python SDK
 
 ```py
-from daytona_sdk import Daytona, DaytonaConfig, CreateSandboxParams
+from daytona import Daytona, DaytonaConfig, CreateSandboxParams
 
 # Initialize the Daytona client
 daytona = Daytona(DaytonaConfig(api_key="YOUR_API_KEY"))
