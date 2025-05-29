@@ -57,7 +57,7 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "isort>=5.10.0,<6.0.0" "black[jupyter]>=23.1.0,<24.0.0" "nbqa>=1.9.1,<2.0.0 " "pylint>=3.3.4,<4.0.0"
+          pip install "isort>=5.10.0,<6.0.0" "black[jupyter]>=23.1.0,<24.0.0" "nbqa>=1.9.1,<2.0.0 " "pylint>=3.3.4,<4.0.0" "unasync>=0.6.0,<0.7.0"
       - run: corepack enable
       - name: generate-api-clients
         run: |
@@ -66,9 +66,10 @@ jobs:
           yarn
           mkdir -p dist/apps/api
           yarn generate:openapi && yarn nx run-many --target=generate:api-client --all --parallel=false
+          yarn sdk-python:generate-sync
           yarn lint:fix
           yarn format
-          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn lint:fix' and commit" && exit 1)
+          git diff --exit-code || (echo "Code not formatted or linting errors! Hint: 'yarn generate:api-client', 'yarn sdk-python:generate-sync', 'yarn lint:fix' and commit" && exit 1)
 
   build:
     runs-on: ubuntu-latest

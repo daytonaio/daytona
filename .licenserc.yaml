@@ -18,6 +18,7 @@ header:
     - 'libs/runner-api-client/**'
     - 'libs/api-client-go/**'
     - 'libs/api-client-python/**'
+    - 'libs/api-client-python-async/**'
     - 'apps/api/src/generate-openapi.ts'
     - 'apps/runner/pkg/api/docs/docs.go'
     - 'examples/**'

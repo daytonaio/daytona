@@ -24,24 +24,42 @@ from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class ApiKeyList(BaseModel):
     """
     ApiKeyList
-    """ # noqa: E501
+    """  # noqa: E501
+
     name: StrictStr = Field(description="The name of the API key")
     value: StrictStr = Field(description="The masked API key value")
     created_at: datetime = Field(description="When the API key was created", alias="createdAt")
-    permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
+    permissions: List[StrictStr] = Field(
+        description="The list of organization resource permissions assigned to the API key"
+    )
     last_used_at: Optional[datetime] = Field(alias="lastUsedAt")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "lastUsedAt"]
 
-    @field_validator('permissions')
+    @field_validator("permissions")
     def permissions_validate_enum(cls, value):
         """Validates the enum"""
         for i in value:
-            if i not in set(['write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes']):
-                raise ValueError("each list item must be one of ('write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')")
+            if i not in set(
+                [
+                    "write:registries",
+                    "delete:registries",
+                    "write:images",
+                    "delete:images",
+                    "write:sandboxes",
+                    "delete:sandboxes",
+                    "read:volumes",
+                    "write:volumes",
+                    "delete:volumes",
+                ]
+            ):
+                raise ValueError(
+                    "each list item must be one of ('write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
+                )
         return value
 
     model_config = ConfigDict(
@@ -49,7 +67,6 @@ class ApiKeyList(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -76,9 +93,11 @@ class ApiKeyList(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -93,7 +112,7 @@ class ApiKeyList(BaseModel):
         # set to None if last_used_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
-            _dict['lastUsedAt'] = None
+            _dict["lastUsedAt"] = None
 
         return _dict
 
@@ -106,18 +125,18 @@ class ApiKeyList(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "value": obj.get("value"),
-            "createdAt": obj.get("createdAt"),
-            "permissions": obj.get("permissions"),
-            "lastUsedAt": obj.get("lastUsedAt")
-        })
+        _obj = cls.model_validate(
+            {
+                "name": obj.get("name"),
+                "value": obj.get("value"),
+                "createdAt": obj.get("createdAt"),
+                "permissions": obj.get("permissions"),
+                "lastUsedAt": obj.get("lastUsedAt"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

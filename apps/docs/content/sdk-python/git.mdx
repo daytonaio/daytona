@@ -13,7 +13,7 @@ Provides Git operations within a Sandbox.
 
 **Attributes**:
 
-- `sandbox` _Sandbox_ - The parent Sandbox instance.
+- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
 
 **Example**:
@@ -42,15 +42,14 @@ sandbox.git.commit(
 #### Git.\_\_init\_\_
 
 ```python
-def __init__(sandbox: "Sandbox", toolbox_api: ToolboxApi,
-             instance: SandboxInstance, get_root_dir: Callable[[], str])
+def __init__(toolbox_api: ToolboxApi, instance: SandboxInstance,
+             get_root_dir: Callable[[], str])
 ```
 
 Initializes a new Git handler instance.
 
 **Arguments**:
 
-- `sandbox` _Sandbox_ - The parent Sandbox instance.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.

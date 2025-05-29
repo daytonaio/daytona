@@ -27,6 +27,7 @@ Using environment variables:
 
 ```python
 daytona = Daytona()  # Uses DAYTONA_API_KEY, DAYTONA_API_URL
+sandbox = daytona.create()
 ```
 
 Using explicit configuration:
@@ -38,6 +39,7 @@ config = DaytonaConfig(
     target="us"
 )
 daytona = Daytona(config)
+sandbox = daytona.create()
 ```
 
 #### Daytona.\_\_init\_\_
