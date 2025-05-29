@@ -37,9 +37,9 @@ class WorkspaceState(str, Enum):
     STOPPING = 'stopping'
     ERROR = 'error'
     PENDING_BUILD = 'pending_build'
-    BUILDING_IMAGE = 'building_image'
+    BUILDING_SNAPSHOT = 'building_snapshot'
     UNKNOWN = 'unknown'
-    PULLING_IMAGE = 'pulling_image'
+    PULLING_SNAPSHOT = 'pulling_snapshot'
     ARCHIVING = 'archiving'
     ARCHIVED = 'archived'
 

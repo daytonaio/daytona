@@ -20,15 +20,15 @@ var _ MappedNullable = &CreateOrganizationQuota{}
 
 // CreateOrganizationQuota struct for CreateOrganizationQuota
 type CreateOrganizationQuota struct {
-	TotalCpuQuota         *float32 `json:"totalCpuQuota,omitempty"`
-	TotalMemoryQuota      *float32 `json:"totalMemoryQuota,omitempty"`
-	TotalDiskQuota        *float32 `json:"totalDiskQuota,omitempty"`
-	MaxCpuPerWorkspace    *float32 `json:"maxCpuPerWorkspace,omitempty"`
-	MaxMemoryPerWorkspace *float32 `json:"maxMemoryPerWorkspace,omitempty"`
-	MaxDiskPerWorkspace   *float32 `json:"maxDiskPerWorkspace,omitempty"`
-	ImageQuota            *float32 `json:"imageQuota,omitempty"`
-	MaxImageSize          *float32 `json:"maxImageSize,omitempty"`
-	VolumeQuota           *float32 `json:"volumeQuota,omitempty"`
+	TotalCpuQuota       *float32 `json:"totalCpuQuota,omitempty"`
+	TotalMemoryQuota    *float32 `json:"totalMemoryQuota,omitempty"`
+	TotalDiskQuota      *float32 `json:"totalDiskQuota,omitempty"`
+	MaxCpuPerSandbox    *float32 `json:"maxCpuPerSandbox,omitempty"`
+	MaxMemoryPerSandbox *float32 `json:"maxMemoryPerSandbox,omitempty"`
+	MaxDiskPerSandbox   *float32 `json:"maxDiskPerSandbox,omitempty"`
+	SnapshotQuota       *float32 `json:"snapshotQuota,omitempty"`
+	MaxSnapshotSize     *float32 `json:"maxSnapshotSize,omitempty"`
+	VolumeQuota         *float32 `json:"volumeQuota,omitempty"`
 }
 
 // NewCreateOrganizationQuota instantiates a new CreateOrganizationQuota object
@@ -144,164 +144,164 @@ func (o *CreateOrganizationQuota) SetTotalDiskQuota(v float32) {
 	o.TotalDiskQuota = &v
 }
 
-// GetMaxCpuPerWorkspace returns the MaxCpuPerWorkspace field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetMaxCpuPerWorkspace() float32 {
-	if o == nil || IsNil(o.MaxCpuPerWorkspace) {
+// GetMaxCpuPerSandbox returns the MaxCpuPerSandbox field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetMaxCpuPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxCpuPerSandbox) {
 		var ret float32
 		return ret
 	}
-	return *o.MaxCpuPerWorkspace
+	return *o.MaxCpuPerSandbox
 }
 
-// GetMaxCpuPerWorkspaceOk returns a tuple with the MaxCpuPerWorkspace field value if set, nil otherwise
+// GetMaxCpuPerSandboxOk returns a tuple with the MaxCpuPerSandbox field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetMaxCpuPerWorkspaceOk() (*float32, bool) {
-	if o == nil || IsNil(o.MaxCpuPerWorkspace) {
+func (o *CreateOrganizationQuota) GetMaxCpuPerSandboxOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaxCpuPerSandbox) {
 		return nil, false
 	}
-	return o.MaxCpuPerWorkspace, true
+	return o.MaxCpuPerSandbox, true
 }
 
-// HasMaxCpuPerWorkspace returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasMaxCpuPerWorkspace() bool {
-	if o != nil && !IsNil(o.MaxCpuPerWorkspace) {
+// HasMaxCpuPerSandbox returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasMaxCpuPerSandbox() bool {
+	if o != nil && !IsNil(o.MaxCpuPerSandbox) {
 		return true
 	}
 
 	return false
 }
 
-// SetMaxCpuPerWorkspace gets a reference to the given float32 and assigns it to the MaxCpuPerWorkspace field.
-func (o *CreateOrganizationQuota) SetMaxCpuPerWorkspace(v float32) {
-	o.MaxCpuPerWorkspace = &v
+// SetMaxCpuPerSandbox gets a reference to the given float32 and assigns it to the MaxCpuPerSandbox field.
+func (o *CreateOrganizationQuota) SetMaxCpuPerSandbox(v float32) {
+	o.MaxCpuPerSandbox = &v
 }
 
-// GetMaxMemoryPerWorkspace returns the MaxMemoryPerWorkspace field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetMaxMemoryPerWorkspace() float32 {
-	if o == nil || IsNil(o.MaxMemoryPerWorkspace) {
+// GetMaxMemoryPerSandbox returns the MaxMemoryPerSandbox field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetMaxMemoryPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxMemoryPerSandbox) {
 		var ret float32
 		return ret
 	}
-	return *o.MaxMemoryPerWorkspace
+	return *o.MaxMemoryPerSandbox
 }
 
-// GetMaxMemoryPerWorkspaceOk returns a tuple with the MaxMemoryPerWorkspace field value if set, nil otherwise
+// GetMaxMemoryPerSandboxOk returns a tuple with the MaxMemoryPerSandbox field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetMaxMemoryPerWorkspaceOk() (*float32, bool) {
-	if o == nil || IsNil(o.MaxMemoryPerWorkspace) {
+func (o *CreateOrganizationQuota) GetMaxMemoryPerSandboxOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaxMemoryPerSandbox) {
 		return nil, false
 	}
-	return o.MaxMemoryPerWorkspace, true
+	return o.MaxMemoryPerSandbox, true
 }
 
-// HasMaxMemoryPerWorkspace returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasMaxMemoryPerWorkspace() bool {
-	if o != nil && !IsNil(o.MaxMemoryPerWorkspace) {
+// HasMaxMemoryPerSandbox returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasMaxMemoryPerSandbox() bool {
+	if o != nil && !IsNil(o.MaxMemoryPerSandbox) {
 		return true
 	}
 
 	return false
 }
 
-// SetMaxMemoryPerWorkspace gets a reference to the given float32 and assigns it to the MaxMemoryPerWorkspace field.
-func (o *CreateOrganizationQuota) SetMaxMemoryPerWorkspace(v float32) {
-	o.MaxMemoryPerWorkspace = &v
+// SetMaxMemoryPerSandbox gets a reference to the given float32 and assigns it to the MaxMemoryPerSandbox field.
+func (o *CreateOrganizationQuota) SetMaxMemoryPerSandbox(v float32) {
+	o.MaxMemoryPerSandbox = &v
 }
 
-// GetMaxDiskPerWorkspace returns the MaxDiskPerWorkspace field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetMaxDiskPerWorkspace() float32 {
-	if o == nil || IsNil(o.MaxDiskPerWorkspace) {
+// GetMaxDiskPerSandbox returns the MaxDiskPerSandbox field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetMaxDiskPerSandbox() float32 {
+	if o == nil || IsNil(o.MaxDiskPerSandbox) {
 		var ret float32
 		return ret
 	}
-	return *o.MaxDiskPerWorkspace
+	return *o.MaxDiskPerSandbox
 }
 
-// GetMaxDiskPerWorkspaceOk returns a tuple with the MaxDiskPerWorkspace field value if set, nil otherwise
+// GetMaxDiskPerSandboxOk returns a tuple with the MaxDiskPerSandbox field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetMaxDiskPerWorkspaceOk() (*float32, bool) {
-	if o == nil || IsNil(o.MaxDiskPerWorkspace) {
+func (o *CreateOrganizationQuota) GetMaxDiskPerSandboxOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaxDiskPerSandbox) {
 		return nil, false
 	}
-	return o.MaxDiskPerWorkspace, true
+	return o.MaxDiskPerSandbox, true
 }
 
-// HasMaxDiskPerWorkspace returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasMaxDiskPerWorkspace() bool {
-	if o != nil && !IsNil(o.MaxDiskPerWorkspace) {
+// HasMaxDiskPerSandbox returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasMaxDiskPerSandbox() bool {
+	if o != nil && !IsNil(o.MaxDiskPerSandbox) {
 		return true
 	}
 
 	return false
 }
 
-// SetMaxDiskPerWorkspace gets a reference to the given float32 and assigns it to the MaxDiskPerWorkspace field.
-func (o *CreateOrganizationQuota) SetMaxDiskPerWorkspace(v float32) {
-	o.MaxDiskPerWorkspace = &v
+// SetMaxDiskPerSandbox gets a reference to the given float32 and assigns it to the MaxDiskPerSandbox field.
+func (o *CreateOrganizationQuota) SetMaxDiskPerSandbox(v float32) {
+	o.MaxDiskPerSandbox = &v
 }
 
-// GetImageQuota returns the ImageQuota field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetImageQuota() float32 {
-	if o == nil || IsNil(o.ImageQuota) {
+// GetSnapshotQuota returns the SnapshotQuota field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetSnapshotQuota() float32 {
+	if o == nil || IsNil(o.SnapshotQuota) {
 		var ret float32
 		return ret
 	}
-	return *o.ImageQuota
+	return *o.SnapshotQuota
 }
 
-// GetImageQuotaOk returns a tuple with the ImageQuota field value if set, nil otherwise
+// GetSnapshotQuotaOk returns a tuple with the SnapshotQuota field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetImageQuotaOk() (*float32, bool) {
-	if o == nil || IsNil(o.ImageQuota) {
+func (o *CreateOrganizationQuota) GetSnapshotQuotaOk() (*float32, bool) {
+	if o == nil || IsNil(o.SnapshotQuota) {
 		return nil, false
 	}
-	return o.ImageQuota, true
+	return o.SnapshotQuota, true
 }
 
-// HasImageQuota returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasImageQuota() bool {
-	if o != nil && !IsNil(o.ImageQuota) {
+// HasSnapshotQuota returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasSnapshotQuota() bool {
+	if o != nil && !IsNil(o.SnapshotQuota) {
 		return true
 	}
 
 	return false
 }
 
-// SetImageQuota gets a reference to the given float32 and assigns it to the ImageQuota field.
-func (o *CreateOrganizationQuota) SetImageQuota(v float32) {
-	o.ImageQuota = &v
+// SetSnapshotQuota gets a reference to the given float32 and assigns it to the SnapshotQuota field.
+func (o *CreateOrganizationQuota) SetSnapshotQuota(v float32) {
+	o.SnapshotQuota = &v
 }
 
-// GetMaxImageSize returns the MaxImageSize field value if set, zero value otherwise.
-func (o *CreateOrganizationQuota) GetMaxImageSize() float32 {
-	if o == nil || IsNil(o.MaxImageSize) {
+// GetMaxSnapshotSize returns the MaxSnapshotSize field value if set, zero value otherwise.
+func (o *CreateOrganizationQuota) GetMaxSnapshotSize() float32 {
+	if o == nil || IsNil(o.MaxSnapshotSize) {
 		var ret float32
 		return ret
 	}
-	return *o.MaxImageSize
+	return *o.MaxSnapshotSize
 }
 
-// GetMaxImageSizeOk returns a tuple with the MaxImageSize field value if set, nil otherwise
+// GetMaxSnapshotSizeOk returns a tuple with the MaxSnapshotSize field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateOrganizationQuota) GetMaxImageSizeOk() (*float32, bool) {
-	if o == nil || IsNil(o.MaxImageSize) {
+func (o *CreateOrganizationQuota) GetMaxSnapshotSizeOk() (*float32, bool) {
+	if o == nil || IsNil(o.MaxSnapshotSize) {
 		return nil, false
 	}
-	return o.MaxImageSize, true
+	return o.MaxSnapshotSize, true
 }
 
-// HasMaxImageSize returns a boolean if a field has been set.
-func (o *CreateOrganizationQuota) HasMaxImageSize() bool {
-	if o != nil && !IsNil(o.MaxImageSize) {
+// HasMaxSnapshotSize returns a boolean if a field has been set.
+func (o *CreateOrganizationQuota) HasMaxSnapshotSize() bool {
+	if o != nil && !IsNil(o.MaxSnapshotSize) {
 		return true
 	}
 
 	return false
 }
 
-// SetMaxImageSize gets a reference to the given float32 and assigns it to the MaxImageSize field.
-func (o *CreateOrganizationQuota) SetMaxImageSize(v float32) {
-	o.MaxImageSize = &v
+// SetMaxSnapshotSize gets a reference to the given float32 and assigns it to the MaxSnapshotSize field.
+func (o *CreateOrganizationQuota) SetMaxSnapshotSize(v float32) {
+	o.MaxSnapshotSize = &v
 }
 
 // GetVolumeQuota returns the VolumeQuota field value if set, zero value otherwise.
@@ -355,20 +355,20 @@ func (o CreateOrganizationQuota) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.TotalDiskQuota) {
 		toSerialize["totalDiskQuota"] = o.TotalDiskQuota
 	}
-	if !IsNil(o.MaxCpuPerWorkspace) {
-		toSerialize["maxCpuPerWorkspace"] = o.MaxCpuPerWorkspace
+	if !IsNil(o.MaxCpuPerSandbox) {
+		toSerialize["maxCpuPerSandbox"] = o.MaxCpuPerSandbox
 	}
-	if !IsNil(o.MaxMemoryPerWorkspace) {
-		toSerialize["maxMemoryPerWorkspace"] = o.MaxMemoryPerWorkspace
+	if !IsNil(o.MaxMemoryPerSandbox) {
+		toSerialize["maxMemoryPerSandbox"] = o.MaxMemoryPerSandbox
 	}
-	if !IsNil(o.MaxDiskPerWorkspace) {
-		toSerialize["maxDiskPerWorkspace"] = o.MaxDiskPerWorkspace
+	if !IsNil(o.MaxDiskPerSandbox) {
+		toSerialize["maxDiskPerSandbox"] = o.MaxDiskPerSandbox
 	}
-	if !IsNil(o.ImageQuota) {
-		toSerialize["imageQuota"] = o.ImageQuota
+	if !IsNil(o.SnapshotQuota) {
+		toSerialize["snapshotQuota"] = o.SnapshotQuota
 	}
-	if !IsNil(o.MaxImageSize) {
-		toSerialize["maxImageSize"] = o.MaxImageSize
+	if !IsNil(o.MaxSnapshotSize) {
+		toSerialize["maxSnapshotSize"] = o.MaxSnapshotSize
 	}
 	if !IsNil(o.VolumeQuota) {
 		toSerialize["volumeQuota"] = o.VolumeQuota

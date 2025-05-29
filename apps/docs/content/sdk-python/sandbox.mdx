@@ -104,7 +104,7 @@ diagnostics, and more.
 **Example**:
 
 ```python
-lsp = sandbox.create_lsp_server("python", "workspace/project")
+lsp = sandbox.create_lsp_server("python", "sandbox/project")
 ```
 
 #### Sandbox.set_labels
@@ -201,13 +201,13 @@ def delete() -> None
 
 Deletes the Sandbox.
 
-#### Sandbox.wait_for_workspace_start
+#### Sandbox.wait_for_sandbox_start
 
 ```python
 @deprecated(reason=(
     "Method is deprecated. Use `wait_for_sandbox_start` instead. This method will be removed in a future"
     " version."))
-def wait_for_workspace_start(timeout: Optional[float] = 60) -> None
+def wait_for_sandbox_start(timeout: Optional[float] = 60) -> None
 ```
 
 Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
@@ -243,13 +243,13 @@ reaches the 'started' state, encounters an error or times out.
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
 
-#### Sandbox.wait_for_workspace_stop
+#### Sandbox.wait_for_sandbox_stop
 
 ```python
 @deprecated(reason=(
     "Method is deprecated. Use `wait_for_sandbox_stop` instead. This method will be removed in a future"
     " version."))
-def wait_for_workspace_stop(timeout: Optional[float] = 60) -> None
+def wait_for_sandbox_stop(timeout: Optional[float] = 60) -> None
 ```
 
 Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it

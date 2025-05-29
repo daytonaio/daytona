@@ -18,19 +18,19 @@ export class UpdateOrganizationQuotaDto {
   totalDiskQuota?: number
 
   @ApiProperty({ nullable: true })
-  maxCpuPerWorkspace?: number
+  maxCpuPerSandbox?: number
 
   @ApiProperty({ nullable: true })
-  maxMemoryPerWorkspace?: number
+  maxMemoryPerSandbox?: number
 
   @ApiProperty({ nullable: true })
-  maxDiskPerWorkspace?: number
+  maxDiskPerSandbox?: number
 
   @ApiProperty({ nullable: true })
-  imageQuota?: number
+  snapshotQuota?: number
 
   @ApiProperty({ nullable: true })
-  maxImageSize?: number
+  maxSnapshotSize?: number
 
   @ApiProperty({ nullable: true })
   volumeQuota?: number

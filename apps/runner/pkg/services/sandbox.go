@@ -35,7 +35,7 @@ func (s *SandboxService) GetSandboxStatesInfo(ctx context.Context, sandboxId str
 	if data == nil {
 		return &models.CacheData{
 			SandboxState:    enums.SandboxStateUnknown,
-			SnapshotState:   enums.SnapshotStateNone,
+			BackupState:     enums.BackupStateNone,
 			DestructionTime: nil,
 		}
 	}

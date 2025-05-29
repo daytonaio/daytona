@@ -26,27 +26,27 @@ export class CreateOrganizationQuotaDto {
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
-  maxCpuPerWorkspace?: number
+  maxCpuPerSandbox?: number
 
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
-  maxMemoryPerWorkspace?: number
+  maxMemoryPerSandbox?: number
 
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
-  maxDiskPerWorkspace?: number
+  maxDiskPerSandbox?: number
 
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
-  imageQuota?: number
+  snapshotQuota?: number
 
   @ApiPropertyOptional()
   @IsNumber()
   @IsOptional()
-  maxImageSize?: number
+  maxSnapshotSize?: number
 
   @ApiPropertyOptional()
   @IsNumber()

@@ -41,31 +41,31 @@ export interface CreateOrganizationQuota {
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  maxCpuPerWorkspace?: number
+  maxCpuPerSandbox?: number
   /**
    *
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  maxMemoryPerWorkspace?: number
+  maxMemoryPerSandbox?: number
   /**
    *
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  maxDiskPerWorkspace?: number
+  maxDiskPerSandbox?: number
   /**
    *
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  imageQuota?: number
+  snapshotQuota?: number
   /**
    *
    * @type {number}
    * @memberof CreateOrganizationQuota
    */
-  maxImageSize?: number
+  maxSnapshotSize?: number
   /**
    *
    * @type {number}
