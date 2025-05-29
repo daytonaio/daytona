@@ -219,13 +219,6 @@ const Images: React.FC = () => {
 
   const handleDelete = async (image: ImageDto) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
-
-    // Optimistically update the image state
-    setImagesData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
-    }))
-
     try {
       await imageApi.removeImage(image.id, selectedOrganization?.id)
       setImageToDelete(null)
@@ -233,35 +226,35 @@ const Images: React.FC = () => {
       toast.success(`Deleting image ${image.name}`)
     } catch (error) {
       handleApiError(error, 'Failed to delete image')
-      // Revert the optimistic update
-      setImagesData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
-      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+    }
+  }
+  const handleBulkDelete = async (ids: string[]) => {
+    setLoadingImages((prev) => ({ ...prev, ...ids.reduce((acc, id) => ({ ...acc, [id]: true }), {}) }))
+    for (const id of ids) {
+      try {
+        await imageApi.removeImage(id, selectedOrganization?.id)
+        toast.success(`Deleted image with ID: ${id}`)
+      } catch (error) {
+        handleApiError(error, `Failed to delete image with ID: ${id}`)
+        const shouldContinue = window.confirm(
+          `Failed to delete image with ID: ${id}. Do you want to continue with the remaining images?`,
+        )
+        if (!shouldContinue) break
+      } finally {
+        setLoadingImages((prev) => ({ ...prev, [id]: false }))
+      }
     }
   }
 
   const handleToggleEnabled = async (image: ImageDto, enabled: boolean) => {
     setLoadingImages((prev) => ({ ...prev, [image.id]: true }))
-
-    // Optimistically update the image enabled flag
-    setImagesData((prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled } : i)),
-    }))
-
     try {
       await imageApi.toggleImageState(image.id, { enabled }, selectedOrganization?.id)
       toast.success(`${enabled ? 'Enabling' : 'Disabling'} image ${image.name}`)
     } catch (error) {
       handleApiError(error, enabled ? 'Failed to enable image' : 'Failed to disable image')
-      // Revert the optimistic update
-      setImagesData((prev) => ({
-        ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, enabled: image.enabled } : i)),
-      }))
     } finally {
       setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
     }
@@ -374,6 +367,7 @@ const Images: React.FC = () => {
             setImageToDelete(image)
             setShowDeleteDialog(true)
           }}
+          onBulkDelete={handleBulkDelete}
           onToggleEnabled={handleToggleEnabled}
           pageCount={imagesData.totalPages}
           onPaginationChange={handlePaginationChange}
