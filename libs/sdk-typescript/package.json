@@ -36,7 +36,6 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@daytonaio/api-client": "^0.19.1",
     "@dotenvx/dotenvx": "^1.25.1",
     "axios": "^1.6.1",
     "form-data": "^4.0.0",
