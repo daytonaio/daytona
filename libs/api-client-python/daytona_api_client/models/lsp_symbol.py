@@ -24,10 +24,12 @@ from daytona_api_client.models.lsp_location import LspLocation
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class LspSymbol(BaseModel):
     """
     LspSymbol
-    """ # noqa: E501
+    """  # noqa: E501
+
     kind: Union[StrictFloat, StrictInt]
     location: LspLocation
     name: StrictStr
@@ -39,7 +41,6 @@ class LspSymbol(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -66,9 +67,11 @@ class LspSymbol(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -77,7 +80,7 @@ class LspSymbol(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of location
         if self.location:
-            _dict['location'] = self.location.to_dict()
+            _dict["location"] = self.location.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -94,16 +97,16 @@ class LspSymbol(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "kind": obj.get("kind"),
-            "location": LspLocation.from_dict(obj["location"]) if obj.get("location") is not None else None,
-            "name": obj.get("name")
-        })
+        _obj = cls.model_validate(
+            {
+                "kind": obj.get("kind"),
+                "location": LspLocation.from_dict(obj["location"]) if obj.get("location") is not None else None,
+                "name": obj.get("name"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

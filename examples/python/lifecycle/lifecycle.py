@@ -2,41 +2,47 @@ from pprint import pprint
 
 from daytona_sdk import Daytona
 
-daytona = Daytona()
 
-print("Creating sandbox")
-sandbox = daytona.create()
-print("Sandbox created")
+def main():
+    daytona = Daytona()
 
-sandbox.set_labels(
-    {
-        "public": True,
-    }
-)
+    print("Creating sandbox")
+    sandbox = daytona.create()
+    print("Sandbox created")
 
-print("Stopping sandbox")
-daytona.stop(sandbox)
-print("Sandbox stopped")
+    sandbox.set_labels(
+        {
+            "public": True,
+        }
+    )
 
-print("Starting sandbox")
-daytona.start(sandbox)
-print("Sandbox started")
+    print("Stopping sandbox")
+    daytona.stop(sandbox)
+    print("Sandbox stopped")
 
-print("Getting existing sandbox")
-existing_sandbox = daytona.get_current_sandbox(sandbox.id)
-print("Get existing sandbox")
+    print("Starting sandbox")
+    daytona.start(sandbox)
+    print("Sandbox started")
 
-response = existing_sandbox.process.exec('echo "Hello World from exec!"', cwd="/home/daytona", timeout=10)
-if response.exit_code != 0:
-    print(f"Error: {response.exit_code} {response.result}")
-else:
-    print(response.result)
+    print("Getting existing sandbox")
+    existing_sandbox = daytona.get_current_sandbox(sandbox.id)
+    print("Get existing sandbox")
 
-sandboxes = daytona.list()
-print("Total sandboxes count:", len(sandboxes))
-# This will show all attributes of the first sandbox
-pprint(vars(sandboxes[0].info()))
+    response = existing_sandbox.process.exec('echo "Hello World from exec!"', cwd="/home/daytona", timeout=10)
+    if response.exit_code != 0:
+        print(f"Error: {response.exit_code} {response.result}")
+    else:
+        print(response.result)
 
-print("Removing sandbox")
-daytona.delete(sandbox)
-print("Sandbox removed")
+    sandboxes = daytona.list()
+    print("Total sandboxes count:", len(sandboxes))
+    # This will show all attributes of the first sandbox
+    pprint(vars(sandboxes[0].info()))
+
+    print("Removing sandbox")
+    daytona.delete(sandbox)
+    print("Sandbox removed")
+
+
+if __name__ == "__main__":
+    main()

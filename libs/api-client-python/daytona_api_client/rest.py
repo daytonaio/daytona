@@ -37,7 +37,6 @@ def is_socks_proxy_url(url):
 
 
 class RESTResponse(io.IOBase):
-
     def __init__(self, resp) -> None:
         self.response = resp
         self.status = resp.status
@@ -59,7 +58,6 @@ class RESTResponse(io.IOBase):
 
 
 class RESTClientObject:
-
     def __init__(self, configuration) -> None:
         # urllib3.PoolManager will pass all kw parameters to connectionpool
         # https://github.com/shazow/urllib3/blob/f9409436f83aeb79fbaf090181cd81b784f1b8ce/urllib3/poolmanager.py#L75  # noqa: E501
@@ -80,22 +78,19 @@ class RESTClientObject:
             "ca_cert_data": configuration.ca_cert_data,
         }
         if configuration.assert_hostname is not None:
-            pool_args['assert_hostname'] = (
-                configuration.assert_hostname
-            )
+            pool_args["assert_hostname"] = configuration.assert_hostname
 
         if configuration.retries is not None:
-            pool_args['retries'] = configuration.retries
+            pool_args["retries"] = configuration.retries
 
         if configuration.tls_server_name:
-            pool_args['server_hostname'] = configuration.tls_server_name
-
+            pool_args["server_hostname"] = configuration.tls_server_name
 
         if configuration.socket_options is not None:
-            pool_args['socket_options'] = configuration.socket_options
+            pool_args["socket_options"] = configuration.socket_options
 
         if configuration.connection_pool_maxsize is not None:
-            pool_args['maxsize'] = configuration.connection_pool_maxsize
+            pool_args["maxsize"] = configuration.connection_pool_maxsize
 
         # https pool manager
         self.pool_manager: urllib3.PoolManager
@@ -103,6 +98,7 @@ class RESTClientObject:
         if configuration.proxy:
             if is_socks_proxy_url(configuration.proxy):
                 from urllib3.contrib.socks import SOCKSProxyManager
+
                 pool_args["proxy_url"] = configuration.proxy
                 pool_args["headers"] = configuration.proxy_headers
                 self.pool_manager = SOCKSProxyManager(**pool_args)
@@ -113,15 +109,7 @@ class RESTClientObject:
         else:
             self.pool_manager = urllib3.PoolManager(**pool_args)
 
-    def request(
-        self,
-        method,
-        url,
-        headers=None,
-        body=None,
-        post_params=None,
-        _request_timeout=None
-    ):
+    def request(self, method, url, headers=None, body=None, post_params=None, _request_timeout=None):
         """Perform requests.
 
         :param method: http request method
@@ -137,20 +125,10 @@ class RESTClientObject:
                                  (connection, read) timeouts.
         """
         method = method.upper()
-        assert method in [
-            'GET',
-            'HEAD',
-            'DELETE',
-            'POST',
-            'PUT',
-            'PATCH',
-            'OPTIONS'
-        ]
+        assert method in ["GET", "HEAD", "DELETE", "POST", "PUT", "PATCH", "OPTIONS"]
 
         if post_params and body:
-            raise ApiValueError(
-                "body parameter cannot be used with post_params parameter."
-            )
+            raise ApiValueError("body parameter cannot be used with post_params parameter.")
 
         post_params = post_params or {}
         headers = headers or {}
@@ -159,37 +137,22 @@ class RESTClientObject:
         if _request_timeout:
             if isinstance(_request_timeout, (int, float)):
                 timeout = urllib3.Timeout(total=_request_timeout)
-            elif (
-                    isinstance(_request_timeout, tuple)
-                    and len(_request_timeout) == 2
-                ):
-                timeout = urllib3.Timeout(
-                    connect=_request_timeout[0],
-                    read=_request_timeout[1]
-                )
+            elif isinstance(_request_timeout, tuple) and len(_request_timeout) == 2:
+                timeout = urllib3.Timeout(connect=_request_timeout[0], read=_request_timeout[1])
 
         try:
             # For `POST`, `PUT`, `PATCH`, `OPTIONS`, `DELETE`
-            if method in ['POST', 'PUT', 'PATCH', 'OPTIONS', 'DELETE']:
-
+            if method in ["POST", "PUT", "PATCH", "OPTIONS", "DELETE"]:
                 # no content type provided or payload is json
-                content_type = headers.get('Content-Type')
-                if (
-                    not content_type
-                    or re.search('json', content_type, re.IGNORECASE)
-                ):
+                content_type = headers.get("Content-Type")
+                if not content_type or re.search("json", content_type, re.IGNORECASE):
                     request_body = None
                     if body is not None:
                         request_body = json.dumps(body)
                     r = self.pool_manager.request(
-                        method,
-                        url,
-                        body=request_body,
-                        timeout=timeout,
-                        headers=headers,
-                        preload_content=False
+                        method, url, body=request_body, timeout=timeout, headers=headers, preload_content=False
                     )
-                elif content_type == 'application/x-www-form-urlencoded':
+                elif content_type == "application/x-www-form-urlencoded":
                     r = self.pool_manager.request(
                         method,
                         url,
@@ -197,15 +160,15 @@ class RESTClientObject:
                         encode_multipart=False,
                         timeout=timeout,
                         headers=headers,
-                        preload_content=False
+                        preload_content=False,
                     )
-                elif content_type == 'multipart/form-data':
+                elif content_type == "multipart/form-data":
                     # must del headers['Content-Type'], or the correct
                     # Content-Type which generated by urllib3 will be
                     # overwritten.
-                    del headers['Content-Type']
+                    del headers["Content-Type"]
                     # Ensures that dict objects are serialized
-                    post_params = [(a, json.dumps(b)) if isinstance(b, dict) else (a,b) for a, b in post_params]
+                    post_params = [(a, json.dumps(b)) if isinstance(b, dict) else (a, b) for a, b in post_params]
                     r = self.pool_manager.request(
                         method,
                         url,
@@ -213,29 +176,20 @@ class RESTClientObject:
                         encode_multipart=True,
                         timeout=timeout,
                         headers=headers,
-                        preload_content=False
+                        preload_content=False,
                     )
                 # Pass a `string` parameter directly in the body to support
                 # other content types than JSON when `body` argument is
                 # provided in serialized form.
                 elif isinstance(body, str) or isinstance(body, bytes):
                     r = self.pool_manager.request(
-                        method,
-                        url,
-                        body=body,
-                        timeout=timeout,
-                        headers=headers,
-                        preload_content=False
+                        method, url, body=body, timeout=timeout, headers=headers, preload_content=False
                     )
-                elif headers['Content-Type'].startswith('text/') and isinstance(body, bool):
+                elif headers["Content-Type"].startswith("text/") and isinstance(body, bool):
                     request_body = "true" if body else "false"
                     r = self.pool_manager.request(
-                        method,
-                        url,
-                        body=request_body,
-                        preload_content=False,
-                        timeout=timeout,
-                        headers=headers)
+                        method, url, body=request_body, preload_content=False, timeout=timeout, headers=headers
+                    )
                 else:
                     # Cannot generate the request from given parameters
                     msg = """Cannot prepare a request message for provided
@@ -245,12 +199,7 @@ class RESTClientObject:
             # For `GET`, `HEAD`
             else:
                 r = self.pool_manager.request(
-                    method,
-                    url,
-                    fields={},
-                    timeout=timeout,
-                    headers=headers,
-                    preload_content=False
+                    method, url, fields={}, timeout=timeout, headers=headers, preload_content=False
                 )
         except urllib3.exceptions.SSLError as e:
             msg = "\n".join([type(e).__name__, str(e)])

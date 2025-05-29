@@ -23,10 +23,12 @@ from typing import Any, ClassVar, Dict, List
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class GitCommitInfo(BaseModel):
     """
     GitCommitInfo
-    """ # noqa: E501
+    """  # noqa: E501
+
     hash: StrictStr
     message: StrictStr
     author: StrictStr
@@ -40,7 +42,6 @@ class GitCommitInfo(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -67,9 +68,11 @@ class GitCommitInfo(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -92,18 +95,18 @@ class GitCommitInfo(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "hash": obj.get("hash"),
-            "message": obj.get("message"),
-            "author": obj.get("author"),
-            "email": obj.get("email"),
-            "timestamp": obj.get("timestamp")
-        })
+        _obj = cls.model_validate(
+            {
+                "hash": obj.get("hash"),
+                "message": obj.get("message"),
+                "author": obj.get("author"),
+                "email": obj.get("email"),
+                "timestamp": obj.get("timestamp"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

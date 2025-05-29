@@ -24,10 +24,12 @@ from daytona_api_client.models.create_build_info import CreateBuildInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class BuildImage(BaseModel):
     """
     BuildImage
-    """ # noqa: E501
+    """  # noqa: E501
+
     name: StrictStr = Field(description="The name of the image to build")
     build_info: CreateBuildInfo = Field(description="Build information for the image", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
@@ -38,7 +40,6 @@ class BuildImage(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -65,9 +66,11 @@ class BuildImage(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -76,7 +79,7 @@ class BuildImage(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
-            _dict['buildInfo'] = self.build_info.to_dict()
+            _dict["buildInfo"] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -93,15 +96,15 @@ class BuildImage(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "name": obj.get("name"),
+                "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

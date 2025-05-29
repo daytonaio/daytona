@@ -24,10 +24,12 @@ from daytona_api_client.models.file_status import FileStatus
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class GitStatus(BaseModel):
     """
     GitStatus
-    """ # noqa: E501
+    """  # noqa: E501
+
     current_branch: StrictStr = Field(alias="currentBranch")
     file_status: List[FileStatus] = Field(alias="FileStatus[]")
     ahead: Optional[Union[StrictFloat, StrictInt]] = None
@@ -41,7 +43,6 @@ class GitStatus(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -68,9 +69,11 @@ class GitStatus(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -83,7 +86,7 @@ class GitStatus(BaseModel):
             for _item_file_status in self.file_status:
                 if _item_file_status:
                     _items.append(_item_file_status.to_dict())
-            _dict['FileStatus[]'] = _items
+            _dict["FileStatus[]"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -100,18 +103,20 @@ class GitStatus(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "currentBranch": obj.get("currentBranch"),
-            "FileStatus[]": [FileStatus.from_dict(_item) for _item in obj["FileStatus[]"]] if obj.get("FileStatus[]") is not None else None,
-            "ahead": obj.get("ahead"),
-            "behind": obj.get("behind"),
-            "branchPublished": obj.get("branchPublished")
-        })
+        _obj = cls.model_validate(
+            {
+                "currentBranch": obj.get("currentBranch"),
+                "FileStatus[]": [FileStatus.from_dict(_item) for _item in obj["FileStatus[]"]]
+                if obj.get("FileStatus[]") is not None
+                else None,
+                "ahead": obj.get("ahead"),
+                "behind": obj.get("behind"),
+                "branchPublished": obj.get("branchPublished"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

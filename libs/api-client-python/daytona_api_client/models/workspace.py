@@ -26,10 +26,12 @@ from daytona_api_client.models.workspace_volume import WorkspaceVolume
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class Workspace(BaseModel):
     """
     Workspace
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr = Field(description="The ID of the workspace")
     name: StrictStr = Field(description="The name of the workspace")
     organization_id: StrictStr = Field(description="The organization ID of the workspace", alias="organizationId")
@@ -42,24 +44,57 @@ class Workspace(BaseModel):
     info: Optional[WorkspaceInfo] = Field(default=None, description="Additional information about the workspace")
     cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The CPU quota for the workspace")
     gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU quota for the workspace")
-    memory: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The memory quota for the workspace")
+    memory: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="The memory quota for the workspace"
+    )
     disk: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk quota for the workspace")
     state: Optional[WorkspaceState] = Field(default=None, description="The state of the workspace")
-    error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the workspace", alias="errorReason")
-    snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
-    snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
-    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
-    volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes attached to the workspace")
+    error_reason: Optional[StrictStr] = Field(
+        default=None, description="The error reason of the workspace", alias="errorReason"
+    )
+    snapshot_state: Optional[StrictStr] = Field(
+        default=None, description="The state of the snapshot", alias="snapshotState"
+    )
+    snapshot_created_at: Optional[StrictStr] = Field(
+        default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt"
+    )
+    auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
+    )
+    volumes: Optional[List[WorkspaceVolume]] = Field(
+        default=None, description="Array of volumes attached to the workspace"
+    )
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "snapshotState", "snapshotCreatedAt", "autoStopInterval", "volumes"]
+    __properties: ClassVar[List[str]] = [
+        "id",
+        "name",
+        "organizationId",
+        "image",
+        "user",
+        "env",
+        "labels",
+        "public",
+        "target",
+        "info",
+        "cpu",
+        "gpu",
+        "memory",
+        "disk",
+        "state",
+        "errorReason",
+        "snapshotState",
+        "snapshotCreatedAt",
+        "autoStopInterval",
+        "volumes",
+    ]
 
-    @field_validator('snapshot_state')
+    @field_validator("snapshot_state")
     def snapshot_state_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(['None', 'Pending', 'InProgress', 'Completed', 'Error']):
+        if value not in set(["None", "Pending", "InProgress", "Completed", "Error"]):
             raise ValueError("must be one of enum values ('None', 'Pending', 'InProgress', 'Completed', 'Error')")
         return value
 
@@ -68,7 +103,6 @@ class Workspace(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -95,9 +129,11 @@ class Workspace(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -106,14 +142,14 @@ class Workspace(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of info
         if self.info:
-            _dict['info'] = self.info.to_dict()
+            _dict["info"] = self.info.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in volumes (list)
         _items = []
         if self.volumes:
             for _item_volumes in self.volumes:
                 if _item_volumes:
                     _items.append(_item_volumes.to_dict())
-            _dict['volumes'] = _items
+            _dict["volumes"] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -130,33 +166,35 @@ class Workspace(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name") if obj.get("name") is not None else '',
-            "organizationId": obj.get("organizationId"),
-            "image": obj.get("image"),
-            "user": obj.get("user"),
-            "env": obj.get("env"),
-            "labels": obj.get("labels"),
-            "public": obj.get("public"),
-            "target": obj.get("target"),
-            "info": WorkspaceInfo.from_dict(obj["info"]) if obj.get("info") is not None else None,
-            "cpu": obj.get("cpu"),
-            "gpu": obj.get("gpu"),
-            "memory": obj.get("memory"),
-            "disk": obj.get("disk"),
-            "state": obj.get("state"),
-            "errorReason": obj.get("errorReason"),
-            "snapshotState": obj.get("snapshotState"),
-            "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
-            "autoStopInterval": obj.get("autoStopInterval"),
-            "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "name": obj.get("name") if obj.get("name") is not None else "",
+                "organizationId": obj.get("organizationId"),
+                "image": obj.get("image"),
+                "user": obj.get("user"),
+                "env": obj.get("env"),
+                "labels": obj.get("labels"),
+                "public": obj.get("public"),
+                "target": obj.get("target"),
+                "info": WorkspaceInfo.from_dict(obj["info"]) if obj.get("info") is not None else None,
+                "cpu": obj.get("cpu"),
+                "gpu": obj.get("gpu"),
+                "memory": obj.get("memory"),
+                "disk": obj.get("disk"),
+                "state": obj.get("state"),
+                "errorReason": obj.get("errorReason"),
+                "snapshotState": obj.get("snapshotState"),
+                "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
+                "autoStopInterval": obj.get("autoStopInterval"),
+                "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]]
+                if obj.get("volumes") is not None
+                else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

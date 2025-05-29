@@ -417,7 +417,7 @@ resources = SandboxResources(
 ## SandboxInfo
 
 ```python
-class SandboxInfo(ApiSandboxInfo)
+class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo)
 ```
 
 Structured information about a Sandbox.
@@ -425,7 +425,7 @@ Structured information about a Sandbox.
 **Attributes**:
 
 - `id` _str_ - Unique identifier for the Sandbox.
-- `image` _str_ - Docker image used for the Sandbox.
+- `image` _Optional[str]_ - Docker image used for the Sandbox.
 - `user` _str_ - OS user running in the Sandbox.
 - `env` _Dict[str, str]_ - Environment variables set in the Sandbox.
 - `labels` _Dict[str, str]_ - Custom labels attached to the Sandbox.

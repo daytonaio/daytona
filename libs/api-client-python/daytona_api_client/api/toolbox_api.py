@@ -67,21 +67,19 @@ class ToolboxApi:
             api_client = ApiClient.get_default()
         self.api_client = api_client
 
-
     @validate_call
     def create_folder(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -120,7 +118,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_folder_serialize(
             workspace_id=workspace_id,
@@ -130,22 +128,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def create_folder_with_http_info(
@@ -153,14 +147,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -199,7 +192,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_folder_serialize(
             workspace_id=workspace_id,
@@ -209,22 +202,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def create_folder_without_preload_content(
@@ -232,14 +221,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         mode: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -278,7 +266,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_folder_serialize(
             workspace_id=workspace_id,
@@ -288,18 +276,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _create_folder_serialize(
         self,
@@ -312,51 +296,39 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         if mode is not None:
-            
-            _query_params.append(('mode', mode))
-            
+            _query_params.append(("mode", mode))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
-
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/folder',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/folder",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -366,25 +338,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def create_session(
         self,
         workspace_id: StrictStr,
         create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -421,7 +389,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_session_serialize(
             workspace_id=workspace_id,
@@ -430,36 +398,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def create_session_with_http_info(
         self,
         workspace_id: StrictStr,
         create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -496,7 +459,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_session_serialize(
             workspace_id=workspace_id,
@@ -505,36 +468,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def create_session_without_preload_content(
         self,
         workspace_id: StrictStr,
         create_session_request: CreateSessionRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -571,7 +529,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._create_session_serialize(
             workspace_id=workspace_id,
@@ -580,18 +538,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _create_session_serialize(
         self,
@@ -603,58 +557,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if create_session_request is not None:
             _body_params = create_session_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -664,25 +603,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def delete_file(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -719,7 +654,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_file_serialize(
             workspace_id=workspace_id,
@@ -728,36 +663,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def delete_file_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -794,7 +724,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_file_serialize(
             workspace_id=workspace_id,
@@ -803,36 +733,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def delete_file_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -869,7 +794,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_file_serialize(
             workspace_id=workspace_id,
@@ -878,18 +803,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _delete_file_serialize(
         self,
@@ -901,47 +822,36 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
-
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/toolbox/{workspaceId}/toolbox/files',
+            method="DELETE",
+            resource_path="/toolbox/{workspaceId}/toolbox/files",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -951,25 +861,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def delete_session(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1006,7 +912,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_session_serialize(
             workspace_id=workspace_id,
@@ -1015,36 +921,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def delete_session_with_http_info(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1081,7 +982,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_session_serialize(
             workspace_id=workspace_id,
@@ -1090,36 +991,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def delete_session_without_preload_content(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1156,7 +1052,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._delete_session_serialize(
             workspace_id=workspace_id,
@@ -1165,18 +1061,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _delete_session_serialize(
         self,
@@ -1188,45 +1080,35 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         if session_id is not None:
-            _path_params['sessionId'] = session_id
+            _path_params["sessionId"] = session_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
-
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session/{sessionId}',
+            method="DELETE",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1236,25 +1118,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def download_file(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1291,7 +1169,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._download_file_serialize(
             workspace_id=workspace_id,
@@ -1300,36 +1178,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytearray",
+            "200": "bytearray",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def download_file_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1366,7 +1239,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._download_file_serialize(
             workspace_id=workspace_id,
@@ -1375,36 +1248,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytearray",
+            "200": "bytearray",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def download_file_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1441,7 +1309,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._download_file_serialize(
             workspace_id=workspace_id,
@@ -1450,18 +1318,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "bytearray",
+            "200": "bytearray",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _download_file_serialize(
         self,
@@ -1473,54 +1337,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/download',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/download",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1530,25 +1380,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def execute_command(
         self,
         workspace_id: StrictStr,
         execute_request: ExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1585,7 +1431,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_command_serialize(
             workspace_id=workspace_id,
@@ -1594,36 +1440,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            "200": "ExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def execute_command_with_http_info(
         self,
         workspace_id: StrictStr,
         execute_request: ExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1660,7 +1501,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_command_serialize(
             workspace_id=workspace_id,
@@ -1669,36 +1510,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            "200": "ExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def execute_command_without_preload_content(
         self,
         workspace_id: StrictStr,
         execute_request: ExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1735,7 +1571,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_command_serialize(
             workspace_id=workspace_id,
@@ -1744,18 +1580,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ExecuteResponse",
+            "200": "ExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _execute_command_serialize(
         self,
@@ -1767,65 +1599,47 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if execute_request is not None:
             _body_params = execute_request
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/execute',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/execute",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1835,11 +1649,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def execute_session_command(
@@ -1847,14 +1658,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1893,7 +1703,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
             workspace_id=workspace_id,
@@ -1903,23 +1713,19 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionExecuteResponse",
-            '202': "SessionExecuteResponse",
+            "200": "SessionExecuteResponse",
+            "202": "SessionExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def execute_session_command_with_http_info(
@@ -1927,14 +1733,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -1973,7 +1778,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
             workspace_id=workspace_id,
@@ -1983,23 +1788,19 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionExecuteResponse",
-            '202': "SessionExecuteResponse",
+            "200": "SessionExecuteResponse",
+            "202": "SessionExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def execute_session_command_without_preload_content(
@@ -2007,14 +1808,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         session_execute_request: SessionExecuteRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2053,7 +1853,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._execute_session_command_serialize(
             workspace_id=workspace_id,
@@ -2063,19 +1863,15 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SessionExecuteResponse",
-            '202': "SessionExecuteResponse",
+            "200": "SessionExecuteResponse",
+            "202": "SessionExecuteResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _execute_session_command_serialize(
         self,
@@ -2088,67 +1884,49 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         if session_id is not None:
-            _path_params['sessionId'] = session_id
+            _path_params["sessionId"] = session_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if session_execute_request is not None:
             _body_params = session_execute_request
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/exec",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2158,11 +1936,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def find_in_files(
@@ -2170,14 +1945,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2216,7 +1990,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._find_in_files_serialize(
             workspace_id=workspace_id,
@@ -2226,22 +2000,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Match]",
+            "200": "List[Match]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def find_in_files_with_http_info(
@@ -2249,14 +2019,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2295,7 +2064,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._find_in_files_serialize(
             workspace_id=workspace_id,
@@ -2305,22 +2074,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Match]",
+            "200": "List[Match]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def find_in_files_without_preload_content(
@@ -2328,14 +2093,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2374,7 +2138,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._find_in_files_serialize(
             workspace_id=workspace_id,
@@ -2384,18 +2148,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Match]",
+            "200": "List[Match]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _find_in_files_serialize(
         self,
@@ -2408,58 +2168,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         if pattern is not None:
-            
-            _query_params.append(('pattern', pattern))
-            
+            _query_params.append(("pattern", pattern))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/find',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/find",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2469,25 +2214,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def get_file_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2524,7 +2265,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_file_info_serialize(
             workspace_id=workspace_id,
@@ -2533,36 +2274,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileInfo",
+            "200": "FileInfo",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def get_file_info_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2599,7 +2335,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_file_info_serialize(
             workspace_id=workspace_id,
@@ -2608,36 +2344,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileInfo",
+            "200": "FileInfo",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def get_file_info_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2674,7 +2405,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_file_info_serialize(
             workspace_id=workspace_id,
@@ -2683,18 +2414,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "FileInfo",
+            "200": "FileInfo",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _get_file_info_serialize(
         self,
@@ -2706,54 +2433,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/info',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/info",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2763,24 +2476,20 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def get_project_dir(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2814,7 +2523,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
             workspace_id=workspace_id,
@@ -2822,35 +2531,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProjectDirResponse",
+            "200": "ProjectDirResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def get_project_dir_with_http_info(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2884,7 +2588,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
             workspace_id=workspace_id,
@@ -2892,35 +2596,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProjectDirResponse",
+            "200": "ProjectDirResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def get_project_dir_without_preload_content(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -2954,7 +2653,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_project_dir_serialize(
             workspace_id=workspace_id,
@@ -2962,18 +2661,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProjectDirResponse",
+            "200": "ProjectDirResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _get_project_dir_serialize(
         self,
@@ -2984,50 +2679,37 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/project-dir',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/project-dir",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3037,25 +2719,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def get_session(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3092,7 +2770,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_serialize(
             workspace_id=workspace_id,
@@ -3101,36 +2779,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            "200": "Session",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def get_session_with_http_info(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3167,7 +2840,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_serialize(
             workspace_id=workspace_id,
@@ -3176,36 +2849,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            "200": "Session",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def get_session_without_preload_content(
         self,
         workspace_id: StrictStr,
         session_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3242,7 +2910,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_serialize(
             workspace_id=workspace_id,
@@ -3251,18 +2919,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Session",
+            "200": "Session",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _get_session_serialize(
         self,
@@ -3274,52 +2938,39 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         if session_id is not None:
-            _path_params['sessionId'] = session_id
+            _path_params["sessionId"] = session_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session/{sessionId}',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3329,11 +2980,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def get_session_command(
@@ -3341,14 +2989,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3387,7 +3034,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_serialize(
             workspace_id=workspace_id,
@@ -3397,22 +3044,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            "200": "Command",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def get_session_command_with_http_info(
@@ -3420,14 +3063,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3466,7 +3108,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_serialize(
             workspace_id=workspace_id,
@@ -3476,22 +3118,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            "200": "Command",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def get_session_command_without_preload_content(
@@ -3499,14 +3137,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3545,7 +3182,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_serialize(
             workspace_id=workspace_id,
@@ -3555,18 +3192,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Command",
+            "200": "Command",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _get_session_command_serialize(
         self,
@@ -3579,54 +3212,41 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         if session_id is not None:
-            _path_params['sessionId'] = session_id
+            _path_params["sessionId"] = session_id
         if command_id is not None:
-            _path_params['commandId'] = command_id
+            _path_params["commandId"] = command_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3636,11 +3256,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def get_session_command_logs(
@@ -3648,15 +3265,14 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         follow: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3697,7 +3313,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
             workspace_id=workspace_id,
@@ -3708,22 +3324,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "str",
+            "200": "str",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def get_session_command_logs_with_http_info(
@@ -3731,15 +3343,14 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         follow: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3780,7 +3391,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
             workspace_id=workspace_id,
@@ -3791,22 +3402,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "str",
+            "200": "str",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def get_session_command_logs_without_preload_content(
@@ -3814,15 +3421,14 @@ class ToolboxApi:
         workspace_id: StrictStr,
         session_id: StrictStr,
         command_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         follow: Optional[StrictBool] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -3863,7 +3469,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._get_session_command_logs_serialize(
             workspace_id=workspace_id,
@@ -3874,18 +3480,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "str",
+            "200": "str",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _get_session_command_logs_serialize(
         self,
@@ -3899,58 +3501,44 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         if session_id is not None:
-            _path_params['sessionId'] = session_id
+            _path_params["sessionId"] = session_id
         if command_id is not None:
-            _path_params['commandId'] = command_id
+            _path_params["commandId"] = command_id
         # process the query parameters
         if follow is not None:
-            
-            _query_params.append(('follow', follow))
-            
+            _query_params.append(("follow", follow))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'text/plain'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["text/plain"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session/{sessionId}/command/{commandId}/logs",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3960,25 +3548,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_add_files(
         self,
         workspace_id: StrictStr,
         git_add_request: GitAddRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4015,7 +3599,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_add_files_serialize(
             workspace_id=workspace_id,
@@ -4024,36 +3608,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_add_files_with_http_info(
         self,
         workspace_id: StrictStr,
         git_add_request: GitAddRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4090,7 +3669,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_add_files_serialize(
             workspace_id=workspace_id,
@@ -4099,36 +3678,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_add_files_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_add_request: GitAddRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4165,7 +3739,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_add_files_serialize(
             workspace_id=workspace_id,
@@ -4174,18 +3748,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_add_files_serialize(
         self,
@@ -4197,58 +3767,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_add_request is not None:
             _body_params = git_add_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/add',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/add",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4258,25 +3813,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_checkout_branch(
         self,
         workspace_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4313,7 +3864,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
             workspace_id=workspace_id,
@@ -4322,36 +3873,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_checkout_branch_with_http_info(
         self,
         workspace_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4388,7 +3934,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
             workspace_id=workspace_id,
@@ -4397,36 +3943,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_checkout_branch_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_checkout_request: GitCheckoutRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4463,7 +4004,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_checkout_branch_serialize(
             workspace_id=workspace_id,
@@ -4472,18 +4013,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_checkout_branch_serialize(
         self,
@@ -4495,58 +4032,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_checkout_request is not None:
             _body_params = git_checkout_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/checkout',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/checkout",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4556,25 +4078,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_clone_repository(
         self,
         workspace_id: StrictStr,
         git_clone_request: GitCloneRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4611,7 +4129,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
             workspace_id=workspace_id,
@@ -4620,36 +4138,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_clone_repository_with_http_info(
         self,
         workspace_id: StrictStr,
         git_clone_request: GitCloneRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4686,7 +4199,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
             workspace_id=workspace_id,
@@ -4695,36 +4208,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_clone_repository_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_clone_request: GitCloneRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4761,7 +4269,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_clone_repository_serialize(
             workspace_id=workspace_id,
@@ -4770,18 +4278,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_clone_repository_serialize(
         self,
@@ -4793,58 +4297,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_clone_request is not None:
             _body_params = git_clone_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/clone',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/clone",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4854,25 +4343,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_commit_changes(
         self,
         workspace_id: StrictStr,
         git_commit_request: GitCommitRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4909,7 +4394,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
             workspace_id=workspace_id,
@@ -4918,36 +4403,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitCommitResponse",
+            "200": "GitCommitResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_commit_changes_with_http_info(
         self,
         workspace_id: StrictStr,
         git_commit_request: GitCommitRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -4984,7 +4464,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
             workspace_id=workspace_id,
@@ -4993,36 +4473,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitCommitResponse",
+            "200": "GitCommitResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_commit_changes_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_commit_request: GitCommitRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5059,7 +4534,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_commit_changes_serialize(
             workspace_id=workspace_id,
@@ -5068,18 +4543,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitCommitResponse",
+            "200": "GitCommitResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_commit_changes_serialize(
         self,
@@ -5091,65 +4562,47 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_commit_request is not None:
             _body_params = git_commit_request
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/commit',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/commit",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5159,25 +4612,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_create_branch(
         self,
         workspace_id: StrictStr,
         git_branch_request: GitBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5214,7 +4663,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
             workspace_id=workspace_id,
@@ -5223,36 +4672,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_create_branch_with_http_info(
         self,
         workspace_id: StrictStr,
         git_branch_request: GitBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5289,7 +4733,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
             workspace_id=workspace_id,
@@ -5298,36 +4742,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_create_branch_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_branch_request: GitBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5364,7 +4803,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_create_branch_serialize(
             workspace_id=workspace_id,
@@ -5373,18 +4812,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_create_branch_serialize(
         self,
@@ -5396,58 +4831,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_branch_request is not None:
             _body_params = git_branch_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/branches',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5457,25 +4877,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_delete_branch(
         self,
         workspace_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5512,7 +4928,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
             workspace_id=workspace_id,
@@ -5521,36 +4937,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_delete_branch_with_http_info(
         self,
         workspace_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5587,7 +4998,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
             workspace_id=workspace_id,
@@ -5596,36 +5007,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_delete_branch_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_delete_branch_request: GitDeleteBranchRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5662,7 +5068,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_delete_branch_serialize(
             workspace_id=workspace_id,
@@ -5671,18 +5077,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_delete_branch_serialize(
         self,
@@ -5694,58 +5096,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_delete_branch_request is not None:
             _body_params = git_delete_branch_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/branches',
+            method="DELETE",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5755,25 +5142,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_get_history(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5810,7 +5193,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_history_serialize(
             workspace_id=workspace_id,
@@ -5819,36 +5202,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GitCommitInfo]",
+            "200": "List[GitCommitInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_get_history_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5885,7 +5263,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_history_serialize(
             workspace_id=workspace_id,
@@ -5894,36 +5272,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GitCommitInfo]",
+            "200": "List[GitCommitInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_get_history_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -5960,7 +5333,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_history_serialize(
             workspace_id=workspace_id,
@@ -5969,18 +5342,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[GitCommitInfo]",
+            "200": "List[GitCommitInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_get_history_serialize(
         self,
@@ -5992,54 +5361,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/history',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/history",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6049,25 +5404,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_get_status(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6104,7 +5455,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_status_serialize(
             workspace_id=workspace_id,
@@ -6113,36 +5464,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitStatus",
+            "200": "GitStatus",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_get_status_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6179,7 +5525,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_status_serialize(
             workspace_id=workspace_id,
@@ -6188,36 +5534,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitStatus",
+            "200": "GitStatus",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_get_status_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6254,7 +5595,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_get_status_serialize(
             workspace_id=workspace_id,
@@ -6263,18 +5604,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "GitStatus",
+            "200": "GitStatus",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_get_status_serialize(
         self,
@@ -6286,54 +5623,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/status',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/status",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6343,25 +5666,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_list_branches(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6398,7 +5717,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
             workspace_id=workspace_id,
@@ -6407,36 +5726,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListBranchResponse",
+            "200": "ListBranchResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_list_branches_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6473,7 +5787,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
             workspace_id=workspace_id,
@@ -6482,36 +5796,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListBranchResponse",
+            "200": "ListBranchResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_list_branches_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6548,7 +5857,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_list_branches_serialize(
             workspace_id=workspace_id,
@@ -6557,18 +5866,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ListBranchResponse",
+            "200": "ListBranchResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_list_branches_serialize(
         self,
@@ -6580,54 +5885,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/branches',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/branches",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6637,25 +5928,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_pull_changes(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6692,7 +5979,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
             workspace_id=workspace_id,
@@ -6701,36 +5988,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_pull_changes_with_http_info(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6767,7 +6049,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
             workspace_id=workspace_id,
@@ -6776,36 +6058,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_pull_changes_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6842,7 +6119,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_pull_changes_serialize(
             workspace_id=workspace_id,
@@ -6851,18 +6128,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_pull_changes_serialize(
         self,
@@ -6874,58 +6147,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_repo_request is not None:
             _body_params = git_repo_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/pull',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/pull",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6935,25 +6193,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def git_push_changes(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -6990,7 +6244,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
             workspace_id=workspace_id,
@@ -6999,36 +6253,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def git_push_changes_with_http_info(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7065,7 +6314,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
             workspace_id=workspace_id,
@@ -7074,36 +6323,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def git_push_changes_without_preload_content(
         self,
         workspace_id: StrictStr,
         git_repo_request: GitRepoRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7140,7 +6384,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._git_push_changes_serialize(
             workspace_id=workspace_id,
@@ -7149,18 +6393,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _git_push_changes_serialize(
         self,
@@ -7172,58 +6412,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if git_repo_request is not None:
             _body_params = git_repo_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/git/push',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/git/push",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7233,25 +6458,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def list_files(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         path: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7287,7 +6508,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_files_serialize(
             workspace_id=workspace_id,
@@ -7296,36 +6517,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[FileInfo]",
+            "200": "List[FileInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def list_files_with_http_info(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         path: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7361,7 +6577,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_files_serialize(
             workspace_id=workspace_id,
@@ -7370,36 +6586,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[FileInfo]",
+            "200": "List[FileInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def list_files_without_preload_content(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         path: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7435,7 +6646,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_files_serialize(
             workspace_id=workspace_id,
@@ -7444,18 +6655,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[FileInfo]",
+            "200": "List[FileInfo]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _list_files_serialize(
         self,
@@ -7467,54 +6674,40 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/files',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/files",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7524,24 +6717,20 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def list_sessions(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7576,7 +6765,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_sessions_serialize(
             workspace_id=workspace_id,
@@ -7584,35 +6773,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            "200": "List[Session]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def list_sessions_with_http_info(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7647,7 +6831,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_sessions_serialize(
             workspace_id=workspace_id,
@@ -7655,35 +6839,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            "200": "List[Session]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def list_sessions_without_preload_content(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7718,7 +6897,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._list_sessions_serialize(
             workspace_id=workspace_id,
@@ -7726,18 +6905,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Session]",
+            "200": "List[Session]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _list_sessions_serialize(
         self,
@@ -7748,50 +6923,37 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/process/session',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/process/session",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -7801,25 +6963,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_completions(
         self,
         workspace_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7856,7 +7014,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
             workspace_id=workspace_id,
@@ -7865,36 +7023,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CompletionList",
+            "200": "CompletionList",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def lsp_completions_with_http_info(
         self,
         workspace_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -7931,7 +7084,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
             workspace_id=workspace_id,
@@ -7940,36 +7093,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CompletionList",
+            "200": "CompletionList",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def lsp_completions_without_preload_content(
         self,
         workspace_id: StrictStr,
         lsp_completion_params: LspCompletionParams,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8006,7 +7154,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_completions_serialize(
             workspace_id=workspace_id,
@@ -8015,18 +7163,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "CompletionList",
+            "200": "CompletionList",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_completions_serialize(
         self,
@@ -8038,65 +7182,47 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if lsp_completion_params is not None:
             _body_params = lsp_completion_params
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/completions',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/completions",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -8106,25 +7232,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_did_close(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8161,7 +7283,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
             workspace_id=workspace_id,
@@ -8170,36 +7292,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def lsp_did_close_with_http_info(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8236,7 +7353,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
             workspace_id=workspace_id,
@@ -8245,36 +7362,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def lsp_did_close_without_preload_content(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8311,7 +7423,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_close_serialize(
             workspace_id=workspace_id,
@@ -8320,18 +7432,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_did_close_serialize(
         self,
@@ -8343,58 +7451,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if lsp_document_request is not None:
             _body_params = lsp_document_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/did-close',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/did-close",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -8404,25 +7497,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_did_open(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8459,7 +7548,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
             workspace_id=workspace_id,
@@ -8468,36 +7557,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def lsp_did_open_with_http_info(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8534,7 +7618,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
             workspace_id=workspace_id,
@@ -8543,36 +7627,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def lsp_did_open_without_preload_content(
         self,
         workspace_id: StrictStr,
         lsp_document_request: LspDocumentRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8609,7 +7688,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_did_open_serialize(
             workspace_id=workspace_id,
@@ -8618,18 +7697,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_did_open_serialize(
         self,
@@ -8641,58 +7716,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if lsp_document_request is not None:
             _body_params = lsp_document_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/did-open',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/did-open",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -8702,11 +7762,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_document_symbols(
@@ -8715,14 +7772,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8763,7 +7819,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
             workspace_id=workspace_id,
@@ -8774,22 +7830,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def lsp_document_symbols_with_http_info(
@@ -8798,14 +7850,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8846,7 +7897,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
             workspace_id=workspace_id,
@@ -8857,22 +7908,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def lsp_document_symbols_without_preload_content(
@@ -8881,14 +7928,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         uri: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -8929,7 +7975,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_document_symbols_serialize(
             workspace_id=workspace_id,
@@ -8940,18 +7986,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_document_symbols_serialize(
         self,
@@ -8965,62 +8007,46 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if language_id is not None:
-            
-            _query_params.append(('languageId', language_id))
-            
+            _query_params.append(("languageId", language_id))
+
         if path_to_project is not None:
-            
-            _query_params.append(('pathToProject', path_to_project))
-            
+            _query_params.append(("pathToProject", path_to_project))
+
         if uri is not None:
-            
-            _query_params.append(('uri', uri))
-            
+            _query_params.append(("uri", uri))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/document-symbols',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/document-symbols",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9030,25 +8056,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_start(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9085,7 +8107,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_start_serialize(
             workspace_id=workspace_id,
@@ -9094,36 +8116,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def lsp_start_with_http_info(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9160,7 +8177,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_start_serialize(
             workspace_id=workspace_id,
@@ -9169,36 +8186,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def lsp_start_without_preload_content(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9235,7 +8247,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_start_serialize(
             workspace_id=workspace_id,
@@ -9244,18 +8256,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_start_serialize(
         self,
@@ -9267,58 +8275,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if lsp_server_request is not None:
             _body_params = lsp_server_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/start',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/start",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9328,25 +8321,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_stop(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9383,7 +8372,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_stop_serialize(
             workspace_id=workspace_id,
@@ -9392,36 +8381,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def lsp_stop_with_http_info(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9458,7 +8442,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_stop_serialize(
             workspace_id=workspace_id,
@@ -9467,36 +8451,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def lsp_stop_without_preload_content(
         self,
         workspace_id: StrictStr,
         lsp_server_request: LspServerRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9533,7 +8512,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_stop_serialize(
             workspace_id=workspace_id,
@@ -9542,18 +8521,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_stop_serialize(
         self,
@@ -9565,58 +8540,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if lsp_server_request is not None:
             _body_params = lsp_server_request
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/stop',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/stop",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9626,11 +8586,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def lsp_workspace_symbols(
@@ -9639,14 +8596,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9687,7 +8643,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_workspace_symbols_serialize(
             workspace_id=workspace_id,
@@ -9698,22 +8654,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def lsp_workspace_symbols_with_http_info(
@@ -9722,14 +8674,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9770,7 +8721,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_workspace_symbols_serialize(
             workspace_id=workspace_id,
@@ -9781,22 +8732,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def lsp_workspace_symbols_without_preload_content(
@@ -9805,14 +8752,13 @@ class ToolboxApi:
         language_id: StrictStr,
         path_to_project: StrictStr,
         query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -9853,7 +8799,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._lsp_workspace_symbols_serialize(
             workspace_id=workspace_id,
@@ -9864,18 +8810,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
+            "200": "List[LspSymbol]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _lsp_workspace_symbols_serialize(
         self,
@@ -9889,62 +8831,46 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if language_id is not None:
-            
-            _query_params.append(('languageId', language_id))
-            
+            _query_params.append(("languageId", language_id))
+
         if path_to_project is not None:
-            
-            _query_params.append(('pathToProject', path_to_project))
-            
+            _query_params.append(("pathToProject", path_to_project))
+
         if query is not None:
-            
-            _query_params.append(('query', query))
-            
+            _query_params.append(("query", query))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/lsp/workspace-symbols',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/lsp/workspace-symbols",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -9954,11 +8880,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def move_file(
@@ -9966,14 +8889,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10012,7 +8934,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._move_file_serialize(
             workspace_id=workspace_id,
@@ -10022,22 +8944,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def move_file_with_http_info(
@@ -10045,14 +8963,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10091,7 +9008,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._move_file_serialize(
             workspace_id=workspace_id,
@@ -10101,22 +9018,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def move_file_without_preload_content(
@@ -10124,14 +9037,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         source: StrictStr,
         destination: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10170,7 +9082,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._move_file_serialize(
             workspace_id=workspace_id,
@@ -10180,18 +9092,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _move_file_serialize(
         self,
@@ -10204,51 +9112,39 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if source is not None:
-            
-            _query_params.append(('source', source))
-            
+            _query_params.append(("source", source))
+
         if destination is not None:
-            
-            _query_params.append(('destination', destination))
-            
+            _query_params.append(("destination", destination))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
-
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/move',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/move",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -10258,25 +9154,21 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def replace_in_files(
         self,
         workspace_id: StrictStr,
         replace_request: ReplaceRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10313,7 +9205,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
             workspace_id=workspace_id,
@@ -10322,36 +9214,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ReplaceResult]",
+            "200": "List[ReplaceResult]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def replace_in_files_with_http_info(
         self,
         workspace_id: StrictStr,
         replace_request: ReplaceRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10388,7 +9275,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
             workspace_id=workspace_id,
@@ -10397,36 +9284,31 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ReplaceResult]",
+            "200": "List[ReplaceResult]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def replace_in_files_without_preload_content(
         self,
         workspace_id: StrictStr,
         replace_request: ReplaceRequest,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10463,7 +9345,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._replace_in_files_serialize(
             workspace_id=workspace_id,
@@ -10472,18 +9354,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[ReplaceResult]",
+            "200": "List[ReplaceResult]",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _replace_in_files_serialize(
         self,
@@ -10495,65 +9373,47 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
         if replace_request is not None:
             _body_params = replace_request
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["application/json"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/replace',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/replace",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -10563,11 +9423,8 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def search_files(
@@ -10575,14 +9432,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10621,7 +9477,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._search_files_serialize(
             workspace_id=workspace_id,
@@ -10631,22 +9487,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchFilesResponse",
+            "200": "SearchFilesResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
-
 
     @validate_call
     def search_files_with_http_info(
@@ -10654,14 +9506,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10700,7 +9551,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._search_files_serialize(
             workspace_id=workspace_id,
@@ -10710,22 +9561,18 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchFilesResponse",
+            "200": "SearchFilesResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
-
 
     @validate_call
     def search_files_without_preload_content(
@@ -10733,14 +9580,13 @@ class ToolboxApi:
         workspace_id: StrictStr,
         path: StrictStr,
         pattern: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10779,7 +9625,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._search_files_serialize(
             workspace_id=workspace_id,
@@ -10789,18 +9635,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SearchFilesResponse",
+            "200": "SearchFilesResponse",
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _search_files_serialize(
         self,
@@ -10813,58 +9655,43 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         if pattern is not None:
-            
-            _query_params.append(('pattern', pattern))
-            
+            _query_params.append(("pattern", pattern))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(["application/json"])
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/search',
+            method="GET",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/search",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -10874,28 +9701,24 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def set_file_permissions(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         owner: Optional[StrictStr] = None,
         group: Optional[StrictStr] = None,
         mode: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -10938,7 +9761,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
             workspace_id=workspace_id,
@@ -10950,39 +9773,34 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def set_file_permissions_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         owner: Optional[StrictStr] = None,
         group: Optional[StrictStr] = None,
         mode: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11025,7 +9843,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
             workspace_id=workspace_id,
@@ -11037,39 +9855,34 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def set_file_permissions_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         owner: Optional[StrictStr] = None,
         group: Optional[StrictStr] = None,
         mode: Optional[StrictStr] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11112,7 +9925,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._set_file_permissions_serialize(
             workspace_id=workspace_id,
@@ -11124,18 +9937,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _set_file_permissions_serialize(
         self,
@@ -11150,59 +9959,45 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         if owner is not None:
-            
-            _query_params.append(('owner', owner))
-            
+            _query_params.append(("owner", owner))
+
         if group is not None:
-            
-            _query_params.append(('group', group))
-            
+            _query_params.append(("group", group))
+
         if mode is not None:
-            
-            _query_params.append(('mode', mode))
-            
+            _query_params.append(("mode", mode))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
-
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/permissions',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/permissions",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -11212,26 +10007,22 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def upload_file(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         file: Optional[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11270,7 +10061,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
         warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
@@ -11281,37 +10072,32 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def upload_file_with_http_info(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         file: Optional[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11350,7 +10136,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
         warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
@@ -11361,37 +10147,32 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def upload_file_without_preload_content(
         self,
         workspace_id: StrictStr,
         path: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         file: Optional[Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]]] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11430,7 +10211,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
         warnings.warn("POST /toolbox/{workspaceId}/toolbox/files/upload is deprecated.", DeprecationWarning)
 
         _param = self._upload_file_serialize(
@@ -11441,18 +10222,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _upload_file_serialize(
         self,
@@ -11465,62 +10242,46 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         if path is not None:
-            
-            _query_params.append(('path', path))
-            
+            _query_params.append(("path", path))
+
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         if file is not None:
-            _files['file'] = file
+            _files["file"] = file
         # process the body parameter
-
-
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'multipart/form-data'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["multipart/form-data"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/upload',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/upload",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -11530,24 +10291,20 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
-
 
     @validate_call
     def upload_files(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11582,7 +10339,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._upload_files_serialize(
             workspace_id=workspace_id,
@@ -11590,35 +10347,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         ).data
 
-
     @validate_call
     def upload_files_with_http_info(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11653,7 +10405,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._upload_files_serialize(
             workspace_id=workspace_id,
@@ -11661,35 +10413,30 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
         return self.api_client.response_deserialize(
             response_data=response_data,
             response_types_map=_response_types_map,
         )
 
-
     @validate_call
     def upload_files_without_preload_content(
         self,
         workspace_id: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        x_daytona_organization_id: Annotated[
+            Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
+        ] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
+            Tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]],
         ] = None,
         _request_auth: Optional[Dict[StrictStr, Any]] = None,
         _content_type: Optional[StrictStr] = None,
@@ -11724,7 +10471,7 @@ class ToolboxApi:
                             in the spec for a single request.
         :type _host_index: int, optional
         :return: Returns the result object.
-        """ # noqa: E501
+        """  # noqa: E501
 
         _param = self._upload_files_serialize(
             workspace_id=workspace_id,
@@ -11732,18 +10479,14 @@ class ToolboxApi:
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
-            _host_index=_host_index
+            _host_index=_host_index,
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': None,
+            "200": None,
         }
-        response_data = self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
+        response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
-
 
     def _upload_files_serialize(
         self,
@@ -11754,56 +10497,41 @@ class ToolboxApi:
         _headers,
         _host_index,
     ) -> RequestSerialized:
-
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-        }
+        _collection_formats: Dict[str, str] = {}
 
         _path_params: Dict[str, str] = {}
         _query_params: List[Tuple[str, str]] = []
         _header_params: Dict[str, Optional[str]] = _headers or {}
         _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
+        _files: Dict[str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]] = {}
         _body_params: Optional[bytes] = None
 
         # process the path parameters
         if workspace_id is not None:
-            _path_params['workspaceId'] = workspace_id
+            _path_params["workspaceId"] = workspace_id
         # process the query parameters
         # process the header parameters
         if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+            _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
 
-
-
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'multipart/form-data'
-                    ]
-                )
-            )
+            _default_content_type = self.api_client.select_header_content_type(["multipart/form-data"])
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
+        _auth_settings: List[str] = ["bearer", "oauth2"]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/toolbox/{workspaceId}/toolbox/files/bulk-upload',
+            method="POST",
+            resource_path="/toolbox/{workspaceId}/toolbox/files/bulk-upload",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -11813,7 +10541,5 @@ class ToolboxApi:
             auth_settings=_auth_settings,
             collection_formats=_collection_formats,
             _host=_host,
-            _request_auth=_request_auth
+            _request_auth=_request_auth,
         )
-
-
