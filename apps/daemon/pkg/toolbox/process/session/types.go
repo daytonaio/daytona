@@ -4,6 +4,7 @@
 package session
 
 import (
+	"context"
 	"io"
 	"os/exec"
 	"path/filepath"
@@ -35,6 +36,9 @@ type session struct {
 	cmd         *exec.Cmd
 	stdinWriter io.Writer
 	commands    map[string]*Command
+	ctx         context.Context
+	cancel      context.CancelFunc
+	deleted     bool
 }
 
 func (s *session) Dir(configDir string) string {
@@ -47,6 +51,6 @@ type Command struct {
 	ExitCode *int   `json:"exitCode,omitempty" validate:"optional"`
 } // @name Command
 
-func (c *Command) LogFilePath(sessionDir string) string {
-	return filepath.Join(sessionDir, c.Id, "output.log")
+func (c *Command) LogFilePath(sessionDir string) (string, string) {
+	return filepath.Join(sessionDir, c.Id, "output.log"), filepath.Join(sessionDir, c.Id, "exit_code")
 }
