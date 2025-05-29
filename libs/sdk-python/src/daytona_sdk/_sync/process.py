@@ -309,13 +309,13 @@ class Process:
             session_id (str): Unique identifier of the session to use.
             req (SessionExecuteRequest): Command execution request containing:
                 - command: The command to execute
-                - run_async: Whether to execute
+                - run_async: Whether to execute asynchronously
 
         Returns:
             SessionExecuteResponse: Command execution results containing:
                 - cmd_id: Unique identifier for the executed command
-                - output: Command output
-                - exit_code: Command exit status
+                - output: Command output (if synchronous execution)
+                - exit_code: Command exit status (if synchronous execution)
 
         Example:
             ```python

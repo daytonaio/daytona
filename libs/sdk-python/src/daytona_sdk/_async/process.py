@@ -314,8 +314,8 @@ class AsyncProcess:
         Returns:
             SessionExecuteResponse: Command execution results containing:
                 - cmd_id: Unique identifier for the executed command
-                - output: Command output
-                - exit_code: Command exit status
+                - output: Command output (if synchronous execution)
+                - exit_code: Command exit status (if synchronous execution)
 
         Example:
             ```python

@@ -142,9 +142,21 @@ def pre_filter(src: Path, dst: Path) -> dict:
 
 
 def apply_replacements(text: str, replacements: list) -> str:
-    for pattern, repl in replacements:
-        text = pattern.sub(repl, text)
-    return text
+    lines = text.splitlines(keepends=True)
+    processed_lines = []
+
+    for line in lines:
+        # Skip applying replacements to lines containing "run_async"
+        if "run_async" in line:
+            processed_lines.append(line)
+        else:
+            # Apply all replacements to this line
+            processed_line = line
+            for pattern, repl in replacements:
+                processed_line = pattern.sub(repl, processed_line)
+            processed_lines.append(processed_line)
+
+    return "".join(processed_lines)
 
 
 def restore_blocks(path: Path, block_map: dict):
