@@ -48,6 +48,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
+import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from './TableEmptyState'
 
@@ -84,16 +85,16 @@ export function WorkspaceTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'state',
-      desc: false,
-    },
-    {
-      id: 'lastEvent',
-      desc: true,
-    },
-  ])
+  const initialSorting: SortingState = [
+    { id: 'state', desc: false },
+    { id: 'lastEvent', desc: true },
+  ]
+
+  // Get persisted sorting (if any)
+  const [persistedSorting, setPersistedSorting] = useTableSorting('workspaces')
+
+  // Use initial sorting only if no persisted sorting exists
+  const [sorting, setSorting] = useState<SortingState>(persistedSorting.length > 0 ? persistedSorting : initialSorting)
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {

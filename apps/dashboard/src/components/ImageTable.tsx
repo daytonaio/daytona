@@ -26,6 +26,7 @@ import {
 import { Pagination } from './Pagination'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
+import { useTableSorting } from '@/hooks/useTableSorting'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
 
@@ -65,7 +66,7 @@ export function ImageTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('images')
   const columns = useMemo(
     () => getColumns({ onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted }),
     [onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted],
