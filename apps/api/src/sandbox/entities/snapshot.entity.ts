@@ -71,6 +71,9 @@ export class Snapshot {
   @Column({ type: 'int', default: 3 })
   disk: number
 
+  @Column({ default: false })
+  hideFromUsers: boolean
+
   @OneToMany(() => SnapshotRunner, (runner) => runner.snapshotRef)
   runners: SnapshotRunner[]
 
