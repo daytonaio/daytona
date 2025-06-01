@@ -19,7 +19,6 @@ go.sum
 model_account_provider.go
 model_api_key_list.go
 model_api_key_response.go
-model_build_snapshot.go
 model_command.go
 model_completion_context.go
 model_completion_item.go

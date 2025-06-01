@@ -53,29 +53,26 @@ export class SnapshotService {
   }
 
   private validateSnapshotName(name: string): string | null {
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
+    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[.:_-][a-zA-Z0-9]+)*$/
 
     if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
     }
 
     return null
   }
 
-  async createSnapshot(
-    organization: Organization,
-    createSnapshotDto: CreateSnapshotDto,
-    buildInfo?: CreateBuildInfoDto,
-    general = false,
-  ) {
-    const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-    if (imageValidationError) {
-      throw new BadRequestException(imageValidationError)
-    }
-
+  async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
     if (nameValidationError) {
       throw new BadRequestException(nameValidationError)
+    }
+
+    if (createSnapshotDto.imageName) {
+      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+      if (imageValidationError) {
+        throw new BadRequestException(imageValidationError)
+      }
     }
 
     // check if the organization has reached the snapshot quota
@@ -98,12 +95,15 @@ export class SnapshotService {
       const snapshot = this.snapshotRepository.create({
         organizationId: organization.id,
         ...createSnapshotDto,
-        state: buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
         general,
       })
 
-      if (buildInfo) {
-        const buildSnapshotRef = generateBuildSnapshotRef(buildInfo.dockerfileContent, buildInfo.contextHashes)
+      if (createSnapshotDto.buildInfo) {
+        const buildSnapshotRef = generateBuildSnapshotRef(
+          createSnapshotDto.buildInfo.dockerfileContent,
+          createSnapshotDto.buildInfo.contextHashes,
+        )
 
         // Check if buildInfo with the same snapshotRef already exists
         const existingBuildInfo = await this.buildInfoRepository.findOne({
@@ -114,7 +114,7 @@ export class SnapshotService {
           snapshot.buildInfo = existingBuildInfo
         } else {
           const buildInfoEntity = this.buildInfoRepository.create({
-            ...buildInfo,
+            ...createSnapshotDto.buildInfo,
           })
           await this.buildInfoRepository.save(buildInfoEntity)
           snapshot.buildInfo = buildInfoEntity
@@ -167,7 +167,7 @@ export class SnapshotService {
 
     const [items, total] = await this.snapshotRepository.findAndCount({
       // Retrieve all snapshots belonging to the organization as well as all general snapshots
-      where: [{ organizationId }, { general: true }],
+      where: [{ organizationId }, { general: true, hideFromUsers: false }],
       order: {
         general: 'ASC', // Sort general snapshots last
         lastUsedAt: {
@@ -235,21 +235,21 @@ export class SnapshotService {
 
   private async validateOrganizationMaxQuotas(
     organization: Organization,
-    cpu: number,
-    memory: number,
-    disk: number,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
   ): Promise<void> {
-    if (cpu > organization.maxCpuPerSandbox) {
+    if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
       )
     }
-    if (memory > organization.maxMemoryPerSandbox) {
+    if (memory && memory > organization.maxMemoryPerSandbox) {
       throw new ForbiddenException(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
       )
     }
-    if (disk > organization.maxDiskPerSandbox) {
+    if (disk && disk > organization.maxDiskPerSandbox) {
       throw new ForbiddenException(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
       )

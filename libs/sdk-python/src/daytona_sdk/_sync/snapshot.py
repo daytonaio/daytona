@@ -47,11 +47,9 @@ class SnapshotService:
                 print(f"{snapshot.name} ({snapshot.image_name})")
             ```
         """
-        response = self.__snapshots_api.get_all_snapshots(
-            limit=SNAPSHOTS_FETCH_LIMIT)
+        response = self.__snapshots_api.get_all_snapshots(limit=SNAPSHOTS_FETCH_LIMIT)
         if response.total > SNAPSHOTS_FETCH_LIMIT:
-            response = self.__snapshots_api.get_all_snapshots(
-                limit=response.total)
+            response = self.__snapshots_api.get_all_snapshots(limit=response.total)
         return [Snapshot.from_dto(snapshot) for snapshot in response.items]
 
     def delete(self, snapshot: Snapshot) -> None:
@@ -90,8 +88,7 @@ class SnapshotService:
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Failed to create snapshot within {timeout} seconds timeout period.")
+        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
     )
     def create(
         self,
@@ -123,8 +120,7 @@ class SnapshotService:
             create_snapshot_req.image_name = params.image
             create_snapshot_req.entrypoint = params.entrypoint
         else:
-            context_hashes = SnapshotService.process_image_context(
-                self.__object_storage_api, params.image)
+            context_hashes = SnapshotService.process_image_context(self.__object_storage_api, params.image)
             create_snapshot_req.build_info = CreateBuildInfo(
                 context_hashes=context_hashes,
                 dockerfile_content=(
@@ -140,8 +136,7 @@ class SnapshotService:
             create_snapshot_req.memory = params.resources.memory
             create_snapshot_req.disk = params.resources.disk
 
-        created_snapshot = self.__snapshots_api.create_snapshot(
-            create_snapshot_req)
+        created_snapshot = self.__snapshots_api.create_snapshot(create_snapshot_req)
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR]
 
@@ -157,8 +152,7 @@ class SnapshotService:
             )
 
             def should_terminate():
-                latest_snapshot = self.__snapshots_api.get_snapshot(
-                    created_snapshot.id)
+                latest_snapshot = self.__snapshots_api.get_snapshot(created_snapshot.id)
                 return latest_snapshot.state in terminal_states
 
             asyncio.run(
@@ -172,8 +166,7 @@ class SnapshotService:
 
         thread_started = False
         if on_logs:
-            on_logs(
-                f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
+            on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
             thread = threading.Thread(target=start_log_streaming)
             if created_snapshot.state != SnapshotState.BUILD_PENDING:
                 thread.start()
@@ -185,18 +178,15 @@ class SnapshotService:
                 if created_snapshot.state != SnapshotState.BUILD_PENDING and not thread_started:
                     thread.start()
                     thread_started = True
-                on_logs(
-                    f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
+                on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state
             time.sleep(1)
-            created_snapshot = self.__snapshots_api.get_snapshot(
-                created_snapshot.id)
+            created_snapshot = self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
             thread.join()
             if created_snapshot.state == SnapshotState.ACTIVE:
-                on_logs(
-                    f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
+                on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
         if created_snapshot.state == SnapshotState.ERROR:
             raise DaytonaError(

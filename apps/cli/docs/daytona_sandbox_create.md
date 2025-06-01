@@ -21,6 +21,7 @@ daytona sandbox create [flags]
   -l, --label stringArray     Labels (format: KEY=VALUE)
       --memory int32          Memory allocated to the sandbox in MB
       --public                Make sandbox publicly accessible
+      --snapshot string       Snapshot to use for the sandbox
       --target string         Target region (eu, us)
       --user string           User associated with the sandbox
   -v, --volume stringArray    Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)

@@ -20,8 +20,8 @@ export class SnapshotDto {
   @ApiProperty()
   name: string
 
-  @ApiProperty()
-  imageName: string
+  @ApiPropertyOptional()
+  imageName?: string
 
   @ApiProperty()
   enabled: boolean

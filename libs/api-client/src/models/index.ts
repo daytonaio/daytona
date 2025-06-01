@@ -1,7 +1,6 @@
 export * from './account-provider'
 export * from './api-key-list'
 export * from './api-key-response'
-export * from './build-snapshot'
 export * from './command'
 export * from './completion-context'
 export * from './completion-item'

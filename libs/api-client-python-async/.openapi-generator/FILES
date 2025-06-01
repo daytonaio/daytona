@@ -21,7 +21,6 @@ daytona_api_client_async/models/__init__.py
 daytona_api_client_async/models/account_provider.py
 daytona_api_client_async/models/api_key_list.py
 daytona_api_client_async/models/api_key_response.py
-daytona_api_client_async/models/build_snapshot.py
 daytona_api_client_async/models/command.py
 daytona_api_client_async/models/completion_context.py
 daytona_api_client_async/models/completion_item.py

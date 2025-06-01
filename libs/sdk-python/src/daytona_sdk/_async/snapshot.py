@@ -84,8 +84,7 @@ class AsyncSnapshotService:
 
     @intercept_errors(message_prefix="Failed to create snapshot: ")
     @with_timeout(
-        error_message=lambda self, timeout: (
-            f"Failed to create snapshot within {timeout} seconds timeout period.")
+        error_message=lambda self, timeout: (f"Failed to create snapshot within {timeout} seconds timeout period.")
     )
     async def create(
         self,
@@ -163,8 +162,7 @@ class AsyncSnapshotService:
 
         thread_started = False
         if on_logs:
-            on_logs(
-                f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
+            on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
             thread = threading.Thread(target=start_log_streaming)
             if created_snapshot.state != SnapshotState.BUILD_PENDING:
                 thread.start()
@@ -176,8 +174,7 @@ class AsyncSnapshotService:
                 if created_snapshot.state != SnapshotState.BUILD_PENDING and not thread_started:
                     thread.start()
                     thread_started = True
-                on_logs(
-                    f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
+                on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state
             time.sleep(1)
             created_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
@@ -185,8 +182,7 @@ class AsyncSnapshotService:
         if on_logs:
             await asyncio.to_thread(thread.join)
             if created_snapshot.state == SnapshotState.ACTIVE:
-                on_logs(
-                    f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
+                on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
         if created_snapshot.state == SnapshotState.ERROR:
             raise DaytonaError(
