@@ -163,6 +163,22 @@ type WorkspaceAPI interface {
 	ReplaceLabelsWorkspaceDeprecatedExecute(r WorkspaceAPIReplaceLabelsWorkspaceDeprecatedRequest) (*SandboxLabels, *http.Response, error)
 
 	/*
+		SetAutoArchiveIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-archive interval
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+		@return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
+
+		Deprecated
+	*/
+	SetAutoArchiveIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
+
+	// SetAutoArchiveIntervalWorkspaceDeprecatedExecute executes the request
+	// Deprecated
+	SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) (*http.Response, error)
+
+	/*
 		SetAutostopIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-stop interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -450,12 +466,12 @@ func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r Workspace
 type WorkspaceAPICreateWorkspaceDeprecatedRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
-	createSandbox          *CreateSandbox
+	createWorkspace        *CreateWorkspace
 	xDaytonaOrganizationID *string
 }
 
-func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) CreateSandbox(createSandbox CreateSandbox) WorkspaceAPICreateWorkspaceDeprecatedRequest {
-	r.createSandbox = &createSandbox
+func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) CreateWorkspace(createWorkspace CreateWorkspace) WorkspaceAPICreateWorkspaceDeprecatedRequest {
+	r.createWorkspace = &createWorkspace
 	return r
 }
 
@@ -507,8 +523,8 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICre
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.createSandbox == nil {
-		return localVarReturnValue, nil, reportError("createSandbox is required and must be specified")
+	if r.createWorkspace == nil {
+		return localVarReturnValue, nil, reportError("createWorkspace is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -532,7 +548,7 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICre
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	// body params
-	localVarPostBody = r.createSandbox
+	localVarPostBody = r.createWorkspace
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -1299,6 +1315,113 @@ func (a *WorkspaceAPIService) ReplaceLabelsWorkspaceDeprecatedExecute(r Workspac
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest struct {
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	interval               float32
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r)
+}
+
+/*
+SetAutoArchiveIntervalWorkspaceDeprecated [DEPRECATED] Set workspace auto-archive interval
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+	@return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest
+
+Deprecated
+*/
+func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecated(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest {
+	return WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+		interval:    interval,
+	}
+}
+
+// Execute executes the request
+// Deprecated
+func (a *WorkspaceAPIService) SetAutoArchiveIntervalWorkspaceDeprecatedExecute(r WorkspaceAPISetAutoArchiveIntervalWorkspaceDeprecatedRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetAutoArchiveIntervalWorkspaceDeprecated")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/autoarchive/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type WorkspaceAPISetAutostopIntervalWorkspaceDeprecatedRequest struct {

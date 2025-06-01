@@ -88,7 +88,7 @@ var CreateCmd = &cobra.Command{
 			createSandbox.SetAutoStopInterval(autoStopFlag)
 		}
 		if autoArchiveFlag >= 0 {
-			createWorkspace.SetAutoArchiveInterval(autoArchiveFlag)
+			createSandbox.SetAutoArchiveInterval(autoArchiveFlag)
 		}
 
 		if dockerfileFlag != "" {
@@ -163,13 +163,17 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 		}
 
-		var runnerDomain string
-		if sandbox.Info != nil && sandbox.Info.ProviderMetadata != nil {
-			metadata := make(map[string]interface{})
-			if err := json.Unmarshal([]byte(*sandbox.Info.ProviderMetadata), &metadata); err == nil {
-				if domain, ok := metadata["runnerDomain"].(string); ok {
-					runnerDomain = domain
-				}
+		runnerDomain, err := getRunnerDomainForSandbox(ctx, apiClient, sandbox)
+		if err != nil {
+			// Reload the sandbox info if the runner hadn't been assigned yet
+			var getSandboxErr error
+			sandbox, res, getSandboxErr = apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
+			if getSandboxErr != nil {
+				return apiclient.HandleErrorResponse(res, getSandboxErr)
+			}
+			runnerDomain, err = getRunnerDomainForSandbox(ctx, apiClient, sandbox)
+			if err != nil {
+				return err
 			}
 		}
 
@@ -216,4 +220,20 @@ func init() {
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
 	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
+
+	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
+	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "context")
+}
+
+func getRunnerDomainForSandbox(ctx context.Context, apiClient *daytonaapiclient.APIClient, sandbox *daytonaapiclient.Sandbox) (string, error) {
+	if sandbox.Info != nil && sandbox.Info.ProviderMetadata != nil {
+		metadata := make(map[string]interface{})
+		if err := json.Unmarshal([]byte(*sandbox.Info.ProviderMetadata), &metadata); err == nil {
+			if domain, ok := metadata["runnerDomain"].(string); ok {
+				return domain, nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("runner domain not found in metadata")
 }

@@ -20,50 +20,82 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
-from daytona_api_client_async.models.create_build_info import CreateBuildInfo
-from daytona_api_client_async.models.sandbox_volume import SandboxVolume
+from daytona_api_client.models.create_build_info import CreateBuildInfo
+from daytona_api_client.models.sandbox_volume import SandboxVolume
 from typing import Optional, Set
 from typing_extensions import Self
+
 
 class CreateWorkspace(BaseModel):
     """
     CreateWorkspace
-    """ # noqa: E501
+    """  # noqa: E501
+
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     user: Optional[StrictStr] = Field(default=None, description="The user associated with the project")
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the workspace")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the workspace")
-    public: Optional[StrictBool] = Field(default=None, description="Whether the workspace http preview is publicly accessible")
+    public: Optional[StrictBool] = Field(
+        default=None, description="Whether the workspace http preview is publicly accessible"
+    )
     var_class: Optional[StrictStr] = Field(default=None, description="The workspace class type", alias="class")
-    target: Optional[StrictStr] = Field(default=None, description="The target (region) where the workspace will be created")
+    target: Optional[StrictStr] = Field(
+        default=None, description="The target (region) where the workspace will be created"
+    )
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the workspace")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the workspace")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the workspace in GB")
-    auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
-    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", alias="autoArchiveInterval")
-    volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
-    build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", alias="buildInfo")
+    auto_stop_interval: Optional[StrictInt] = Field(
+        default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
+    )
+    auto_archive_interval: Optional[StrictInt] = Field(
+        default=None,
+        description="Auto-archive interval in minutes (0 means the maximum interval will be used)",
+        alias="autoArchiveInterval",
+    )
+    volumes: Optional[List[SandboxVolume]] = Field(
+        default=None, description="Array of volumes to attach to the workspace"
+    )
+    build_info: Optional[CreateBuildInfo] = Field(
+        default=None, description="Build information for the workspace", alias="buildInfo"
+    )
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = [
+        "image",
+        "user",
+        "env",
+        "labels",
+        "public",
+        "class",
+        "target",
+        "cpu",
+        "gpu",
+        "memory",
+        "disk",
+        "autoStopInterval",
+        "autoArchiveInterval",
+        "volumes",
+        "buildInfo",
+    ]
 
-    @field_validator('var_class')
+    @field_validator("var_class")
     def var_class_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(['small', 'medium', 'large']):
+        if value not in set(["small", "medium", "large"]):
             raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
-    @field_validator('target')
+    @field_validator("target")
     def target_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(['eu', 'us', 'asia']):
+        if value not in set(["eu", "us", "asia"]):
             raise ValueError("must be one of enum values ('eu', 'us', 'asia')")
         return value
 
@@ -72,7 +104,6 @@ class CreateWorkspace(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -99,9 +130,11 @@ class CreateWorkspace(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -114,10 +147,10 @@ class CreateWorkspace(BaseModel):
             for _item_volumes in self.volumes:
                 if _item_volumes:
                     _items.append(_item_volumes.to_dict())
-            _dict['volumes'] = _items
+            _dict["volumes"] = _items
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
-            _dict['buildInfo'] = self.build_info.to_dict()
+            _dict["buildInfo"] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -134,28 +167,30 @@ class CreateWorkspace(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "image": obj.get("image"),
-            "user": obj.get("user"),
-            "env": obj.get("env"),
-            "labels": obj.get("labels"),
-            "public": obj.get("public"),
-            "class": obj.get("class"),
-            "target": obj.get("target"),
-            "cpu": obj.get("cpu"),
-            "gpu": obj.get("gpu"),
-            "memory": obj.get("memory"),
-            "disk": obj.get("disk"),
-            "autoStopInterval": obj.get("autoStopInterval"),
-            "autoArchiveInterval": obj.get("autoArchiveInterval"),
-            "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
-            "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
-        })
+        _obj = cls.model_validate(
+            {
+                "image": obj.get("image"),
+                "user": obj.get("user"),
+                "env": obj.get("env"),
+                "labels": obj.get("labels"),
+                "public": obj.get("public"),
+                "class": obj.get("class"),
+                "target": obj.get("target"),
+                "cpu": obj.get("cpu"),
+                "gpu": obj.get("gpu"),
+                "memory": obj.get("memory"),
+                "disk": obj.get("disk"),
+                "autoStopInterval": obj.get("autoStopInterval"),
+                "autoArchiveInterval": obj.get("autoArchiveInterval"),
+                "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
+                if obj.get("volumes") is not None
+                else None,
+                "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

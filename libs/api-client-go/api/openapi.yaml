@@ -3519,7 +3519,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Snapshot ID
+        - description: Snapshot ID or name
           explode: false
           in: path
           name: id
@@ -3542,43 +3542,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get snapshot by ID
-      tags:
-        - snapshots
-  /snapshots/build:
-    post:
-      operationId: buildSnapshot
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildSnapshot'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SnapshotDto'
-          description: The snapshot has been successfully built.
-        '400':
-          description: Bad request - Invalid build parameters
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Build a snapshot
+      summary: Get snapshot by ID or name
       tags:
         - snapshots
   /snapshots/{id}/toggle:
@@ -3769,7 +3733,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSandbox'
+              $ref: '#/components/schemas/CreateWorkspace'
         required: true
       responses:
         '200':
@@ -4097,6 +4061,48 @@ paths:
             - profile
             - email
       summary: '[DEPRECATED] Set workspace auto-stop interval'
+      tags:
+        - workspace
+  /workspace/{workspaceId}/autoarchive/{interval}:
+    post:
+      deprecated: true
+      operationId: setAutoArchiveIntervalWorkspace_deprecated
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-archive interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: '[DEPRECATED] Set workspace auto-archive interval'
       tags:
         - workspace
   /workspace/{workspaceId}/archive:
@@ -6673,6 +6679,7 @@ components:
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
+        buildInfo: ''
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
@@ -6711,8 +6718,11 @@ components:
           description: Disk space allocated to the sandbox in GB
           example: 3
           type: integer
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the snapshot
       required:
-        - imageName
         - name
       type: object
     SnapshotState:
@@ -6803,30 +6813,12 @@ components:
         - general
         - gpu
         - id
-        - imageName
         - lastUsedAt
         - mem
         - name
         - size
         - state
         - updatedAt
-      type: object
-    BuildSnapshot:
-      example:
-        buildInfo: ''
-        name: my-custom-snapshot-v1
-      properties:
-        name:
-          description: The name of the snapshot to build
-          example: my-custom-snapshot-v1
-          type: string
-        buildInfo:
-          allOf:
-            - $ref: '#/components/schemas/CreateBuildInfo'
-          description: Build information for the snapshot
-      required:
-        - buildInfo
-        - name
       type: object
     ToggleState:
       example:
@@ -6910,6 +6902,107 @@ components:
           type: boolean
       required:
         - general
+      type: object
+    CreateWorkspace:
+      example:
+        image: daytonaio/workspace:latest
+        memory: 1
+        buildInfo: ''
+        volumes:
+          - mountPath: /data
+            volumeId: volume123
+          - mountPath: /data
+            volumeId: volume123
+        cpu: 2
+        env:
+          NODE_ENV: production
+        gpu: 1
+        autoStopInterval: 30
+        labels:
+          daytona.io/public: 'true'
+        target: eu
+        disk: 3
+        public: false
+        user: daytona
+        class: small
+        autoArchiveInterval: 10080
+      properties:
+        image:
+          description: The image used for the workspace
+          example: daytonaio/workspace:latest
+          type: string
+        user:
+          description: The user associated with the project
+          example: daytona
+          type: string
+        env:
+          additionalProperties:
+            type: string
+          description: Environment variables for the workspace
+          example:
+            NODE_ENV: production
+          type: object
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels for the workspace
+          example:
+            daytona.io/public: 'true'
+          type: object
+        public:
+          description: Whether the workspace http preview is publicly accessible
+          example: false
+          type: boolean
+        class:
+          description: The workspace class type
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        target:
+          description: The target (region) where the workspace will be created
+          enum:
+            - eu
+            - us
+            - asia
+          example: eu
+          type: string
+        cpu:
+          description: CPU cores allocated to the workspace
+          example: 2
+          type: integer
+        gpu:
+          description: GPU units allocated to the workspace
+          example: 1
+          type: integer
+        memory:
+          description: Memory allocated to the workspace in GB
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to the workspace in GB
+          example: 3
+          type: integer
+        autoStopInterval:
+          description: Auto-stop interval in minutes (0 means disabled)
+          example: 30
+          type: integer
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          example: 10080
+          type: integer
+        volumes:
+          description: Array of volumes to attach to the workspace
+          items:
+            $ref: '#/components/schemas/SandboxVolume'
+          type: array
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the workspace
       type: object
     VolumeState:
       description: Volume state

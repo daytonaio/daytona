@@ -53,8 +53,9 @@ import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
-import { BuildSnapshotDto } from '../dto/build-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { Snapshot } from '../entities/snapshot.entity'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -94,6 +95,19 @@ export class SnapshotController {
       throw new ForbiddenException('Insufficient permissions for creating general snapshots')
     }
 
+    if (createSnapshotDto.buildInfo) {
+      if (createSnapshotDto.imageName) {
+        throw new BadRequestError('Cannot specify an image name when using a build info entry')
+      }
+      if (createSnapshotDto.entrypoint) {
+        throw new BadRequestError('Cannot specify an entrypoint when using a build info entry')
+      }
+    } else {
+      if (!createSnapshotDto.imageName) {
+        throw new BadRequestError('Must specify an image name when not using a build info entry')
+      }
+    }
+
     // TODO: consider - if using transient registry, prepend the snapshot name with the username
     const snapshot = await this.snapshotService.createSnapshot(authContext.organization, createSnapshotDto)
     return SnapshotDto.fromSnapshot(snapshot)
@@ -101,12 +115,12 @@ export class SnapshotController {
 
   @Get(':id')
   @ApiOperation({
-    summary: 'Get snapshot by ID',
+    summary: 'Get snapshot by ID or name',
     operationId: 'getSnapshot',
   })
   @ApiParam({
     name: 'id',
-    description: 'Snapshot ID',
+    description: 'Snapshot ID or name',
   })
   @ApiResponse({
     status: 200,
@@ -118,41 +132,18 @@ export class SnapshotController {
     description: 'Snapshot not found',
   })
   @UseGuards(SnapshotAccessGuard)
-  async getSnapshot(@Param('id') snapshotId: string): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.getSnapshot(snapshotId)
-    return SnapshotDto.fromSnapshot(snapshot)
-  }
-
-  @Post('build')
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Build a snapshot',
-    operationId: 'buildSnapshot',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The snapshot has been successfully built.',
-    type: SnapshotDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Invalid build parameters',
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
-  async buildSnapshot(
+  async getSnapshot(
+    @Param('id') snapshotIdOrName: string,
     @AuthContext() authContext: OrganizationAuthContext,
-    @Body() buildSnapshotDto: BuildSnapshotDto,
   ): Promise<SnapshotDto> {
-    const snapshot = await this.snapshotService.createSnapshot(
-      authContext.organization,
-      {
-        name: buildSnapshotDto.name,
-      },
-      {
-        dockerfileContent: buildSnapshotDto.buildInfo.dockerfileContent,
-        contextHashes: buildSnapshotDto.buildInfo.contextHashes,
-      },
-    )
+    let snapshot: Snapshot
+    try {
+      // Try to get by ID
+      snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
+    } catch (error) {
+      // If not found by ID, try by name
+      snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
+    }
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
@@ -282,7 +273,7 @@ export class SnapshotController {
 
     // Check if the snapshot has build info
     if (!snapshot.buildInfo) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} has no build info`)
+      throw new NotFoundException(`Snapshot ${snapshotId} has no build info`)
     }
 
     // Retry until a runner is assigned or timeout after 30 seconds

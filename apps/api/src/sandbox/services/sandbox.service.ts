@@ -393,10 +393,6 @@ export class SandboxService {
       sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
-    if (createSandboxDto.autoArchiveInterval !== undefined) {
-      sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
-    }
-
     const buildInfoSnapshotRef = generateBuildSnapshotRef(
       createSandboxDto.buildInfo.dockerfileContent,
       createSandboxDto.buildInfo.contextHashes,

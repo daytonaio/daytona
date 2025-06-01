@@ -51,7 +51,7 @@ export interface SnapshotDto {
    * @type {string}
    * @memberof SnapshotDto
    */
-  imageName: string
+  imageName?: string
   /**
    *
    * @type {boolean}

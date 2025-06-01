@@ -8,12 +8,15 @@ async def main():
         sandbox = await daytona.create(
             CreateSandboxFromImageParams(
                 image=(
-                    Image.base("alpine:3.22.0").run_commands(
-                        "apk add --no-cache nodejs npm",
-                        "npm install -g typescript typescript-language-server",
+                    Image.base("ubuntu:25.10").run_commands(
+                        "apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils",
+                        "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
+                        "apt-get install -y nodejs",
+                        "npm install -g ts-node typescript typescript-language-server",
                     )
                 ),
             ),
+            timeout=120,
             on_snapshot_create_logs=print,
         )
 

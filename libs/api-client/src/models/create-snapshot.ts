@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -11,6 +11,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+
+// May contain unused imports in some cases
+// @ts-ignore
+import type { CreateBuildInfo } from './create-build-info'
 
 /**
  *
@@ -29,7 +33,7 @@ export interface CreateSnapshot {
    * @type {string}
    * @memberof CreateSnapshot
    */
-  imageName: string
+  imageName?: string
   /**
    * The entrypoint command for the snapshot
    * @type {Array<string>}
@@ -66,4 +70,10 @@ export interface CreateSnapshot {
    * @memberof CreateSnapshot
    */
   disk?: number
+  /**
+   * Build information for the snapshot
+   * @type {CreateBuildInfo}
+   * @memberof CreateSnapshot
+   */
+  buildInfo?: CreateBuildInfo
 }

@@ -32,6 +32,8 @@ import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
+
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
@@ -181,9 +183,8 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in snapshot names'
     }
 
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
-    if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+    if (!IMAGE_NAME_REGEX.test(name)) {
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, slashes and dashes'
     }
 
     return null
@@ -194,20 +195,16 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in image names'
     }
 
-    // Basic format check
-    const snapshotNameRegex =
-      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
-
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Snapshot name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag (e.g., ubuntu:22.04)'
     }
 
     if (name.endsWith(':latest')) {
-      return 'Snapshots with tag ":latest" are not allowed'
+      return 'Images with tag ":latest" are not allowed'
     }
 
-    if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+    if (!IMAGE_NAME_REGEX.test(name)) {
+      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
     }
 
     return null
@@ -313,29 +310,29 @@ const Snapshots: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
-  const handleBulkDelete = async (images: ImageDto[]) => {
-    setLoadingImages((prev) => ({ ...prev, ...images.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
+  const handleBulkDelete = async (snapshots: SnapshotDto[]) => {
+    setLoadingSnapshots((prev) => ({ ...prev, ...snapshots.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
 
-    for (const image of images) {
-      setImagesData((prev) => ({
+    for (const snapshot of snapshots) {
+      setSnapshotsData((prev) => ({
         ...prev,
-        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
+        items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: SnapshotState.REMOVING } : i)),
       }))
 
       try {
-        await imageApi.removeImage(image.id, selectedOrganization?.id)
-        toast.success(`Deleting image ${image.name}`)
+        await snapshotApi.removeSnapshot(snapshot.id, selectedOrganization?.id)
+        toast.success(`Deleting snapshot ${snapshot.name}`)
       } catch (error) {
-        handleApiError(error, `Failed to delete image ${image.name}`)
+        handleApiError(error, `Failed to delete snapshot ${snapshot.name}`)
 
-        setImagesData((prev) => ({
+        setSnapshotsData((prev) => ({
           ...prev,
-          items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
+          items: prev.items.map((i) => (i.id === snapshot.id ? { ...i, state: snapshot.state } : i)),
         }))
 
-        if (images.indexOf(image) < images.length - 1) {
+        if (snapshots.indexOf(snapshot) < snapshots.length - 1) {
           const shouldContinue = window.confirm(
-            `Failed to delete image ${image.name}. Do you want to continue with the remaining images?`,
+            `Failed to delete snapshot ${snapshot.name}. Do you want to continue with the remaining snapshots?`,
           )
 
           if (!shouldContinue) {
@@ -343,7 +340,7 @@ const Snapshots: React.FC = () => {
           }
         }
       } finally {
-        setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+        setLoadingSnapshots((prev) => ({ ...prev, [snapshot.id]: false }))
       }
     }
   }

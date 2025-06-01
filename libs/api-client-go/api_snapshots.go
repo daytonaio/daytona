@@ -23,18 +23,6 @@ import (
 type SnapshotsAPI interface {
 
 	/*
-		BuildSnapshot Build a snapshot
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@return SnapshotsAPIBuildSnapshotRequest
-	*/
-	BuildSnapshot(ctx context.Context) SnapshotsAPIBuildSnapshotRequest
-
-	// BuildSnapshotExecute executes the request
-	//  @return SnapshotDto
-	BuildSnapshotExecute(r SnapshotsAPIBuildSnapshotRequest) (*SnapshotDto, *http.Response, error)
-
-	/*
 		CreateSnapshot Create a new snapshot
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -59,10 +47,10 @@ type SnapshotsAPI interface {
 	GetAllSnapshotsExecute(r SnapshotsAPIGetAllSnapshotsRequest) (*PaginatedSnapshotsDto, *http.Response, error)
 
 	/*
-		GetSnapshot Get snapshot by ID
+		GetSnapshot Get snapshot by ID or name
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param id Snapshot ID
+		@param id Snapshot ID or name
 		@return SnapshotsAPIGetSnapshotRequest
 	*/
 	GetSnapshot(ctx context.Context, id string) SnapshotsAPIGetSnapshotRequest
@@ -124,125 +112,6 @@ type SnapshotsAPI interface {
 
 // SnapshotsAPIService SnapshotsAPI service
 type SnapshotsAPIService service
-
-type SnapshotsAPIBuildSnapshotRequest struct {
-	ctx                    context.Context
-	ApiService             SnapshotsAPI
-	buildSnapshot          *BuildSnapshot
-	xDaytonaOrganizationID *string
-}
-
-func (r SnapshotsAPIBuildSnapshotRequest) BuildSnapshot(buildSnapshot BuildSnapshot) SnapshotsAPIBuildSnapshotRequest {
-	r.buildSnapshot = &buildSnapshot
-	return r
-}
-
-// Use with JWT to specify the organization ID
-func (r SnapshotsAPIBuildSnapshotRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) SnapshotsAPIBuildSnapshotRequest {
-	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-func (r SnapshotsAPIBuildSnapshotRequest) Execute() (*SnapshotDto, *http.Response, error) {
-	return r.ApiService.BuildSnapshotExecute(r)
-}
-
-/*
-BuildSnapshot Build a snapshot
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@return SnapshotsAPIBuildSnapshotRequest
-*/
-func (a *SnapshotsAPIService) BuildSnapshot(ctx context.Context) SnapshotsAPIBuildSnapshotRequest {
-	return SnapshotsAPIBuildSnapshotRequest{
-		ApiService: a,
-		ctx:        ctx,
-	}
-}
-
-// Execute executes the request
-//
-//	@return SnapshotDto
-func (a *SnapshotsAPIService) BuildSnapshotExecute(r SnapshotsAPIBuildSnapshotRequest) (*SnapshotDto, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodPost
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue *SnapshotDto
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SnapshotsAPIService.BuildSnapshot")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/snapshots/build"
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.buildSnapshot == nil {
-		return localVarReturnValue, nil, reportError("buildSnapshot is required and must be specified")
-	}
-
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{"application/json"}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.xDaytonaOrganizationID != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
-	}
-	// body params
-	localVarPostBody = r.buildSnapshot
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
 
 type SnapshotsAPICreateSnapshotRequest struct {
 	ctx                    context.Context
@@ -509,10 +378,10 @@ func (r SnapshotsAPIGetSnapshotRequest) Execute() (*SnapshotDto, *http.Response,
 }
 
 /*
-GetSnapshot Get snapshot by ID
+GetSnapshot Get snapshot by ID or name
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param id Snapshot ID
+	@param id Snapshot ID or name
 	@return SnapshotsAPIGetSnapshotRequest
 */
 func (a *SnapshotsAPIService) GetSnapshot(ctx context.Context, id string) SnapshotsAPIGetSnapshotRequest {

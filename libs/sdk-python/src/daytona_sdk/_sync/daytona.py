@@ -325,7 +325,7 @@ class Daytona:
         timeout: Optional[float] = 60,
         on_snapshot_create_logs: Callable[[str], None] = None,
     ) -> Sandbox:
-        code_toolbox = self._get_code_toolbox(params)
+        code_toolbox = self._get_code_toolbox(params.language)
 
         if timeout < 0:
             raise DaytonaError("Timeout must be a non-negative number")
