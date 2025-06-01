@@ -31,7 +31,6 @@ import { UpdateOrganizationRoleDto } from '../organization/dto/update-organizati
 import { CreateOrganizationInvitationDto } from '../organization/dto/create-organization-invitation.dto'
 import { UpdateOrganizationInvitationDto } from '../organization/dto/update-organization-invitation.dto'
 import { CustomHeaders } from '../common/constants/header.constants'
-import { BuildSnapshotDto } from '../sandbox/dto/build-snapshot.dto'
 import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
 import { VolumeDto } from '../sandbox/dto/volume.dto'
 
@@ -112,7 +111,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       userAgent,
       error,
       source: Array.isArray(source) ? source[0] : source,
-      isDeprecated: request.route.path.contains('/workspace') || request.route.path.contains('/images'),
+      isDeprecated: request.route.path.includes('/workspace') || request.route.path.includes('/images'),
     }
 
     switch (request.method) {
@@ -123,9 +122,6 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
             break
           case '/api/snapshots':
             this.captureCreateSnapshot(props, request.body, response)
-            break
-          case '/api/snapshots/build':
-            this.captureBuildSnapshot(props, request.body, response)
             break
           case '/api/docker-registry':
             this.captureCreateDockerRegistry(props, response)
@@ -432,14 +428,8 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       snapshot_gpu: request.gpu,
       snapshot_memory: request.memory,
       snapshot_disk: request.disk,
-    })
-  }
-
-  private captureBuildSnapshot(props: CommonCaptureProps, request: BuildSnapshotDto, response: SnapshotDto) {
-    this.capture('api_snapshot_built', props, 'api_snapshot_build_failed', {
-      snapshot_id: response.id,
-      snapshot_name: request.name,
-      snapshot_build_info_context_hashes_length: request.buildInfo.contextHashes?.length,
+      snapshot_is_build: request.buildInfo ? true : false,
+      snapshot_build_info_context_hashes_length: request.buildInfo?.contextHashes?.length,
     })
   }
 

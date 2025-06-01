@@ -27,7 +27,7 @@ type SnapshotDto struct {
 	OrganizationId *string         `json:"organizationId,omitempty"`
 	General        bool            `json:"general"`
 	Name           string          `json:"name"`
-	ImageName      string          `json:"imageName"`
+	ImageName      *string         `json:"imageName,omitempty"`
 	Enabled        bool            `json:"enabled"`
 	State          SnapshotState   `json:"state"`
 	Size           NullableFloat32 `json:"size"`
@@ -48,12 +48,11 @@ type _SnapshotDto SnapshotDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSnapshotDto(id string, general bool, name string, imageName string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
+func NewSnapshotDto(id string, general bool, name string, enabled bool, state SnapshotState, size NullableFloat32, entrypoint []string, cpu float32, gpu float32, mem float32, disk float32, errorReason NullableString, createdAt time.Time, updatedAt time.Time, lastUsedAt NullableTime) *SnapshotDto {
 	this := SnapshotDto{}
 	this.Id = id
 	this.General = general
 	this.Name = name
-	this.ImageName = imageName
 	this.Enabled = enabled
 	this.State = state
 	this.Size = size
@@ -181,28 +180,36 @@ func (o *SnapshotDto) SetName(v string) {
 	o.Name = v
 }
 
-// GetImageName returns the ImageName field value
+// GetImageName returns the ImageName field value if set, zero value otherwise.
 func (o *SnapshotDto) GetImageName() string {
-	if o == nil {
+	if o == nil || IsNil(o.ImageName) {
 		var ret string
 		return ret
 	}
-
-	return o.ImageName
+	return *o.ImageName
 }
 
-// GetImageNameOk returns a tuple with the ImageName field value
+// GetImageNameOk returns a tuple with the ImageName field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *SnapshotDto) GetImageNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ImageName) {
 		return nil, false
 	}
-	return &o.ImageName, true
+	return o.ImageName, true
 }
 
-// SetImageName sets field value
+// HasImageName returns a boolean if a field has been set.
+func (o *SnapshotDto) HasImageName() bool {
+	if o != nil && !IsNil(o.ImageName) {
+		return true
+	}
+
+	return false
+}
+
+// SetImageName gets a reference to the given string and assigns it to the ImageName field.
 func (o *SnapshotDto) SetImageName(v string) {
-	o.ImageName = v
+	o.ImageName = &v
 }
 
 // GetEnabled returns the Enabled field value
@@ -517,7 +524,9 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	}
 	toSerialize["general"] = o.General
 	toSerialize["name"] = o.Name
-	toSerialize["imageName"] = o.ImageName
+	if !IsNil(o.ImageName) {
+		toSerialize["imageName"] = o.ImageName
+	}
 	toSerialize["enabled"] = o.Enabled
 	toSerialize["state"] = o.State
 	toSerialize["size"] = o.Size.Get()
@@ -543,7 +552,6 @@ func (o *SnapshotDto) UnmarshalJSON(data []byte) (err error) {
 		"id",
 		"general",
 		"name",
-		"imageName",
 		"enabled",
 		"state",
 		"size",

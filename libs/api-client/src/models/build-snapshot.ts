@@ -29,6 +29,30 @@ export interface BuildSnapshot {
    */
   name: string
   /**
+   * CPU cores allocated to the resulting sandbox
+   * @type {number}
+   * @memberof BuildSnapshot
+   */
+  cpu?: number
+  /**
+   * GPU units allocated to the resulting sandbox
+   * @type {number}
+   * @memberof BuildSnapshot
+   */
+  gpu?: number
+  /**
+   * Memory allocated to the resulting sandbox in GB
+   * @type {number}
+   * @memberof BuildSnapshot
+   */
+  memory?: number
+  /**
+   * Disk space allocated to the sandbox in GB
+   * @type {number}
+   * @memberof BuildSnapshot
+   */
+  disk?: number
+  /**
    * Build information for the snapshot
    * @type {CreateBuildInfo}
    * @memberof BuildSnapshot

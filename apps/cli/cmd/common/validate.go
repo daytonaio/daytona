@@ -8,10 +8,10 @@ import (
 	"strings"
 )
 
-func ValidateSnapshotName(snapshotName string) error {
-	parts := strings.Split(snapshotName, ":")
+func ValidateImageName(imageName string) error {
+	parts := strings.Split(imageName, ":")
 	if len(parts) != 2 {
-		return fmt.Errorf("invalid snapshot format: must contain exactly one colon (e.g., 'mysnapshot:1.0')")
+		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'ubuntu:22.04')")
 	}
 	if parts[1] == "latest" {
 		return fmt.Errorf("tag 'latest' not allowed, please use a specific version tag")

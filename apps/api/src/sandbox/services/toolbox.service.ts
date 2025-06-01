@@ -41,8 +41,7 @@ export class ToolboxService {
 
         const requestConfig: any = {
           method,
-          // TODO: remove /main from the path after the runner-agent refactor
-          url: `${runner.apiUrl}/sandboxes/${sandboxId}/main${path}`,
+          url: `${runner.apiUrl}/sandboxes/${sandboxId}${path}`,
           headers,
           maxBodyLength: 209715200, // 200MB in bytes
           maxContentLength: 209715200, // 200MB in bytes
