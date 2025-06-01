@@ -167,7 +167,7 @@ export class SnapshotService {
 
     const [items, total] = await this.snapshotRepository.findAndCount({
       // Retrieve all snapshots belonging to the organization as well as all general snapshots
-      where: [{ organizationId }, { general: true }],
+      where: [{ organizationId }, { general: true, hideFromUsers: false }],
       order: {
         general: 'ASC', // Sort general snapshots last
         lastUsedAt: {
