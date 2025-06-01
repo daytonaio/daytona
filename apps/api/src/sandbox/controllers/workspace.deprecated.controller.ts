@@ -27,7 +27,6 @@ import {
 import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService as WorkspaceService } from '../services/sandbox.service'
-import { CreateSandboxDto as CreateWorkspaceDto } from '../dto/create-sandbox.dto'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -58,6 +57,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
+import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -137,7 +137,15 @@ export class WorkspaceController {
     }
 
     const organization = authContext.organization
-    const workspace = await this.workspaceService.createFromSnapshot(createWorkspaceDto, organization, true)
+
+    const workspace = await this.workspaceService.createFromSnapshot(
+      {
+        ...createWorkspaceDto,
+        snapshot: createWorkspaceDto.image,
+      },
+      organization,
+      true,
+    )
 
     // Wait for the workspace to start
     const sandboxState = await this.waitForWorkspaceState(
@@ -362,6 +370,35 @@ export class WorkspaceController {
     @Param('interval') interval: number,
   ): Promise<void> {
     await this.workspaceService.setAutostopInterval(workspaceId, interval)
+  }
+
+  @Post(':workspaceId/autoarchive/:interval')
+  @ApiOperation({
+    summary: '[DEPRECATED] Set workspace auto-archive interval',
+    operationId: 'setAutoArchiveIntervalWorkspace_deprecated',
+    deprecated: true,
+  })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'ID of the workspace',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'interval',
+    description: 'Auto-archive interval in minutes (0 means the maximum interval will be used)',
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-archive interval has been set',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(WorkspaceAccessGuard)
+  async setAutoArchiveInterval(
+    @Param('workspaceId') workspaceId: string,
+    @Param('interval') interval: number,
+  ): Promise<void> {
+    await this.workspaceService.setAutoArchiveInterval(workspaceId, interval)
   }
 
   @Post(':workspaceId/archive')

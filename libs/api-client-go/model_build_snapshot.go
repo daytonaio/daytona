@@ -24,6 +24,14 @@ var _ MappedNullable = &BuildSnapshot{}
 type BuildSnapshot struct {
 	// The name of the snapshot to build
 	Name string `json:"name"`
+	// CPU cores allocated to the resulting sandbox
+	Cpu *int32 `json:"cpu,omitempty"`
+	// GPU units allocated to the resulting sandbox
+	Gpu *int32 `json:"gpu,omitempty"`
+	// Memory allocated to the resulting sandbox in GB
+	Memory *int32 `json:"memory,omitempty"`
+	// Disk space allocated to the sandbox in GB
+	Disk *int32 `json:"disk,omitempty"`
 	// Build information for the snapshot
 	BuildInfo CreateBuildInfo `json:"buildInfo"`
 }
@@ -73,6 +81,134 @@ func (o *BuildSnapshot) SetName(v string) {
 	o.Name = v
 }
 
+// GetCpu returns the Cpu field value if set, zero value otherwise.
+func (o *BuildSnapshot) GetCpu() int32 {
+	if o == nil || IsNil(o.Cpu) {
+		var ret int32
+		return ret
+	}
+	return *o.Cpu
+}
+
+// GetCpuOk returns a tuple with the Cpu field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildSnapshot) GetCpuOk() (*int32, bool) {
+	if o == nil || IsNil(o.Cpu) {
+		return nil, false
+	}
+	return o.Cpu, true
+}
+
+// HasCpu returns a boolean if a field has been set.
+func (o *BuildSnapshot) HasCpu() bool {
+	if o != nil && !IsNil(o.Cpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetCpu gets a reference to the given int32 and assigns it to the Cpu field.
+func (o *BuildSnapshot) SetCpu(v int32) {
+	o.Cpu = &v
+}
+
+// GetGpu returns the Gpu field value if set, zero value otherwise.
+func (o *BuildSnapshot) GetGpu() int32 {
+	if o == nil || IsNil(o.Gpu) {
+		var ret int32
+		return ret
+	}
+	return *o.Gpu
+}
+
+// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildSnapshot) GetGpuOk() (*int32, bool) {
+	if o == nil || IsNil(o.Gpu) {
+		return nil, false
+	}
+	return o.Gpu, true
+}
+
+// HasGpu returns a boolean if a field has been set.
+func (o *BuildSnapshot) HasGpu() bool {
+	if o != nil && !IsNil(o.Gpu) {
+		return true
+	}
+
+	return false
+}
+
+// SetGpu gets a reference to the given int32 and assigns it to the Gpu field.
+func (o *BuildSnapshot) SetGpu(v int32) {
+	o.Gpu = &v
+}
+
+// GetMemory returns the Memory field value if set, zero value otherwise.
+func (o *BuildSnapshot) GetMemory() int32 {
+	if o == nil || IsNil(o.Memory) {
+		var ret int32
+		return ret
+	}
+	return *o.Memory
+}
+
+// GetMemoryOk returns a tuple with the Memory field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildSnapshot) GetMemoryOk() (*int32, bool) {
+	if o == nil || IsNil(o.Memory) {
+		return nil, false
+	}
+	return o.Memory, true
+}
+
+// HasMemory returns a boolean if a field has been set.
+func (o *BuildSnapshot) HasMemory() bool {
+	if o != nil && !IsNil(o.Memory) {
+		return true
+	}
+
+	return false
+}
+
+// SetMemory gets a reference to the given int32 and assigns it to the Memory field.
+func (o *BuildSnapshot) SetMemory(v int32) {
+	o.Memory = &v
+}
+
+// GetDisk returns the Disk field value if set, zero value otherwise.
+func (o *BuildSnapshot) GetDisk() int32 {
+	if o == nil || IsNil(o.Disk) {
+		var ret int32
+		return ret
+	}
+	return *o.Disk
+}
+
+// GetDiskOk returns a tuple with the Disk field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *BuildSnapshot) GetDiskOk() (*int32, bool) {
+	if o == nil || IsNil(o.Disk) {
+		return nil, false
+	}
+	return o.Disk, true
+}
+
+// HasDisk returns a boolean if a field has been set.
+func (o *BuildSnapshot) HasDisk() bool {
+	if o != nil && !IsNil(o.Disk) {
+		return true
+	}
+
+	return false
+}
+
+// SetDisk gets a reference to the given int32 and assigns it to the Disk field.
+func (o *BuildSnapshot) SetDisk(v int32) {
+	o.Disk = &v
+}
+
 // GetBuildInfo returns the BuildInfo field value
 func (o *BuildSnapshot) GetBuildInfo() CreateBuildInfo {
 	if o == nil {
@@ -108,6 +244,18 @@ func (o BuildSnapshot) MarshalJSON() ([]byte, error) {
 func (o BuildSnapshot) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Cpu) {
+		toSerialize["cpu"] = o.Cpu
+	}
+	if !IsNil(o.Gpu) {
+		toSerialize["gpu"] = o.Gpu
+	}
+	if !IsNil(o.Memory) {
+		toSerialize["memory"] = o.Memory
+	}
+	if !IsNil(o.Disk) {
+		toSerialize["disk"] = o.Disk
+	}
 	toSerialize["buildInfo"] = o.BuildInfo
 	return toSerialize, nil
 }

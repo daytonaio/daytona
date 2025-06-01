@@ -38,7 +38,7 @@ async function main() {
 
   // Get the file from the first sandbox
   const file = await sandbox1.fs.downloadFile(newFile)
-  console.log('File:', file)
+  console.log('File:', file.toString())
 
   // Cleanup
   await daytona.delete(sandbox1)
