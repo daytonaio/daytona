@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
+from daytona_api_client.models.create_build_info import CreateBuildInfo
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -30,15 +31,30 @@ class CreateSnapshot(BaseModel):
     """  # noqa: E501
 
     name: StrictStr = Field(description="The name of the snapshot")
-    image_name: StrictStr = Field(description="The image name of the snapshot", alias="imageName")
+    image_name: Optional[StrictStr] = Field(
+        default=None, description="The image name of the snapshot", alias="imageName"
+    )
     entrypoint: Optional[List[StrictStr]] = Field(default=None, description="The entrypoint command for the snapshot")
     general: Optional[StrictBool] = Field(default=None, description="Whether the snapshot is general")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the resulting sandbox")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the resulting sandbox")
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the resulting sandbox in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the sandbox in GB")
+    build_info: Optional[CreateBuildInfo] = Field(
+        default=None, description="Build information for the snapshot", alias="buildInfo"
+    )
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "imageName", "entrypoint", "general", "cpu", "gpu", "memory", "disk"]
+    __properties: ClassVar[List[str]] = [
+        "name",
+        "imageName",
+        "entrypoint",
+        "general",
+        "cpu",
+        "gpu",
+        "memory",
+        "disk",
+        "buildInfo",
+    ]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -82,6 +98,9 @@ class CreateSnapshot(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of build_info
+        if self.build_info:
+            _dict["buildInfo"] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -108,6 +127,7 @@ class CreateSnapshot(BaseModel):
                 "gpu": obj.get("gpu"),
                 "memory": obj.get("memory"),
                 "disk": obj.get("disk"),
+                "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
             }
         )
         # store additional fields in additional_properties

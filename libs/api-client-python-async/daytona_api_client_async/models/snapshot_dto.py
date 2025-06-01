@@ -33,7 +33,7 @@ class SnapshotDto(BaseModel):
     organization_id: Optional[StrictStr] = Field(default=None, alias="organizationId")
     general: StrictBool
     name: StrictStr
-    image_name: StrictStr = Field(alias="imageName")
+    image_name: Optional[StrictStr] = Field(default=None, alias="imageName")
     enabled: StrictBool
     state: SnapshotState
     size: Optional[Union[StrictFloat, StrictInt]]

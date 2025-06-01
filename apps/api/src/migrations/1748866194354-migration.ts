@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1748337927899 implements MigrationInterface {
-  name = 'Migration1748337927899'
+export class Migration1748866194354 implements MigrationInterface {
+  name = 'Migration1748866194354'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Snapshot to backup rename
@@ -79,9 +79,20 @@ export class Migration1748337927899 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "snapshot" ADD "mem" integer NOT NULL DEFAULT '1'`)
     await queryRunner.query(`ALTER TABLE "snapshot" ADD "disk" integer NOT NULL DEFAULT '3'`)
     await queryRunner.query(`UPDATE "snapshot" SET "imageName" = "name"`)
+
+    // Add hideFromUsers column
+    await queryRunner.query(`ALTER TABLE "snapshot" ADD "hideFromUsers" boolean NOT NULL DEFAULT false`)
+
+    // Set hideFromUsers to true for general snapshots with names starting with "daytonaio/"
+    await queryRunner.query(
+      `UPDATE "snapshot" SET "hideFromUsers" = true WHERE "general" = true AND "name" LIKE 'daytonaio/%'`,
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // Remove hideFromUsers column
+    await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "hideFromUsers"`)
+
     // Snapshot fields
     await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "disk"`)
     await queryRunner.query(`ALTER TABLE "snapshot" DROP COLUMN "mem"`)

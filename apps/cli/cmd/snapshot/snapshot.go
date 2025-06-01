@@ -21,5 +21,4 @@ func init() {
 	SnapshotsCmd.AddCommand(CreateCmd)
 	SnapshotsCmd.AddCommand(PushCmd)
 	SnapshotsCmd.AddCommand(DeleteCmd)
-	SnapshotsCmd.AddCommand(BuildCmd)
 }

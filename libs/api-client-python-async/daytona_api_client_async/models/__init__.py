@@ -18,7 +18,6 @@
 from daytona_api_client_async.models.account_provider import AccountProvider
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
-from daytona_api_client_async.models.build_snapshot import BuildSnapshot
 from daytona_api_client_async.models.command import Command
 from daytona_api_client_async.models.completion_context import CompletionContext
 from daytona_api_client_async.models.completion_item import CompletionItem
@@ -37,6 +36,7 @@ from daytona_api_client_async.models.create_session_request import CreateSession
 from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
+from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.execute_request import ExecuteRequest
 from daytona_api_client_async.models.execute_response import ExecuteResponse

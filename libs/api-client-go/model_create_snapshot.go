@@ -25,7 +25,7 @@ type CreateSnapshot struct {
 	// The name of the snapshot
 	Name string `json:"name"`
 	// The image name of the snapshot
-	ImageName string `json:"imageName"`
+	ImageName *string `json:"imageName,omitempty"`
 	// The entrypoint command for the snapshot
 	Entrypoint []string `json:"entrypoint,omitempty"`
 	// Whether the snapshot is general
@@ -38,6 +38,8 @@ type CreateSnapshot struct {
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space allocated to the sandbox in GB
 	Disk *int32 `json:"disk,omitempty"`
+	// Build information for the snapshot
+	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
 }
 
 type _CreateSnapshot CreateSnapshot
@@ -46,10 +48,9 @@ type _CreateSnapshot CreateSnapshot
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewCreateSnapshot(name string, imageName string) *CreateSnapshot {
+func NewCreateSnapshot(name string) *CreateSnapshot {
 	this := CreateSnapshot{}
 	this.Name = name
-	this.ImageName = imageName
 	return &this
 }
 
@@ -85,28 +86,36 @@ func (o *CreateSnapshot) SetName(v string) {
 	o.Name = v
 }
 
-// GetImageName returns the ImageName field value
+// GetImageName returns the ImageName field value if set, zero value otherwise.
 func (o *CreateSnapshot) GetImageName() string {
-	if o == nil {
+	if o == nil || IsNil(o.ImageName) {
 		var ret string
 		return ret
 	}
-
-	return o.ImageName
+	return *o.ImageName
 }
 
-// GetImageNameOk returns a tuple with the ImageName field value
+// GetImageNameOk returns a tuple with the ImageName field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 func (o *CreateSnapshot) GetImageNameOk() (*string, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.ImageName) {
 		return nil, false
 	}
-	return &o.ImageName, true
+	return o.ImageName, true
 }
 
-// SetImageName sets field value
+// HasImageName returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasImageName() bool {
+	if o != nil && !IsNil(o.ImageName) {
+		return true
+	}
+
+	return false
+}
+
+// SetImageName gets a reference to the given string and assigns it to the ImageName field.
 func (o *CreateSnapshot) SetImageName(v string) {
-	o.ImageName = v
+	o.ImageName = &v
 }
 
 // GetEntrypoint returns the Entrypoint field value if set, zero value otherwise.
@@ -301,6 +310,38 @@ func (o *CreateSnapshot) SetDisk(v int32) {
 	o.Disk = &v
 }
 
+// GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
+func (o *CreateSnapshot) GetBuildInfo() CreateBuildInfo {
+	if o == nil || IsNil(o.BuildInfo) {
+		var ret CreateBuildInfo
+		return ret
+	}
+	return *o.BuildInfo
+}
+
+// GetBuildInfoOk returns a tuple with the BuildInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *CreateSnapshot) GetBuildInfoOk() (*CreateBuildInfo, bool) {
+	if o == nil || IsNil(o.BuildInfo) {
+		return nil, false
+	}
+	return o.BuildInfo, true
+}
+
+// HasBuildInfo returns a boolean if a field has been set.
+func (o *CreateSnapshot) HasBuildInfo() bool {
+	if o != nil && !IsNil(o.BuildInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildInfo gets a reference to the given CreateBuildInfo and assigns it to the BuildInfo field.
+func (o *CreateSnapshot) SetBuildInfo(v CreateBuildInfo) {
+	o.BuildInfo = &v
+}
+
 func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -312,7 +353,9 @@ func (o CreateSnapshot) MarshalJSON() ([]byte, error) {
 func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
-	toSerialize["imageName"] = o.ImageName
+	if !IsNil(o.ImageName) {
+		toSerialize["imageName"] = o.ImageName
+	}
 	if !IsNil(o.Entrypoint) {
 		toSerialize["entrypoint"] = o.Entrypoint
 	}
@@ -331,6 +374,9 @@ func (o CreateSnapshot) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Disk) {
 		toSerialize["disk"] = o.Disk
 	}
+	if !IsNil(o.BuildInfo) {
+		toSerialize["buildInfo"] = o.BuildInfo
+	}
 	return toSerialize, nil
 }
 
@@ -340,7 +386,6 @@ func (o *CreateSnapshot) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"name",
-		"imageName",
 	}
 
 	allProperties := make(map[string]interface{})

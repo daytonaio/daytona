@@ -34,7 +34,7 @@ var PushCmd = &cobra.Command{
 		ctx := context.Background()
 		sourceImage := args[0]
 
-		err := common.ValidateSnapshotName(sourceImage)
+		err := common.ValidateImageName(sourceImage)
 		if err != nil {
 			return err
 		}

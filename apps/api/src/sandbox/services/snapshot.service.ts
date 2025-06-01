@@ -16,13 +16,13 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
-import { CreateBuildInfoDto } from '../dto/create-build-info.dto'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
 
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 @Injectable()
 export class SnapshotService {
   constructor(
@@ -41,11 +41,7 @@ export class SnapshotService {
       return 'Images with tag ":latest" are not allowed'
     }
 
-    // Basic format check
-    const imageNameRegex =
-      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
-
-    if (!imageNameRegex.test(name)) {
+    if (!IMAGE_NAME_REGEX.test(name)) {
       return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
     }
 
@@ -53,29 +49,24 @@ export class SnapshotService {
   }
 
   private validateSnapshotName(name: string): string | null {
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
-
-    if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+    if (!IMAGE_NAME_REGEX.test(name)) {
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
     }
 
     return null
   }
 
-  async createSnapshot(
-    organization: Organization,
-    createSnapshotDto: CreateSnapshotDto,
-    buildInfo?: CreateBuildInfoDto,
-    general = false,
-  ) {
-    const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-    if (imageValidationError) {
-      throw new BadRequestException(imageValidationError)
-    }
-
+  async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
     if (nameValidationError) {
       throw new BadRequestException(nameValidationError)
+    }
+
+    if (createSnapshotDto.imageName) {
+      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+      if (imageValidationError) {
+        throw new BadRequestException(imageValidationError)
+      }
     }
 
     // check if the organization has reached the snapshot quota
@@ -98,12 +89,15 @@ export class SnapshotService {
       const snapshot = this.snapshotRepository.create({
         organizationId: organization.id,
         ...createSnapshotDto,
-        state: buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
         general,
       })
 
-      if (buildInfo) {
-        const buildSnapshotRef = generateBuildSnapshotRef(buildInfo.dockerfileContent, buildInfo.contextHashes)
+      if (createSnapshotDto.buildInfo) {
+        const buildSnapshotRef = generateBuildSnapshotRef(
+          createSnapshotDto.buildInfo.dockerfileContent,
+          createSnapshotDto.buildInfo.contextHashes,
+        )
 
         // Check if buildInfo with the same snapshotRef already exists
         const existingBuildInfo = await this.buildInfoRepository.findOne({
@@ -114,7 +108,7 @@ export class SnapshotService {
           snapshot.buildInfo = existingBuildInfo
         } else {
           const buildInfoEntity = this.buildInfoRepository.create({
-            ...buildInfo,
+            ...createSnapshotDto.buildInfo,
           })
           await this.buildInfoRepository.save(buildInfoEntity)
           snapshot.buildInfo = buildInfoEntity
@@ -139,7 +133,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     snapshot.enabled = enabled
@@ -152,7 +146,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
     if (snapshot.general) {
       throw new ForbiddenException('You cannot delete a general snapshot')
@@ -167,7 +161,7 @@ export class SnapshotService {
 
     const [items, total] = await this.snapshotRepository.findAndCount({
       // Retrieve all snapshots belonging to the organization as well as all general snapshots
-      where: [{ organizationId }, { general: true }],
+      where: [{ organizationId }, { general: true, hideFromUsers: false }],
       order: {
         general: 'ASC', // Sort general snapshots last
         lastUsedAt: {
@@ -194,7 +188,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     return snapshot
@@ -226,7 +220,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     snapshot.general = general
@@ -235,21 +229,21 @@ export class SnapshotService {
 
   private async validateOrganizationMaxQuotas(
     organization: Organization,
-    cpu: number,
-    memory: number,
-    disk: number,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
   ): Promise<void> {
-    if (cpu > organization.maxCpuPerSandbox) {
+    if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
       )
     }
-    if (memory > organization.maxMemoryPerSandbox) {
+    if (memory && memory > organization.maxMemoryPerSandbox) {
       throw new ForbiddenException(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
       )
     }
-    if (disk > organization.maxDiskPerSandbox) {
+    if (disk && disk > organization.maxDiskPerSandbox) {
       throw new ForbiddenException(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
       )
