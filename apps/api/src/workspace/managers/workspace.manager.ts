@@ -251,6 +251,7 @@ export class WorkspaceManager {
 
     if (nodeId) {
       await this.updateWorkspaceState(workspace.id, WorkspaceState.UNKNOWN, nodeId)
+      await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
       this.syncInstanceState(workspace.id)
       return
     }
@@ -289,6 +290,7 @@ export class WorkspaceManager {
 
     await this.updateWorkspaceState(workspace.id, WorkspaceState.BUILDING_IMAGE, nodeId)
     await this.nodeService.recalculateNodeUsage(nodeId)
+    await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
     this.syncInstanceState(workspace.id)
   }
 
@@ -649,18 +651,13 @@ export class WorkspaceManager {
       switch (imageNode.state) {
         case ImageNodeState.READY: {
           // TODO: "UNKNOWN" should probably be changed to something else
-          await this.workspaceRepository.update(workspace.id, {
-            state: WorkspaceState.UNKNOWN,
-          })
+          await this.updateWorkspaceState(workspace.id, WorkspaceState.UNKNOWN)
           await this.redisLockProvider.unlock(SYNC_INSTANCE_STATE_LOCK_KEY + workspace.id)
           this.syncInstanceState(workspace.id)
           return
         }
         case ImageNodeState.ERROR: {
-          await this.workspaceRepository.update(workspace.id, {
-            state: WorkspaceState.ERROR,
-            errorReason: imageNode.errorReason,
-          })
+          await this.updateWorkspaceErrorState(workspace.id, imageNode.errorReason)
           return
         }
       }
