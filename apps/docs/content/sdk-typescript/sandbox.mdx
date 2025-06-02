@@ -1,7 +1,8 @@
 ---
-title: 'Sandbox'
+title: "Sandbox"
 hideTitleOnPage: true
 ---
+
 
 ## Sandbox
 
@@ -23,10 +24,10 @@ Represents a Daytona Sandbox.
 
 ```ts
 new Sandbox(
-   id: string,
-   instance: SandboxInstance,
-   sandboxApi: WorkspaceApi,
-   toolboxApi: ToolboxApi,
+   id: string, 
+   instance: SandboxInstance, 
+   sandboxApi: WorkspaceApi, 
+   toolboxApi: ToolboxApi, 
    codeToolbox: SandboxCodeToolbox): Sandbox
 ```
 
@@ -62,7 +63,7 @@ Converts an API sandbox instance to a SandboxInfo object.
 
 - `SandboxInfo` - The converted SandboxInfo object
 
----
+***
 
 #### ~~toWorkspaceInfo()~~
 
@@ -84,7 +85,7 @@ Converts an API workspace instance to a WorkspaceInfo object.
 
 Use `toSandboxInfo` instead. This method will be removed in a future version.
 
----
+***
 
 #### archive()
 
@@ -101,7 +102,7 @@ Sandbox must be stopped before archiving.
 
 - `Promise<void>`
 
----
+***
 
 #### createLspServer()
 
@@ -118,7 +119,7 @@ diagnostics, and more.
 
 - `languageId` _string_ - The language server type (e.g., "typescript")
 - `pathToProject` _string_ - Path to the project root directory. Relative paths are resolved based on the user's
-  root directory.
+    root directory.
 
 **Returns**:
 
@@ -127,10 +128,10 @@ diagnostics, and more.
 **Example:**
 
 ```ts
-const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project');
 ```
 
----
+***
 
 #### delete()
 
@@ -144,7 +145,7 @@ Deletes the Sandbox.
 
 - `Promise<void>`
 
----
+***
 
 #### getPreviewLink()
 
@@ -163,17 +164,17 @@ to the URL.
 **Returns**:
 
 - `Promise<PortPreviewUrl>` - The response object for the preview link, which includes the `url`
-  and the `token` (to access private sandboxes).
+    and the `token` (to access private sandboxes).
 
 **Example:**
 
 ```ts
-const previewLink = await sandbox.getPreviewLink(3000)
-console.log(`Preview URL: ${previewLink.url}`)
-console.log(`Token: ${previewLink.token}`)
+const previewLink = await sandbox.getPreviewLink(3000);
+console.log(`Preview URL: ${previewLink.url}`);
+console.log(`Token: ${previewLink.token}`);
 ```
 
----
+***
 
 #### getUserRootDir()
 
@@ -190,11 +191,11 @@ Gets the root directory path for the logged in user inside the Sandbox.
 **Example:**
 
 ```ts
-const rootDir = await sandbox.getUserRootDir()
-console.log(`Sandbox root: ${rootDir}`)
+const rootDir = await sandbox.getUserRootDir();
+console.log(`Sandbox root: ${rootDir}`);
 ```
 
----
+***
 
 #### ~~getWorkspaceRootDir()~~
 
@@ -210,7 +211,7 @@ getWorkspaceRootDir(): Promise<undefined | string>
 
 Use `getUserRootDir` instead. This method will be removed in a future version.
 
----
+***
 
 #### info()
 
@@ -223,18 +224,18 @@ Gets structured information about the Sandbox.
 **Returns**:
 
 - `Promise<SandboxInfo>` - Detailed information about the Sandbox including its
-  configuration, resources, and current state
+    configuration, resources, and current state
 
 **Example:**
 
 ```ts
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id}:`)
-console.log(`State: ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
+const info = await sandbox.info();
+console.log(`Sandbox ${info.id}:`);
+console.log(`State: ${info.state}`);
+console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
 ```
 
----
+***
 
 #### setAutostopInterval()
 
@@ -251,7 +252,7 @@ Interactions using Sandbox Previews are not included.
 **Parameters**:
 
 - `interval` _number_ - Number of minutes of inactivity before auto-stopping.
-  Set to 0 to disable auto-stop. Default is 15 minutes.
+    Set to 0 to disable auto-stop. Default is 15 minutes.
 
 **Returns**:
 
@@ -265,12 +266,12 @@ Interactions using Sandbox Previews are not included.
 
 ```ts
 // Auto-stop after 1 hour
-await sandbox.setAutostopInterval(60)
+await sandbox.setAutostopInterval(60);
 // Or disable auto-stop
-await sandbox.setAutostopInterval(0)
+await sandbox.setAutostopInterval(0);
 ```
 
----
+***
 
 #### setLabels()
 
@@ -297,11 +298,11 @@ Labels are key-value pairs that can be used to organize and identify Sandboxes.
 await sandbox.setLabels({
   project: 'my-project',
   environment: 'development',
-  team: 'backend',
-})
+  team: 'backend'
+});
 ```
 
----
+***
 
 #### start()
 
@@ -316,7 +317,7 @@ This method starts the Sandbox and waits for it to be ready.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60-second timeout.
+    Defaults to 60-second timeout.
 
 **Returns**:
 
@@ -329,12 +330,12 @@ This method starts the Sandbox and waits for it to be ready.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox')
-await sandbox.start(40) // Wait up to 40 seconds
-console.log('Sandbox started successfully')
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.start(40);  // Wait up to 40 seconds
+console.log('Sandbox started successfully');
 ```
 
----
+***
 
 #### stop()
 
@@ -349,7 +350,7 @@ This method stops the Sandbox and waits for it to be fully stopped.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60-second timeout.
+    Defaults to 60-second timeout.
 
 **Returns**:
 
@@ -358,12 +359,12 @@ This method stops the Sandbox and waits for it to be fully stopped.
 **Example:**
 
 ```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox')
-await sandbox.stop()
-console.log('Sandbox stopped successfully')
+const sandbox = await daytona.getCurrentSandbox('my-sandbox');
+await sandbox.stop();
+console.log('Sandbox stopped successfully');
 ```
 
----
+***
 
 #### waitUntilStarted()
 
@@ -379,7 +380,7 @@ or encounters an error.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60 seconds.
+    Defaults to 60 seconds.
 
 **Returns**:
 
@@ -389,7 +390,7 @@ or encounters an error.
 
 - `DaytonaError` - If the sandbox ends up in an error state or fails to start within the timeout period.
 
----
+***
 
 #### waitUntilStopped()
 
@@ -405,7 +406,7 @@ or encounters an error.
 **Parameters**:
 
 - `timeout?` _number = 60_ - Maximum time to wait in seconds. 0 means no timeout.
-  Defaults to 60 seconds.
+    Defaults to 60 seconds.
 
 **Returns**:
 
@@ -438,7 +439,7 @@ Generates a command to run the provided code
 
 - `string`
 
----
+***
 
 ## SandboxInfo
 
@@ -452,18 +453,18 @@ Structured information about a Sandbox
 
   ##### Memberof
 
-  WorkspaceInfo
+    WorkspaceInfo
 
   ##### Inherited from
 
-  ```ts
-  Omit.created
-  ```
+    ```ts
+    Omit.created
+    ```
 
 - `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
 - `errorReason` _null \| string_ - Error message if Sandbox is in error state
 - `id` _string_ - Unique identifier for the Sandbox
-- `image?` _string_ - Docker image used for the Sandbox
+- `image?` _string_ - Docker image used for the Sandbox.
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
 - `lastSnapshot` _null \| string_ - When the last snapshot was created
 - `nodeDomain` _string_ - Domain name of the Sandbox node
@@ -484,10 +485,10 @@ resources, and current state.
 **Example:**
 
 ```ts
-const sandbox = await daytona.create()
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id} is ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
+const sandbox = await daytona.create();
+const info = await sandbox.info();
+console.log(`Sandbox ${info.id} is ${info.state}`);
+console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
 ```
 
 **Extends:**
@@ -504,242 +505,241 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.autoStopInterval
-  ```
+    ```ts
+    Omit.autoStopInterval
+    ```
 
 - `cpu?` _number_ - The CPU quota for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.cpu
-  ```
+    ```ts
+    Omit.cpu
+    ```
 
 - `disk?` _number_ - The disk quota for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.disk
-  ```
+    ```ts
+    Omit.disk
+    ```
 
 - `env` _{}_ - Environment variables for the workspace
 
   ##### Index Signature
 
-  ```ts
-  [key: string]: string
-  ```
+    ```ts
+    [key: string]: string
+    ```
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.env
-  ```
+    ```ts
+    Omit.env
+    ```
 
 - `errorReason?` _string_ - The error reason of the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.errorReason
-  ```
+    ```ts
+    Omit.errorReason
+    ```
 
 - `gpu?` _number_ - The GPU quota for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.gpu
-  ```
+    ```ts
+    Omit.gpu
+    ```
 
 - `id` _string_ - The ID of the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.id
-  ```
+    ```ts
+    Omit.id
+    ```
 
 - `image?` _string_ - The image used for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.image
-  ```
+    ```ts
+    Omit.image
+    ```
 
 - `info?` _SandboxInfo_
 - `labels` _{}_ - Labels for the workspace
 
   ##### Index Signature
 
-  ```ts
-  [key: string]: string
-  ```
+    ```ts
+    [key: string]: string
+    ```
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.labels
-  ```
+    ```ts
+    Omit.labels
+    ```
 
 - `memory?` _number_ - The memory quota for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.memory
-  ```
+    ```ts
+    Omit.memory
+    ```
 
 - `~~name~~` _string_ - The name of the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
-  ```ts
-  Omit.name
-  ```
+    ```ts
+    Omit.name
+    ```
 
   - **_Deprecated_** - ##### Inherited from
-
 - `organizationId` _string_ - The organization ID of the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.organizationId
-  ```
+    ```ts
+    Omit.organizationId
+    ```
 
 - `public` _boolean_ - Whether the workspace http preview is public
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.public
-  ```
+    ```ts
+    Omit.public
+    ```
 
 - `snapshotCreatedAt?` _string_ - The creation timestamp of the last snapshot
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.snapshotCreatedAt
-  ```
+    ```ts
+    Omit.snapshotCreatedAt
+    ```
 
 - `snapshotState?` _WorkspaceSnapshotStateEnum_ - The state of the snapshot
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.snapshotState
-  ```
+    ```ts
+    Omit.snapshotState
+    ```
 
 - `state?` _WorkspaceState_ - The state of the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.state
-  ```
+    ```ts
+    Omit.state
+    ```
 
 - `target` _string_ - The target environment for the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.target
-  ```
+    ```ts
+    Omit.target
+    ```
 
 - `user` _string_ - The user associated with the project
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.user
-  ```
+    ```ts
+    Omit.user
+    ```
 
 - `volumes?` _WorkspaceVolume\[\]_ - Array of volumes attached to the workspace
 
   ##### Memberof
 
-  Workspace
+    Workspace
 
   ##### Inherited from
 
-  ```ts
-  Omit.volumes
-  ```
+    ```ts
+    Omit.volumes
+    ```
 
 - `Omit`\<`ApiSandbox`, `"info"`\>
 
@@ -758,9 +758,9 @@ Resources allocated to a Sandbox
 
 ```ts
 const resources: SandboxResources = {
-  cpu: '2',
-  gpu: '1',
-  memory: '4Gi',
-  disk: '20Gi',
-}
+  cpu: "2",
+  gpu: "1",
+  memory: "4Gi",
+  disk: "20Gi"
+};
 ```

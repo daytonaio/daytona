@@ -250,7 +250,7 @@ class Sandbox:
         Raises:
             DaytonaError: If timeout is negative; If Sandbox fails to start or times out
         """
-        state = None
+        state = (self.info()).state
         while state != "started":
             response = self.sandbox_api.get_workspace(self.id)
             state = response.state
@@ -301,7 +301,7 @@ class Sandbox:
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
-        state = None
+        state = (self.info()).state
         while state != "stopped":
             try:
                 response = self.sandbox_api.get_workspace(self.id)

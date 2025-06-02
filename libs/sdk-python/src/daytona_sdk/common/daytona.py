@@ -4,8 +4,9 @@
 import warnings
 from dataclasses import dataclass
 from enum import Enum
-from typing import Annotated, Dict, List, Optional
+from typing import Annotated, Dict, List, Optional, Union
 
+from daytona_sdk.common.image import Image
 from daytona_sdk.common.sandbox import SandboxTargetRegion
 from daytona_sdk.common.volume import VolumeMount
 from pydantic import BaseModel, Field, model_validator
@@ -124,7 +125,8 @@ class CreateSandboxParams(BaseModel):
     Attributes:
         language (Optional[CodeLanguage]): Programming language for the Sandbox ("python", "javascript", "typescript").
         Defaults to "python".
-        image (Optional[str]): Custom Docker image to use for the Sandbox.
+        image (Optional[Union[str, Image]]): Custom Docker image to use for the Sandbox. If an Image object is provided,
+            the image will be dynamically built.
         os_user (Optional[str]): OS user for the Sandbox.
         env_vars (Optional[Dict[str, str]]): Environment variables to set in the Sandbox.
         labels (Optional[Dict[str, str]]): Custom labels for the Sandbox.
@@ -148,7 +150,7 @@ class CreateSandboxParams(BaseModel):
     """
 
     language: Optional[CodeLanguage] = None
-    image: Optional[str] = None
+    image: Optional[Union[str, Image]] = None
     os_user: Optional[str] = None
     env_vars: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
