@@ -6,13 +6,13 @@
 import { useState, useEffect } from 'react'
 import { SortingState } from '@tanstack/react-table'
 
-export const useTableSorting = (tableId: string) => {
+export const useTableSorting = (tableId: string, initialState?: SortingState) => {
   const [sorting, setSorting] = useState<SortingState>(() => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem(`table-sorting-${tableId}`)
-      return stored ? JSON.parse(stored) : []
+      return stored ? JSON.parse(stored) : initialState || []
     }
-    return []
+    return initialState || []
   })
 
   useEffect(() => {
@@ -21,6 +21,5 @@ export const useTableSorting = (tableId: string) => {
     }
   }, [sorting, tableId])
 
-  // Return as an array to match the useState pattern that TanStack Table expects
   return [sorting, setSorting] as const
 }

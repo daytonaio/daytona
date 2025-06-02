@@ -84,16 +84,10 @@ export function WorkspaceTable({
     [authenticatedUserHasPermission],
   )
 
-  const initialSorting: SortingState = [
+  const [sorting, setSorting] = useTableSorting('workspaces', [
     { id: 'state', desc: false },
     { id: 'lastEvent', desc: true },
-  ]
-
-  // Get persisted sorting (if any)
-  const [persistedSorting, setPersistedSorting] = useTableSorting('workspaces')
-
-  // Use initial sorting only if no persisted sorting exists
-  const [sorting, setSorting] = useState<SortingState>(persistedSorting.length > 0 ? persistedSorting : initialSorting)
+  ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
