@@ -57,11 +57,23 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 		if autoStopIntervalStr, ok := autoStopInterval.(string); ok && autoStopIntervalStr != "" {
 			autoStopIntervalValue, err := strconv.Atoi(autoStopIntervalStr)
 			if err != nil {
-				log.Error(fmt.Errorf("invalid auto stop interval value, fallack to default (15m)"))
+				log.Error(fmt.Errorf("invalid auto stop interval value, fallback to default (15m)"))
 				autoStopIntervalValue = 15
 			}
 
 			createSandbox.SetAutoStopInterval(int32(autoStopIntervalValue))
+		}
+	}
+
+	if autoArchiveInterval, ok := request.Params.Arguments["auto_archive_interval"]; ok && autoArchiveInterval != nil {
+		if autoArchiveIntervalStr, ok := autoArchiveInterval.(string); ok && autoArchiveIntervalStr != "" {
+			autoArchiveIntervalValue, err := strconv.Atoi(autoArchiveIntervalStr)
+			if err != nil {
+				log.Error(fmt.Errorf("invalid auto archive interval value, fallback to default (7d)"))
+				autoArchiveIntervalValue = 7 * 24 * 60
+			}
+
+			createSandbox.SetAutoArchiveInterval(int32(autoArchiveIntervalValue))
 		}
 	}
 

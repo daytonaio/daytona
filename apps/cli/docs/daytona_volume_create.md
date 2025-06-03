@@ -20,4 +20,4 @@ daytona volume create [NAME] [flags]
 
 ### SEE ALSO
 
-* [daytona volume](daytona_volume.md)  - Manage Daytona volumes
+- [daytona volume](daytona_volume.md) - Manage Daytona volumes

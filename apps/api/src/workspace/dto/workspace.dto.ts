@@ -198,6 +198,14 @@ export class WorkspaceDto {
   autoStopInterval?: number
 
   @ApiPropertyOptional({
+    description: 'Auto-archive interval in minutes',
+    example: 7 * 24 * 60,
+    required: false,
+  })
+  @IsOptional()
+  autoArchiveInterval?: number
+
+  @ApiPropertyOptional({
     description: 'Array of volumes attached to the workspace',
     type: [WorkspaceVolume],
     required: false,
@@ -232,6 +240,7 @@ export class WorkspaceDto {
       snapshotState: workspace.snapshotState,
       snapshotCreatedAt: workspace.lastSnapshotAt?.toISOString(),
       autoStopInterval: workspace.autoStopInterval,
+      autoArchiveInterval: workspace.autoArchiveInterval,
       info: {
         name: workspace.id,
         created: workspace.createdAt?.toISOString(),
@@ -247,6 +256,7 @@ export class WorkspaceDto {
           memory: workspace.mem,
           disk: workspace.disk,
           autoStopInterval: workspace.autoStopInterval,
+          autoArchiveInterval: workspace.autoArchiveInterval,
         }),
       },
     }

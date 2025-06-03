@@ -155,6 +155,10 @@ export class Workspace {
   @Column({ default: 15 })
   autoStopInterval?: number
 
+  //  this is the interval in minutes after which a continuously stopped workspace will be automatically archived
+  @Column({ default: 7 * 24 * 60 })
+  autoArchiveInterval?: number
+
   @Column({ default: false })
   pending?: boolean
 

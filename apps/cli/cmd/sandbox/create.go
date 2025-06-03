@@ -87,6 +87,10 @@ var CreateCmd = &cobra.Command{
 		if autoStopFlag > 0 {
 			createWorkspace.SetAutoStopInterval(autoStopFlag)
 		}
+		if autoArchiveFlag >= 0 {
+			createWorkspace.SetAutoArchiveInterval(autoArchiveFlag)
+		}
+
 		if dockerfileFlag != "" {
 			createBuildInfoDto, err := common.GetCreateBuildInfoDto(ctx, dockerfileFlag, contextFlag)
 			if err != nil {
@@ -177,21 +181,22 @@ var CreateCmd = &cobra.Command{
 }
 
 var (
-	imageFlag      string
-	userFlag       string
-	envFlag        []string
-	labelsFlag     []string
-	publicFlag     bool
-	classFlag      string
-	targetFlag     string
-	cpuFlag        int32
-	gpuFlag        int32
-	memoryFlag     int32
-	diskFlag       int32
-	autoStopFlag   int32
-	volumesFlag    []string
-	dockerfileFlag string
-	contextFlag    []string
+	imageFlag       string
+	userFlag        string
+	envFlag         []string
+	labelsFlag      []string
+	publicFlag      bool
+	classFlag       string
+	targetFlag      string
+	cpuFlag         int32
+	gpuFlag         int32
+	memoryFlag      int32
+	diskFlag        int32
+	autoStopFlag    int32
+	autoArchiveFlag int32
+	volumesFlag     []string
+	dockerfileFlag  string
+	contextFlag     []string
 )
 
 func init() {
@@ -207,6 +212,7 @@ func init() {
 	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory allocated to the sandbox in MB")
 	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space allocated to the sandbox in GB")
 	CreateCmd.Flags().Int32Var(&autoStopFlag, "auto-stop", 0, "Auto-stop interval in minutes (0 means disabled)")
+	CreateCmd.Flags().Int32Var(&autoArchiveFlag, "auto-archive", 10080, "Auto-archive interval in minutes (0 means the maximum interval will be used)")
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
 	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox image")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")

@@ -59,7 +59,8 @@ You can also customize sandbox creation:
 sandbox = daytona.create(CreateSandboxParams(
     language="python",
     env_vars={"PYTHON_ENV": "development"},
-    auto_stop_interval=60  # Auto-stop after 1 hour of inactivity
+    auto_stop_interval=60,  # Auto-stop after 1 hour of inactivity
+    auto_archive_interval=60  # Auto-archive after a Sandbox has been stopped for 1 hour
 ))
 ```
 

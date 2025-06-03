@@ -68,6 +68,7 @@ const configuration = {
     roleName: process.env.S3_ROLE_NAME,
   },
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
+  maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
 }
 
 export { configuration }

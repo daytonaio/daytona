@@ -49,6 +49,11 @@ class CreateWorkspace(BaseModel):
     auto_stop_interval: Optional[StrictInt] = Field(
         default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
     )
+    auto_archive_interval: Optional[StrictInt] = Field(
+        default=None,
+        description="Auto-archive interval in minutes (0 means the maximum interval will be used)",
+        alias="autoArchiveInterval",
+    )
     volumes: Optional[List[WorkspaceVolume]] = Field(
         default=None, description="Array of volumes to attach to the workspace"
     )
@@ -69,6 +74,7 @@ class CreateWorkspace(BaseModel):
         "memory",
         "disk",
         "autoStopInterval",
+        "autoArchiveInterval",
         "volumes",
         "buildInfo",
     ]
@@ -175,6 +181,7 @@ class CreateWorkspace(BaseModel):
                 "memory": obj.get("memory"),
                 "disk": obj.get("disk"),
                 "autoStopInterval": obj.get("autoStopInterval"),
+                "autoArchiveInterval": obj.get("autoArchiveInterval"),
                 "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None
                 else None,

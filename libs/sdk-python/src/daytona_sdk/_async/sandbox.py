@@ -343,6 +343,32 @@ class AsyncSandbox:
         await self.sandbox_api.set_autostop_interval(self.id, interval)
         self.instance.auto_stop_interval = interval
 
+    @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
+    async def set_auto_archive_interval(self, interval: int) -> None:
+        """Sets the auto-archive interval for the Sandbox.
+
+        The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+        Args:
+            interval (int): Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+                Set to 0 for the maximum interval. Default is 7 days.
+
+        Raises:
+            DaytonaError: If interval is negative
+
+        Example:
+            ```python
+            # Auto-archive after 1 hour
+            sandbox.set_autoarchive_interval(60)
+            # Or use the maximum interval
+            sandbox.set_autoarchive_interval(0)
+            ```
+        """
+        if not isinstance(interval, int) or interval < 0:
+            raise DaytonaError("Auto-archive interval must be a non-negative integer")
+        await self.sandbox_api.set_auto_archive_interval(self.id, interval)
+        self.instance.auto_archive_interval = interval
+
     @intercept_errors(message_prefix="Failed to get preview link: ")
     async def get_preview_link(self, port: int) -> PortPreviewUrl:
         """Retrieves the preview link for the sandbox at the specified port. If the port is closed,
@@ -411,6 +437,7 @@ class AsyncSandbox:
             snapshot_state=instance.snapshot_state,
             snapshot_created_at=instance.snapshot_created_at,
             auto_stop_interval=instance.auto_stop_interval,
+            auto_archive_interval=instance.auto_archive_interval,
             created=instance.info.created or "",
             node_domain=provider_metadata.get("nodeDomain", ""),
             region=provider_metadata.get("region", ""),
