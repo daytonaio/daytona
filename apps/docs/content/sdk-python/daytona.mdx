@@ -84,7 +84,9 @@ daytona2 = Daytona(config)
 ```python
 @intercept_errors(message_prefix="Failed to create sandbox: ")
 def create(params: Optional[CreateSandboxParams] = None,
-           timeout: Optional[float] = 60) -> Sandbox
+           timeout: Optional[float] = 60,
+           *,
+           on_image_build_logs: Callable[[str], None] = None) -> Sandbox
 ```
 
 Creates Sandboxes with default or custom configurations. You can specify various parameters,
@@ -96,6 +98,9 @@ including language, image, resources, environment variables, and volumes for the
   defaults to Python language.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
+- `on_image_build_logs` _Callable[[str], None]_ - This callback function handles image build logs.
+  It's invoked only when `params.image` is an instance of `Image` and there's no existing
+  image in Daytona with the same configuration.
 
 **Returns**:
 
@@ -291,6 +296,35 @@ Stops a Sandbox and waits for it to be stopped.
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to stop or times out
 
+#### Daytona.create_image
+
+```python
+@intercept_errors(message_prefix="Failed to build image: ")
+@with_timeout(error_message=lambda self, timeout: (
+    f"Failed to build image within {timeout} seconds timeout period."))
+def create_image(name: str,
+                 image: Image,
+                 *,
+                 on_logs: Callable[[str], None] = None,
+                 timeout: Optional[float] = 0) -> None
+```
+
+Creates and registers a new image from the given Image definition.
+
+**Arguments**:
+
+- `name` _str_ - The name of the image to create.
+- `image` _Image_ - The Image instance.
+- `on_logs` _Callable[[str], None]_ - This callback function handles image build logs.
+- `timeout` _Optional[float]_ - Default is no timeout. Timeout in seconds (0 means no timeout).
+
+**Example**:
+
+```python
+image = Image.debianSlim('3.12').pipInstall('numpy')
+daytona.create_image('my-image', image, on_logs=print)
+```
+
 ## CodeLanguage
 
 ```python
@@ -378,7 +412,8 @@ Parameters for creating a new Sandbox.
 
 - `language` _Optional[CodeLanguage]_ - Programming language for the Sandbox ("python", "javascript", "typescript").
   Defaults to "python".
-- `image` _Optional[str]_ - Custom Docker image to use for the Sandbox.
+- `image` _Optional[Union[str, Image]]_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
+  the image will be dynamically built.
 - `os_user` _Optional[str]_ - OS user for the Sandbox.
 - `env_vars` _Optional[Dict[str, str]]_ - Environment variables to set in the Sandbox.
 - `labels` _Optional[Dict[str, str]]_ - Custom labels for the Sandbox.

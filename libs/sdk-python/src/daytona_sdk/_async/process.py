@@ -1,12 +1,10 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: AGPL-3.0
 
-import asyncio
 import base64
 import json
 from typing import Awaitable, Callable, Dict, List, Optional
 
-import httpx
 from daytona_api_client_async import (
     Command,
     CreateSessionRequest,
@@ -16,6 +14,7 @@ from daytona_api_client_async import (
     ToolboxApi,
 )
 from daytona_sdk._utils.errors import intercept_errors
+from daytona_sdk._utils.stream import process_streaming_response
 from daytona_sdk.code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
 from daytona_sdk.common.charts import parse_chart
 from daytona_sdk.common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
@@ -389,45 +388,30 @@ class AsyncProcess:
             )
             ```
         """
-        url = (
-            f"{self.toolbox_api.api_client.configuration.host}/toolbox/{self.instance.id}"
-            + f"/toolbox/process/session/{session_id}/command/{command_id}/logs?follow=true"
+        _, url, *_ = self.toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
+            workspace_id=self.instance.id,
+            session_id=session_id,
+            command_id=command_id,
+            x_daytona_organization_id=None,
+            follow=True,
+            _request_auth=None,
+            _content_type=None,
+            _headers=None,
+            _host_index=None,
         )
-        headers = self.toolbox_api.api_client.default_headers
 
-        async with httpx.AsyncClient(timeout=None) as client:
-            async with client.stream("GET", url, headers=headers) as response:
-                stream = response.aiter_bytes()
-                next_chunk = None
-                exit_code_seen_count = 0
+        # unasync: preserve end
+        async def should_terminate():
+            return (await self.get_session_command(session_id, command_id)).exit_code is not None
 
-                while True:
-                    if next_chunk is None:
-                        next_chunk = asyncio.create_task(anext(stream, None))
-                    timeout = asyncio.create_task(asyncio.sleep(2))
+        # unasync: preserve start
 
-                    done, pending = await asyncio.wait([next_chunk, timeout], return_when=asyncio.FIRST_COMPLETED)
-
-                    if next_chunk in done:
-                        timeout.cancel()
-                        chunk = next_chunk.result()
-                        next_chunk = None
-
-                        if chunk is None:
-                            break
-
-                        on_logs(chunk.decode("utf-8"))
-                    elif timeout in done:
-                        # unasync: preserve end
-                        cmd_status = await self.get_session_command(session_id, command_id)
-                        # unasync: preserve start
-
-                        if cmd_status.exit_code is not None:
-                            exit_code_seen_count += 1
-                            if exit_code_seen_count > 1:
-                                if next_chunk in pending:
-                                    next_chunk.cancel()
-                                break
+        await process_streaming_response(
+            url=url,
+            headers=self.toolbox_api.api_client.default_headers,
+            on_chunk=on_logs,
+            should_terminate=should_terminate,
+        )
 
     # unasync: preserve end
 
