@@ -1,16 +1,15 @@
-## daytona sandbox info
+## daytona volume list
 
-Get sandbox info
+List all volumes
 
 ```
-daytona sandbox info [SANDBOX_ID] [flags]
+daytona volume list [flags]
 ```
 
 ### Options
 
 ```
   -f, --format string   Output format. Must be one of (yaml, json)
-  -v, --verbose         Include verbose output
 ```
 
 ### Options inherited from parent commands
@@ -21,4 +20,4 @@ daytona sandbox info [SANDBOX_ID] [flags]
 
 ### SEE ALSO
 
-* [daytona sandbox](daytona_sandbox.md)  - Manage Daytona sandboxes
+* [daytona volume](daytona_volume.md)  - Manage Daytona volumes
