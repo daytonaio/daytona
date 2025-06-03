@@ -41,9 +41,13 @@ options:
     default_value: 'false'
     usage: Make sandbox publicly accessible
   - name: target
-    usage: Target region (eu, us, asia)
+    usage: Target region (eu, us)
   - name: user
     usage: User associated with the sandbox
+  - name: volume
+    shorthand: v
+    default_value: '[]'
+    usage: 'Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)'
 inherited_options:
   - name: help
     default_value: 'false'
