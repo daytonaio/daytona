@@ -29,6 +29,7 @@ daytona_api_client/models/create_api_key.py
 daytona_api_client/models/create_build_info.py
 daytona_api_client/models/create_docker_registry.py
 daytona_api_client/models/create_image.py
+daytona_api_client/models/create_linked_account.py
 daytona_api_client/models/create_node.py
 daytona_api_client/models/create_organization.py
 daytona_api_client/models/create_organization_invitation.py

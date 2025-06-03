@@ -29,6 +29,7 @@ models/create-api-key.ts
 models/create-build-info.ts
 models/create-docker-registry.ts
 models/create-image.ts
+models/create-linked-account.ts
 models/create-node.ts
 models/create-organization-invitation.ts
 models/create-organization-quota.ts

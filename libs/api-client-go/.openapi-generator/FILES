@@ -27,6 +27,7 @@ model_create_api_key.go
 model_create_build_info.go
 model_create_docker_registry.go
 model_create_image.go
+model_create_linked_account.go
 model_create_node.go
 model_create_organization.go
 model_create_organization_invitation.go

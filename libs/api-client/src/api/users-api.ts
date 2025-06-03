@@ -34,6 +34,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { AccountProvider } from '../models'
 // @ts-ignore
+import type { CreateLinkedAccount } from '../models'
+// @ts-ignore
 import type { CreateUser } from '../models'
 // @ts-ignore
 import type { User } from '../models'
@@ -145,6 +147,86 @@ export const UsersApiAxiosParamCreator = function (configuration?: Configuration
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get user by ID
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getUser: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'id' is not null or undefined
+      assertParamExists('getUser', 'id', id)
+      const localVarPath = `/users/{id}`.replace(`{${'id'}}`, encodeURIComponent(String(id)))
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Link account
+     * @param {CreateLinkedAccount} createLinkedAccount
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    linkAccount: async (
+      createLinkedAccount: CreateLinkedAccount,
+      options: RawAxiosRequestConfig = {},
+    ): Promise<RequestArgs> => {
+      // verify required parameter 'createLinkedAccount' is not null or undefined
+      assertParamExists('linkAccount', 'createLinkedAccount', createLinkedAccount)
+      const localVarPath = `/users/linked-accounts`
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      localVarHeaderParameter['Content-Type'] = 'application/json'
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
+      localVarRequestOptions.data = serializeDataIfNeeded(createLinkedAccount, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -345,6 +427,52 @@ export const UsersApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get user by ID
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getUser(
+      id: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<User>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getUser(id, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['UsersApi.getUser']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
+     * @summary Link account
+     * @param {CreateLinkedAccount} createLinkedAccount
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async linkAccount(
+      createLinkedAccount: CreateLinkedAccount,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.linkAccount(createLinkedAccount, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['UsersApi.linkAccount']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary List all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -452,6 +580,26 @@ export const UsersApiFactory = function (configuration?: Configuration, basePath
     },
     /**
      *
+     * @summary Get user by ID
+     * @param {string} id
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getUser(id: string, options?: RawAxiosRequestConfig): AxiosPromise<User> {
+      return localVarFp.getUser(id, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
+     * @summary Link account
+     * @param {CreateLinkedAccount} createLinkedAccount
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    linkAccount(createLinkedAccount: CreateLinkedAccount, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+      return localVarFp.linkAccount(createLinkedAccount, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary List all users
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -527,6 +675,34 @@ export class UsersApi extends BaseAPI {
   public getAvailableAccountProviders(options?: RawAxiosRequestConfig) {
     return UsersApiFp(this.configuration)
       .getAvailableAccountProviders(options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get user by ID
+   * @param {string} id
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof UsersApi
+   */
+  public getUser(id: string, options?: RawAxiosRequestConfig) {
+    return UsersApiFp(this.configuration)
+      .getUser(id, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Link account
+   * @param {CreateLinkedAccount} createLinkedAccount
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof UsersApi
+   */
+  public linkAccount(createLinkedAccount: CreateLinkedAccount, options?: RawAxiosRequestConfig) {
+    return UsersApiFp(this.configuration)
+      .linkAccount(createLinkedAccount, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
