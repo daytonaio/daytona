@@ -12,6 +12,11 @@ converting async/await patterns to synchronous equivalents, while:
   - dropping regions marked by # unasync: delete start / # unasync: delete end
   - stripping all Awaitable[...] and cleaning up Awaitable imports
   - replacing aiofiles.open calls with built-in open and removing aiofiles imports
+  - translating await asyncio.to_thread(...) calls into direct method calls
+  - removing unused asyncio imports
+  - converting `await process_streaming_response(...)` into `asyncio.run(process_streaming_response(...))`
+  - wrapping any unwrapped calls to `process_streaming_response(...)` in `asyncio.run(...)`
+    (but not when `process_streaming_response` appears inside an import statement)
 """
 
 import logging
@@ -59,6 +64,8 @@ ADDITIONAL_REPLACEMENTS = {
     "AsyncSandbox": "Sandbox",
     # aiofiles replacement
     "aiofiles.open": "open",
+    # aioboto3 replacement
+    "aioboto3": "boto3",
 }
 
 # Complex regex-based tweaks
@@ -159,6 +166,283 @@ def apply_replacements(text: str, replacements: list) -> str:
     return "".join(processed_lines)
 
 
+def replace_all_to_thread_calls(text: str) -> str:
+    """
+    Translate all occurrences of:
+      await asyncio.to_thread(func_expr, arg1, arg2, ...)
+    into:
+      func_expr(arg1, arg2, ...)
+    """
+
+    result_parts = []
+    i = 0
+    while True:
+        idx = text.find("asyncio.to_thread", i)
+        if idx == -1:
+            # No more occurrences; append the remaining text
+            result_parts.append(text[i:])
+            break
+
+        # Append text up to the match
+        result_parts.append(text[i:idx])
+
+        # Find the opening parenthesis after "asyncio.to_thread"
+        start_paren = text.find("(", idx)
+        if start_paren == -1:
+            # Malformed usage; just skip it
+            i = idx + len("asyncio.to_thread")
+            result_parts.append(text[idx:i])
+            continue
+
+        # Find the matching closing parenthesis
+        paren_count = 0
+        j = start_paren
+        end_paren = None
+        while j < len(text):
+            if text[j] == "(":
+                paren_count += 1
+            elif text[j] == ")":
+                paren_count -= 1
+                if paren_count == 0:
+                    end_paren = j
+                    break
+            j += 1
+
+        if end_paren is None:
+            # No matching closing parenthesis; skip
+            i = idx
+            result_parts.append(text[idx : idx + 1])
+            continue
+
+        # Extract the inside of the parentheses
+        inside = text[start_paren + 1 : end_paren]
+
+        # Split inside into function expression and arguments at top-level comma
+        func_expr = ""
+        rest_args = ""
+        par = 0
+        split_index = None
+        for k, ch in enumerate(inside):
+            if ch == "(":
+                par += 1
+            elif ch == ")":
+                par -= 1
+            elif ch == "," and par == 0:
+                split_index = k
+                break
+
+        if split_index is not None:
+            func_expr = inside[:split_index].strip()
+            rest_args = inside[split_index + 1 :].strip()
+        else:
+            func_expr = inside.strip()
+            rest_args = ""
+
+        # Construct replacement text
+        if rest_args:
+            replacement = f"{func_expr}({rest_args})"
+        else:
+            replacement = f"{func_expr}()"
+
+        result_parts.append(replacement)
+        i = end_paren + 1
+
+    return "".join(result_parts)
+
+
+def replace_await_process_streaming(text: str) -> str:
+    """
+    Replace occurrences of:
+      await process_streaming_response(...)
+
+    with:
+      asyncio.run(process_streaming_response(...))
+    """
+    result = []
+    i = 0
+    pattern = "await process_streaming_response"
+    plen = len(pattern)
+
+    while True:
+        idx = text.find(pattern, i)
+        if idx == -1:
+            result.append(text[i:])
+            break
+
+        # Append text up to the match
+        result.append(text[i:idx])
+
+        # Find the opening parenthesis after the pattern
+        start_paren = text.find("(", idx + plen)
+        if start_paren == -1:
+            # Malformed usage; just copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Now find the matching closing parenthesis for this call
+        paren_count = 0
+        j = start_paren
+        end_paren = None
+        while j < len(text):
+            if text[j] == "(":
+                paren_count += 1
+            elif text[j] == ")":
+                paren_count -= 1
+                if paren_count == 0:
+                    end_paren = j
+                    break
+            j += 1
+
+        if end_paren is None:
+            # Unbalanced parentheses; copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Extract the inside of the parentheses
+        call_args = text[start_paren + 1 : end_paren]
+
+        # Reconstruct the replacement:
+        #   "asyncio.run(process_streaming_response(" + call_args + "))"
+        replacement = f"asyncio.run(process_streaming_response({call_args}))"
+        result.append(replacement)
+
+        # Advance i past the original call
+        i = end_paren + 1
+
+    return "".join(result)
+
+
+def replace_unwrapped_process_streaming(text: str) -> str:
+    """
+    Wrap standalone calls to process_streaming_response(...) with asyncio.run(...)
+    if they are not already wrapped, and skip wrapping in import statements.
+    """
+    result_parts = []
+    i = 0
+    func_name = "process_streaming_response"
+    wrapper_prefix = "asyncio.run("
+    length_name = len(func_name)
+
+    while True:
+        idx = text.find(func_name, i)
+        if idx == -1:
+            result_parts.append(text[i:])
+            break
+
+        # Append text up to this occurrence
+        result_parts.append(text[i:idx])
+
+        # Determine the start of the current line
+        line_start = text.rfind("\n", 0, idx) + 1
+        line_prefix = text[line_start:idx].lstrip()
+
+        # If this occurrence is inside an import statement, skip wrapping
+        if line_prefix.startswith("import ") or line_prefix.startswith("from "):
+            # Find end of this occurrence (skip over the function name and any following "()")
+            j = idx + length_name
+            # If next non-space character is '(', skip to matching ')'
+            while j < len(text) and text[j].isspace():
+                j += 1
+            if j < len(text) and text[j] == "(":
+                paren_count = 0
+                k = j
+                while k < len(text):
+                    if text[k] == "(":
+                        paren_count += 1
+                    elif text[k] == ")":
+                        paren_count -= 1
+                        if paren_count == 0:
+                            j = k + 1
+                            break
+                    k += 1
+            result_parts.append(text[idx:j])
+            i = j
+            continue
+
+        # Find opening parenthesis after the function name
+        start_paren = text.find("(", idx + length_name)
+        if start_paren == -1:
+            # No parenthesis, skip this occurrence
+            result_parts.append(text[idx : idx + length_name])
+            i = idx + length_name
+            continue
+
+        # Find matching closing parenthesis
+        paren_count = 0
+        j = start_paren
+        end_paren = None
+        while j < len(text):
+            if text[j] == "(":
+                paren_count += 1
+            elif text[j] == ")":
+                paren_count -= 1
+                if paren_count == 0:
+                    end_paren = j
+                    break
+            j += 1
+        if end_paren is None:
+            # Unbalanced parentheses, copy as is and move on
+            result_parts.append(text[idx : idx + length_name])
+            i = idx + length_name
+            continue
+
+        # Check if already wrapped in asyncio.run(
+        head = text[:idx]
+        if re.search(r"asyncio\.run\s*\(\s*$", head):
+            # Already within an asyncio.run(, so do not wrap
+            result_parts.append(text[idx : end_paren + 1])
+            i = end_paren + 1
+            continue
+
+        # Otherwise, wrap the call
+        original_call = text[idx : end_paren + 1]
+        wrapped = f"{wrapper_prefix}{original_call})"
+        result_parts.append(wrapped)
+        i = end_paren + 1
+
+    return "".join(result_parts)
+
+
+def remove_unused_asyncio_imports(text: str) -> str:
+    """
+    Remove "import asyncio" and "from asyncio import X, Y" lines if the names
+    imported from asyncio are not used elsewhere in the file.
+    """
+    lines = text.splitlines(keepends=True)
+    new_lines = []
+    for line in lines:
+        # Check for "import asyncio"
+        if re.match(r"^\s*import asyncio\s*$", line):
+            occurrences = re.findall(r"\basyncio\b", text)
+            if len(occurrences) <= 1:
+                continue  # drop this line
+            new_lines.append(line)
+            continue
+
+        # Check for "from asyncio import X, Y"
+        m = re.match(r"^\s*from asyncio import (.+)$", line)
+        if m:
+            imported = [imp.strip() for imp in m.group(1).split(",")]
+            used_any = False
+            for imp in imported:
+                pattern = rf"\b{re.escape(imp)}\b"
+                if re.search(pattern, text):
+                    occurrences = re.findall(pattern, text)
+                    if len(occurrences) > 1:
+                        used_any = True
+                        break
+            if not used_any:
+                continue  # drop this import line
+            new_lines.append(line)
+            continue
+
+        new_lines.append(line)
+
+    return "".join(new_lines)
+
+
 def restore_blocks(path: Path, block_map: dict):
     content = path.read_text(encoding="utf-8")
     for placeholder, block in block_map.items():
@@ -169,22 +453,40 @@ def restore_blocks(path: Path, block_map: dict):
 def post_process(path: Path):
     text = path.read_text(encoding="utf-8")
     original = text
+
+    # 1) Apply existing POST_REPLACEMENTS
     text = apply_replacements(text, POST_REPLACEMENTS)
-    # Strip type Awaitable[...] wrappers
+
+    # 2) Translate any "await asyncio.to_thread(...)" calls
+    text = replace_all_to_thread_calls(text)
+
+    # 3) Convert "await process_streaming_response(...)" calls
+    text = replace_await_process_streaming(text)
+
+    # 4) Wrap any unwrapped "process_streaming_response(...)" calls,
+    #    skipping lines where it appears in an import statement
+    text = replace_unwrapped_process_streaming(text)
+
+    # 5) Strip type Awaitable[...] wrappers
     text = re.sub(r"Awaitable\[(.*?)\]", r"\1", text)
 
-    # Clean up typing imports
-    def clean_imports(m):
-        imps = [i.strip() for i in m.group(1).split(",") if i.strip() != "Awaitable"]
+    # 6) Clean up typing imports
+    def clean_imports(match):
+        imps = [i.strip() for i in match.group(1).split(",") if i.strip() != "Awaitable"]
         return f"from typing import {', '.join(imps)}" if imps else ""
 
     text = re.sub(r"^from typing import (.+)$", clean_imports, text, flags=re.MULTILINE)
-    # Inject auto-gen banner if missing
+
+    # 7) Remove unused asyncio imports
+    text = remove_unused_asyncio_imports(text)
+
+    # 8) Inject auto-gen banner if missing
     lines = text.splitlines(keepends=True)
     if not any("auto-generated by the unasync conversion script" in l for l in lines[:10]):
         idx = find_license_end(lines)
         lines.insert(idx, AUTO_GEN_WARNING)
         text = "".join(lines)
+
     if text != original:
         path.write_text(text, encoding="utf-8")
         logger.info(f"  Post-processed: {path.name}")
@@ -221,7 +523,6 @@ def main():
             restore_blocks(dest, placeholders[gen.name])
 
     logger.info("Unasync transformation completed successfully!")
-
     return 0
 
 

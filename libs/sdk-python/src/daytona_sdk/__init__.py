@@ -24,6 +24,7 @@ from .common.charts import (
 from .common.daytona import CodeLanguage, CreateSandboxParams, DaytonaConfig, SandboxResources
 from .common.errors import DaytonaError
 from .common.filesystem import FileUpload
+from .common.image import Image
 from .common.lsp_server import LspLanguageId
 from .common.process import CodeRunParams, SessionExecuteRequest
 from .common.sandbox import SandboxState, SandboxTargetRegion
@@ -67,4 +68,5 @@ __all__ = [
     "VolumeMount",
     "AsyncDaytona",
     "AsyncSandbox",
+    "Image",
 ]
