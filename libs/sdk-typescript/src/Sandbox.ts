@@ -64,7 +64,7 @@ export interface SandboxResources {
  *
  * @interface
  * @property {string} id - Unique identifier for the Sandbox
- * @property {string} [image] - Docker image used for the Sandbox.
+ * @property {string} [image] - Docker image used for the Sandbox
  * @property {string} user - OS user running in the Sandbox
  * @property {Record<string, string>} env - Environment variables set in the Sandbox
  * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
