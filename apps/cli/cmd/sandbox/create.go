@@ -88,7 +88,7 @@ var CreateCmd = &cobra.Command{
 			createSandbox.SetAutoStopInterval(autoStopFlag)
 		}
 		if autoArchiveFlag >= 0 {
-			createWorkspace.SetAutoArchiveInterval(autoArchiveFlag)
+			createSandbox.SetAutoArchiveInterval(autoArchiveFlag)
 		}
 
 		if dockerfileFlag != "" {
