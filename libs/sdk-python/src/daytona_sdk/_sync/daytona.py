@@ -85,6 +85,7 @@ class Daytona:
             from daytona_sdk import Daytona, DaytonaConfig
             # Using environment variables
             daytona1 = Daytona()
+
             # Using explicit configuration
             config = DaytonaConfig(
                 api_key="your-api-key",
@@ -92,6 +93,7 @@ class Daytona:
                 target="us"
             )
             daytona2 = Daytona(config)
+
             ```
         """
 

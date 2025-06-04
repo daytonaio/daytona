@@ -112,8 +112,184 @@ def find_license_end(lines):
     return license_end
 
 
+def transform_docstrings(text: str) -> str:
+    """
+    Transform docstrings so that code-block examples are converted from async to sync:
+    1. async with AsyncDaytona() as var: -> var = Daytona()
+    2. try/finally blocks with only daytona.close() -> remove try/finally, unindent body
+    3. try/finally blocks with other content -> remove only daytona.close() line
+    4. Properly handle indentation for all cases
+    """
+
+    def process_python_code_block(match):
+        """Process individual ```python ... ``` blocks"""
+        block = match.group(0)
+        lines = block.split("\n")
+
+        if len(lines) < 2:
+            return block
+
+        result_lines = [lines[0]]  # Keep opening fence
+        i = 1
+
+        while i < len(lines):
+            line = lines[i]
+
+            # Check for closing fence
+            if line.strip() == "```":
+                result_lines.append(line)
+                break
+
+            # Handle async with pattern
+            async_with_match = re.match(
+                r"^(\s*)async\s+with\s+(?:Async)?Daytona\(\)(?:\([^)]*\))?\s+as\s+(\w+):\s*(#.*)?$", line
+            )
+            if async_with_match:
+                indent, var_name, comment = async_with_match.groups()
+                # Transform to variable assignment
+                new_line = f"{indent}{var_name} = Daytona()"
+                if comment:
+                    new_line += f"  {comment}"
+                result_lines.append(new_line)
+
+                # Process the block content, reducing indentation by 4 spaces
+                i += 1
+                async_with_indent = len(indent)
+
+                while i < len(lines):
+                    line = lines[i]
+
+                    # Check for closing fence
+                    if line.strip() == "```":
+                        result_lines.append(line)
+                        i = len(lines)  # Exit outer loop too
+                        break
+
+                    # Check if we've exited the async with block
+                    line_indent = len(line) - len(line.lstrip()) if line.strip() else 0
+                    if line.strip() and line_indent <= async_with_indent:
+                        # We've exited the async with block, process this line normally
+                        # Don't increment i here, let the outer loop handle it
+                        break
+
+                    # Reduce indentation by 4 spaces for lines inside async with
+                    if line.strip():  # Skip empty lines
+                        if line.startswith(" " * (async_with_indent + 4)):
+                            new_line = line[4:]  # Remove 4 spaces
+                        else:
+                            new_line = line  # Keep as is if indentation is unexpected
+                    else:
+                        new_line = line  # Keep empty lines as is
+
+                    result_lines.append(new_line)
+                    i += 1
+                continue
+
+            # Handle try/finally blocks
+            if line.strip() == "try:":
+                try_indent = len(line) - len(line.lstrip())
+
+                # Look for finally block
+                j = i + 1
+                finally_idx = None
+                while j < len(lines):
+                    if lines[j].strip() == "```":
+                        break
+                    if lines[j].strip() == "finally:":
+                        finally_line_indent = len(lines[j]) - len(lines[j].lstrip())
+                        if finally_line_indent == try_indent:
+                            finally_idx = j
+                            break
+                    j += 1
+
+                if finally_idx is not None:
+                    # Check what's in the finally block
+                    finally_content = []
+                    k = finally_idx + 1
+                    while k < len(lines):
+                        if lines[k].strip() == "```":
+                            break
+                        finally_line_indent = len(lines[k]) - len(lines[k].lstrip()) if lines[k].strip() else 0
+                        if lines[k].strip() and finally_line_indent <= try_indent:
+                            break
+                        finally_content.append(lines[k])
+                        k += 1
+
+                    # Check if finally only contains daytona.close()
+                    non_empty_finally = [l for l in finally_content if l.strip()]
+                    only_has_close = len(non_empty_finally) == 1 and (
+                        re.search(r"daytona\w*\.close\(\)", non_empty_finally[0])
+                        or re.search(r"await\s+daytona\w*\.close\(\)", non_empty_finally[0])
+                    )
+
+                    if only_has_close:
+                        # Remove try/finally, unindent try body
+                        # Skip the 'try:' line
+                        i += 1
+
+                        # Process try body with reduced indentation
+                        while i < finally_idx:
+                            line = lines[i]
+                            if line.strip():  # Skip empty lines
+                                if line.startswith(" " * (try_indent + 4)):
+                                    new_line = " " * try_indent + line[try_indent + 4 :]
+                                else:
+                                    new_line = line
+                            else:
+                                new_line = line
+                            result_lines.append(new_line)
+                            i += 1
+
+                        # Skip the finally block
+                        i = k
+                        continue
+                    # Keep try/finally but remove daytona.close() lines
+                    result_lines.append(line)  # Add 'try:' line
+                    i += 1
+
+                    # Add try body
+                    while i < finally_idx:
+                        result_lines.append(lines[i])
+                        i += 1
+
+                    # Add 'finally:' line
+                    result_lines.append(lines[i])
+                    i += 1
+
+                    # Add finally body, filtering out daytona.close()
+                    while i < k:
+                        line = lines[i]
+                        if not re.search(r"(?:await\s+)?daytona\w*\.close\(\)", line):
+                            result_lines.append(line)
+                        i += 1
+                    continue
+
+            # Regular line processing
+            result_lines.append(line)
+            i += 1
+
+        return "\n".join(result_lines)
+
+    # Process all python code blocks
+    text = re.sub(r"(^[ \t]*```python\n.*?^[ \t]*```)", process_python_code_block, text, flags=re.MULTILINE | re.DOTALL)
+
+    # Remove any stray daytona.close() lines outside code blocks
+    text = re.sub(r"^\s*(?:await\s+)?daytona\w*\.close\(\)\s*$", "", text, flags=re.MULTILINE)
+
+    # Clean up multiple blank lines
+    text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
+
+    # Remove await keywords outside code blocks
+    text = re.sub(r"\bawait\s+", "", text)
+
+    return text
+
+
 def pre_filter(src: Path, dst: Path) -> dict:
-    """Copy src to dst, removing delete-blocks and preserving verbatim sections."""
+    """
+    Copy src to dst, removing delete-blocks and preserving verbatim sections.
+    Returns a map of placeholder→block for all # unasync: preserve … blocks.
+    """
     lines = src.read_text(encoding="utf-8").splitlines(keepends=True)
     out, block_map = [], {}
     buf, idx = [], 0
@@ -149,21 +325,21 @@ def pre_filter(src: Path, dst: Path) -> dict:
 
 
 def apply_replacements(text: str, replacements: list) -> str:
+    """
+    Apply a list of (pattern, replacement) to every line in 'text',
+    skipping lines that contain 'run_async' (we never want to rewrite those).
+    """
     lines = text.splitlines(keepends=True)
-    processed_lines = []
-
+    processed = []
     for line in lines:
-        # Skip applying replacements to lines containing "run_async"
         if "run_async" in line:
-            processed_lines.append(line)
+            processed.append(line)
         else:
-            # Apply all replacements to this line
-            processed_line = line
-            for pattern, repl in replacements:
-                processed_line = pattern.sub(repl, processed_line)
-            processed_lines.append(processed_line)
-
-    return "".join(processed_lines)
+            tmp = line
+            for pat, repl in replacements:
+                tmp = pat.sub(repl, tmp)
+            processed.append(tmp)
+    return "".join(processed)
 
 
 def replace_all_to_thread_calls(text: str) -> str:
@@ -444,6 +620,9 @@ def remove_unused_asyncio_imports(text: str) -> str:
 
 
 def restore_blocks(path: Path, block_map: dict):
+    """
+    Replace each placeholder "# UNASYNC_SKIP_BLOCK_n" with its original preserved block.
+    """
     content = path.read_text(encoding="utf-8")
     for placeholder, block in block_map.items():
         content = content.replace(placeholder, block)
@@ -451,36 +630,63 @@ def restore_blocks(path: Path, block_map: dict):
 
 
 def post_process(path: Path):
+    """
+    1) Call transform_docstrings()
+    2) Apply POST_REPLACEMENTS (strip 'await', rename imports, etc.)
+    3) Translate await asyncio.to_thread(...) calls
+    4) Convert await process_streaming_response(...) calls
+    5) Wrap any unwrapped process_streaming_response(...) calls
+    6) Strip Awaitable[...] wrappers
+    7) Clean up typing imports
+    8) Remove any leftover daytona.close() lines
+    9) Collapse >2 blank lines into exactly 2
+    10) Remove unused asyncio imports
+    11) Inject auto‐gen banner if missing
+    """
     text = path.read_text(encoding="utf-8")
     original = text
 
-    # 1) Apply existing POST_REPLACEMENTS
+    # 1) Transform docstrings so that code‐block examples go from async→sync
+    text = transform_docstrings(text)
+
+    # 2) Apply simple regex‐based post‐replacements (strip 'await', rename imports, etc.)
     text = apply_replacements(text, POST_REPLACEMENTS)
 
-    # 2) Translate any "await asyncio.to_thread(...)" calls
+    # 3) Translate any "await asyncio.to_thread(...)" calls into direct calls
     text = replace_all_to_thread_calls(text)
 
-    # 3) Convert "await process_streaming_response(...)" calls
+    # 4) Convert "await process_streaming_response(...)" calls into "asyncio.run(...)"
     text = replace_await_process_streaming(text)
 
-    # 4) Wrap any unwrapped "process_streaming_response(...)" calls,
-    #    skipping lines where it appears in an import statement
+    # 5) Wrap any unwrapped "process_streaming_response(...)" calls with asyncio.run(...)
+    #    (skipping lines where it appears inside an import statement)
     text = replace_unwrapped_process_streaming(text)
 
-    # 5) Strip type Awaitable[...] wrappers
+    # 6) Strip type Awaitable[...] wrappers
     text = re.sub(r"Awaitable\[(.*?)\]", r"\1", text)
 
-    # 6) Clean up typing imports
-    def clean_imports(match):
-        imps = [i.strip() for i in match.group(1).split(",") if i.strip() != "Awaitable"]
+    # 7) Clean up typing imports, dropping "Awaitable"
+    def clean_imports(m):
+        imps = [i.strip() for i in m.group(1).split(",") if i.strip() != "Awaitable"]
         return f"from typing import {', '.join(imps)}" if imps else ""
 
-    text = re.sub(r"^from typing import (.+)$", clean_imports, text, flags=re.MULTILINE)
+    text = re.sub(
+        r"^from typing import (.+)$",
+        clean_imports,
+        text,
+        flags=re.MULTILINE,
+    )
 
-    # 7) Remove unused asyncio imports
+    # 8) Remove any leftover "daytona.close()" lines
+    text = re.sub(r"^\s*daytona\w*\.close\(\)\s*$", "", text, flags=re.MULTILINE)
+
+    # 9) Collapse more than two blank lines into exactly two
+    text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
+
+    # 10) Remove unused asyncio imports
     text = remove_unused_asyncio_imports(text)
 
-    # 8) Inject auto-gen banner if missing
+    # 11) Inject auto‐gen banner if it's missing in the first few lines
     lines = text.splitlines(keepends=True)
     if not any("auto-generated by the unasync conversion script" in l for l in lines[:10]):
         idx = find_license_end(lines)
@@ -501,14 +707,16 @@ def main():
         sync_tmp = tmp_dir / "sync"
         sync_tmp.mkdir()
 
+        # 1) Pre‐filter each async file: strip out delete-blocks, capture preserve-blocks
         placeholders = {}
         for src in async_files:
             tmp_file = tmp_dir / src.name
             placeholders[src.name] = pre_filter(src, tmp_file)
-            # apply regex-based pre-replacements
             txt = tmp_file.read_text(encoding="utf-8")
+            # 2) Apply PRE_REPLACEMENTS (strip "AsyncX" → "X", etc.)
             tmp_file.write_text(apply_replacements(txt, PRE_REPLACEMENTS), encoding="utf-8")
 
+        # 3) Run unasync to create raw sync files
         rule = unasync.Rule(
             fromdir=str(tmp_dir),
             todir=str(sync_tmp),
@@ -516,6 +724,7 @@ def main():
         )
         unasync.unasync_files([str(tmp_dir / f.name) for f in async_files], [rule])
 
+        # 4) Move generated files into TARGET_DIR, then post-process each
         for gen in sync_tmp.glob("*.py"):
             dest = TARGET_DIR / gen.name
             dest.write_text(gen.read_text(encoding="utf-8"), encoding="utf-8")
