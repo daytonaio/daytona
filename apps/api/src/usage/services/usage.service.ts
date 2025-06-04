@@ -28,22 +28,28 @@ export class UsageService {
   async handleWorkspaceStateUpdate(event: WorkspaceStateUpdatedEvent) {
     await this.waitForLock(event.workspace.id)
 
-    switch (event.newState) {
-      case WorkspaceState.STARTED: {
-        await this.closeUsagePeriod(event.workspace.id)
-        await this.createUsagePeriod(event)
-        break
+    try {
+      switch (event.newState) {
+        case WorkspaceState.STARTED: {
+          await this.closeUsagePeriod(event.workspace.id)
+          await this.createUsagePeriod(event)
+          break
+        }
+        case WorkspaceState.STOPPED:
+          await this.closeUsagePeriod(event.workspace.id)
+          await this.createUsagePeriod(event, true)
+          break
+        case WorkspaceState.ERROR:
+        case WorkspaceState.ARCHIVED:
+        case WorkspaceState.DESTROYED: {
+          await this.closeUsagePeriod(event.workspace.id)
+          break
+        }
       }
-      case WorkspaceState.STOPPED:
-        await this.closeUsagePeriod(event.workspace.id)
-        await this.createUsagePeriod(event, true)
-        break
-      case WorkspaceState.ERROR:
-      case WorkspaceState.ARCHIVED:
-      case WorkspaceState.DESTROYED: {
-        await this.closeUsagePeriod(event.workspace.id)
-        break
-      }
+    } finally {
+      this.releaseLock(event.workspace.id).catch((error) => {
+        this.logger.error(`Error releasing lock for workspace ${event.workspace.id}`, error)
+      })
     }
   }
 
