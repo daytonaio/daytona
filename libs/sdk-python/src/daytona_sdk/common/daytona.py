@@ -149,7 +149,6 @@ class CreateSandboxParams(BaseModel):
             auto_stop_interval=20,
             auto_archive_interval=60
         )
-        sandbox = daytona.create(params, 50)
         ```
     """
 

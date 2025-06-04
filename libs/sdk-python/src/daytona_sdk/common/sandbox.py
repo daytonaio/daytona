@@ -85,14 +85,6 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
         last_snapshot (Optional[str]): When the last snapshot was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
         auto_archive_interval (int): Auto-archive interval in minutes.
-
-    Example:
-        ```python
-        sandbox = daytona.create()
-        info = sandbox.info()
-        print(f"Sandbox {info.id} is {info.state}")
-        print(f"Resources: {info.resources.cpu} CPU, {info.resources.memory} RAM")
-        ```
     """
 
     id: str

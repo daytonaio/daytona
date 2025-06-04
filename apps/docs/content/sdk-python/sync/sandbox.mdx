@@ -473,15 +473,6 @@ Structured information about a Sandbox.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
 - `auto_archive_interval` _int_ - Auto-archive interval in minutes.
 
-**Example**:
-
-```python
-sandbox = daytona.create()
-info = sandbox.info()
-print(f"Sandbox {info.id} is {info.state}")
-print(f"Resources: {info.resources.cpu} CPU, {info.resources.memory} RAM")
-```
-
 ## SandboxInstance
 
 ```python
