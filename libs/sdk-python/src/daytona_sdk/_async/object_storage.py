@@ -12,8 +12,8 @@ import aioboto3
 from .._utils.docs_ignore import docs_ignore
 
 
-class ObjectStorage:
-    """ObjectStorage class for interacting with object storage services.
+class AsyncObjectStorage:
+    """AsyncObjectStorage class for interacting with object storage services.
 
     Attributes:
         endpoint_url (str): The endpoint URL for the object storage service.

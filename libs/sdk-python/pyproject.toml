@@ -12,8 +12,8 @@ description = "Python SDK for Daytona"
 readme = "README.md"
 requires-python = ">=3.7"
 dependencies = [
-    "daytona_api_client>=0.19.1,<0.20.0",
-    "daytona_api_client_async>=0.19.1,<0.20.0",
+    "daytona_api_client>=0.20.1,<0.21.0",
+    "daytona_api_client_async>=0.20.1,<0.21.0",
     "environs>=9.5.0,<10.0.0",
     "marshmallow>=3.19.0,<4.0.0",
     "pydantic>=2.4.2,<3.0.0",
