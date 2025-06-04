@@ -484,12 +484,17 @@ Structured information about a Sandbox
 - `autoStopInterval` _number_ - Auto-stop interval in minutes
 - `class` _CreateNodeClassEnum_ - Sandbox class
 - `created` _string_ - The creation timestamp of the project
+
   ##### Memberof
+
   WorkspaceInfo
+
   ##### Inherited from
+
   ```ts
   Omit.created
   ```
+
 - `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
 - `errorReason` _null \| string_ - Error message if Sandbox is in error state
 - `id` _string_ - Unique identifier for the Sandbox
@@ -531,147 +536,245 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 **Properties**:
 
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.autoArchiveInterval
   ```
+
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.autoStopInterval
   ```
+
 - `cpu?` _number_ - The CPU quota for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.cpu
   ```
+
 - `disk?` _number_ - The disk quota for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.disk
   ```
+
 - `env` _{}_ - Environment variables for the workspace
+
   ##### Index Signature
+
   ```ts
   [key: string]: string
   ```
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.env
   ```
+
 - `errorReason?` _string_ - The error reason of the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.errorReason
   ```
+
 - `gpu?` _number_ - The GPU quota for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.gpu
   ```
+
 - `id` _string_ - The ID of the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.id
   ```
+
 - `image?` _string_ - The image used for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.image
   ```
+
 - `info?` _SandboxInfo_
 - `labels` _{}_ - Labels for the workspace
+
   ##### Index Signature
+
   ```ts
   [key: string]: string
   ```
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.labels
   ```
+
 - `memory?` _number_ - The memory quota for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.memory
   ```
+
 - `~~name~~` _string_ - The name of the workspace
+
   ##### Memberof
+
   Workspace
+
   ```ts
   Omit.name
   ```
+
   - **_Deprecated_** - ##### Inherited from
 - `organizationId` _string_ - The organization ID of the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.organizationId
   ```
+
 - `public` _boolean_ - Whether the workspace http preview is public
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.public
   ```
+
 - `snapshotCreatedAt?` _string_ - The creation timestamp of the last snapshot
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.snapshotCreatedAt
   ```
+
 - `snapshotState?` _WorkspaceSnapshotStateEnum_ - The state of the snapshot
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.snapshotState
   ```
+
 - `state?` _WorkspaceState_ - The state of the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.state
   ```
+
 - `target` _string_ - The target environment for the workspace
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.target
   ```
+
 - `user` _string_ - The user associated with the project
+
   ##### Memberof
+
   Workspace
+
   ##### Inherited from
+
   ```ts
   Omit.user
   ```
+
 - `volumes?` _WorkspaceVolume\[\]_ - Array of volumes attached to the workspace
 
   ##### Memberof
