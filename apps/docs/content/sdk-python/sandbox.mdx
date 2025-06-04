@@ -318,6 +318,35 @@ sandbox.set_autostop_interval(60)
 sandbox.set_autostop_interval(0)
 ```
 
+#### Sandbox.set_auto_archive_interval
+
+```python
+@intercept_errors(message_prefix="Failed to set auto-archive interval: ")
+def set_auto_archive_interval(interval: int) -> None
+```
+
+Sets the auto-archive interval for the Sandbox.
+
+The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+**Arguments**:
+
+- `interval` _int_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+  Set to 0 for the maximum interval. Default is 7 days.
+
+**Raises**:
+
+- `DaytonaError` - If interval is negative
+
+**Example**:
+
+```python
+# Auto-archive after 1 hour
+sandbox.set_autoarchive_interval(60)
+# Or use the maximum interval
+sandbox.set_autoarchive_interval(0)
+```
+
 #### Sandbox.get_preview_link
 
 ```python
@@ -442,6 +471,7 @@ Structured information about a Sandbox.
 - `updated_at` _str_ - When the Sandbox was last updated.
 - `last_snapshot` _Optional[str]_ - When the last snapshot was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
+- `auto_archive_interval` _int_ - Auto-archive interval in minutes.
 
 **Example**:
 

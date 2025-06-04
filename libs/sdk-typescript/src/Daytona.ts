@@ -128,6 +128,7 @@ export interface SandboxResources {
  * @property {boolean} [async] - If true, will not wait for the Sandbox to be ready before returning
  * @property {number} [timeout] - Timeout in seconds for the Sandbox to be ready (0 means no timeout)
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled)
+ * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used)
  *
  * @example
  * const params: CreateSandboxParams = {
@@ -137,7 +138,8 @@ export interface SandboxResources {
  *         cpu: 2,
  *         memory: 4 // 4GB RAM
  *     },
- *     autoStopInterval: 60  // Auto-stop after 1 hour of inactivity
+ *     autoStopInterval: 60,  // Auto-stop after 1 hour of inactivity
+ *     autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
  * };
  * const sandbox = await daytona.create(params, 50);
  */
@@ -165,6 +167,8 @@ export type CreateSandboxParams = {
   timeout?: number
   /** Auto-stop interval in minutes (0 means disabled) (must be a non-negative integer) */
   autoStopInterval?: number
+  /** Auto-archive interval in minutes (0 means the maximum interval will be used) (must be a non-negative integer) */
+  autoArchiveInterval?: number
   /** List of volumes to mount in the Sandbox */
   volumes?: VolumeMount[]
 }
@@ -339,7 +343,8 @@ export class Daytona {
    *         cpu: 2,
    *         memory: 4 // 4GB RAM
    *     },
-   *     autoStopInterval: 60
+   *     autoStopInterval: 60,
+   *     autoArchiveInterval: 60
    * };
    * const sandbox = await daytona.create(params, 40);
    */
@@ -415,6 +420,13 @@ export class Daytona {
       throw new DaytonaError('autoStopInterval must be a non-negative integer')
     }
 
+    if (
+      params.autoArchiveInterval !== undefined &&
+      (!Number.isInteger(params.autoArchiveInterval) || params.autoArchiveInterval < 0)
+    ) {
+      throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
+    }
+
     const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
 
     try {
@@ -446,6 +458,7 @@ export class Daytona {
           memory: params.resources?.memory,
           disk: params.resources?.disk,
           autoStopInterval: params.autoStopInterval,
+          autoArchiveInterval: params.autoArchiveInterval,
           volumes: params.volumes,
         },
         undefined,

@@ -357,6 +357,34 @@ export class WorkspaceController {
     await this.workspaceService.setAutostopInterval(workspaceId, interval)
   }
 
+  @Post(':workspaceId/autoarchive/:interval')
+  @ApiOperation({
+    summary: 'Set workspace auto-archive interval',
+    operationId: 'setAutoArchiveInterval',
+  })
+  @ApiParam({
+    name: 'workspaceId',
+    description: 'ID of the workspace',
+    type: 'string',
+  })
+  @ApiParam({
+    name: 'interval',
+    description: 'Auto-archive interval in minutes (0 means the maximum interval will be used)',
+    type: 'number',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Auto-archive interval has been set',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
+  @UseGuards(WorkspaceAccessGuard)
+  async setAutoArchiveInterval(
+    @Param('workspaceId') workspaceId: string,
+    @Param('interval') interval: number,
+  ): Promise<void> {
+    await this.workspaceService.setAutoArchiveInterval(workspaceId, interval)
+  }
+
   @Post(':workspaceId/archive')
   @HttpCode(200)
   @ApiOperation({

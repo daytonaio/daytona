@@ -61,6 +61,9 @@ class Workspace(BaseModel):
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
         default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval"
     )
+    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
+        default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval"
+    )
     volumes: Optional[List[WorkspaceVolume]] = Field(
         default=None, description="Array of volumes attached to the workspace"
     )
@@ -85,6 +88,7 @@ class Workspace(BaseModel):
         "snapshotState",
         "snapshotCreatedAt",
         "autoStopInterval",
+        "autoArchiveInterval",
         "volumes",
     ]
 
@@ -187,6 +191,7 @@ class Workspace(BaseModel):
                 "snapshotState": obj.get("snapshotState"),
                 "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
                 "autoStopInterval": obj.get("autoStopInterval"),
+                "autoArchiveInterval": obj.get("autoArchiveInterval"),
                 "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None
                 else None,

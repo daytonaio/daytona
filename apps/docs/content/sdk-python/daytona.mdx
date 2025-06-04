@@ -108,7 +108,8 @@ including language, image, resources, environment variables, and volumes for the
 
 **Raises**:
 
-- `DaytonaError` - If timeout or auto_stop_interval is negative; If sandbox fails to start or times out
+- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
+  If sandbox fails to start or times out
 
 **Example**:
 
@@ -126,7 +127,8 @@ params = CreateSandboxParams(
     image="debian:12.9",
     env_vars={"DEBUG": "true"},
     resources=SandboxResources(cpu=2, memory=4),
-    auto_stop_interval=0
+    auto_stop_interval=0,
+    auto_archive_interval=60
 )
 sandbox = daytona.create(params, 40)
 ```
@@ -423,6 +425,9 @@ Parameters for creating a new Sandbox.
 - `auto_stop_interval` _Optional[int]_ - Interval in minutes after which Sandbox will
   automatically stop if no Sandbox event occurs during that time. Default is 15 minutes.
   0 means no auto-stop.
+- `auto_archive_interval` _Optional[int]_ - Interval in minutes after which a continuously stopped Sandbox will
+  automatically archive. Default is 7 days.
+  0 means the maximum interval will be used.
 
 **Example**:
 
@@ -431,7 +436,8 @@ params = CreateSandboxParams(
     language="python",
     env_vars={"DEBUG": "true"},
     resources=SandboxResources(cpu=2, memory=4),
-    auto_stop_interval=20
+    auto_stop_interval=20,
+    auto_archive_interval=60
 )
 sandbox = daytona.create(params, 50)
 ```

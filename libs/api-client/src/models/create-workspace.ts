@@ -98,6 +98,12 @@ export interface CreateWorkspace {
    */
   autoStopInterval?: number
   /**
+   * Auto-archive interval in minutes (0 means the maximum interval will be used)
+   * @type {number}
+   * @memberof CreateWorkspace
+   */
+  autoArchiveInterval?: number
+  /**
    * Array of volumes to attach to the workspace
    * @type {Array<WorkspaceVolume>}
    * @memberof CreateWorkspace

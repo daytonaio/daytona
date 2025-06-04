@@ -84,6 +84,7 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
         updated_at (str): When the Sandbox was last updated.
         last_snapshot (Optional[str]): When the last snapshot was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
+        auto_archive_interval (int): Auto-archive interval in minutes.
 
     Example:
         ```python
@@ -119,12 +120,13 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
     updated_at: str
     last_snapshot: Optional[str]
     auto_stop_interval: int
+    auto_archive_interval: int
     provider_metadata: Annotated[
         Optional[str],
         Field(
             deprecated=(
                 "The `provider_metadata` field is deprecated. Use `state`, `node_domain`, `region`, `class_name`,"
-                " `updated_at`, `last_snapshot`, `resources`, `auto_stop_interval` instead."
+                " `updated_at`, `last_snapshot`, `resources`, `auto_stop_interval`, `auto_archive_interval` instead."
             )
         ),
     ]
