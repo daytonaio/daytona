@@ -147,8 +147,9 @@ export class WorkspaceManager {
           order: {
             lastSnapshotAt: 'ASC',
           },
-          //  todo: increase this number when auto-archive is stable
-          take: 10,
+          //  max 3 workspaces can be archived at the same time on the same node
+          //  this is to prevent the node from being overloaded
+          take: 3,
         })
 
         await Promise.all(
