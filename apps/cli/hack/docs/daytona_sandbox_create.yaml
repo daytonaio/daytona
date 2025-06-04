@@ -2,6 +2,10 @@ name: daytona sandbox create
 synopsis: Create a new sandbox
 usage: daytona sandbox create [flags]
 options:
+  - name: auto-archive
+    default_value: '10080'
+    usage: |
+      Auto-archive interval in minutes (0 means the maximum interval will be used)
   - name: auto-stop
     default_value: '0'
     usage: Auto-stop interval in minutes (0 means disabled)

@@ -1431,6 +1431,47 @@ paths:
       summary: Set workspace auto-stop interval
       tags:
         - workspace
+  /workspace/{workspaceId}/autoarchive/{interval}:
+    post:
+      operationId: setAutoArchiveInterval
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-archive interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set workspace auto-archive interval
+      tags:
+        - workspace
   /workspace/{workspaceId}/archive:
     post:
       operationId: archiveWorkspace
@@ -5013,6 +5054,7 @@ components:
         id: workspace123
         state: creating
         user: daytona
+        autoArchiveInterval: 10080
         info: ''
       properties:
         id:
@@ -5106,6 +5148,10 @@ components:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30
           type: number
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes
+          example: 10080
+          type: number
         volumes:
           description: Array of volumes attached to the workspace
           items:
@@ -5165,6 +5211,7 @@ components:
         public: false
         user: daytona
         class: small
+        autoArchiveInterval: 10080
       properties:
         image:
           description: The image used for the workspace
@@ -5227,6 +5274,11 @@ components:
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30
+          type: integer
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          example: 10080
           type: integer
         volumes:
           description: Array of volumes to attach to the workspace

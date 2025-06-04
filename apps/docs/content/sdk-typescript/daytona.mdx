@@ -103,6 +103,7 @@ const params: CreateSandboxParams = {
     memory: 4, // 4GB RAM
   },
   autoStopInterval: 60,
+  autoArchiveInterval: 60,
 }
 const sandbox = await daytona.create(params, 40)
 ```
@@ -412,6 +413,7 @@ Parameters for creating a new Sandbox.
 **Properties**:
 
 - `async?` _boolean_ - If true, will not wait for the Sandbox to be ready before returning
+- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used)
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
 - `image?` _string \| Image_ - Optional Docker image to use for the Sandbox or an Image instance
@@ -434,6 +436,7 @@ const params: CreateSandboxParams = {
     memory: 4, // 4GB RAM
   },
   autoStopInterval: 60, // Auto-stop after 1 hour of inactivity
+  autoArchiveInterval: 60, // Auto-archive after a Sandbox has been stopped for 1 hour
 }
 const sandbox = await daytona.create(params, 50)
 ```

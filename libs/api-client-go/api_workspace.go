@@ -136,6 +136,19 @@ type WorkspaceAPI interface {
 	ReplaceLabelsExecute(r WorkspaceAPIReplaceLabelsRequest) (*WorkspaceLabels, *http.Response, error)
 
 	/*
+		SetAutoArchiveInterval Set workspace auto-archive interval
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId ID of the workspace
+		@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+		@return WorkspaceAPISetAutoArchiveIntervalRequest
+	*/
+	SetAutoArchiveInterval(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalRequest
+
+	// SetAutoArchiveIntervalExecute executes the request
+	SetAutoArchiveIntervalExecute(r WorkspaceAPISetAutoArchiveIntervalRequest) (*http.Response, error)
+
+	/*
 		SetAutostopInterval Set workspace auto-stop interval
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1227,6 +1240,110 @@ func (a *WorkspaceAPIService) ReplaceLabelsExecute(r WorkspaceAPIReplaceLabelsRe
 	}
 
 	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type WorkspaceAPISetAutoArchiveIntervalRequest struct {
+	ctx                    context.Context
+	ApiService             WorkspaceAPI
+	workspaceId            string
+	interval               float32
+	xDaytonaOrganizationID *string
+}
+
+// Use with JWT to specify the organization ID
+func (r WorkspaceAPISetAutoArchiveIntervalRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) WorkspaceAPISetAutoArchiveIntervalRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r WorkspaceAPISetAutoArchiveIntervalRequest) Execute() (*http.Response, error) {
+	return r.ApiService.SetAutoArchiveIntervalExecute(r)
+}
+
+/*
+SetAutoArchiveInterval Set workspace auto-archive interval
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId ID of the workspace
+	@param interval Auto-archive interval in minutes (0 means the maximum interval will be used)
+	@return WorkspaceAPISetAutoArchiveIntervalRequest
+*/
+func (a *WorkspaceAPIService) SetAutoArchiveInterval(ctx context.Context, workspaceId string, interval float32) WorkspaceAPISetAutoArchiveIntervalRequest {
+	return WorkspaceAPISetAutoArchiveIntervalRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+		interval:    interval,
+	}
+}
+
+// Execute executes the request
+func (a *WorkspaceAPIService) SetAutoArchiveIntervalExecute(r WorkspaceAPISetAutoArchiveIntervalRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodPost
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.SetAutoArchiveInterval")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/workspace/{workspaceId}/autoarchive/{interval}"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+	localVarPath = strings.Replace(localVarPath, "{"+"interval"+"}", url.PathEscape(parameterValueToString(r.interval, "interval")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
 }
 
 type WorkspaceAPISetAutostopIntervalRequest struct {

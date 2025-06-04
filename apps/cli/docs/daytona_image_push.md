@@ -18,4 +18,4 @@ daytona image push [IMAGE] [flags]
 
 ### SEE ALSO
 
-* [daytona image](daytona_image.md)  - Manage Daytona images
+- [daytona image](daytona_image.md) - Manage Daytona images

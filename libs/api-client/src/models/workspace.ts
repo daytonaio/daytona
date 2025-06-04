@@ -144,6 +144,12 @@ export interface Workspace {
    */
   autoStopInterval?: number
   /**
+   * Auto-archive interval in minutes
+   * @type {number}
+   * @memberof Workspace
+   */
+  autoArchiveInterval?: number
+  /**
    * Array of volumes attached to the workspace
    * @type {Array<WorkspaceVolume>}
    * @memberof Workspace

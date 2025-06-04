@@ -41,10 +41,11 @@ class CreateWorkspace(BaseModel):
     memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in MB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the workspace in GB")
     auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
+    auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", alias="autoArchiveInterval")
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -146,6 +147,7 @@ class CreateWorkspace(BaseModel):
             "memory": obj.get("memory"),
             "disk": obj.get("disk"),
             "autoStopInterval": obj.get("autoStopInterval"),
+            "autoArchiveInterval": obj.get("autoArchiveInterval"),
             "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
             "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
         })

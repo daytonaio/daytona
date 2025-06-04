@@ -49,9 +49,10 @@ class Workspace(BaseModel):
     snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
     snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
+    auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes attached to the workspace")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "snapshotState", "snapshotCreatedAt", "autoStopInterval", "volumes"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "snapshotState", "snapshotCreatedAt", "autoStopInterval", "autoArchiveInterval", "volumes"]
 
     @field_validator('snapshot_state')
     def snapshot_state_validate_enum(cls, value):
@@ -150,6 +151,7 @@ class Workspace(BaseModel):
             "snapshotState": obj.get("snapshotState"),
             "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
             "autoStopInterval": obj.get("autoStopInterval"),
+            "autoArchiveInterval": obj.get("autoArchiveInterval"),
             "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None
         })
         # store additional fields in additional_properties
