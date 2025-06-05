@@ -5,10 +5,10 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Annotated, Dict, Optional
 
-from daytona_api_client import Workspace as ApiSandbox
-from daytona_api_client import WorkspaceInfo as ApiSandboxInfo
-from daytona_api_client import WorkspaceState as SandboxState
-from daytona_api_client_async import WorkspaceInfo as AsyncApiSandboxInfo
+from daytona_api_client import Sandbox as ApiSandbox
+from daytona_api_client import SandboxInfo as ApiSandboxInfo
+from daytona_api_client import SandboxState
+from daytona_api_client_async import SandboxInfo as AsyncApiSandboxInfo
 from pydantic import Field
 
 
@@ -36,30 +36,34 @@ class SandboxTargetRegion(str, Enum):
 
 
 @dataclass
-class SandboxResources:
-    """Resources allocated to a Sandbox.
+class Resources:
+    """Resources configuration for Sandbox.
 
     Attributes:
-        cpu (str): Nu, "1", "2").
-        gpu (Optional[str]): Number of GPUs allocated mber of CPU cores allocated (e.g.(e.g., "1") or None if no GPU.
-        memory (str): Amount of memory allocated with unit (e.g., "2Gi", "4Gi").
-        disk (str): Amount of disk space allocated with unit (e.g., "10Gi", "20Gi").
+        cpu (Optional[int]): Number of CPU cores to allocate.
+        memory (Optional[int]): Amount of memory in GiB to allocate.
+        disk (Optional[int]): Amount of disk space in GiB to allocate.
+        gpu (Optional[int]): Number of GPUs to allocate.
 
     Example:
         ```python
-        resources = SandboxResources(
-            cpu="2",
-            gpu="1",
-            memory="4Gi",
-            disk="20Gi"
+        resources = Resources(
+            cpu=2,
+            memory=4,  # 4GiB RAM
+            disk=20,   # 20GiB disk
+            gpu=1
+        )
+        params = CreateSandboxParams(
+            language="python",
+            resources=resources
         )
         ```
     """
 
-    cpu: str
-    memory: str
-    disk: str
-    gpu: Optional[str] = None
+    cpu: Optional[int] = None
+    memory: Optional[int] = None
+    disk: Optional[int] = None
+    gpu: Optional[int] = None
 
 
 class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
@@ -67,22 +71,22 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
 
     Attributes:
         id (str): Unique identifier for the Sandbox.
-        image (Optional[str]): Docker image used for the Sandbox.
+        snapshot (Optional[str]): Daytona snapshot used to create the Sandbox.
         user (str): OS user running in the Sandbox.
         env (Dict[str, str]): Environment variables set in the Sandbox.
         labels (Dict[str, str]): Custom labels attached to the Sandbox.
         public (bool): Whether the Sandbox is publicly accessible.
         target (str): Target environment where the Sandbox runs.
-        resources (SandboxResources): Resource allocations for the Sandbox.
+        resources (Resources): Resource allocations for the Sandbox.
         state (str): Current state of the Sandbox (e.g., "started", "stopped").
         error_reason (Optional[str]): Error message if Sandbox is in error state.
-        snapshot_state (Optional[str]): Current state of Sandbox snapshot.
-        snapshot_created_at (Optional[str]): When the snapshot was created.
+        backup_state (Optional[str]): Current state of Sandbox backup.
+        backup_created_at (Optional[str]): When the backup was created.
         node_domain (str): Domain name of the Sandbox node.
         region (str): Region of the Sandbox node.
         class_name (str): Sandbox class.
         updated_at (str): When the Sandbox was last updated.
-        last_snapshot (Optional[str]): When the last snapshot was created.
+        last_backup (Optional[str]): When the last backup was created.
         auto_stop_interval (int): Auto-stop interval in minutes.
         auto_archive_interval (int): Auto-archive interval in minutes.
     """
@@ -95,22 +99,22 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
             deprecated="The `name` field is deprecated.",
         ),
     ]
-    image: Optional[str]
+    snapshot: Optional[str]
     user: str
     env: Dict[str, str]
     labels: Dict[str, str]
     public: bool
     target: SandboxTargetRegion
-    resources: SandboxResources
+    resources: Resources
     state: SandboxState
     error_reason: Optional[str]
-    snapshot_state: Optional[str]
-    snapshot_created_at: Optional[str]
+    backup_state: Optional[str]
+    backup_created_at: Optional[str]
     node_domain: str
     region: str
     class_name: str
     updated_at: str
-    last_snapshot: Optional[str]
+    last_backup: Optional[str]
     auto_stop_interval: int
     auto_archive_interval: int
     provider_metadata: Annotated[
@@ -118,7 +122,7 @@ class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo):
         Field(
             deprecated=(
                 "The `provider_metadata` field is deprecated. Use `state`, `node_domain`, `region`, `class_name`,"
-                " `updated_at`, `last_snapshot`, `resources`, `auto_stop_interval`, `auto_archive_interval` instead."
+                " `updated_at`, `last_backup`, `resources`, `auto_stop_interval`, `auto_archive_interval` instead."
             )
         ),
     ]

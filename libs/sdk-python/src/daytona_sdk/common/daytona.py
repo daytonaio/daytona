@@ -6,10 +6,11 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Annotated, Dict, List, Optional, Union
 
-from daytona_sdk.common.image import Image
-from daytona_sdk.common.sandbox import SandboxTargetRegion
-from daytona_sdk.common.volume import VolumeMount
 from pydantic import BaseModel, Field, model_validator
+
+from .image import Image
+from .sandbox import Resources, SandboxTargetRegion
+from .volume import VolumeMount
 
 
 @dataclass
@@ -88,50 +89,15 @@ class DaytonaConfig(BaseModel):
         return values
 
 
-@dataclass
-class SandboxResources:
-    """Resources configuration for Sandbox.
+class CreateSandboxBaseParams(BaseModel):
+    """Base parameters for creating a new Sandbox.
 
     Attributes:
-        cpu (Optional[int]): Number of CPU cores to allocate.
-        memory (Optional[int]): Amount of memory in GB to allocate.
-        disk (Optional[int]): Amount of disk space in GB to allocate.
-        gpu (Optional[int]): Number of GPUs to allocate.
-
-    Example:
-        ```python
-        resources = SandboxResources(
-            cpu=2,
-            memory=4,  # 4GB RAM
-            disk=20,   # 20GB disk
-            gpu=1
-        )
-        params = CreateSandboxParams(
-            language="python",
-            resources=resources
-        )
-        ```
-    """
-
-    cpu: Optional[int] = None
-    memory: Optional[int] = None
-    disk: Optional[int] = None
-    gpu: Optional[int] = None
-
-
-class CreateSandboxParams(BaseModel):
-    """Parameters for creating a new Sandbox.
-
-    Attributes:
-        language (Optional[CodeLanguage]): Programming language for the Sandbox ("python", "javascript", "typescript").
-        Defaults to "python".
-        image (Optional[Union[str, Image]]): Custom Docker image to use for the Sandbox. If an Image object is provided,
-            the image will be dynamically built.
+        language (Optional[CodeLanguage]): Programming language for the Sandbox. Defaults to "python".
         os_user (Optional[str]): OS user for the Sandbox.
         env_vars (Optional[Dict[str, str]]): Environment variables to set in the Sandbox.
         labels (Optional[Dict[str, str]]): Custom labels for the Sandbox.
         public (Optional[bool]): Whether the Sandbox should be public.
-        resources (Optional[SandboxResources]): Resource configuration for the Sandbox.
         timeout (Optional[float]): Timeout in seconds for Sandbox to be created and started.
         auto_stop_interval (Optional[int]): Interval in minutes after which Sandbox will
             automatically stop if no Sandbox event occurs during that time. Default is 15 minutes.
@@ -139,48 +105,37 @@ class CreateSandboxParams(BaseModel):
         auto_archive_interval (Optional[int]): Interval in minutes after which a continuously stopped Sandbox will
             automatically archive. Default is 7 days.
             0 means the maximum interval will be used.
-
-    Example:
-        ```python
-        params = CreateSandboxParams(
-            language="python",
-            env_vars={"DEBUG": "true"},
-            resources=SandboxResources(cpu=2, memory=4),
-            auto_stop_interval=20,
-            auto_archive_interval=60
-        )
-        ```
     """
 
     language: Optional[CodeLanguage] = None
-    image: Optional[Union[str, Image]] = None
     os_user: Optional[str] = None
     env_vars: Optional[Dict[str, str]] = None
     labels: Optional[Dict[str, str]] = None
     public: Optional[bool] = None
-    resources: Optional[SandboxResources] = None
-    timeout: Annotated[
-        Optional[float],
-        Field(
-            default=None,
-            deprecated=(
-                "The `timeout` field is deprecated and will be removed in future versions. "
-                "Use `timeout` argument in method calls instead."
-            ),
-        ),
-    ]
     auto_stop_interval: Optional[int] = None
     auto_archive_interval: Optional[int] = None
     volumes: Optional[List[VolumeMount]] = None
 
-    @model_validator(mode="before")
-    @classmethod
-    def __handle_deprecated_timeout(cls, values):  # pylint: disable=unused-private-member
-        if "timeout" in values and values.get("timeout"):
-            warnings.warn(
-                "The `timeout` field is deprecated and will be removed in future versions. "
-                + "Use `timeout` argument in method calls instead.",
-                DeprecationWarning,
-                stacklevel=3,
-            )
-        return values
+
+class CreateSandboxFromImageParams(CreateSandboxBaseParams):
+    """Parameters for creating a new Sandbox from an image.
+
+    Attributes:
+        image (Union[str, Image]): Custom Docker image to use for the Sandbox. If an Image object is provided,
+            the image will be dynamically built.
+        resources (Optional[Resources]): Resource configuration for the Sandbox. If not provided, sandbox will
+            have default resources.
+    """
+
+    image: Union[str, Image]
+    resources: Optional[Resources] = None
+
+
+class CreateSandboxFromSnapshotParams(CreateSandboxBaseParams):
+    """Parameters for creating a new Sandbox from a snapshot.
+
+    Attributes:
+        snapshot (Optional[str]): Name of the snapshot to use for the Sandbox.
+    """
+
+    snapshot: Optional[str] = None

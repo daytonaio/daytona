@@ -6,7 +6,8 @@ import json
 from typing import Callable, ParamSpec, TypeVar
 
 from daytona_api_client.exceptions import OpenApiException
-from daytona_sdk.common.errors import DaytonaError
+
+from ..common.errors import DaytonaError
 
 P = ParamSpec("P")
 T = TypeVar("T")

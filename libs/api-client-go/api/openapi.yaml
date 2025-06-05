@@ -6972,7 +6972,6 @@ components:
         - createdAt
         - errorReason
         - id
-        - lastUsedAt
         - name
         - organizationId
         - state

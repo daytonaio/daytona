@@ -12,10 +12,11 @@ from typing import Callable, List, Union, overload
 
 import httpx
 from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
-from daytona_sdk._utils.errors import intercept_errors
-from daytona_sdk._utils.path import prefix_relative_path
-from daytona_sdk.common.filesystem import FileUpload
-from daytona_sdk.common.protocols import SandboxInstance
+
+from .._utils.errors import intercept_errors
+from .._utils.path import prefix_relative_path
+from ..common.filesystem import FileUpload
+from ..common.protocols import SandboxInstance
 
 
 class FileSystem:

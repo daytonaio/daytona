@@ -198,7 +198,7 @@ export class LspServer {
    * });
    */
   public async sandboxSymbols(query: string): Promise<LspSymbol[]> {
-    const response = await this.toolboxApi.lspWorkspaceSymbols(
+    const response = await this.toolboxApi.lspSandboxSymbols(
       this.instance.id,
       this.languageId,
       this.pathToProject,

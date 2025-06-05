@@ -5,7 +5,7 @@ import concurrent.futures
 import functools
 from typing import Any, Callable, Optional, ParamSpec, TypeVar
 
-from daytona_sdk._utils.errors import DaytonaError
+from .._utils.errors import DaytonaError
 
 P = ParamSpec("P")
 T = TypeVar("T")

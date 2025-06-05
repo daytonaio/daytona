@@ -1,12 +1,21 @@
-import { Daytona } from '@daytonaio/sdk'
+import { Daytona, Image } from '@daytonaio/sdk'
 
 async function main() {
   const daytona = new Daytona()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  })
+  const sandbox = await daytona.create(
+    {
+      image: Image.base('alpine:3.22.0').runCommands(
+        'apk add --no-cache nodejs npm',
+        'npm install -g typescript typescript-language-server',
+      ),
+      language: 'typescript',
+    },
+    {
+      onSnapshotCreateLogs: console.log,
+    },
+  )
 
   try {
     const projectDir = 'learn-typescript'
