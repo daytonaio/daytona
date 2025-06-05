@@ -16,8 +16,7 @@ export class CreateSnapshotDto {
   @IsString()
   name: string
 
-  // Not optional from user perspective, but is for internals
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'The image name of the snapshot',
     example: 'ubuntu:22.04',
   })

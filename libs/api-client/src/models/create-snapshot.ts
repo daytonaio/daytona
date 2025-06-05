@@ -33,7 +33,7 @@ export interface CreateSnapshot {
    * @type {string}
    * @memberof CreateSnapshot
    */
-  imageName: string
+  imageName?: string
   /**
    * The entrypoint command for the snapshot
    * @type {Array<string>}

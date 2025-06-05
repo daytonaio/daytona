@@ -6592,7 +6592,6 @@ components:
             - $ref: '#/components/schemas/CreateBuildInfo'
           description: Build information for the snapshot
       required:
-        - imageName
         - name
       type: object
     SnapshotState:
