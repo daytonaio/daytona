@@ -26,12 +26,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from './ui/dialog'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { Pagination } from './Pagination'
 import { Loader2 } from 'lucide-react'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
+import { PermissionBadges } from './PermissionBadges'
 
 interface DataTableProps {
   data: ApiKeyList[]
@@ -129,20 +129,11 @@ const getColumns = ({
         return <div className="max-w-md px-3">Permissions</div>
       },
       cell: ({ row }) => {
-        const permissions = row.original.permissions.join(', ')
+        const permissions = row.original.permissions
         return (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <div className="truncate max-w-md px-3 cursor-text">{permissions || '-'}</div>
-              </TooltipTrigger>
-              {permissions && (
-                <TooltipContent>
-                  <p className="max-w-[300px]">{permissions}</p>
-                </TooltipContent>
-              )}
-            </Tooltip>
-          </TooltipProvider>
+          <div className="max-w-md px-3">
+            <PermissionBadges permissions={permissions} showDetails />
+          </div>
         )
       },
     },
