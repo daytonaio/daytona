@@ -81,7 +81,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
   const chartConfig = useMemo(() => {
     const mapped: Record<string, { label: string; color: string }> = {
       diskGB: {
-        label: 'Disk',
+        label: 'Storage',
         color: 'hsl(var(--chart-1))',
       },
       ramGB: {
@@ -119,7 +119,7 @@ export function UsageChart({ usageData, showTotal, title }: UsageChartProps) {
               value: 'cpu',
             },
             {
-              label: 'Disk',
+              label: 'Storage',
               value: 'diskGB',
             },
             // {

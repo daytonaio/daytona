@@ -24,26 +24,30 @@ from daytona_api_client.models.create_organization_quota import CreateOrganizati
 from typing import Optional, Set
 from typing_extensions import Self
 
+
 class CreateUser(BaseModel):
     """
     CreateUser
-    """ # noqa: E501
+    """  # noqa: E501
+
     id: StrictStr
     name: StrictStr
     email: Optional[StrictStr] = None
-    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(default=None, alias="personalOrganizationQuota")
+    personal_organization_quota: Optional[CreateOrganizationQuota] = Field(
+        default=None, alias="personalOrganizationQuota"
+    )
     role: Optional[StrictStr] = None
     email_verified: Optional[StrictBool] = Field(default=None, alias="emailVerified")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["id", "name", "email", "personalOrganizationQuota", "role", "emailVerified"]
 
-    @field_validator('role')
+    @field_validator("role")
     def role_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(['admin', 'user']):
+        if value not in set(["admin", "user"]):
             raise ValueError("must be one of enum values ('admin', 'user')")
         return value
 
@@ -52,7 +56,6 @@ class CreateUser(BaseModel):
         validate_assignment=True,
         protected_namespaces=(),
     )
-
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -79,9 +82,11 @@ class CreateUser(BaseModel):
           are ignored.
         * Fields in `self.additional_properties` are added to the output dict.
         """
-        excluded_fields: Set[str] = set([
-            "additional_properties",
-        ])
+        excluded_fields: Set[str] = set(
+            [
+                "additional_properties",
+            ]
+        )
 
         _dict = self.model_dump(
             by_alias=True,
@@ -90,7 +95,7 @@ class CreateUser(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of personal_organization_quota
         if self.personal_organization_quota:
-            _dict['personalOrganizationQuota'] = self.personal_organization_quota.to_dict()
+            _dict["personalOrganizationQuota"] = self.personal_organization_quota.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -107,19 +112,21 @@ class CreateUser(BaseModel):
         if not isinstance(obj, dict):
             return cls.model_validate(obj)
 
-        _obj = cls.model_validate({
-            "id": obj.get("id"),
-            "name": obj.get("name"),
-            "email": obj.get("email"),
-            "personalOrganizationQuota": CreateOrganizationQuota.from_dict(obj["personalOrganizationQuota"]) if obj.get("personalOrganizationQuota") is not None else None,
-            "role": obj.get("role"),
-            "emailVerified": obj.get("emailVerified")
-        })
+        _obj = cls.model_validate(
+            {
+                "id": obj.get("id"),
+                "name": obj.get("name"),
+                "email": obj.get("email"),
+                "personalOrganizationQuota": CreateOrganizationQuota.from_dict(obj["personalOrganizationQuota"])
+                if obj.get("personalOrganizationQuota") is not None
+                else None,
+                "role": obj.get("role"),
+                "emailVerified": obj.get("emailVerified"),
+            }
+        )
         # store additional fields in additional_properties
         for _key in obj.keys():
             if _key not in cls.__properties:
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
-
-

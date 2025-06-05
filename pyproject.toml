@@ -20,7 +20,14 @@ disable = [
     "R0801",  # duplicate-code
     "R0911",  # too-many-return-statements
     "R0915",  # too-many-statements
-    "R0914",  # too-many-locals
+    "R0914",  # too-many-locals,
+    "C0414",  # useless-import-alias
+    "E1121",  # too-many-function-args
+    "W1203",  # logging-fstring-interpolation
+    "W1514",  # unspecified-encoding
+    "W0640",  # cell-var-from-loop
+    "R0912",  # too-many-branches
+    "R1702",  # too-many-nested-blocks
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]

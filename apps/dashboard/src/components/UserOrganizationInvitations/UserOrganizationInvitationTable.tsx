@@ -21,6 +21,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -115,16 +116,12 @@ export function UserOrganizationInvitationTable({
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState colSpan={columns.length} message="No Invitations found." />
               )}
             </TableBody>
           </Table>
         </div>
-        <Pagination table={table} className="mt-4" />
+        <Pagination table={table} className="mt-4" entityName="Invitations" />
       </div>
 
       {invitationToDecline && (

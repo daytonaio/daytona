@@ -28,3 +28,4 @@ daytona [flags]
 - [daytona organization](daytona_organization.md) - Manage Daytona organizations
 - [daytona sandbox](daytona_sandbox.md) - Manage Daytona sandboxes
 - [daytona version](daytona_version.md) - Print the version number
+- [daytona volume](daytona_volume.md) - Manage Daytona volumes

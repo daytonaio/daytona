@@ -5,7 +5,11 @@
 
 import {
   Configuration,
+  ImagesApi,
+  ImageState,
+  ObjectStorageApi,
   WorkspaceApi as SandboxApi,
+  WorkspaceState as SandboxState,
   CreateWorkspaceTargetEnum as SandboxTargetRegion,
   ToolboxApi,
   VolumesApi,
@@ -16,7 +20,10 @@ import * as dotenv from 'dotenv'
 import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbox'
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
+import { Image } from './Image'
+import { ObjectStorage } from './ObjectStorage'
 import { Sandbox, SandboxInstance, Sandbox as Workspace } from './Sandbox'
+import { processStreamingResponse } from './utils/Stream'
 import { VolumeService } from './Volume'
 
 /**
@@ -111,7 +118,7 @@ export interface SandboxResources {
  * Parameters for creating a new Sandbox.
  *
  * @interface
- * @property {string} [image] - Optional Docker image to use for the Sandbox
+ * @property {string | Image} [image] - Optional Docker image to use for the Sandbox or an Image instance
  * @property {string} [user] - Optional os user to use for the Sandbox
  * @property {CodeLanguage | string} [language] - Programming language for direct code execution
  * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
@@ -121,6 +128,7 @@ export interface SandboxResources {
  * @property {boolean} [async] - If true, will not wait for the Sandbox to be ready before returning
  * @property {number} [timeout] - Timeout in seconds for the Sandbox to be ready (0 means no timeout)
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled)
+ * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used)
  *
  * @example
  * const params: CreateSandboxParams = {
@@ -130,13 +138,14 @@ export interface SandboxResources {
  *         cpu: 2,
  *         memory: 4 // 4GB RAM
  *     },
- *     autoStopInterval: 60  // Auto-stop after 1 hour of inactivity
+ *     autoStopInterval: 60,  // Auto-stop after 1 hour of inactivity
+ *     autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
  * };
  * const sandbox = await daytona.create(params, 50);
  */
 export type CreateSandboxParams = {
-  /** Optional Docker image to use for the Sandbox */
-  image?: string
+  /** Optional Docker image to use for the Sandbox or an Image instance */
+  image?: string | Image
   /** Optional os user to use for the Sandbox */
   user?: string
   /** Programming language for direct code execution */
@@ -158,6 +167,8 @@ export type CreateSandboxParams = {
   timeout?: number
   /** Auto-stop interval in minutes (0 means disabled) (must be a non-negative integer) */
   autoStopInterval?: number
+  /** Auto-archive interval in minutes (0 means the maximum interval will be used) (must be a non-negative integer) */
+  autoArchiveInterval?: number
   /** List of volumes to mount in the Sandbox */
   volumes?: VolumeMount[]
 }
@@ -201,6 +212,8 @@ export type SandboxFilter = {
 export class Daytona {
   private readonly sandboxApi: SandboxApi
   private readonly toolboxApi: ToolboxApi
+  private readonly imagesApi: ImagesApi
+  private readonly objectStorageApi: ObjectStorageApi
   private readonly target: SandboxTargetRegion
   private readonly apiKey?: string
   private readonly jwtToken?: string
@@ -299,9 +312,13 @@ export class Daytona {
     this.sandboxApi = new SandboxApi(configuration, '', axiosInstance)
     this.toolboxApi = new ToolboxApi(configuration, '', axiosInstance)
     this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
+    this.imagesApi = new ImagesApi(configuration, '', axiosInstance)
+    this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
   }
 
   /**
+   * @deprecated Use `create` with `options` object instead. This method will be removed in a future version.
+   *
    * Creates Sandboxes with default or custom configurations. You can specify various parameters,
    * including language, image, resources, environment variables, and volumes for the Sandbox.
    *
@@ -326,12 +343,60 @@ export class Daytona {
    *         cpu: 2,
    *         memory: 4 // 4GB RAM
    *     },
-   *     autoStopInterval: 60
+   *     autoStopInterval: 60,
+   *     autoArchiveInterval: 60
    * };
    * const sandbox = await daytona.create(params, 40);
    */
-  public async create(params?: CreateSandboxParams, timeout = 60): Promise<Sandbox> {
+  public async create(params?: CreateSandboxParams, options?: number): Promise<Sandbox>
+  /**
+   * Creates Sandboxes with default or custom configurations. You can specify various parameters,
+   * including language, image, resources, environment variables, and volumes for the Sandbox.
+   *
+   * @param {CreateSandboxParams} [params] - Parameters for Sandbox creation
+   * @param {object} [options] - Options for the create operation
+   * @param {number} [options.timeout] - Timeout in seconds (0 means no timeout, default is 60)
+   * @param {function} [options.onImageBuildLogs] - Callback function to handle image build logs.
+   * It's invoked only when `params.image` is an instance of `Image` and there's no existing
+   * image in Daytona with the same configuration.
+   * @returns {Promise<Sandbox>} The created Sandbox instance
+   *
+   * @example
+   * const image = Image.debianSlim('3.12').pipInstall('numpy');
+   * const sandbox = await daytona.create({ image }, { timeout: 90, onImageBuildLogs: console.log });
+   *
+   * @example
+   * // Create a custom sandbox
+   * const image = Image.debianSlim('3.12').pipInstall('numpy');
+   * const params: CreateSandboxParams = {
+   *     language: 'typescript',
+   *     image,
+   *     envVars: {
+   *         NODE_ENV: 'development',
+   *         DEBUG: 'true'
+   *     },
+   *     resources: {
+   *         cpu: 2,
+   *         memory: 4 // 4GB RAM
+   *     },
+   *     autoStopInterval: 60
+   * };
+   * const sandbox = await daytona.create(params, { timeout: 100, onImageBuildLogs: console.log });
+   */
+  public async create(
+    params?: CreateSandboxParams,
+    options?: { onImageBuildLogs?: (chunk: string) => void; timeout?: number },
+  ): Promise<Sandbox>
+  public async create(
+    params?: CreateSandboxParams,
+    options: number | { onImageBuildLogs?: (chunk: string) => void; timeout?: number } = { timeout: 60 },
+  ): Promise<Sandbox> {
     const startTime = Date.now()
+
+    options = typeof options === 'number' ? { timeout: options } : { ...options }
+    if (options.timeout == undefined || options.timeout == null) {
+      options.timeout = 60
+    }
 
     if (params == null) {
       params = { language: 'python' }
@@ -343,7 +408,7 @@ export class Daytona {
     }
 
     // remove this when params.timeout is removed
-    const effectiveTimeout = params.timeout || timeout
+    const effectiveTimeout = params.timeout || options.timeout
     if (effectiveTimeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
@@ -355,12 +420,34 @@ export class Daytona {
       throw new DaytonaError('autoStopInterval must be a non-negative integer')
     }
 
+    if (
+      params.autoArchiveInterval !== undefined &&
+      (!Number.isInteger(params.autoArchiveInterval) || params.autoArchiveInterval < 0)
+    ) {
+      throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
+    }
+
     const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
 
     try {
+      // Handle Image instance if provided
+      let imageStr: string | undefined
+      let buildInfo: any | undefined
+
+      if (typeof params.image === 'string') {
+        imageStr = params.image
+      } else if (params.image instanceof Image) {
+        const contextHashes = await this.processImageContext(params.image)
+        buildInfo = {
+          contextHashes,
+          dockerfileContent: params.image.dockerfile,
+        }
+      }
+
       const response = await this.sandboxApi.createWorkspace(
         {
-          image: params.image,
+          image: imageStr,
+          buildInfo,
           user: params.user,
           env: params.envVars || {},
           labels: params.labels,
@@ -371,6 +458,7 @@ export class Daytona {
           memory: params.resources?.memory,
           disk: params.resources?.disk,
           autoStopInterval: params.autoStopInterval,
+          autoArchiveInterval: params.autoArchiveInterval,
           volumes: params.volumes,
         },
         undefined,
@@ -379,7 +467,26 @@ export class Daytona {
         },
       )
 
-      const sandboxInstance = response.data
+      let sandboxInstance = response.data
+
+      if (sandboxInstance.state === SandboxState.PENDING_BUILD && options.onImageBuildLogs) {
+        const terminalStates: SandboxState[] = [SandboxState.STARTED, SandboxState.STARTING, SandboxState.ERROR]
+
+        while (sandboxInstance.state === SandboxState.PENDING_BUILD) {
+          await new Promise((resolve) => setTimeout(resolve, 1000))
+          sandboxInstance = (await this.sandboxApi.getWorkspace(sandboxInstance.id)).data
+        }
+
+        await processStreamingResponse(
+          () => this.sandboxApi.getBuildLogs(sandboxInstance.id, undefined, true, { responseType: 'stream' }),
+          options.onImageBuildLogs,
+          async () => {
+            sandboxInstance = (await this.sandboxApi.getWorkspace(sandboxInstance.id)).data
+            return sandboxInstance.state !== undefined && terminalStates.includes(sandboxInstance.state)
+          },
+        )
+      }
+
       const sandboxInfo = Sandbox.toSandboxInfo(sandboxInstance)
       sandboxInstance.info = {
         ...sandboxInfo,
@@ -394,7 +501,7 @@ export class Daytona {
         codeToolbox,
       )
 
-      if (!params.async) {
+      if (!params.async && sandbox.instance.state !== 'started') {
         const timeElapsed = Date.now() - startTime
         await sandbox.waitUntilStarted(effectiveTimeout ? effectiveTimeout - timeElapsed / 1000 : 0)
       }
@@ -567,6 +674,93 @@ export class Daytona {
   }
 
   /**
+   * Creates and registers a new image from the given Image definition.
+   *
+   * @param {string} name - The name of the image to create.
+   * @param {Image} image - The Image instance.
+   * @param {object} options - Options for the create operation.
+   * @param {boolean} options.verbose - Default is false. Whether to log progress information upon each state change of the image.
+   * @param {number} options.timeout - Default is no timeout. Timeout in seconds (0 means no timeout).
+   * @returns {Promise<void>}
+   *
+   * @example
+   * const image = Image.debianSlim('3.12').pipInstall('numpy');
+   * await daytona.createImage('my-python-image', image);
+   */
+  public async createImage(
+    name: string,
+    image: Image,
+    options: { onLogs?: (chunk: string) => void; timeout?: number } = {},
+  ): Promise<void> {
+    const contextHashes = await this.processImageContext(image)
+    let builtImage = (
+      await this.imagesApi.buildImage(
+        {
+          name,
+          buildInfo: {
+            contextHashes,
+            dockerfileContent: image.dockerfile,
+          },
+        },
+        undefined,
+        {
+          timeout: (options.timeout || 0) * 1000,
+        },
+      )
+    ).data
+
+    const terminalStates: ImageState[] = [ImageState.ACTIVE, ImageState.ERROR]
+    const imageRef = { builtImage }
+    let streamPromise: Promise<void> | undefined
+    const startLogStreaming = async () => {
+      if (!streamPromise) {
+        streamPromise = processStreamingResponse(
+          () => this.imagesApi.getImageBuildLogs(builtImage.id, undefined, true, { responseType: 'stream' }),
+          options.onLogs!,
+          async () => terminalStates.includes(imageRef.builtImage.state),
+        )
+      }
+    }
+
+    if (options.onLogs) {
+      options.onLogs(`Building image ${builtImage.name} (${builtImage.state})`)
+
+      if (builtImage.state !== ImageState.BUILD_PENDING) {
+        await startLogStreaming()
+      }
+    }
+
+    let previousState = builtImage.state
+    while (!terminalStates.includes(builtImage.state)) {
+      if (options.onLogs && previousState !== builtImage.state) {
+        if (builtImage.state !== ImageState.BUILD_PENDING && !streamPromise) {
+          await startLogStreaming()
+        }
+        options.onLogs(`Building image ${builtImage.name} (${builtImage.state})`)
+        previousState = builtImage.state
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      builtImage = (await this.imagesApi.getImage(builtImage.id)).data
+      imageRef.builtImage = builtImage
+    }
+
+    if (options.onLogs) {
+      if (streamPromise) {
+        await streamPromise
+      }
+      if (builtImage.state === ImageState.ACTIVE) {
+        options.onLogs(`Built image ${builtImage.name} (${builtImage.state})`)
+      }
+    }
+
+    if (builtImage.state === ImageState.ERROR) {
+      throw new DaytonaError(
+        `Failed to build image. Image ended in the ERROR state. name: ${builtImage.name}; error reason: ${builtImage.errorReason}`,
+      )
+    }
+  }
+
+  /**
    * Gets the appropriate code toolbox based on language.
    *
    * @private
@@ -587,5 +781,39 @@ export class Daytona {
           `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`,
         )
     }
+  }
+
+  /**
+   * Processes the image contexts by uploading them to object storage
+   *
+   * @private
+   * @param {Image} image - The Image instance.
+   * @returns {Promise<string[]>} The list of context hashes stored in object storage.
+   */
+  private async processImageContext(image: Image): Promise<string[]> {
+    if (!image.contextList || !image.contextList.length) {
+      return []
+    }
+
+    const pushAccessCreds = (await this.objectStorageApi.getPushAccess()).data
+    const objectStorage = new ObjectStorage({
+      endpointUrl: pushAccessCreds.storageUrl,
+      accessKeyId: pushAccessCreds.accessKey,
+      secretAccessKey: pushAccessCreds.secret,
+      sessionToken: pushAccessCreds.sessionToken,
+      bucketName: pushAccessCreds.bucket,
+    })
+
+    const contextHashes = []
+    for (const context of image.contextList) {
+      const contextHash = await objectStorage.upload(
+        context.sourcePath,
+        pushAccessCreds.organizationId,
+        context.archivePath,
+      )
+      contextHashes.push(contextHash)
+    }
+
+    return contextHashes
   }
 }

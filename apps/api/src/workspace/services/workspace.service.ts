@@ -21,7 +21,6 @@ import { SnapshotState } from '../enums/snapshot-state.enum'
 import { Image } from '../entities/image.entity'
 import { ImageState } from '../enums/image-state.enum'
 import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/workspace.constants'
-import { ConfigService } from '@nestjs/config'
 import { WorkspaceWarmPoolService } from './workspace-warm-pool.service'
 import { EventEmitter2, OnEvent } from '@nestjs/event-emitter'
 import { WarmPoolEvents } from '../constants/warmpool-events.constants'
@@ -41,6 +40,7 @@ import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { OrganizationService } from '../../organization/services/organization.service'
 import { OrganizationEvents } from '../../organization/constants/organization-events.constant'
 import { OrganizationSuspendedWorkspaceStoppedEvent } from '../../organization/events/organization-suspended-workspace-stopped.event'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -61,7 +61,7 @@ export class WorkspaceService {
     @InjectRepository(BuildInfo)
     private readonly buildInfoRepository: Repository<BuildInfo>,
     private readonly nodeService: NodeService,
-    private readonly configService: ConfigService,
+    private readonly configService: TypedConfigService,
     private readonly warmPoolService: WorkspaceWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
@@ -212,7 +212,7 @@ export class WorkspaceService {
     let workspaceImage = createWorkspaceDto.image
 
     if ((!createWorkspaceDto.image || createWorkspaceDto.image.trim() === '') && !createWorkspaceDto.buildInfo) {
-      workspaceImage = this.configService.get<string>('DEFAULT_IMAGE')
+      workspaceImage = this.configService.getOrThrow('defaultImage')
     }
 
     const image = await this.imageRepository.findOne({
@@ -224,7 +224,7 @@ export class WorkspaceService {
 
     if (!createWorkspaceDto.buildInfo && (createWorkspaceDto.volumes || []).length === 0) {
       if (!image) {
-        throw new BadRequestError(`Image ${workspaceImage} not found or not accessible`)
+        throw new BadRequestError(`Image ${workspaceImage} not found. Did you add it through the Daytona Dashboard?`)
       }
 
       if (organizationId !== WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION) {
@@ -246,6 +246,11 @@ export class WorkspaceService {
           warmPoolWorkspace.labels = createWorkspaceDto.labels || {}
           if (createWorkspaceDto.autoStopInterval !== undefined) {
             warmPoolWorkspace.autoStopInterval = createWorkspaceDto.autoStopInterval
+          }
+          if (createWorkspaceDto.autoArchiveInterval !== undefined) {
+            warmPoolWorkspace.autoArchiveInterval = this.resolveAutoArchiveInterval(
+              createWorkspaceDto.autoArchiveInterval,
+            )
           }
           warmPoolWorkspace.organizationId = organizationId
           warmPoolWorkspace.createdAt = new Date()
@@ -307,6 +312,10 @@ export class WorkspaceService {
 
     if (createWorkspaceDto.autoStopInterval !== undefined) {
       workspace.autoStopInterval = createWorkspaceDto.autoStopInterval
+    }
+
+    if (createWorkspaceDto.autoArchiveInterval !== undefined) {
+      workspace.autoArchiveInterval = this.resolveAutoArchiveInterval(createWorkspaceDto.autoArchiveInterval)
     }
 
     const imageRef = workspace.buildInfo ? workspace.buildInfo.imageRef : image.internalName
@@ -573,6 +582,19 @@ export class WorkspaceService {
     await this.workspaceRepository.save(workspace)
   }
 
+  async setAutoArchiveInterval(workspaceId: string, interval: number): Promise<void> {
+    const workspace = await this.workspaceRepository.findOne({
+      where: { id: workspaceId },
+    })
+
+    if (!workspace) {
+      throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
+    }
+
+    workspace.autoArchiveInterval = this.resolveAutoArchiveInterval(interval)
+    await this.workspaceRepository.save(workspace)
+  }
+
   @OnEvent(WarmPoolEvents.TOPUP_REQUESTED)
   private async createWarmPoolWorkspace(event: WarmPoolTopUpRequested) {
     const warmPoolItem = event.warmPool
@@ -656,5 +678,19 @@ export class WorkspaceService {
         error,
       )
     })
+  }
+
+  private resolveAutoArchiveInterval(autoArchiveInterval: number): number {
+    if (autoArchiveInterval < 0) {
+      throw new BadRequestError('Auto-archive interval must be non-negative')
+    }
+
+    const maxAutoArchiveInterval = this.configService.getOrThrow('maxAutoArchiveInterval')
+
+    if (autoArchiveInterval === 0) {
+      return maxAutoArchiveInterval
+    }
+
+    return Math.min(autoArchiveInterval, maxAutoArchiveInterval)
   }
 }

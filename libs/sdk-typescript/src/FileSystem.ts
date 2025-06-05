@@ -8,7 +8,7 @@ import { SandboxInstance } from './Sandbox'
 import { prefixRelativePath } from './utils/Path'
 import * as fs from 'fs'
 import { Readable } from 'stream'
-import * as FormData from 'form-data'
+import FormData from 'form-data'
 
 /**
  * Parameters for setting file permissions in the Sandbox.

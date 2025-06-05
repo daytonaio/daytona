@@ -13,9 +13,10 @@ interface PaginationProps<TData> {
   table: Table<TData>
   selectionEnabled?: boolean
   className?: string
+  entityName?: string
 }
 
-export function Pagination<TData>({ table, selectionEnabled, className }: PaginationProps<TData>) {
+export function Pagination<TData>({ table, selectionEnabled, className, entityName }: PaginationProps<TData>) {
   return (
     <div className={`flex items-center justify-between px-2 w-full ${className}`}>
       {selectionEnabled ? (
@@ -28,7 +29,7 @@ export function Pagination<TData>({ table, selectionEnabled, className }: Pagina
       )}
       <div className="flex items-center space-x-6 lg:space-x-8">
         <div className="flex items-center space-x-2">
-          <p className="text-sm font-medium">Rows per page</p>
+          <p className="text-sm font-medium">{entityName ? `${entityName} per page` : 'Rows per page'}</p>
           <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {

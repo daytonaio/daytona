@@ -25,6 +25,7 @@ import { UpdateAssignedOrganizationRolesDialog } from '@/components/Organization
 import { capitalize } from '@/lib/utils'
 import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from '../TableEmptyState'
 
 interface DataTableProps {
   data: OrganizationUser[]
@@ -163,16 +164,12 @@ export function OrganizationMemberTable({
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
+                <TableEmptyState colSpan={columns.length} message="No Members found." />
               )}
             </TableBody>
           </Table>
         </div>
-        <Pagination table={table} className="mt-4" />
+        <Pagination table={table} className="mt-4" entityName="Members" />
       </div>
 
       {memberToUpdate && (

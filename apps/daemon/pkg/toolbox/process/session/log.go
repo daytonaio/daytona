@@ -18,55 +18,26 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
-	return func(c *gin.Context) {
-		sessionId := c.Param("sessionId")
-		cmdId := c.Param("commandId")
+func (s *SessionController) GetSessionCommandLogs(c *gin.Context) {
+	sessionId := c.Param("sessionId")
+	cmdId := c.Param("commandId")
 
-		session, ok := sessions[sessionId]
-		if !ok {
-			c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
-			return
-		}
+	session, ok := sessions[sessionId]
+	if !ok || session.deleted {
+		c.AbortWithError(http.StatusNotFound, errors.New("session not found"))
+		return
+	}
 
-		command, ok := sessions[sessionId].commands[cmdId]
-		if !ok {
-			c.AbortWithError(http.StatusNotFound, errors.New("command not found"))
-			return
-		}
+	command, ok := sessions[sessionId].commands[cmdId]
+	if !ok {
+		c.AbortWithError(http.StatusNotFound, errors.New("command not found"))
+		return
+	}
 
-		path := command.LogFilePath(session.Dir(configDir))
+	logFilePath, _ := command.LogFilePath(session.Dir(s.configDir))
 
-		if c.Request.Header.Get("Upgrade") == "websocket" {
-			logFile, err := os.Open(path)
-			if err != nil {
-				if os.IsNotExist(err) {
-					c.AbortWithError(http.StatusNotFound, err)
-					return
-				}
-				if os.IsPermission(err) {
-					c.AbortWithError(http.StatusForbidden, err)
-					return
-				}
-				c.AbortWithError(http.StatusBadRequest, err)
-				return
-			}
-			defer logFile.Close()
-			ReadLog(c, logFile, util.ReadLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
-				for {
-					msg := <-messages
-					_, output := extractExitCode(string(msg))
-					err := conn.WriteMessage(websocket.TextMessage, []byte(output))
-					if err != nil {
-						errors <- err
-						break
-					}
-				}
-			})
-			return
-		}
-
-		content, err := os.ReadFile(path)
+	if c.Request.Header.Get("Upgrade") == "websocket" {
+		logFile, err := os.Open(logFilePath)
 		if err != nil {
 			if os.IsNotExist(err) {
 				c.AbortWithError(http.StatusNotFound, err)
@@ -79,10 +50,44 @@ func GetSessionCommandLogs(configDir string) func(c *gin.Context) {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
-
-		_, output := extractExitCode(string(content))
-		c.String(http.StatusOK, output)
+		defer logFile.Close()
+		ReadLog(c, logFile, util.ReadLog, func(conn *websocket.Conn, messages chan []byte, errors chan error) {
+			for {
+				select {
+				case <-session.ctx.Done():
+					err := conn.WriteControl(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""), time.Now().Add(time.Second))
+					if err != nil {
+						log.Error(err)
+					}
+					conn.Close()
+					return
+				case msg := <-messages:
+					err := conn.WriteMessage(websocket.TextMessage, msg)
+					if err != nil {
+						errors <- err
+						return
+					}
+				}
+			}
+		})
+		return
 	}
+
+	logBytes, err := os.ReadFile(logFilePath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			c.AbortWithError(http.StatusNotFound, err)
+			return
+		}
+		if os.IsPermission(err) {
+			c.AbortWithError(http.StatusForbidden, err)
+			return
+		}
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	c.String(http.StatusOK, string(logBytes))
 }
 
 var upgrader = websocket.Upgrader{

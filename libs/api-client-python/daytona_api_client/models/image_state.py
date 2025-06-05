@@ -27,19 +27,17 @@ class ImageState(str, Enum):
     """
     allowed enum values
     """
-    BUILD_PENDING = 'build_pending'
-    BUILDING = 'building'
-    PENDING = 'pending'
-    PULLING_IMAGE = 'pulling_image'
-    PENDING_VALIDATION = 'pending_validation'
-    VALIDATING = 'validating'
-    ACTIVE = 'active'
-    ERROR = 'error'
-    REMOVING = 'removing'
+    BUILD_PENDING = "build_pending"
+    BUILDING = "building"
+    PENDING = "pending"
+    PULLING_IMAGE = "pulling_image"
+    PENDING_VALIDATION = "pending_validation"
+    VALIDATING = "validating"
+    ACTIVE = "active"
+    ERROR = "error"
+    REMOVING = "removing"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of ImageState from a JSON string"""
         return cls(json.loads(json_str))
-
-

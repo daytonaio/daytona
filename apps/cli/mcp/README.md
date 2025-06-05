@@ -88,6 +88,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
     - `target` (default: "us"): Target region of the sandbox
     - `image`: Image of the sandbox (optional)
     - `auto_stop_interval` (default: "15"): Auto-stop interval in minutes (0 means disabled)
+    - `auto_archive_interval` (default: "10080"): Auto-archive interval in minutes (0 means the maximum interval will be used)
 
 - `destroy_sandbox`: Destroy a sandbox with Daytona
 

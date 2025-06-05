@@ -61,6 +61,8 @@ type Workspace struct {
 	SnapshotCreatedAt *string `json:"snapshotCreatedAt,omitempty"`
 	// Auto-stop interval in minutes (0 means disabled)
 	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
+	// Auto-archive interval in minutes
+	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
 	// Array of volumes attached to the workspace
 	Volumes []WorkspaceVolume `json:"volumes,omitempty"`
 }
@@ -641,6 +643,38 @@ func (o *Workspace) SetAutoStopInterval(v float32) {
 	o.AutoStopInterval = &v
 }
 
+// GetAutoArchiveInterval returns the AutoArchiveInterval field value if set, zero value otherwise.
+func (o *Workspace) GetAutoArchiveInterval() float32 {
+	if o == nil || IsNil(o.AutoArchiveInterval) {
+		var ret float32
+		return ret
+	}
+	return *o.AutoArchiveInterval
+}
+
+// GetAutoArchiveIntervalOk returns a tuple with the AutoArchiveInterval field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetAutoArchiveIntervalOk() (*float32, bool) {
+	if o == nil || IsNil(o.AutoArchiveInterval) {
+		return nil, false
+	}
+	return o.AutoArchiveInterval, true
+}
+
+// HasAutoArchiveInterval returns a boolean if a field has been set.
+func (o *Workspace) HasAutoArchiveInterval() bool {
+	if o != nil && !IsNil(o.AutoArchiveInterval) {
+		return true
+	}
+
+	return false
+}
+
+// SetAutoArchiveInterval gets a reference to the given float32 and assigns it to the AutoArchiveInterval field.
+func (o *Workspace) SetAutoArchiveInterval(v float32) {
+	o.AutoArchiveInterval = &v
+}
+
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
 func (o *Workspace) GetVolumes() []WorkspaceVolume {
 	if o == nil || IsNil(o.Volumes) {
@@ -723,6 +757,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.AutoStopInterval) {
 		toSerialize["autoStopInterval"] = o.AutoStopInterval
+	}
+	if !IsNil(o.AutoArchiveInterval) {
+		toSerialize["autoArchiveInterval"] = o.AutoArchiveInterval
 	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes

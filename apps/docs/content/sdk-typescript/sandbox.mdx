@@ -236,6 +236,40 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 
 ---
 
+#### setAutoArchiveInterval()
+
+```ts
+setAutoArchiveInterval(interval: number): Promise<void>
+```
+
+Set the auto-archive interval for the Sandbox.
+
+The Sandbox will automatically archive after being continuously stopped for the specified interval.
+
+**Parameters**:
+
+- `interval` _number_ - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+  Set to 0 for the maximum interval. Default is 7 days.
+
+**Returns**:
+
+- `Promise<void>`
+
+**Throws**:
+
+- `DaytonaError` - If interval is not a non-negative integer
+
+**Example:**
+
+```ts
+// Auto-archive after 1 hour
+await sandbox.setAutoArchiveInterval(60)
+// Or use the maximum interval
+await sandbox.setAutoArchiveInterval(0)
+```
+
+---
+
 #### setAutostopInterval()
 
 ```ts
@@ -446,6 +480,7 @@ Structured information about a Sandbox
 
 **Properties**:
 
+- `autoArchiveInterval` _number_ - Auto-archive interval in minutes
 - `autoStopInterval` _number_ - Auto-stop interval in minutes
 - `class` _CreateNodeClassEnum_ - Sandbox class
 - `created` _string_ - The creation timestamp of the project
@@ -467,7 +502,7 @@ Structured information about a Sandbox
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
 - `lastSnapshot` _null \| string_ - When the last snapshot was created
 - `nodeDomain` _string_ - Domain name of the Sandbox node
-- ~~`providerMetadata?`~~ _string_ - **_Deprecated_** - Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval` instead.
+- ~~`providerMetadata?`~~ _string_ - **_Deprecated_** - Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
 - `public` _boolean_ - Whether the Sandbox is publicly accessible
 - `region` _CreateNodeRegionEnum_ - Region of the Sandbox node
 - `resources` _SandboxResources_ - Resource allocations for the Sandbox
@@ -499,6 +534,18 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 **Extends:**
 
 **Properties**:
+
+- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
+
+  ##### Memberof
+
+  Workspace
+
+  ##### Inherited from
+
+  ```ts
+  Omit.autoArchiveInterval
+  ```
 
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
 
@@ -644,7 +691,6 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   ```
 
   - **_Deprecated_** - ##### Inherited from
-
 - `organizationId` _string_ - The organization ID of the workspace
 
   ##### Memberof

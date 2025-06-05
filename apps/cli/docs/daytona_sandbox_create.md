@@ -9,6 +9,7 @@ daytona sandbox create [flags]
 ### Options
 
 ```
+      --auto-archive int32    Auto-archive interval in minutes (0 means the maximum interval will be used) (default 10080)
       --auto-stop int32       Auto-stop interval in minutes (0 means disabled)
       --class string          Workspace class type (small, medium, large)
   -c, --context stringArray   Files or directories to include in the build context (can be specified multiple times)
@@ -21,8 +22,9 @@ daytona sandbox create [flags]
   -l, --label stringArray     Labels (format: KEY=VALUE)
       --memory int32          Memory allocated to the sandbox in MB
       --public                Make sandbox publicly accessible
-      --target string         Target region (eu, us, asia)
+      --target string         Target region (eu, us)
       --user string           User associated with the sandbox
+  -v, --volume stringArray    Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)
 ```
 
 ### Options inherited from parent commands

@@ -1017,27 +1017,27 @@ paths:
       summary: Get available account providers
       tags:
         - users
-  /users/linked-accounts/{providerId}/{userId}:
+  /users/linked-accounts/{provider}/{providerUserId}:
     delete:
       operationId: unlinkAccount
       parameters:
         - explode: false
           in: path
-          name: providerId
+          name: provider
           required: true
           schema:
             type: string
           style: simple
         - explode: false
           in: path
-          name: userId
+          name: providerUserId
           required: true
           schema:
             type: string
           style: simple
       responses:
-        '200':
-          description: ''
+        '204':
+          description: Account unlinked successfully
       security:
         - bearer: []
         - oauth2:
@@ -1429,6 +1429,47 @@ paths:
             - profile
             - email
       summary: Set workspace auto-stop interval
+      tags:
+        - workspace
+  /workspace/{workspaceId}/autoarchive/{interval}:
+    post:
+      operationId: setAutoArchiveInterval
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - description: ID of the workspace
+          explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          explode: false
+          in: path
+          name: interval
+          required: true
+          schema:
+            type: number
+          style: simple
+      responses:
+        '200':
+          description: Auto-archive interval has been set
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Set workspace auto-archive interval
       tags:
         - workspace
   /workspace/{workspaceId}/archive:
@@ -2233,6 +2274,43 @@ paths:
       tags:
         - toolbox
   /toolbox/{workspaceId}/toolbox/git/branches:
+    delete:
+      description: Delete branch on git repository
+      operationId: gitDeleteBranch
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: workspaceId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitDeleteBranchRequest'
+        required: true
+      responses:
+        '200':
+          description: Branch deleted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Delete branch
+      tags:
+        - toolbox
     get:
       description: Get branch list from git repository
       operationId: gitListBranches
@@ -4976,6 +5054,7 @@ components:
         id: workspace123
         state: creating
         user: daytona
+        autoArchiveInterval: 10080
         info: ''
       properties:
         id:
@@ -5069,6 +5148,10 @@ components:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30
           type: number
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes
+          example: 10080
+          type: number
         volumes:
           description: Array of volumes attached to the workspace
           items:
@@ -5128,6 +5211,7 @@ components:
         public: false
         user: daytona
         class: small
+        autoArchiveInterval: 10080
       properties:
         image:
           description: The image used for the workspace
@@ -5190,6 +5274,11 @@ components:
         autoStopInterval:
           description: Auto-stop interval in minutes (0 means disabled)
           example: 30
+          type: integer
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          example: 10080
           type: integer
         volumes:
           description: Array of volumes to attach to the workspace
@@ -5445,6 +5534,19 @@ components:
         - branches
       type: object
     GitBranchRequest:
+      example:
+        path: path
+        name: name
+      properties:
+        path:
+          type: string
+        name:
+          type: string
+      required:
+        - name
+        - path
+      type: object
+    GitDeleteBranchRequest:
       example:
         path: path
         name: name
@@ -6152,11 +6254,23 @@ components:
       required:
         - general
       type: object
+    VolumeState:
+      description: Volume state
+      enum:
+        - creating
+        - ready
+        - pending_create
+        - pending_delete
+        - deleting
+        - deleted
+        - error
+      type: string
     VolumeDto:
       example:
         organizationId: 123e4567-e89b-12d3-a456-426614174000
         createdAt: 2023-01-01T00:00:00.000Z
         lastUsedAt: 2023-01-01T00:00:00.000Z
+        errorReason: Error processing volume
         name: my-volume
         id: vol-12345678
         state: ready
@@ -6175,17 +6289,10 @@ components:
           example: 123e4567-e89b-12d3-a456-426614174000
           type: string
         state:
+          allOf:
+            - $ref: '#/components/schemas/VolumeState'
           description: Volume state
-          enum:
-            - creating
-            - ready
-            - pending_create
-            - pending_delete
-            - deleting
-            - deleted
-            - error
           example: ready
-          type: string
         createdAt:
           description: Creation timestamp
           example: 2023-01-01T00:00:00.000Z
@@ -6198,8 +6305,14 @@ components:
           description: Last used timestamp
           example: 2023-01-01T00:00:00.000Z
           type: string
+        errorReason:
+          description: The error reason of the volume
+          example: Error processing volume
+          nullable: true
+          type: string
       required:
         - createdAt
+        - errorReason
         - id
         - lastUsedAt
         - name

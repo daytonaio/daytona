@@ -27,25 +27,23 @@ class WorkspaceState(str, Enum):
     """
     allowed enum values
     """
-    CREATING = 'creating'
-    RESTORING = 'restoring'
-    DESTROYED = 'destroyed'
-    DESTROYING = 'destroying'
-    STARTED = 'started'
-    STOPPED = 'stopped'
-    STARTING = 'starting'
-    STOPPING = 'stopping'
-    ERROR = 'error'
-    PENDING_BUILD = 'pending_build'
-    BUILDING_IMAGE = 'building_image'
-    UNKNOWN = 'unknown'
-    PULLING_IMAGE = 'pulling_image'
-    ARCHIVING = 'archiving'
-    ARCHIVED = 'archived'
+    CREATING = "creating"
+    RESTORING = "restoring"
+    DESTROYED = "destroyed"
+    DESTROYING = "destroying"
+    STARTED = "started"
+    STOPPED = "stopped"
+    STARTING = "starting"
+    STOPPING = "stopping"
+    ERROR = "error"
+    PENDING_BUILD = "pending_build"
+    BUILDING_IMAGE = "building_image"
+    UNKNOWN = "unknown"
+    PULLING_IMAGE = "pulling_image"
+    ARCHIVING = "archiving"
+    ARCHIVED = "archived"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:
         """Create an instance of WorkspaceState from a JSON string"""
         return cls(json.loads(json_str))
-
-

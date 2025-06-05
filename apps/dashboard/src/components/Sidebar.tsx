@@ -6,10 +6,10 @@
 import {
   BookOpen,
   Box,
-  ChartColumn,
   ChevronsUpDown,
   Container,
   CreditCard,
+  HardDrive,
   KeyRound,
   Link2,
   ListChecks,
@@ -48,7 +48,7 @@ import { useMemo } from 'react'
 import { OrganizationPicker } from '@/components/Organizations/OrganizationPicker'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useUserOrganizationInvitations } from '@/hooks/useUserOrganizationInvitations'
-import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { OrganizationRolePermissionsEnum, OrganizationUserRoleEnum } from '@daytonaio/api-client'
 import { Card, CardHeader, CardTitle } from './ui/card'
 import { Tooltip, TooltipContent } from './ui/tooltip'
 import { TooltipProvider, TooltipTrigger } from './ui/tooltip'
@@ -61,7 +61,8 @@ export function Sidebar() {
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
 
-  const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
+  const { selectedOrganization, authenticatedUserOrganizationMember, authenticatedUserHasPermission } =
+    useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
 
   const sidebarItems = useMemo(() => {
@@ -76,14 +77,19 @@ export function Sidebar() {
       { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
     ]
 
+    if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)) {
+      arr.push({ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES })
+    }
+
+    if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
+      arr.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
+    }
+
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
     ) {
-      arr.push(
-        { icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS },
-        { icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING },
-      )
+      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
     }
 
     if (!selectedOrganization?.personal) {
@@ -96,7 +102,7 @@ export function Sidebar() {
     }
     arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal])
+  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
 
   const handleSignOut = () => {
     signoutRedirect()
@@ -192,6 +198,16 @@ export function Sidebar() {
               </TooltipProvider>
             </SidebarMenuItem>
           )}
+          <SidebarMenuItem key="theme-toggle">
+            <SidebarMenuButton
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="text-xs h-8 py-0"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="!w-4 !h-4" /> : <Moon className="!w-4 !h-4" />}
+              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
               <a href={DAYTONA_SLACK_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
@@ -254,16 +270,6 @@ export function Sidebar() {
                         {organizationInvitationsCount}
                       </span>
                     )}
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  >
-                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

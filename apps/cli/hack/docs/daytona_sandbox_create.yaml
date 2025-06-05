@@ -2,6 +2,10 @@ name: daytona sandbox create
 synopsis: Create a new sandbox
 usage: daytona sandbox create [flags]
 options:
+  - name: auto-archive
+    default_value: '10080'
+    usage: |
+      Auto-archive interval in minutes (0 means the maximum interval will be used)
   - name: auto-stop
     default_value: '0'
     usage: Auto-stop interval in minutes (0 means disabled)
@@ -41,9 +45,13 @@ options:
     default_value: 'false'
     usage: Make sandbox publicly accessible
   - name: target
-    usage: Target region (eu, us, asia)
+    usage: Target region (eu, us)
   - name: user
     usage: User associated with the sandbox
+  - name: volume
+    shorthand: v
+    default_value: '[]'
+    usage: 'Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)'
 inherited_options:
   - name: help
     default_value: 'false'

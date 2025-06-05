@@ -1,5 +1,5 @@
 /* tslint:disable */
-
+/* eslint-disable */
 /**
  * Daytona
  * Daytona AI platform API Docs
@@ -11,6 +11,10 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+
+// May contain unused imports in some cases
+// @ts-ignore
+import type { VolumeState } from './volume-state'
 
 /**
  *
@@ -38,10 +42,10 @@ export interface VolumeDto {
   organizationId: string
   /**
    * Volume state
-   * @type {string}
+   * @type {VolumeState}
    * @memberof VolumeDto
    */
-  state: VolumeDtoStateEnum
+  state: VolumeState
   /**
    * Creation timestamp
    * @type {string}
@@ -60,16 +64,10 @@ export interface VolumeDto {
    * @memberof VolumeDto
    */
   lastUsedAt: string
+  /**
+   * The error reason of the volume
+   * @type {string}
+   * @memberof VolumeDto
+   */
+  errorReason: string | null
 }
-
-export const VolumeDtoStateEnum = {
-  CREATING: 'creating',
-  READY: 'ready',
-  PENDING_CREATE: 'pending_create',
-  PENDING_DELETE: 'pending_delete',
-  DELETING: 'deleting',
-  DELETED: 'deleted',
-  ERROR: 'error',
-} as const
-
-export type VolumeDtoStateEnum = (typeof VolumeDtoStateEnum)[keyof typeof VolumeDtoStateEnum]

@@ -291,6 +291,20 @@ type ToolboxAPI interface {
 	GitCreateBranchExecute(r ToolboxAPIGitCreateBranchRequest) (*http.Response, error)
 
 	/*
+		GitDeleteBranch Delete branch
+
+		Delete branch on git repository
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workspaceId
+		@return ToolboxAPIGitDeleteBranchRequest
+	*/
+	GitDeleteBranch(ctx context.Context, workspaceId string) ToolboxAPIGitDeleteBranchRequest
+
+	// GitDeleteBranchExecute executes the request
+	GitDeleteBranchExecute(r ToolboxAPIGitDeleteBranchRequest) (*http.Response, error)
+
+	/*
 		GitGetHistory Get commit history
 
 		Get commit history from git repository
@@ -2706,6 +2720,119 @@ func (a *ToolboxAPIService) GitCreateBranchExecute(r ToolboxAPIGitCreateBranchRe
 	}
 	// body params
 	localVarPostBody = r.gitBranchRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarHTTPResponse, newErr
+	}
+
+	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPIGitDeleteBranchRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	workspaceId            string
+	gitDeleteBranchRequest *GitDeleteBranchRequest
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPIGitDeleteBranchRequest) GitDeleteBranchRequest(gitDeleteBranchRequest GitDeleteBranchRequest) ToolboxAPIGitDeleteBranchRequest {
+	r.gitDeleteBranchRequest = &gitDeleteBranchRequest
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPIGitDeleteBranchRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPIGitDeleteBranchRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPIGitDeleteBranchRequest) Execute() (*http.Response, error) {
+	return r.ApiService.GitDeleteBranchExecute(r)
+}
+
+/*
+GitDeleteBranch Delete branch
+
+Delete branch on git repository
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workspaceId
+	@return ToolboxAPIGitDeleteBranchRequest
+*/
+func (a *ToolboxAPIService) GitDeleteBranch(ctx context.Context, workspaceId string) ToolboxAPIGitDeleteBranchRequest {
+	return ToolboxAPIGitDeleteBranchRequest{
+		ApiService:  a,
+		ctx:         ctx,
+		workspaceId: workspaceId,
+	}
+}
+
+// Execute executes the request
+func (a *ToolboxAPIService) GitDeleteBranchExecute(r ToolboxAPIGitDeleteBranchRequest) (*http.Response, error) {
+	var (
+		localVarHTTPMethod = http.MethodDelete
+		localVarPostBody   interface{}
+		formFiles          []formFile
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.GitDeleteBranch")
+	if err != nil {
+		return nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{workspaceId}/toolbox/git/branches"
+	localVarPath = strings.Replace(localVarPath, "{"+"workspaceId"+"}", url.PathEscape(parameterValueToString(r.workspaceId, "workspaceId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.gitDeleteBranchRequest == nil {
+		return nil, reportError("gitDeleteBranchRequest is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	// body params
+	localVarPostBody = r.gitDeleteBranchRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err

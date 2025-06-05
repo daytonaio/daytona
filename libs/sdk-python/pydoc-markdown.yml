@@ -3,6 +3,12 @@ loaders:
 
 processors:
   - type: filter
+  - type: filter
+    expression: >
+      not any(
+        dec.name == 'docs_ignore'
+        for dec in (getattr(obj, 'decorations', []) or [])
+      )
   - type: smart
   - type: crossref
 

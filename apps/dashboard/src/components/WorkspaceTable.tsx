@@ -50,6 +50,7 @@ import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
 import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: Workspace[]
@@ -190,13 +191,7 @@ export function WorkspaceTable({
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState colSpan={columns.length} message="No Sandboxes found." />
             )}
           </TableBody>
         </Table>
@@ -239,7 +234,7 @@ export function WorkspaceTable({
             </div>
           )}
         </div>
-        <Pagination table={table} selectionEnabled />
+        <Pagination table={table} selectionEnabled entityName="Sandboxes" />
       </div>
     </div>
   )

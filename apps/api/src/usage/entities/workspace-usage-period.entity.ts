@@ -37,4 +37,18 @@ export class WorkspaceUsagePeriod {
 
   @Column()
   region: string
+
+  public static fromUsagePeriod(usagePeriod: WorkspaceUsagePeriod) {
+    const usagePeriodEntity = new WorkspaceUsagePeriod()
+    usagePeriodEntity.workspaceId = usagePeriod.workspaceId
+    usagePeriodEntity.organizationId = usagePeriod.organizationId
+    usagePeriodEntity.startAt = usagePeriod.startAt
+    usagePeriodEntity.endAt = usagePeriod.endAt
+    usagePeriodEntity.cpu = usagePeriod.cpu
+    usagePeriodEntity.gpu = usagePeriod.gpu
+    usagePeriodEntity.mem = usagePeriod.mem
+    usagePeriodEntity.disk = usagePeriod.disk
+    usagePeriodEntity.region = usagePeriod.region
+    return usagePeriodEntity
+  }
 }

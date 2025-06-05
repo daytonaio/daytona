@@ -16,8 +16,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Pencil, MoreHorizontal, Loader2 } from 'lucide-react'
+import { MoreHorizontal } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +29,7 @@ import { Pagination } from './Pagination'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
+import { TableEmptyState } from './TableEmptyState'
 
 interface DataTableProps {
   data: DockerRegistry[]
@@ -103,18 +103,16 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState
+                colSpan={columns.length}
+                message="No Container registries found."
+                description="Connect to external container registries (e.g., Docker Hub, GCR, ECR) to pull images for your Sandboxes."
+              />
             )}
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" />
+      <Pagination table={table} className="mt-4" entityName="Registries" />
     </div>
   )
 }

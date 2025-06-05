@@ -64,7 +64,7 @@ export interface SandboxResources {
  *
  * @interface
  * @property {string} id - Unique identifier for the Sandbox
- * @property {string} image - Docker image used for the Sandbox
+ * @property {string} [image] - Docker image used for the Sandbox
  * @property {string} user - OS user running in the Sandbox
  * @property {Record<string, string>} env - Environment variables set in the Sandbox
  * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
@@ -81,6 +81,7 @@ export interface SandboxResources {
  * @property {string} updatedAt - When the Sandbox was last updated
  * @property {string | null} lastSnapshot - When the last snapshot was created
  * @property {number} autoStopInterval - Auto-stop interval in minutes
+ * @property {number} autoArchiveInterval - Auto-archive interval in minutes
  *
  * @example
  * const sandbox = await daytona.create();
@@ -125,8 +126,10 @@ export interface SandboxInfo extends Omit<ApiSandboxInfo, 'name'> {
   lastSnapshot: string | null
   /** Auto-stop interval in minutes*/
   autoStopInterval: number
+  /** Auto-archive interval in minutes */
+  autoArchiveInterval: number
   /**
-   * @deprecated Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval` instead.
+   * @deprecated Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
    */
   providerMetadata?: string
 }
@@ -326,13 +329,11 @@ export class Sandbox {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    while (timeout === 0 || Date.now() - startTime < timeout * 1000) {
-      const response = await this.sandboxApi.getWorkspace(this.id)
-      const state = response.data.state
+    let state: SandboxState | undefined = (await this.info()).state
 
-      if (state === 'started') {
-        return
-      }
+    while (state !== 'started') {
+      const response = await this.sandboxApi.getWorkspace(this.id)
+      state = response.data.state
 
       if (state === 'error') {
         throw new DaytonaError(
@@ -340,10 +341,12 @@ export class Sandbox {
         )
       }
 
+      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
+        throw new DaytonaError('Sandbox failed to become ready within the timeout period')
+      }
+
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
     }
-
-    throw new DaytonaError('Sandbox failed to become ready within the timeout period')
   }
 
   /**
@@ -365,13 +368,11 @@ export class Sandbox {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    while (timeout === 0 || Date.now() - startTime < timeout * 1000) {
-      const response = await this.sandboxApi.getWorkspace(this.id)
-      const state = response.data.state
+    let state: SandboxState | undefined = (await this.info()).state
 
-      if (state === 'stopped') {
-        return
-      }
+    while (state !== 'stopped') {
+      const response = await this.sandboxApi.getWorkspace(this.id)
+      state = response.data.state
 
       if (state === 'error') {
         throw new DaytonaError(
@@ -379,10 +380,12 @@ export class Sandbox {
         )
       }
 
+      if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
+        throw new DaytonaError('Sandbox failed to become stopped within the timeout period')
+      }
+
       await new Promise((resolve) => setTimeout(resolve, checkInterval))
     }
-
-    throw new DaytonaError('Sandbox failed to become stopped within the timeout period')
   }
 
   /**
@@ -445,6 +448,7 @@ export class Sandbox {
       snapshotState: instance.snapshotState || null,
       snapshotCreatedAt: instance.snapshotCreatedAt || null,
       autoStopInterval: instance.autoStopInterval || 15,
+      autoArchiveInterval: instance.autoArchiveInterval || 7 * 24 * 60,
       created: instance.info?.created || '',
       nodeDomain: providerMetadata.nodeDomain || '',
       region: providerMetadata.region || '',
@@ -480,6 +484,30 @@ export class Sandbox {
 
     await this.sandboxApi.setAutostopInterval(this.id, interval)
     this.instance.autoStopInterval = interval
+  }
+
+  /**
+   * Set the auto-archive interval for the Sandbox.
+   *
+   * The Sandbox will automatically archive after being continuously stopped for the specified interval.
+   *
+   * @param {number} interval - Number of minutes after which a continuously stopped Sandbox will be auto-archived.
+   *                           Set to 0 for the maximum interval. Default is 7 days.
+   * @returns {Promise<void>}
+   * @throws {DaytonaError} - `DaytonaError` - If interval is not a non-negative integer
+   *
+   * @example
+   * // Auto-archive after 1 hour
+   * await sandbox.setAutoArchiveInterval(60);
+   * // Or use the maximum interval
+   * await sandbox.setAutoArchiveInterval(0);
+   */
+  public async setAutoArchiveInterval(interval: number): Promise<void> {
+    if (!Number.isInteger(interval) || interval < 0) {
+      throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
+    }
+    await this.sandboxApi.setAutoArchiveInterval(this.id, interval)
+    this.instance.autoArchiveInterval = interval
   }
 
   /**
