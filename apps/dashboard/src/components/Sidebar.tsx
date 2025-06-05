@@ -33,6 +33,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -69,43 +70,67 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
     useSelectedOrganization()
   const { count: organizationInvitationsCount } = useUserOrganizationInvitations()
 
-  const sidebarItems = useMemo(() => {
-    const arr = [
+  const sidebarGroups = useMemo(() => {
+    const groups = []
+
+    // Develop group
+    const developItems = [
       { icon: <Container className="w-5 h-5" />, label: 'Sandboxes', path: RoutePath.SANDBOXES },
-      { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: RoutePath.KEYS },
       {
         icon: <Box className="w-5 h-5" />,
         label: 'Snapshots',
         path: RoutePath.SNAPSHOTS,
       },
       { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
+      { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: RoutePath.KEYS },
     ]
 
     if (authenticatedUserHasPermission(OrganizationRolePermissionsEnum.READ_VOLUMES)) {
-      arr.push({ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES })
+      developItems.push({ icon: <HardDrive className="w-5 h-5" />, label: 'Volumes', path: RoutePath.VOLUMES })
     }
 
+    groups.push({
+      label: 'Develop',
+      items: developItems,
+    })
+
+    // Manage & Monitor group
+    const manageItems = []
+
     if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
-      arr.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
+      manageItems.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
     }
 
     if (
       import.meta.env.VITE_BILLING_API_URL &&
       authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
     ) {
-      arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
+      manageItems.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
     }
 
     if (!selectedOrganization?.personal) {
-      arr.push({ icon: <Users className="w-5 h-5" />, label: 'Members', path: RoutePath.MEMBERS })
+      manageItems.push({ icon: <Users className="w-5 h-5" />, label: 'Members', path: RoutePath.MEMBERS })
 
       // TODO: uncomment when we allow creating custom roles
       // if (authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
-      //   arr.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
+      //   manageItems.push({ icon: <UserCog className="w-5 h-5" />, label: 'Roles', path: RoutePath.ROLES })
       // }
     }
-    arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
-    return arr
+
+    if (manageItems.length > 0) {
+      groups.push({
+        label: 'Manage & Monitor',
+        items: manageItems,
+      })
+    }
+
+    // Settings group (Keeps its own section)
+    groups.push({
+      label: 'Settings',
+      items: [{ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS }],
+    })
+
+    return groups
   }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
 
   const handleSignOut = () => {
@@ -126,20 +151,25 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
 
           <OrganizationPicker />
 
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {sidebarItems.map((item) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton asChild>
-                    <button onClick={() => navigate(item.path)} className="text-sm">
-                      {item.icon}
-                      <span>{item.label}</span>
-                    </button>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+          {sidebarGroups.map((group) => (
+            <div key={group.label} className="mb-4">
+              <SidebarGroupLabel className="mb-2">{group.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.label}>
+                      <SidebarMenuButton asChild>
+                        <button onClick={() => navigate(item.path)} className="text-sm gap-2">
+                          {item.icon}
+                          <span>{item.label}</span>
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </div>
+          ))}
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
@@ -150,7 +180,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Card className="w-full m-0 p-0 mb-4 cursor-pointer border-red-600 bg-red-100/80 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300">
-                      <CardHeader className="py-2 pl-2">
+                      <CardHeader className="py-2 px-2">
                         <CardTitle className="text-sm flex items-center gap-2">
                           <TriangleAlert className="w-4 h-4 flex-shrink-0" />
                           <div className="overflow-hidden">
