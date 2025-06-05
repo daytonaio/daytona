@@ -198,6 +198,16 @@ export function Sidebar() {
               </TooltipProvider>
             </SidebarMenuItem>
           )}
+          <SidebarMenuItem key="theme-toggle">
+            <SidebarMenuButton
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              className="text-xs h-8 py-0"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun className="!w-4 !h-4" /> : <Moon className="!w-4 !h-4" />}
+              <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
           <SidebarMenuItem key="slack">
             <SidebarMenuButton asChild>
               <a href={DAYTONA_SLACK_URL} className="text-xs h-8 py-0" target="_blank" rel="noopener noreferrer">
@@ -260,16 +270,6 @@ export function Sidebar() {
                         {organizationInvitationsCount}
                       </span>
                     )}
-                  </Button>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Button
-                    variant="ghost"
-                    className="w-full cursor-pointer justify-start"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  >
-                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    {theme === 'dark' ? 'Light mode' : 'Dark mode'}
                   </Button>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
