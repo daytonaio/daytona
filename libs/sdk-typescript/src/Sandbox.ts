@@ -5,13 +5,13 @@
 
 import {
   ToolboxApi,
-  WorkspaceState as SandboxState,
-  WorkspaceApi as SandboxApi,
-  Workspace as ApiSandbox,
-  WorkspaceInfo as ApiSandboxInfo,
-  CreateNodeClassEnum as SandboxClass,
-  CreateNodeRegionEnum as SandboxTargetRegion,
-  Workspace as ApiWorkspace,
+  SandboxState,
+  SandboxApi,
+  Sandbox as ApiSandbox,
+  SandboxInfo as ApiSandboxInfo,
+  CreateRunnerClassEnum as SandboxClass,
+  CreateRunnerRegionEnum as SandboxTargetRegion,
+  Sandbox as ApiWorkspace,
   PortPreviewUrl,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
@@ -20,40 +20,13 @@ import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError } from './errors/DaytonaError'
 import { prefixRelativePath } from './utils/Path'
+import { Resources } from './Daytona'
 
 /** @deprecated Use SandboxInfo instead. This type will be removed in a future version. */
 type WorkspaceInfo = SandboxInfo
 
 export interface SandboxInstance extends Omit<ApiSandbox, 'info'> {
   info?: SandboxInfo
-}
-
-/**
- * Resources allocated to a Sandbox
- *
- * @interface
- * @property {string} cpu - Number of CPU cores allocated (e.g., "1", "2")
- * @property {string | null} gpu - Number of GPUs allocated (e.g., "1") or null if no GPU
- * @property {string} memory - Amount of memory allocated with unit (e.g., "2Gi", "4Gi")
- * @property {string} disk - Amount of disk space allocated with unit (e.g., "10Gi", "20Gi")
- *
- * @example
- * const resources: SandboxResources = {
- *   cpu: "2",
- *   gpu: "1",
- *   memory: "4Gi",
- *   disk: "20Gi"
- * };
- */
-export interface SandboxResources {
-  /** CPU allocation */
-  cpu: string
-  /** GPU allocation */
-  gpu: string | null
-  /** Memory allocation */
-  memory: string
-  /** Disk allocation */
-  disk: string
 }
 
 /**
@@ -64,22 +37,22 @@ export interface SandboxResources {
  *
  * @interface
  * @property {string} id - Unique identifier for the Sandbox
- * @property {string} [image] - Docker image used for the Sandbox
+ * @property {string} [snapshot] - Daytona snapshot used to create the Sandbox
  * @property {string} user - OS user running in the Sandbox
  * @property {Record<string, string>} env - Environment variables set in the Sandbox
  * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
  * @property {boolean} public - Whether the Sandbox is publicly accessible
  * @property {string} target - Target environment where the Sandbox runs
- * @property {SandboxResources} resources - Resource allocations for the Sandbox
+ * @property {Resources} resources - Resource allocations for the Sandbox
  * @property {string} state - Current state of the Sandbox (e.g., "started", "stopped")
  * @property {string | null} errorReason - Error message if Sandbox is in error state
- * @property {string | null} snapshotState - Current state of Sandbox snapshot
- * @property {string | null} snapshotCreatedAt - When the snapshot was created
+ * @property {string | null} backupState - Current state of Sandbox backup
+ * @property {string | null} backupCreatedAt - When the backup was created
  * @property {string} nodeDomain - Domain name of the Sandbox node
  * @property {string} region - Region of the Sandbox node
  * @property {string} class - Sandbox class
  * @property {string} updatedAt - When the Sandbox was last updated
- * @property {string | null} lastSnapshot - When the last snapshot was created
+ * @property {string | null} lastBackup - When the last backup was created
  * @property {number} autoStopInterval - Auto-stop interval in minutes
  * @property {number} autoArchiveInterval - Auto-archive interval in minutes
  *
@@ -92,8 +65,8 @@ export interface SandboxResources {
 export interface SandboxInfo extends Omit<ApiSandboxInfo, 'name'> {
   /** Unique identifier */
   id: string
-  /** Docker image */
-  image?: string
+  /** Daytona snapshot */
+  snapshot?: string
   /** OS user */
   user: string
   /** Environment variables */
@@ -105,15 +78,15 @@ export interface SandboxInfo extends Omit<ApiSandboxInfo, 'name'> {
   /** Target location */
   target: SandboxTargetRegion | string
   /** Resource allocations */
-  resources: SandboxResources
+  resources: Resources
   /** Current state */
   state: SandboxState
   /** Error reason if any */
   errorReason: string | null
-  /** Snapshot state */
-  snapshotState: string | null
-  /** Snapshot creation time */
-  snapshotCreatedAt: string | null
+  /** Backup state */
+  backupState: string | null
+  /** Backup creation time */
+  backupCreatedAt: string | null
   /** Node domain */
   nodeDomain: string
   /** Region */
@@ -122,14 +95,14 @@ export interface SandboxInfo extends Omit<ApiSandboxInfo, 'name'> {
   class: SandboxClass
   /** Updated at */
   updatedAt: string
-  /** Last snapshot */
-  lastSnapshot: string | null
+  /** Last backup */
+  lastBackup: string | null
   /** Auto-stop interval in minutes*/
   autoStopInterval: number
   /** Auto-archive interval in minutes */
   autoArchiveInterval: number
   /**
-   * @deprecated Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
+   * @deprecated Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastBackup`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
    */
   providerMetadata?: string
 }
@@ -273,7 +246,7 @@ export class Sandbox {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.startWorkspace(this.instance.id, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.startSandbox(this.instance.id, undefined, { timeout: timeout * 1000 })
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -297,7 +270,7 @@ export class Sandbox {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.stopWorkspace(this.instance.id, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.stopSandbox(this.instance.id, undefined, { timeout: timeout * 1000 })
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -307,7 +280,7 @@ export class Sandbox {
    * @returns {Promise<void>}
    */
   public async delete(): Promise<void> {
-    await this.sandboxApi.deleteWorkspace(this.instance.id, true)
+    await this.sandboxApi.deleteSandbox(this.instance.id, true)
   }
 
   /**
@@ -332,7 +305,7 @@ export class Sandbox {
     let state: SandboxState | undefined = (await this.info()).state
 
     while (state !== 'started') {
-      const response = await this.sandboxApi.getWorkspace(this.id)
+      const response = await this.sandboxApi.getSandbox(this.id)
       state = response.data.state
 
       if (state === 'error') {
@@ -371,7 +344,7 @@ export class Sandbox {
     let state: SandboxState | undefined = (await this.info()).state
 
     while (state !== 'stopped') {
-      const response = await this.sandboxApi.getWorkspace(this.id)
+      const response = await this.sandboxApi.getSandbox(this.id)
       state = response.data.state
 
       if (state === 'error') {
@@ -401,7 +374,7 @@ export class Sandbox {
    * console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
    */
   public async info(): Promise<SandboxInfo> {
-    const response = await this.sandboxApi.getWorkspace(this.id)
+    const response = await this.sandboxApi.getSandbox(this.id)
     const instance = response.data
     return Sandbox.toSandboxInfo(instance)
   }
@@ -427,16 +400,16 @@ export class Sandbox {
     const providerMetadata = JSON.parse(instance.info?.providerMetadata || '{}')
 
     // Extract resources with defaults
-    const resources: SandboxResources = {
-      cpu: String(instance.cpu || '1'),
-      gpu: instance.gpu ? String(instance.gpu) : null,
-      memory: `${instance.memory ?? 2}Gi`,
-      disk: `${instance.disk ?? 10}Gi`,
+    const resources: Resources = {
+      cpu: instance.cpu,
+      gpu: instance.gpu,
+      memory: instance.memory,
+      disk: instance.disk,
     }
 
     return {
       id: instance.id,
-      image: instance.image,
+      snapshot: instance.snapshot,
       user: instance.user,
       env: instance.env || {},
       labels: instance.labels || {},
@@ -445,8 +418,8 @@ export class Sandbox {
       resources,
       state: instance.state || SandboxState.UNKNOWN,
       errorReason: instance.errorReason || null,
-      snapshotState: instance.snapshotState || null,
-      snapshotCreatedAt: instance.snapshotCreatedAt || null,
+      backupState: instance.backupState || null,
+      backupCreatedAt: instance.backupCreatedAt || null,
       autoStopInterval: instance.autoStopInterval || 15,
       autoArchiveInterval: instance.autoArchiveInterval || 7 * 24 * 60,
       created: instance.info?.created || '',
@@ -454,7 +427,7 @@ export class Sandbox {
       region: providerMetadata.region || '',
       class: providerMetadata.class || '',
       updatedAt: providerMetadata.updatedAt || '',
-      lastSnapshot: providerMetadata.lastSnapshot || null,
+      lastBackup: providerMetadata.lastBackup || null,
       providerMetadata: instance.info?.providerMetadata,
     }
   }
@@ -535,7 +508,7 @@ export class Sandbox {
    * Sandbox must be stopped before archiving.
    */
   public async archive(): Promise<void> {
-    await this.sandboxApi.archiveWorkspace(this.id)
+    await this.sandboxApi.archiveSandbox(this.id)
   }
 
   private async getRootDir(): Promise<string> {

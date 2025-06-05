@@ -1,13 +1,20 @@
 import time
 
-from daytona_sdk import CreateSandboxParams, Daytona, Image
+from daytona_sdk import (
+    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
+    CreateSnapshotParams,
+    Daytona,
+    Image,
+    Resources,
+)
 
 
 def main():
     daytona = Daytona()
 
-    # Generate unique name for the image to avoid conflicts
-    image_name = f"python-example:{int(time.time())}"
+    # Generate unique name for the snapshot to avoid conflicts
+    snapshot_name = f"python-example:{int(time.time())}"
 
     # Create local file with some data and add it to the image
     with open("file_example.txt", "w") as f:
@@ -29,15 +36,24 @@ def main():
         .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
 
-    # Create the image
-    print(f"=== Creating Image: {image_name} ===")
-    daytona.create_image(image_name, image, on_logs=lambda chunk: print(chunk, end=""))
+    # Create the snapshot
+    print(f"=== Creating Snapshot: {snapshot_name} ===")
+    daytona.snapshot.create(
+        CreateSnapshotParams(
+            name=snapshot_name,
+            image=image,
+            resources=Resources(
+                cpu=1,
+                memory=1,
+                disk=3,
+            ),
+        ),
+        on_logs=print,
+    )
 
     # Create first sandbox using the pre-built image
     print("\n=== Creating Sandbox from Pre-built Image ===")
-    sandbox1 = daytona.create(
-        CreateSandboxParams(image=image_name), on_image_build_logs=lambda chunk: print(chunk, end="")
-    )
+    sandbox1 = daytona.create(CreateSandboxFromSnapshotParams(snapshot=snapshot_name))
 
     try:
         # Verify the first sandbox environment
@@ -68,11 +84,11 @@ def main():
 
     # Create sandbox with the dynamic image
     sandbox2 = daytona.create(
-        CreateSandboxParams(
+        CreateSandboxFromImageParams(
             image=dynamic_image,
         ),
         timeout=0,
-        on_image_build_logs=print,
+        on_snapshot_create_logs=print,
     )
 
     try:

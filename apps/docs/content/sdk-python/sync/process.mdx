@@ -70,7 +70,7 @@ response = sandbox.process.exec("echo 'Hello'")
 print(response.artifacts.stdout)  # Prints: Hello
 
 # Command with working directory
-result = sandbox.process.exec("ls", cwd="sandbox/src")
+result = sandbox.process.exec("ls", cwd="workspace/src")
 
 # Command with timeout
 result = sandbox.process.exec("sleep 10", timeout=5)
@@ -270,7 +270,7 @@ Executes a command in the session.
 session_id = "my-session"
 
 # Change directory
-req = SessionExecuteRequest(command="cd /sandbox")
+req = SessionExecuteRequest(command="cd /workspace")
 sandbox.process.execute_session_command(session_id, req)
 
 # Create a file

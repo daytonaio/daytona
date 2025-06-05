@@ -35,7 +35,7 @@ type VolumeDto struct {
 	// Last update timestamp
 	UpdatedAt string `json:"updatedAt"`
 	// Last used timestamp
-	LastUsedAt NullableString `json:"lastUsedAt"`
+	LastUsedAt NullableString `json:"lastUsedAt,omitempty"`
 	// The error reason of the volume
 	ErrorReason NullableString `json:"errorReason"`
 }
@@ -46,7 +46,7 @@ type _VolumeDto VolumeDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt NullableString, errorReason NullableString) *VolumeDto {
+func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, errorReason NullableString) *VolumeDto {
 	this := VolumeDto{}
 	this.Id = id
 	this.Name = name
@@ -54,7 +54,6 @@ func NewVolumeDto(id string, name string, organizationId string, state VolumeSta
 	this.State = state
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
-	this.LastUsedAt = lastUsedAt
 	this.ErrorReason = errorReason
 	return &this
 }
@@ -211,18 +210,16 @@ func (o *VolumeDto) SetUpdatedAt(v string) {
 	o.UpdatedAt = v
 }
 
-// GetLastUsedAt returns the LastUsedAt field value
-// If the value is explicit nil, the zero value for string will be returned
+// GetLastUsedAt returns the LastUsedAt field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *VolumeDto) GetLastUsedAt() string {
-	if o == nil || o.LastUsedAt.Get() == nil {
+	if o == nil || IsNil(o.LastUsedAt.Get()) {
 		var ret string
 		return ret
 	}
-
 	return *o.LastUsedAt.Get()
 }
 
-// GetLastUsedAtOk returns a tuple with the LastUsedAt field value
+// GetLastUsedAtOk returns a tuple with the LastUsedAt field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *VolumeDto) GetLastUsedAtOk() (*string, bool) {
@@ -232,9 +229,28 @@ func (o *VolumeDto) GetLastUsedAtOk() (*string, bool) {
 	return o.LastUsedAt.Get(), o.LastUsedAt.IsSet()
 }
 
-// SetLastUsedAt sets field value
+// HasLastUsedAt returns a boolean if a field has been set.
+func (o *VolumeDto) HasLastUsedAt() bool {
+	if o != nil && o.LastUsedAt.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLastUsedAt gets a reference to the given NullableString and assigns it to the LastUsedAt field.
 func (o *VolumeDto) SetLastUsedAt(v string) {
 	o.LastUsedAt.Set(&v)
+}
+
+// SetLastUsedAtNil sets the value for LastUsedAt to be an explicit nil
+func (o *VolumeDto) SetLastUsedAtNil() {
+	o.LastUsedAt.Set(nil)
+}
+
+// UnsetLastUsedAt ensures that no value is present for LastUsedAt, not even an explicit nil
+func (o *VolumeDto) UnsetLastUsedAt() {
+	o.LastUsedAt.Unset()
 }
 
 // GetErrorReason returns the ErrorReason field value
@@ -279,7 +295,9 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["state"] = o.State
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
-	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	if o.LastUsedAt.IsSet() {
+		toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	}
 	toSerialize["errorReason"] = o.ErrorReason.Get()
 	return toSerialize, nil
 }
@@ -295,7 +313,6 @@ func (o *VolumeDto) UnmarshalJSON(data []byte) (err error) {
 		"state",
 		"createdAt",
 		"updatedAt",
-		"lastUsedAt",
 		"errorReason",
 	}
 

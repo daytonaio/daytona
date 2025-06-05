@@ -63,7 +63,7 @@ export interface VolumeDto {
    * @type {string}
    * @memberof VolumeDto
    */
-  lastUsedAt: string | null
+  lastUsedAt?: string | null
   /**
    * The error reason of the volume
    * @type {string}
