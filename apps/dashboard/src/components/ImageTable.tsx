@@ -15,7 +15,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
-import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, XCircle } from 'lucide-react'
+import { AlertTriangle, CheckCircle, MoreHorizontal, Timer, XCircle, Trash2 } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,14 +26,18 @@ import {
 import { Pagination } from './Pagination'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
-import { useTableSorting } from '@/hooks/useTableSorting'
+import { Checkbox } from './ui/checkbox'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { getRelativeTimeString } from '@/lib/utils'
+import { TableEmptyState } from './TableEmptyState'
+import { Loader2 } from 'lucide-react'
 
 interface DataTableProps {
   data: ImageDto[]
   loading: boolean
   loadingImages: Record<string, boolean>
   onDelete: (image: ImageDto) => void
+  onBulkDelete?: (images: ImageDto[]) => void
   onToggleEnabled: (image: ImageDto, enabled: boolean) => void
   pagination: {
     pageIndex: number
@@ -51,6 +55,7 @@ export function ImageTable({
   onToggleEnabled,
   pagination,
   pageCount,
+  onBulkDelete,
   onPaginationChange,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
@@ -65,14 +70,57 @@ export function ImageTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useTableSorting('images')
+  const [sorting, setSorting] = useState<SortingState>([])
+
   const columns = useMemo(
-    () => getColumns({ onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted }),
+    () =>
+      getColumns({
+        onDelete,
+        onToggleEnabled,
+        loadingImages,
+        writePermitted,
+        deletePermitted,
+      }),
     [onDelete, onToggleEnabled, loadingImages, writePermitted, deletePermitted],
   )
+
+  const columnsWithSelection = useMemo(() => {
+    const selectionColumn: ColumnDef<ImageDto> = {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+          disabled={!deletePermitted || loading}
+          className="translate-y-[2px]"
+        />
+      ),
+      cell: ({ row }) => {
+        if (loadingImages[row.original.id]) {
+          return <Loader2 className="w-4 h-4 animate-spin" />
+        }
+
+        return (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+            disabled={!deletePermitted || loadingImages[row.original.id] || loading}
+            className="translate-y-[2px]"
+          />
+        )
+      },
+      enableSorting: false,
+      enableHiding: false,
+    }
+
+    return deletePermitted ? [selectionColumn, ...columns] : columns
+  }, [deletePermitted, columns, loading, loadingImages])
+
   const table = useReactTable({
     data,
-    columns,
+    columns: columnsWithSelection,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
@@ -92,7 +140,18 @@ export function ImageTable({
       },
     },
     getRowId: (row) => row.id,
+    enableRowSelection: deletePermitted,
   })
+
+  const selectedRows = table.getSelectedRowModel().rows
+  const [bulkDeleteConfirmationOpen, setBulkDeleteConfirmationOpen] = useState(false)
+  const selectedImages = selectedRows.map((row) => row.original)
+
+  const handleBulkDelete = () => {
+    if (onBulkDelete && selectedImages.length > 0) {
+      onBulkDelete(selectedImages)
+    }
+  }
 
   return (
     <div>
@@ -114,7 +173,7 @@ export function ImageTable({
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
+                <TableCell colSpan={columnsWithSelection.length} className="h-24 text-center">
                   Loading...
                 </TableCell>
               </TableRow>
@@ -122,7 +181,7 @@ export function ImageTable({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && 'selected'}
+                  data-state={row.getIsSelected() ? 'selected' : undefined}
                   className={`${loadingImages[row.original.id] || row.original.state === ImageState.REMOVING ? 'opacity-50 pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
@@ -131,18 +190,50 @@ export function ImageTable({
                 </TableRow>
               ))
             ) : (
-              !loading && (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
-                </TableRow>
-              )
+              <TableEmptyState colSpan={columns.length} message="No Images found." />
             )}
           </TableBody>
         </Table>
       </div>
-      <Pagination table={table} className="mt-4" />
+      <div className="flex items-center justify-between gap-2 mt-4">
+        <div className="flex items-center gap-4">
+          {deletePermitted && selectedRows.length > 0 && (
+            <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
+              <PopoverTrigger>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Bulk Delete
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent side="top">
+                <div className="flex flex-col gap-4">
+                  <p>Are you sure you want to delete these images?</p>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="destructive"
+                      onClick={() => {
+                        handleBulkDelete()
+                        setBulkDeleteConfirmationOpen(false)
+                      }}
+                    >
+                      Delete
+                    </Button>
+                    <Button variant="outline" onClick={() => setBulkDeleteConfirmationOpen(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+          {deletePermitted && (
+            <span className="text-sm text-muted-foreground whitespace-nowrap">
+              {selectedRows.length} of {data.length} row(s) selected
+            </span>
+          )}
+        </div>
+        <Pagination table={table} entityName="Images" />
+      </div>
     </div>
   )
 }
