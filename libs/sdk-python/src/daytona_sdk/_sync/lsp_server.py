@@ -15,11 +15,12 @@ from daytona_api_client import (
     LspSymbol,
     ToolboxApi,
 )
-from daytona_sdk._utils.errors import intercept_errors
-from daytona_sdk._utils.path import prefix_relative_path
-from daytona_sdk.common.lsp_server import LspLanguageId, Position
-from daytona_sdk.common.protocols import SandboxInstance
 from deprecated import deprecated
+
+from .._utils.errors import intercept_errors
+from .._utils.path import prefix_relative_path
+from ..common.lsp_server import LspLanguageId, Position
+from ..common.protocols import SandboxInstance
 
 
 class LspServer:
@@ -217,7 +218,7 @@ class LspServer:
                 print(f"{symbol.name} in {symbol.location}")
             ```
         """
-        return self.toolbox_api.lsp_workspace_symbols(
+        return self.toolbox_api.lsp_sandbox_symbols(
             self.instance.id,
             language_id=self.language_id,
             path_to_project=self.path_to_project,

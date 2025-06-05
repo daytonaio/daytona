@@ -28,6 +28,7 @@ disable = [
     "W0640",  # cell-var-from-loop
     "R0912",  # too-many-branches
     "R1702",  # too-many-nested-blocks
+    "R0916",  # too-many-boolean-expressions
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]

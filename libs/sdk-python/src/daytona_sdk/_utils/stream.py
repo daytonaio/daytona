@@ -52,7 +52,7 @@ async def process_streaming_response(
                     if chunk is None:
                         break
 
-                    on_chunk(chunk.decode("utf-8"))
+                    on_chunk(chunk.decode("utf-8", "ignore"))
                     exit_check_streak = 0  # Reset on activity
 
                 elif timeout in done:

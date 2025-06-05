@@ -11,6 +11,7 @@ Can be initialized either with explicit configuration or using environment varia
 
 **Properties**:
 
+- `snapshot` _SnapshotService_ - Service for managing Daytona Snapshots
 - `volume` _VolumeService_ - Service for managing Daytona Volumes
 
 **Examples:**
@@ -63,70 +64,18 @@ Creates a new Daytona client instance.
 ##### Call Signature
 
 ```ts
-create(params?: CreateSandboxParams, options?: number): Promise<Sandbox>
-```
-
-**Parameters**:
-
-- `params?` _CreateSandboxParams_ - Parameters for Sandbox creation
-- `options?` _number_
-
-**Returns**:
-
-- `Promise<Sandbox>` - The created Sandbox instance
-
-###### Deprecated
-
-Use `create` with `options` object instead. This method will be removed in a future version.
-
-Creates Sandboxes with default or custom configurations. You can specify various parameters,
-including language, image, resources, environment variables, and volumes for the Sandbox.
-
-**Examples:**
-
-```ts
-// Create a default sandbox
-const sandbox = await daytona.create()
-```
-
-```ts
-// Create a custom sandbox
-const params: CreateSandboxParams = {
-  language: 'typescript',
-  image: 'node:18',
-  envVars: {
-    NODE_ENV: 'development',
-    DEBUG: 'true',
-  },
-  resources: {
-    cpu: 2,
-    memory: 4, // 4GB RAM
-  },
-  autoStopInterval: 60,
-  autoArchiveInterval: 60,
-}
-const sandbox = await daytona.create(params, 40)
-```
-
-##### Call Signature
-
-```ts
-create(params?: CreateSandboxParams, options?: {
-  onImageBuildLogs: (chunk: string) => void;
+create(params?: CreateSandboxFromSnapshotParams, options?: {
   timeout: number;
 }): Promise<Sandbox>
 ```
 
-Creates Sandboxes with default or custom configurations. You can specify various parameters,
-including language, image, resources, environment variables, and volumes for the Sandbox.
+Creates Sandboxes from specified or default snapshot. You can specify various parameters,
+including language, image, environment variables, and volumes.
 
 **Parameters**:
 
-- `params?` _CreateSandboxParams_ - Parameters for Sandbox creation
+- `params?` _CreateSandboxFromSnapshotParams_ - Parameters for Sandbox creation from snapshot
 - `options?` _Options for the create operation_
-- `onImageBuildLogs?` _\(chunk: string\) =\> void_ - Callback function to handle image build logs.
-  It's invoked only when `params.image` is an instance of `Image` and there's no existing
-  image in Daytona with the same configuration.
 - `timeout?` _number_ - Timeout in seconds (0 means no timeout, default is 60)
 
 **Returns**:
@@ -136,14 +85,57 @@ including language, image, resources, environment variables, and volumes for the
 **Examples:**
 
 ```ts
-const image = Image.debianSlim('3.12').pipInstall('numpy')
-const sandbox = await daytona.create({ image }, { timeout: 90, onImageBuildLogs: console.log })
+const sandbox = await daytona.create()
 ```
 
 ```ts
 // Create a custom sandbox
-const image = Image.debianSlim('3.12').pipInstall('numpy')
-const params: CreateSandboxParams = {
+const params: CreateSandboxFromSnapshotParams = {
+  language: 'typescript',
+  snapshot: 'my-snapshot-id',
+  envVars: {
+    NODE_ENV: 'development',
+    DEBUG: 'true',
+  },
+  autoStopInterval: 60,
+}
+const sandbox = await daytona.create(params, { timeout: 100 })
+```
+
+##### Call Signature
+
+```ts
+create(params?: CreateSandboxFromImageParams, options?: {
+  onSnapshotCreateLogs: (chunk: string) => void;
+  timeout: number;
+}): Promise<Sandbox>
+```
+
+Creates Sandboxes from specified image available on some registry or declarative Daytona Image. You can specify various parameters,
+including resources, language, image, environment variables, and volumes. Daytona creates snapshot from
+provided image and uses it to create Sandbox.
+
+**Parameters**:
+
+- `params?` _CreateSandboxFromImageParams_ - Parameters for Sandbox creation from image
+- `options?` _Options for the create operation_
+- `onSnapshotCreateLogs?` _\(chunk: string\) =\> void_ - Callback function to handle snapshot creation logs.
+- `timeout?` _number_ - Timeout in seconds (0 means no timeout, default is 60)
+
+**Returns**:
+
+- `Promise<Sandbox>` - The created Sandbox instance
+
+**Examples:**
+
+```ts
+const sandbox = await daytona.create({ image: 'debian:12.9' }, { timeout: 90, onSnapshotCreateLogs: console.log })
+```
+
+```ts
+// Create a custom sandbox
+const image = Image.base('alpine:3.18').pipInstall('numpy')
+const params: CreateSandboxFromImageParams = {
   language: 'typescript',
   image,
   envVars: {
@@ -156,42 +148,7 @@ const params: CreateSandboxParams = {
   },
   autoStopInterval: 60,
 }
-const sandbox = await daytona.create(params, { timeout: 100, onImageBuildLogs: console.log })
-```
-
----
-
-#### createImage()
-
-```ts
-createImage(
-   name: string,
-   image: Image,
-   options: {
-  onLogs: (chunk: string) => void;
-  timeout: number;
-}): Promise<void>
-```
-
-Creates and registers a new image from the given Image definition.
-
-**Parameters**:
-
-- `name` _string_ - The name of the image to create.
-- `image` _Image_ - The Image instance.
-- `options` _Options for the create operation._
-- `onLogs?` _\(chunk: string\) =\> void_
-- `timeout?` _number_ - Default is no timeout. Timeout in seconds (0 means no timeout).
-
-**Returns**:
-
-- `Promise<void>`
-
-**Example:**
-
-```ts
-const image = Image.debianSlim('3.12').pipInstall('numpy')
-await daytona.createImage('my-python-image', image)
+const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log })
 ```
 
 ---
@@ -297,17 +254,17 @@ console.log(`Current sandbox state: ${sandbox.instance.state}`)
 
 ---
 
-#### ~~getCurrentSandbox()~~
+#### ~~getCurrentWorkspace()~~
 
 ```ts
-getCurrentSandbox(sandboxId: string): Promise<Sandbox>
+getCurrentWorkspace(workspaceId: string): Promise<Sandbox>
 ```
 
 Gets the Sandbox by ID.
 
 **Parameters**:
 
-- `sandboxId` _string_ - The ID of the Sandbox to retrieve
+- `workspaceId` _string_ - The ID of the Sandbox to retrieve
 
 **Returns**:
 
@@ -406,40 +363,58 @@ Supported programming languages for code execution
 - `PYTHON` ("python")
 - `TYPESCRIPT` ("typescript")
 
-## CreateSandboxParams
+## CreateSandboxBaseParams
+
+Base parameters for creating a new Sandbox.
+
+**Properties**:
+
+- `async?` _boolean_ - If true, will not wait for the Sandbox to be ready before returning
+- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
+- `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
+- `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
+- `labels?` _Record\<string, string\>_ - Sandbox labels
+- `language?` _string_ - Programming language for direct code execution
+- `public?` _boolean_ - Is the Sandbox port preview public
+- `user?` _string_ - Optional os user to use for the Sandbox
+- `volumes?` _VolumeMount\[\]_
+
+## CreateSandboxFromImageParams
 
 Parameters for creating a new Sandbox.
 
 **Properties**:
 
-- `async?` _boolean_ - If true, will not wait for the Sandbox to be ready before returning
-- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used)
-- `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
-- `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
-- `image?` _string \| Image_ - Optional Docker image to use for the Sandbox or an Image instance
-- `labels?` _Record\<string, string\>_ - Sandbox labels
-- `language?` _string_ - Programming language for direct code execution
-- `public?` _boolean_ - Is the Sandbox port preview public
-- `resources?` _SandboxResources_ - Resource allocation for the Sandbox
-- `timeout?` _number_ - Timeout in seconds for the Sandbox to be ready (0 means no timeout)
-- `user?` _string_ - Optional os user to use for the Sandbox
-- `volumes?` _VolumeMount\[\]_ - List of volumes to mount in the Sandbox
+- `async?` _boolean_
+- `autoArchiveInterval?` _number_
+- `autoStopInterval?` _number_
+- `envVars?` _Record\<string, string\>_
+- `image` _string \| Image_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
+  the image will be dynamically built.
+- `labels?` _Record\<string, string\>_
+- `language?` _string_
+- `public?` _boolean_
+- `resources?` _Resources_ - Resource allocation for the Sandbox. If not provided, sandbox will
+  have default resources.
+- `user?` _string_
+- `volumes?` _VolumeMount\[\]_
 
-**Example:**
+## CreateSandboxFromSnapshotParams
 
-```ts
-const params: CreateSandboxParams = {
-  language: 'typescript',
-  envVars: { NODE_ENV: 'development' },
-  resources: {
-    cpu: 2,
-    memory: 4, // 4GB RAM
-  },
-  autoStopInterval: 60, // Auto-stop after 1 hour of inactivity
-  autoArchiveInterval: 60, // Auto-archive after a Sandbox has been stopped for 1 hour
-}
-const sandbox = await daytona.create(params, 50)
-```
+Parameters for creating a new Sandbox from a snapshot.
+
+**Properties**:
+
+- `async?` _boolean_
+- `autoArchiveInterval?` _number_
+- `autoStopInterval?` _number_
+- `envVars?` _Record\<string, string\>_
+- `labels?` _Record\<string, string\>_
+- `language?` _string_
+- `public?` _boolean_
+- `snapshot?` _string_ - Name of the snapshot to use for the Sandbox.
+- `user?` _string_
+- `volumes?` _VolumeMount\[\]_
 
 ## DaytonaConfig
 
@@ -468,6 +443,27 @@ const config: DaytonaConfig = {
 const daytona = new Daytona(config)
 ```
 
+## Resources
+
+Resource allocation for a Sandbox.
+
+**Properties**:
+
+- `cpu?` _number_ - CPU allocation for the Sandbox in cores
+- `disk?` _number_ - Disk space allocation for the Sandbox in GiB
+- `gpu?` _number_ - GPU allocation for the Sandbox in units
+- `memory?` _number_ - Memory allocation for the Sandbox in GiB
+
+**Example:**
+
+```ts
+const resources: SandboxResources = {
+  cpu: 2,
+  memory: 4, // 4GiB RAM
+  disk: 20, // 20GiB disk
+}
+```
+
 ## SandboxFilter
 
 Filter for Sandboxes.
@@ -476,27 +472,6 @@ Filter for Sandboxes.
 
 - `id?` _string_ - The ID of the Sandbox to retrieve
 - `labels?` _Record\<string, string\>_ - Labels to filter Sandboxes
-
-## SandboxResources
-
-Resource allocation for a Sandbox.
-
-**Properties**:
-
-- `cpu?` _number_ - CPU allocation for the Sandbox in cores
-- `disk?` _number_ - Disk space allocation for the Sandbox in GB
-- `gpu?` _number_ - GPU allocation for the Sandbox in units
-- `memory?` _number_ - Memory allocation for the Sandbox in GB
-
-**Example:**
-
-```ts
-const resources: SandboxResources = {
-  cpu: 2,
-  memory: 4, // 4GB RAM
-  disk: 20, // 20GB disk
-}
-```
 
 ## VolumeMount
 
