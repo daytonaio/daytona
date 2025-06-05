@@ -272,6 +272,41 @@ const Images: React.FC = () => {
     [authenticatedUserHasPermission],
   )
 
+  const handleBulkDelete = async (images: ImageDto[]) => {
+    setLoadingImages((prev) => ({ ...prev, ...images.reduce((acc, img) => ({ ...acc, [img.id]: true }), {}) }))
+
+    for (const image of images) {
+      setImagesData((prev) => ({
+        ...prev,
+        items: prev.items.map((i) => (i.id === image.id ? { ...i, state: ImageState.REMOVING } : i)),
+      }))
+
+      try {
+        await imageApi.removeImage(image.id, selectedOrganization?.id)
+        toast.success(`Deleting image ${image.name}`)
+      } catch (error) {
+        handleApiError(error, `Failed to delete image ${image.name}`)
+
+        setImagesData((prev) => ({
+          ...prev,
+          items: prev.items.map((i) => (i.id === image.id ? { ...i, state: image.state } : i)),
+        }))
+
+        if (images.indexOf(image) < images.length - 1) {
+          const shouldContinue = window.confirm(
+            `Failed to delete image ${image.name}. Do you want to continue with the remaining images?`,
+          )
+
+          if (!shouldContinue) {
+            break
+          }
+        }
+      } finally {
+        setLoadingImages((prev) => ({ ...prev, [image.id]: false }))
+      }
+    }
+  }
+
   return (
     <div className="p-6">
       <Dialog
@@ -374,6 +409,7 @@ const Images: React.FC = () => {
             setImageToDelete(image)
             setShowDeleteDialog(true)
           }}
+          onBulkDelete={handleBulkDelete}
           onToggleEnabled={handleToggleEnabled}
           pageCount={imagesData.totalPages}
           onPaginationChange={handlePaginationChange}
