@@ -181,9 +181,9 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in snapshot names'
     }
 
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
+    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[.:_-][a-zA-Z0-9]+)*$/
     if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
     }
 
     return null

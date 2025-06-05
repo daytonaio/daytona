@@ -53,10 +53,10 @@ export class SnapshotService {
   }
 
   private validateSnapshotName(name: string): string | null {
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[._-][a-zA-Z0-9]+)*$/
+    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[.:_-][a-zA-Z0-9]+)*$/
 
     if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, and dashes'
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
     }
 
     return null
