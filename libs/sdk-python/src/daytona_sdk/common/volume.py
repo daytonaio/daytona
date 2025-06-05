@@ -1,12 +1,13 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: AGPL-3.0
 
+from daytona_api_client import SandboxVolume as ApiVolumeMount
 from daytona_api_client import VolumeDto
-from daytona_api_client import WorkspaceVolume as ApiVolumeMount
-from daytona_api_client_async import WorkspaceVolume as AsyncApiVolumeMount
+from daytona_api_client_async import SandboxVolume as AsyncApiVolumeMount
 
 
-class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount): ...
+class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount):
+    ...
 
 
 class Volume(VolumeDto):

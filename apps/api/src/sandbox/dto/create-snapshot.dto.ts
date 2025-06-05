@@ -4,7 +4,8 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { IsArray, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
+import { IsArray, IsObject, IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator'
+import { CreateBuildInfoDto } from './create-build-info.dto'
 
 @ApiSchema({ name: 'CreateSnapshot' })
 export class CreateSnapshotDto {
@@ -76,4 +77,12 @@ export class CreateSnapshotDto {
   @IsOptional()
   @IsNumber()
   disk?: number
+
+  @ApiPropertyOptional({
+    description: 'Build information for the snapshot',
+    type: CreateBuildInfoDto,
+  })
+  @IsOptional()
+  @IsObject()
+  buildInfo?: CreateBuildInfoDto
 }

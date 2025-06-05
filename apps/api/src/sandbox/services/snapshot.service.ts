@@ -62,12 +62,7 @@ export class SnapshotService {
     return null
   }
 
-  async createSnapshot(
-    organization: Organization,
-    createSnapshotDto: CreateSnapshotDto,
-    buildInfo?: CreateBuildInfoDto,
-    general = false,
-  ) {
+  async createSnapshot(organization: Organization, createSnapshotDto: CreateSnapshotDto, general = false) {
     const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
     if (nameValidationError) {
       throw new BadRequestException(nameValidationError)
@@ -100,12 +95,15 @@ export class SnapshotService {
       const snapshot = this.snapshotRepository.create({
         organizationId: organization.id,
         ...createSnapshotDto,
-        state: buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
+        state: createSnapshotDto.buildInfo ? SnapshotState.BUILD_PENDING : SnapshotState.PENDING,
         general,
       })
 
-      if (buildInfo) {
-        const buildSnapshotRef = generateBuildSnapshotRef(buildInfo.dockerfileContent, buildInfo.contextHashes)
+      if (createSnapshotDto.buildInfo) {
+        const buildSnapshotRef = generateBuildSnapshotRef(
+          createSnapshotDto.buildInfo.dockerfileContent,
+          createSnapshotDto.buildInfo.contextHashes,
+        )
 
         // Check if buildInfo with the same snapshotRef already exists
         const existingBuildInfo = await this.buildInfoRepository.findOne({
@@ -116,7 +114,7 @@ export class SnapshotService {
           snapshot.buildInfo = existingBuildInfo
         } else {
           const buildInfoEntity = this.buildInfoRepository.create({
-            ...buildInfo,
+            ...createSnapshotDto.buildInfo,
           })
           await this.buildInfoRepository.save(buildInfoEntity)
           snapshot.buildInfo = buildInfoEntity

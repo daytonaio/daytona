@@ -149,7 +149,6 @@ export class AppService implements OnApplicationBootstrap {
       {
         name: this.configService.getOrThrow('defaultSnapshot'),
       },
-      null,
       true,
     )
   }

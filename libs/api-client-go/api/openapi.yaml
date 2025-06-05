@@ -3470,7 +3470,7 @@ paths:
           schema:
             type: string
           style: simple
-        - description: Snapshot ID
+        - description: Snapshot ID or name
           explode: false
           in: path
           name: id
@@ -3493,43 +3493,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Get snapshot by ID
-      tags:
-        - snapshots
-  /snapshots/build:
-    post:
-      operationId: buildSnapshot
-      parameters:
-        - description: Use with JWT to specify the organization ID
-          explode: false
-          in: header
-          name: X-Daytona-Organization-ID
-          required: false
-          schema:
-            type: string
-          style: simple
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/BuildSnapshot'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SnapshotDto'
-          description: The snapshot has been successfully built.
-        '400':
-          description: Bad request - Invalid build parameters
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Build a snapshot
+      summary: Get snapshot by ID or name
       tags:
         - snapshots
   /snapshots/{id}/toggle:
@@ -6584,6 +6548,7 @@ components:
         disk: 3
         imageName: ubuntu:22.04
         memory: 1
+        buildInfo: ''
         entrypoint: sleep infinity
         name: ubuntu-4vcpu-8ram-100gb
         cpu: 1
@@ -6622,6 +6587,10 @@ components:
           description: Disk space allocated to the sandbox in GB
           example: 3
           type: integer
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the snapshot
       required:
         - imageName
         - name
@@ -6721,43 +6690,6 @@ components:
         - size
         - state
         - updatedAt
-      type: object
-    BuildSnapshot:
-      example:
-        disk: 3
-        memory: 1
-        buildInfo: ''
-        name: my-custom-snapshot-v1
-        cpu: 1
-        gpu: 0
-      properties:
-        name:
-          description: The name of the snapshot to build
-          example: my-custom-snapshot-v1
-          type: string
-        cpu:
-          description: CPU cores allocated to the resulting sandbox
-          example: 1
-          type: integer
-        gpu:
-          description: GPU units allocated to the resulting sandbox
-          example: 0
-          type: integer
-        memory:
-          description: Memory allocated to the resulting sandbox in GB
-          example: 1
-          type: integer
-        disk:
-          description: Disk space allocated to the sandbox in GB
-          example: 3
-          type: integer
-        buildInfo:
-          allOf:
-            - $ref: '#/components/schemas/CreateBuildInfo'
-          description: Build information for the snapshot
-      required:
-        - buildInfo
-        - name
       type: object
     ToggleState:
       example:
