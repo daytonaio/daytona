@@ -68,14 +68,16 @@ export class SnapshotService {
     buildInfo?: CreateBuildInfoDto,
     general = false,
   ) {
-    const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
-    if (imageValidationError) {
-      throw new BadRequestException(imageValidationError)
-    }
-
     const nameValidationError = this.validateSnapshotName(createSnapshotDto.name)
     if (nameValidationError) {
       throw new BadRequestException(nameValidationError)
+    }
+
+    if (createSnapshotDto.imageName) {
+      const imageValidationError = this.validateImageName(createSnapshotDto.imageName)
+      if (imageValidationError) {
+        throw new BadRequestException(imageValidationError)
+      }
     }
 
     // check if the organization has reached the snapshot quota
@@ -235,21 +237,21 @@ export class SnapshotService {
 
   private async validateOrganizationMaxQuotas(
     organization: Organization,
-    cpu: number,
-    memory: number,
-    disk: number,
+    cpu?: number,
+    memory?: number,
+    disk?: number,
   ): Promise<void> {
-    if (cpu > organization.maxCpuPerSandbox) {
+    if (cpu && cpu > organization.maxCpuPerSandbox) {
       throw new ForbiddenException(
         `CPU request ${cpu} exceeds maximum allowed per sandbox (${organization.maxCpuPerSandbox})`,
       )
     }
-    if (memory > organization.maxMemoryPerSandbox) {
+    if (memory && memory > organization.maxMemoryPerSandbox) {
       throw new ForbiddenException(
         `Memory request ${memory}GB exceeds maximum allowed per sandbox (${organization.maxMemoryPerSandbox}GB)`,
       )
     }
-    if (disk > organization.maxDiskPerSandbox) {
+    if (disk && disk > organization.maxDiskPerSandbox) {
       throw new ForbiddenException(
         `Disk request ${disk}GB exceeds maximum allowed per sandbox (${organization.maxDiskPerSandbox}GB)`,
       )

@@ -6724,13 +6724,33 @@ components:
       type: object
     BuildSnapshot:
       example:
+        disk: 3
+        memory: 1
         buildInfo: ''
         name: my-custom-snapshot-v1
+        cpu: 1
+        gpu: 0
       properties:
         name:
           description: The name of the snapshot to build
           example: my-custom-snapshot-v1
           type: string
+        cpu:
+          description: CPU cores allocated to the resulting sandbox
+          example: 1
+          type: integer
+        gpu:
+          description: GPU units allocated to the resulting sandbox
+          example: 0
+          type: integer
+        memory:
+          description: Memory allocated to the resulting sandbox in GB
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to the sandbox in GB
+          example: 3
+          type: integer
         buildInfo:
           allOf:
             - $ref: '#/components/schemas/CreateBuildInfo'

@@ -147,6 +147,10 @@ export class SnapshotController {
       authContext.organization,
       {
         name: buildSnapshotDto.name,
+        cpu: buildSnapshotDto.cpu,
+        gpu: buildSnapshotDto.gpu,
+        memory: buildSnapshotDto.memory,
+        disk: buildSnapshotDto.disk,
       },
       {
         dockerfileContent: buildSnapshotDto.buildInfo.dockerfileContent,

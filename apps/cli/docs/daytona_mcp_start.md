@@ -14,4 +14,4 @@ daytona mcp start [flags]
 
 ### SEE ALSO
 
-* [daytona mcp](daytona_mcp.md)  - Manage Daytona MCP Server
+- [daytona mcp](daytona_mcp.md) - Manage Daytona MCP Server
