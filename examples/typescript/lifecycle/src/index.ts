@@ -24,7 +24,12 @@ async function main() {
   const existingSandbox = await daytona.get(sandbox.id)
   console.log('Got existing sandbox')
 
-  const response = await existingSandbox.process.executeCommand('echo "Hello World from exec!"', '/home/daytona', 10)
+  const response = await existingSandbox.process.executeCommand(
+    'echo "Hello World from exec!"',
+    '/home/daytona',
+    undefined,
+    10,
+  )
   if (response.exitCode !== 0) {
     console.error(`Error: ${response.exitCode} ${response.result}`)
   } else {

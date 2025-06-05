@@ -67,7 +67,7 @@ export class SandboxService {
     private readonly warmPoolService: SandboxWarmPoolService,
     private readonly eventEmitter: EventEmitter2,
     private readonly organizationService: OrganizationService,
-  ) { }
+  ) {}
 
   private async validateOrganizationQuotas(
     organization: Organization,

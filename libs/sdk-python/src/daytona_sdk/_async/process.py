@@ -13,12 +13,13 @@ from daytona_api_client_async import (
     SessionExecuteResponse,
     ToolboxApi,
 )
-from daytona_sdk._utils.errors import intercept_errors
-from daytona_sdk._utils.stream import process_streaming_response
-from daytona_sdk.code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
-from daytona_sdk.common.charts import parse_chart
-from daytona_sdk.common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
-from daytona_sdk.common.protocols import SandboxInstance
+
+from .._utils.errors import intercept_errors
+from .._utils.stream import process_streaming_response
+from ..code_toolbox.sandbox_python_code_toolbox import SandboxPythonCodeToolbox
+from ..common.charts import parse_chart
+from ..common.process import CodeRunParams, ExecuteResponse, ExecutionArtifacts, SessionExecuteRequest
+from ..common.protocols import SandboxInstance
 
 
 class AsyncProcess:
@@ -135,9 +136,7 @@ class AsyncProcess:
         command = f'sh -c "{command}"'
         execute_request = ExecuteRequest(command=command, cwd=cwd or await self._get_root_dir(), timeout=timeout)
 
-        response = await self.toolbox_api.execute_command(
-            workspace_id=self.instance.id, execute_request=execute_request
-        )
+        response = await self.toolbox_api.execute_command(sandbox_id=self.instance.id, execute_request=execute_request)
 
         # Post-process the output to extract ExecutionArtifacts
         artifacts = AsyncProcess._parse_output(response.result.splitlines())
@@ -389,7 +388,7 @@ class AsyncProcess:
             ```
         """
         _, url, *_ = self.toolbox_api._get_session_command_logs_serialize(  # pylint: disable=protected-access
-            workspace_id=self.instance.id,
+            sandbox_id=self.instance.id,
             session_id=session_id,
             command_id=command_id,
             x_daytona_organization_id=None,

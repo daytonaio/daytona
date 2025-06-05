@@ -22,17 +22,17 @@ Provides Git operations within a Sandbox.
 # Clone a repository
 sandbox.git.clone(
     url="https://github.com/user/repo.git",
-    path="sandbox/repo"
+    path="workspace/repo"
 )
 
 # Check repository status
-status = sandbox.git.status("sandbox/repo")
+status = sandbox.git.status("workspace/repo")
 print(f"Modified files: {status.modified}")
 
 # Stage and commit changes
-sandbox.git.add("sandbox/repo", ["file.txt"])
+sandbox.git.add("workspace/repo", ["file.txt"])
 sandbox.git.commit(
-    path="sandbox/repo",
+    path="workspace/repo",
     message="Update file",
     author="John Doe",
     email="john@example.com"
@@ -74,10 +74,10 @@ running 'git add' on the command line.
 
 ```python
 # Stage a single file
-sandbox.git.add("sandbox/repo", ["file.txt"])
+sandbox.git.add("workspace/repo", ["file.txt"])
 
 # Stage multiple files
-sandbox.git.add("sandbox/repo", [
+sandbox.git.add("workspace/repo", [
     "src/main.py",
     "tests/test_main.py",
     "README.md"
@@ -105,7 +105,7 @@ Lists branches in the repository.
 **Example**:
 
 ```python
-response = sandbox.git.branches("sandbox/repo")
+response = sandbox.git.branches("workspace/repo")
 print(f"Branches: {response.branches}")
 ```
 
@@ -143,13 +143,13 @@ repository if credentials are provided.
 # Clone the default branch
 sandbox.git.clone(
     url="https://github.com/user/repo.git",
-    path="sandbox/repo"
+    path="workspace/repo"
 )
 
 # Clone a specific branch with authentication
 sandbox.git.clone(
     url="https://github.com/user/private-repo.git",
-    path="sandbox/private",
+    path="workspace/private",
     branch="develop",
     username="user",
     password="token"
@@ -158,7 +158,7 @@ sandbox.git.clone(
 # Clone a specific commit
 sandbox.git.clone(
     url="https://github.com/user/repo.git",
-    path="sandbox/repo-old",
+    path="workspace/repo-old",
     commit_id="abc123"
 )
 ```
@@ -186,9 +186,9 @@ changes using the add() method before committing.
 
 ```python
 # Stage and commit changes
-sandbox.git.add("sandbox/repo", ["README.md"])
+sandbox.git.add("workspace/repo", ["README.md"])
 sandbox.git.commit(
-    path="sandbox/repo",
+    path="workspace/repo",
     message="Update documentation",
     author="John Doe",
     email="john@example.com"
@@ -219,11 +219,11 @@ username and password/token.
 
 ```python
 # Push without authentication (for public repos or SSH)
-sandbox.git.push("sandbox/repo")
+sandbox.git.push("workspace/repo")
 
 # Push with authentication
 sandbox.git.push(
-    path="sandbox/repo",
+    path="workspace/repo",
     username="user",
     password="github_token"
 )
@@ -252,11 +252,11 @@ provide username and password/token.
 
 ```python
 # Pull without authentication
-sandbox.git.pull("sandbox/repo")
+sandbox.git.pull("workspace/repo")
 
 # Pull with authentication
 sandbox.git.pull(
-    path="sandbox/repo",
+    path="workspace/repo",
     username="user",
     password="github_token"
 )
@@ -288,7 +288,7 @@ Gets the current Git repository status.
 **Example**:
 
 ```python
-status = sandbox.git.status("sandbox/repo")
+status = sandbox.git.status("workspace/repo")
 print(f"On branch: {status.current_branch}")
 print(f"Commits ahead: {status.ahead}")
 print(f"Commits behind: {status.behind}")

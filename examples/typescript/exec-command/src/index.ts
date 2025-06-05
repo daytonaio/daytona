@@ -76,6 +76,14 @@ async function main() {
   //  first, create a sandbox
   const sandbox = await daytona.create({
     language: 'typescript',
+    snapshot: 'ubuntu:22.04',
+    resources: {
+      cpu: 2,
+      memory: 4,
+      disk: 20,
+    },
+    autoStopInterval: 60,
+    autoArchiveInterval: 60,
   })
 
   try {

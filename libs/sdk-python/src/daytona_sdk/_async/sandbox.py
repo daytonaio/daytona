@@ -5,21 +5,22 @@ import json
 import time
 from typing import Dict, Optional
 
-from daytona_api_client_async import PortPreviewUrl, ToolboxApi
-from daytona_api_client_async import Workspace as ApiSandbox
-from daytona_api_client_async import WorkspaceApi as SandboxApi
-from daytona_sdk._async.filesystem import AsyncFileSystem
-from daytona_sdk._async.git import AsyncGit
-from daytona_sdk._async.lsp_server import AsyncLspServer, LspLanguageId
-from daytona_sdk._async.process import AsyncProcess
-from daytona_sdk._utils.enum import to_enum
-from daytona_sdk._utils.errors import intercept_errors
-from daytona_sdk._utils.path import prefix_relative_path
-from daytona_sdk._utils.timeout import with_timeout
-from daytona_sdk.common.errors import DaytonaError
-from daytona_sdk.common.protocols import SandboxCodeToolbox
-from daytona_sdk.common.sandbox import SandboxInfo, SandboxInstance, SandboxResources, SandboxTargetRegion
+from daytona_api_client_async import PortPreviewUrl
+from daytona_api_client_async import Sandbox as ApiSandbox
+from daytona_api_client_async import SandboxApi, ToolboxApi
 from deprecated import deprecated
+
+from .._utils.enum import to_enum
+from .._utils.errors import intercept_errors
+from .._utils.path import prefix_relative_path
+from .._utils.timeout import with_timeout
+from ..common.errors import DaytonaError
+from ..common.protocols import SandboxCodeToolbox
+from ..common.sandbox import Resources, SandboxInfo, SandboxInstance, SandboxTargetRegion
+from .filesystem import AsyncFileSystem
+from .git import AsyncGit
+from .lsp_server import AsyncLspServer, LspLanguageId
+from .process import AsyncProcess
 
 
 class AsyncSandbox:
@@ -77,7 +78,7 @@ class AsyncSandbox:
             print(f"Resources: {info.resources.cpu} CPU, {info.resources.memory} RAM")
             ```
         """
-        instance = await self.sandbox_api.get_workspace(self.id)
+        instance = await self.sandbox_api.get_sandbox(self.id)
         return AsyncSandbox.to_sandbox_info(instance)
 
     @intercept_errors(message_prefix="Failed to get sandbox root directory: ")
@@ -177,7 +178,7 @@ class AsyncSandbox:
             print("Sandbox started successfully")
             ```
         """
-        await self.sandbox_api.start_workspace(self.id, _request_timeout=timeout or None)
+        await self.sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
         await self.wait_for_sandbox_start()
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
@@ -202,12 +203,12 @@ class AsyncSandbox:
             print("Sandbox stopped successfully")
             ```
         """
-        await self.sandbox_api.stop_workspace(self.id, _request_timeout=timeout or None)
+        await self.sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         await self.wait_for_sandbox_stop()
 
     async def delete(self) -> None:
         """Deletes the Sandbox."""
-        await self.sandbox_api.delete_workspace(self.id, force=True)
+        await self.sandbox_api.delete_sandbox(self.id, force=True)
 
     @deprecated(
         reason=(
@@ -248,7 +249,7 @@ class AsyncSandbox:
         """
         state = (await self.info()).state
         while state != "started":
-            response = await self.sandbox_api.get_workspace(self.id)
+            response = await self.sandbox_api.get_sandbox(self.id)
             state = response.state
 
             if state == "error":
@@ -300,7 +301,7 @@ class AsyncSandbox:
         state = (await self.info()).state
         while state != "stopped":
             try:
-                response = await self.sandbox_api.get_workspace(self.id)
+                response = await self.sandbox_api.get_sandbox(self.id)
                 state = response.state
 
                 if state == "error":
@@ -399,7 +400,7 @@ class AsyncSandbox:
         and stopped states is that starting an archived sandbox takes more time, depending on its size.
         Sandbox must be stopped before archiving.
         """
-        await self.sandbox_api.archive_workspace(self.id)
+        await self.sandbox_api.archive_sandbox(self.id)
 
     @staticmethod
     def to_sandbox_info(instance: ApiSandbox) -> SandboxInfo:
@@ -414,18 +415,18 @@ class AsyncSandbox:
         provider_metadata = json.loads(instance.info.provider_metadata or "{}")
 
         # Extract resources with defaults
-        resources = SandboxResources(
-            cpu=str(instance.cpu or "1"),
-            gpu=str(instance.gpu) if instance.gpu else None,
-            memory=str(instance.memory or "2") + "Gi",
-            disk=str(instance.disk or "10") + "Gi",
+        resources = Resources(
+            cpu=instance.cpu,
+            gpu=instance.gpu,
+            memory=instance.memory,
+            disk=instance.disk,
         )
 
         enum_target = to_enum(SandboxTargetRegion, instance.target)
 
         return SandboxInfo(
             id=instance.id,
-            image=instance.image,
+            snapshot=instance.snapshot,
             user=instance.user,
             env=instance.env or {},
             labels=instance.labels or {},
@@ -434,8 +435,8 @@ class AsyncSandbox:
             resources=resources,
             state=instance.state,
             error_reason=instance.error_reason,
-            snapshot_state=instance.snapshot_state,
-            snapshot_created_at=instance.snapshot_created_at,
+            backup_state=instance.backup_state,
+            backup_created_at=instance.backup_created_at,
             auto_stop_interval=instance.auto_stop_interval,
             auto_archive_interval=instance.auto_archive_interval,
             created=instance.info.created or "",
@@ -443,7 +444,7 @@ class AsyncSandbox:
             region=provider_metadata.get("region", ""),
             class_name=provider_metadata.get("class", ""),
             updated_at=provider_metadata.get("updatedAt", ""),
-            last_snapshot=provider_metadata.get("lastSnapshot"),
+            last_backup=provider_metadata.get("lastBackup"),
             provider_metadata=instance.info.provider_metadata,
         )
 

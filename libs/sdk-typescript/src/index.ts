@@ -4,7 +4,14 @@
  */
 
 export { CodeLanguage, Daytona } from './Daytona'
-export type { CreateSandboxParams, DaytonaConfig, SandboxResources, VolumeMount } from './Daytona'
+export type {
+  CreateSandboxBaseParams,
+  CreateSandboxFromImageParams,
+  CreateSandboxFromSnapshotParams,
+  DaytonaConfig,
+  Resources,
+  VolumeMount,
+} from './Daytona'
 export { FileSystem } from './FileSystem'
 export { Git } from './Git'
 export { LspLanguageId } from './LspServer'
@@ -15,6 +22,7 @@ export { DaytonaError } from './errors/DaytonaError'
 export { Image } from './Image'
 export { Sandbox } from './Sandbox'
 export type { SandboxCodeToolbox } from './Sandbox'
+export { CreateSnapshotParams } from './Snapshot'
 
 // Chart and artifact types
 export { ChartType } from './types/Charts'
@@ -28,7 +36,7 @@ export type {
   ScatterChart,
 } from './types/Charts'
 
-export { WorkspaceState as SandboxState, CreateWorkspaceTargetEnum as SandboxTargetRegion } from '@daytonaio/api-client'
+export { SandboxState, CreateSandboxTargetEnum as SandboxTargetRegion } from '@daytonaio/api-client'
 export type {
   FileInfo,
   GitStatus,
@@ -39,13 +47,13 @@ export type {
 } from '@daytonaio/api-client'
 
 // Re-export necessary Workspace-related types for backward compatibility
-import { CreateWorkspaceTargetEnum, WorkspaceState as WS } from '@daytonaio/api-client'
-import type { CreateSandboxParams, SandboxResources } from './Daytona'
+import { CreateSandboxTargetEnum, SandboxState as SS } from '@daytonaio/api-client'
+import type { CreateSandboxFromImageParams, Resources } from './Daytona'
 import type { SandboxCodeToolbox } from './Sandbox'
 import { Sandbox } from './Sandbox'
 
 /** @deprecated `CreateWorkspaceParams` is deprecated. Please use `CreateSandboxParams` instead. This will be removed in a future version. */
-export type CreateWorkspaceParams = CreateSandboxParams
+export type CreateWorkspaceParams = CreateSandboxFromImageParams
 
 /** @deprecated `Workspace` is deprecated. Please use `Sandbox` instead. This will be removed in a future version. */
 export const Workspace = Sandbox
@@ -56,14 +64,14 @@ export type Workspace = Sandbox
 export type WorkspaceCodeToolbox = SandboxCodeToolbox
 
 /** @deprecated `WorkspaceResources` is deprecated. Please use `SandboxResources` instead. This will be removed in a future version. */
-export type WorkspaceResources = SandboxResources
+export type WorkspaceResources = Resources
 
 /** @deprecated `WorkspaceState` is deprecated. Please use `SandboxState` instead. This will be removed in a future version. */
-export type WorkspaceState = WS
+export type WorkspaceState = SS
 /** @deprecated `WorkspaceState` is deprecated. Please use `SandboxState` instead. This will be removed in a future version. */
-export const WorkspaceState = WS
+export const WorkspaceState = SS
 
 /** @deprecated `WorkspaceTargetRegion` is deprecated. Please use `SandboxTargetRegion` instead. This will be removed in a future version. */
-export const WorkspaceTargetRegion = CreateWorkspaceTargetEnum
+export const WorkspaceTargetRegion = CreateSandboxTargetEnum
 /** @deprecated `WorkspaceTargetRegion` is deprecated. Please use `SandboxTargetRegion` instead. This will be removed in a future version. */
-export type WorkspaceTargetRegion = CreateWorkspaceTargetEnum
+export type WorkspaceTargetRegion = CreateSandboxTargetEnum

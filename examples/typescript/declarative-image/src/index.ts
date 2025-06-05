@@ -4,9 +4,9 @@ import fs from 'fs'
 async function main() {
   const daytona = new Daytona()
 
-  // Generate unique name for the image to avoid conflicts
-  const imageName = `node-example:${Date.now()}`
-  console.log(`Creating image with name: ${imageName}`)
+  // Generate unique name for the snapshot to avoid conflicts
+  const snapshotName = `node-example:${Date.now()}`
+  console.log(`Creating snapshot with name: ${snapshotName}`)
 
   // Create a local file with some data
   const localFilePath = 'file_example.txt'
@@ -14,7 +14,7 @@ async function main() {
   fs.writeFileSync(localFilePath, localFileContent)
 
   // Create a Python image with common data science packages
-  const image = Image.debianSlim('3.12')
+  const image = Image.base('alpine:3.18')
     .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
     .runCommands(['apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace'])
     .workdir('/home/daytona/workspace')
@@ -23,20 +23,28 @@ async function main() {
     })
     .addLocalFile(localFilePath, '/home/daytona/workspace/file_example.txt')
 
-  // Create the image
-  console.log(`=== Creating Image: ${imageName} ===`)
-  await daytona.createImage(imageName, image, { onLogs: console.log })
-
-  // Create first sandbox using the pre-built image
-  console.log('\n=== Creating Sandbox from Pre-built Image ===')
-  const sandbox1 = await daytona.create(
+  // Create the snapshot
+  console.log(`=== Creating Snapshot: ${snapshotName} ===`)
+  await daytona.snapshot.create(
     {
-      image: imageName,
+      name: snapshotName,
+      image,
+      resources: {
+        cpu: 1,
+        memory: 1,
+        disk: 3,
+      },
     },
     {
-      onImageBuildLogs: console.log,
+      onLogs: console.log,
     },
   )
+
+  // Create first sandbox using the pre-built image
+  console.log('\n=== Creating Sandbox from Pre-built Snapshot ===')
+  const sandbox1 = await daytona.create({
+    snapshot: snapshotName,
+  })
 
   try {
     // Verify the first sandbox environment
@@ -73,7 +81,7 @@ async function main() {
     },
     {
       timeout: 0,
-      onImageBuildLogs: console.log,
+      onSnapshotCreateLogs: console.log,
     },
   )
 
