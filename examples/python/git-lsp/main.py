@@ -1,10 +1,20 @@
-from daytona_sdk import Daytona
+from daytona_sdk import CreateSandboxFromImageParams, Daytona, Image
 
 
 def main():
     daytona = Daytona()
 
-    sandbox = daytona.create()
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(
+            image=(
+                Image.base("alpine:3.22.0").run_commands(
+                    "apk add --no-cache nodejs npm",
+                    "npm install -g typescript typescript-language-server",
+                )
+            ),
+        ),
+        on_snapshot_create_logs=print,
+    )
 
     try:
         project_dir = "learn-typescript"
@@ -45,7 +55,7 @@ def main():
         print("Completions:", completions)
 
     except Exception as error:
-        print("Error creating sandbox:", error)
+        print("Error executing example:", error)
     finally:
         # Cleanup
         daytona.delete(sandbox)

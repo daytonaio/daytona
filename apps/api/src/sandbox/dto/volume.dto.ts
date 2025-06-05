@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { IsEnum } from 'class-validator'
 import { VolumeState } from '../enums/volume-state.enum'
 import { Volume } from '../entities/volume.entity'
@@ -48,7 +48,7 @@ export class VolumeDto {
   })
   updatedAt: string
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Last used timestamp',
     example: '2023-01-01T00:00:00.000Z',
     nullable: true,

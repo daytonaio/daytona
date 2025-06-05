@@ -58,7 +58,7 @@ export class SandboxManager {
     private readonly snapshotService: SnapshotService,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly dockerProvider: DockerProvider,
-  ) { }
+  ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
   @OtelSpan()
@@ -108,10 +108,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(
-                `Error processing auto-stop state for sandbox ${sandbox.id}:`,
-                fromAxiosError(error),
-              )
+              this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, fromAxiosError(error))
             }
           }),
         )
@@ -167,10 +164,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(
-                `Error processing auto-archive state for sandbox ${sandbox.id}:`,
-                fromAxiosError(error),
-              )
+              this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, fromAxiosError(error))
             }
           }),
         )
@@ -412,9 +406,7 @@ export class SandboxManager {
     await this.runnerService.createSnapshotRunner(runnerId, buildInfo.snapshotRef, state)
   }
 
-  private handleSandboxDesiredStateArchived: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private handleSandboxDesiredStateArchived: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
@@ -521,9 +513,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleSandboxDesiredStateDestroyed: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private handleSandboxDesiredStateDestroyed: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
     if (sandbox.state === SandboxState.ARCHIVED) {
       await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
       return DONT_SYNC_AGAIN
@@ -583,9 +573,7 @@ export class SandboxManager {
     }
   }
 
-  private handleSandboxDesiredStateStarted: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private handleSandboxDesiredStateStarted: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
     switch (sandbox.state) {
       case SandboxState.PENDING_BUILD: {
         return this.handleUnassignedBuildSandbox(sandbox)
@@ -633,9 +621,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleSandboxDesiredStateStopped: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private handleSandboxDesiredStateStopped: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       //  console.debug(`Runner ${runner.id} is not ready`);
@@ -694,10 +680,7 @@ export class SandboxManager {
   private handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart: StateSyncHandler = async (
     sandbox: Sandbox,
   ): Promise<ShouldSyncAgain> => {
-    const snapshotRunner = await this.runnerService.getSnapshotRunner(
-      sandbox.runnerId,
-      sandbox.buildInfo.snapshotRef,
-    )
+    const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
         case SnapshotRunnerState.READY: {
@@ -899,9 +882,7 @@ export class SandboxManager {
         throw new Error('No registry found for snapshot')
       }
 
-      const existingSnapshots = sandbox.existingBackupSnapshots.map(
-        (existingSnapshot) => existingSnapshot.snapshotName,
-      )
+      const existingSnapshots = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
       let validBackupSnapshot
       let exists = false
 
@@ -1041,9 +1022,7 @@ export class SandboxManager {
         if (sandbox.prevRunnerId) {
           const runner = await this.runnerService.findOne(sandbox.prevRunnerId)
           if (!runner) {
-            this.logger.warn(
-              `Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`,
-            )
+            this.logger.warn(`Previously assigned runner ${sandbox.prevRunnerId} for sandbox ${sandbox.id} not found`)
             //  clear prevRunnerId to avoid trying to cleanup on a non-existent runner
             sandbox.prevRunnerId = null
 

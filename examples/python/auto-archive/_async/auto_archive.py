@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona_sdk import AsyncDaytona, CreateSandboxParams
+from daytona_sdk import AsyncDaytona, CreateSandboxFromSnapshotParams
 
 
 async def main():
@@ -14,11 +14,11 @@ async def main():
         print(sandbox1.instance.auto_archive_interval)
 
         # Max interval
-        sandbox2 = await daytona.create(params=CreateSandboxParams(auto_archive_interval=0))
+        sandbox2 = await daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=0))
         print(sandbox2.instance.auto_archive_interval)
 
         # 1 day interval
-        sandbox3 = await daytona.create(params=CreateSandboxParams(auto_archive_interval=1440))
+        sandbox3 = await daytona.create(params=CreateSandboxFromSnapshotParams(auto_archive_interval=1440))
         print(sandbox3.instance.auto_archive_interval)
 
         await sandbox1.delete()

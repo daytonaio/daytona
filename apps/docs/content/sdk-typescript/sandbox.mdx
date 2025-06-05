@@ -64,21 +64,21 @@ Converts an API sandbox instance to a SandboxInfo object.
 
 ---
 
-#### ~~toSandboxInfo()~~
+#### ~~toWorkspaceInfo()~~
 
 ```ts
-static toSandboxInfo(instance: Sandbox): SandboxInfo
+static toWorkspaceInfo(instance: Sandbox): SandboxInfo
 ```
 
-Converts an API sandbox instance to a SandboxInfo object.
+Converts an API workspace instance to a WorkspaceInfo object.
 
 **Parameters**:
 
-- `instance` _Sandbox_ - The API sandbox instance to convert
+- `instance` _Sandbox_ - The API workspace instance to convert
 
 **Returns**:
 
-- `SandboxInfo` - The converted SandboxInfo object
+- `SandboxInfo` - The converted WorkspaceInfo object
 
 ##### Deprecated
 
@@ -127,7 +127,7 @@ diagnostics, and more.
 **Example:**
 
 ```ts
-const lsp = await sandbox.createLspServer('typescript', 'sandbox/project')
+const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
 ```
 
 ---
@@ -196,10 +196,10 @@ console.log(`Sandbox root: ${rootDir}`)
 
 ---
 
-#### ~~getSandboxRootDir()~~
+#### ~~getWorkspaceRootDir()~~
 
 ```ts
-getSandboxRootDir(): Promise<undefined | string>
+getWorkspaceRootDir(): Promise<undefined | string>
 ```
 
 **Returns**:
@@ -482,22 +482,22 @@ Structured information about a Sandbox
 
 - `autoArchiveInterval` _number_ - Auto-archive interval in minutes
 - `autoStopInterval` _number_ - Auto-stop interval in minutes
-- `class` _CreateNodeClassEnum_ - Sandbox class
+- `backupCreatedAt` _null \| string_ - When the backup was created
+- `backupState` _null \| string_ - Current state of Sandbox backup
+- `class` _CreateRunnerClassEnum_ - Sandbox class
 - `created` _string_ - The creation timestamp of the project
   - _Inherited from_: `SandboxInfo.created`
 - `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
 - `errorReason` _null \| string_ - Error message if Sandbox is in error state
 - `id` _string_ - Unique identifier for the Sandbox
-- `image?` _string_ - Docker image used for the Sandbox
 - `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
-- `lastSnapshot` _null \| string_ - When the last snapshot was created
+- `lastBackup` _null \| string_ - When the last backup was created
 - `nodeDomain` _string_ - Domain name of the Sandbox node
-- ~~`providerMetadata?`~~ _string_ - **_Deprecated_** - Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
+- ~~`providerMetadata?`~~ _string_ - **_Deprecated_** - Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastBackup`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
 - `public` _boolean_ - Whether the Sandbox is publicly accessible
-- `region` _CreateNodeRegionEnum_ - Region of the Sandbox node
-- `resources` _SandboxResources_ - Resource allocations for the Sandbox
-- `snapshotCreatedAt` _null \| string_ - When the snapshot was created
-- `snapshotState` _null \| string_ - Current state of Sandbox snapshot
+- `region` _CreateRunnerRegionEnum_ - Region of the Sandbox node
+- `resources` _Resources_ - Resource allocations for the Sandbox
+- `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
 - `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
 - `target` _string_ - Target environment where the Sandbox runs
 - `updatedAt` _string_ - When the Sandbox was last updated
@@ -541,8 +541,8 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.gpu`
 - `id` _string_ - The ID of the sandbox
   - _Inherited from_: `Sandbox.id`
-- `image?` _string_ - The image used for the sandbox
-  - _Inherited from_: `Sandbox.image`
+- `sandbox?` _string_ - The snapshot used for the sandbox
+  - _Inherited from_: `Sandbox.sandbox`
 - `info?` _SandboxInfo_
 - `labels` _\[key: string\]: string_ - Labels for the sandbox
   - _Inherited from_: `Sandbox.labels`
@@ -554,10 +554,10 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.organizationId`
 - `public` _boolean_ - Whether the sandbox http preview is public
   - _Inherited from_: `Sandbox.public`
-- `snapshotCreatedAt?` _string_ - The creation timestamp of the last snapshot
-  - _Inherited from_: `Sandbox.snapshotCreatedAt`
-- `snapshotState?` _SandboxSnapshotStateEnum_ - The state of the snapshot
-  - _Inherited from_: `Sandbox.snapshotState`
+- `backupCreatedAt?` _string_ - The creation timestamp of the last backup
+  - _Inherited from_: `Sandbox.backupCreatedAt`
+- `backupState?` _SandboxBackupStateEnum_ - The state of the backup
+  - _Inherited from_: `Sandbox.backupState`
 - `state?` _SandboxState_ - The state of the sandbox
   - _Inherited from_: `Sandbox.state`
 - `target` _string_ - The target environment for the sandbox
@@ -569,25 +569,3 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.volumes`
 
 - `Omit`\<`ApiSandbox`, `"info"`\>
-
-## SandboxResources
-
-Resources allocated to a Sandbox
-
-**Properties**:
-
-- `cpu` _string_ - Number of CPU cores allocated (e.g., "1", "2")
-- `disk` _string_ - Amount of disk space allocated with unit (e.g., "10Gi", "20Gi")
-- `gpu` _null \| string_ - Number of GPUs allocated (e.g., "1") or null if no GPU
-- `memory` _string_ - Amount of memory allocated with unit (e.g., "2Gi", "4Gi")
-
-**Example:**
-
-```ts
-const resources: SandboxResources = {
-  cpu: '2',
-  gpu: '1',
-  memory: '4Gi',
-  disk: '20Gi',
-}
-```

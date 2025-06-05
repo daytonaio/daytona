@@ -1,7 +1,7 @@
-import { Daytona, Sandbox } from '@daytonaio/sdk'
+import { Daytona, Sandbox, Image } from '@daytonaio/sdk'
 
 async function basicExec(sandbox: Sandbox) {
-  //  run some python code directly
+  //  run some typescript code directly
   const codeResult = await sandbox.process.codeRun('console.log("Hello World from code!")')
   if (codeResult.exitCode !== 0) {
     console.error('Error running code:', codeResult.exitCode)
@@ -74,9 +74,20 @@ async function main() {
   const daytona = new Daytona()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create({
-    language: 'typescript',
-  })
+  const sandbox = await daytona.create(
+    {
+      image: Image.base('ubuntu:22.04').runCommands(
+        'apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils',
+        'npm install -g typescript',
+      ),
+      language: 'typescript',
+      autoStopInterval: 60,
+      autoArchiveInterval: 60,
+    },
+    {
+      onSnapshotCreateLogs: console.log,
+    },
+  )
 
   try {
     await basicExec(sandbox)
