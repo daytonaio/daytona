@@ -49,7 +49,7 @@ It initializes the language server for the specified language and project.
 **Example**:
 
 ```python
-lsp = sandbox.create_lsp_server("typescript", "sandbox/project")
+lsp = sandbox.create_lsp_server("typescript", "workspace/project")
 lsp.start()  # Initialize the server
 # Now ready for LSP operations
 ```
@@ -95,7 +95,7 @@ will begin tracking the file's contents and providing language features.
 
 ```python
 # When opening a file for editing
-lsp.did_open("sandbox/project/src/index.ts")
+lsp.did_open("workspace/project/src/index.ts")
 # Now can get completions, symbols, etc. for this file
 ```
 
@@ -120,7 +120,7 @@ the language server to clean up any resources associated with that file.
 
 ```python
 # When done editing a file
-lsp.did_close("sandbox/project/src/index.ts")
+lsp.did_close("workspace/project/src/index.ts")
 ```
 
 #### LspServer.document_symbols
@@ -148,19 +148,19 @@ Gets symbol information (functions, classes, variables, etc.) from a document.
 
 ```python
 # Get all symbols in a file
-symbols = lsp.document_symbols("sandbox/project/src/index.ts")
+symbols = lsp.document_symbols("workspace/project/src/index.ts")
 for symbol in symbols:
     print(f"{symbol.kind} {symbol.name}: {symbol.location}")
 ```
 
-#### LspServer.sandbox_symbols
+#### LspServer.workspace_symbols
 
 ```python
 @deprecated(
     reason=
     "Method is deprecated. Use `sandbox_symbols` instead. This method will be removed in a future version."
 )
-def sandbox_symbols(query: str) -> List[LspSymbol]
+def workspace_symbols(query: str) -> List[LspSymbol]
 ```
 
 Searches for symbols matching the query string across all files
@@ -238,7 +238,7 @@ Gets completion suggestions at a position in a file.
 ```python
 # Get completions at a specific position
 pos = Position(line=10, character=15)
-completions = lsp.completions("sandbox/project/src/index.ts", pos)
+completions = lsp.completions("workspace/project/src/index.ts", pos)
 for item in completions.items:
     print(f"{item.label} ({item.kind}): {item.detail}")
 ```

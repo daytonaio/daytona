@@ -581,40 +581,95 @@ def replace_unwrapped_process_streaming(text: str) -> str:
     return "".join(result_parts)
 
 
-def remove_unused_asyncio_imports(text: str) -> str:
+def manage_asyncio_imports(text: str) -> str:
     """
-    Remove "import asyncio" and "from asyncio import X, Y" lines if the names
-    imported from asyncio are not used elsewhere in the file.
+    Manage asyncio imports based on usage:
+    - If asyncio is used in the text but not imported, add "import asyncio"
+    - If asyncio is not used, remove any existing asyncio imports
     """
     lines = text.splitlines(keepends=True)
-    new_lines = []
+
+    # Check if asyncio is used anywhere in the text (excluding import lines)
+    asyncio_used = False
+    non_import_text = ""
     for line in lines:
-        # Check for "import asyncio"
+        if not (line.strip().startswith("import asyncio") or line.strip().startswith("from asyncio import")):
+            non_import_text += line
+
+    if re.search(r"\basyncio\.", non_import_text):
+        asyncio_used = True
+
+    # Check if asyncio is already imported
+    has_asyncio_import = False
+    import_asyncio_line_idx = None
+
+    new_lines = []
+    for i, line in enumerate(lines):
+        # Check for existing asyncio imports
         if re.match(r"^\s*import asyncio\s*$", line):
-            occurrences = re.findall(r"\basyncio\b", text)
-            if len(occurrences) <= 1:
-                continue  # drop this line
-            new_lines.append(line)
+            has_asyncio_import = True
+            if asyncio_used:
+                new_lines.append(line)  # Keep the import
+            # else: skip this line (remove unused import)
             continue
 
-        # Check for "from asyncio import X, Y"
+        # Check for "from asyncio import X, Y" - remove if not used
         m = re.match(r"^\s*from asyncio import (.+)$", line)
         if m:
-            imported = [imp.strip() for imp in m.group(1).split(",")]
-            used_any = False
-            for imp in imported:
-                pattern = rf"\b{re.escape(imp)}\b"
-                if re.search(pattern, text):
-                    occurrences = re.findall(pattern, text)
-                    if len(occurrences) > 1:
-                        used_any = True
-                        break
-            if not used_any:
-                continue  # drop this import line
-            new_lines.append(line)
+            if asyncio_used:
+                # Keep specific imports only if those specific names are used
+                imported = [imp.strip() for imp in m.group(1).split(",")]
+                used_imports = []
+                for imp in imported:
+                    pattern = rf"\b{re.escape(imp)}\b"
+                    if re.search(pattern, non_import_text):
+                        used_imports.append(imp)
+
+                if used_imports:
+                    new_lines.append(f"from asyncio import {', '.join(used_imports)}\n")
+            # else: skip this line (remove unused import)
             continue
 
         new_lines.append(line)
+
+        # Track where we could insert import asyncio (after other imports)
+        if (
+            not has_asyncio_import
+            and import_asyncio_line_idx is None
+            and line.strip()
+            and not line.strip().startswith("#")
+            and not line.strip().startswith("import")
+            and not line.strip().startswith("from")
+        ):
+            import_asyncio_line_idx = len(new_lines) - 1
+
+    # If asyncio is used but not imported, add the import
+    if asyncio_used and not has_asyncio_import:
+        if import_asyncio_line_idx is not None:
+            # Insert after the last import but before other code
+            # Find the best position - after imports but before other code
+            insert_idx = 0
+            for i, line in enumerate(new_lines):
+                if (
+                    line.strip().startswith("import")
+                    or line.strip().startswith("from")
+                    or line.strip().startswith("#")
+                    or not line.strip()
+                ):
+                    insert_idx = i + 1
+                else:
+                    break
+            new_lines.insert(insert_idx, "import asyncio\n")
+        else:
+            # If no good position found, add at the beginning after license/comments
+            license_end = 0
+            for i, line in enumerate(new_lines):
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    license_end = i + 1
+                else:
+                    break
+            new_lines.insert(license_end, "import asyncio\n")
 
     return "".join(new_lines)
 
@@ -640,7 +695,7 @@ def post_process(path: Path):
     7) Clean up typing imports
     8) Remove any leftover daytona.close() lines
     9) Collapse >2 blank lines into exactly 2
-    10) Remove unused asyncio imports
+    10) Manage asyncio imports (add if needed based on usage, remove if unused)
     11) Inject auto‐gen banner if missing
     """
     text = path.read_text(encoding="utf-8")
@@ -683,8 +738,8 @@ def post_process(path: Path):
     # 9) Collapse more than two blank lines into exactly two
     text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
 
-    # 10) Remove unused asyncio imports
-    text = remove_unused_asyncio_imports(text)
+    # 10) Manage asyncio imports (add if needed based on usage, remove if unused)
+    text = manage_asyncio_imports(text)
 
     # 11) Inject auto‐gen banner if it's missing in the first few lines
     lines = text.splitlines(keepends=True)

@@ -1,11 +1,11 @@
 import asyncio
 
-from daytona_sdk import AsyncDaytona, CreateSandboxParams
+from daytona_sdk import AsyncDaytona, CreateSandboxFromSnapshotParams
 
 
 async def main():
     async with AsyncDaytona() as daytona:
-        params = CreateSandboxParams(
+        params = CreateSandboxFromSnapshotParams(
             language="python",
         )
         sandbox = await daytona.create(params)

@@ -55,12 +55,12 @@ running 'git add' on the command line.
 
 ```ts
 // Stage a single file
-await git.add('sandbox/repo', ['file.txt'])
+await git.add('workspace/repo', ['file.txt'])
 ```
 
 ```ts
 // Stage whole repository
-await git.add('sandbox/repo', ['.'])
+await git.add('workspace/repo', ['.'])
 ```
 
 ---
@@ -85,7 +85,7 @@ List branches in the repository.
 **Example:**
 
 ```ts
-const response = await git.branches('sandbox/repo')
+const response = await git.branches('workspace/repo')
 console.log(`Branches: ${response.branches}`)
 ```
 
@@ -125,14 +125,14 @@ repository if credentials are provided.
 
 ```ts
 // Clone the default branch
-await git.clone('https://github.com/user/repo.git', 'sandbox/repo')
+await git.clone('https://github.com/user/repo.git', 'workspace/repo')
 ```
 
 ```ts
 // Clone a specific branch with authentication
 await git.clone(
   'https://github.com/user/private-repo.git',
-  'sandbox/private',
+  'workspace/private',
   (branch = 'develop'),
   (username = 'user'),
   (password = 'token'),
@@ -141,7 +141,7 @@ await git.clone(
 
 ```ts
 // Clone a specific commit
-await git.clone('https://github.com/user/repo.git', 'sandbox/repo-old', (commitId = 'abc123'))
+await git.clone('https://github.com/user/repo.git', 'workspace/repo-old', (commitId = 'abc123'))
 ```
 
 ---
@@ -174,8 +174,8 @@ Commits staged changes.
 
 ```ts
 // Stage and commit changes
-await git.add('sandbox/repo', ['README.md'])
-await git.commit('sandbox/repo', 'Update documentation', 'John Doe', 'john@example.com')
+await git.add('workspace/repo', ['README.md'])
+await git.commit('workspace/repo', 'Update documentation', 'John Doe', 'john@example.com')
 ```
 
 ---
@@ -206,12 +206,12 @@ Pulls changes from the remote repository.
 
 ```ts
 // Pull from a public repository
-await git.pull('sandbox/repo')
+await git.pull('workspace/repo')
 ```
 
 ```ts
 // Pull from a private repository
-await git.pull('sandbox/repo', 'user', 'token')
+await git.pull('workspace/repo', 'user', 'token')
 ```
 
 ---
@@ -242,12 +242,12 @@ Push local changes to the remote repository.
 
 ```ts
 // Push to a public repository
-await git.push('sandbox/repo')
+await git.push('workspace/repo')
 ```
 
 ```ts
 // Push to a private repository
-await git.push('sandbox/repo', 'user', 'token')
+await git.push('workspace/repo', 'user', 'token')
 ```
 
 ---
@@ -277,7 +277,7 @@ Gets the current status of the Git repository.
 **Example:**
 
 ```ts
-const status = await sandbox.git.status('sandbox/repo')
+const status = await sandbox.git.status('workspace/repo')
 console.log(`Current branch: ${status.currentBranch}`)
 console.log(`Commits ahead: ${status.ahead}`)
 console.log(`Commits behind: ${status.behind}`)

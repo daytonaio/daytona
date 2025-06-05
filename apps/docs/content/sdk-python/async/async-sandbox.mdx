@@ -416,30 +416,34 @@ Target regions for Sandboxes
 
 **Enum Members**: - `EU` ("eu") - `US` ("us") - `ASIA` ("asia")
 
-## SandboxResources
+## Resources
 
 ```python
 @dataclass
-class SandboxResources()
+class Resources()
 ```
 
-Resources allocated to a Sandbox.
+Resources configuration for Sandbox.
 
 **Attributes**:
 
-- `cpu` _str_ - Nu, "1", "2").
-- `gpu` _Optional[str]_ - Number of GPUs allocated mber of CPU cores allocated (e.g.(e.g., "1") or None if no GPU.
-- `memory` _str_ - Amount of memory allocated with unit (e.g., "2Gi", "4Gi").
-- `disk` _str_ - Amount of disk space allocated with unit (e.g., "10Gi", "20Gi").
+- `cpu` _Optional[int]_ - Number of CPU cores to allocate.
+- `memory` _Optional[int]_ - Amount of memory in GiB to allocate.
+- `disk` _Optional[int]_ - Amount of disk space in GiB to allocate.
+- `gpu` _Optional[int]_ - Number of GPUs to allocate.
 
 **Example**:
 
 ```python
-resources = SandboxResources(
-    cpu="2",
-    gpu="1",
-    memory="4Gi",
-    disk="20Gi"
+resources = Resources(
+    cpu=2,
+    memory=4,  # 4GiB RAM
+    disk=20,   # 20GiB disk
+    gpu=1
+)
+params = CreateSandboxParams(
+    language="python",
+    resources=resources
 )
 ```
 
@@ -454,22 +458,22 @@ Structured information about a Sandbox.
 **Attributes**:
 
 - `id` _str_ - Unique identifier for the Sandbox.
-- `image` _Optional[str]_ - Docker image used for the Sandbox.
+- `snapshot` _Optional[str]_ - Daytona snapshot used to create the Sandbox.
 - `user` _str_ - OS user running in the Sandbox.
 - `env` _Dict[str, str]_ - Environment variables set in the Sandbox.
 - `labels` _Dict[str, str]_ - Custom labels attached to the Sandbox.
 - `public` _bool_ - Whether the Sandbox is publicly accessible.
 - `target` _str_ - Target environment where the Sandbox runs.
-- `resources` _SandboxResources_ - Resource allocations for the Sandbox.
+- `resources` _Resources_ - Resource allocations for the Sandbox.
 - `state` _str_ - Current state of the Sandbox (e.g., "started", "stopped").
 - `error_reason` _Optional[str]_ - Error message if Sandbox is in error state.
-- `snapshot_state` _Optional[str]_ - Current state of Sandbox snapshot.
-- `snapshot_created_at` _Optional[str]_ - When the snapshot was created.
+- `backup_state` _Optional[str]_ - Current state of Sandbox backup.
+- `backup_created_at` _Optional[str]_ - When the backup was created.
 - `node_domain` _str_ - Domain name of the Sandbox node.
 - `region` _str_ - Region of the Sandbox node.
 - `class_name` _str_ - Sandbox class.
 - `updated_at` _str_ - When the Sandbox was last updated.
-- `last_snapshot` _Optional[str]_ - When the last snapshot was created.
+- `last_backup` _Optional[str]_ - When the last backup was created.
 - `auto_stop_interval` _int_ - Auto-stop interval in minutes.
 - `auto_archive_interval` _int_ - Auto-archive interval in minutes.
 

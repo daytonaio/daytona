@@ -5,7 +5,7 @@ import base64
 import re
 from typing import Optional
 
-from daytona_sdk.common.process import CodeRunParams
+from ..common.process import CodeRunParams
 
 
 class SandboxPythonCodeToolbox:

@@ -53,10 +53,10 @@ permissions.
 
 ```python
 # Create a directory with standard permissions
-sandbox.fs.create_folder("sandbox/data", "755")
+sandbox.fs.create_folder("workspace/data", "755")
 
 # Create a private directory
-sandbox.fs.create_folder("sandbox/secrets", "700")
+sandbox.fs.create_folder("workspace/secrets", "700")
 ```
 
 #### FileSystem.delete_file
@@ -76,7 +76,7 @@ Deletes a file from the Sandbox.
 
 ```python
 # Delete a file
-sandbox.fs.delete_file("sandbox/data/old_file.txt")
+sandbox.fs.delete_file("workspace/data/old_file.txt")
 ```
 
 #### FileSystem.download_file
@@ -104,12 +104,12 @@ It can only be used for smaller files.
 
 ```python
 # Download and save a file locally
-content = sandbox.fs.download_file("sandbox/data/file.txt")
+content = sandbox.fs.download_file("workspace/data/file.txt")
 with open("local_copy.txt", "wb") as f:
     f.write(content)
 
 # Download and process text content
-content = sandbox.fs.download_file("sandbox/data/config.json")
+content = sandbox.fs.download_file("workspace/data/config.json")
 config = json.loads(content.decode('utf-8'))
 ```
 
@@ -169,7 +169,7 @@ the grep command.
 
 ```python
 # Search for TODOs in Python files
-matches = sandbox.fs.find_files("sandbox/src", "TODO:")
+matches = sandbox.fs.find_files("workspace/src", "TODO:")
 for match in matches:
     print(f"{match.file}:{match.line}: {match.content.strip()}")
 ```
@@ -205,13 +205,13 @@ size, permissions, and timestamps.
 
 ```python
 # Get file metadata
-info = sandbox.fs.get_file_info("sandbox/data/file.txt")
+info = sandbox.fs.get_file_info("workspace/data/file.txt")
 print(f"Size: {info.size} bytes")
 print(f"Modified: {info.mod_time}")
 print(f"Mode: {info.mode}")
 
 # Check if path is a directory
-info = sandbox.fs.get_file_info("sandbox/data")
+info = sandbox.fs.get_file_info("workspace/data")
 if info.is_dir:
     print("Path is a directory")
 ```
@@ -239,7 +239,7 @@ Lists files and directories in a given path and returns their information, simil
 
 ```python
 # List directory contents
-files = sandbox.fs.list_files("sandbox/data")
+files = sandbox.fs.list_files("workspace/data")
 
 # Print files and their sizes
 for file in files:
@@ -272,20 +272,20 @@ Moves or renames a file or directory. The parent directory of the destination mu
 ```python
 # Rename a file
 sandbox.fs.move_files(
-    "sandbox/data/old_name.txt",
-    "sandbox/data/new_name.txt"
+    "workspace/data/old_name.txt",
+    "workspace/data/new_name.txt"
 )
 
 # Move a file to a different directory
 sandbox.fs.move_files(
-    "sandbox/data/file.txt",
-    "sandbox/archive/file.txt"
+    "workspace/data/file.txt",
+    "workspace/archive/file.txt"
 )
 
 # Move a directory
 sandbox.fs.move_files(
-    "sandbox/old_dir",
-    "sandbox/new_dir"
+    "workspace/old_dir",
+    "workspace/new_dir"
 )
 ```
 
@@ -320,7 +320,7 @@ Performs search and replace operations across multiple files.
 ```python
 # Replace in specific files
 results = sandbox.fs.replace_in_files(
-    files=["sandbox/src/file1.py", "sandbox/src/file2.py"],
+    files=["workspace/src/file1.py", "workspace/src/file2.py"],
     pattern="old_function",
     new_value="new_function"
 )
@@ -359,12 +359,12 @@ specified pattern. The pattern can be a simple string or a glob pattern.
 
 ```python
 # Find all Python files
-result = sandbox.fs.search_files("sandbox", "*.py")
+result = sandbox.fs.search_files("workspace", "*.py")
 for file in result.files:
     print(file)
 
 # Find files with specific prefix
-result = sandbox.fs.search_files("sandbox/data", "test_*")
+result = sandbox.fs.search_files("workspace/data", "test_*")
 print(f"Found {len(result.files)} test files")
 ```
 
@@ -395,13 +395,13 @@ to leave that attribute unchanged.
 ```python
 # Make a file executable
 sandbox.fs.set_file_permissions(
-    path="sandbox/scripts/run.sh",
+    path="workspace/scripts/run.sh",
     mode="755"  # rwxr-xr-x
 )
 
 # Change file owner
 sandbox.fs.set_file_permissions(
-    path="sandbox/data/file.txt",
+    path="workspace/data/file.txt",
     owner="daytona",
     group="daytona"
 )
@@ -496,7 +496,7 @@ files = [
         destination="/tmp/file1.txt"
     ),
     FileUpload(
-        source="sandbox/data/file2.txt",
+        source="workspace/data/file2.txt",
         destination="/tmp/file2.txt"
     ),
     FileUpload(
