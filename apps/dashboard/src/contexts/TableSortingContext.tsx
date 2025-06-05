@@ -4,11 +4,12 @@
  */
 
 import { createContext } from 'react'
+import { TableSortingStates } from '@/types/TableSortingStates'
 import { SortingState } from '@tanstack/react-table'
 
 export interface ITableSortingContext {
-  sortingStates: SortingState
-  updateSortingState: (viewId: string, field: string, direction: 'asc' | 'desc') => void
+  sortingStates: TableSortingStates
+  updateSortingState: (tableId: string, sortingState: SortingState) => void
 }
 
 export const TableSortingContext = createContext<ITableSortingContext | undefined>(undefined)

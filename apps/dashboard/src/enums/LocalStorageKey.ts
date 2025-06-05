@@ -6,5 +6,5 @@
 export enum LocalStorageKey {
   SelectedOrganizationId = 'SelectedOrganizationId',
   SkipOnboardingPrefix = 'SkipOnboarding_',
-  DashboardSortingStorage = 'dashboard-sorting-storage',
+  TableSorting = 'TableSorting',
 }

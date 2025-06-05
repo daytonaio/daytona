@@ -13,13 +13,6 @@ import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { TableSortingProvider } from '@/providers/TableSortingProvider'
 
-type SortingState = {
-  [key: string]: {
-    field: string
-    direction: 'asc' | 'desc'
-  }
-}
-
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)

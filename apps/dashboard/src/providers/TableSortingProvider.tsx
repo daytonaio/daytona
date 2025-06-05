@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { TableSortingContext } from '@/contexts/TableSortingContext'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
+import { TableSortingStates } from '@/types/TableSortingStates'
 import { SortingState } from '@tanstack/react-table'
 
 type Props = {
@@ -13,21 +14,21 @@ type Props = {
 }
 
 export function TableSortingProvider({ children }: Props) {
-  const [sortingStates, setSortingStates] = useState<SortingState>(() => {
+  const [sortingStates, setSortingStates] = useState<TableSortingStates>(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(LocalStorageKey.DashboardSortingStorage)
+      const stored = localStorage.getItem(LocalStorageKey.TableSorting)
       return stored ? JSON.parse(stored) : {}
     }
     return {}
   })
 
-  const updateSortingState = (viewId: string, field: string, direction: 'asc' | 'desc') => {
+  const updateSortingState = (tableId: string, sortingState: SortingState) => {
     const newState = {
       ...sortingStates,
-      [viewId]: { field, direction },
+      [tableId]: sortingState,
     }
     setSortingStates(newState)
-    localStorage.setItem(LocalStorageKey.DashboardSortingStorage, JSON.stringify(newState))
+    localStorage.setItem(LocalStorageKey.TableSorting, JSON.stringify(newState))
   }
 
   return (
