@@ -186,6 +186,9 @@ func (s *SessionController) getSessionCommand(sessionId, cmdId string) (*Command
 	_, exitCodeFilePath := command.LogFilePath(session.Dir(s.configDir))
 	exitCode, err := os.ReadFile(exitCodeFilePath)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return command, nil
+		}
 		return nil, errors.New("failed to read exit code file")
 	}
 
