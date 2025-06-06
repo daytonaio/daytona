@@ -21,6 +21,7 @@ import { NodeService } from './workspace/services/node.service'
 import { NodeRegion } from './workspace/enums/node-region.enum'
 import { WorkspaceClass } from './workspace/enums/workspace-class.enum'
 import { getOpenApiConfig } from './openapi.config'
+import { SchedulerRegistry } from '@nestjs/schedule'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -111,6 +112,15 @@ async function bootstrap() {
         class: WorkspaceClass.SMALL,
         domain: 'localtest.me:3003',
       })
+    }
+  }
+
+  // Stop all cron jobs if maintenance mode is enabled
+  if (configService.get('maintananceMode')) {
+    await app.init()
+    const schedulerRegistry = app.get(SchedulerRegistry)
+    for (const cronName of schedulerRegistry.getCronJobs().keys()) {
+      schedulerRegistry.deleteCronJob(cronName)
     }
   }
 

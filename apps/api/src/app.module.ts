@@ -28,6 +28,7 @@ import { TypedConfigModule } from './config/typed-config.module'
 import { NotificationModule } from './notification/notification.module'
 import { ObjectStorageModule } from './object-storage/object-storage.module'
 import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
+import { MaintenanceMiddleware } from './common/middleware/maintenance.middleware'
 
 @Module({
   imports: [
@@ -114,5 +115,6 @@ import { CustomNamingStrategy } from './common/utils/naming-strategy.util'
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer.apply(VersionHeaderMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
+    consumer.apply(MaintenanceMiddleware).forRoutes({ path: '*', method: RequestMethod.ALL })
   }
 }

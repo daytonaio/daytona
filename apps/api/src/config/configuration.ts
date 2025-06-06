@@ -69,6 +69,7 @@ const configuration = {
   },
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
   maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
+  maintananceMode: process.env.MAINTENANCE_MODE === 'true',
 }
 
 export { configuration }
