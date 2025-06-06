@@ -472,7 +472,7 @@ export class Daytona {
 
         await processStreamingResponse(
           () => this.sandboxApi.getBuildLogs(sandboxInstance.id, undefined, true, { responseType: 'stream' }),
-          options.onSnapshotCreateLogs,
+          (chunk) => options.onSnapshotCreateLogs?.(chunk.trimEnd()),
           async () => {
             sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
             return sandboxInstance.state !== undefined && terminalStates.includes(sandboxInstance.state)

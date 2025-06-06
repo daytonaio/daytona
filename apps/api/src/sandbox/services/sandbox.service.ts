@@ -315,7 +315,7 @@ export class SandboxService {
     }
 
     if (createSandboxDto.autoArchiveInterval !== undefined) {
-      warmPoolSandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
+      sandbox.autoArchiveInterval = this.resolveAutoArchiveInterval(createSandboxDto.autoArchiveInterval)
     }
 
     sandbox.runnerId = runner.id
