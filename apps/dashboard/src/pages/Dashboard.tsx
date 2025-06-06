@@ -11,6 +11,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
+import { TableSortingProvider } from '@/providers/TableSortingProvider'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -28,13 +29,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="relative w-full">
       <SidebarProvider>
-        <Sidebar />
-        <SidebarTrigger className="md:hidden" />
-        <div className="w-full">
-          <Outlet />
-        </div>
-        <Toaster />
-        <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        <TableSortingProvider>
+          <Sidebar />
+          <SidebarTrigger className="md:hidden" />
+          <div className="w-full">
+            <Outlet />
+          </div>
+          <Toaster />
+          <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        </TableSortingProvider>
       </SidebarProvider>
     </div>
   )

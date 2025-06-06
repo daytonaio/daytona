@@ -22,6 +22,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
 import { UpdateOrganizationRoleDialog } from '@/components/OrganizationRoles/UpdateOrganizationRoleDialog'
+import { useTableSorting } from '@/hooks/useTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
 
@@ -45,7 +46,7 @@ export function OrganizationRoleTable({
   onDeleteRole,
   loadingRoleAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = useTableSorting('organization-members')
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)
