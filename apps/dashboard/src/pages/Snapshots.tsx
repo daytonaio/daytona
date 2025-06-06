@@ -32,8 +32,7 @@ import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
-const IMAGE_NAME_REGEX =
-  /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
+const IMAGE_NAME_REGEX = /^[a-zA-Z0-9.\-:]+(\/[a-zA-Z0-9.\-:]+)*$/
 
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
