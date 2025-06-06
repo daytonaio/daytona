@@ -1332,7 +1332,7 @@ func (x *RemoveImageResponse) GetMessage() string {
 	return ""
 }
 
-type GetBuildLogsRequest struct {
+type BuildLogsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ImageRef      string                 `protobuf:"bytes,1,opt,name=image_ref,json=imageRef,proto3" json:"image_ref,omitempty"`
 	Follow        bool                   `protobuf:"varint,2,opt,name=follow,proto3" json:"follow,omitempty"`
@@ -1340,20 +1340,20 @@ type GetBuildLogsRequest struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetBuildLogsRequest) Reset() {
-	*x = GetBuildLogsRequest{}
+func (x *BuildLogsRequest) Reset() {
+	*x = BuildLogsRequest{}
 	mi := &file_apps_proto_runner_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetBuildLogsRequest) String() string {
+func (x *BuildLogsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetBuildLogsRequest) ProtoMessage() {}
+func (*BuildLogsRequest) ProtoMessage() {}
 
-func (x *GetBuildLogsRequest) ProtoReflect() protoreflect.Message {
+func (x *BuildLogsRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_apps_proto_runner_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1365,46 +1365,46 @@ func (x *GetBuildLogsRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetBuildLogsRequest.ProtoReflect.Descriptor instead.
-func (*GetBuildLogsRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use BuildLogsRequest.ProtoReflect.Descriptor instead.
+func (*BuildLogsRequest) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{25}
 }
 
-func (x *GetBuildLogsRequest) GetImageRef() string {
+func (x *BuildLogsRequest) GetImageRef() string {
 	if x != nil {
 		return x.ImageRef
 	}
 	return ""
 }
 
-func (x *GetBuildLogsRequest) GetFollow() bool {
+func (x *BuildLogsRequest) GetFollow() bool {
 	if x != nil {
 		return x.Follow
 	}
 	return false
 }
 
-type LogLine struct {
+type BuildLogsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
+	Data          []byte                 `protobuf:"bytes,1,opt,name=data,proto3" json:"data,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *LogLine) Reset() {
-	*x = LogLine{}
+func (x *BuildLogsResponse) Reset() {
+	*x = BuildLogsResponse{}
 	mi := &file_apps_proto_runner_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *LogLine) String() string {
+func (x *BuildLogsResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*LogLine) ProtoMessage() {}
+func (*BuildLogsResponse) ProtoMessage() {}
 
-func (x *LogLine) ProtoReflect() protoreflect.Message {
+func (x *BuildLogsResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_apps_proto_runner_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -1416,16 +1416,16 @@ func (x *LogLine) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use LogLine.ProtoReflect.Descriptor instead.
-func (*LogLine) Descriptor() ([]byte, []int) {
+// Deprecated: Use BuildLogsResponse.ProtoReflect.Descriptor instead.
+func (*BuildLogsResponse) Descriptor() ([]byte, []int) {
 	return file_apps_proto_runner_proto_rawDescGZIP(), []int{26}
 }
 
-func (x *LogLine) GetContent() string {
+func (x *BuildLogsResponse) GetData() []byte {
 	if x != nil {
-		return x.Content
+		return x.Data
 	}
-	return ""
+	return nil
 }
 
 // Add Volume message for CreateSandboxRequest
@@ -1585,16 +1585,16 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\x05image\x18\x01 \x01(\tR\x05image\x12\x14\n" +
 	"\x05force\x18\x02 \x01(\bR\x05force\"/\n" +
 	"\x13RemoveImageResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage\"J\n" +
-	"\x13GetBuildLogsRequest\x12\x1b\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"G\n" +
+	"\x10BuildLogsRequest\x12\x1b\n" +
 	"\timage_ref\x18\x01 \x01(\tR\bimageRef\x12\x16\n" +
-	"\x06follow\x18\x02 \x01(\bR\x06follow\"#\n" +
-	"\aLogLine\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent\"D\n" +
+	"\x06follow\x18\x02 \x01(\bR\x06follow\"'\n" +
+	"\x11BuildLogsResponse\x12\x12\n" +
+	"\x04data\x18\x01 \x01(\fR\x04data\"D\n" +
 	"\x06Volume\x12\x1b\n" +
 	"\tvolume_id\x18\x01 \x01(\tR\bvolumeId\x12\x1d\n" +
 	"\n" +
-	"mount_path\x18\x02 \x01(\tR\tmountPath2\xfe\a\n" +
+	"mount_path\x18\x02 \x01(\tR\tmountPath2\x82\b\n" +
 	"\x06Runner\x12H\n" +
 	"\vHealthCheck\x12\x1a.runner.HealthCheckRequest\x1a\x1b.runner.HealthCheckResponse\"\x00\x12N\n" +
 	"\rCreateSandbox\x12\x1c.runner.CreateSandboxRequest\x1a\x1d.runner.CreateSandboxResponse\"\x00\x12Q\n" +
@@ -1608,8 +1608,8 @@ const file_apps_proto_runner_proto_rawDesc = "" +
 	"\n" +
 	"BuildImage\x12\x19.runner.BuildImageRequest\x1a\x1a.runner.BuildImageResponse\"\x00\x12H\n" +
 	"\vImageExists\x12\x1a.runner.ImageExistsRequest\x1a\x1b.runner.ImageExistsResponse\"\x00\x12H\n" +
-	"\vRemoveImage\x12\x1a.runner.RemoveImageRequest\x1a\x1b.runner.RemoveImageResponse\"\x00\x12@\n" +
-	"\fGetBuildLogs\x12\x1b.runner.GetBuildLogsRequest\x1a\x0f.runner.LogLine\"\x000\x01B#Z!github.com/daytonaio/runner/protob\x06proto3"
+	"\vRemoveImage\x12\x1a.runner.RemoveImageRequest\x1a\x1b.runner.RemoveImageResponse\"\x00\x12D\n" +
+	"\tBuildLogs\x12\x18.runner.BuildLogsRequest\x1a\x19.runner.BuildLogsResponse\"\x000\x01B#Z!github.com/daytonaio/runner/protob\x06proto3"
 
 var (
 	file_apps_proto_runner_proto_rawDescOnce sync.Once
@@ -1650,8 +1650,8 @@ var file_apps_proto_runner_proto_goTypes = []any{
 	(*ImageExistsResponse)(nil),            // 22: runner.ImageExistsResponse
 	(*RemoveImageRequest)(nil),             // 23: runner.RemoveImageRequest
 	(*RemoveImageResponse)(nil),            // 24: runner.RemoveImageResponse
-	(*GetBuildLogsRequest)(nil),            // 25: runner.GetBuildLogsRequest
-	(*LogLine)(nil),                        // 26: runner.LogLine
+	(*BuildLogsRequest)(nil),               // 25: runner.BuildLogsRequest
+	(*BuildLogsResponse)(nil),              // 26: runner.BuildLogsResponse
 	(*Volume)(nil),                         // 27: runner.Volume
 	nil,                                    // 28: runner.CreateSandboxRequest.EnvEntry
 }
@@ -1674,7 +1674,7 @@ var file_apps_proto_runner_proto_depIdxs = []int32{
 	19, // 15: runner.Runner.BuildImage:input_type -> runner.BuildImageRequest
 	21, // 16: runner.Runner.ImageExists:input_type -> runner.ImageExistsRequest
 	23, // 17: runner.Runner.RemoveImage:input_type -> runner.RemoveImageRequest
-	25, // 18: runner.Runner.GetBuildLogs:input_type -> runner.GetBuildLogsRequest
+	25, // 18: runner.Runner.BuildLogs:input_type -> runner.BuildLogsRequest
 	1,  // 19: runner.Runner.HealthCheck:output_type -> runner.HealthCheckResponse
 	3,  // 20: runner.Runner.CreateSandbox:output_type -> runner.CreateSandboxResponse
 	5,  // 21: runner.Runner.DestroySandbox:output_type -> runner.DestroySandboxResponse
@@ -1687,7 +1687,7 @@ var file_apps_proto_runner_proto_depIdxs = []int32{
 	20, // 28: runner.Runner.BuildImage:output_type -> runner.BuildImageResponse
 	22, // 29: runner.Runner.ImageExists:output_type -> runner.ImageExistsResponse
 	24, // 30: runner.Runner.RemoveImage:output_type -> runner.RemoveImageResponse
-	26, // 31: runner.Runner.GetBuildLogs:output_type -> runner.LogLine
+	26, // 31: runner.Runner.BuildLogs:output_type -> runner.BuildLogsResponse
 	19, // [19:32] is the sub-list for method output_type
 	6,  // [6:19] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name

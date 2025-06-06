@@ -4,40 +4,66 @@
  */
 
 import { Logger } from '@nestjs/common'
-import { createProxyMiddleware, fixRequestBody, Options } from 'http-proxy-middleware'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'express'
+import { RunnerClient } from '@daytonaio/runner-grpc-client'
 
 export class LogProxy {
   private readonly logger = new Logger(LogProxy.name)
 
   constructor(
-    private readonly targetUrl: string,
+    private readonly runnerClient: RunnerClient, // Changed from targetUrl to runnerClient
     private readonly imageRef: string,
-    private readonly authToken: string,
+    private readonly authToken: string, // Keep for compatibility, but not used in gRPC (handled by client factory)
     private readonly follow: boolean,
     private readonly req: IncomingMessage,
     private readonly res: ServerResponse<IncomingMessage>,
     private readonly next: NextFunction,
   ) {}
 
-  create() {
-    const proxyOptions: Options = {
-      target: this.targetUrl,
-      secure: false,
-      changeOrigin: true,
-      autoRewrite: true,
-      pathRewrite: () => `/images/logs?imageRef=${this.imageRef}&follow=${this.follow}`,
-      on: {
-        proxyReq: (proxyReq: any, req: any) => {
-          proxyReq.setHeader('Authorization', `Bearer ${this.authToken}`)
-          proxyReq.setHeader('Accept', 'application/octet-stream')
-          fixRequestBody(proxyReq, req)
-        },
-      },
-      proxyTimeout: 5 * 60 * 1000,
-    }
+  async create() {
+    try {
+      // Set response headers
+      this.res.setHeader('Content-Type', 'application/octet-stream')
 
-    return createProxyMiddleware(proxyOptions)(this.req, this.res, this.next)
+      // Create the gRPC request
+      const request = {
+        image_ref: this.imageRef,
+        follow: this.follow,
+      }
+
+      // Get the stream from gRPC client
+      const stream = await this.runnerClient.buildLogs(request)
+
+      // Handle AsyncIterable stream
+      if (stream && typeof stream[Symbol.asyncIterator] === 'function') {
+        try {
+          for await (const response of stream) {
+            if (response && response.data) {
+              this.res.write(response.data)
+            }
+          }
+          this.res.end()
+        } catch (streamError) {
+          this.logger.error(`Error streaming logs: ${streamError.message}`)
+          if (!this.res.headersSent) {
+            this.res.statusCode = 500
+          }
+          this.res.end()
+        }
+      } else {
+        // Fallback for single response (non-streaming case)
+        if (stream && (stream as any).data) {
+          this.res.write((stream as any).data)
+        }
+        this.res.end()
+      }
+    } catch (error) {
+      this.logger.error(`Error in LogProxy: ${error.message}`)
+      if (!this.res.headersSent) {
+        this.res.statusCode = 500
+      }
+      this.res.end()
+    }
   }
 }

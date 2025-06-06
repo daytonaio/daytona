@@ -55,7 +55,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetImageGeneralStatusDto } from '../dto/update-image.dto'
 import { BuildImageDto } from '../dto/build-image.dto'
 import { LogProxy } from '../proxy/log-proxy'
-
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 @ApiTags('images')
 @Controller('images')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
@@ -68,6 +68,7 @@ export class ImageController {
   constructor(
     private readonly imageService: ImageService,
     private readonly nodeService: NodeService,
+    private readonly runnerClientFactory: RunnerClientFactory,
   ) {}
 
   @Post()
@@ -299,7 +300,9 @@ export class ImageController {
       throw new NotFoundException(`Build node for image ${imageId} not found`)
     }
 
-    const logProxy = new LogProxy(node.apiUrl, image.id, node.apiKey, follow === true, req, res, next)
+    // Create gRPC client instead of using targetUrl
+    const runnerClient = this.runnerClientFactory.create(node)
+    const logProxy = new LogProxy(runnerClient, image.id, node.apiKey, follow === true, req, res, next)
     return logProxy.create()
   }
 }

@@ -58,7 +58,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
-
+import { RunnerClientFactory } from '../runner-api/runnerApi'
 @ApiTags('workspace')
 @Controller('workspace')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
@@ -72,6 +72,7 @@ export class WorkspaceController {
     @InjectRedis() private readonly redis: Redis,
     private readonly nodeService: NodeService,
     private readonly workspaceService: WorkspaceService,
+    private readonly runnerClientFactory: RunnerClientFactory,
   ) {}
 
   @Get()
@@ -444,8 +445,10 @@ export class WorkspaceController {
       throw new NotFoundException(`Node for workspace ${workspaceId} not found`)
     }
 
+    // Create gRPC client instead of using targetUrl
+    const runnerClient = this.runnerClientFactory.create(node)
     const logProxy = new LogProxy(
-      node.apiUrl,
+      runnerClient,
       workspace.buildInfo.imageRef.split(':')[0],
       node.apiKey,
       follow === true,

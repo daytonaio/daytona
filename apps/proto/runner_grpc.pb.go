@@ -31,7 +31,7 @@ const (
 	Runner_BuildImage_FullMethodName             = "/runner.Runner/BuildImage"
 	Runner_ImageExists_FullMethodName            = "/runner.Runner/ImageExists"
 	Runner_RemoveImage_FullMethodName            = "/runner.Runner/RemoveImage"
-	Runner_GetBuildLogs_FullMethodName           = "/runner.Runner/GetBuildLogs"
+	Runner_BuildLogs_FullMethodName              = "/runner.Runner/BuildLogs"
 )
 
 // RunnerClient is the client API for Runner service.
@@ -53,7 +53,7 @@ type RunnerClient interface {
 	BuildImage(ctx context.Context, in *BuildImageRequest, opts ...grpc.CallOption) (*BuildImageResponse, error)
 	ImageExists(ctx context.Context, in *ImageExistsRequest, opts ...grpc.CallOption) (*ImageExistsResponse, error)
 	RemoveImage(ctx context.Context, in *RemoveImageRequest, opts ...grpc.CallOption) (*RemoveImageResponse, error)
-	GetBuildLogs(ctx context.Context, in *GetBuildLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogLine], error)
+	BuildLogs(ctx context.Context, in *BuildLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BuildLogsResponse], error)
 }
 
 type runnerClient struct {
@@ -184,13 +184,13 @@ func (c *runnerClient) RemoveImage(ctx context.Context, in *RemoveImageRequest, 
 	return out, nil
 }
 
-func (c *runnerClient) GetBuildLogs(ctx context.Context, in *GetBuildLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LogLine], error) {
+func (c *runnerClient) BuildLogs(ctx context.Context, in *BuildLogsRequest, opts ...grpc.CallOption) (grpc.ServerStreamingClient[BuildLogsResponse], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], Runner_GetBuildLogs_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Runner_ServiceDesc.Streams[0], Runner_BuildLogs_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &grpc.GenericClientStream[GetBuildLogsRequest, LogLine]{ClientStream: stream}
+	x := &grpc.GenericClientStream[BuildLogsRequest, BuildLogsResponse]{ClientStream: stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -201,7 +201,7 @@ func (c *runnerClient) GetBuildLogs(ctx context.Context, in *GetBuildLogsRequest
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Runner_GetBuildLogsClient = grpc.ServerStreamingClient[LogLine]
+type Runner_BuildLogsClient = grpc.ServerStreamingClient[BuildLogsResponse]
 
 // RunnerServer is the server API for Runner service.
 // All implementations must embed UnimplementedRunnerServer
@@ -222,7 +222,7 @@ type RunnerServer interface {
 	BuildImage(context.Context, *BuildImageRequest) (*BuildImageResponse, error)
 	ImageExists(context.Context, *ImageExistsRequest) (*ImageExistsResponse, error)
 	RemoveImage(context.Context, *RemoveImageRequest) (*RemoveImageResponse, error)
-	GetBuildLogs(*GetBuildLogsRequest, grpc.ServerStreamingServer[LogLine]) error
+	BuildLogs(*BuildLogsRequest, grpc.ServerStreamingServer[BuildLogsResponse]) error
 	mustEmbedUnimplementedRunnerServer()
 }
 
@@ -269,8 +269,8 @@ func (UnimplementedRunnerServer) ImageExists(context.Context, *ImageExistsReques
 func (UnimplementedRunnerServer) RemoveImage(context.Context, *RemoveImageRequest) (*RemoveImageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemoveImage not implemented")
 }
-func (UnimplementedRunnerServer) GetBuildLogs(*GetBuildLogsRequest, grpc.ServerStreamingServer[LogLine]) error {
-	return status.Errorf(codes.Unimplemented, "method GetBuildLogs not implemented")
+func (UnimplementedRunnerServer) BuildLogs(*BuildLogsRequest, grpc.ServerStreamingServer[BuildLogsResponse]) error {
+	return status.Errorf(codes.Unimplemented, "method BuildLogs not implemented")
 }
 func (UnimplementedRunnerServer) mustEmbedUnimplementedRunnerServer() {}
 func (UnimplementedRunnerServer) testEmbeddedByValue()                {}
@@ -509,16 +509,16 @@ func _Runner_RemoveImage_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Runner_GetBuildLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
-	m := new(GetBuildLogsRequest)
+func _Runner_BuildLogs_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(BuildLogsRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(RunnerServer).GetBuildLogs(m, &grpc.GenericServerStream[GetBuildLogsRequest, LogLine]{ServerStream: stream})
+	return srv.(RunnerServer).BuildLogs(m, &grpc.GenericServerStream[BuildLogsRequest, BuildLogsResponse]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Runner_GetBuildLogsServer = grpc.ServerStreamingServer[LogLine]
+type Runner_BuildLogsServer = grpc.ServerStreamingServer[BuildLogsResponse]
 
 // Runner_ServiceDesc is the grpc.ServiceDesc for Runner service.
 // It's only intended for direct use with grpc.RegisterService,
@@ -578,8 +578,8 @@ var Runner_ServiceDesc = grpc.ServiceDesc{
 	},
 	Streams: []grpc.StreamDesc{
 		{
-			StreamName:    "GetBuildLogs",
-			Handler:       _Runner_GetBuildLogs_Handler,
+			StreamName:    "BuildLogs",
+			Handler:       _Runner_BuildLogs_Handler,
 			ServerStreams: true,
 		},
 	},

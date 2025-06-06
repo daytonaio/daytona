@@ -22,7 +22,7 @@ service Runner {
   rpc BuildImage(BuildImageRequest) returns (BuildImageResponse) {}
   rpc ImageExists(ImageExistsRequest) returns (ImageExistsResponse) {}
   rpc RemoveImage(RemoveImageRequest) returns (RemoveImageResponse) {}
-  rpc GetBuildLogs(GetBuildLogsRequest) returns (stream LogLine) {}
+  rpc BuildLogs(BuildLogsRequest) returns (stream BuildLogsResponse) {}
 }
 
 // Health messages
@@ -153,13 +153,13 @@ message RemoveImageResponse {
   string message = 1;
 }
 
-message GetBuildLogsRequest {
+message BuildLogsRequest {
   string image_ref = 1;
   bool follow = 2;
 }
 
-message LogLine {
-  string content = 1;
+message BuildLogsResponse {
+  bytes data = 1;
 }
 
 // Add Volume message for CreateSandboxRequest

@@ -12361,7 +12361,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     ts-jest: "npm:^29.1.0"
     ts-node: "npm:^10.9.1"
-    ts-proto: "npm:^2.7.0"
+    ts-proto: "npm:^2.7.2"
     tslib: "npm:^2.8.1"
     typeorm: "npm:^0.3.20"
     typescript: "npm:~5.7.2"
@@ -24988,12 +24988,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-poet@npm:^6.7.0":
-  version: 6.11.0
-  resolution: "ts-poet@npm:6.11.0"
+"ts-poet@npm:^6.12.0":
+  version: 6.12.0
+  resolution: "ts-poet@npm:6.12.0"
   dependencies:
     dprint-node: "npm:^1.0.8"
-  checksum: 10c0/42b7bcb805f4cb66b96c3b8fd9b8c9fb1216c968f5d47e4d29988f694448d00c497e51d2314508af90308a9714d6eb53d8749b1d5539e7a72f7aaf989df21abb
+  checksum: 10c0/605ac770055259b618ba657b88995f7851d8a6106d9c335e71c8442be51a9b8a87c501aa7ab4babb43700a32ff47dc1cd877f78892c15166ded87c311c878735
   languageName: node
   linkType: hard
 
@@ -25006,17 +25006,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-proto@npm:^2.7.0":
-  version: 2.7.0
-  resolution: "ts-proto@npm:2.7.0"
+"ts-proto@npm:^2.7.2":
+  version: 2.7.2
+  resolution: "ts-proto@npm:2.7.2"
   dependencies:
     "@bufbuild/protobuf": "npm:^2.0.0"
     case-anything: "npm:^2.1.13"
-    ts-poet: "npm:^6.7.0"
+    ts-poet: "npm:^6.12.0"
     ts-proto-descriptors: "npm:2.0.0"
   bin:
     protoc-gen-ts_proto: protoc-gen-ts_proto
-  checksum: 10c0/5054335ea0cb6dc386de510bfd12d17593e2777593855b14802d83718a3872758b50dd2fbe517bc198847e18e2308d49689031136829939b267a35cb03b25d87
+  checksum: 10c0/1a236fb77ce37a6f8c36ef684f1053f1edeca7ba3158a1357539e3dae93b2cbcf897b9c581d1eb4f369f6d5ed0799f86971fdfd71443b2fba71c797861f3a4a2
   languageName: node
   linkType: hard
 
