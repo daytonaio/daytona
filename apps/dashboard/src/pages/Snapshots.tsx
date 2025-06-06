@@ -32,6 +32,9 @@ import { Label } from '@/components/ui/label'
 import { handleApiError } from '@/lib/error-handling'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 
+const IMAGE_NAME_REGEX =
+  /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
+
 const Snapshots: React.FC = () => {
   const { notificationSocket } = useNotificationSocket()
 
@@ -181,9 +184,8 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in snapshot names'
     }
 
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[.:_-][a-zA-Z0-9]+)*$/
-    if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
+    if (!IMAGE_NAME_REGEX.test(name)) {
+      return 'Invalid snapshot name format. May contain letters, digits, dots, colons, slashes and dashes'
     }
 
     return null
@@ -194,20 +196,16 @@ const Snapshots: React.FC = () => {
       return 'Spaces are not allowed in image names'
     }
 
-    // Basic format check
-    const snapshotNameRegex =
-      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
-
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Snapshot name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag (e.g., ubuntu:22.04)'
     }
 
     if (name.endsWith(':latest')) {
-      return 'Snapshots with tag ":latest" are not allowed'
+      return 'Images with tag ":latest" are not allowed'
     }
 
-    if (!snapshotNameRegex.test(name)) {
-      return 'Invalid snapshot name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+    if (!IMAGE_NAME_REGEX.test(name)) {
+      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
     }
 
     return null
