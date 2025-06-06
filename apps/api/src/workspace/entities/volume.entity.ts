@@ -38,7 +38,7 @@ export class Volume {
   updatedAt: Date
 
   @Column({ nullable: true })
-  lastUsedAt: Date
+  lastUsedAt?: Date
 
   public getBucketName(): string {
     return `daytona-volume-${this.id}`
