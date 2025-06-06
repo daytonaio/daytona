@@ -55,6 +55,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { Snapshot } from '../entities/snapshot.entity'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -135,23 +136,15 @@ export class SnapshotController {
     @Param('id') snapshotIdOrName: string,
     @AuthContext() authContext: OrganizationAuthContext,
   ): Promise<SnapshotDto> {
+    let snapshot: Snapshot
     try {
       // Try to get by ID
-      const snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
-      return SnapshotDto.fromSnapshot(snapshot)
+      snapshot = await this.snapshotService.getSnapshot(snapshotIdOrName)
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        // If not found by ID, try by name
-        try {
-          const snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
-          return SnapshotDto.fromSnapshot(snapshot)
-        } catch (nameError) {
-          // If not found by name either, throw the original error
-          throw error
-        }
-      }
-      throw error
+      // If not found by ID, try by name
+      snapshot = await this.snapshotService.getSnapshotByName(snapshotIdOrName, authContext.organizationId)
     }
+    return SnapshotDto.fromSnapshot(snapshot)
   }
 
   @Patch(':id/toggle')
@@ -280,7 +273,7 @@ export class SnapshotController {
 
     // Check if the snapshot has build info
     if (!snapshot.buildInfo) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} has no build info`)
+      throw new NotFoundException(`Snapshot ${snapshotId} has no build info`)
     }
 
     // Retry until a runner is assigned or timeout after 30 seconds

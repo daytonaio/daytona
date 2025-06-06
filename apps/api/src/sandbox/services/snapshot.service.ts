@@ -134,7 +134,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     snapshot.enabled = enabled
@@ -147,7 +147,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
     if (snapshot.general) {
       throw new ForbiddenException('You cannot delete a general snapshot')
@@ -189,7 +189,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     return snapshot
@@ -221,7 +221,7 @@ export class SnapshotService {
     })
 
     if (!snapshot) {
-      throw new NotFoundException(`Snapshot with ID ${snapshotId} not found`)
+      throw new NotFoundException(`Snapshot ${snapshotId} not found`)
     }
 
     snapshot.general = general
