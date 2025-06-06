@@ -88,7 +88,7 @@ def main():
             image=dynamic_image,
         ),
         timeout=0,
-        on_snapshot_create_logs=print,
+        on_snapshot_create_logs=lambda chunk: print(chunk, end=""),
     )
 
     try:
