@@ -16,13 +16,14 @@ import { Snapshot } from '../entities/snapshot.entity'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { CreateSnapshotDto } from '../dto/create-snapshot.dto'
 import { BuildInfo } from '../entities/build-info.entity'
-import { CreateBuildInfoDto } from '../dto/create-build-info.dto'
 import { generateBuildInfoHash as generateBuildSnapshotRef } from '../entities/build-info.entity'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { Organization } from '../../organization/entities/organization.entity'
 
+const IMAGE_NAME_REGEX =
+  /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
 @Injectable()
 export class SnapshotService {
   constructor(
@@ -41,11 +42,7 @@ export class SnapshotService {
       return 'Images with tag ":latest" are not allowed'
     }
 
-    // Basic format check
-    const imageNameRegex =
-      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
-
-    if (!imageNameRegex.test(name)) {
+    if (!IMAGE_NAME_REGEX.test(name)) {
       return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
     }
 
@@ -53,9 +50,7 @@ export class SnapshotService {
   }
 
   private validateSnapshotName(name: string): string | null {
-    const snapshotNameRegex = /^[a-zA-Z0-9]+(?:[.:_-][a-zA-Z0-9]+)*$/
-
-    if (!snapshotNameRegex.test(name)) {
+    if (!IMAGE_NAME_REGEX.test(name)) {
       return 'Invalid snapshot name format. May contain letters, digits, dots, colons, and dashes'
     }
 
