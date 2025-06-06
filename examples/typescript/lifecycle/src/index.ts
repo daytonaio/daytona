@@ -26,7 +26,7 @@ async function main() {
 
   const response = await existingSandbox.process.executeCommand(
     'echo "Hello World from exec!"',
-    '/home/daytona',
+    undefined,
     undefined,
     10,
   )

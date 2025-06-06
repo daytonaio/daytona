@@ -48,7 +48,7 @@ def main():
                 disk=3,
             ),
         ),
-        on_logs=lambda chunk: print(chunk, end=""),
+        on_logs=print,
     )
 
     # Create first sandbox using the pre-built image

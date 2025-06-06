@@ -8,6 +8,7 @@ import {
   LineChart,
   PieChart,
   ScatterChart,
+  Image,
 } from '@daytonaio/sdk'
 import * as fs from 'fs'
 import * as path from 'path'
@@ -16,7 +17,14 @@ async function main() {
   const daytona = new Daytona()
 
   //  first, create a sandbox
-  const sandbox = await daytona.create()
+  const sandbox = await daytona.create(
+    {
+      image: Image.debianSlim('3.13').pipInstall('matplotlib'),
+    },
+    {
+      onSnapshotCreateLogs: console.log,
+    },
+  )
 
   try {
     const response = await sandbox.process.codeRun(code)

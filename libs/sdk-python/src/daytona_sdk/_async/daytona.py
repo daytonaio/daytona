@@ -437,7 +437,7 @@ class AsyncDaytona:
             await process_streaming_response(
                 url=url,
                 headers=self.sandbox_api.api_client.default_headers,
-                on_chunk=on_snapshot_create_logs,
+                on_chunk=lambda chunk: on_snapshot_create_logs(chunk.rstrip()),
                 should_terminate=should_terminate,
             )
             response = response_ref["response"]

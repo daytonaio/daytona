@@ -51,7 +51,7 @@ async def main():
                     disk=3,
                 ),
             ),
-            on_logs=lambda chunk: print(chunk, end=""),
+            on_logs=print,
         )
 
         # Create first sandbox using the pre-built image
@@ -91,7 +91,7 @@ async def main():
                 image=dynamic_image,
             ),
             timeout=0,
-            on_snapshot_create_logs=lambda chunk: print(chunk, end=""),
+            on_snapshot_create_logs=print,
         )
 
         try:

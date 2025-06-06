@@ -174,7 +174,7 @@ export class SnapshotService {
       if (!streamPromise) {
         streamPromise = processStreamingResponse(
           () => this.snapshotsApi.getSnapshotBuildLogs(createdSnapshot.id, undefined, true, { responseType: 'stream' }),
-          onChunk,
+          (chunk) => onChunk(chunk.trimEnd()),
           async () => terminalStates.includes(snapshotRef.createdSnapshot.state),
         )
       }

@@ -29,6 +29,7 @@ class AsyncSnapshotService:
         self.__snapshots_api = snapshots_api
         self.__object_storage_api = object_storage_api
 
+    @intercept_errors(message_prefix="Failed to list snapshots: ")
     async def list(self) -> List[Snapshot]:
         """List all Snapshots.
 
@@ -48,6 +49,7 @@ class AsyncSnapshotService:
             response = await self.__snapshots_api.get_all_snapshots(limit=response.total)
         return [Snapshot.from_dto(snapshot) for snapshot in response.items]
 
+    @intercept_errors(message_prefix="Failed to delete snapshot: ")
     async def delete(self, snapshot: Snapshot) -> None:
         """Delete a Snapshot.
 
@@ -64,6 +66,7 @@ class AsyncSnapshotService:
         """
         await self.__snapshots_api.remove_snapshot(snapshot.id)
 
+    @intercept_errors(message_prefix="Failed to get snapshot: ")
     async def get(self, name: str) -> Snapshot:
         """Get a Snapshot by name.
 
@@ -155,7 +158,7 @@ class AsyncSnapshotService:
                 process_streaming_response(
                     url=url,
                     headers=self.__snapshots_api.api_client.default_headers,
-                    on_chunk=on_logs,
+                    on_chunk=lambda chunk: on_logs(chunk.rstrip()),
                     should_terminate=should_terminate,
                 )
             )
