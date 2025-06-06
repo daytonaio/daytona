@@ -144,10 +144,13 @@ export class AppService implements OnApplicationBootstrap {
       this.logger.log('Default snapshot not found, creating...')
     }
 
+    const defaultSnapshot = this.configService.getOrThrow('defaultSnapshot')
+
     await this.snapshotService.createSnapshot(
       adminPersonalOrg,
       {
-        name: this.configService.getOrThrow('defaultSnapshot'),
+        name: defaultSnapshot,
+        imageName: defaultSnapshot,
       },
       true,
     )
