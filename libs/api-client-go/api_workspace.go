@@ -450,12 +450,12 @@ func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r Workspace
 type WorkspaceAPICreateWorkspaceDeprecatedRequest struct {
 	ctx                    context.Context
 	ApiService             WorkspaceAPI
-	createSandbox          *CreateSandbox
+	createWorkspace        *CreateWorkspace
 	xDaytonaOrganizationID *string
 }
 
-func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) CreateSandbox(createSandbox CreateSandbox) WorkspaceAPICreateWorkspaceDeprecatedRequest {
-	r.createSandbox = &createSandbox
+func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) CreateWorkspace(createWorkspace CreateWorkspace) WorkspaceAPICreateWorkspaceDeprecatedRequest {
+	r.createWorkspace = &createWorkspace
 	return r
 }
 
@@ -507,8 +507,8 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICre
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.createSandbox == nil {
-		return localVarReturnValue, nil, reportError("createSandbox is required and must be specified")
+	if r.createWorkspace == nil {
+		return localVarReturnValue, nil, reportError("createWorkspace is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -532,7 +532,7 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICre
 		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
 	}
 	// body params
-	localVarPostBody = r.createSandbox
+	localVarPostBody = r.createWorkspace
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err

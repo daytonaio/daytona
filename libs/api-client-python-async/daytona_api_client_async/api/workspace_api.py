@@ -20,7 +20,7 @@ from typing_extensions import Annotated
 from pydantic import Field, StrictBool, StrictFloat, StrictInt, StrictStr
 from typing import List, Optional, Union
 from typing_extensions import Annotated
-from daytona_api_client_async.models.create_sandbox import CreateSandbox
+from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
@@ -593,7 +593,7 @@ class WorkspaceApi:
     @validate_call
     async def create_workspace_deprecated(
         self,
-        create_sandbox: CreateSandbox,
+        create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -611,8 +611,8 @@ class WorkspaceApi:
         """(Deprecated) [DEPRECATED] Create a new workspace
 
 
-        :param create_sandbox: (required)
-        :type create_sandbox: CreateSandbox
+        :param create_workspace: (required)
+        :type create_workspace: CreateWorkspace
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -639,7 +639,7 @@ class WorkspaceApi:
         warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
         _param = self._create_workspace_deprecated_serialize(
-            create_sandbox=create_sandbox,
+            create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -664,7 +664,7 @@ class WorkspaceApi:
     @validate_call
     async def create_workspace_deprecated_with_http_info(
         self,
-        create_sandbox: CreateSandbox,
+        create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -682,8 +682,8 @@ class WorkspaceApi:
         """(Deprecated) [DEPRECATED] Create a new workspace
 
 
-        :param create_sandbox: (required)
-        :type create_sandbox: CreateSandbox
+        :param create_workspace: (required)
+        :type create_workspace: CreateWorkspace
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -710,7 +710,7 @@ class WorkspaceApi:
         warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
         _param = self._create_workspace_deprecated_serialize(
-            create_sandbox=create_sandbox,
+            create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -735,7 +735,7 @@ class WorkspaceApi:
     @validate_call
     async def create_workspace_deprecated_without_preload_content(
         self,
-        create_sandbox: CreateSandbox,
+        create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
         _request_timeout: Union[
             None,
@@ -753,8 +753,8 @@ class WorkspaceApi:
         """(Deprecated) [DEPRECATED] Create a new workspace
 
 
-        :param create_sandbox: (required)
-        :type create_sandbox: CreateSandbox
+        :param create_workspace: (required)
+        :type create_workspace: CreateWorkspace
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -781,7 +781,7 @@ class WorkspaceApi:
         warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
         _param = self._create_workspace_deprecated_serialize(
-            create_sandbox=create_sandbox,
+            create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -801,7 +801,7 @@ class WorkspaceApi:
 
     def _create_workspace_deprecated_serialize(
         self,
-        create_sandbox,
+        create_workspace,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -830,8 +830,8 @@ class WorkspaceApi:
             _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
-        if create_sandbox is not None:
-            _body_params = create_sandbox
+        if create_workspace is not None:
+            _body_params = create_workspace
 
 
         # set the HTTP header `Accept`

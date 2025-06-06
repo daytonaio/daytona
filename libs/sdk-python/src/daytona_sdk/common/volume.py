@@ -6,7 +6,8 @@ from daytona_api_client import VolumeDto
 from daytona_api_client_async import SandboxVolume as AsyncApiVolumeMount
 
 
-class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount): ...
+class VolumeMount(ApiVolumeMount, AsyncApiVolumeMount):
+    ...
 
 
 class Volume(VolumeDto):

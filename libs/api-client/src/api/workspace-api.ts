@@ -32,7 +32,7 @@ import {
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
-import type { CreateSandbox } from '../models'
+import type { CreateWorkspace } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
@@ -146,19 +146,19 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     /**
      *
      * @summary [DEPRECATED] Create a new workspace
-     * @param {CreateSandbox} createSandbox
+     * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     createWorkspaceDeprecated: async (
-      createSandbox: CreateSandbox,
+      createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
-      // verify required parameter 'createSandbox' is not null or undefined
-      assertParamExists('createWorkspaceDeprecated', 'createSandbox', createSandbox)
+      // verify required parameter 'createWorkspace' is not null or undefined
+      assertParamExists('createWorkspaceDeprecated', 'createWorkspace', createWorkspace)
       const localVarPath = `/workspace`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -185,7 +185,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(createSandbox, localVarRequestOptions, configuration)
+      localVarRequestOptions.data = serializeDataIfNeeded(createWorkspace, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -796,19 +796,19 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     /**
      *
      * @summary [DEPRECATED] Create a new workspace
-     * @param {CreateSandbox} createSandbox
+     * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     async createWorkspaceDeprecated(
-      createSandbox: CreateSandbox,
+      createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspaceDeprecated(
-        createSandbox,
+        createWorkspace,
         xDaytonaOrganizationID,
         options,
       )
@@ -1196,19 +1196,19 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
     /**
      *
      * @summary [DEPRECATED] Create a new workspace
-     * @param {CreateSandbox} createSandbox
+     * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @deprecated
      * @throws {RequiredError}
      */
     createWorkspaceDeprecated(
-      createSandbox: CreateSandbox,
+      createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Sandbox> {
       return localVarFp
-        .createWorkspaceDeprecated(createSandbox, xDaytonaOrganizationID, options)
+        .createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
@@ -1460,7 +1460,7 @@ export class WorkspaceApi extends BaseAPI {
   /**
    *
    * @summary [DEPRECATED] Create a new workspace
-   * @param {CreateSandbox} createSandbox
+   * @param {CreateWorkspace} createWorkspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @deprecated
@@ -1468,12 +1468,12 @@ export class WorkspaceApi extends BaseAPI {
    * @memberof WorkspaceApi
    */
   public createWorkspaceDeprecated(
-    createSandbox: CreateSandbox,
+    createWorkspace: CreateWorkspace,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .createWorkspaceDeprecated(createSandbox, xDaytonaOrganizationID, options)
+      .createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

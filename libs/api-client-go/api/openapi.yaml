@@ -3733,7 +3733,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateSandbox'
+              $ref: '#/components/schemas/CreateWorkspace'
         required: true
       responses:
         '200':
@@ -6835,6 +6835,107 @@ components:
           type: boolean
       required:
         - general
+      type: object
+    CreateWorkspace:
+      example:
+        image: daytonaio/workspace:latest
+        memory: 1
+        buildInfo: ''
+        volumes:
+          - mountPath: /data
+            volumeId: volume123
+          - mountPath: /data
+            volumeId: volume123
+        cpu: 2
+        env:
+          NODE_ENV: production
+        gpu: 1
+        autoStopInterval: 30
+        labels:
+          daytona.io/public: 'true'
+        target: eu
+        disk: 3
+        public: false
+        user: daytona
+        class: small
+        autoArchiveInterval: 10080
+      properties:
+        image:
+          description: The image used for the workspace
+          example: daytonaio/workspace:latest
+          type: string
+        user:
+          description: The user associated with the project
+          example: daytona
+          type: string
+        env:
+          additionalProperties:
+            type: string
+          description: Environment variables for the workspace
+          example:
+            NODE_ENV: production
+          type: object
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels for the workspace
+          example:
+            daytona.io/public: 'true'
+          type: object
+        public:
+          description: Whether the workspace http preview is publicly accessible
+          example: false
+          type: boolean
+        class:
+          description: The workspace class type
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        target:
+          description: The target (region) where the workspace will be created
+          enum:
+            - eu
+            - us
+            - asia
+          example: eu
+          type: string
+        cpu:
+          description: CPU cores allocated to the workspace
+          example: 2
+          type: integer
+        gpu:
+          description: GPU units allocated to the workspace
+          example: 1
+          type: integer
+        memory:
+          description: Memory allocated to the workspace in GB
+          example: 1
+          type: integer
+        disk:
+          description: Disk space allocated to the workspace in GB
+          example: 3
+          type: integer
+        autoStopInterval:
+          description: Auto-stop interval in minutes (0 means disabled)
+          example: 30
+          type: integer
+        autoArchiveInterval:
+          description: Auto-archive interval in minutes (0 means the maximum interval
+            will be used)
+          example: 10080
+          type: integer
+        volumes:
+          description: Array of volumes to attach to the workspace
+          items:
+            $ref: '#/components/schemas/SandboxVolume'
+          type: array
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/CreateBuildInfo'
+          description: Build information for the workspace
       type: object
     VolumeState:
       description: Volume state

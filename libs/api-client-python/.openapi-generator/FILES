@@ -39,6 +39,7 @@ daytona_api_client/models/create_session_request.py
 daytona_api_client/models/create_snapshot.py
 daytona_api_client/models/create_user.py
 daytona_api_client/models/create_volume.py
+daytona_api_client/models/create_workspace.py
 daytona_api_client/models/docker_registry.py
 daytona_api_client/models/execute_request.py
 daytona_api_client/models/execute_response.py

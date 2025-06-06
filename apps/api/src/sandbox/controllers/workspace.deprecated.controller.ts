@@ -27,7 +27,6 @@ import {
 import Redis from 'ioredis'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SandboxService as WorkspaceService } from '../services/sandbox.service'
-import { CreateSandboxDto as CreateWorkspaceDto } from '../dto/create-sandbox.dto'
 import {
   ApiOAuth2,
   ApiResponse,
@@ -58,6 +57,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
+import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
 
 @ApiTags('workspace')
 @Controller('workspace')

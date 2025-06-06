@@ -64,6 +64,7 @@ from daytona_api_client_async.models.create_session_request import CreateSession
 from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
+from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.execute_request import ExecuteRequest
 from daytona_api_client_async.models.execute_response import ExecuteResponse

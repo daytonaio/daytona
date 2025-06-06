@@ -21,7 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional
 from daytona_api_client_async.models.create_build_info import CreateBuildInfo
-from daytona_api_client_async.models.workspace_volume import WorkspaceVolume
+from daytona_api_client_async.models.sandbox_volume import SandboxVolume
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -29,7 +29,7 @@ class CreateWorkspace(BaseModel):
     """
     CreateWorkspace
     """ # noqa: E501
-    snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the workspace")
+    image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     user: Optional[StrictStr] = Field(default=None, description="The user associated with the project")
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the workspace")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the workspace")
@@ -38,14 +38,14 @@ class CreateWorkspace(BaseModel):
     target: Optional[StrictStr] = Field(default=None, description="The target (region) where the workspace will be created")
     cpu: Optional[StrictInt] = Field(default=None, description="CPU cores allocated to the workspace")
     gpu: Optional[StrictInt] = Field(default=None, description="GPU units allocated to the workspace")
-    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in MB")
+    memory: Optional[StrictInt] = Field(default=None, description="Memory allocated to the workspace in GB")
     disk: Optional[StrictInt] = Field(default=None, description="Disk space allocated to the workspace in GB")
     auto_stop_interval: Optional[StrictInt] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     auto_archive_interval: Optional[StrictInt] = Field(default=None, description="Auto-archive interval in minutes (0 means the maximum interval will be used)", alias="autoArchiveInterval")
-    volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
+    volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes to attach to the workspace")
     build_info: Optional[CreateBuildInfo] = Field(default=None, description="Build information for the workspace", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["snapshot", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
+    __properties: ClassVar[List[str]] = ["image", "user", "env", "labels", "public", "class", "target", "cpu", "gpu", "memory", "disk", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 
     @field_validator('var_class')
     def var_class_validate_enum(cls, value):
@@ -135,7 +135,7 @@ class CreateWorkspace(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "snapshot": obj.get("snapshot"),
+            "image": obj.get("image"),
             "user": obj.get("user"),
             "env": obj.get("env"),
             "labels": obj.get("labels"),
@@ -148,7 +148,7 @@ class CreateWorkspace(BaseModel):
             "disk": obj.get("disk"),
             "autoStopInterval": obj.get("autoStopInterval"),
             "autoArchiveInterval": obj.get("autoArchiveInterval"),
-            "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
+            "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
             "buildInfo": CreateBuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
         })
         # store additional fields in additional_properties

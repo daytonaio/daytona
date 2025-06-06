@@ -39,6 +39,7 @@ models/create-session-request.ts
 models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
+models/create-workspace.ts
 models/docker-registry.ts
 models/execute-request.ts
 models/execute-response.ts
