@@ -16,7 +16,7 @@ export const ViewerOrganizationRoleCheckbox: React.FC = () => {
           Viewer
         </Label>
         <p className="text-sm text-gray-500">
-          Grants read access to sandboxes, images, and registries in the organization
+          Grants read access to sandboxes, snapshots, and registries in the organization
         </p>
       </div>
     </div>

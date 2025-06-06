@@ -10,7 +10,8 @@ from typing import List
 
 from daytona_api_client import CreateVolume, VolumesApi
 from daytona_api_client.exceptions import NotFoundException
-from daytona_sdk.common.volume import Volume
+
+from ..common.volume import Volume
 
 
 class VolumeService:

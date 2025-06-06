@@ -26,7 +26,8 @@ dependencies = [
     "aiohttp_retry>=2.9.0,<3.0.0",
     "toml>=0.10.0,<0.11.0",
     "aioboto3>=14.0.0,<15.0.0",
-    "boto3>=1.0.0,<2.0.0"
+    "boto3>=1.0.0,<2.0.0",
+    "importlib-metadata>=1.0.0,<6.0.0; python_version<'3.8'"
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",

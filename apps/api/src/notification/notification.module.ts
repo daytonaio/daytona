@@ -7,12 +7,12 @@ import { Module } from '@nestjs/common'
 import { NotificationService } from './services/notification.service'
 import { NotificationGateway } from './gateways/notification.gateway'
 import { OrganizationModule } from '../organization/organization.module'
-import { WorkspaceModule } from '../workspace/workspace.module'
+import { SandboxModule } from '../sandbox/sandbox.module'
 import { RedisModule } from '@nestjs-modules/ioredis'
 import { AuthModule } from '../auth/auth.module'
 
 @Module({
-  imports: [OrganizationModule, WorkspaceModule, RedisModule, AuthModule],
+  imports: [OrganizationModule, SandboxModule, RedisModule, AuthModule],
   providers: [NotificationService, NotificationGateway],
   exports: [NotificationService],
 })

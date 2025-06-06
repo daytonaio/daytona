@@ -6,7 +6,8 @@ from typing import List
 
 from daytona_api_client_async import CreateVolume, VolumesApi
 from daytona_api_client_async.exceptions import NotFoundException
-from daytona_sdk.common.volume import Volume
+
+from ..common.volume import Volume
 
 
 class AsyncVolumeService:

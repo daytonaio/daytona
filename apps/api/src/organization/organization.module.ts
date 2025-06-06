@@ -18,10 +18,10 @@ import { OrganizationRoleService } from './services/organization-role.service'
 import { OrganizationUserService } from './services/organization-user.service'
 import { OrganizationInvitationService } from './services/organization-invitation.service'
 import { UserModule } from '../user/user.module'
-import { Workspace } from '../workspace/entities/workspace.entity'
-import { Image } from '../workspace/entities/image.entity'
-import { Volume } from '../workspace/entities/volume.entity'
-import { RedisLockProvider } from '../workspace/common/redis-lock.provider'
+import { Sandbox } from '../sandbox/entities/sandbox.entity'
+import { Snapshot } from '../sandbox/entities/snapshot.entity'
+import { Volume } from '../sandbox/entities/volume.entity'
+import { RedisLockProvider } from '../sandbox/common/redis-lock.provider'
 
 @Module({
   imports: [
@@ -31,8 +31,8 @@ import { RedisLockProvider } from '../workspace/common/redis-lock.provider'
       OrganizationRole,
       OrganizationUser,
       OrganizationInvitation,
-      Workspace,
-      Image,
+      Sandbox,
+      Snapshot,
       Volume,
     ]),
   ],

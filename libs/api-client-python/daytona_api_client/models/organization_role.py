@@ -56,8 +56,8 @@ class OrganizationRole(BaseModel):
                 [
                     "write:registries",
                     "delete:registries",
-                    "write:images",
-                    "delete:images",
+                    "write:snapshots",
+                    "delete:snapshots",
                     "write:sandboxes",
                     "delete:sandboxes",
                     "read:volumes",
@@ -66,7 +66,7 @@ class OrganizationRole(BaseModel):
                 ]
             ):
                 raise ValueError(
-                    "each list item must be one of ('write:registries', 'delete:registries', 'write:images', 'delete:images', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
+                    "each list item must be one of ('write:registries', 'delete:registries', 'write:snapshots', 'delete:snapshots', 'write:sandboxes', 'delete:sandboxes', 'read:volumes', 'write:volumes', 'delete:volumes')"
                 )
         return value
 

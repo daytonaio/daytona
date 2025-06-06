@@ -12,7 +12,7 @@ from typing import List, Literal, Optional, Sequence, Union, get_args
 import toml
 from pydantic import BaseModel, PrivateAttr
 
-from .._async.object_storage import AsyncObjectStorage
+from .._sync.object_storage import ObjectStorage
 from .errors import DaytonaError
 
 SupportedPythonSeries = Literal["3.9", "3.10", "3.11", "3.12", "3.13"]
@@ -114,7 +114,7 @@ class Image(BaseModel):
 
         extra_args = self.__format_pip_install_args(find_links, index_url, extra_index_urls, pre, extra_options)
 
-        archive_path = AsyncObjectStorage.compute_archive_base_path(requirements_txt)
+        archive_path = ObjectStorage.compute_archive_base_path(requirements_txt)
         self._context_list.append(Context(source_path=requirements_txt, archive_path=archive_path))
         self._dockerfile += f"COPY {archive_path} /.requirements.txt\n"
         self._dockerfile += f"RUN python -m pip install -r /.requirements.txt{extra_args}\n"
@@ -198,7 +198,7 @@ class Image(BaseModel):
             remote_path = remote_path + Path(local_path).name
 
         local_path = os.path.expanduser(local_path)
-        archive_path = AsyncObjectStorage.compute_archive_base_path(local_path)
+        archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
         self._dockerfile += f"COPY {archive_path} {remote_path}\n"
 
@@ -220,7 +220,7 @@ class Image(BaseModel):
             ```
         """
         local_path = os.path.expanduser(local_path)
-        archive_path = AsyncObjectStorage.compute_archive_base_path(local_path)
+        archive_path = ObjectStorage.compute_archive_base_path(local_path)
         self._context_list.append(Context(source_path=local_path, archive_path=archive_path))
         self._dockerfile += f"COPY {archive_path} {remote_path}\n"
 

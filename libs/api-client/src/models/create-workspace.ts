@@ -17,7 +17,7 @@
 import type { CreateBuildInfo } from './create-build-info'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { WorkspaceVolume } from './workspace-volume'
+import type { SandboxVolume } from './sandbox-volume'
 
 /**
  *
@@ -80,7 +80,7 @@ export interface CreateWorkspace {
    */
   gpu?: number
   /**
-   * Memory allocated to the workspace in MB
+   * Memory allocated to the workspace in GB
    * @type {number}
    * @memberof CreateWorkspace
    */
@@ -105,10 +105,10 @@ export interface CreateWorkspace {
   autoArchiveInterval?: number
   /**
    * Array of volumes to attach to the workspace
-   * @type {Array<WorkspaceVolume>}
+   * @type {Array<SandboxVolume>}
    * @memberof CreateWorkspace
    */
-  volumes?: Array<WorkspaceVolume>
+  volumes?: Array<SandboxVolume>
   /**
    * Build information for the workspace
    * @type {CreateBuildInfo}

@@ -1,15 +1,22 @@
 import asyncio
 import time
 
-from daytona_sdk import AsyncDaytona, CreateSandboxParams, Image
+from daytona_sdk import (
+    AsyncDaytona,
+    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
+    CreateSnapshotParams,
+    Image,
+    Resources,
+)
 
 
 async def main():
     daytona = AsyncDaytona()
 
     try:
-        # Generate unique name for the image to avoid conflicts
-        image_name = f"python-example:{int(time.time())}"
+        # Generate unique name for the snapshot to avoid conflicts
+        snapshot_name = f"python-example:{int(time.time())}"
 
         # Create local file with some data and add it to the image
         with open("file_example.txt", "w") as f:
@@ -33,14 +40,23 @@ async def main():
         )
 
         # Create the image
-        print(f"=== Creating Image: {image_name} ===")
-        await daytona.create_image(image_name, image, on_logs=lambda chunk: print(chunk, end=""))
+        print(f"=== Creating Snapshot: {snapshot_name} ===")
+        await daytona.snapshot.create(
+            CreateSnapshotParams(
+                name=snapshot_name,
+                image=image,
+                resources=Resources(
+                    cpu=1,
+                    memory=1,
+                    disk=3,
+                ),
+            ),
+            on_logs=print,
+        )
 
         # Create first sandbox using the pre-built image
         print("\n=== Creating Sandbox from Pre-built Image ===")
-        sandbox1 = await daytona.create(
-            CreateSandboxParams(image=image_name), on_image_build_logs=lambda chunk: print(chunk, end="")
-        )
+        sandbox1 = await daytona.create(CreateSandboxFromSnapshotParams(snapshot=snapshot_name))
 
         try:
             # Verify the first sandbox environment
@@ -71,11 +87,11 @@ async def main():
 
         # Create sandbox with the dynamic image
         sandbox2 = await daytona.create(
-            CreateSandboxParams(
+            CreateSandboxFromImageParams(
                 image=dynamic_image,
             ),
             timeout=0,
-            on_image_build_logs=print,
+            on_snapshot_create_logs=print,
         )
 
         try:

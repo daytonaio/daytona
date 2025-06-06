@@ -33,7 +33,7 @@ class Workspace(BaseModel):
     id: StrictStr = Field(description="The ID of the workspace")
     name: StrictStr = Field(description="The name of the workspace")
     organization_id: StrictStr = Field(description="The organization ID of the workspace", alias="organizationId")
-    image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
+    snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the workspace")
     user: StrictStr = Field(description="The user associated with the project")
     env: Dict[str, StrictStr] = Field(description="Environment variables for the workspace")
     labels: Dict[str, StrictStr] = Field(description="Labels for the workspace")
@@ -46,16 +46,16 @@ class Workspace(BaseModel):
     disk: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk quota for the workspace")
     state: Optional[WorkspaceState] = Field(default=None, description="The state of the workspace")
     error_reason: Optional[StrictStr] = Field(default=None, description="The error reason of the workspace", alias="errorReason")
-    snapshot_state: Optional[StrictStr] = Field(default=None, description="The state of the snapshot", alias="snapshotState")
-    snapshot_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt")
+    backup_state: Optional[StrictStr] = Field(default=None, description="The state of the backup", alias="backupState")
+    backup_created_at: Optional[StrictStr] = Field(default=None, description="The creation timestamp of the last backup", alias="backupCreatedAt")
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
     volumes: Optional[List[WorkspaceVolume]] = Field(default=None, description="Array of volumes attached to the workspace")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "image", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "snapshotState", "snapshotCreatedAt", "autoStopInterval", "autoArchiveInterval", "volumes"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "volumes"]
 
-    @field_validator('snapshot_state')
-    def snapshot_state_validate_enum(cls, value):
+    @field_validator('backup_state')
+    def backup_state_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
@@ -135,7 +135,7 @@ class Workspace(BaseModel):
             "id": obj.get("id"),
             "name": obj.get("name") if obj.get("name") is not None else '',
             "organizationId": obj.get("organizationId"),
-            "image": obj.get("image"),
+            "snapshot": obj.get("snapshot"),
             "user": obj.get("user"),
             "env": obj.get("env"),
             "labels": obj.get("labels"),
@@ -148,8 +148,8 @@ class Workspace(BaseModel):
             "disk": obj.get("disk"),
             "state": obj.get("state"),
             "errorReason": obj.get("errorReason"),
-            "snapshotState": obj.get("snapshotState"),
-            "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
+            "backupState": obj.get("backupState"),
+            "backupCreatedAt": obj.get("backupCreatedAt"),
             "autoStopInterval": obj.get("autoStopInterval"),
             "autoArchiveInterval": obj.get("autoArchiveInterval"),
             "volumes": [WorkspaceVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None

@@ -4,7 +4,7 @@
 import base64
 from typing import Optional
 
-from daytona_sdk.common.process import CodeRunParams
+from ..common.process import CodeRunParams
 
 
 class SandboxTsCodeToolbox:

@@ -21,7 +21,7 @@ type RowData struct {
 	LastEvent string
 }
 
-func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationName *string) {
+func ListSandboxes(sandboxList []daytonaapiclient.Sandbox, activeOrganizationName *string) {
 	if len(sandboxList) == 0 {
 		util.NotifyEmptySandboxList(true)
 		return
@@ -47,7 +47,7 @@ func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationN
 	fmt.Println(table)
 }
 
-func SortSandboxes(sandboxList *[]daytonaapiclient.Workspace) {
+func SortSandboxes(sandboxList *[]daytonaapiclient.Sandbox) {
 	sort.Slice(*sandboxList, func(i, j int) bool {
 		pi, pj := getStateSortPriorities(*(*sandboxList)[i].State, *(*sandboxList)[j].State)
 		if pi != pj {
@@ -63,7 +63,7 @@ func SortSandboxes(sandboxList *[]daytonaapiclient.Workspace) {
 	})
 }
 
-func getTableRowData(sandbox daytonaapiclient.Workspace) *RowData {
+func getTableRowData(sandbox daytonaapiclient.Sandbox) *RowData {
 	rowData := RowData{"", "", "", "", ""}
 	rowData.Name = sandbox.Id + util.AdditionalPropertyPadding
 	if sandbox.State != nil {
@@ -84,7 +84,7 @@ func getTableRowData(sandbox daytonaapiclient.Workspace) *RowData {
 	return &rowData
 }
 
-func renderUnstyledList(sandboxList []daytonaapiclient.Workspace) {
+func renderUnstyledList(sandboxList []daytonaapiclient.Sandbox) {
 	for _, sandbox := range sandboxList {
 		RenderInfo(&sandbox, true)
 
@@ -107,7 +107,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 daytonaapiclient.WorkspaceState) (int, int) {
+func getStateSortPriorities(state1, state2 daytonaapiclient.SandboxState) (int, int) {
 	pi, ok := sandboxListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -121,7 +121,7 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.WorkspaceState) (int
 }
 
 // Sandboxes that have actions being performed on them have a higher priority when listing
-var sandboxListStatePriorities = map[daytonaapiclient.WorkspaceState]int{
+var sandboxListStatePriorities = map[daytonaapiclient.SandboxState]int{
 	"pending":       1,
 	"pending-start": 1,
 	"deleting":      1,

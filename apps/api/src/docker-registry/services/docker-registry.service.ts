@@ -10,7 +10,7 @@ import { DockerRegistry } from '../entities/docker-registry.entity'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { ApiOAuth2 } from '@nestjs/swagger'
-import { RegistryPushAccessDto } from '../../workspace/dto/registry-push-access-dto'
+import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import {
   DOCKER_REGISTRY_PROVIDER,
   IDockerRegistryProvider,
@@ -127,12 +127,12 @@ export class DockerRegistryService {
     })
   }
 
-  async findOneByImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
+  async findOneBySnapshotImageName(imageName: string, organizationId?: string): Promise<DockerRegistry | null> {
     const registries = await this.dockerRegistryRepository.find({
       where: [...(organizationId && [{ organizationId }]), { organizationId: IsNull() }],
     })
 
-    // Try to find a registry that matches the image name pattern
+    // Try to find a registry that matches the snapshot image name pattern
     for (const registry of registries) {
       const strippedUrl = registry.url.replace(/^(https?:\/\/)/, '')
       if (imageName.startsWith(strippedUrl)) {

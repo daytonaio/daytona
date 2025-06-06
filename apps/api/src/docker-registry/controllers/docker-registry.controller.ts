@@ -10,7 +10,7 @@ import { DockerRegistryService } from '../services/docker-registry.service'
 import { CreateDockerRegistryDto } from '../dto/create-docker-registry.dto'
 import { UpdateDockerRegistryDto } from '../dto/update-docker-registry.dto'
 import { DockerRegistryDto } from '../dto/docker-registry.dto'
-import { RegistryPushAccessDto } from '../../workspace/dto/registry-push-access-dto'
+import { RegistryPushAccessDto } from '../../sandbox/dto/registry-push-access-dto'
 import { DockerRegistryAccessGuard } from '../guards/docker-registry-access.guard'
 import { DockerRegistry } from '../decorators/docker-registry.decorator'
 import { DockerRegistry as DockerRegistryEntity } from '../entities/docker-registry.entity'
@@ -65,7 +65,7 @@ export class DockerRegistryController {
   @Get('registry-push-access')
   @HttpCode(200)
   @ApiOperation({
-    summary: 'Get temporary registry access for pushing images',
+    summary: 'Get temporary registry access for pushing snapshots',
     operationId: 'getTransientPushAccess',
   })
   @ApiResponse({

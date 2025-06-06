@@ -45,7 +45,7 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 	log.Infof("Generating preview link - port: %d", port)
 
 	// Get the sandbox using sandbox ID
-	sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxId).Execute()
+	sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("failed to get sandbox: %v", err)
 	}
@@ -85,13 +85,13 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error parsing provider metadata: %v", err)
 	}
 
-	nodeDomain, ok := metadata["nodeDomain"].(string)
+	runnerDomain, ok := metadata["runnerDomain"].(string)
 	if !ok {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("node domain not found in metadata")
+		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("runner domain not found in metadata")
 	}
 
 	// Format preview URL
-	previewURL := fmt.Sprintf("http://%d-%s.%s", port, sandboxId, nodeDomain)
+	previewURL := fmt.Sprintf("http://%d-%s.%s", port, sandboxId, runnerDomain)
 
 	// Test URL accessibility if requested
 	var accessible bool

@@ -3,11 +3,12 @@
 # import apis into api package
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
-from daytona_api_client_async.api.images_api import ImagesApi
-from daytona_api_client_async.api.nodes_api import NodesApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
 from daytona_api_client_async.api.preview_api import PreviewApi
+from daytona_api_client_async.api.runners_api import RunnersApi
+from daytona_api_client_async.api.sandbox_api import SandboxApi
+from daytona_api_client_async.api.snapshots_api import SnapshotsApi
 from daytona_api_client_async.api.toolbox_api import ToolboxApi
 from daytona_api_client_async.api.users_api import UsersApi
 from daytona_api_client_async.api.volumes_api import VolumesApi

@@ -10,6 +10,8 @@ from daytona_sdk import (
     Chart,
     ChartType,
     CompositeChart,
+    CreateSandboxFromImageParams,
+    Image,
     LineChart,
     PieChart,
     ScatterChart,
@@ -77,7 +79,12 @@ plt.show()
 
 async def main():
     async with AsyncDaytona() as daytona:
-        sandbox = await daytona.create()
+        sandbox = await daytona.create(
+            CreateSandboxFromImageParams(
+                image=Image.debian_slim("3.13").pip_install("matplotlib"),
+            ),
+            on_snapshot_create_logs=print,
+        )
         response = await sandbox.process.code_run(code)
 
         if response.exit_code != 0:

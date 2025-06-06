@@ -38,7 +38,7 @@ type CreateWorkspace struct {
 	Cpu *int32 `json:"cpu,omitempty"`
 	// GPU units allocated to the workspace
 	Gpu *int32 `json:"gpu,omitempty"`
-	// Memory allocated to the workspace in MB
+	// Memory allocated to the workspace in GB
 	Memory *int32 `json:"memory,omitempty"`
 	// Disk space allocated to the workspace in GB
 	Disk *int32 `json:"disk,omitempty"`
@@ -47,7 +47,7 @@ type CreateWorkspace struct {
 	// Auto-archive interval in minutes (0 means the maximum interval will be used)
 	AutoArchiveInterval *int32 `json:"autoArchiveInterval,omitempty"`
 	// Array of volumes to attach to the workspace
-	Volumes []WorkspaceVolume `json:"volumes,omitempty"`
+	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the workspace
 	BuildInfo *CreateBuildInfo `json:"buildInfo,omitempty"`
 }
@@ -486,9 +486,9 @@ func (o *CreateWorkspace) SetAutoArchiveInterval(v int32) {
 }
 
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
-func (o *CreateWorkspace) GetVolumes() []WorkspaceVolume {
+func (o *CreateWorkspace) GetVolumes() []SandboxVolume {
 	if o == nil || IsNil(o.Volumes) {
-		var ret []WorkspaceVolume
+		var ret []SandboxVolume
 		return ret
 	}
 	return o.Volumes
@@ -496,7 +496,7 @@ func (o *CreateWorkspace) GetVolumes() []WorkspaceVolume {
 
 // GetVolumesOk returns a tuple with the Volumes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *CreateWorkspace) GetVolumesOk() ([]WorkspaceVolume, bool) {
+func (o *CreateWorkspace) GetVolumesOk() ([]SandboxVolume, bool) {
 	if o == nil || IsNil(o.Volumes) {
 		return nil, false
 	}
@@ -512,8 +512,8 @@ func (o *CreateWorkspace) HasVolumes() bool {
 	return false
 }
 
-// SetVolumes gets a reference to the given []WorkspaceVolume and assigns it to the Volumes field.
-func (o *CreateWorkspace) SetVolumes(v []WorkspaceVolume) {
+// SetVolumes gets a reference to the given []SandboxVolume and assigns it to the Volumes field.
+func (o *CreateWorkspace) SetVolumes(v []SandboxVolume) {
 	o.Volumes = v
 }
 
