@@ -117,6 +117,7 @@ async function bootstrap() {
 
   // Stop all cron jobs if maintenance mode is enabled
   if (configService.get('maintananceMode')) {
+    await app.init()
     const schedulerRegistry = app.get(SchedulerRegistry)
     for (const cronName of schedulerRegistry.getCronJobs().keys()) {
       schedulerRegistry.deleteCronJob(cronName)
