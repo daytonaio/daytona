@@ -35,7 +35,7 @@ type VolumeDto struct {
 	// Last update timestamp
 	UpdatedAt string `json:"updatedAt"`
 	// Last used timestamp
-	LastUsedAt string `json:"lastUsedAt"`
+	LastUsedAt NullableString `json:"lastUsedAt"`
 	// The error reason of the volume
 	ErrorReason NullableString `json:"errorReason"`
 }
@@ -46,7 +46,7 @@ type _VolumeDto VolumeDto
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt string, errorReason NullableString) *VolumeDto {
+func NewVolumeDto(id string, name string, organizationId string, state VolumeState, createdAt string, updatedAt string, lastUsedAt NullableString, errorReason NullableString) *VolumeDto {
 	this := VolumeDto{}
 	this.Id = id
 	this.Name = name
@@ -212,27 +212,29 @@ func (o *VolumeDto) SetUpdatedAt(v string) {
 }
 
 // GetLastUsedAt returns the LastUsedAt field value
+// If the value is explicit nil, the zero value for string will be returned
 func (o *VolumeDto) GetLastUsedAt() string {
-	if o == nil {
+	if o == nil || o.LastUsedAt.Get() == nil {
 		var ret string
 		return ret
 	}
 
-	return o.LastUsedAt
+	return *o.LastUsedAt.Get()
 }
 
 // GetLastUsedAtOk returns a tuple with the LastUsedAt field value
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *VolumeDto) GetLastUsedAtOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.LastUsedAt, true
+	return o.LastUsedAt.Get(), o.LastUsedAt.IsSet()
 }
 
 // SetLastUsedAt sets field value
 func (o *VolumeDto) SetLastUsedAt(v string) {
-	o.LastUsedAt = v
+	o.LastUsedAt.Set(&v)
 }
 
 // GetErrorReason returns the ErrorReason field value
@@ -277,7 +279,7 @@ func (o VolumeDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["state"] = o.State
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
-	toSerialize["lastUsedAt"] = o.LastUsedAt
+	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
 	toSerialize["errorReason"] = o.ErrorReason.Get()
 	return toSerialize, nil
 }
