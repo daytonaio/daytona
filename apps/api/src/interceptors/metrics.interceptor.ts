@@ -111,7 +111,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       userAgent,
       error,
       source: Array.isArray(source) ? source[0] : source,
-      isDeprecated: request.route.path.contains('/workspace') || request.route.path.contains('/images'),
+      isDeprecated: request.route.path.includes('/workspace') || request.route.path.includes('/images'),
     }
 
     switch (request.method) {
