@@ -51,6 +51,7 @@ export class VolumeDto {
   @ApiProperty({
     description: 'Last used timestamp',
     example: '2023-01-01T00:00:00.000Z',
+    nullable: true,
   })
   lastUsedAt: string
 
