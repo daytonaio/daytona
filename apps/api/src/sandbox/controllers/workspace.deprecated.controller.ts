@@ -137,7 +137,15 @@ export class WorkspaceController {
     }
 
     const organization = authContext.organization
-    const workspace = await this.workspaceService.createFromSnapshot(createWorkspaceDto, organization, true)
+
+    const workspace = await this.workspaceService.createFromSnapshot(
+      {
+        ...createWorkspaceDto,
+        snapshot: createWorkspaceDto.image,
+      },
+      organization,
+      true,
+    )
 
     // Wait for the workspace to start
     const sandboxState = await this.waitForWorkspaceState(
