@@ -319,6 +319,7 @@ export class OrganizationService implements OnModuleInit {
       where: {
         organizationId: In(suspendedOrganizationIds),
         desiredState: WorkspaceDesiredState.STARTED,
+        state: Not(WorkspaceState.ERROR),
       },
     })
 
