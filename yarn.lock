@@ -15644,6 +15644,7 @@ __metadata:
     raw-body: "npm:^3.0.0"
     react: "npm:19.0.0"
     react-dom: "npm:19.0.0"
+    react-error-boundary: "npm:^6.0.0"
     react-oidc-context: "npm:^3.3.0"
     react-router-dom: "npm:6.29.0"
     recharts: "npm:^2.15.3"
@@ -25148,6 +25149,17 @@ __metadata:
   peerDependencies:
     react: ^19.0.0
   checksum: 10c0/a36ce7ab507b237ae2759c984cdaad4af4096d8199fb65b3815c16825e5cfeb7293da790a3fc2184b52bfba7ba3ff31c058c01947aff6fd1a3701632aabaa6a9
+  languageName: node
+  linkType: hard
+
+"react-error-boundary@npm:^6.0.0":
+  version: 6.0.0
+  resolution: "react-error-boundary@npm:6.0.0"
+  dependencies:
+    "@babel/runtime": "npm:^7.12.5"
+  peerDependencies:
+    react: ">=16.13.1"
+  checksum: 10c0/1914d600dee95a14f14af4afe9867b0d35c26c4f7826d23208800ba2a99728659029aad60a6ef95e13430b4d79c2c4c9b3585f50bf508450478760d2e4e732d8
   languageName: node
   linkType: hard
 
