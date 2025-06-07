@@ -19,6 +19,7 @@ interface ImportMetaEnv {
   readonly VITE_POSTHOG_KEY: string | undefined
   readonly VITE_POSTHOG_HOST: string | undefined
   readonly VITE_LINKED_ACCOUNTS_ENABLED: string | undefined
+  readonly VITE_ANNOUNCEMENT_BANNER_TEXT: string | undefined
 }
 
 interface ImportMeta {
