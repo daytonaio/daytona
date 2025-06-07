@@ -49,7 +49,7 @@ export function SelectedOrganizationProvider(props: Props) {
       localStorage.setItem(LocalStorageKey.SelectedOrganizationId, defaultOrg.id)
       setSelectedOrganizationId(defaultOrg.id)
     }
-  }, [organizations])
+  }, [organizations, selectedOrganizationId])
 
   const selectedOrganization = useMemo<Organization | null>(() => {
     if (!selectedOrganizationId) {
@@ -64,7 +64,7 @@ export function SelectedOrganizationProvider(props: Props) {
     }
 
     posthog.group('organization', selectedOrganizationId)
-  }, [selectedOrganizationId])
+  }, [posthog, selectedOrganizationId])
 
   const getOrganizationMembers = useCallback(
     async (selectedOrganizationId: string | null) => {
@@ -75,7 +75,7 @@ export function SelectedOrganizationProvider(props: Props) {
         return (await organizationsApi.listOrganizationMembers(selectedOrganizationId)).data
       } catch (error) {
         handleApiError(error, 'Failed to fetch organization members')
-        return []
+        throw error
       }
     },
     [organizationsApi],

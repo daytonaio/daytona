@@ -11,17 +11,21 @@ import { oidcConfig } from './auth/oidc-config'
 import { AuthProvider } from 'react-oidc-context'
 import App from './App'
 import './index.css'
+import { ErrorBoundary } from 'react-error-boundary'
+import { ErrorBoundaryFallback } from './components/ErrorBoundaryFallback'
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 
 root.render(
   <React.StrictMode>
-    <PostHogProviderWrapper>
-      <AuthProvider {...oidcConfig}>
-        <BrowserRouter>
-          <App />
-        </BrowserRouter>
-      </AuthProvider>
-    </PostHogProviderWrapper>
+    <ErrorBoundary FallbackComponent={ErrorBoundaryFallback}>
+      <PostHogProviderWrapper>
+        <AuthProvider {...oidcConfig}>
+          <BrowserRouter>
+            <App />
+          </BrowserRouter>
+        </AuthProvider>
+      </PostHogProviderWrapper>
+    </ErrorBoundary>
   </React.StrictMode>,
 )

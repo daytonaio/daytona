@@ -22,7 +22,7 @@ export function OrganizationsProvider(props: Props) {
       return (await organizationsApi.listOrganizations()).data
     } catch (error) {
       handleApiError(error, 'Failed to fetch your organizations')
-      return []
+      throw error
     }
   }, [organizationsApi])
 
