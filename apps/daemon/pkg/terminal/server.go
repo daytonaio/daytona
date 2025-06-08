@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/daytonaio/daemon/pkg/common"
 	"github.com/gorilla/websocket"
@@ -26,7 +27,7 @@ type windowSize struct {
 	Cols uint16 `json:"cols"`
 }
 
-func StartTerminalServer(port int) error {
+func StartTerminalServer(port int, readTimeout, writeTimeout time.Duration) error {
 	// Prepare the embedded frontend files
 	// Serve the files from the embedded filesystem
 	staticFS, err := fs.Sub(static, "static")
@@ -39,7 +40,15 @@ func StartTerminalServer(port int) error {
 
 	addr := fmt.Sprintf(":%d", port)
 	log.Printf("Starting terminal server on http://localhost%s", addr)
-	return http.ListenAndServe(addr, nil)
+
+	server := &http.Server{
+		Addr:         addr,
+		Handler:      nil, // Use default ServeMux
+		ReadTimeout:  readTimeout,
+		WriteTimeout: writeTimeout,
+	}
+
+	return server.ListenAndServe()
 }
 
 // func handleHome(w http.ResponseWriter, r *http.Request) {

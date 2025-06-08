@@ -8,6 +8,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"time"
 
 	golog "log"
 
@@ -63,7 +64,7 @@ func main() {
 
 	// Start terminal server
 	go func() {
-		if err := terminal.StartTerminalServer(22222); err != nil {
+		if err := terminal.StartTerminalServer(22222, 10*time.Minute, 10*time.Minute); err != nil {
 			errChan <- err
 		}
 	}()
