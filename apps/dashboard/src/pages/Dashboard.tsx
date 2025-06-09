@@ -29,6 +29,7 @@ const Dashboard: React.FC = () => {
   }, [selectedOrganization])
 
   const bannerText = import.meta.env.VITE_ANNOUNCEMENT_BANNER_TEXT
+  const bannerLearnMoreUrl = import.meta.env.VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
@@ -54,7 +55,9 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="relative w-full">
-      {isBannerVisible && bannerText && <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} />}
+      {isBannerVisible && bannerText && (
+        <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
+      )}
       <SidebarProvider isBannerVisible={isBannerVisible}>
         <Sidebar isBannerVisible={isBannerVisible} />
         <SidebarTrigger className="md:hidden" />
