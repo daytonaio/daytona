@@ -73,6 +73,17 @@ function App() {
         name: user.profile.name,
       })
     }
+    if (import.meta.env.PROD && import.meta.env.VITE_PYLON_APP_ID && isAuthenticated && user) {
+      window.pylon = {
+        chat_settings: {
+          app_id: import.meta.env.VITE_PYLON_APP_ID,
+          email: user.profile.email || '',
+          name: user.profile.name || '',
+          avatar_url: user.profile.picture,
+          email_hash: user.profile?.email_hash as string | undefined,
+        },
+      }
+    }
   }, [isAuthenticated, user, posthog])
 
   // Hack for tracking PostHog pageviews in SPAs
