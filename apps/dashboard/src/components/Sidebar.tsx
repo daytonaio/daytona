@@ -56,7 +56,11 @@ import { addHours, formatRelative } from 'date-fns'
 import { RoutePath } from '@/enums/RoutePath'
 import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 
-export function Sidebar() {
+interface SidebarProps {
+  isBannerVisible: boolean
+}
+
+export function Sidebar({ isBannerVisible }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
@@ -109,7 +113,7 @@ export function Sidebar() {
   }
 
   return (
-    <SidebarComponent>
+    <SidebarComponent isBannerVisible={isBannerVisible}>
       <SidebarContent>
         <SidebarGroup>
           <div className="p-2 mb-2">
