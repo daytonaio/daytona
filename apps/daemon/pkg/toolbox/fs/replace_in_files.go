@@ -32,7 +32,12 @@ func ReplaceInFiles(c *gin.Context) {
 			continue
 		}
 
-		newContent := strings.ReplaceAll(string(content), req.Pattern, req.NewValue)
+		newValue := ""
+		if req.NewValue != nil {
+			newValue = *req.NewValue
+		}
+
+		newContent := strings.ReplaceAll(string(content), req.Pattern, newValue)
 
 		err = os.WriteFile(filePath, []byte(newContent), 0644)
 		if err != nil {
