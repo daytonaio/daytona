@@ -12,6 +12,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/daytonaio/daytona/cli/views/common"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/term"
 )
 
 var isAborted bool
@@ -57,14 +58,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func WithSpinner(message string, fn func() error) error {
-	p := start(message, false)
-	defer stop(p)
+	if isTTY() {
+		p := start(message, false)
+		defer stop(p)
+	}
 	return fn()
 }
 
 func WithInlineSpinner(message string, fn func() error) error {
-	p := start(message, true)
-	defer stop(p)
+	if isTTY() {
+		p := start(message, true)
+		defer stop(p)
+	}
 	return fn()
 }
 
@@ -110,4 +115,8 @@ func (m model) View() string {
 	}
 
 	return str
+}
+
+func isTTY() bool {
+	return term.IsTerminal(int(os.Stdout.Fd()))
 }
