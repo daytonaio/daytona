@@ -26,7 +26,7 @@ import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { NodeService } from '../services/node.service'
-import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-adapter/runnerSandboxAdapter.v2'
 @Injectable()
 export class ImageManager {
   private readonly logger = new Logger(ImageManager.name)

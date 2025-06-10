@@ -26,7 +26,7 @@ import { WorkspaceEvents } from '../constants/workspace-events.constants'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceSnapshotCreatedEvent } from '../events/workspace-snapshot-created.event'
 import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
-import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-adapter/runnerSandboxAdapter.v2'
 
 @Injectable()
 export class SnapshotManager {

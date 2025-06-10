@@ -58,7 +58,7 @@ import { PortPreviewUrlDto } from '../dto/port-preview-url.dto'
 import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
-import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-adapter/runnerSandboxAdapter.v2'
 @ApiTags('workspace')
 @Controller('workspace')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)

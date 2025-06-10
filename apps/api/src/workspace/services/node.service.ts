@@ -20,7 +20,7 @@ import { WorkspaceState } from './../../workspace/enums/workspace-state.enum'
 import { Workspace } from './../../workspace/entities/workspace.entity'
 import { ImageNode } from './../../workspace/entities/image-node.entity'
 import { ImageNodeState } from './../../workspace/enums/image-node-state.enum'
-import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-adapter/runnerSandboxAdapter.v2'
 
 @Injectable()
 export class NodeService {

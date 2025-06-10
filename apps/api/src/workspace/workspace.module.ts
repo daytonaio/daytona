@@ -39,7 +39,7 @@ import { Volume } from './entities/volume.entity'
 import { BuildInfo } from './entities/build-info.entity'
 import { SnapshotManager } from './managers/snapshot.manager'
 import { VolumeSubscriber } from './subscribers/volume.subscriber'
-import { RunnerClientFactory } from './runner-api/runnerApi'
+import { RunnerClientFactory } from './runner-adapter/runnerSandboxAdapter.v2'
 
 @Module({
   imports: [

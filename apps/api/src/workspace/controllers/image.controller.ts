@@ -55,7 +55,7 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetImageGeneralStatusDto } from '../dto/update-image.dto'
 import { BuildImageDto } from '../dto/build-image.dto'
 import { LogProxy } from '../proxy/log-proxy'
-import { RunnerClientFactory } from '../runner-api/runnerApi'
+import { RunnerClientFactory } from '../runner-adapter/runnerSandboxAdapter.v2'
 @ApiTags('images')
 @Controller('images')
 @ApiHeader(CustomHeaders.ORGANIZATION_ID)
