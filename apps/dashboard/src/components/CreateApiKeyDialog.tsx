@@ -23,15 +23,21 @@ import { CREATE_API_KEY_PERMISSIONS_GROUPS } from '@/constants/CreateApiKeyPermi
 import { CreateApiKeyPermissionGroup } from '@/types/CreateApiKeyPermissionGroup'
 import { Label } from '@/components/ui/label'
 import { getMaskedApiKey } from '@/lib/utils'
+import { DatePicker } from '@/components/ui/date-picker'
 
 interface CreateApiKeyDialogProps {
   availablePermissions: CreateApiKeyPermissionsEnum[]
-  onCreateApiKey: (name: string, permissions: CreateApiKeyPermissionsEnum[]) => Promise<ApiKeyResponse | null>
+  onCreateApiKey: (
+    name: string,
+    permissions: CreateApiKeyPermissionsEnum[],
+    expiresAt: Date | null,
+  ) => Promise<ApiKeyResponse | null>
 }
 
 export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availablePermissions, onCreateApiKey }) => {
   const [open, setOpen] = useState(false)
   const [name, setName] = useState('')
+  const [expiresAt, setExpiresAt] = useState<Date | undefined>(undefined)
   const [checkedPermissions, setCheckedPermissions] = useState<CreateApiKeyPermissionsEnum[]>([])
   const [loading, setLoading] = useState(false)
 
@@ -55,10 +61,11 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
   const handleCreateApiKey = async () => {
     setLoading(true)
     try {
-      const key = await onCreateApiKey(name, checkedPermissions)
+      const key = await onCreateApiKey(name, checkedPermissions, expiresAt ?? null)
       if (key) {
         setCreatedKey(key)
         setName('')
+        setExpiresAt(undefined)
         setCheckedPermissions(availablePermissions)
       }
     } finally {
@@ -118,6 +125,7 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
         setOpen(isOpen)
         if (!isOpen) {
           setName('')
+          setExpiresAt(undefined)
           setCheckedPermissions(availablePermissions)
           setCreatedKey(null)
           setCopied(null)
@@ -188,6 +196,10 @@ export const CreateApiKeyDialog: React.FC<CreateApiKeyDialogProps> = ({ availabl
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Name"
               />
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="expires-at">Expires</Label>
+              <DatePicker value={expiresAt} onChange={setExpiresAt} disabledBefore={new Date()} id="expires-at" />
             </div>
             {availableGroups.length > 0 && (
               <div className="space-y-3">

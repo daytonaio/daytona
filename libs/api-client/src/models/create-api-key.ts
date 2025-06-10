@@ -30,6 +30,12 @@ export interface CreateApiKey {
    * @memberof CreateApiKey
    */
   permissions: Array<CreateApiKeyPermissionsEnum>
+  /**
+   * When the API key expires
+   * @type {Date}
+   * @memberof CreateApiKey
+   */
+  expiresAt?: Date | null
 }
 
 export const CreateApiKeyPermissionsEnum = {

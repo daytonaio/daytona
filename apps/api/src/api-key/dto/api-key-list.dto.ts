@@ -34,8 +34,19 @@ export class ApiKeyListDto {
   })
   permissions: OrganizationResourcePermission[]
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({
+    description: 'When the API key was last used',
+    example: '2024-03-14T12:00:00.000Z',
+    nullable: true,
+  })
   lastUsedAt?: Date
+
+  @ApiProperty({
+    description: 'When the API key expires',
+    example: '2024-03-14T12:00:00.000Z',
+    nullable: true,
+  })
+  expiresAt?: Date
 
   constructor(partial: Partial<ApiKeyListDto>) {
     Object.assign(this, partial)
@@ -50,6 +61,7 @@ export class ApiKeyListDto {
       createdAt: apiKey.createdAt,
       permissions: apiKey.permissions,
       lastUsedAt: apiKey.lastUsedAt,
+      expiresAt: apiKey.expiresAt,
     })
   }
 }

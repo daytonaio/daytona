@@ -972,33 +972,6 @@ paths:
       summary: Create user
       tags:
         - users
-  /users/{id}:
-    get:
-      operationId: getUser
-      parameters:
-        - explode: false
-          in: path
-          name: id
-          required: true
-          schema:
-            type: string
-          style: simple
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: User details
-      security:
-        - bearer: []
-        - oauth2:
-            - openid
-            - profile
-            - email
-      summary: Get user by ID
-      tags:
-        - users
   /users/{id}/regenerate-key-pair:
     post:
       operationId: regenerateKeyPair
@@ -1094,6 +1067,33 @@ paths:
             - profile
             - email
       summary: Unlink account
+      tags:
+        - users
+  /users/{id}:
+    get:
+      operationId: getUser
+      parameters:
+        - explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get user by ID
       tags:
         - users
   /workspace:
@@ -4224,6 +4224,7 @@ components:
           - write:registries
           - write:registries
         name: My API Key
+        expiresAt: 2025-06-09T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -4245,6 +4246,12 @@ components:
               - delete:volumes
             type: string
           type: array
+        expiresAt:
+          description: When the API key expires
+          example: 2025-06-09T12:00:00Z
+          format: date-time
+          nullable: true
+          type: string
       required:
         - name
         - permissions
@@ -4257,6 +4264,7 @@ components:
           - write:registries
         name: My API Key
         value: bb_sk_1234567890abcdef
+        expiresAt: 2025-06-09T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -4287,8 +4295,15 @@ components:
               - delete:volumes
             type: string
           type: array
+        expiresAt:
+          description: When the API key expires
+          example: 2025-06-09T12:00:00Z
+          format: date-time
+          nullable: true
+          type: string
       required:
         - createdAt
+        - expiresAt
         - name
         - permissions
         - value
@@ -4296,12 +4311,13 @@ components:
     ApiKeyList:
       example:
         createdAt: 2024-03-14T12:00:00Z
-        lastUsedAt: 2000-01-23T04:56:07.000+00:00
+        lastUsedAt: 2024-03-14T12:00:00Z
         permissions:
           - write:registries
           - write:registries
         name: My API Key
         value: bb_********************def
+        expiresAt: 2024-03-14T12:00:00Z
       properties:
         name:
           description: The name of the API key
@@ -4333,11 +4349,20 @@ components:
             type: string
           type: array
         lastUsedAt:
+          description: When the API key was last used
+          example: 2024-03-14T12:00:00Z
+          format: date-time
+          nullable: true
+          type: string
+        expiresAt:
+          description: When the API key expires
+          example: 2024-03-14T12:00:00Z
           format: date-time
           nullable: true
           type: string
       required:
         - createdAt
+        - expiresAt
         - lastUsedAt
         - name
         - permissions

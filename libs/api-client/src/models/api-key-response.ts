@@ -42,6 +42,12 @@ export interface ApiKeyResponse {
    * @memberof ApiKeyResponse
    */
   permissions: Array<ApiKeyResponsePermissionsEnum>
+  /**
+   * When the API key expires
+   * @type {Date}
+   * @memberof ApiKeyResponse
+   */
+  expiresAt: Date | null
 }
 
 export const ApiKeyResponsePermissionsEnum = {

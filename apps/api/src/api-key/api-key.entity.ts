@@ -44,4 +44,7 @@ export class ApiKey {
 
   @Column({ nullable: true })
   lastUsedAt?: Date
+
+  @Column({ nullable: true })
+  expiresAt?: Date
 }
