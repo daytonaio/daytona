@@ -34,12 +34,20 @@ export class ApiKeyResponseDto {
   })
   permissions: OrganizationResourcePermission[]
 
+  @ApiProperty({
+    description: 'When the API key expires',
+    example: '2025-06-09T12:00:00.000Z',
+    nullable: true,
+  })
+  expiresAt?: Date
+
   static fromApiKey(apiKey: ApiKey, value: string): ApiKeyResponseDto {
     return {
       name: apiKey.name,
       value,
       createdAt: apiKey.createdAt,
       permissions: apiKey.permissions,
+      expiresAt: apiKey.expiresAt,
     }
   }
 }

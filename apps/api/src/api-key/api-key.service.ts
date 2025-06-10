@@ -44,6 +44,7 @@ export class ApiKeyService {
     userId: string,
     name: string,
     permissions: OrganizationResourcePermission[],
+    expiresAt?: Date,
   ): Promise<{ apiKey: ApiKey; value: string }> {
     const existingKey = await this.apiKeyRepository.findOne({ where: { organizationId, userId, name } })
     if (existingKey) {
@@ -61,6 +62,7 @@ export class ApiKeyService {
       keySuffix: this.getApiKeySuffix(value),
       permissions,
       createdAt: new Date(),
+      expiresAt,
     })
 
     return { apiKey, value }

@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { ArrayNotEmpty, IsArray, IsEnum, IsNotEmpty, IsString } from 'class-validator'
-import { ApiProperty, ApiSchema } from '@nestjs/swagger'
+import { ArrayNotEmpty, IsArray, IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator'
+import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
+import { Type } from 'class-transformer'
 
 @ApiSchema({ name: 'CreateApiKey' })
 export class CreateApiKeyDto {
@@ -28,4 +29,14 @@ export class CreateApiKeyDto {
   @ArrayNotEmpty()
   @IsEnum(OrganizationResourcePermission, { each: true })
   permissions: OrganizationResourcePermission[]
+
+  @ApiPropertyOptional({
+    description: 'When the API key expires',
+    example: '2025-06-09T12:00:00.000Z',
+    nullable: true,
+  })
+  @IsOptional()
+  @Type(() => Date)
+  @IsDate()
+  expiresAt?: Date
 }

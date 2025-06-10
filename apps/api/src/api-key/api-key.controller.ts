@@ -49,6 +49,7 @@ export class ApiKeyController {
       authContext.userId,
       createApiKeyDto.name,
       createApiKeyDto.permissions,
+      createApiKeyDto.expiresAt,
     )
 
     return ApiKeyResponseDto.fromApiKey(apiKey, value)
