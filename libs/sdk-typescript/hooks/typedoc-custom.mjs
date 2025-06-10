@@ -49,6 +49,7 @@ function transformContent(contents) {
     removeInternalLinks,
     escapePromiseSpecialCharacters,
     transformExtendsSection,
+    transformInheritedSections,
     transformParametersSection,
     transformReturnsSection,
     transformPropertiesSection,
@@ -224,6 +225,171 @@ function transformExtendsSection(contents) {
   return contents.replace(/^#{1,10}\s*(Extends)$/gm, '**$1:**')
 }
 
+function transformInheritedSections(contents) {
+  // Transform "##### Inherited from" sections into inline inheritance notes
+  // Handle both simple and complex patterns (with Memberof sections and code blocks)
+
+  const hasInheritedFrom = contents.includes('##### Inherited from')
+
+  if (!hasInheritedFrom) {
+    return contents
+  }
+
+  // Use line-by-line processing for maximum reliability
+  const lines = contents.split('\n')
+  let modified = false
+
+  for (let i = 0; i < lines.length; i++) {
+    // Look for "##### Inherited from" lines
+    if (lines[i].trim() === '##### Inherited from') {
+      // Look backwards for property definition (list item or heading)
+      let propertyLineIndex = -1
+      let propertyLine = ''
+
+      // Search backwards up to 20 lines
+      for (let j = i - 1; j >= Math.max(0, i - 20); j--) {
+        const line = lines[j].trim()
+        // Property heading format: #### propertyName
+        if (line.match(/^#### [^#]+$/)) {
+          propertyLineIndex = j
+          propertyLine = lines[j]
+          break
+        }
+        // Property list item format: - `property` _type_ - description
+        if (line.match(/^- `[^`]+` _[^_]+_/)) {
+          propertyLineIndex = j
+          propertyLine = lines[j]
+          break
+        }
+      }
+
+      // Look forwards for inheritance info
+      let inheritanceInfo = ''
+      let memberofInfo = ''
+      let endIndex = i
+
+      // Check for code block format
+      for (let k = i + 1; k < Math.min(lines.length, i + 5); k++) {
+        if (lines[k].trim() === '```ts' && k + 2 < lines.length) {
+          const nextLine = lines[k + 1].trim()
+          if (nextLine && lines[k + 2].trim() === '```') {
+            inheritanceInfo = nextLine
+            endIndex = k + 2
+            break
+          }
+        }
+        // Check for simple format: `Class`.`property`
+        if (lines[k].trim().match(/^`[^`]+`\.`[^`]+`$/)) {
+          inheritanceInfo = lines[k].trim().replace(/`/g, '')
+          endIndex = k
+          break
+        }
+      }
+
+      // Look backwards for Memberof info
+      for (let m = i - 1; m >= Math.max(0, i - 5); m--) {
+        if (lines[m].trim() === '##### Memberof') {
+          // Look for the memberof value in the next few lines
+          for (let n = m + 1; n < Math.min(lines.length, m + 5); n++) {
+            if (lines[n].trim() === '```ts' && n + 2 < lines.length) {
+              const memberofLine = lines[n + 1].trim()
+              if (memberofLine && lines[n + 2].trim() === '```') {
+                memberofInfo = memberofLine
+                break
+              }
+            }
+            // Check for simple format: `ClassName`
+            if (lines[n].trim().match(/^`[^`]+`$/)) {
+              memberofInfo = lines[n].trim().replace(/`/g, '')
+              break
+            }
+            // Check for plain text format: ClassName
+            if (lines[n].trim().length > 0 && !lines[n].trim().startsWith('#') && !lines[n].trim().startsWith('```')) {
+              memberofInfo = lines[n].trim()
+              break
+            }
+          }
+          break
+        }
+      }
+
+      // If we found both property and inheritance info, transform it
+      if (propertyLineIndex >= 0 && inheritanceInfo) {
+        // Use memberof info if available, otherwise use inheritance info
+        let finalInheritanceInfo
+        if (memberofInfo && inheritanceInfo.includes('.')) {
+          // Extract property name from inheritance info and combine with memberof class
+          const propertyName = inheritanceInfo.split('.').pop()
+          finalInheritanceInfo = `${memberofInfo}.${propertyName}`
+        } else {
+          finalInheritanceInfo = inheritanceInfo
+        }
+
+        // Add inheritance info to property line
+        if (propertyLine.startsWith('#### ')) {
+          // For headings, add after the heading
+          lines[propertyLineIndex] = propertyLine + `\n\n_Inherited from_: \`${finalInheritanceInfo}\``
+        } else if (propertyLine.startsWith('- `')) {
+          // For list items, add as a sub-item
+          lines[propertyLineIndex] = propertyLine + `\n    - _Inherited from_: \`${finalInheritanceInfo}\``
+        }
+
+        // Remove the inheritance section
+        // Find the start of the section (might include Memberof)
+        let startIndex = i
+        for (let m = i - 1; m >= Math.max(0, i - 5); m--) {
+          if (lines[m].trim() === '##### Memberof') {
+            startIndex = m
+            break
+          }
+          // Also check for empty lines to find the start of the inheritance block
+          if (lines[m].trim() === '' && m > 0 && lines[m - 1].trim() !== '') {
+            startIndex = m
+            break
+          }
+        }
+
+        // Remove all lines from startIndex to endIndex (inclusive)
+        for (let r = endIndex; r >= startIndex; r--) {
+          lines.splice(r, 1)
+        }
+
+        // Adjust our loop index since we removed lines
+        i = propertyLineIndex
+        modified = true
+      }
+    }
+  }
+
+  // Remove any remaining standalone "##### Memberof" sections
+  if (modified) {
+    const finalLines = lines.join('\n').split('\n')
+    for (let i = finalLines.length - 1; i >= 0; i--) {
+      if (finalLines[i].trim() === '##### Memberof') {
+        // Remove the Memberof line and any following content until next heading or empty line
+        let endMemberof = i
+        for (let j = i + 1; j < finalLines.length; j++) {
+          if (finalLines[j].trim() === '' || finalLines[j].match(/^#{1,6} /)) {
+            break
+          }
+          endMemberof = j
+        }
+        finalLines.splice(i, endMemberof - i + 1)
+      }
+    }
+
+    // Also remove any standalone class name lines that might be leftover
+    const cleanedContent = finalLines
+      .join('\n')
+      .replace(/\n\s*\n\s*([A-Z][a-zA-Z]*)\s*\n\s*\n/g, '\n\n') // Remove standalone class names between empty lines
+      .replace(/\n\s*([A-Z][a-zA-Z]*)\s*\n(?=\s*-|\s*\*\*)/g, '\n') // Remove class names before property lists or sections
+
+    return cleanedContent
+  }
+
+  return modified ? lines.join('\n') : contents
+}
+
 function transformEnumSection(contents) {
   // First, find all sections with "Enumeration Members" headings
   const sections = contents.split(/^## /gm)
@@ -338,8 +504,11 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
         const headingHashesShorter = Array.from({ length: itemHeadingLevel }, (_, k) => '#'.repeat(k + 1)).join('|')
         const itemBlockRegex = new RegExp(
           `${headingHashes} ([^\\n]+)\\n\\n` + // #### propName
+            '(?:_Inherited from_: `([^`]+)`\\n\\n)?' + // optional inheritance info
+            '(?:([A-Za-z]+)\\n)?' + // optional leftover memberof text (like "Workspace")
+            '(?:\\n)?' + // optional empty line after leftover text
             '```ts\\n([^\\n]+);\\n```\\n' + // code block
-            '([\\s\\S]*?)' + // description block
+            '([\\s\\S]*?)' + // description block (may include Index Signature)
             `(?=(?:\\n\\*\\*\\*\\n)?(?=\\n${headingHashes} )|\\n(?:${headingHashesShorter}) |$)`,
           'g',
         )
@@ -348,7 +517,7 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
         let itemMatch
 
         while ((itemMatch = itemBlockRegex.exec(sectionContent)) !== null) {
-          const [, name, typeLine, rawDescription] = itemMatch
+          const [, name, inheritanceInfo, leftoverText, typeLine, rawDescription] = itemMatch
 
           const lines = rawDescription
             .trim()
@@ -358,8 +527,21 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
 
           let deprecation = ''
           const contentLines = []
+          const indexSignatureLines = []
+          let inIndexSignature = false
 
           for (let i = 0; i < lines.length; i++) {
+            if (new RegExp(`^\#{${itemHeadingLevel + 1}}? Index Signature`, 'i').test(lines[i])) {
+              inIndexSignature = true
+              indexSignatureLines.push(lines[i])
+              continue
+            }
+
+            if (inIndexSignature) {
+              indexSignatureLines.push(lines[i])
+              continue
+            }
+
             if (new RegExp(`^\#{${itemHeadingLevel + 1}}? Overrides`, 'i').test(lines[i])) {
               let j = i + 1
               while (j < lines.length && !lines[j].trim().startsWith('#')) j++
@@ -379,12 +561,23 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
           const mainDescription = contentLines[0] || ''
           const otherLines = contentLines.slice(1)
 
+          // Extract index signature type if present
+          let indexSignatureType = null
+          for (const line of indexSignatureLines) {
+            if (line.includes('[') && line.includes(']:')) {
+              indexSignatureType = line.trim()
+              break
+            }
+          }
+
           items.push({
             name,
             typeLine,
             mainDescription,
             otherLines,
             deprecation,
+            inheritanceInfo,
+            indexSignatureType,
           })
         }
 
@@ -392,12 +585,26 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
 
         let result = `**${headerTitle}**:\n\n`
 
-        for (const { name, typeLine, mainDescription, otherLines, deprecation } of items) {
+        for (const {
+          name,
+          typeLine,
+          mainDescription,
+          otherLines,
+          deprecation,
+          inheritanceInfo,
+          indexSignatureType,
+        } of items) {
           const typeMatch = typeLine.match(/:\s*([^;]+)/)
           if (!typeMatch) continue
 
           let type = typeMatch[1].trim()
           type = type.replace(/readonly\s+/, '').trim()
+
+          // Use index signature type if available, otherwise use the original type
+          if (indexSignatureType) {
+            type = indexSignatureType
+          }
+
           type = type.replace(/([*_`\[\]()<>|])/g, '\\$1')
 
           if (!mainDescription && deprecation) {
@@ -415,6 +622,10 @@ function transformPropsOrTypeDeclaration(contents, headerTitle) {
 
           if (deprecation) {
             result += `    - **_Deprecated_** - ${deprecation}\n`
+          }
+
+          if (inheritanceInfo) {
+            result += `    - _Inherited from_: \`${inheritanceInfo}\`\n`
           }
         }
 
