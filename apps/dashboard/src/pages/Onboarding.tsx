@@ -328,9 +328,9 @@ console.log(response.result);
   `,
   },
   python: {
-    install: `pip install daytona-sdk`,
+    install: `pip install daytona`,
     run: `python main.py`,
-    example: `from daytona_sdk import Daytona, DaytonaConfig
+    example: `from daytona import Daytona, DaytonaConfig
   
 # Define the configuration
 config = DaytonaConfig(api_key="your-api-key")
