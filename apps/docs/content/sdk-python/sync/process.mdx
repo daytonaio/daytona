@@ -117,41 +117,40 @@ Matplotlib charts are automatically detected and returned in the `charts` field
 of the `ExecutionArtifacts` object.
 
 ```python
-           code = '''
-           import matplotlib.pyplot as plt
-           import numpy as np
+code = '''
+import matplotlib.pyplot as plt
+import numpy as np
 
-           x = np.linspace(0, 10, 30)
-           y = np.sin(x)
+x = np.linspace(0, 10, 30)
+y = np.sin(x)
 
-           plt.figure(figsize=(8, 5))
-           plt.plot(x, y, 'b-', linewidth=2)
-           plt.title('Line Chart')
-           plt.xlabel('X-axis (seconds)')
-           plt.ylabel('Y-axis (amplitude)')
-           plt.grid(True)
-           plt.show()
-           '''
+plt.figure(figsize=(8, 5))
+plt.plot(x, y, 'b-', linewidth=2)
+plt.title('Line Chart')
+plt.xlabel('X-axis (seconds)')
+plt.ylabel('Y-axis (amplitude)')
+plt.grid(True)
+plt.show()
+'''
 
-           response = sandbox.process.code_run(code)
-           chart = response.artifacts.charts[0]
+response = sandbox.process.code_run(code)
+chart = response.artifacts.charts[0]
 
-           print(f"Type: {chart.type}")
-           print(f"Title: {chart.title}")
-           if chart.type == ChartType.LINE and isinstance(chart, LineChart):
-               print(f"X Label: {chart.x_label}")
-               print(f"Y Label: {chart.y_label}")
-               print(f"X Ticks: {chart.x_ticks}")
-               print(f"X Tick Labels: {chart.x_tick_labels}")
-               print(f"X Scale: {chart.x_scale}")
-               print(f"Y Ticks: {chart.y_ticks}")
-               print(f"Y Tick Labels: {chart.y_tick_labels}")
-               print(f"Y Scale: {chart.y_scale}")
-               print("Elements:")
-               for element in chart.elements:
-                   print(f"
-Label: {element.label}")
-                   print(f"	Points: {element.points}")
+print(f"Type: {chart.type}")
+print(f"Title: {chart.title}")
+if chart.type == ChartType.LINE and isinstance(chart, LineChart):
+    print(f"X Label: {chart.x_label}")
+    print(f"Y Label: {chart.y_label}")
+    print(f"X Ticks: {chart.x_ticks}")
+    print(f"X Tick Labels: {chart.x_tick_labels}")
+    print(f"X Scale: {chart.x_scale}")
+    print(f"Y Ticks: {chart.y_ticks}")
+    print(f"Y Tick Labels: {chart.y_tick_labels}")
+    print(f"Y Scale: {chart.y_scale}")
+    print("Elements:")
+    for element in chart.elements:
+        print(f"Label: {element.label}")
+        print(f"Points: {element.points}")
 ```
 
 #### Process.create_session
