@@ -75,9 +75,10 @@ const Keys: React.FC = () => {
   const handleCreateKey = async (
     name: string,
     permissions: CreateApiKeyPermissionsEnum[],
+    expiresAt: Date | null,
   ): Promise<ApiKeyResponse | null> => {
     try {
-      const key = (await apiKeyApi.createApiKey({ name, permissions }, selectedOrganization?.id)).data
+      const key = (await apiKeyApi.createApiKey({ name, permissions, expiresAt }, selectedOrganization?.id)).data
       toast.success('API key created successfully')
       await fetchKeys(false)
       return key
