@@ -5754,23 +5754,23 @@ components:
       type: object
     GitStatus:
       example:
-        FileStatus[]:
-          - extra: extra
-            name: name
-            staging: staging
-            worktree: worktree
-          - extra: extra
-            name: name
-            staging: staging
-            worktree: worktree
         behind: 6.027456183070403
+        fileStatus:
+          - extra: extra
+            name: name
+            staging: staging
+            worktree: worktree
+          - extra: extra
+            name: name
+            staging: staging
+            worktree: worktree
         ahead: 0.8008281904610115
         branchPublished: true
         currentBranch: currentBranch
       properties:
         currentBranch:
           type: string
-        FileStatus[]:
+        fileStatus:
           items:
             $ref: '#/components/schemas/FileStatus'
           type: array
@@ -5781,8 +5781,8 @@ components:
         branchPublished:
           type: boolean
       required:
-        - 'FileStatus[]'
         - currentBranch
+        - fileStatus
       type: object
     ExecuteRequest:
       example:

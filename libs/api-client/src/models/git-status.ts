@@ -33,7 +33,7 @@ export interface GitStatus {
    * @type {Array<FileStatus>}
    * @memberof GitStatus
    */
-  'FileStatus[]': Array<FileStatus>
+  fileStatus: Array<FileStatus>
   /**
    *
    * @type {number}

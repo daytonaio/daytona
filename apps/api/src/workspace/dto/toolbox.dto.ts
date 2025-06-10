@@ -190,7 +190,6 @@ export class GitStatusDto {
 
   @ApiProperty({
     type: [FileStatusDto],
-    name: 'FileStatus[]',
   })
   fileStatus: FileStatusDto[]
 

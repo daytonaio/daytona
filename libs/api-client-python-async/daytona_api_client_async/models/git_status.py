@@ -29,12 +29,12 @@ class GitStatus(BaseModel):
     GitStatus
     """ # noqa: E501
     current_branch: StrictStr = Field(alias="currentBranch")
-    file_status: List[FileStatus] = Field(alias="FileStatus[]")
+    file_status: List[FileStatus] = Field(alias="fileStatus")
     ahead: Optional[Union[StrictFloat, StrictInt]] = None
     behind: Optional[Union[StrictFloat, StrictInt]] = None
     branch_published: Optional[StrictBool] = Field(default=None, alias="branchPublished")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["currentBranch", "FileStatus[]", "ahead", "behind", "branchPublished"]
+    __properties: ClassVar[List[str]] = ["currentBranch", "fileStatus", "ahead", "behind", "branchPublished"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -83,7 +83,7 @@ class GitStatus(BaseModel):
             for _item_file_status in self.file_status:
                 if _item_file_status:
                     _items.append(_item_file_status.to_dict())
-            _dict['FileStatus[]'] = _items
+            _dict['fileStatus'] = _items
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -102,7 +102,7 @@ class GitStatus(BaseModel):
 
         _obj = cls.model_validate({
             "currentBranch": obj.get("currentBranch"),
-            "FileStatus[]": [FileStatus.from_dict(_item) for _item in obj["FileStatus[]"]] if obj.get("FileStatus[]") is not None else None,
+            "fileStatus": [FileStatus.from_dict(_item) for _item in obj["fileStatus"]] if obj.get("fileStatus") is not None else None,
             "ahead": obj.get("ahead"),
             "behind": obj.get("behind"),
             "branchPublished": obj.get("branchPublished")
