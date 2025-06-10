@@ -37,34 +37,53 @@ async def process_streaming_response(
             next_chunk = None
             exit_check_streak = 0
 
-            while True:
-                if next_chunk is None:
-                    next_chunk = asyncio.create_task(anext(stream, None))
-                timeout = asyncio.create_task(asyncio.sleep(chunk_timeout))
+            try:
+                while True:
+                    if next_chunk is None:
+                        next_chunk = asyncio.create_task(anext(stream, None))
+                    timeout_task = asyncio.create_task(asyncio.sleep(chunk_timeout))
 
-                done, pending = await asyncio.wait([next_chunk, timeout], return_when=asyncio.FIRST_COMPLETED)
+                    done, _ = await asyncio.wait([next_chunk, timeout_task], return_when=asyncio.FIRST_COMPLETED)
 
-                if next_chunk in done:
-                    timeout.cancel()
-                    chunk = next_chunk.result()
-                    next_chunk = None
+                    if next_chunk in done:
+                        # Cancel timeout task and handle any cancellation errors
+                        timeout_task.cancel()
+                        try:
+                            await timeout_task
+                        except asyncio.CancelledError:
+                            pass
 
-                    if chunk is None:
-                        break
+                        chunk = next_chunk.result()
+                        next_chunk = None
 
-                    on_chunk(chunk.decode("utf-8"))
-                    exit_check_streak = 0  # Reset on activity
-
-                elif timeout in done:
-                    should_end = should_terminate()
-                    if inspect.isawaitable(should_end):
-                        should_end = await should_end
-
-                    if should_end:
-                        exit_check_streak += 1
-                        if not require_consecutive_termination or exit_check_streak > 1:
-                            if next_chunk in pending:
-                                next_chunk.cancel()
+                        if chunk is None:
                             break
-                    else:
-                        exit_check_streak = 0
+
+                        on_chunk(chunk.decode("utf-8", "ignore"))
+                        exit_check_streak = 0  # Reset on activity
+
+                    elif timeout_task in done:
+                        should_end = should_terminate()
+                        if inspect.isawaitable(should_end):
+                            should_end = await should_end
+
+                        if should_end:
+                            exit_check_streak += 1
+                            if not require_consecutive_termination or exit_check_streak > 1:
+                                break
+                        else:
+                            exit_check_streak = 0
+            finally:
+                # Final cleanup - ensure any remaining tasks are cancelled
+                if timeout_task:
+                    timeout_task.cancel()
+                    try:
+                        await timeout_task
+                    except asyncio.CancelledError:
+                        pass
+                if next_chunk:
+                    next_chunk.cancel()
+                    try:
+                        await next_chunk
+                    except asyncio.CancelledError:
+                        pass
