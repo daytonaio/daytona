@@ -972,6 +972,33 @@ paths:
       summary: Create user
       tags:
         - users
+  /users/{id}:
+    get:
+      operationId: getUser
+      parameters:
+        - explode: false
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User details
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get user by ID
+      tags:
+        - users
   /users/{id}/regenerate-key-pair:
     post:
       operationId: regenerateKeyPair
@@ -1015,6 +1042,28 @@ paths:
             - profile
             - email
       summary: Get available account providers
+      tags:
+        - users
+  /users/linked-accounts:
+    post:
+      operationId: linkAccount
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLinkedAccount'
+        required: true
+      responses:
+        '204':
+          description: Account linked successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Link account
       tags:
         - users
   /users/linked-accounts/{provider}/{providerUserId}:
@@ -4971,6 +5020,21 @@ components:
         - displayName
         - name
       type: object
+    CreateLinkedAccount:
+      example:
+        provider: provider
+        userId: userId
+      properties:
+        provider:
+          description: The authentication provider of the secondary account
+          type: string
+        userId:
+          description: The user ID of the secondary account
+          type: string
+      required:
+        - provider
+        - userId
+      type: object
     WorkspaceInfo:
       properties:
         created:
@@ -6304,6 +6368,7 @@ components:
         lastUsedAt:
           description: Last used timestamp
           example: 2023-01-01T00:00:00.000Z
+          nullable: true
           type: string
         errorReason:
           description: The error reason of the volume

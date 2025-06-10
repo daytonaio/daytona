@@ -56,7 +56,6 @@ services:
       - TAGLIST_PAGE_SIZE=100
       - REGISTRY_SECURED=false
       - CATALOG_ELEMENTS_LIMIT=1000
-    container_name: registry-ui
 
   registry:
     image: registry:2.8.2
@@ -70,7 +69,6 @@ services:
       REGISTRY_STORAGE_DELETE_ENABLED: 'true'
     volumes:
       - registry:/var/lib/registry
-    container_name: registry
 
   maildev:
     image: maildev/maildev
@@ -84,7 +82,9 @@ services:
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
-    container_name: minio
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.67.0
 
 volumes:
   registry: {}

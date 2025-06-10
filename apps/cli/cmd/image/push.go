@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
@@ -107,6 +108,10 @@ var PushCmd = &cobra.Command{
 			Name: targetImage,
 		}
 
+		if entrypointFlag != "" {
+			createImage.Entrypoint = strings.Split(entrypointFlag, " ")
+		}
+
 		// Poll until the image is really available on the registry
 		// This is a workaround for harbor's delay in making newly created images available
 		for {
@@ -135,4 +140,8 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessage(fmt.Sprintf("%s  Use '%s' to create a new sandbox using this image", views_common.Checkmark, targetImage))
 		return nil
 	},
+}
+
+func init() {
+	PushCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the image")
 }

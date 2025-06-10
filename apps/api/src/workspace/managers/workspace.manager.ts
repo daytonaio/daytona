@@ -34,6 +34,7 @@ import { WorkspaceArchivedEvent } from '../events/workspace-archived.event'
 import { WorkspaceDestroyedEvent } from '../events/workspace-destroyed.event'
 import { WorkspaceCreatedEvent } from '../events/workspace-create.event'
 import { ImageNode } from '../entities/image-node.entity'
+import { OtelSpan } from '../../common/decorators/otel.decorator'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = true
@@ -60,6 +61,7 @@ export class WorkspaceManager {
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
+  @OtelSpan()
   async autostopCheck(): Promise<void> {
     //  lock the sync to only run one instance at a time
     const snapshotCheckWorkerSelected = await this.redis.get('auto-stop-check-worker-selected')
@@ -178,6 +180,7 @@ export class WorkspaceManager {
   }
 
   @Cron(CronExpression.EVERY_10_SECONDS, { name: 'sync-states' })
+  @OtelSpan()
   async syncStates(): Promise<void> {
     const lockKey = 'sync-states'
     if (!(await this.redisLockProvider.lock(lockKey, 30))) {

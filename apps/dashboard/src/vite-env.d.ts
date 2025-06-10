@@ -19,6 +19,9 @@ interface ImportMetaEnv {
   readonly VITE_POSTHOG_KEY: string | undefined
   readonly VITE_POSTHOG_HOST: string | undefined
   readonly VITE_LINKED_ACCOUNTS_ENABLED: string | undefined
+  readonly VITE_ANNOUNCEMENT_BANNER_TEXT: string | undefined
+  readonly VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL: string | undefined
+  readonly VITE_PYLON_APP_ID: string | undefined
 }
 
 interface ImportMeta {

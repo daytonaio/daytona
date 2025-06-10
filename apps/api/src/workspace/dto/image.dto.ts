@@ -45,7 +45,7 @@ export class ImageDto {
   updatedAt: Date
 
   @ApiProperty({ nullable: true })
-  lastUsedAt: Date
+  lastUsedAt?: Date
 
   static fromImage(image: Image): ImageDto {
     return {

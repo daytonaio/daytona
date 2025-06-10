@@ -70,7 +70,7 @@ export class Image {
   updatedAt: Date
 
   @Column({ nullable: true })
-  lastUsedAt: Date
+  lastUsedAt?: Date
 
   @ManyToOne(() => BuildInfo, (buildInfo) => buildInfo.images, {
     nullable: true,

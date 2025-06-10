@@ -36,7 +36,7 @@ class VolumeDto(BaseModel):
     state: VolumeState = Field(description="Volume state")
     created_at: StrictStr = Field(description="Creation timestamp", alias="createdAt")
     updated_at: StrictStr = Field(description="Last update timestamp", alias="updatedAt")
-    last_used_at: StrictStr = Field(description="Last used timestamp", alias="lastUsedAt")
+    last_used_at: Optional[StrictStr] = Field(description="Last used timestamp", alias="lastUsedAt")
     error_reason: Optional[StrictStr] = Field(description="The error reason of the volume", alias="errorReason")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
@@ -96,6 +96,11 @@ class VolumeDto(BaseModel):
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
+
+        # set to None if last_used_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.last_used_at is None and "last_used_at" in self.model_fields_set:
+            _dict["lastUsedAt"] = None
 
         # set to None if error_reason (nullable) is None
         # and model_fields_set contains the field

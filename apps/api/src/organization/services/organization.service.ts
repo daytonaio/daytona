@@ -32,6 +32,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../../workspace/common/redis-lock.provider'
 import { OrganizationSuspendedWorkspaceStoppedEvent } from '../events/organization-suspended-workspace-stopped.event'
+import { WorkspaceDesiredState } from '../../workspace/enums/workspace-desired-state.enum'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -317,7 +318,8 @@ export class OrganizationService implements OnModuleInit {
     const workspaces = await this.workspaceRepository.find({
       where: {
         organizationId: In(suspendedOrganizationIds),
-        state: WorkspaceState.STARTED,
+        desiredState: WorkspaceDesiredState.STARTED,
+        state: Not(WorkspaceState.ERROR),
       },
     })
 

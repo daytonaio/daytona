@@ -17,7 +17,7 @@ type FileInfo struct {
 type ReplaceRequest struct {
 	Files    []string `json:"files" validate:"required"`
 	Pattern  string   `json:"pattern" validate:"required"`
-	NewValue string   `json:"newValue" validate:"required"`
+	NewValue *string  `json:"newValue" validate:"required"`
 } // @name ReplaceRequest
 
 type ReplaceResult struct {
