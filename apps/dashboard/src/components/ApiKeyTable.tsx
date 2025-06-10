@@ -107,6 +107,30 @@ export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableP
   )
 }
 
+const getExpiresAtColor = (expiresAt: Date | null) => {
+  if (!expiresAt) {
+    return 'text-foreground'
+  }
+
+  const MILLISECONDS_IN_MINUTE = 1000 * 60
+  const MINUTES_IN_DAY = 24 * 60
+
+  const diffInMinutes = Math.floor((new Date(expiresAt).getTime() - new Date().getTime()) / MILLISECONDS_IN_MINUTE)
+
+  // Already expired
+  if (diffInMinutes < 0) {
+    return 'text-red-500'
+  }
+
+  // Expires within a day
+  if (diffInMinutes < MINUTES_IN_DAY) {
+    return 'text-yellow-600 dark:text-yellow-400'
+  }
+
+  // Expires in more than a day
+  return 'text-foreground'
+}
+
 const getColumns = ({
   onRevoke,
   loadingKeys,
@@ -150,14 +174,77 @@ const getColumns = ({
       accessorKey: 'createdAt',
       header: 'Created',
       cell: ({ row }) => {
-        return getRelativeTimeString(row.original.createdAt).relativeTimeString
+        const createdAt = row.original.createdAt
+        const relativeTime = getRelativeTimeString(createdAt).relativeTimeString
+        const fullDate = new Date(createdAt).toLocaleString()
+
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="cursor-default">{relativeTime}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{fullDate}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
       },
     },
     {
       accessorKey: 'lastUsedAt',
       header: 'Last Used',
       cell: ({ row }) => {
-        return getRelativeTimeString(row.original.lastUsedAt).relativeTimeString
+        const lastUsedAt = row.original.lastUsedAt
+        const relativeTime = getRelativeTimeString(lastUsedAt).relativeTimeString
+
+        if (!lastUsedAt) {
+          return relativeTime
+        }
+
+        const fullDate = new Date(lastUsedAt).toLocaleString()
+
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className="cursor-default">{relativeTime}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{fullDate}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      },
+    },
+    {
+      accessorKey: 'expiresAt',
+      header: 'Expires',
+      cell: ({ row }) => {
+        const expiresAt = row.original.expiresAt
+        const relativeTime = getRelativeTimeString(expiresAt).relativeTimeString
+
+        if (!expiresAt) {
+          return relativeTime
+        }
+
+        const fullDate = new Date(expiresAt).toLocaleString()
+        const color = getExpiresAtColor(expiresAt)
+
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <span className={`cursor-default ${color}`}>{relativeTime}</span>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{fullDate}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
       },
     },
     {
