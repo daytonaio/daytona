@@ -56,28 +56,20 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="relative w-full">
-      <SidebarProvider>
+      <SidebarProvider isBannerVisible={isBannerVisible}>
         <TableSortingProvider>
-          <Sidebar />
+          <Sidebar isBannerVisible={isBannerVisible} />
           <SidebarTrigger className="md:hidden" />
-          <div className="w-full">
+          <div className={cn('w-full', isBannerVisible ? 'md:pt-12' : '')}>
             <Outlet />
           </div>
           <Toaster />
           <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
         </TableSortingProvider>
+      </SidebarProvider>
       {isBannerVisible && bannerText && (
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
-      <SidebarProvider isBannerVisible={isBannerVisible}>
-        <Sidebar isBannerVisible={isBannerVisible} />
-        <SidebarTrigger className="md:hidden" />
-        <div className={cn('w-full', isBannerVisible ? 'md:pt-12' : '')}>
-          <Outlet />
-        </div>
-        <Toaster />
-        <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
-      </SidebarProvider>
     </div>
   )
 }
