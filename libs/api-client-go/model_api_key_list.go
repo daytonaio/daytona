@@ -30,8 +30,11 @@ type ApiKeyList struct {
 	// When the API key was created
 	CreatedAt time.Time `json:"createdAt"`
 	// The list of organization resource permissions assigned to the API key
-	Permissions []string     `json:"permissions"`
-	LastUsedAt  NullableTime `json:"lastUsedAt"`
+	Permissions []string `json:"permissions"`
+	// When the API key was last used
+	LastUsedAt NullableTime `json:"lastUsedAt"`
+	// When the API key expires
+	ExpiresAt NullableTime `json:"expiresAt"`
 }
 
 type _ApiKeyList ApiKeyList
@@ -40,13 +43,14 @@ type _ApiKeyList ApiKeyList
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime) *ApiKeyList {
+func NewApiKeyList(name string, value string, createdAt time.Time, permissions []string, lastUsedAt NullableTime, expiresAt NullableTime) *ApiKeyList {
 	this := ApiKeyList{}
 	this.Name = name
 	this.Value = value
 	this.CreatedAt = createdAt
 	this.Permissions = permissions
 	this.LastUsedAt = lastUsedAt
+	this.ExpiresAt = expiresAt
 	return &this
 }
 
@@ -180,6 +184,32 @@ func (o *ApiKeyList) SetLastUsedAt(v time.Time) {
 	o.LastUsedAt.Set(&v)
 }
 
+// GetExpiresAt returns the ExpiresAt field value
+// If the value is explicit nil, the zero value for time.Time will be returned
+func (o *ApiKeyList) GetExpiresAt() time.Time {
+	if o == nil || o.ExpiresAt.Get() == nil {
+		var ret time.Time
+		return ret
+	}
+
+	return *o.ExpiresAt.Get()
+}
+
+// GetExpiresAtOk returns a tuple with the ExpiresAt field value
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ApiKeyList) GetExpiresAtOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ExpiresAt.Get(), o.ExpiresAt.IsSet()
+}
+
+// SetExpiresAt sets field value
+func (o *ApiKeyList) SetExpiresAt(v time.Time) {
+	o.ExpiresAt.Set(&v)
+}
+
 func (o ApiKeyList) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -195,6 +225,7 @@ func (o ApiKeyList) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["permissions"] = o.Permissions
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	toSerialize["expiresAt"] = o.ExpiresAt.Get()
 	return toSerialize, nil
 }
 
@@ -208,6 +239,7 @@ func (o *ApiKeyList) UnmarshalJSON(data []byte) (err error) {
 		"createdAt",
 		"permissions",
 		"lastUsedAt",
+		"expiresAt",
 	}
 
 	allProperties := make(map[string]interface{})

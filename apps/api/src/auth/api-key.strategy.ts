@@ -34,6 +34,10 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       const apiKey = await this.apiKeyService.getApiKeyByValue(token)
       this.logger.debug(`API key found for userId: ${apiKey.userId}`)
 
+      if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+        throw new UnauthorizedException('This API key has expired')
+      }
+
       this.logger.debug(`Updating last used timestamp for API key: ${token.substring(0, 8)}...`)
       await this.apiKeyService.updateLastUsedAt(apiKey.organizationId, apiKey.userId, apiKey.name, new Date())
 
@@ -58,6 +62,11 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
       return result
     } catch (error) {
       this.logger.debug('Error in validate method:', error)
+
+      if (error instanceof UnauthorizedException) {
+        throw error
+      }
+
       throw new UnauthorizedException('Invalid API key')
     }
   }

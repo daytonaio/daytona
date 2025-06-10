@@ -20,7 +20,7 @@ import json
 
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List
+from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -32,8 +32,9 @@ class ApiKeyResponse(BaseModel):
     value: StrictStr = Field(description="The API key value")
     created_at: datetime = Field(description="When the API key was created", alias="createdAt")
     permissions: List[StrictStr] = Field(description="The list of organization resource permissions assigned to the API key")
+    expires_at: Optional[datetime] = Field(description="When the API key expires", alias="expiresAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions"]
+    __properties: ClassVar[List[str]] = ["name", "value", "createdAt", "permissions", "expiresAt"]
 
     @field_validator('permissions')
     def permissions_validate_enum(cls, value):
@@ -89,6 +90,11 @@ class ApiKeyResponse(BaseModel):
             for _key, _value in self.additional_properties.items():
                 _dict[_key] = _value
 
+        # set to None if expires_at (nullable) is None
+        # and model_fields_set contains the field
+        if self.expires_at is None and "expires_at" in self.model_fields_set:
+            _dict['expiresAt'] = None
+
         return _dict
 
     @classmethod
@@ -104,7 +110,8 @@ class ApiKeyResponse(BaseModel):
             "name": obj.get("name"),
             "value": obj.get("value"),
             "createdAt": obj.get("createdAt"),
-            "permissions": obj.get("permissions")
+            "permissions": obj.get("permissions"),
+            "expiresAt": obj.get("expiresAt")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():
