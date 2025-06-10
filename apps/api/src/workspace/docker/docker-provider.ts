@@ -391,7 +391,11 @@ export class DockerProvider implements OnModuleInit {
       return false
     }
     const images = await this.docker.listImages({})
-    const imageExists = images.some((imageInfo) => imageInfo.RepoTags && imageInfo.RepoTags.includes(image))
+    const imageExists = images.some(
+      (imageInfo) =>
+        (imageInfo.RepoTags && imageInfo.RepoTags.includes(image)) ||
+        (imageInfo.RepoDigests && imageInfo.RepoDigests.includes(image)),
+    )
     return imageExists
   }
 

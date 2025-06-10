@@ -32,6 +32,12 @@ func (d *DockerClient) ImageExists(ctx context.Context, imageName string, includ
 				break
 			}
 		}
+		for _, digest := range image.RepoDigests {
+			if strings.HasPrefix(digest, imageName) {
+				found = true
+				break
+			}
+		}
 	}
 
 	if found {

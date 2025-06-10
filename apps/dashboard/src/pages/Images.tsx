@@ -166,10 +166,10 @@ const Images: React.FC = () => {
   const validateImageName = (name: string): string | null => {
     // Basic format check
     const imageNameRegex =
-      /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*:[a-z0-9]+(?:[._-][a-z0-9]+)*$/
+      /^(?:(?:[a-z0-9.-]+(?::[0-9]+)?\/)?[a-z0-9]+(?:[._-][a-z0-9]+)*\/)*[a-z0-9]+(?:[._-][a-z0-9]+)*(?::(?!latest$)[A-Za-z0-9._-]{1,128})?(?:@sha256:[a-f0-9]{64})?$/
 
     if (!name.includes(':') || name.endsWith(':') || /:\s*$/.test(name)) {
-      return 'Image name must include a tag (e.g., ubuntu:22.04)'
+      return 'Image name must include a tag/digest (e.g., ubuntu:22.04)'
     }
 
     if (name.endsWith(':latest')) {
@@ -177,7 +177,7 @@ const Images: React.FC = () => {
     }
 
     if (!imageNameRegex.test(name)) {
-      return 'Invalid image name format. Must be lowercase, may contain digits, dots, dashes, and single slashes between components'
+      return "Invalid image format: must have a lowercase name, include a tag or digest, and follow Docker's image format rules."
     }
 
     return null
@@ -360,7 +360,7 @@ const Images: React.FC = () => {
                   placeholder="ubuntu:22.04"
                 />
                 <p className="text-sm text-muted-foreground mt-1 pl-1">
-                  Must include a tag (e.g., ubuntu:22.04). The tag "latest" is not allowed.
+                  Use a non-"latest" tag/digest (e.g. ubuntu:22.04) and follow Docker's image format rules.
                 </p>
               </div>
               <div className="space-y-3">
