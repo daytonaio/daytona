@@ -22,28 +22,43 @@ export function getRelativeTimeString(
     const date = new Date(timestamp)
     const now = new Date()
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60))
+    const isFuture = diffInMinutes < 0
+    const absDiffInMinutes = Math.abs(diffInMinutes)
 
-    if (diffInMinutes < 1) return { date, relativeTimeString: 'just now' }
-    if (diffInMinutes === 1) return { date, relativeTimeString: '1 minute ago' }
-    if (diffInMinutes < 60) return { date, relativeTimeString: `${diffInMinutes} minutes ago` }
+    if (absDiffInMinutes < 1)
+      return {
+        date,
+        relativeTimeString: isFuture ? 'shortly' : 'just now',
+      }
 
-    const hours = Math.floor(diffInMinutes / 60)
-    const minutes = diffInMinutes % 60
-
-    if (hours === 1) {
-      return minutes > 0
-        ? { date, relativeTimeString: `1 hour ${minutes} minutes ago` }
-        : { date, relativeTimeString: '1 hour ago' }
+    if (absDiffInMinutes < 60) {
+      return {
+        date,
+        relativeTimeString: isFuture ? `in ${absDiffInMinutes}m` : `${absDiffInMinutes}m ago`,
+      }
     }
 
+    const hours = Math.floor(absDiffInMinutes / 60)
     if (hours < 24) {
-      return minutes > 0
-        ? { date, relativeTimeString: `${hours} hours ${minutes} minutes ago` }
-        : { date, relativeTimeString: `${hours} hours ago` }
+      return {
+        date,
+        relativeTimeString: isFuture ? `in ${hours}h` : `${hours}h ago`,
+      }
     }
 
     const days = Math.floor(hours / 24)
-    return { date, relativeTimeString: days === 1 ? 'yesterday' : `${days} days ago` }
+    if (days < 365) {
+      return {
+        date,
+        relativeTimeString: isFuture ? `in ${days}d` : `${days}d ago`,
+      }
+    }
+
+    const years = Math.floor(days / 365)
+    return {
+      date,
+      relativeTimeString: isFuture ? `in ${years}y` : `${years}y ago`,
+    }
   } catch (e) {
     return { date: new Date(), relativeTimeString: fallback }
   }
