@@ -101,3 +101,4 @@ models/user-public-key.ts
 models/user.ts
 models/volume-dto.ts
 models/volume-state.ts
+models/workspace.ts

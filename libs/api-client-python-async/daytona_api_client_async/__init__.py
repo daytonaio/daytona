@@ -125,3 +125,4 @@ from daytona_api_client_async.models.user import User
 from daytona_api_client_async.models.user_public_key import UserPublicKey
 from daytona_api_client_async.models.volume_dto import VolumeDto
 from daytona_api_client_async.models.volume_state import VolumeState
+from daytona_api_client_async.models.workspace import Workspace

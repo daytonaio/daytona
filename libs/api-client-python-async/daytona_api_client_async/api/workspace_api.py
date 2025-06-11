@@ -22,8 +22,8 @@ from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
-from daytona_api_client_async.models.sandbox import Sandbox
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
+from daytona_api_client_async.models.workspace import Workspace
 
 from daytona_api_client_async.api_client import ApiClient, RequestSerialized
 from daytona_api_client_async.api_response import ApiResponse
@@ -330,7 +330,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Sandbox:
+    ) -> Workspace:
         """(Deprecated) [DEPRECATED] Create workspace backup
 
 
@@ -371,7 +371,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -401,7 +401,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Sandbox]:
+    ) -> ApiResponse[Workspace]:
         """(Deprecated) [DEPRECATED] Create workspace backup
 
 
@@ -442,7 +442,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -513,7 +513,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -607,7 +607,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Sandbox:
+    ) -> Workspace:
         """(Deprecated) [DEPRECATED] Create a new workspace
 
 
@@ -648,7 +648,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -678,7 +678,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Sandbox]:
+    ) -> ApiResponse[Workspace]:
         """(Deprecated) [DEPRECATED] Create a new workspace
 
 
@@ -719,7 +719,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -790,7 +790,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1764,7 +1764,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Sandbox:
+    ) -> Workspace:
         """(Deprecated) [DEPRECATED] Get workspace details
 
 
@@ -1808,7 +1808,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1839,7 +1839,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Sandbox]:
+    ) -> ApiResponse[Workspace]:
         """(Deprecated) [DEPRECATED] Get workspace details
 
 
@@ -1883,7 +1883,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1958,7 +1958,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Sandbox",
+            '200': "Workspace",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2058,7 +2058,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[Sandbox]:
+    ) -> List[Workspace]:
         """(Deprecated) [DEPRECATED] List all workspaces
 
 
@@ -2102,7 +2102,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "List[Workspace]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2133,7 +2133,7 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[Sandbox]]:
+    ) -> ApiResponse[List[Workspace]]:
         """(Deprecated) [DEPRECATED] List all workspaces
 
 
@@ -2177,7 +2177,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "List[Workspace]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2252,7 +2252,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[Sandbox]",
+            '200': "List[Workspace]",
         }
         response_data = await self.api_client.call_api(
             *_param,

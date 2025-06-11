@@ -98,5 +98,6 @@ model_user.go
 model_user_public_key.go
 model_volume_dto.go
 model_volume_state.go
+model_workspace.go
 response.go
 utils.go

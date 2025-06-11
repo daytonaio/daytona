@@ -36,9 +36,9 @@ import type { CreateWorkspace } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
-import type { Sandbox } from '../models'
-// @ts-ignore
 import type { SandboxLabels } from '../models'
+// @ts-ignore
+import type { Workspace } from '../models'
 /**
  * WorkspaceApi - axios parameter creator
  * @export
@@ -828,7 +828,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createBackupWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
@@ -858,7 +858,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspaceDeprecated(
         createWorkspace,
         xDaytonaOrganizationID,
@@ -989,7 +989,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Sandbox>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
@@ -1022,7 +1022,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       verbose?: boolean,
       labels?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Sandbox>>> {
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Workspace>>> {
       const localVarAxiosArgs = await localVarAxiosParamCreator.listWorkspacesDeprecated(
         xDaytonaOrganizationID,
         verbose,
@@ -1274,7 +1274,7 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Sandbox> {
+    ): AxiosPromise<Workspace> {
       return localVarFp
         .createBackupWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -1292,7 +1292,7 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Sandbox> {
+    ): AxiosPromise<Workspace> {
       return localVarFp
         .createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
@@ -1372,7 +1372,7 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Sandbox> {
+    ): AxiosPromise<Workspace> {
       return localVarFp
         .getWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, verbose, options)
         .then((request) => request(axios, basePath))
@@ -1392,7 +1392,7 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
       verbose?: boolean,
       labels?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<Array<Sandbox>> {
+    ): AxiosPromise<Array<Workspace>> {
       return localVarFp
         .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
         .then((request) => request(axios, basePath))
