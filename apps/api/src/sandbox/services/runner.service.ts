@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron } from '@nestjs/schedule'
 import { FindOptionsWhere, In, Not, Raw, Repository } from 'typeorm'
@@ -67,8 +67,20 @@ export class RunnerService {
     return this.runnerRepository.find()
   }
 
-  findOne(id: string): Promise<Runner | null> {
+  async findOne(id: string): Promise<Runner | null> {
     return this.runnerRepository.findOneBy({ id })
+  }
+
+  async findBySandboxId(sandboxId: string): Promise<Runner | null> {
+    const sandbox = await this.sandboxRepository.findOneBy({ id: sandboxId })
+    if (!sandbox) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+    }
+    if (!sandbox.runnerId) {
+      throw new NotFoundException(`Sandbox with ID ${sandboxId} does not have a runner`)
+    }
+
+    return this.runnerRepository.findOneBy({ id: sandbox.runnerId })
   }
 
   async findAvailableRunners(params: GetRunnerParams): Promise<Runner[]> {

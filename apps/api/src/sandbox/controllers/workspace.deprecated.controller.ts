@@ -59,6 +59,8 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
+import { TypedConfigService } from '../../config/typed-config.service'
+import { BadRequestError } from '../../exceptions/bad-request.exception'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -73,6 +75,7 @@ export class WorkspaceController {
     @InjectRedis() private readonly redis: Redis,
     private readonly runnerService: RunnerService,
     private readonly workspaceService: WorkspaceService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   @Get()
@@ -448,6 +451,27 @@ export class WorkspaceController {
     @Param('workspaceId') workspaceId: string,
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    const proxyDomain = this.configService.get('proxy.domain')
+    const proxyProtocol = this.configService.get('proxy.protocol')
+    if (proxyDomain && proxyProtocol) {
+      const workspace = await this.workspaceService.findOne(workspaceId)
+      if (!workspace) {
+        throw new NotFoundException(`Workspace with ID ${workspaceId} not found`)
+      }
+
+      // Return new preview url only for updated workspaces/sandboxes
+      if (workspace.daemonVersion) {
+        return {
+          url: `${proxyProtocol}://${port}-${workspaceId}.${proxyDomain}`,
+          token: workspace.authToken,
+        }
+      }
+    }
+
     return this.workspaceService.getPortPreviewUrl(workspaceId, port)
   }
 

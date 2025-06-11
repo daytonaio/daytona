@@ -16,7 +16,6 @@ import { firstValueFrom } from 'rxjs'
 import { UserService } from '../user/user.service'
 import { TypedConfigModule } from '../config/typed-config.module'
 import { catchError, map } from 'rxjs/operators'
-
 @Module({
   imports: [
     PassportModule.register({

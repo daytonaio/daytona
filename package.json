@@ -22,6 +22,7 @@
     "build:production": "nx run-many --target=build --all --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
     "serve": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:skip-runner": "nx run-many --target=serve --all --exclude=runner,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
+    "serve:skip-proxy": "nx run-many --target=serve --all --exclude=proxy,daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=development",
     "serve:production": "nx run-many --target=serve --all --exclude=daemon --parallel=$(getconf _NPROCESSORS_ONLN) --configuration=production",
     "generate:openapi": "nx run-many --target=openapi --all",
     "generate:api-client": "yarn generate:openapi && nx run-many --target=generate:api-client --all",

@@ -58,6 +58,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -72,6 +73,7 @@ export class SandboxController {
     @InjectRedis() private readonly redis: Redis,
     private readonly runnerService: RunnerService,
     private readonly sandboxService: SandboxService,
+    private readonly configService: TypedConfigService,
   ) {}
 
   @Get()
@@ -426,6 +428,27 @@ export class SandboxController {
     @Param('sandboxId') sandboxId: string,
     @Param('port') port: number,
   ): Promise<PortPreviewUrlDto> {
+    if (port < 1 || port > 65535) {
+      throw new BadRequestError('Invalid port')
+    }
+
+    const proxyDomain = this.configService.get('proxy.domain')
+    const proxyProtocol = this.configService.get('proxy.protocol')
+    if (proxyDomain && proxyProtocol) {
+      const sandbox = await this.sandboxService.findOne(sandboxId)
+      if (!sandbox) {
+        throw new NotFoundException(`Sandbox with ID ${sandboxId} not found`)
+      }
+
+      // Return new preview url only for updated sandboxes
+      if (sandbox.daemonVersion) {
+        return {
+          url: `${proxyProtocol}://${port}-${sandboxId}.${proxyDomain}`,
+          token: sandbox.authToken,
+        }
+      }
+    }
+
     return this.sandboxService.getPortPreviewUrl(sandboxId, port)
   }
 
