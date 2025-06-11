@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from daytona_sdk import (
+from daytona import (
     AsyncDaytona,
     CreateSandboxFromImageParams,
     CreateSandboxFromSnapshotParams,

@@ -7,7 +7,7 @@ A Python SDK for interacting with the Daytona API, providing a simple interface 
 You can install the package using pip:
 
 ```bash
-pip install daytona-sdk
+pip install daytona
 ```
 
 ## Quick Start
@@ -15,7 +15,7 @@ pip install daytona-sdk
 Here's a simple example of using the SDK:
 
 ```python
-from daytona_sdk import Daytona
+from daytona import Daytona
 
 # Initialize using environment variables
 daytona = Daytona()
@@ -36,7 +36,7 @@ daytona.delete(sandbox)
 The SDK can be configured using environment variables or by passing a configuration object:
 
 ```python
-from daytona_sdk import Daytona, DaytonaConfig
+from daytona import Daytona, DaytonaConfig
 
 # Initialize with configuration
 config = DaytonaConfig(
@@ -137,4 +137,4 @@ completions = lsp.completions('path/to/file.ts', {"line": 10, "character": 15})
 
 Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
 
-Code in [\_sync](src/daytona_sdk/_sync/) directory shouldn't be edited directly. It should be generated from the corresponding async code in the [\_async](src/daytona_sdk/_async/) directory using the [sync_generator.py](scripts/sync_generator.py) script.
+Code in [\_sync](src/daytona/_sync/) directory shouldn't be edited directly. It should be generated from the corresponding async code in the [\_async](src/daytona/_async/) directory using the [sync_generator.py](scripts/sync_generator.py) script.

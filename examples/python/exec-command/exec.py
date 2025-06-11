@@ -1,4 +1,4 @@
-from daytona_sdk import CreateSandboxFromImageParams, Daytona, Resources
+from daytona import CreateSandboxFromImageParams, Daytona, Resources
 
 
 def main():

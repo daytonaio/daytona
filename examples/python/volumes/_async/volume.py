@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from daytona_sdk import AsyncDaytona, CreateSandboxFromSnapshotParams, VolumeMount
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, VolumeMount
 
 
 async def main():

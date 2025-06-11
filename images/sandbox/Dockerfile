@@ -13,7 +13,7 @@ RUN python3 -m pip install python-lsp-server
 RUN python3 -m pip install \
     numpy pandas scikit-learn keras torch scipy seaborn matplotlib \
     django flask beautifulsoup4 requests opencv-python pillow sqlalchemy \
-    daytona-sdk pydantic-ai langchain transformers openai anthropic llama-index instructor huggingface ollama
+    daytona pydantic-ai langchain transformers openai anthropic llama-index instructor huggingface ollama
 
 # Create the Daytona user and configure sudo access
 RUN useradd -m daytona && echo "daytona ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/91-daytona

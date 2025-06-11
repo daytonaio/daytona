@@ -1,6 +1,6 @@
 import asyncio
 
-from daytona_sdk import AsyncDaytona, CreateSandboxFromImageParams, Image
+from daytona import AsyncDaytona, CreateSandboxFromImageParams, Image
 
 
 async def main():

@@ -11,13 +11,13 @@ The Daytona Python SDK provides a robust interface for programmatically interact
 Install the Daytona Python SDK using pip:
 
 ```bash
-pip install daytona_sdk
+pip install daytona
 ```
 
 Or using poetry:
 
 ```bash
-poetry add daytona_sdk
+poetry add daytona
 ```
 
 ## Getting Started
@@ -25,7 +25,7 @@ poetry add daytona_sdk
 Here's a simple example to help you get started with the Daytona Python SDK:
 
 ```python
-from daytona_sdk import Daytona, CreateSandboxParams
+from daytona import Daytona, CreateSandboxParams
 
 def main():
     # Initialize the SDK (uses environment variables by default)
@@ -50,7 +50,7 @@ if __name__ == "__main__":
 The SDK can be configured using environment variables or by passing options to the constructor:
 
 ```python
-from daytona_sdk import Daytona, DaytonaConfig, SandboxTargetRegion
+from daytona import Daytona, DaytonaConfig, SandboxTargetRegion
 
 # Using environment variables (DAYTONA_API_KEY, DAYTONA_SERVER_URL, DAYTONA_TARGET)
 daytona = Daytona()

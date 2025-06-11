@@ -1,6 +1,6 @@
 from pprint import pprint
 
-from daytona_sdk import Daytona
+from daytona import Daytona
 
 
 def main():

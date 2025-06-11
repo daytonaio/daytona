@@ -35,8 +35,8 @@ logger = logging.getLogger(__name__)
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root))
 
-SOURCE_DIR = project_root / "src" / "daytona_sdk" / "_async"
-TARGET_DIR = project_root / "src" / "daytona_sdk" / "_sync"
+SOURCE_DIR = project_root / "src" / "daytona" / "_async"
+TARGET_DIR = project_root / "src" / "daytona" / "_sync"
 
 # Regex markers for blocks
 MARKERS = {
@@ -80,7 +80,7 @@ POST_REPLACEMENTS = [
     # httpx client fix
     (re.compile(r"httpx\.SyncClient\b"), "httpx.Client"),
     # Update module imports
-    (re.compile(r"from daytona_sdk\._async"), "from daytona_sdk._sync"),
+    (re.compile(r"from daytona\._async"), "from daytona._sync"),
     # Documentation cleanup
     (re.compile(r"\basynchronous methods\b"), "methods"),
     (re.compile(r"\basynchronous\b"), "synchronous"),

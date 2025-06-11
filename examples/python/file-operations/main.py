@@ -2,7 +2,7 @@ import json
 import os
 from datetime import datetime
 
-from daytona_sdk import CreateSandboxFromSnapshotParams, Daytona, FileUpload
+from daytona import CreateSandboxFromSnapshotParams, Daytona, FileUpload
 
 
 def main():

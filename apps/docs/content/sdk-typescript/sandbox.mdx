@@ -529,6 +529,10 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.autoArchiveInterval`
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
   - _Inherited from_: `Sandbox.autoStopInterval`
+- `backupCreatedAt?` _string_ - The creation timestamp of the last backup
+  - _Inherited from_: `Sandbox.backupCreatedAt`
+- `backupState?` _SandboxBackupStateEnum_ - The state of the backup
+  - _Inherited from_: `Sandbox.backupState`
 - `cpu?` _number_ - The CPU quota for the sandbox
   - _Inherited from_: `Sandbox.cpu`
 - `disk?` _number_ - The disk quota for the sandbox
@@ -541,8 +545,6 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.gpu`
 - `id` _string_ - The ID of the sandbox
   - _Inherited from_: `Sandbox.id`
-- `sandbox?` _string_ - The snapshot used for the sandbox
-  - _Inherited from_: `Sandbox.sandbox`
 - `info?` _SandboxInfo_
 - `labels` _\[key: string\]: string_ - Labels for the sandbox
   - _Inherited from_: `Sandbox.labels`
@@ -554,10 +556,8 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
   - _Inherited from_: `Sandbox.organizationId`
 - `public` _boolean_ - Whether the sandbox http preview is public
   - _Inherited from_: `Sandbox.public`
-- `backupCreatedAt?` _string_ - The creation timestamp of the last backup
-  - _Inherited from_: `Sandbox.backupCreatedAt`
-- `backupState?` _SandboxBackupStateEnum_ - The state of the backup
-  - _Inherited from_: `Sandbox.backupState`
+- `snapshot?` _string_ - The snapshot used for the sandbox
+  - _Inherited from_: `Sandbox.snapshot`
 - `state?` _SandboxState_ - The state of the sandbox
   - _Inherited from_: `Sandbox.state`
 - `target` _string_ - The target environment for the sandbox
@@ -565,6 +565,8 @@ console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`
 - `user` _string_ - The user associated with the project
   - _Inherited from_: `Sandbox.user`
 - `volumes?` _SandboxVolume\[\]_ - Array of volumes attached to the sandbox
+
+  Sandbox
 
   - _Inherited from_: `Sandbox.volumes`
 
