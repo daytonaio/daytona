@@ -220,8 +220,8 @@ class Process:
                 print(f"Y Scale: {chart.y_scale}")
                 print("Elements:")
                 for element in chart.elements:
-                    print(f"\n\tLabel: {element.label}")
-                    print(f"\tPoints: {element.points}")
+                    print(f"Label: {element.label}")
+                    print(f"Points: {element.points}")
             ```
         """
         command = self.code_toolbox.get_run_command(code, params)
