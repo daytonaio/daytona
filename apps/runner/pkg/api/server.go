@@ -76,7 +76,7 @@ func (a *ApiServer) Start() error {
 	a.router.Use(gin.Recovery())
 
 	gin.SetMode(gin.ReleaseMode)
-	if config.GetRunnerEnv() == "development" {
+	if config.GetEnvironment() == "development" {
 		gin.SetMode(gin.DebugMode)
 	}
 
@@ -87,7 +87,7 @@ func (a *ApiServer) Start() error {
 	public.GET("", controllers.HealthCheck)
 	public.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	if config.GetRunnerEnv() == "development" {
+	if config.GetEnvironment() == "development" {
 		public.GET("/api/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 

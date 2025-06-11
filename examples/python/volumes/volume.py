@@ -1,6 +1,6 @@
 import os
 
-from daytona_sdk import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
+from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
 
 
 def main():

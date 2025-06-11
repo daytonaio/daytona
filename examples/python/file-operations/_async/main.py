@@ -3,7 +3,7 @@ import json
 import os
 from datetime import datetime
 
-from daytona_sdk import AsyncDaytona, CreateSandboxFromSnapshotParams, FileUpload
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, FileUpload
 
 
 async def main():

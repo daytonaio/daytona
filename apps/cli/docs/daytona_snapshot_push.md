@@ -10,6 +10,12 @@ Push a local Docker image to Daytona. To securely build it on our infrastructure
 daytona snapshot push [SNAPSHOT] [flags]
 ```
 
+### Options
+
+```
+  -e, --entrypoint string   The entrypoint command for the image
+```
+
 ### Options inherited from parent commands
 
 ```

@@ -7,8 +7,7 @@ inherited_options:
     usage: help for daytona
 see_also:
   - daytona - Daytona CLI
-  - daytona snapshot build - Build an snapshot from a Dockerfile
-  - daytona snapshot create - Create an snapshot
+  - daytona snapshot create - Create a snapshot
   - daytona snapshot delete - Delete a snapshot
   - daytona snapshot list - List all snapshots
   - daytona snapshot push - Push local snapshot

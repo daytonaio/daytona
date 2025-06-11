@@ -3,7 +3,7 @@ requires = ["setuptools>=68.0.0", "wheel>=0.41.2", "build>=1.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "daytona_sdk"
+name = "daytona"
 version = "0.0.0-dev"
 authors = [
     { name = "Daytona Platforms Inc.", email = "support@daytona.io"  },

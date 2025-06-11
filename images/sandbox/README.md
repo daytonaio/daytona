@@ -22,7 +22,7 @@ The default sandbox image contains Python, Node and their most popular dependenc
 - opencv-python
 - pillow
 - sqlalchemy
-- daytona-sdk
+- daytona
 - pydantic-ai
 - langchain
 - transformers
