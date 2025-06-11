@@ -11,6 +11,7 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Toaster } from '@/components/ui/sonner'
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
+import { TableSortingProvider } from '@/providers/TableSortingProvider'
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { cn } from '@/lib/utils'
@@ -55,18 +56,20 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="relative w-full">
+      <SidebarProvider isBannerVisible={isBannerVisible}>
+        <TableSortingProvider>
+          <Sidebar isBannerVisible={isBannerVisible} />
+          <SidebarTrigger className="md:hidden" />
+          <div className={cn('w-full', isBannerVisible ? 'md:pt-12' : '')}>
+            <Outlet />
+          </div>
+          <Toaster />
+          <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
+        </TableSortingProvider>
+      </SidebarProvider>
       {isBannerVisible && bannerText && (
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
-      <SidebarProvider isBannerVisible={isBannerVisible}>
-        <Sidebar isBannerVisible={isBannerVisible} />
-        <SidebarTrigger className="md:hidden" />
-        <div className={cn('w-full', isBannerVisible ? 'md:pt-12' : '')}>
-          <Outlet />
-        </div>
-        <Toaster />
-        <VerifyEmailDialog open={showVerifyEmailDialog} onOpenChange={setShowVerifyEmailDialog} />
-      </SidebarProvider>
     </div>
   )
 }
