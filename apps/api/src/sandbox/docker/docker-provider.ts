@@ -8,15 +8,8 @@ import { Inject, Injectable, OnModuleInit, Logger } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import axios from 'axios'
 import path from 'path'
-import net from 'net'
 import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
 import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
-
-export interface RegistryConfig {
-  url: string
-  username: string
-  password: string
-}
 
 @Injectable()
 export class DockerProvider implements OnModuleInit {
@@ -597,89 +590,6 @@ export class DockerProvider implements OnModuleInit {
     } catch (error) {
       this.logger.error('Error stopping Docker container:', error)
       throw error // Rethrow or handle as needed
-    }
-  }
-
-  async isAgentListening(containerId: string, port: number): Promise<boolean> {
-    try {
-      const ipAddress = await this.getContainerIPAddress(containerId)
-      await axios.get(`http://${ipAddress}:${port}/project-dir/`)
-      return true
-    } catch (error) {
-      return false
-    }
-  }
-
-  async isPortListening(containerId: string, port: number): Promise<boolean> {
-    try {
-      const ipAddress = await this.getContainerIPAddress(containerId)
-
-      return new Promise((resolve) => {
-        const socket = new net.Socket()
-
-        socket.setTimeout(1000) // 1 second timeout
-
-        socket.on('connect', () => {
-          socket.destroy()
-          resolve(true)
-        })
-
-        socket.on('error', (err) => {
-          console.log(new Date().toISOString())
-          console.log('Error on port listening:', err)
-          socket.destroy()
-          resolve(false)
-        })
-
-        socket.on('timeout', () => {
-          socket.destroy()
-          resolve(false)
-        })
-
-        socket.connect(port, ipAddress)
-      })
-    } catch (error) {
-      return false
-    }
-  }
-
-  async loginToRegistry(registry: { url: string; username: string; password: string }): Promise<void> {
-    try {
-      await this.docker.checkAuth({
-        serveraddress: registry.url,
-        username: registry.username,
-        password: registry.password,
-      })
-    } catch (error) {
-      this.logger.error('Error logging into registry:', error)
-      throw new Error('Failed to authenticate with registry')
-    }
-  }
-
-  /**
-   * Gets the container ID by matching the container name
-   * @param name - Name of the container to find
-   * @returns The container ID or null if not found
-   */
-  public async getContainerIdByName(name: string): Promise<string | null> {
-    try {
-      const containers = await this.docker.listContainers({
-        all: true, // Include stopped containers
-        filters: {
-          name: [name],
-        },
-      })
-
-      if (containers.length > 0) {
-        // Remove the leading '/' from container name and match exactly
-        const container = containers.find((c) => c.Names[0].substring(1) === name)
-        return container ? container.Id : null
-      }
-
-      return null
-    } catch (error) {
-      this.logger.error('Error getting container ID by name:', error)
-      return null
     }
   }
 

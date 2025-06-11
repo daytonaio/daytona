@@ -109,7 +109,7 @@ var PushCmd = &cobra.Command{
 		}
 
 		if entrypointFlag != "" {
-			createImage.Entrypoint = strings.Split(entrypointFlag, " ")
+			createSnapshot.Entrypoint = strings.Split(entrypointFlag, " ")
 		}
 
 		// Poll until the image is really available on the registry
