@@ -17,6 +17,12 @@
       "type": "node-terminal"
     },
     {
+      "command": "yarn serve:skip-proxy",
+      "name": "Debug - Skip Proxy",
+      "request": "launch",
+      "type": "node-terminal"
+    },
+    {
       "name": "Runner",
       "type": "go",
       "request": "launch",
@@ -35,6 +41,16 @@
       "program": "${workspaceFolder}/apps/daemon/cmd/daemon",
       "console": "integratedTerminal",
       "output": "${workspaceFolder}/dist/apps/daemon"
+    },
+    {
+      "name": "Proxy",
+      "type": "go",
+      "request": "launch",
+      "mode": "debug",
+      "program": "${workspaceFolder}/apps/proxy/cmd/proxy",
+      "console": "integratedTerminal",
+      "envFile": "${workspaceFolder}/apps/proxy/.env",
+      "output": "${workspaceFolder}/dist/apps/proxy"
     }
   ]
 }
