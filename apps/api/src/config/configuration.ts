@@ -70,6 +70,11 @@ const configuration = {
   skipConnections: process.env.SKIP_CONNECTIONS === 'true',
   maxAutoArchiveInterval: parseInt(process.env.MAX_AUTO_ARCHIVE_INTERVAL || '43200', 10),
   maintananceMode: process.env.MAINTENANCE_MODE === 'true',
+  proxy: {
+    domain: process.env.PROXY_DOMAIN,
+    protocol: process.env.PROXY_PROTOCOL,
+    apiKey: process.env.PROXY_API_KEY,
+  },
 }
 
 export { configuration }

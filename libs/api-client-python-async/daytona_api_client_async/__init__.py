@@ -104,7 +104,11 @@ from daytona_api_client_async.models.range import Range
 from daytona_api_client_async.models.registry_push_access_dto import RegistryPushAccessDto
 from daytona_api_client_async.models.replace_request import ReplaceRequest
 from daytona_api_client_async.models.replace_result import ReplaceResult
+from daytona_api_client_async.models.runner import Runner
+from daytona_api_client_async.models.runner_region import RunnerRegion
+from daytona_api_client_async.models.runner_state import RunnerState
 from daytona_api_client_async.models.sandbox import Sandbox
+from daytona_api_client_async.models.sandbox_class import SandboxClass
 from daytona_api_client_async.models.sandbox_info import SandboxInfo
 from daytona_api_client_async.models.sandbox_labels import SandboxLabels
 from daytona_api_client_async.models.sandbox_state import SandboxState

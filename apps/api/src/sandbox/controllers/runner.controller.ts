@@ -7,15 +7,17 @@ import { Body, Controller, Get, Post, Param, Patch, UseGuards } from '@nestjs/co
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { Runner } from '../entities/runner.entity'
 import { RunnerService } from '../services/runner.service'
-import { AuthGuard } from '@nestjs/passport'
-import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger'
+import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { ProxyGuard } from '../../auth/proxy.guard'
+import { RunnerDto } from '../dto/runner.dto'
 
+import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 @ApiTags('runners')
 @Controller('runners')
-@UseGuards(AuthGuard('jwt'), SystemActionGuard)
+@UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
 @RequiredSystemRole(SystemRole.ADMIN)
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
@@ -50,5 +52,20 @@ export class RunnerController {
     @Body('unschedulable') unschedulable: boolean,
   ): Promise<Runner> {
     return this.runnerService.updateSchedulingStatus(id, unschedulable)
+  }
+
+  @Get('/by-sandbox/:sandboxId')
+  @ApiOperation({
+    summary: 'Get runner by sandbox ID',
+    operationId: 'getRunnerBySandboxId',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Runner found',
+    type: RunnerDto,
+  })
+  async getRunnerBySandboxId(@Param('sandboxId') sandboxId: string): Promise<RunnerDto> {
+    const runner = await this.runnerService.findBySandboxId(sandboxId)
+    return RunnerDto.fromRunner(runner)
   }
 }
