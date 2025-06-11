@@ -49,9 +49,9 @@ type WorkspaceAPI interface {
 	CreateBackupWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPICreateBackupWorkspaceDeprecatedRequest
 
 	// CreateBackupWorkspaceDeprecatedExecute executes the request
-	//  @return Sandbox
+	//  @return Workspace
 	// Deprecated
-	CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error)
+	CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
 		CreateWorkspaceDeprecated [DEPRECATED] Create a new workspace
@@ -64,9 +64,9 @@ type WorkspaceAPI interface {
 	CreateWorkspaceDeprecated(ctx context.Context) WorkspaceAPICreateWorkspaceDeprecatedRequest
 
 	// CreateWorkspaceDeprecatedExecute executes the request
-	//  @return Sandbox
+	//  @return Workspace
 	// Deprecated
-	CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error)
+	CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
 		DeleteWorkspaceDeprecated [DEPRECATED] Delete workspace
@@ -127,9 +127,9 @@ type WorkspaceAPI interface {
 	GetWorkspaceDeprecated(ctx context.Context, workspaceId string) WorkspaceAPIGetWorkspaceDeprecatedRequest
 
 	// GetWorkspaceDeprecatedExecute executes the request
-	//  @return Sandbox
+	//  @return Workspace
 	// Deprecated
-	GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error)
+	GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error)
 
 	/*
 		ListWorkspacesDeprecated [DEPRECATED] List all workspaces
@@ -142,9 +142,9 @@ type WorkspaceAPI interface {
 	ListWorkspacesDeprecated(ctx context.Context) WorkspaceAPIListWorkspacesDeprecatedRequest
 
 	// ListWorkspacesDeprecatedExecute executes the request
-	//  @return []Sandbox
+	//  @return []Workspace
 	// Deprecated
-	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Sandbox, *http.Response, error)
+	ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error)
 
 	/*
 		ReplaceLabelsWorkspaceDeprecated [DEPRECATED] Replace workspace labels
@@ -360,7 +360,7 @@ func (r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) XDaytonaOrganization
 	return r
 }
 
-func (r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) Execute() (*Sandbox, *http.Response, error) {
+func (r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) Execute() (*Workspace, *http.Response, error) {
 	return r.ApiService.CreateBackupWorkspaceDeprecatedExecute(r)
 }
 
@@ -383,15 +383,15 @@ func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecated(ctx context.Contex
 
 // Execute executes the request
 //
-//	@return Sandbox
+//	@return Workspace
 //
 // Deprecated
-func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error) {
+func (a *WorkspaceAPIService) CreateBackupWorkspaceDeprecatedExecute(r WorkspaceAPICreateBackupWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateBackupWorkspaceDeprecated")
@@ -481,7 +481,7 @@ func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) XDaytonaOrganizationID(xDa
 	return r
 }
 
-func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) Execute() (*Sandbox, *http.Response, error) {
+func (r WorkspaceAPICreateWorkspaceDeprecatedRequest) Execute() (*Workspace, *http.Response, error) {
 	return r.ApiService.CreateWorkspaceDeprecatedExecute(r)
 }
 
@@ -502,15 +502,15 @@ func (a *WorkspaceAPIService) CreateWorkspaceDeprecated(ctx context.Context) Wor
 
 // Execute executes the request
 //
-//	@return Sandbox
+//	@return Workspace
 //
 // Deprecated
-func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error) {
+func (a *WorkspaceAPIService) CreateWorkspaceDeprecatedExecute(r WorkspaceAPICreateWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.CreateWorkspaceDeprecated")
@@ -952,7 +952,7 @@ func (r WorkspaceAPIGetWorkspaceDeprecatedRequest) Verbose(verbose bool) Workspa
 	return r
 }
 
-func (r WorkspaceAPIGetWorkspaceDeprecatedRequest) Execute() (*Sandbox, *http.Response, error) {
+func (r WorkspaceAPIGetWorkspaceDeprecatedRequest) Execute() (*Workspace, *http.Response, error) {
 	return r.ApiService.GetWorkspaceDeprecatedExecute(r)
 }
 
@@ -975,15 +975,15 @@ func (a *WorkspaceAPIService) GetWorkspaceDeprecated(ctx context.Context, worksp
 
 // Execute executes the request
 //
-//	@return Sandbox
+//	@return Workspace
 //
 // Deprecated
-func (a *WorkspaceAPIService) GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Sandbox, *http.Response, error) {
+func (a *WorkspaceAPIService) GetWorkspaceDeprecatedExecute(r WorkspaceAPIGetWorkspaceDeprecatedRequest) (*Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *Sandbox
+		localVarReturnValue *Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.GetWorkspaceDeprecated")
@@ -1084,7 +1084,7 @@ func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Labels(labels string) Works
 	return r
 }
 
-func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() ([]Sandbox, *http.Response, error) {
+func (r WorkspaceAPIListWorkspacesDeprecatedRequest) Execute() ([]Workspace, *http.Response, error) {
 	return r.ApiService.ListWorkspacesDeprecatedExecute(r)
 }
 
@@ -1105,15 +1105,15 @@ func (a *WorkspaceAPIService) ListWorkspacesDeprecated(ctx context.Context) Work
 
 // Execute executes the request
 //
-//	@return []Sandbox
+//	@return []Workspace
 //
 // Deprecated
-func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Sandbox, *http.Response, error) {
+func (a *WorkspaceAPIService) ListWorkspacesDeprecatedExecute(r WorkspaceAPIListWorkspacesDeprecatedRequest) ([]Workspace, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodGet
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue []Sandbox
+		localVarReturnValue []Workspace
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkspaceAPIService.ListWorkspacesDeprecated")

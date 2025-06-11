@@ -37,7 +37,8 @@ import {
   ApiHeader,
   ApiBearerAuth,
 } from '@nestjs/swagger'
-import { SandboxDto as WorkspaceDto, SandboxLabelsDto as WorkspaceLabelsDto } from '../dto/sandbox.dto'
+import { SandboxLabelsDto as WorkspaceLabelsDto } from '../dto/sandbox.dto'
+import { WorkspaceDto } from '../dto/workspace.deprecated.dto'
 import { RunnerService } from '../services/runner.service'
 import { SandboxState as WorkspaceState } from '../enums/sandbox-state.enum'
 import { Sandbox as WorkspaceEntity } from '../entities/sandbox.entity'
@@ -138,13 +139,15 @@ export class WorkspaceController {
 
     const organization = authContext.organization
 
-    const workspace = await this.workspaceService.createFromSnapshot(
-      {
-        ...createWorkspaceDto,
-        snapshot: createWorkspaceDto.image,
-      },
-      organization,
-      true,
+    const workspace = WorkspaceDto.fromSandboxDto(
+      await this.workspaceService.createFromSnapshot(
+        {
+          ...createWorkspaceDto,
+          snapshot: createWorkspaceDto.image,
+        },
+        organization,
+        true,
+      ),
     )
 
     // Wait for the workspace to start

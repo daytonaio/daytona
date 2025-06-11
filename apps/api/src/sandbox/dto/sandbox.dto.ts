@@ -247,8 +247,6 @@ export class SandboxDto {
         providerMetadata: JSON.stringify({
           state: this.getSandboxState(sandbox),
           runnerDomain: runnerDomain,
-          // Deprecated field
-          nodeDomain: runnerDomain,
           region: sandbox.region,
           class: sandbox.class,
           updatedAt: sandbox.updatedAt?.toISOString(),
