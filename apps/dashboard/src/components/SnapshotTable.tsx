@@ -90,7 +90,13 @@ export function SnapshotTable({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(value) => {
+            table.getRowModel().rows.forEach((row) => {
+              if (!row.original.general) {
+                row.toggleSelected()
+              }
+            })
+          }}
           aria-label="Select all"
           disabled={!deletePermitted || loading}
           className="translate-y-[2px]"
@@ -99,6 +105,10 @@ export function SnapshotTable({
       cell: ({ row }) => {
         if (loadingSnapshots[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
+        }
+
+        if (row.original.general) {
+          return null
         }
 
         return (
@@ -186,7 +196,7 @@ export function SnapshotTable({
                     loadingSnapshots[row.original.id] || row.original.state === SnapshotState.REMOVING
                       ? 'opacity-50 pointer-events-none'
                       : ''
-                  } ${row.original.general ? 'opacity-60 pointer-events-none' : ''}`}
+                  } ${row.original.general ? 'pointer-events-none' : ''}`}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -319,27 +329,20 @@ const getColumns = ({
       },
     },
     {
-      accessorKey: 'size',
-      header: 'Size',
-      cell: ({ row }) => {
-        const size = row.original.size
-        return size ? `${(size * 1024).toFixed(2)} MB` : '-'
-      },
-    },
-    {
-      accessorKey: 'entrypoint',
-      header: 'Entrypoint',
-      cell: ({ row }) => (row.original.entrypoint ? row.original.entrypoint.join(' ') : '-'),
-    },
-    {
       accessorKey: 'createdAt',
       header: 'Created',
-      cell: ({ row }) => getRelativeTimeString(row.original.createdAt).relativeTimeString,
+      cell: ({ row }) => {
+        const snapshot = row.original
+        return snapshot.general ? '' : getRelativeTimeString(snapshot.createdAt).relativeTimeString
+      },
     },
     {
       accessorKey: 'lastUsedAt',
       header: 'Last Used',
-      cell: ({ row }) => getRelativeTimeString(row.original.lastUsedAt).relativeTimeString,
+      cell: ({ row }) => {
+        const snapshot = row.original
+        return snapshot.general ? '' : getRelativeTimeString(snapshot.lastUsedAt).relativeTimeString
+      },
     },
     {
       id: 'actions',

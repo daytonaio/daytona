@@ -1,7 +1,7 @@
 import asyncio
 from pprint import pprint
 
-from daytona_sdk import AsyncDaytona
+from daytona import AsyncDaytona
 
 
 async def main():
