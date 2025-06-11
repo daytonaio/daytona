@@ -25,7 +25,7 @@ func WriteDaemonBinary() (string, error) {
 		return "", err
 	}
 
-	daemonPath := filepath.Join(tmpBinariesDir, "daemon-amd64")
+	daemonPath := filepath.Join(tmpBinariesDir, "daytona")
 	_, err = os.Stat(daemonPath)
 	if err != nil && !os.IsNotExist(err) {
 		return "", err
