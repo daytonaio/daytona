@@ -38,6 +38,8 @@ import {
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base'
 // @ts-ignore
 import type { CreateRunner } from '../models'
+// @ts-ignore
+import type { Runner } from '../models'
 /**
  * RunnersApi - axios parameter creator
  * @export
@@ -78,6 +80,46 @@ export const RunnersApiAxiosParamCreator = function (configuration?: Configurati
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
       localVarRequestOptions.data = serializeDataIfNeeded(createRunner, localVarRequestOptions, configuration)
+
+      return {
+        url: toPathString(localVarUrlObj),
+        options: localVarRequestOptions,
+      }
+    },
+    /**
+     *
+     * @summary Get runner by sandbox ID
+     * @param {string} sandboxId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRunnerBySandboxId: async (sandboxId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+      // verify required parameter 'sandboxId' is not null or undefined
+      assertParamExists('getRunnerBySandboxId', 'sandboxId', sandboxId)
+      const localVarPath = `/runners/by-sandbox/{sandboxId}`.replace(
+        `{${'sandboxId'}}`,
+        encodeURIComponent(String(sandboxId)),
+      )
+      // use dummy base URL string because the URL constructor only accepts absolute URLs.
+      const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
+      let baseOptions
+      if (configuration) {
+        baseOptions = configuration.baseOptions
+      }
+
+      const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options }
+      const localVarHeaderParameter = {} as any
+      const localVarQueryParameter = {} as any
+
+      // authentication bearer required
+      // http bearer authentication required
+      await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+      // authentication oauth2 required
+
+      setSearchParams(localVarUrlObj, localVarQueryParameter)
+      let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
+      localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
 
       return {
         url: toPathString(localVarUrlObj),
@@ -190,6 +232,29 @@ export const RunnersApiFp = function (configuration?: Configuration) {
     },
     /**
      *
+     * @summary Get runner by sandbox ID
+     * @param {string} sandboxId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    async getRunnerBySandboxId(
+      sandboxId: string,
+      options?: RawAxiosRequestConfig,
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Runner>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getRunnerBySandboxId(sandboxId, options)
+      const localVarOperationServerIndex = configuration?.serverIndex ?? 0
+      const localVarOperationServerBasePath =
+        operationServerMap['RunnersApi.getRunnerBySandboxId']?.[localVarOperationServerIndex]?.url
+      return (axios, basePath) =>
+        createRequestFunction(
+          localVarAxiosArgs,
+          globalAxios,
+          BASE_PATH,
+          configuration,
+        )(axios, localVarOperationServerBasePath || basePath)
+    },
+    /**
+     *
      * @summary List all runners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -254,6 +319,16 @@ export const RunnersApiFactory = function (configuration?: Configuration, basePa
     },
     /**
      *
+     * @summary Get runner by sandbox ID
+     * @param {string} sandboxId
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     */
+    getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig): AxiosPromise<Runner> {
+      return localVarFp.getRunnerBySandboxId(sandboxId, options).then((request) => request(axios, basePath))
+    },
+    /**
+     *
      * @summary List all runners
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -292,6 +367,20 @@ export class RunnersApi extends BaseAPI {
   public createRunner(createRunner: CreateRunner, options?: RawAxiosRequestConfig) {
     return RunnersApiFp(this.configuration)
       .createRunner(createRunner, options)
+      .then((request) => request(this.axios, this.basePath))
+  }
+
+  /**
+   *
+   * @summary Get runner by sandbox ID
+   * @param {string} sandboxId
+   * @param {*} [options] Override http request option.
+   * @throws {RequiredError}
+   * @memberof RunnersApi
+   */
+  public getRunnerBySandboxId(sandboxId: string, options?: RawAxiosRequestConfig) {
+    return RunnersApiFp(this.configuration)
+      .getRunnerBySandboxId(sandboxId, options)
       .then((request) => request(this.axios, this.basePath))
   }
 

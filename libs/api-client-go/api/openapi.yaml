@@ -1696,6 +1696,33 @@ paths:
       summary: Update runner scheduling status
       tags:
         - runners
+  /runners/by-sandbox/{sandboxId}:
+    get:
+      operationId: getRunnerBySandboxId
+      parameters:
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Runner'
+          description: Runner found
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get runner by sandbox ID
+      tags:
+        - runners
   /toolbox/{sandboxId}/toolbox/project-dir:
     get:
       operationId: getProjectDir
@@ -6022,6 +6049,143 @@ components:
         - gpuType
         - memory
         - region
+      type: object
+    SandboxClass:
+      description: The class of the runner
+      enum:
+        - small
+        - medium
+        - large
+      type: string
+    RunnerRegion:
+      description: The region of the runner
+      enum:
+        - eu
+        - us
+        - asia
+      type: string
+    RunnerState:
+      description: The state of the runner
+      enum:
+        - initializing
+        - ready
+        - disabled
+        - decommissioned
+        - unresponsive
+      type: string
+    Runner:
+      example:
+        memory: 16
+        apiKey: api-key-123
+        cpu: 8
+        used: 2
+        gpu: 1
+        capacity: 10
+        createdAt: 2023-10-01T12:00:00Z
+        disk: 100
+        apiUrl: https://api.runner1.example.com
+        domain: runner1.example.com
+        id: runner123
+        state: initializing
+        region: eu
+        unschedulable: false
+        class: small
+        lastChecked: 2024-10-01T12:00:00Z
+        gpuType: gpuType
+        updatedAt: 2023-10-01T12:00:00Z
+      properties:
+        id:
+          description: The ID of the runner
+          example: runner123
+          type: string
+        domain:
+          description: The domain of the runner
+          example: runner1.example.com
+          type: string
+        apiUrl:
+          description: The API URL of the runner
+          example: https://api.runner1.example.com
+          type: string
+        apiKey:
+          description: The API key for the runner
+          example: api-key-123
+          type: string
+        cpu:
+          description: The CPU capacity of the runner
+          example: 8
+          type: number
+        memory:
+          description: The memory capacity of the runner in GB
+          example: 16
+          type: number
+        disk:
+          description: The disk capacity of the runner in GB
+          example: 100
+          type: number
+        gpu:
+          description: The GPU capacity of the runner
+          example: 1
+          type: number
+        gpuType:
+          description: The type of GPU
+          type: string
+        class:
+          allOf:
+            - $ref: '#/components/schemas/SandboxClass'
+          description: The class of the runner
+          example: small
+        used:
+          description: The current usage of the runner
+          example: 2
+          type: number
+        capacity:
+          description: The capacity of the runner
+          example: 10
+          type: number
+        region:
+          allOf:
+            - $ref: '#/components/schemas/RunnerRegion'
+          description: The region of the runner
+          example: eu
+        state:
+          allOf:
+            - $ref: '#/components/schemas/RunnerState'
+          description: The state of the runner
+          example: initializing
+        lastChecked:
+          description: The last time the runner was checked
+          example: 2024-10-01T12:00:00Z
+          type: string
+        unschedulable:
+          description: Whether the runner is unschedulable
+          example: false
+          type: boolean
+        createdAt:
+          description: The creation timestamp of the runner
+          example: 2023-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the runner
+          example: 2023-10-01T12:00:00Z
+          type: string
+      required:
+        - apiKey
+        - apiUrl
+        - capacity
+        - class
+        - cpu
+        - createdAt
+        - disk
+        - domain
+        - gpu
+        - gpuType
+        - id
+        - memory
+        - region
+        - state
+        - unschedulable
+        - updatedAt
+        - used
       type: object
     ProjectDirResponse:
       example:

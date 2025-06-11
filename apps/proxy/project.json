@@ -1,0 +1,42 @@
+{
+  "name": "proxy",
+  "$schema": "../../runner_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/proxy",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/proxy/main.go",
+        "outputPath": "dist/apps/proxy"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "cwd": ".",
+        "main": "{projectRoot}/cmd/proxy/main.go"
+      },
+      "configurations": {
+        "production": {}
+      }
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./..."
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    }
+  }
+}
