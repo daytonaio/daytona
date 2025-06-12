@@ -9,13 +9,196 @@ Represents a Daytona Sandbox.
 
 **Properties**:
 
+- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.autoArchiveInterval
+  ```
+
+- `autoStopInterval?` _number_ - Auto-stop interval in minutes
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.autoStopInterval
+  ```
+
+- `backupCreatedAt?` _string_ - When the backup was created
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.backupCreatedAt
+  ```
+
+- `backupState?` _SandboxBackupStateEnum_ - Current state of Sandbox backup
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.backupState
+  ```
+
+- `buildInfo?` _BuildInfo_ - Build information for the Sandbox if it was created from dynamic build
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.buildInfo
+  ```
+
+- `cpu` _number_ - Number of CPUs allocated to the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.cpu
+  ```
+
+- `createdAt?` _string_ - When the Sandbox was created
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.createdAt
+  ```
+
+- `disk` _number_ - Amount of disk space allocated to the Sandbox in GiB
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.disk
+  ```
+
+- `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.env
+  ```
+
+- `errorReason?` _string_ - Error message if Sandbox is in error state
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.errorReason
+  ```
+
 - `fs` _FileSystem_ - File system operations interface
 - `git` _Git_ - Git operations interface
+- `gpu` _number_ - Number of GPUs allocated to the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.gpu
+  ```
+
 - `id` _string_ - Unique identifier for the Sandbox
-- `instance` _SandboxInstance_ - The underlying Sandbox instance
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.id
+  ```
+
+- `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.labels
+  ```
+
+- `memory` _number_ - Amount of memory allocated to the Sandbox in GiB
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.memory
+  ```
+
+- `organizationId` _string_ - Organization ID of the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.organizationId
+  ```
+
 - `process` _Process_ - Process execution interface
-- `sandboxApi` _SandboxApi_ - API client for Sandbox operations
-- `toolboxApi` _ToolboxApi_ - API client for toolbox operations
+- `public` _boolean_ - Whether the Sandbox is publicly accessible
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.public
+  ```
+
+- `runnerDomain?` _string_ - Domain name of the Sandbox runner
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.runnerDomain
+  ```
+
+- `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.snapshot
+  ```
+
+- `state?` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.state
+  ```
+
+- `target` _string_ - Target location of the runner where the Sandbox runs
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.target
+  ```
+
+- `updatedAt?` _string_ - When the Sandbox was last updated
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.updatedAt
+  ```
+
+- `user` _string_ - OS user running in the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.user
+  ```
+
+- `volumes?` _SandboxVolume\[\]_ - Volumes attached to the Sandbox
+
+  ##### Implementation of
+
+  ```ts
+  SandboxDto.volumes
+  ```
+
+### Implements
+
+- `Sandbox`
 
 ### Constructors
 
@@ -23,8 +206,7 @@ Represents a Daytona Sandbox.
 
 ```ts
 new Sandbox(
-   id: string,
-   instance: SandboxInstance,
+   sandboxDto: Sandbox,
    sandboxApi: SandboxApi,
    toolboxApi: ToolboxApi,
    codeToolbox: SandboxCodeToolbox): Sandbox
@@ -34,8 +216,7 @@ Creates a new Sandbox instance
 
 **Parameters**:
 
-- `id` _string_ - Unique identifier for the Sandbox
-- `instance` _SandboxInstance_ - The underlying Sandbox instance
+- `sandboxDto` _Sandbox_ - The API Sandbox instance
 - `sandboxApi` _SandboxApi_ - API client for Sandbox operations
 - `toolboxApi` _ToolboxApi_ - API client for toolbox operations
 - `codeToolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation
@@ -45,46 +226,6 @@ Creates a new Sandbox instance
 - `Sandbox`
 
 ### Methods
-
-#### toSandboxInfo()
-
-```ts
-static toSandboxInfo(instance: Sandbox): SandboxInfo
-```
-
-Converts an API sandbox instance to a SandboxInfo object.
-
-**Parameters**:
-
-- `instance` _Sandbox_ - The API sandbox instance to convert
-
-**Returns**:
-
-- `SandboxInfo` - The converted SandboxInfo object
-
----
-
-#### ~~toWorkspaceInfo()~~
-
-```ts
-static toWorkspaceInfo(instance: Sandbox): SandboxInfo
-```
-
-Converts an API workspace instance to a WorkspaceInfo object.
-
-**Parameters**:
-
-- `instance` _Sandbox_ - The API workspace instance to convert
-
-**Returns**:
-
-- `SandboxInfo` - The converted WorkspaceInfo object
-
-##### Deprecated
-
-Use `toSandboxInfo` instead. This method will be removed in a future version.
-
----
 
 #### archive()
 
@@ -196,42 +337,25 @@ console.log(`Sandbox root: ${rootDir}`)
 
 ---
 
-#### ~~getWorkspaceRootDir()~~
+#### refreshData()
 
 ```ts
-getWorkspaceRootDir(): Promise<undefined | string>
+refreshData(): Promise<void>
 ```
+
+Refreshes the Sandbox data from the API.
 
 **Returns**:
 
-- `Promise<undefined | string>`
-
-##### Deprecated
-
-Use `getUserRootDir` instead. This method will be removed in a future version.
-
----
-
-#### info()
-
-```ts
-info(): Promise<SandboxInfo>
-```
-
-Gets structured information about the Sandbox.
-
-**Returns**:
-
-- `Promise<SandboxInfo>` - Detailed information about the Sandbox including its
-  configuration, resources, and current state
+- `Promise<void>`
 
 **Example:**
 
 ```ts
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id}:`)
-console.log(`State: ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
+await sandbox.refreshData()
+console.log(`Sandbox ${sandbox.id}:`)
+console.log(`State: ${sandbox.state}`)
+console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`)
 ```
 
 ---
@@ -471,103 +595,3 @@ Generates a command to run the provided code
 **Returns**:
 
 - `string`
-
----
-
-## SandboxInfo
-
-Structured information about a Sandbox
-
-**Properties**:
-
-- `autoArchiveInterval` _number_ - Auto-archive interval in minutes
-- `autoStopInterval` _number_ - Auto-stop interval in minutes
-- `backupCreatedAt` _null \| string_ - When the backup was created
-- `backupState` _null \| string_ - Current state of Sandbox backup
-- `class` _CreateRunnerClassEnum_ - Sandbox class
-- `created` _string_ - The creation timestamp of the project
-  - _Inherited from_: `SandboxInfo.created`
-- `env` _Record\<string, string\>_ - Environment variables set in the Sandbox
-- `errorReason` _null \| string_ - Error message if Sandbox is in error state
-- `id` _string_ - Unique identifier for the Sandbox
-- `labels` _Record\<string, string\>_ - Custom labels attached to the Sandbox
-- `lastBackup` _null \| string_ - When the last backup was created
-- `nodeDomain` _string_ - Domain name of the Sandbox node
-- ~~`providerMetadata?`~~ _string_ - **_Deprecated_** - Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastBackup`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
-- `public` _boolean_ - Whether the Sandbox is publicly accessible
-- `region` _CreateRunnerRegionEnum_ - Region of the Sandbox node
-- `resources` _Resources_ - Resource allocations for the Sandbox
-- `snapshot?` _string_ - Daytona snapshot used to create the Sandbox
-- `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped")
-- `target` _string_ - Target environment where the Sandbox runs
-- `updatedAt` _string_ - When the Sandbox was last updated
-- `user` _string_ - OS user running in the Sandbox
-
-This interface provides detailed information about a Sandbox's configuration,
-resources, and current state.
-
-**Example:**
-
-```ts
-const sandbox = await daytona.create()
-const info = await sandbox.info()
-console.log(`Sandbox ${info.id} is ${info.state}`)
-console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`)
-```
-
-**Extends:**
-
-- `Omit`\<`ApiSandboxInfo`, `"name"`\>
-
-## SandboxInstance
-
-**Extends:**
-
-**Properties**:
-
-- `autoArchiveInterval?` _number_ - Auto-archive interval in minutes
-  - _Inherited from_: `Sandbox.autoArchiveInterval`
-- `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled)
-  - _Inherited from_: `Sandbox.autoStopInterval`
-- `backupCreatedAt?` _string_ - The creation timestamp of the last backup
-  - _Inherited from_: `Sandbox.backupCreatedAt`
-- `backupState?` _SandboxBackupStateEnum_ - The state of the backup
-  - _Inherited from_: `Sandbox.backupState`
-- `cpu?` _number_ - The CPU quota for the sandbox
-  - _Inherited from_: `Sandbox.cpu`
-- `disk?` _number_ - The disk quota for the sandbox
-  - _Inherited from_: `Sandbox.disk`
-- `env` _\[key: string\]: string_ - Environment variables for the sandbox
-  - _Inherited from_: `Sandbox.env`
-- `errorReason?` _string_ - The error reason of the sandbox
-  - _Inherited from_: `Sandbox.errorReason`
-- `gpu?` _number_ - The GPU quota for the sandbox
-  - _Inherited from_: `Sandbox.gpu`
-- `id` _string_ - The ID of the sandbox
-  - _Inherited from_: `Sandbox.id`
-- `info?` _SandboxInfo_
-- `labels` _\[key: string\]: string_ - Labels for the sandbox
-  - _Inherited from_: `Sandbox.labels`
-- `memory?` _number_ - The memory quota for the sandbox
-  - _Inherited from_: `Sandbox.memory`
-- `~~name~~` _string_ - The name of the sandbox
-  - _Inherited from_: `Omit.name`
-- `organizationId` _string_ - The organization ID of the sandbox
-  - _Inherited from_: `Sandbox.organizationId`
-- `public` _boolean_ - Whether the sandbox http preview is public
-  - _Inherited from_: `Sandbox.public`
-- `snapshot?` _string_ - The snapshot used for the sandbox
-  - _Inherited from_: `Sandbox.snapshot`
-- `state?` _SandboxState_ - The state of the sandbox
-  - _Inherited from_: `Sandbox.state`
-- `target` _string_ - The target environment for the sandbox
-  - _Inherited from_: `Sandbox.target`
-- `user` _string_ - The user associated with the project
-  - _Inherited from_: `Sandbox.user`
-- `volumes?` _SandboxVolume\[\]_ - Array of volumes attached to the sandbox
-
-  Sandbox
-
-  - _Inherited from_: `Sandbox.volumes`
-
-- `Omit`\<`ApiSandbox`, `"info"`\>

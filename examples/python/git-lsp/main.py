@@ -15,7 +15,7 @@ def main():
                 )
             ),
         ),
-        timeout=120,
+        timeout=200,
         on_snapshot_create_logs=print,
     )
 

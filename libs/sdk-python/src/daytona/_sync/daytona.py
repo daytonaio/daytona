@@ -29,7 +29,6 @@ from daytona_api_client import (
 )
 from daytona_api_client import ToolboxApi as ToolboxApi
 from daytona_api_client import VolumesApi as VolumesApi
-from deprecated import deprecated
 from environs import Env
 
 from .._utils.enum import to_enum
@@ -45,11 +44,9 @@ from ..common.daytona import (
     DaytonaConfig,
     Image,
 )
-from .sandbox import Sandbox, SandboxTargetRegion
+from .sandbox import Sandbox
 from .snapshot import SnapshotService
 from .volume import VolumeService
-
-Workspace = Sandbox
 
 
 class Daytona:
@@ -59,9 +56,6 @@ class Daytona:
     It can be initialized either with explicit configuration or using environment variables.
 
     Attributes:
-        api_key (str): API key for authentication.
-        api_url (str): URL of the Daytona API.
-        target (str): Target location for Sandboxes.
         volume (VolumeService): Service for managing volumes.
         snapshot (SnapshotService): Service for managing snapshots.
 
@@ -90,7 +84,7 @@ class Daytona:
         If no config is provided, reads from environment variables:
         - `DAYTONA_API_KEY`: Required API key for authentication
         - `DAYTONA_API_URL`: Required api URL
-        - `DAYTONA_TARGET`: Optional target environment (defaults to SandboxTargetRegion.US)
+        - `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
 
         Args:
             config (Optional[DaytonaConfig]): Object containing api_key, api_url, and target.
@@ -116,7 +110,6 @@ class Daytona:
         """
 
         default_api_url = "https://app.daytona.io/api"
-        default_target = SandboxTargetRegion.US
         self.default_language = CodeLanguage.PYTHON
 
         if config is None or (
@@ -136,11 +129,11 @@ class Daytona:
             # reads .env.local and overrides values
             env.read_env(".env.local", override=True)
 
-            self.api_key = env.str("DAYTONA_API_KEY", None)
-            self.jwt_token = env.str("DAYTONA_JWT_TOKEN", None)
-            self.organization_id = env.str("DAYTONA_ORGANIZATION_ID", None)
-            self.api_url = env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", default_api_url)
-            self.target = env.str("DAYTONA_TARGET", default_target)
+            self._api_key = env.str("DAYTONA_API_KEY", None)
+            self._jwt_token = env.str("DAYTONA_JWT_TOKEN", None)
+            self._organization_id = env.str("DAYTONA_ORGANIZATION_ID", None)
+            self._api_url = env.str("DAYTONA_API_URL", None) or env.str("DAYTONA_SERVER_URL", default_api_url)
+            self._target = env.str("DAYTONA_TARGET", None)
 
             if env.str("DAYTONA_SERVER_URL", None) and not env.str("DAYTONA_API_URL", None):
                 warnings.warn(
@@ -152,22 +145,22 @@ class Daytona:
 
         if config:
             if not config.api_key and config.jwt_token:
-                self.api_key = None
+                self._api_key = None
             else:
-                self.api_key = config.api_key or getattr(self, "api_key", None)
-            self.jwt_token = config.jwt_token or getattr(self, "jwt_token", None)
-            self.organization_id = config.organization_id or getattr(self, "organization_id", None)
-            self.api_url = config.api_url or self.api_url
-            self.target = config.target or self.target
+                self._api_key = config.api_key or getattr(self, "api_key", None)
+            self._jwt_token = config.jwt_token or getattr(self, "jwt_token", None)
+            self._organization_id = config.organization_id or getattr(self, "organization_id", None)
+            self._api_url = config.api_url or self._api_url
+            self._target = config.target or self._target
 
-        if not self.api_key and not self.jwt_token:
+        if not self._api_key and not self._jwt_token:
             raise DaytonaError("API key or JWT token is required")
 
         # Create API configuration without api_key
-        configuration = Configuration(host=self.api_url)
-        self.api_client = ApiClient(configuration)
-        self.api_client.default_headers["Authorization"] = f"Bearer {self.api_key or self.jwt_token}"
-        self.api_client.default_headers["X-Daytona-Source"] = "python-sdk"
+        configuration = Configuration(host=self._api_url)
+        self._api_client = ApiClient(configuration)
+        self._api_client.default_headers["Authorization"] = f"Bearer {self._api_key or self._jwt_token}"
+        self._api_client.default_headers["X-Daytona-Source"] = "python-sdk"
 
         # Get SDK version dynamically
         try:
@@ -185,21 +178,21 @@ class Daytona:
         except Exception:
             # Fallback version if neither package metadata is available
             sdk_version = "unknown"
-        self.api_client.default_headers["X-Daytona-SDK-Version"] = sdk_version
+        self._api_client.default_headers["X-Daytona-SDK-Version"] = sdk_version
 
-        if not self.api_key:
-            if not self.organization_id:
+        if not self._api_key:
+            if not self._organization_id:
                 raise DaytonaError("Organization ID is required when using JWT token")
-            self.api_client.default_headers["X-Daytona-Organization-ID"] = self.organization_id
+            self._api_client.default_headers["X-Daytona-Organization-ID"] = self._organization_id
 
         # Initialize API clients with the api_client instance
-        self.sandbox_api = SandboxApi(self.api_client)
-        self.toolbox_api = ToolboxApi(self.api_client)
-        self.object_storage_api = ObjectStorageApi(self.api_client)
+        self._sandbox_api = SandboxApi(self._api_client)
+        self._toolbox_api = ToolboxApi(self._api_client)
+        self._object_storage_api = ObjectStorageApi(self._api_client)
 
         # Initialize services
-        self.volume = VolumeService(VolumesApi(self.api_client))
-        self.snapshot = SnapshotService(SnapshotsApi(self.api_client), self.object_storage_api)
+        self.volume = VolumeService(VolumesApi(self._api_client))
+        self.snapshot = SnapshotService(SnapshotsApi(self._api_client), self._object_storage_api)
 
     @overload
     def create(
@@ -336,7 +329,7 @@ class Daytona:
         if params.auto_archive_interval is not None and params.auto_archive_interval < 0:
             raise DaytonaError("auto_archive_interval must be a non-negative integer")
 
-        target = self.target
+        target = self._target
 
         # Create sandbox using dictionary
         sandbox_data = CreateSandbox(
@@ -359,7 +352,7 @@ class Daytona:
                     dockerfile_content=Image.base(params.image).dockerfile(),
                 )
             elif isinstance(params.image, Image):
-                context_hashes = SnapshotService.process_image_context(self.object_storage_api, params.image)
+                context_hashes = SnapshotService.process_image_context(self._object_storage_api, params.image)
                 sandbox_data.build_info = CreateBuildInfo(
                     context_hashes=context_hashes,
                     dockerfile_content=params.image.dockerfile(),
@@ -371,10 +364,10 @@ class Daytona:
             sandbox_data.disk = params.resources.disk
             sandbox_data.gpu = params.resources.gpu
 
-        response = self.sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
+        response = self._sandbox_api.create_sandbox(sandbox_data, _request_timeout=timeout or None)
 
         if response.state == SandboxState.PENDING_BUILD and on_snapshot_create_logs:
-            _, url, *_ = self.sandbox_api._get_build_logs_serialize(  # pylint: disable=protected-access
+            _, url, *_ = self._sandbox_api._get_build_logs_serialize(  # pylint: disable=protected-access
                 response.id,
                 follow=True,
                 x_daytona_organization_id=None,
@@ -387,7 +380,7 @@ class Daytona:
             response_ref = {"response": response}
 
             def should_terminate():
-                response_ref["response"] = self.sandbox_api.get_sandbox(response_ref["response"].id)
+                response_ref["response"] = self._sandbox_api.get_sandbox(response_ref["response"].id)
                 return response_ref["response"].state in [
                     SandboxState.STARTED,
                     SandboxState.STARTING,
@@ -397,30 +390,26 @@ class Daytona:
 
             while response_ref["response"].state == SandboxState.PENDING_BUILD:
                 time.sleep(1)
-                response_ref["response"] = self.sandbox_api.get_sandbox(response_ref["response"].id)
+                response_ref["response"] = self._sandbox_api.get_sandbox(response_ref["response"].id)
 
             asyncio.run(
                 process_streaming_response(
                     url=url,
-                    headers=self.sandbox_api.api_client.default_headers,
+                    headers=self._sandbox_api.api_client.default_headers,
                     on_chunk=lambda chunk: on_snapshot_create_logs(chunk.rstrip()),
                     should_terminate=should_terminate,
                 )
             )
             response = response_ref["response"]
 
-        sandbox_info = Sandbox.to_sandbox_info(response)
-        response.info = sandbox_info
-
         sandbox = Sandbox(
-            response.id,
             response,
-            self.sandbox_api,
-            self.toolbox_api,
+            self._sandbox_api,
+            self._toolbox_api,
             code_toolbox,
         )
 
-        if sandbox.instance.state != SandboxState.STARTED:
+        if sandbox.state != SandboxState.STARTED:
             # Wait for sandbox to start
             try:
                 sandbox.wait_for_sandbox_start()
@@ -477,28 +466,10 @@ class Daytona:
             daytona.delete(sandbox)  # Clean up when done
             ```
         """
-        return self.sandbox_api.delete_sandbox(sandbox.id, force=True, _request_timeout=timeout or None)
-
-    remove = delete
-
-    @deprecated(
-        reason=(
-            "Method is deprecated. Use `get_current_sandbox` instead. This method will be removed in a future version."
-        )
-    )
-    def get_current_workspace(self, workspace_id: str) -> Workspace:
-        """Gets a Sandbox by its ID.
-
-        Args:
-            workspace_id (str): The ID of the Sandbox to retrieve.
-
-        Returns:
-            Workspace: The Sandbox instance.
-        """
-        return self.get_current_sandbox(workspace_id)
+        return self._sandbox_api.delete_sandbox(sandbox.id, force=True, _request_timeout=timeout or None)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
-    def get_current_sandbox(self, sandbox_id: str) -> Sandbox:
+    def get(self, sandbox_id: str) -> Sandbox:
         """Gets a Sandbox by its ID.
 
         Args:
@@ -512,7 +483,7 @@ class Daytona:
 
         Example:
             ```python
-            sandbox = daytona.get_current_sandbox("my-sandbox-id")
+            sandbox = daytona.get("my-sandbox-id")
             print(sandbox.status)
             ```
         """
@@ -520,17 +491,14 @@ class Daytona:
             raise DaytonaError("sandbox_id is required")
 
         # Get the sandbox instance
-        sandbox_instance = self.sandbox_api.get_sandbox(sandbox_id)
-        sandbox_info = Sandbox.to_sandbox_info(sandbox_instance)
-        sandbox_instance.info = sandbox_info
+        sandbox_instance = self._sandbox_api.get_sandbox(sandbox_id)
 
         # Create and return sandbox with Python code toolbox as default
         code_toolbox = SandboxPythonCodeToolbox()
         return Sandbox(
-            sandbox_id,
             sandbox_instance,
-            self.sandbox_api,
-            self.toolbox_api,
+            self._sandbox_api,
+            self._toolbox_api,
             code_toolbox,
         )
 
@@ -551,11 +519,11 @@ class Daytona:
         Example:
             ```python
             sandbox = daytona.find_one(labels={"my-label": "my-value"})
-            print(sandbox.info())
+            print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
             ```
         """
         if sandbox_id:
-            return self.get_current_sandbox(sandbox_id)
+            return self.get(sandbox_id)
         sandboxes = self.list(labels)
         if len(sandboxes) == 0:
             raise DaytonaError(f"No sandbox found with labels {labels}")
@@ -578,18 +546,13 @@ class Daytona:
                 print(f"{sandbox.id}: {sandbox.status}")
             ```
         """
-        sandboxes = self.sandbox_api.list_sandboxes(labels=json.dumps(labels))
-
-        for sandbox in sandboxes:
-            sandbox_info = Sandbox.to_sandbox_info(sandbox)
-            sandbox.info = sandbox_info
+        sandboxes = self._sandbox_api.list_sandboxes(labels=json.dumps(labels))
 
         return [
             Sandbox(
-                sandbox.id,
                 sandbox,
-                self.sandbox_api,
-                self.toolbox_api,
+                self._sandbox_api,
+                self._toolbox_api,
                 self._get_code_toolbox(self._validate_language_label(sandbox.labels.get("code-toolbox-language"))),
             )
             for sandbox in sandboxes
@@ -614,15 +577,6 @@ class Daytona:
         if enum_language is None:
             raise DaytonaError(f"Invalid code-toolbox-language: {language}")
         return enum_language
-
-    # def resize(self, sandbox: Sandbox, resources: SandboxResources) -> None:
-    #     """Resizes a sandbox.
-
-    #     Args:
-    #         sandbox: The sandbox to resize
-    #         resources: The new resources to set
-    #     """
-    #     self.sandbox_api. (sandbox_id=sandbox.id, resources=resources)
 
     def start(self, sandbox: Sandbox, timeout: Optional[float] = 60) -> None:
         """Starts a Sandbox and waits for it to be ready.

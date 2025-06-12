@@ -16,7 +16,7 @@ async function main() {
   // Create a Python image with common data science packages
   const image = Image.debianSlim('3.12')
     .pipInstall(['numpy', 'pandas', 'matplotlib', 'scipy', 'scikit-learn'])
-    .runCommands(['apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/workspace')
     .workdir('/home/daytona/workspace')
     .env({
       MY_ENV_VAR: 'My Environment Variable',
@@ -59,7 +59,7 @@ async function main() {
     console.log(fileContent.result)
   } finally {
     // Clean up first sandbox
-    await daytona.remove(sandbox1)
+    await daytona.delete(sandbox1)
   }
 
   // Create second sandbox with a new dynamic image
@@ -68,7 +68,7 @@ async function main() {
   // Define a new dynamic image for the second sandbox
   const dynamicImage = Image.debianSlim('3.13')
     .pipInstall(['pytest', 'pytest-cov', 'black', 'isort', 'mypy', 'ruff'])
-    .runCommands(['apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project'])
+    .runCommands('apt-get update && apt-get install -y git', 'mkdir -p /home/daytona/project')
     .workdir('/home/daytona/project')
     .env({
       NODE_ENV: 'development',
@@ -93,7 +93,7 @@ async function main() {
     console.log(toolsResponse.result)
   } finally {
     // Clean up second sandbox
-    await daytona.remove(sandbox2)
+    await daytona.delete(sandbox2)
   }
 }
 

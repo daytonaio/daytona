@@ -64,7 +64,8 @@ export class ObjectStorage {
    */
   async upload(path: string, organizationId: string, archiveBasePath?: string): Promise<string> {
     if (!fs.existsSync(path)) {
-      throw new DaytonaError(`Path does not exist: ${path}`)
+      const errMsg = `Path does not exist: ${path}`
+      throw new DaytonaError(errMsg)
     }
 
     // Compute hash for the path

@@ -224,14 +224,18 @@ export class Image {
    * @example
    * const image = Image
    *  .debianSlim('3.12')
-   *  .runCommands('echo "Hello, world!"')
+   *  .runCommands(
+   *    'echo "Hello, world!"',
+   *    ['bash', '-c', 'echo Hello, world, again!']
+   *  )
    */
   runCommands(...commands: (string | string[])[]): Image {
-    const cmds = this.flattenStringArgs('runCommands', 'commands', commands)
-    if (!cmds.length) return this
-
-    for (const cmd of cmds) {
-      this._dockerfile += `RUN ${cmd}\n`
+    for (const command of commands) {
+      if (Array.isArray(command)) {
+        this._dockerfile += `RUN ${command.map((c) => `"${c.replace(/"/g, '\\\\\\"').replace(/'/g, "\\'")}"`).join(' ')}\n`
+      } else {
+        this._dockerfile += `RUN ${command}\n`
+      }
     }
 
     return this
@@ -336,10 +340,7 @@ export class Image {
    *  .debianSlim('3.12')
    *  .dockerfileCommands(['RUN echo "Hello, world!"'])
    */
-  dockerfileCommands(dockerfileCommands: (string | string[])[], contextDir?: string): Image {
-    const cmds = this.flattenStringArgs('dockerfileCommands', 'dockerfileCommands', dockerfileCommands)
-    if (!cmds.length) return this
-
+  dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image {
     if (contextDir) {
       const expandedPath = untildify(contextDir)
       if (!fs.existsSync(expandedPath) || !fs.statSync(expandedPath).isDirectory()) {
@@ -347,7 +348,10 @@ export class Image {
       }
     }
 
-    for (const [contextPath, originalPath] of Image.extractCopySources(cmds.join('\n'), contextDir || '')) {
+    for (const [contextPath, originalPath] of Image.extractCopySources(
+      dockerfileCommands.join('\n'),
+      contextDir || '',
+    )) {
       let archiveBasePath = contextPath
       if (contextDir && !originalPath.startsWith(contextDir)) {
         archiveBasePath = contextPath.substring(contextDir.length)
@@ -358,7 +362,7 @@ export class Image {
       this._contextList.push({ sourcePath: contextPath, archivePath: archiveBasePath })
     }
 
-    this._dockerfile += cmds.join('\n') + '\n'
+    this._dockerfile += dockerfileCommands.join('\n') + '\n'
     return this
   }
 

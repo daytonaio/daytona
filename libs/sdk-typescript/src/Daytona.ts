@@ -9,7 +9,7 @@ import {
   ObjectStorageApi,
   SandboxApi,
   SandboxState,
-  CreateSandboxTargetEnum as SandboxTargetRegion,
+  CreateSandboxTargetEnum,
   ToolboxApi,
   VolumesApi,
   SandboxVolume,
@@ -20,7 +20,7 @@ import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbo
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { Sandbox, SandboxInstance, Sandbox as Workspace } from './Sandbox'
+import { Sandbox } from './Sandbox'
 import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
 import * as packageJson from '../package.json'
@@ -50,7 +50,7 @@ export interface VolumeMount extends SandboxVolume {
  * is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
  * @property {string} apiUrl - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
  * if not set here and not set in environment variable DAYTONA_API_URL.
- * @property {CreateSandboxTargetEnum} target - Target location for Sandboxes
+ * @property {string} target - Target location for Sandboxes
  *
  * @example
  * const config: DaytonaConfig = {
@@ -75,7 +75,7 @@ export interface DaytonaConfig {
    */
   serverUrl?: string
   /** Target environment for sandboxes */
-  target?: SandboxTargetRegion
+  target?: string
 }
 
 /**
@@ -123,7 +123,6 @@ export interface Resources {
  * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
  * @property {Record<string, string>} [labels] - Sandbox labels
  * @property {boolean} [public] - Is the Sandbox port preview public
- * @property {boolean} [async] - If true, will not wait for the Sandbox to be ready before returning
  * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
  * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
  */
@@ -133,7 +132,6 @@ export type CreateSandboxBaseParams = {
   envVars?: Record<string, string>
   labels?: Record<string, string>
   public?: boolean
-  async?: boolean
   autoStopInterval?: number
   autoArchiveInterval?: number
   volumes?: VolumeMount[]
@@ -204,7 +202,7 @@ export class Daytona {
   private readonly sandboxApi: SandboxApi
   private readonly toolboxApi: ToolboxApi
   private readonly objectStorageApi: ObjectStorageApi
-  private readonly target: SandboxTargetRegion
+  private readonly target?: string
   private readonly apiKey?: string
   private readonly jwtToken?: string
   private readonly organizationId?: string
@@ -219,8 +217,6 @@ export class Daytona {
    * @throws {DaytonaError} - `DaytonaError` - When API key is missing
    */
   constructor(config?: DaytonaConfig) {
-    this.remove = this.delete.bind(this)
-
     dotenv.config()
     dotenv.config({ path: '.env.local', override: true })
     const apiKey = !config?.apiKey && config?.jwtToken ? undefined : config?.apiKey || process?.env['DAYTONA_API_KEY']
@@ -235,8 +231,8 @@ export class Daytona {
       process?.env['DAYTONA_API_URL'] ||
       process?.env['DAYTONA_SERVER_URL'] ||
       'https://app.daytona.io/api'
-    const envTarget = process?.env['DAYTONA_TARGET'] as SandboxTargetRegion
-    const target = config?.target || envTarget || SandboxTargetRegion.US
+    const envTarget = process?.env['DAYTONA_TARGET']
+    const target = config?.target || envTarget
 
     if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
       console.warn(
@@ -445,7 +441,7 @@ export class Daytona {
           env: params.envVars || {},
           labels: params.labels,
           public: params.public,
-          target: this.target,
+          target: this.target as CreateSandboxTargetEnum,
           cpu: resources?.cpu,
           gpu: resources?.gpu,
           memory: resources?.memory,
@@ -485,21 +481,9 @@ export class Daytona {
         )
       }
 
-      const sandboxInfo = Sandbox.toSandboxInfo(sandboxInstance)
-      sandboxInstance.info = {
-        ...sandboxInfo,
-        name: '',
-      }
+      const sandbox = new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
 
-      const sandbox = new Sandbox(
-        sandboxInstance.id,
-        sandboxInstance as SandboxInstance,
-        this.sandboxApi,
-        this.toolboxApi,
-        codeToolbox,
-      )
-
-      if (!params.async && sandbox.instance.state !== 'started') {
+      if (sandbox.state !== 'started') {
         const timeElapsed = Date.now() - startTime
         await sandbox.waitUntilStarted(options.timeout ? options.timeout - timeElapsed / 1000 : 0)
       }
@@ -507,9 +491,8 @@ export class Daytona {
       return sandbox
     } catch (error) {
       if (error instanceof DaytonaError && error.message.includes('Operation timed out')) {
-        throw new DaytonaError(
-          `Failed to create and start sandbox within ${options.timeout} seconds. Operation timed out.`,
-        )
+        const errMsg = `Failed to create and start sandbox within ${options.timeout} seconds. Operation timed out.`
+        throw new DaytonaError(errMsg)
       }
       throw error
     }
@@ -523,20 +506,15 @@ export class Daytona {
    *
    * @example
    * const sandbox = await daytona.get('my-sandbox-id');
-   * console.log(`Sandbox state: ${sandbox.instance.state}`);
+   * console.log(`Sandbox state: ${sandbox.state}`);
    */
   public async get(sandboxId: string): Promise<Sandbox> {
     const response = await this.sandboxApi.getSandbox(sandboxId)
     const sandboxInstance = response.data
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
-    const sandboxInfo = Sandbox.toSandboxInfo(sandboxInstance)
-    sandboxInstance.info = {
-      ...sandboxInfo,
-      name: '',
-    }
 
-    return new Sandbox(sandboxId, sandboxInstance as SandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
+    return new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
   }
 
   /**
@@ -547,7 +525,7 @@ export class Daytona {
    *
    * @example
    * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-   * console.log(`Sandbox: ${await sandbox.info()}`);
+   * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
    */
   public async findOne(filter: SandboxFilter): Promise<Sandbox> {
     if (filter.id) {
@@ -556,7 +534,8 @@ export class Daytona {
 
     const sandboxes = await this.list(filter.labels)
     if (sandboxes.length === 0) {
-      throw new DaytonaError(`No sandbox found with labels ${JSON.stringify(filter.labels)}`)
+      const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
+      throw new DaytonaError(errMsg)
     }
     return sandboxes[0]
   }
@@ -570,7 +549,7 @@ export class Daytona {
    * @example
    * const sandboxes = await daytona.list({ 'my-label': 'my-value' });
    * for (const sandbox of sandboxes) {
-   *     console.log(`${sandbox.id}: ${sandbox.instance.state}`);
+   *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
   public async list(labels?: Record<string, string>): Promise<Sandbox[]> {
@@ -581,19 +560,8 @@ export class Daytona {
     )
     return response.data.map((sandbox) => {
       const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-      const sandboxInfo = Sandbox.toSandboxInfo(sandbox)
-      sandbox.info = {
-        ...sandboxInfo,
-        name: '',
-      }
 
-      return new Sandbox(
-        sandbox.id,
-        sandbox as SandboxInstance,
-        this.sandboxApi,
-        this.toolboxApi,
-        this.getCodeToolbox(language),
-      )
+      return new Sandbox(sandbox, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
     })
   }
 
@@ -642,35 +610,6 @@ export class Daytona {
     await this.sandboxApi.deleteSandbox(sandbox.id, true, undefined, { timeout: timeout * 1000 })
   }
 
-  /** @hidden */
-  public remove!: (sandbox: Sandbox, timeout?: number) => Promise<void>
-
-  /**
-   * Gets the Sandbox by ID.
-   *
-   * @param {string} workspaceId - The ID of the Sandbox to retrieve
-   * @returns {Promise<Workspace>} The Sandbox
-   *
-   * @deprecated Use `getCurrentSandbox` instead. This method will be removed in a future version.
-   */
-  public async getCurrentWorkspace(workspaceId: string): Promise<Workspace> {
-    return await this.getCurrentSandbox(workspaceId)
-  }
-
-  /**
-   * Gets the Sandbox by ID.
-   *
-   * @param {string} sandboxId - The ID of the Sandbox to retrieve
-   * @returns {Promise<Sandbox>} The Sandbox
-   *
-   * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox-id');
-   * console.log(`Current sandbox state: ${sandbox.instance.state}`);
-   */
-  public async getCurrentSandbox(sandboxId: string): Promise<Sandbox> {
-    return await this.get(sandboxId)
-  }
-
   /**
    * Gets the appropriate code toolbox based on language.
    *
@@ -687,10 +626,10 @@ export class Daytona {
       case CodeLanguage.PYTHON:
       case undefined:
         return new SandboxPythonCodeToolbox()
-      default:
-        throw new DaytonaError(
-          `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`,
-        )
+      default: {
+        const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
+        throw new DaytonaError(errMsg)
+      }
     }
   }
 }
