@@ -1,8 +1,7 @@
 ---
-title: "Charts"
+title: 'Charts'
 hideTitleOnPage: true
 ---
-
 
 ## ChartType
 
@@ -30,15 +29,15 @@ function parseChart(data: any): Chart
 
 - `Chart`
 
-***
+---
 
 ## BarChart
 
 ```ts
 type BarChart = Chart2D & {
-  elements: BarData[];
-  type: BAR;
-};
+  elements: BarData[]
+  type: BAR
+}
 ```
 
 Represents a bar chart with metadata.
@@ -52,10 +51,10 @@ Represents a bar chart with metadata.
 
 ```ts
 type BarData = {
-  group: string;
-  label: string;
-  value: string;
-};
+  group: string
+  label: string
+  value: string
+}
 ```
 
 Represents a bar in a bar chart.
@@ -70,9 +69,9 @@ Represents a bar in a bar chart.
 
 ```ts
 type BoxAndWhiskerChart = Chart2D & {
-  elements: BoxAndWhiskerData[];
-  type: BOX_AND_WHISKER;
-};
+  elements: BoxAndWhiskerData[]
+  type: BOX_AND_WHISKER
+}
 ```
 
 Represents a box and whisker chart with metadata.
@@ -80,19 +79,19 @@ Represents a box and whisker chart with metadata.
 **Type declaration**:
 
 - `elements` _BoxAndWhiskerData\[\]_ - The box and whiskers of the chart
-- `type` _BOX\_AND\_WHISKER_ - The type of chart
+- `type` _BOX_AND_WHISKER_ - The type of chart
 
 ## BoxAndWhiskerData
 
 ```ts
 type BoxAndWhiskerData = {
-  first_quartile: number;
-  label: string;
-  max: number;
-  median: number;
-  min: number;
-  outliers: number[];
-};
+  first_quartile: number
+  label: string
+  max: number
+  median: number
+  min: number
+  outliers: number[]
+}
 ```
 
 Represents a box and whisker in a box and whisker chart.
@@ -110,11 +109,11 @@ Represents a box and whisker in a box and whisker chart.
 
 ```ts
 type Chart = {
-  elements: any[];
-  png: string;
-  title: string;
-  type: ChartType;
-};
+  elements: any[]
+  png: string
+  title: string
+  type: ChartType
+}
 ```
 
 Represents a chart with metadata from matplotlib.
@@ -130,9 +129,9 @@ Represents a chart with metadata from matplotlib.
 
 ```ts
 type Chart2D = Chart & {
-  x_label: string;
-  y_label: string;
-};
+  x_label: string
+  y_label: string
+}
 ```
 
 Represents a 2D chart with metadata.
@@ -146,9 +145,9 @@ Represents a 2D chart with metadata.
 
 ```ts
 type CompositeChart = Chart & {
-  elements: Chart[];
-  type: COMPOSITE_CHART;
-};
+  elements: Chart[]
+  type: COMPOSITE_CHART
+}
 ```
 
 Represents a composite chart with metadata.
@@ -156,14 +155,14 @@ Represents a composite chart with metadata.
 **Type declaration**:
 
 - `elements` _Chart\[\]_ - The charts of the composite chart
-- `type` _COMPOSITE\_CHART_ - The type of chart
+- `type` _COMPOSITE_CHART_ - The type of chart
 
 ## LineChart
 
 ```ts
 type LineChart = PointChart & {
-  type: LINE;
-};
+  type: LINE
+}
 ```
 
 Represents a line chart with metadata.
@@ -176,9 +175,9 @@ Represents a line chart with metadata.
 
 ```ts
 type PieChart = Chart & {
-  elements: PieData[];
-  type: PIE;
-};
+  elements: PieData[]
+  type: PIE
+}
 ```
 
 Represents a pie chart with metadata.
@@ -192,10 +191,10 @@ Represents a pie chart with metadata.
 
 ```ts
 type PieData = {
-  angle: number;
-  label: string;
-  radius: number;
-};
+  angle: number
+  label: string
+  radius: number
+}
 ```
 
 Represents a pie slice in a pie chart.
@@ -210,14 +209,14 @@ Represents a pie slice in a pie chart.
 
 ```ts
 type PointChart = Chart2D & {
-  elements: PointData[];
-  x_scale: string;
-  x_tick_labels: string[];
-  x_ticks: (number | string)[];
-  y_scale: string;
-  y_tick_labels: string[];
-  y_ticks: (number | string)[];
-};
+  elements: PointData[]
+  x_scale: string
+  x_tick_labels: string[]
+  x_ticks: (number | string)[]
+  y_scale: string
+  y_tick_labels: string[]
+  y_ticks: (number | string)[]
+}
 ```
 
 Represents a point chart with metadata.
@@ -236,9 +235,9 @@ Represents a point chart with metadata.
 
 ```ts
 type PointData = {
-  label: string;
-  points: [number | string, number | string][];
-};
+  label: string
+  points: [number | string, number | string][]
+}
 ```
 
 Represents a point in a 2D chart.
@@ -252,8 +251,8 @@ Represents a point in a 2D chart.
 
 ```ts
 type ScatterChart = PointChart & {
-  type: SCATTER;
-};
+  type: SCATTER
+}
 ```
 
 Represents a scatter chart with metadata.

@@ -1,8 +1,7 @@
 ---
-title: "Volume"
+title: 'Volume'
 hideTitleOnPage: true
 ---
-
 
 ## VolumeService
 
@@ -51,12 +50,12 @@ If the Volume cannot be created
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const volume = await daytona.volume.create("my-data-volume");
-console.log(`Created volume ${volume.name} with ID ${volume.id}`);
+const daytona = new Daytona()
+const volume = await daytona.volume.create('my-data-volume')
+console.log(`Created volume ${volume.name} with ID ${volume.id}`)
 ```
 
-***
+---
 
 #### delete()
 
@@ -81,13 +80,13 @@ If the Volume does not exist or cannot be deleted
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const volume = await daytona.volume.get("volume-name");
-await daytona.volume.delete(volume);
-console.log("Volume deleted successfully");
+const daytona = new Daytona()
+const volume = await daytona.volume.get('volume-name')
+await daytona.volume.delete(volume)
+console.log('Volume deleted successfully')
 ```
 
-***
+---
 
 #### get()
 
@@ -113,12 +112,12 @@ If the Volume does not exist or cannot be accessed
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const volume = await daytona.volume.get("volume-name", true);
-console.log(`Volume ${volume.name} is in state ${volume.state}`);
+const daytona = new Daytona()
+const volume = await daytona.volume.get('volume-name', true)
+console.log(`Volume ${volume.name} is in state ${volume.state}`)
 ```
 
-***
+---
 
 #### list()
 
@@ -135,20 +134,20 @@ Lists all available Volumes.
 **Example:**
 
 ```ts
-const daytona = new Daytona();
-const volumes = await daytona.volume.list();
-console.log(`Found ${volumes.length} volumes`);
-volumes.forEach(vol => console.log(`${vol.name} (${vol.id})`));
+const daytona = new Daytona()
+const volumes = await daytona.volume.list()
+console.log(`Found ${volumes.length} volumes`)
+volumes.forEach((vol) => console.log(`${vol.name} (${vol.id})`))
 ```
 
-***
+---
 
 ## Volume
 
 ```ts
 type Volume = VolumeDto & {
-  __brand: "Volume";
-};
+  __brand: 'Volume'
+}
 ```
 
 Represents a Daytona Volume which is a shared storage volume for Sandboxes.
