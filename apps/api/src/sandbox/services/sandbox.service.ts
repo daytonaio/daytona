@@ -5,7 +5,7 @@
 
 import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
-import { Not, Repository, LessThan, In, JsonContains } from 'typeorm'
+import { Not, Repository, LessThan, In, JsonContains, FindOptionsWhere } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { CreateSandboxDto } from '../dto/create-sandbox.dto'
 import { SandboxState } from '../enums/sandbox-state.enum'
@@ -43,6 +43,7 @@ import { OrganizationSuspendedSandboxStoppedEvent } from '../../organization/eve
 import { TypedConfigService } from '../../config/typed-config.service'
 import { WarmPool } from '../entities/warm-pool.entity'
 import { SandboxDto } from '../dto/sandbox.dto'
+import { isValidUuid } from '../../common/utils/uuid'
 
 const DEFAULT_CPU = 1
 const DEFAULT_MEMORY = 1
@@ -95,7 +96,7 @@ export class SandboxService {
       )
     }
 
-    const ignoredStates = [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.ERROR]
+    const ignoredStates = [SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.ERROR, SandboxState.BUILD_FAILED]
 
     const inactiveStates = [...ignoredStates, SandboxState.STOPPED, SandboxState.ARCHIVING]
 
@@ -170,15 +171,6 @@ export class SandboxService {
     this.eventEmitter.emit(SandboxEvents.ARCHIVED, new SandboxArchivedEvent(sandbox))
   }
 
-  async count(organizationId: string): Promise<number> {
-    return this.sandboxRepository.count({
-      where: {
-        organizationId,
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ARCHIVED, SandboxState.ERROR])),
-      },
-    })
-  }
-
   async createForWarmPool(warmPoolItem: WarmPool): Promise<Sandbox> {
     const sandbox = new Sandbox()
 
@@ -226,21 +218,30 @@ export class SandboxService {
     const region = this.getValidatedOrDefaultRegion(createSandboxDto.target)
     const sandboxClass = this.getValidatedOrDefaultClass(createSandboxDto.class)
 
-    let snapshotName = createSandboxDto.snapshot
+    let snapshotIdOrName = createSandboxDto.snapshot
 
     if (!createSandboxDto.snapshot?.trim()) {
-      snapshotName = this.configService.getOrThrow('defaultSnapshot')
+      snapshotIdOrName = this.configService.getOrThrow('defaultSnapshot')
+    }
+
+    const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
+      { organizationId: organization.id, name: snapshotIdOrName, state: SnapshotState.ACTIVE },
+      { general: true, name: snapshotIdOrName, state: SnapshotState.ACTIVE },
+    ]
+
+    if (isValidUuid(snapshotIdOrName)) {
+      snapshotFilter.push(
+        { organizationId: organization.id, id: snapshotIdOrName, state: SnapshotState.ACTIVE },
+        { general: true, id: snapshotIdOrName, state: SnapshotState.ACTIVE },
+      )
     }
 
     const snapshot = await this.snapshotRepository.findOne({
-      where: [
-        { organizationId: organization.id, name: snapshotName, state: SnapshotState.ACTIVE },
-        { general: true, name: snapshotName, state: SnapshotState.ACTIVE },
-      ],
+      where: snapshotFilter,
     })
 
     if (!snapshot) {
-      throw new BadRequestError(`Snapshot ${snapshotName} not found. Did you add it through the Daytona Dashboard?`)
+      throw new BadRequestError(`Snapshot ${snapshotIdOrName} not found. Did you add it through the Daytona Dashboard?`)
     }
 
     let cpu = snapshot.cpu
@@ -268,7 +269,7 @@ export class SandboxService {
 
     const warmPoolSandbox = await this.warmPoolService.fetchWarmPoolSandbox({
       organizationId: organization.id,
-      snapshot: snapshotName,
+      snapshot: snapshotIdOrName,
       target: createSandboxDto.target,
       class: createSandboxDto.class,
       cpu: cpu,
@@ -296,7 +297,7 @@ export class SandboxService {
     //  TODO: make configurable
     sandbox.region = region
     sandbox.class = sandboxClass
-    sandbox.snapshot = snapshotName
+    sandbox.snapshot = snapshot.name
     //  TODO: default user should be configurable
     sandbox.osUser = createSandboxDto.user || 'daytona'
     sandbox.env = createSandboxDto.env || {}

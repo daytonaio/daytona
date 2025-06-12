@@ -29,7 +29,7 @@ class CreateSandbox(BaseModel):
     """
     CreateSandbox
     """ # noqa: E501
-    snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
+    snapshot: Optional[StrictStr] = Field(default=None, description="The ID or name of the snapshot used for the sandbox")
     user: Optional[StrictStr] = Field(default=None, description="The user associated with the project")
     env: Optional[Dict[str, StrictStr]] = Field(default=None, description="Environment variables for the sandbox")
     labels: Optional[Dict[str, StrictStr]] = Field(default=None, description="Labels for the sandbox")

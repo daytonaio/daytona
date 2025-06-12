@@ -252,6 +252,7 @@ const getStateIcon = (state?: SandboxState) => {
     case SandboxState.STOPPED:
       return <Circle className="w-4 h-4" />
     case SandboxState.ERROR:
+    case SandboxState.BUILD_FAILED:
       return <AlertTriangle className="w-4 h-4" />
     case SandboxState.CREATING:
     case SandboxState.STARTING:
@@ -302,6 +303,7 @@ const getStateColor = (state?: SandboxState) => {
     case SandboxState.STOPPED:
       return 'text-gray-500'
     case SandboxState.ERROR:
+    case SandboxState.BUILD_FAILED:
       return 'text-red-500'
     default:
       return 'text-gray-600 dark:text-gray-400'
@@ -316,13 +318,17 @@ const getStateLabel = (state?: SandboxState) => {
   if (state === SandboxState.DESTROYING) {
     return 'Deleting'
   }
-  return state.charAt(0).toUpperCase() + state.slice(1)
+  return state
+    .split('_')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ')
 }
 
 const statuses: FacetedFilterOption[] = [
   { label: getStateLabel(SandboxState.STARTED), value: SandboxState.STARTED, icon: CheckCircle },
   { label: getStateLabel(SandboxState.STOPPED), value: SandboxState.STOPPED, icon: Circle },
   { label: getStateLabel(SandboxState.ERROR), value: SandboxState.ERROR, icon: AlertTriangle },
+  { label: getStateLabel(SandboxState.BUILD_FAILED), value: SandboxState.BUILD_FAILED, icon: AlertTriangle },
   { label: getStateLabel(SandboxState.STARTING), value: SandboxState.STARTING, icon: Timer },
   { label: getStateLabel(SandboxState.STOPPING), value: SandboxState.STOPPING, icon: Timer },
   { label: getStateLabel(SandboxState.DESTROYING), value: SandboxState.DESTROYING, icon: Timer },
@@ -432,7 +438,7 @@ const getColumns = ({
         const state = row.original.state
         const color = getStateColor(state)
 
-        if (state === SandboxState.ERROR && !!sandbox.errorReason) {
+        if ((state === SandboxState.ERROR || state === SandboxState.BUILD_FAILED) && !!sandbox.errorReason) {
           return (
             <TooltipProvider>
               <Tooltip>
@@ -465,6 +471,7 @@ const getColumns = ({
           [SandboxState.PENDING_BUILD]: 2,
           [SandboxState.RESTORING]: 3,
           [SandboxState.ERROR]: 4,
+          [SandboxState.BUILD_FAILED]: 4,
           [SandboxState.STOPPED]: 5,
           [SandboxState.ARCHIVING]: 6,
           [SandboxState.ARCHIVED]: 6,

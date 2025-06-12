@@ -23,8 +23,6 @@ var _ MappedNullable = &BuildInfo{}
 
 // BuildInfo struct for BuildInfo
 type BuildInfo struct {
-	// The unique identifier for the build info
-	ImageRef string `json:"imageRef"`
 	// The Dockerfile content used for the build
 	DockerfileContent *string `json:"dockerfileContent,omitempty"`
 	// The context hashes used for the build
@@ -41,9 +39,8 @@ type _BuildInfo BuildInfo
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewBuildInfo(imageRef string, createdAt time.Time, updatedAt time.Time) *BuildInfo {
+func NewBuildInfo(createdAt time.Time, updatedAt time.Time) *BuildInfo {
 	this := BuildInfo{}
-	this.ImageRef = imageRef
 	this.CreatedAt = createdAt
 	this.UpdatedAt = updatedAt
 	return &this
@@ -55,30 +52,6 @@ func NewBuildInfo(imageRef string, createdAt time.Time, updatedAt time.Time) *Bu
 func NewBuildInfoWithDefaults() *BuildInfo {
 	this := BuildInfo{}
 	return &this
-}
-
-// GetImageRef returns the ImageRef field value
-func (o *BuildInfo) GetImageRef() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.ImageRef
-}
-
-// GetImageRefOk returns a tuple with the ImageRef field value
-// and a boolean to check if the value has been set.
-func (o *BuildInfo) GetImageRefOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.ImageRef, true
-}
-
-// SetImageRef sets field value
-func (o *BuildInfo) SetImageRef(v string) {
-	o.ImageRef = v
 }
 
 // GetDockerfileContent returns the DockerfileContent field value if set, zero value otherwise.
@@ -203,7 +176,6 @@ func (o BuildInfo) MarshalJSON() ([]byte, error) {
 
 func (o BuildInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	toSerialize["imageRef"] = o.ImageRef
 	if !IsNil(o.DockerfileContent) {
 		toSerialize["dockerfileContent"] = o.DockerfileContent
 	}
@@ -220,7 +192,6 @@ func (o *BuildInfo) UnmarshalJSON(data []byte) (err error) {
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
-		"imageRef",
 		"createdAt",
 		"updatedAt",
 	}

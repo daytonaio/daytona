@@ -23,7 +23,7 @@ func AwaitSnapshotState(ctx context.Context, apiClient *daytonaapiclient.APIClie
 			if snapshot.Name == targetImage {
 				if snapshot.State == state {
 					return nil
-				} else if snapshot.State == daytonaapiclient.SNAPSHOTSTATE_ERROR {
+				} else if snapshot.State == daytonaapiclient.SNAPSHOTSTATE_ERROR || snapshot.State == daytonaapiclient.SNAPSHOTSTATE_BUILD_FAILED {
 					if !snapshot.ErrorReason.IsSet() {
 						return fmt.Errorf("snapshot processing failed")
 					}
@@ -47,7 +47,7 @@ func AwaitSandboxState(ctx context.Context, apiClient *daytonaapiclient.APIClien
 			if sandbox.Id == targetSandbox {
 				if sandbox.State != nil && *sandbox.State == state {
 					return nil
-				} else if sandbox.State != nil && *sandbox.State == daytonaapiclient.SANDBOXSTATE_ERROR {
+				} else if sandbox.State != nil && (*sandbox.State == daytonaapiclient.SANDBOXSTATE_ERROR || *sandbox.State == daytonaapiclient.SANDBOXSTATE_BUILD_FAILED) {
 					if sandbox.ErrorReason == nil {
 						return fmt.Errorf("sandbox processing failed")
 					}

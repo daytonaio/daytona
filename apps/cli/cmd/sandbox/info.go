@@ -34,9 +34,9 @@ var InfoCmd = &cobra.Command{
 		infoArg := args[0]
 		var sandboxCount int
 
-		for _, w := range sandboxList {
-			if w.Id == args[0] {
-				infoArg = w.Id
+		for _, s := range sandboxList {
+			if s.Id == args[0] {
+				infoArg = s.Id
 				sandboxCount++
 			}
 		}

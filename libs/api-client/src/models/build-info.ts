@@ -19,12 +19,6 @@
  */
 export interface BuildInfo {
   /**
-   * The unique identifier for the build info
-   * @type {string}
-   * @memberof BuildInfo
-   */
-  imageRef: string
-  /**
    * The Dockerfile content used for the build
    * @type {string}
    * @memberof BuildInfo

@@ -172,7 +172,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSn
 
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, multiWriter, 0, true, nil)
 	if err != nil {
-		return fmt.Errorf("failed to stream build output: %w", err)
+		return err
 	}
 
 	if d.logWriter != nil {

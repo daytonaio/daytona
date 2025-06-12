@@ -6,6 +6,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { SnapshotState } from '../enums/snapshot-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
+import { BuildInfoDto } from './build-info.dto'
 
 export class SnapshotDto {
   @ApiProperty()
@@ -62,6 +63,12 @@ export class SnapshotDto {
   @ApiProperty({ nullable: true })
   lastUsedAt?: Date
 
+  @ApiPropertyOptional({
+    description: 'Build information for the snapshot',
+    type: BuildInfoDto,
+  })
+  buildInfo?: BuildInfoDto
+
   static fromSnapshot(snapshot: Snapshot): SnapshotDto {
     return {
       id: snapshot.id,
@@ -81,6 +88,14 @@ export class SnapshotDto {
       createdAt: snapshot.createdAt,
       updatedAt: snapshot.updatedAt,
       lastUsedAt: snapshot.lastUsedAt,
+      buildInfo: snapshot.buildInfo
+        ? {
+            dockerfileContent: snapshot.buildInfo.dockerfileContent,
+            contextHashes: snapshot.buildInfo.contextHashes,
+            createdAt: snapshot.buildInfo.createdAt,
+            updatedAt: snapshot.buildInfo.updatedAt,
+          }
+        : undefined,
     }
   }
 }

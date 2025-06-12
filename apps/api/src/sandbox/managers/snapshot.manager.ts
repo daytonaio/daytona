@@ -355,7 +355,7 @@ export class SnapshotManager {
     //  get all snapshots
     const snapshots = await this.snapshotRepository.find({
       where: {
-        state: Not(In([SnapshotState.ACTIVE, SnapshotState.ERROR])),
+        state: Not(In([SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED])),
       },
     })
 
@@ -509,13 +509,13 @@ export class SnapshotManager {
     const timeoutMinutes = 30
     const timeoutMs = timeoutMinutes * 60 * 1000
     if (Date.now() - snapshot.createdAt.getTime() > timeoutMs) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Timeout while building snapshot')
+      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Timeout while building snapshot')
       return
     }
 
     // Get build info
     if (!snapshot.buildInfo) {
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, 'Missing build information')
+      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, 'Missing build information')
       return
     }
 
@@ -542,11 +542,8 @@ export class SnapshotManager {
 
       const runnerSnapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
 
-      const tag = snapshot.imageName.split(':')[1] // Tag existance had already been validated
-      const snapshotIdWithTag = `${snapshot.id}:${tag}`
-
       await runnerSnapshotApi.buildSnapshot({
-        snapshot: snapshotIdWithTag, // Name doesn't matter for runner, it uses the snapshot ID when pushing to internal registry
+        snapshot: snapshot.buildInfo.snapshotRef, // Name doesn't matter for runner, it uses the snapshot ID when pushing to internal registry
         registry: {
           url: registry.url,
           project: registry.project,
@@ -561,7 +558,7 @@ export class SnapshotManager {
 
       // save snapshotRunner
 
-      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshotIdWithTag}`
+      const internalSnapshotName = `${registry.url}/${registry.project}/${snapshot.buildInfo.snapshotRef}`
 
       snapshot.internalName = internalSnapshotName
       await this.snapshotRepository.save(snapshot)
@@ -578,7 +575,7 @@ export class SnapshotManager {
       }
 
       this.logger.error(`Error building snapshot ${snapshot.name}: ${fromAxiosError(err)}`)
-      await this.updateSnapshotState(snapshot.id, SnapshotState.ERROR, fromAxiosError(err).message)
+      await this.updateSnapshotState(snapshot.id, SnapshotState.BUILD_FAILED, fromAxiosError(err).message)
     }
   }
 

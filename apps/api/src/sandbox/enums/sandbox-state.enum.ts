@@ -13,6 +13,7 @@ export enum SandboxState {
   STARTING = 'starting',
   STOPPING = 'stopping',
   ERROR = 'error',
+  BUILD_FAILED = 'build_failed',
   PENDING_BUILD = 'pending_build',
   BUILDING_SNAPSHOT = 'building_snapshot',
   UNKNOWN = 'unknown',
