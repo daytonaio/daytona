@@ -30,6 +30,7 @@ const (
 	SANDBOXSTATE_STARTING          SandboxState = "starting"
 	SANDBOXSTATE_STOPPING          SandboxState = "stopping"
 	SANDBOXSTATE_ERROR             SandboxState = "error"
+	SANDBOXSTATE_BUILD_FAILED      SandboxState = "build_failed"
 	SANDBOXSTATE_PENDING_BUILD     SandboxState = "pending_build"
 	SANDBOXSTATE_BUILDING_SNAPSHOT SandboxState = "building_snapshot"
 	SANDBOXSTATE_UNKNOWN           SandboxState = "unknown"
@@ -49,6 +50,7 @@ var AllowedSandboxStateEnumValues = []SandboxState{
 	"starting",
 	"stopping",
 	"error",
+	"build_failed",
 	"pending_build",
 	"building_snapshot",
 	"unknown",

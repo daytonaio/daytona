@@ -166,7 +166,7 @@ export class SnapshotService {
       throw new DaytonaError("Failed to create snapshot. Didn't receive a snapshot from the server API.")
     }
 
-    const terminalStates: SnapshotState[] = [SnapshotState.ACTIVE, SnapshotState.ERROR]
+    const terminalStates: SnapshotState[] = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
     const snapshotRef = { createdSnapshot: createdSnapshot }
     let streamPromise: Promise<void> | undefined
     // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -211,9 +211,9 @@ export class SnapshotService {
       }
     }
 
-    if (createdSnapshot.state === SnapshotState.ERROR) {
+    if (createdSnapshot.state === SnapshotState.ERROR || createdSnapshot.state === SnapshotState.BUILD_FAILED) {
       throw new DaytonaError(
-        `Failed to create snapshot. Snapshot ended in the ERROR state. name: ${createdSnapshot.name}; error reason: ${createdSnapshot.errorReason}`,
+        `Failed to create snapshot. Name: ${createdSnapshot.name} Reason: ${createdSnapshot.errorReason}`,
       )
     }
 

@@ -77,6 +77,8 @@ func getStateLabel(state daytonaapiclient.SnapshotState) string {
 		return common.StartedStyle.Render("ACTIVE")
 	case daytonaapiclient.SNAPSHOTSTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
+	case daytonaapiclient.SNAPSHOTSTATE_BUILD_FAILED:
+		return common.ErrorStyle.Render("BUILD FAILED")
 	case daytonaapiclient.SNAPSHOTSTATE_REMOVING:
 		return common.DeletedStyle.Render("REMOVING")
 	default:

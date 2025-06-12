@@ -65,6 +65,8 @@ type Workspace struct {
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
 	// Array of volumes attached to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
+	// Build information for the sandbox
+	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
 	// The image used for the workspace
 	Image *string `json:"image,omitempty"`
 	// The state of the snapshot
@@ -713,6 +715,38 @@ func (o *Workspace) SetVolumes(v []SandboxVolume) {
 	o.Volumes = v
 }
 
+// GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
+func (o *Workspace) GetBuildInfo() BuildInfo {
+	if o == nil || IsNil(o.BuildInfo) {
+		var ret BuildInfo
+		return ret
+	}
+	return *o.BuildInfo
+}
+
+// GetBuildInfoOk returns a tuple with the BuildInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetBuildInfoOk() (*BuildInfo, bool) {
+	if o == nil || IsNil(o.BuildInfo) {
+		return nil, false
+	}
+	return o.BuildInfo, true
+}
+
+// HasBuildInfo returns a boolean if a field has been set.
+func (o *Workspace) HasBuildInfo() bool {
+	if o != nil && !IsNil(o.BuildInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildInfo gets a reference to the given BuildInfo and assigns it to the BuildInfo field.
+func (o *Workspace) SetBuildInfo(v BuildInfo) {
+	o.BuildInfo = &v
+}
+
 // GetImage returns the Image field value if set, zero value otherwise.
 func (o *Workspace) GetImage() string {
 	if o == nil || IsNil(o.Image) {
@@ -865,6 +899,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes
+	}
+	if !IsNil(o.BuildInfo) {
+		toSerialize["buildInfo"] = o.BuildInfo
 	}
 	if !IsNil(o.Image) {
 		toSerialize["image"] = o.Image

@@ -12,5 +12,6 @@ export enum SnapshotState {
   VALIDATING = 'validating',
   ACTIVE = 'active',
   ERROR = 'error',
+  BUILD_FAILED = 'build_failed',
   REMOVING = 'removing',
 }

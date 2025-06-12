@@ -65,6 +65,8 @@ type Sandbox struct {
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
 	// Array of volumes attached to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
+	// Build information for the sandbox
+	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
 }
 
 type _Sandbox Sandbox
@@ -707,6 +709,38 @@ func (o *Sandbox) SetVolumes(v []SandboxVolume) {
 	o.Volumes = v
 }
 
+// GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
+func (o *Sandbox) GetBuildInfo() BuildInfo {
+	if o == nil || IsNil(o.BuildInfo) {
+		var ret BuildInfo
+		return ret
+	}
+	return *o.BuildInfo
+}
+
+// GetBuildInfoOk returns a tuple with the BuildInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetBuildInfoOk() (*BuildInfo, bool) {
+	if o == nil || IsNil(o.BuildInfo) {
+		return nil, false
+	}
+	return o.BuildInfo, true
+}
+
+// HasBuildInfo returns a boolean if a field has been set.
+func (o *Sandbox) HasBuildInfo() bool {
+	if o != nil && !IsNil(o.BuildInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildInfo gets a reference to the given BuildInfo and assigns it to the BuildInfo field.
+func (o *Sandbox) SetBuildInfo(v BuildInfo) {
+	o.BuildInfo = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -763,6 +797,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes
+	}
+	if !IsNil(o.BuildInfo) {
+		toSerialize["buildInfo"] = o.BuildInfo
 	}
 	return toSerialize, nil
 }

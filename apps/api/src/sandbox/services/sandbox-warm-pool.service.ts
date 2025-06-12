@@ -6,7 +6,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { In, MoreThan, Not, Repository } from 'typeorm'
+import { FindOptionsWhere, In, MoreThan, Not, Repository } from 'typeorm'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
@@ -27,6 +27,7 @@ import { WarmPoolEvents } from '../constants/warmpool-events.constants'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { isValidUuid } from '../../common/utils/uuid'
 
 export type FetchWarmPoolSandboxParams = {
   snapshot: string
@@ -69,11 +70,21 @@ export class SandboxWarmPoolService {
   async fetchWarmPoolSandbox(params: FetchWarmPoolSandboxParams): Promise<Sandbox | null> {
     //  validate snapshot
     const sandboxSnapshot = params.snapshot || this.configService.get<string>('DEFAULT_SNAPSHOT')
+
+    const snapshotFilter: FindOptionsWhere<Snapshot>[] = [
+      { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+      { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
+    ]
+
+    if (isValidUuid(sandboxSnapshot)) {
+      snapshotFilter.push(
+        { organizationId: params.organizationId, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
+        { general: true, id: sandboxSnapshot, state: SnapshotState.ACTIVE },
+      )
+    }
+
     const snapshot = await this.snapshotRepository.findOne({
-      where: [
-        { organizationId: params.organizationId, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-        { general: true, name: sandboxSnapshot, state: SnapshotState.ACTIVE },
-      ],
+      where: snapshotFilter,
     })
     if (!snapshot) {
       throw new BadRequestError(`Snapshot ${sandboxSnapshot} not found. Did you add it through the Daytona Dashboard?`)
@@ -108,7 +119,7 @@ export class SandboxWarmPoolService {
           cpu: warmPoolItem.cpu,
           mem: warmPoolItem.mem,
           disk: warmPoolItem.disk,
-          snapshot: sandboxSnapshot,
+          snapshot: snapshot.name, // Use snapshot.name instead of sandboxSnapshot
           osUser: warmPoolItem.osUser,
           env: warmPoolItem.env,
           organizationId: SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION,
@@ -161,7 +172,7 @@ export class SandboxWarmPoolService {
             mem: warmPoolItem.mem,
             disk: warmPoolItem.disk,
             desiredState: SandboxDesiredState.STARTED,
-            state: Not(SandboxState.ERROR),
+            state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
           },
         })
 
@@ -221,7 +232,7 @@ export class SandboxWarmPoolService {
         mem: warmPoolItem.mem,
         disk: warmPoolItem.disk,
         desiredState: SandboxDesiredState.STARTED,
-        state: Not(SandboxState.ERROR),
+        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
       },
     })
 

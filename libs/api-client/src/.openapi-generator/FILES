@@ -21,6 +21,7 @@ index.ts
 models/account-provider.ts
 models/api-key-list.ts
 models/api-key-response.ts
+models/build-info.ts
 models/command.ts
 models/completion-context.ts
 models/completion-item.ts

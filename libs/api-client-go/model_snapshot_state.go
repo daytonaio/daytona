@@ -29,6 +29,7 @@ const (
 	SNAPSHOTSTATE_VALIDATING         SnapshotState = "validating"
 	SNAPSHOTSTATE_ACTIVE             SnapshotState = "active"
 	SNAPSHOTSTATE_ERROR              SnapshotState = "error"
+	SNAPSHOTSTATE_BUILD_FAILED       SnapshotState = "build_failed"
 	SNAPSHOTSTATE_REMOVING           SnapshotState = "removing"
 )
 
@@ -42,6 +43,7 @@ var AllowedSnapshotStateEnumValues = []SnapshotState{
 	"validating",
 	"active",
 	"error",
+	"build_failed",
 	"removing",
 }
 

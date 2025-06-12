@@ -182,7 +182,7 @@ export class SandboxManager {
 
     const sandboxs = await this.sandboxRepository.find({
       where: {
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR])),
+        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED])),
         desiredState: Raw(
           () =>
             `"Sandbox"."desiredState"::text != "Sandbox"."state"::text AND "Sandbox"."desiredState"::text != 'archived'`,
@@ -224,7 +224,9 @@ export class SandboxManager {
           desiredState: SandboxDesiredState.ARCHIVED,
         },
         {
-          state: Not(In([SandboxState.ARCHIVED, SandboxState.DESTROYED, SandboxState.ERROR])),
+          state: Not(
+            In([SandboxState.ARCHIVED, SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED]),
+          ),
           desiredState: SandboxDesiredState.ARCHIVED,
           runnerId: Not(In(runnersWith3InProgress.map((runner) => runner.runnerId))),
         },
@@ -255,7 +257,7 @@ export class SandboxManager {
       id: sandboxId,
     })
 
-    if (sandbox.state === SandboxState.ERROR) {
+    if (sandbox.state === SandboxState.ERROR || sandbox.state === SandboxState.BUILD_FAILED) {
       await this.redisLockProvider.unlock(lockKey)
       return
     }
@@ -294,7 +296,7 @@ export class SandboxManager {
           //  edge case where sandbox is deleted while desired state is being processed
           return
         }
-        await this.updateSandboxErrorState(sandbox.id, error.message || String(error))
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, error.message || String(error))
       }
     }
 
@@ -333,7 +335,7 @@ export class SandboxManager {
           await this.updateSandboxState(sandbox.id, SandboxState.BUILDING_SNAPSHOT, runner.id)
           return SYNC_AGAIN
         } else if (snapshotRunner.state === SnapshotRunnerState.ERROR) {
-          await this.updateSandboxErrorState(sandbox.id, snapshotRunner.errorReason)
+          await this.updateSandboxState(sandbox.id, SandboxState.BUILD_FAILED, undefined, snapshotRunner.errorReason)
           return DONT_SYNC_AGAIN
         }
       }
@@ -448,7 +450,7 @@ export class SandboxManager {
           const archiveErrorRetryCount = archiveErrorRetryCountRaw ? parseInt(archiveErrorRetryCountRaw) : 0
           //  if the archive error retry count is greater than 3, we need to mark the sandbox as error
           if (archiveErrorRetryCount > 3) {
-            await this.updateSandboxErrorState(sandbox.id, 'Failed to archive sandbox')
+            await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Failed to archive sandbox')
             await this.redis.del(archiveErrorRetryKey)
             return DONT_SYNC_AGAIN
           }
@@ -465,7 +467,7 @@ export class SandboxManager {
         // Check for timeout - if more than 30 minutes since last activity
         const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000)
         if (sandbox.lastActivityAt < thirtyMinutesAgo) {
-          await this.updateSandboxErrorState(sandbox.id, 'Archiving operation timed out')
+          await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'Archiving operation timed out')
           return DONT_SYNC_AGAIN
         }
 
@@ -654,7 +656,12 @@ export class SandboxManager {
             return SYNC_AGAIN
           }
           case RunnerSandboxState.SandboxStateError: {
-            await this.updateSandboxErrorState(sandbox.id, 'Sandbox is in error state on runner')
+            await this.updateSandboxState(
+              sandbox.id,
+              SandboxState.ERROR,
+              undefined,
+              'Sandbox is in error state on runner',
+            )
             return DONT_SYNC_AGAIN
           }
         }
@@ -689,7 +696,7 @@ export class SandboxManager {
           return SYNC_AGAIN
         }
         case SnapshotRunnerState.ERROR: {
-          await this.updateSandboxErrorState(sandbox.id, snapshotRunner.errorReason)
+          await this.updateSandboxState(sandbox.id, SandboxState.BUILD_FAILED, undefined, snapshotRunner.errorReason)
           return DONT_SYNC_AGAIN
         }
       }
@@ -873,7 +880,12 @@ export class SandboxManager {
       //  use the backup snapshot to start the sandbox
 
       if (sandbox.backupState !== BackupState.COMPLETED) {
-        await this.updateSandboxErrorState(sandbox.id, 'Sandbox has no runner and backup is not completed')
+        await this.updateSandboxState(
+          sandbox.id,
+          SandboxState.ERROR,
+          undefined,
+          'Sandbox has no runner and backup is not completed',
+        )
         return true
       }
 
@@ -909,7 +921,7 @@ export class SandboxManager {
       }
 
       if (!exists) {
-        await this.updateSandboxErrorState(sandbox.id, 'No valid backup snapshot found')
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, 'No valid backup snapshot found')
         return SYNC_AGAIN
       }
 
@@ -984,7 +996,7 @@ export class SandboxManager {
     if (sandboxInfo.state === RunnerSandboxState.SandboxStatePullingSnapshot) {
       await this.updateSandboxState(sandbox.id, SandboxState.PULLING_SNAPSHOT)
     } else if (sandboxInfo.state === RunnerSandboxState.SandboxStateError) {
-      await this.updateSandboxErrorState(sandbox.id)
+      await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
     } else {
       await this.updateSandboxState(sandbox.id, SandboxState.STARTING)
     }
@@ -1075,7 +1087,7 @@ export class SandboxManager {
         break
       }
       case RunnerSandboxState.SandboxStateError: {
-        await this.updateSandboxErrorState(sandbox.id)
+        await this.updateSandboxState(sandbox.id, SandboxState.ERROR)
         break
       }
     }
@@ -1083,7 +1095,12 @@ export class SandboxManager {
     return SYNC_AGAIN
   }
 
-  private async updateSandboxState(sandboxId: string, state: SandboxState, runnerId?: string | null | undefined) {
+  private async updateSandboxState(
+    sandboxId: string,
+    state: SandboxState,
+    runnerId?: string | null | undefined,
+    errorReason?: string,
+  ) {
     const sandbox = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
@@ -1094,18 +1111,10 @@ export class SandboxManager {
     if (runnerId !== undefined) {
       sandbox.runnerId = runnerId
     }
-
-    await this.sandboxRepository.save(sandbox)
-  }
-
-  private async updateSandboxErrorState(sandboxId: string, errorReason?: string) {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-    sandbox.state = SandboxState.ERROR
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
     }
+
     await this.sandboxRepository.save(sandbox)
   }
 

@@ -9,6 +9,7 @@ import { IsEnum, IsOptional } from 'class-validator'
 import { BackupState } from '../enums/backup-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
+import { BuildInfoDto } from './build-info.dto'
 
 @ApiSchema({ name: 'SandboxInfo' })
 export class SandboxInfoDto {
@@ -213,6 +214,14 @@ export class SandboxDto {
   @IsOptional()
   volumes?: SandboxVolume[]
 
+  @ApiPropertyOptional({
+    description: 'Build information for the sandbox',
+    type: BuildInfoDto,
+    required: false,
+  })
+  @IsOptional()
+  buildInfo?: BuildInfoDto
+
   constructor() {
     if (this.name === '') {
       this.name = this.id
@@ -241,6 +250,14 @@ export class SandboxDto {
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
+      buildInfo: sandbox.buildInfo
+        ? {
+            dockerfileContent: sandbox.buildInfo.dockerfileContent,
+            contextHashes: sandbox.buildInfo.contextHashes,
+            createdAt: sandbox.buildInfo.createdAt,
+            updatedAt: sandbox.buildInfo.updatedAt,
+          }
+        : undefined,
       info: {
         name: sandbox.id,
         created: sandbox.createdAt?.toISOString(),

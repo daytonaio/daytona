@@ -46,6 +46,7 @@ from daytona_api_client_async.exceptions import ApiException
 from daytona_api_client_async.models.account_provider import AccountProvider
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
+from daytona_api_client_async.models.build_info import BuildInfo
 from daytona_api_client_async.models.command import Command
 from daytona_api_client_async.models.completion_context import CompletionContext
 from daytona_api_client_async.models.completion_item import CompletionItem

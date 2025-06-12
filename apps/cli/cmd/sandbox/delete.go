@@ -35,10 +35,10 @@ var DeleteCmd = &cobra.Command{
 			if allFlag {
 				var deletedCount int
 
-				for _, w := range sandboxList {
-					res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, w.Id).Force(forceFlag).Execute()
+				for _, s := range sandboxList {
+					res, err := apiClient.SandboxAPI.DeleteSandbox(ctx, s.Id).Force(forceFlag).Execute()
 					if err != nil {
-						fmt.Printf("Failed to delete sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
+						fmt.Printf("Failed to delete sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
 						deletedCount++
 					}
@@ -54,9 +54,9 @@ var DeleteCmd = &cobra.Command{
 
 		var sandboxCount int
 
-		for _, w := range sandboxList {
-			if w.Id == args[0] {
-				deletionArg = w.Id
+		for _, s := range sandboxList {
+			if s.Id == args[0] {
+				deletionArg = s.Id
 				sandboxCount++
 			}
 		}

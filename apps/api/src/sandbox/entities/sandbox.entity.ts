@@ -200,6 +200,7 @@ export class Sandbox {
             SandboxState.BUILDING_SNAPSHOT,
             SandboxState.PULLING_SNAPSHOT,
             SandboxState.ERROR,
+            SandboxState.BUILD_FAILED,
           ].includes(this.state)
         ) {
           break
@@ -207,14 +208,26 @@ export class Sandbox {
         throw new Error(`Sandbox ${this.id} is not in a valid state to be started. State: ${this.state}`)
       case SandboxDesiredState.STOPPED:
         if (
-          [SandboxState.STARTED, SandboxState.STOPPING, SandboxState.STOPPED, SandboxState.ERROR].includes(this.state)
+          [
+            SandboxState.STARTED,
+            SandboxState.STOPPING,
+            SandboxState.STOPPED,
+            SandboxState.ERROR,
+            SandboxState.BUILD_FAILED,
+          ].includes(this.state)
         ) {
           break
         }
         throw new Error(`Sandbox ${this.id} is not in a valid state to be stopped. State: ${this.state}`)
       case SandboxDesiredState.ARCHIVED:
         if (
-          [SandboxState.ARCHIVED, SandboxState.ARCHIVING, SandboxState.STOPPED, SandboxState.ERROR].includes(this.state)
+          [
+            SandboxState.ARCHIVED,
+            SandboxState.ARCHIVING,
+            SandboxState.STOPPED,
+            SandboxState.ERROR,
+            SandboxState.BUILD_FAILED,
+          ].includes(this.state)
         ) {
           break
         }
@@ -228,6 +241,7 @@ export class Sandbox {
             SandboxState.STARTED,
             SandboxState.ARCHIVED,
             SandboxState.ERROR,
+            SandboxState.BUILD_FAILED,
           ].includes(this.state)
         ) {
           break
@@ -241,7 +255,7 @@ export class Sandbox {
     if (String(this.state) === String(this.desiredState)) {
       this.pending = false
     }
-    if (this.state === SandboxState.ERROR) {
+    if (this.state === SandboxState.ERROR || this.state === SandboxState.BUILD_FAILED) {
       this.pending = false
     }
   }

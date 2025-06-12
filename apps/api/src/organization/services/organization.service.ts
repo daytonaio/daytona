@@ -124,7 +124,7 @@ export class OrganizationService implements OnModuleInit {
     const sandboxes = await this.sandboxRepository.find({
       where: {
         organizationId,
-        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.ARCHIVED])),
+        state: Not(In([SandboxState.DESTROYED, SandboxState.ERROR, SandboxState.BUILD_FAILED, SandboxState.ARCHIVED])),
       },
     })
 
@@ -317,7 +317,7 @@ export class OrganizationService implements OnModuleInit {
       where: {
         organizationId: In(suspendedOrganizationIds),
         desiredState: SandboxDesiredState.STARTED,
-        state: Not(SandboxState.ERROR),
+        state: Not(In([SandboxState.ERROR, SandboxState.BUILD_FAILED])),
       },
     })
 

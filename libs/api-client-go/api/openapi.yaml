@@ -5610,6 +5610,7 @@ components:
         - starting
         - stopping
         - error
+        - build_failed
         - pending_build
         - building_snapshot
         - unknown
@@ -5634,9 +5635,41 @@ components:
         - mountPath
         - volumeId
       type: object
+    BuildInfo:
+      properties:
+        dockerfileContent:
+          description: The Dockerfile content used for the build
+          example: |-
+            FROM node:14
+            WORKDIR /app
+            COPY . .
+            RUN npm install
+            CMD ["npm", "start"]
+          type: string
+        contextHashes:
+          description: The context hashes used for the build
+          example:
+            - hash1
+            - hash2
+          items:
+            type: string
+          type: array
+        createdAt:
+          description: The creation timestamp
+          format: date-time
+          type: string
+        updatedAt:
+          description: The last update timestamp
+          format: date-time
+          type: string
+      required:
+        - createdAt
+        - updatedAt
+      type: object
     Sandbox:
       example:
         memory: 4
+        buildInfo: ''
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -5764,6 +5797,10 @@ components:
           items:
             $ref: '#/components/schemas/SandboxVolume'
           type: array
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/BuildInfo'
+          description: Build information for the sandbox
       required:
         - env
         - id
@@ -5818,11 +5855,11 @@ components:
         user: daytona
         class: small
         autoArchiveInterval: 10080
-        snapshot: daytonaio/sandbox:latest
+        snapshot: ubuntu-4vcpu-8ram-100gb
       properties:
         snapshot:
-          description: The snapshot used for the sandbox
-          example: daytonaio/sandbox:latest
+          description: The ID or name of the snapshot used for the sandbox
+          example: ubuntu-4vcpu-8ram-100gb
           type: string
         user:
           description: The user associated with the project
@@ -6735,11 +6772,13 @@ components:
         - validating
         - active
         - error
+        - build_failed
         - removing
       type: string
     SnapshotDto:
       example:
         imageName: imageName
+        buildInfo: ''
         cpu: 6.027456183070403
         gpu: 1.4658129805029452
         enabled: true
@@ -6803,6 +6842,10 @@ components:
           format: date-time
           nullable: true
           type: string
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/BuildInfo'
+          description: Build information for the snapshot
       required:
         - cpu
         - createdAt
@@ -6838,6 +6881,7 @@ components:
         page: 7.061401241503109
         items:
           - imageName: imageName
+            buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
             enabled: true
@@ -6857,6 +6901,7 @@ components:
             state: ''
             updatedAt: 2000-01-23T04:56:07.000+00:00
           - imageName: imageName
+            buildInfo: ''
             cpu: 6.027456183070403
             gpu: 1.4658129805029452
             enabled: true
@@ -6905,8 +6950,17 @@ components:
       type: object
     Workspace:
       example:
-        image: daytonaio/workspace:latest
         memory: 4
+        buildInfo: ''
+        autoStopInterval: 30
+        organizationId: organization123
+        snapshotState: None
+        public: false
+        errorReason: The sandbox is not running
+        id: sandbox123
+        state: creating
+        info: ''
+        image: daytonaio/workspace:latest
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -6918,23 +6972,15 @@ components:
         snapshotCreatedAt: 2024-10-01T12:00:00Z
         gpu: 0
         backupCreatedAt: 2024-10-01T12:00:00Z
-        autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
         target: local
-        organizationId: organization123
         disk: 10
-        snapshotState: None
-        public: false
-        errorReason: The sandbox is not running
         name: MySandbox
-        id: sandbox123
-        state: creating
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
         snapshot: daytonaio/sandbox:latest
-        info: ''
       properties:
         id:
           description: The ID of the sandbox
@@ -7036,6 +7082,10 @@ components:
           items:
             $ref: '#/components/schemas/SandboxVolume'
           type: array
+        buildInfo:
+          allOf:
+            - $ref: '#/components/schemas/BuildInfo'
+          description: Build information for the sandbox
         image:
           description: The image used for the workspace
           example: daytonaio/workspace:latest

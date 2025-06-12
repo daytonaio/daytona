@@ -14,6 +14,9 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
+import type { BuildInfo } from './build-info'
+// May contain unused imports in some cases
+// @ts-ignore
 import type { SandboxInfo } from './sandbox-info'
 // May contain unused imports in some cases
 // @ts-ignore
@@ -155,6 +158,12 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   volumes?: Array<SandboxVolume>
+  /**
+   * Build information for the sandbox
+   * @type {BuildInfo}
+   * @memberof Sandbox
+   */
+  buildInfo?: BuildInfo
 }
 
 export const SandboxBackupStateEnum = {

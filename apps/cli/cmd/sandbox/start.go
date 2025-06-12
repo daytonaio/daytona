@@ -33,10 +33,10 @@ var StartCmd = &cobra.Command{
 			if allFlag {
 				var startedCount int
 
-				for _, w := range sandboxList {
-					res, err := apiClient.SandboxAPI.StartSandbox(ctx, w.Id).Execute()
+				for _, s := range sandboxList {
+					res, err := apiClient.SandboxAPI.StartSandbox(ctx, s.Id).Execute()
 					if err != nil {
-						fmt.Printf("Failed to start sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
+						fmt.Printf("Failed to start sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
 						startedCount++
 					}
@@ -51,9 +51,9 @@ var StartCmd = &cobra.Command{
 		startArg := args[0]
 		var sandboxCount int
 
-		for _, w := range sandboxList {
-			if w.Id == args[0] {
-				startArg = w.Id
+		for _, s := range sandboxList {
+			if s.Id == args[0] {
+				startArg = s.Id
 				sandboxCount++
 			}
 		}

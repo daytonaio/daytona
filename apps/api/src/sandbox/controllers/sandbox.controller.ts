@@ -17,7 +17,6 @@ import {
   UseInterceptors,
   Put,
   NotFoundException,
-  ForbiddenException,
   Res,
   Request,
   RawBodyRequest,
@@ -495,7 +494,11 @@ export class SandboxController {
     while (Date.now() - startTime < timeout) {
       const sandbox = await this.sandboxService.findOne(sandboxId)
       sandboxState = sandbox.state
-      if (sandboxState === desiredState || sandboxState === SandboxState.ERROR) {
+      if (
+        sandboxState === desiredState ||
+        sandboxState === SandboxState.ERROR ||
+        sandboxState === SandboxState.BUILD_FAILED
+      ) {
         return sandboxState
       }
       await new Promise((resolve) => setTimeout(resolve, 100)) // Wait 100 ms before checking again

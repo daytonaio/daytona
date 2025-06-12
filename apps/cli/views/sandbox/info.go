@@ -127,6 +127,8 @@ func getStateLabel(state daytonaapiclient.SandboxState) string {
 		return common.StoppedStyle.Render("ARCHIVED")
 	case daytonaapiclient.SANDBOXSTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
+	case daytonaapiclient.SANDBOXSTATE_BUILD_FAILED:
+		return common.ErrorStyle.Render("BUILD FAILED")
 	case daytonaapiclient.SANDBOXSTATE_UNKNOWN:
 		return common.UndefinedStyle.Render("UNKNOWN")
 	default:
