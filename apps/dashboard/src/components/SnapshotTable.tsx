@@ -31,6 +31,7 @@ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover'
 import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
 import { Loader2 } from 'lucide-react'
+import { Badge } from './ui/badge'
 
 interface DataTableProps {
   data: SnapshotDto[]
@@ -286,6 +287,17 @@ const getColumns = ({
     {
       accessorKey: 'imageName',
       header: 'Image',
+      cell: ({ row }) => {
+        const snapshot = row.original
+        if (!snapshot.imageName && snapshot.buildInfo) {
+          return (
+            <Badge variant="secondary" className="rounded-sm px-1 font-medium">
+              DECLARATIVE BUILD
+            </Badge>
+          )
+        }
+        return snapshot.imageName
+      },
     },
     {
       id: 'resources',
@@ -302,7 +314,10 @@ const getColumns = ({
         const snapshot = row.original
         const color = getStateColor(snapshot.state)
 
-        if (snapshot.state === SnapshotState.ERROR && !!snapshot.errorReason) {
+        if (
+          (snapshot.state === SnapshotState.ERROR || snapshot.state === SnapshotState.BUILD_FAILED) &&
+          !!snapshot.errorReason
+        ) {
           return (
             <TooltipProvider>
               <Tooltip>
@@ -396,6 +411,7 @@ const getStateIcon = (state: SnapshotState) => {
     case SnapshotState.ACTIVE:
       return <CheckCircle className="w-4 h-4 flex-shrink-0" />
     case SnapshotState.ERROR:
+    case SnapshotState.BUILD_FAILED:
       return <AlertTriangle className="w-4 h-4 flex-shrink-0" />
     default:
       return <Timer className="w-4 h-4 flex-shrink-0" />
@@ -407,6 +423,7 @@ const getStateColor = (state: SnapshotState) => {
     case SnapshotState.ACTIVE:
       return 'text-green-500'
     case SnapshotState.ERROR:
+    case SnapshotState.BUILD_FAILED:
       return 'text-red-500'
     default:
       return 'text-gray-600 dark:text-gray-400'

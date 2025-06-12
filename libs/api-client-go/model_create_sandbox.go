@@ -20,7 +20,7 @@ var _ MappedNullable = &CreateSandbox{}
 
 // CreateSandbox struct for CreateSandbox
 type CreateSandbox struct {
-	// The snapshot used for the sandbox
+	// The ID or name of the snapshot used for the sandbox
 	Snapshot *string `json:"snapshot,omitempty"`
 	// The user associated with the project
 	User *string `json:"user,omitempty"`

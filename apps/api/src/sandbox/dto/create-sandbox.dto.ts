@@ -13,8 +13,8 @@ import { CreateBuildInfoDto } from './create-build-info.dto'
 @ApiSchema({ name: 'CreateSandbox' })
 export class CreateSandboxDto {
   @ApiPropertyOptional({
-    description: 'The snapshot used for the sandbox',
-    example: 'daytonaio/sandbox:latest',
+    description: 'The ID or name of the snapshot used for the sandbox',
+    example: 'ubuntu-4vcpu-8ram-100gb',
   })
   @IsOptional()
   @IsString()

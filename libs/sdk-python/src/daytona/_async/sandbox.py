@@ -252,7 +252,7 @@ class AsyncSandbox:
             response = await self.sandbox_api.get_sandbox(self.id)
             state = response.state
 
-            if state == "error":
+            if state in ["error", "build_failed"]:
                 raise DaytonaError(
                     f"Sandbox {self.id} failed to start with state: {state}, error reason: {response.error_reason}"
                 )
@@ -304,7 +304,7 @@ class AsyncSandbox:
                 response = await self.sandbox_api.get_sandbox(self.id)
                 state = response.state
 
-                if state == "error":
+                if state in ["error", "build_failed"]:
                     raise DaytonaError(
                         f"Sandbox {self.id} failed to stop with status: {state}, error reason: {response.error_reason}"
                     )

@@ -31,11 +31,11 @@ func ListSandboxes(sandboxList []daytonaapiclient.Sandbox, activeOrganizationNam
 
 	data := [][]string{}
 
-	for _, w := range sandboxList {
+	for _, s := range sandboxList {
 		var rowData *RowData
 		var row []string
 
-		rowData = getTableRowData(w)
+		rowData = getTableRowData(s)
 		row = getRowFromRowData(*rowData)
 		data = append(data, row)
 	}
@@ -129,5 +129,6 @@ var sandboxListStatePriorities = map[daytonaapiclient.SandboxState]int{
 	"started":       2,
 	"undefined":     2,
 	"error":         3,
+	"build-failed":  3,
 	"stopped":       4,
 }

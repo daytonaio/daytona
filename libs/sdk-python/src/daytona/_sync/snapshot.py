@@ -141,7 +141,7 @@ class SnapshotService:
 
         created_snapshot = self.__snapshots_api.create_snapshot(create_snapshot_req)
 
-        terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR]
+        terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
 
         def start_log_streaming():
             _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(  # pylint: disable=protected-access
@@ -191,9 +191,9 @@ class SnapshotService:
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
-        if created_snapshot.state == SnapshotState.ERROR:
+        if created_snapshot.state in (SnapshotState.ERROR, SnapshotState.BUILD_FAILED):
             raise DaytonaError(
-                f"Failed to create snapshot {created_snapshot.name}, error reason: {created_snapshot.error_reason}"
+                f"Failed to create snapshot {created_snapshot.name}, reason: {created_snapshot.error_reason}"
             )
 
         return created_snapshot if isinstance(created_snapshot, Snapshot) else Snapshot.from_dto(created_snapshot)

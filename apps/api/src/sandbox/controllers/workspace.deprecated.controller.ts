@@ -517,7 +517,11 @@ export class WorkspaceController {
     while (Date.now() - startTime < timeout) {
       const workspace = await this.workspaceService.findOne(workspaceId)
       workspaceState = workspace.state
-      if (workspaceState === desiredState || workspaceState === WorkspaceState.ERROR) {
+      if (
+        workspaceState === desiredState ||
+        workspaceState === WorkspaceState.ERROR ||
+        workspaceState === WorkspaceState.BUILD_FAILED
+      ) {
         return workspaceState
       }
       await new Promise((resolve) => setTimeout(resolve, 100)) // Wait 100 ms before checking again

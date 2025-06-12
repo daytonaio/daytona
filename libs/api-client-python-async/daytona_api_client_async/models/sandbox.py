@@ -20,6 +20,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from daytona_api_client_async.models.build_info import BuildInfo
 from daytona_api_client_async.models.sandbox_info import SandboxInfo
 from daytona_api_client_async.models.sandbox_state import SandboxState
 from daytona_api_client_async.models.sandbox_volume import SandboxVolume
@@ -51,8 +52,9 @@ class Sandbox(BaseModel):
     auto_stop_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-stop interval in minutes (0 means disabled)", alias="autoStopInterval")
     auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval")
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes attached to the sandbox")
+    build_info: Optional[BuildInfo] = Field(default=None, description="Build information for the sandbox", alias="buildInfo")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "volumes"]
+    __properties: ClassVar[List[str]] = ["id", "name", "organizationId", "snapshot", "user", "env", "labels", "public", "target", "info", "cpu", "gpu", "memory", "disk", "state", "errorReason", "backupState", "backupCreatedAt", "autoStopInterval", "autoArchiveInterval", "volumes", "buildInfo"]
 
     @field_validator('backup_state')
     def backup_state_validate_enum(cls, value):
@@ -115,6 +117,9 @@ class Sandbox(BaseModel):
                 if _item_volumes:
                     _items.append(_item_volumes.to_dict())
             _dict['volumes'] = _items
+        # override the default output from pydantic by calling `to_dict()` of build_info
+        if self.build_info:
+            _dict['buildInfo'] = self.build_info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -152,7 +157,8 @@ class Sandbox(BaseModel):
             "backupCreatedAt": obj.get("backupCreatedAt"),
             "autoStopInterval": obj.get("autoStopInterval"),
             "autoArchiveInterval": obj.get("autoArchiveInterval"),
-            "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None
+            "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]] if obj.get("volumes") is not None else None,
+            "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

@@ -293,7 +293,15 @@ export class SnapshotController {
       throw new NotFoundException(`Build runner for snapshot ${snapshotId} not found`)
     }
 
-    const logProxy = new LogProxy(runner.apiUrl, snapshot.id, runner.apiKey, follow === true, req, res, next)
+    const logProxy = new LogProxy(
+      runner.apiUrl,
+      snapshot.buildInfo.snapshotRef,
+      runner.apiKey,
+      follow === true,
+      req,
+      res,
+      next,
+    )
     return logProxy.create()
   }
 }

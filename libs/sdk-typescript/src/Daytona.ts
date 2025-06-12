@@ -463,7 +463,12 @@ export class Daytona {
       let sandboxInstance = response.data
 
       if (sandboxInstance.state === SandboxState.PENDING_BUILD && options.onSnapshotCreateLogs) {
-        const terminalStates: SandboxState[] = [SandboxState.STARTED, SandboxState.STARTING, SandboxState.ERROR]
+        const terminalStates: SandboxState[] = [
+          SandboxState.STARTED,
+          SandboxState.STARTING,
+          SandboxState.ERROR,
+          SandboxState.BUILD_FAILED,
+        ]
 
         while (sandboxInstance.state === SandboxState.PENDING_BUILD) {
           await new Promise((resolve) => setTimeout(resolve, 1000))

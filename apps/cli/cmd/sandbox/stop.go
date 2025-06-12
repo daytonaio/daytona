@@ -33,10 +33,10 @@ var StopCmd = &cobra.Command{
 			if allFlag {
 				var stoppedCount int
 
-				for _, w := range sandboxList {
-					res, err := apiClient.SandboxAPI.StopSandbox(ctx, w.Id).Execute()
+				for _, s := range sandboxList {
+					res, err := apiClient.SandboxAPI.StopSandbox(ctx, s.Id).Execute()
 					if err != nil {
-						fmt.Printf("Failed to stop sandbox %s: %s\n", w.Id, apiclient.HandleErrorResponse(res, err))
+						fmt.Printf("Failed to stop sandbox %s: %s\n", s.Id, apiclient.HandleErrorResponse(res, err))
 					} else {
 						stoppedCount++
 					}
@@ -51,9 +51,9 @@ var StopCmd = &cobra.Command{
 		stopArg := args[0]
 		var sandboxCount int
 
-		for _, w := range sandboxList {
-			if w.Id == args[0] {
-				stopArg = w.Id
+		for _, s := range sandboxList {
+			if s.Id == args[0] {
+				stopArg = s.Id
 				sandboxCount++
 			}
 		}

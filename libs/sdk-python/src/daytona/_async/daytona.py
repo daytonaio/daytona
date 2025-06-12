@@ -428,6 +428,7 @@ class AsyncDaytona:
                     SandboxState.STARTED,
                     SandboxState.STARTING,
                     SandboxState.ERROR,
+                    SandboxState.BUILD_FAILED,
                 ]
 
             while response_ref["response"].state == SandboxState.PENDING_BUILD:

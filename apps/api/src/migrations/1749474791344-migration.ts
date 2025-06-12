@@ -5,8 +5,8 @@
 
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1748866194354 implements MigrationInterface {
-  name = 'Migration1748866194354'
+export class Migration1749474791344 implements MigrationInterface {
+  name = 'Migration1749474791344'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     // Snapshot to backup rename

@@ -40,6 +40,8 @@ type SnapshotDto struct {
 	CreatedAt      time.Time       `json:"createdAt"`
 	UpdatedAt      time.Time       `json:"updatedAt"`
 	LastUsedAt     NullableTime    `json:"lastUsedAt"`
+	// Build information for the snapshot
+	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
 }
 
 type _SnapshotDto SnapshotDto
@@ -508,6 +510,38 @@ func (o *SnapshotDto) SetLastUsedAt(v time.Time) {
 	o.LastUsedAt.Set(&v)
 }
 
+// GetBuildInfo returns the BuildInfo field value if set, zero value otherwise.
+func (o *SnapshotDto) GetBuildInfo() BuildInfo {
+	if o == nil || IsNil(o.BuildInfo) {
+		var ret BuildInfo
+		return ret
+	}
+	return *o.BuildInfo
+}
+
+// GetBuildInfoOk returns a tuple with the BuildInfo field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SnapshotDto) GetBuildInfoOk() (*BuildInfo, bool) {
+	if o == nil || IsNil(o.BuildInfo) {
+		return nil, false
+	}
+	return o.BuildInfo, true
+}
+
+// HasBuildInfo returns a boolean if a field has been set.
+func (o *SnapshotDto) HasBuildInfo() bool {
+	if o != nil && !IsNil(o.BuildInfo) {
+		return true
+	}
+
+	return false
+}
+
+// SetBuildInfo gets a reference to the given BuildInfo and assigns it to the BuildInfo field.
+func (o *SnapshotDto) SetBuildInfo(v BuildInfo) {
+	o.BuildInfo = &v
+}
+
 func (o SnapshotDto) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -541,6 +575,9 @@ func (o SnapshotDto) ToMap() (map[string]interface{}, error) {
 	toSerialize["createdAt"] = o.CreatedAt
 	toSerialize["updatedAt"] = o.UpdatedAt
 	toSerialize["lastUsedAt"] = o.LastUsedAt.Get()
+	if !IsNil(o.BuildInfo) {
+		toSerialize["buildInfo"] = o.BuildInfo
+	}
 	return toSerialize, nil
 }
 
