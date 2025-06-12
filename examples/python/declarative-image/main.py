@@ -25,11 +25,9 @@ def main():
         Image.debian_slim("3.12")
         .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
         .run_commands(
-            [
-                "apt-get update && apt-get install -y git",
-                "groupadd -r daytona && useradd -r -g daytona -m daytona",
-                "mkdir -p /home/daytona/workspace",
-            ]
+            "apt-get update && apt-get install -y git",
+            "groupadd -r daytona && useradd -r -g daytona -m daytona",
+            "mkdir -p /home/daytona/workspace",
         )
         .workdir("/home/daytona/workspace")
         .env({"MY_ENV_VAR": "My Environment Variable"})
@@ -68,7 +66,7 @@ def main():
         print(response.result)
     finally:
         # Clean up first sandbox
-        daytona.remove(sandbox1)
+        daytona.delete(sandbox1)
 
     # Create second sandbox with a new dynamic image
     print("=== Creating Sandbox with Dynamic Image ===")
@@ -77,7 +75,7 @@ def main():
     dynamic_image = (
         Image.debian_slim("3.11")
         .pip_install(["pytest", "pytest-cov", "black", "isort", "mypy", "ruff"])
-        .run_commands(["apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project"])
+        .run_commands("apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project")
         .workdir("/home/daytona/project")
         .env({"ENV_VAR": "My Environment Variable"})
     )
@@ -88,7 +86,7 @@ def main():
             image=dynamic_image,
         ),
         timeout=0,
-        on_snapshot_create_logs=lambda chunk: print(chunk, end=""),
+        on_snapshot_create_logs=print,
     )
 
     try:
@@ -99,7 +97,7 @@ def main():
         print(response.result)
     finally:
         # Clean up second sandbox
-        daytona.remove(sandbox2)
+        daytona.delete(sandbox2)
 
 
 if __name__ == "__main__":

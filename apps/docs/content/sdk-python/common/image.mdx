@@ -186,7 +186,10 @@ Runs commands in the image.
 **Example**:
 
 ```python
-image = Image.debian_slim("3.12").run_commands("npm install", "npm run build")
+image = Image.debian_slim("3.12").run_commands(
+    'echo "Hello, world!"',
+    ['bash', '-c', 'echo Hello, world, again!']
+)
 ```
 
 #### Image.env
@@ -281,7 +284,7 @@ image = Image.debian_slim("3.12").cmd(["/bin/bash"])
 
 ```python
 def dockerfile_commands(
-        *dockerfile_commands: Union[str, list[str]],
+        dockerfile_commands: list[str],
         context_dir: Optional[Union[Path, str]] = None) -> "Image"
 ```
 
@@ -299,7 +302,7 @@ Adds arbitrary Dockerfile-like commands to the image.
 **Example**:
 
 ```python
-image = Image.debian_slim("3.12").dockerfile_commands("RUN echo 'Hello, world!'")
+image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
 ```
 
 #### Image.from_dockerfile

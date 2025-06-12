@@ -9,7 +9,7 @@ from typing import Annotated, Dict, List, Optional, Union
 from pydantic import BaseModel, Field, model_validator
 
 from .image import Image
-from .sandbox import Resources, SandboxTargetRegion
+from .sandbox import Resources
 from .volume import VolumeMount
 
 
@@ -71,7 +71,7 @@ class DaytonaConfig(BaseModel):
             deprecated="`server_url` is deprecated and will be removed in a future version. Use `api_url` instead.",
         ),
     ]
-    target: Optional[SandboxTargetRegion] = None
+    target: Optional[str] = None
     jwt_token: Optional[str] = None
     organization_id: Optional[str] = None
 

@@ -27,11 +27,9 @@ async def main():
             Image.debian_slim("3.12")
             .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
             .run_commands(
-                [
-                    "apt-get update && apt-get install -y git",
-                    "groupadd -r daytona && useradd -r -g daytona -m daytona",
-                    "mkdir -p /home/daytona/workspace",
-                ]
+                "apt-get update && apt-get install -y git",
+                "groupadd -r daytona && useradd -r -g daytona -m daytona",
+                "mkdir -p /home/daytona/workspace",
             )
             .dockerfile_commands(["USER daytona"])
             .workdir("/home/daytona/workspace")
@@ -71,7 +69,7 @@ async def main():
             print(response.result)
         finally:
             # Clean up first sandbox
-            await daytona.remove(sandbox1)
+            await daytona.delete(sandbox1)
 
         # Create second sandbox with a new dynamic image
         print("=== Creating Sandbox with Dynamic Image ===")
@@ -80,7 +78,7 @@ async def main():
         dynamic_image = (
             Image.debian_slim("3.11")
             .pip_install(["pytest", "pytest-cov", "black", "isort", "mypy", "ruff"])
-            .run_commands(["apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project"])
+            .run_commands("apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project")
             .workdir("/home/daytona/project")
             .env({"ENV_VAR": "My Environment Variable"})
         )
@@ -102,7 +100,7 @@ async def main():
             print(response.result)
         finally:
             # Clean up second sandbox
-            await daytona.remove(sandbox2)
+            await daytona.delete(sandbox2)
     finally:
         await daytona.close()
 

@@ -237,15 +237,21 @@ class Image(BaseModel):
 
         Example:
             ```python
-            image = Image.debian_slim("3.12").run_commands("npm install", "npm run build")
+            image = Image.debian_slim("3.12").run_commands(
+                'echo "Hello, world!"',
+                ['bash', '-c', 'echo Hello, world, again!']
+            )
             ```
         """
-        cmds = self.__flatten_str_args("run_commands", "commands", commands)
-        if not cmds:
-            return self
-
-        for cmd in cmds:
-            self._dockerfile += f"RUN {cmd}\n"
+        for command in commands:
+            if isinstance(command, list):
+                escaped = []
+                for c in command:
+                    c_escaped = c.replace('"', '\\\\\\"').replace("'", "\\'")
+                    escaped.append(f'"{c_escaped}"')
+                self._dockerfile += f"RUN {' '.join(escaped)}\n"
+            else:
+                self._dockerfile += f"RUN {command}\n"
 
         return self
 
@@ -335,7 +341,7 @@ class Image(BaseModel):
 
     def dockerfile_commands(
         self,
-        *dockerfile_commands: Union[str, list[str]],
+        dockerfile_commands: list[str],
         context_dir: Optional[Union[Path, str]] = None,
     ) -> "Image":
         """Adds arbitrary Dockerfile-like commands to the image.
@@ -349,25 +355,23 @@ class Image(BaseModel):
 
         Example:
             ```python
-            image = Image.debian_slim("3.12").dockerfile_commands("RUN echo 'Hello, world!'")
+            image = Image.debian_slim("3.12").dockerfile_commands(["RUN echo 'Hello, world!'"])
             ```
         """
-        cmds = self.__flatten_str_args("dockerfile_commands", "dockerfile_commands", dockerfile_commands)
-        if not cmds:
-            return self
-
         if context_dir:
             context_dir = os.path.expanduser(context_dir)
             if not os.path.isdir(context_dir):
                 raise DaytonaError(f"Context directory {context_dir} does not exist")
 
-        for context_path, original_path in Image.__extract_copy_sources("\n".join(cmds), context_dir or ""):
+        for context_path, original_path in Image.__extract_copy_sources(
+            "\n".join(dockerfile_commands), context_dir or ""
+        ):
             archive_base_path = context_path
             if context_dir and not original_path.startswith(context_dir):
                 archive_base_path = context_path.removeprefix(context_dir)
             self._context_list.append(Context(source_path=context_path, archive_path=archive_base_path))
 
-        self._dockerfile += "\n".join(cmds) + "\n"
+        self._dockerfile += "\n".join(dockerfile_commands) + "\n"
 
         return self
 

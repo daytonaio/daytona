@@ -12,17 +12,11 @@ class AsyncLspServer()
 Provides Language Server Protocol functionality for code intelligence to provide
 IDE-like features such as code completion, symbol search, and more.
 
-**Attributes**:
-
-- `language_id` _LspLanguageId_ - The language server type (e.g., "python", "typescript").
-- `path_to_project` _str_ - Absolute path to the project root directory.
-- `instance` _SandboxInstance_ - The Sandbox instance this server belongs to.
-
 #### AsyncLspServer.\_\_init\_\_
 
 ```python
 def __init__(language_id: LspLanguageId, path_to_project: str,
-             toolbox_api: ToolboxApi, instance: SandboxInstance)
+             toolbox_api: ToolboxApi, sandbox_id: str)
 ```
 
 Initializes a new LSP server instance.

@@ -16,7 +16,6 @@ from daytona_api_client import FileInfo, Match, ReplaceRequest, ReplaceResult, S
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
 from ..common.filesystem import FileUpload
-from ..common.protocols import SandboxInstance
 
 
 class FileSystem:
@@ -24,26 +23,23 @@ class FileSystem:
 
     This class implements a high-level interface to file system operations that can
     be performed within a Daytona Sandbox.
-
-    Attributes:
-        instance (SandboxInstance): The Sandbox instance this file system belongs to.
     """
 
     def __init__(
         self,
-        instance: SandboxInstance,
+        sandbox_id: str,
         toolbox_api: ToolboxApi,
         get_root_dir: Callable[[], str],
     ):
         """Initializes a new FileSystem instance.
 
         Args:
-            instance (SandboxInstance): The Sandbox instance this file system belongs to.
+            sandbox_id (str): The Sandbox ID.
             toolbox_api (ToolboxApi): API client for Sandbox operations.
             get_root_dir (Callable[[], str]): A function to get the default root directory of the Sandbox.
         """
-        self.instance = instance
-        self.toolbox_api = toolbox_api
+        self._sandbox_id = sandbox_id
+        self._toolbox_api = toolbox_api
         self._get_root_dir = get_root_dir
 
     @intercept_errors(message_prefix="Failed to create folder: ")
@@ -67,8 +63,8 @@ class FileSystem:
         """
         path = prefix_relative_path(self._get_root_dir(), path)
         print(f"Creating folder {path} with mode {mode}")
-        self.toolbox_api.create_folder(
-            self.instance.id,
+        self._toolbox_api.create_folder(
+            self._sandbox_id,
             path=path,
             mode=mode,
         )
@@ -86,7 +82,7 @@ class FileSystem:
             sandbox.fs.delete_file("workspace/data/old_file.txt")
             ```
         """
-        self.toolbox_api.delete_file(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        self._toolbox_api.delete_file(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
 
     @overload
     def download_file(self, remote_path: str, timeout: int = 30 * 60) -> bytes:
@@ -140,8 +136,8 @@ class FileSystem:
         if len(args) == 1 or (len(args) == 2 and isinstance(args[1], int)):
             remote_path = args[0]
             timeout = args[1] if len(args) == 2 else 30 * 60
-            return self.toolbox_api.download_file(
-                self.instance.id,
+            return self._toolbox_api.download_file(
+                self._sandbox_id,
                 path=prefix_relative_path(self._get_root_dir(), remote_path),
                 _request_timeout=timeout or None,
             )
@@ -150,8 +146,8 @@ class FileSystem:
         local_path = args[1]
         timeout = args[2] if len(args) == 3 else 30 * 60
         # pylint: disable=protected-access
-        method, url, headers, *_ = self.toolbox_api._download_file_serialize(
-            self.instance.id,
+        method, url, headers, *_ = self._toolbox_api._download_file_serialize(
+            self._sandbox_id,
             path=prefix_relative_path(self._get_root_dir(), remote_path),
             x_daytona_organization_id=None,
             _request_auth=None,
@@ -198,8 +194,8 @@ class FileSystem:
                 print(f"{match.file}:{match.line}: {match.content.strip()}")
             ```
         """
-        return self.toolbox_api.find_in_files(
-            self.instance.id,
+        return self._toolbox_api.find_in_files(
+            self._sandbox_id,
             path=prefix_relative_path(self._get_root_dir(), path),
             pattern=pattern,
         )
@@ -238,7 +234,7 @@ class FileSystem:
                 print("Path is a directory")
             ```
         """
-        return self.toolbox_api.get_file_info(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self._toolbox_api.get_file_info(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
 
     @intercept_errors(message_prefix="Failed to list files: ")
     def list_files(self, path: str) -> List[FileInfo]:
@@ -267,7 +263,7 @@ class FileSystem:
             print("Subdirectories:", ", ".join(d.name for d in dirs))
             ```
         """
-        return self.toolbox_api.list_files(self.instance.id, path=prefix_relative_path(self._get_root_dir(), path))
+        return self._toolbox_api.list_files(self._sandbox_id, path=prefix_relative_path(self._get_root_dir(), path))
 
     @intercept_errors(message_prefix="Failed to move files: ")
     def move_files(self, source: str, destination: str) -> None:
@@ -300,8 +296,8 @@ class FileSystem:
             )
             ```
         """
-        self.toolbox_api.move_file(
-            self.instance.id,
+        self._toolbox_api.move_file(
+            self._sandbox_id,
             source=prefix_relative_path(self._get_root_dir(), source),
             destination=prefix_relative_path(self._get_root_dir(), destination),
         )
@@ -346,7 +342,7 @@ class FileSystem:
 
         replace_request = ReplaceRequest(files=files, new_value=new_value, pattern=pattern)
 
-        return self.toolbox_api.replace_in_files(self.instance.id, replace_request=replace_request)
+        return self._toolbox_api.replace_in_files(self._sandbox_id, replace_request=replace_request)
 
     @intercept_errors(message_prefix="Failed to search files: ")
     def search_files(self, path: str, pattern: str) -> SearchFilesResponse:
@@ -375,8 +371,8 @@ class FileSystem:
             print(f"Found {len(result.files)} test files")
             ```
         """
-        return self.toolbox_api.search_files(
-            self.instance.id,
+        return self._toolbox_api.search_files(
+            self._sandbox_id,
             path=prefix_relative_path(self._get_root_dir(), path),
             pattern=pattern,
         )
@@ -410,8 +406,8 @@ class FileSystem:
             )
             ```
         """
-        self.toolbox_api.set_file_permissions(
-            self.instance.id,
+        self._toolbox_api.set_file_permissions(
+            self._sandbox_id,
             path=prefix_relative_path(self._get_root_dir(), path),
             mode=mode,
             owner=owner,
@@ -518,8 +514,8 @@ class FileSystem:
                 file_fields[f"files[{i}].file"] = (filename, stream)
 
             # pylint: disable=protected-access
-            _, url, headers, *_ = self.toolbox_api._upload_files_serialize(
-                self.instance.id, None, None, None, None, None
+            _, url, headers, *_ = self._toolbox_api._upload_files_serialize(
+                self._sandbox_id, None, None, None, None, None
             )
             # strip any prior Content-Type so HTTPX can set its own multipart header
             headers.pop("Content-Type", None)

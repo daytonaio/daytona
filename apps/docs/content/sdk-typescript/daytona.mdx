@@ -199,7 +199,7 @@ Finds a Sandbox by its ID or labels.
 
 ```ts
 const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } })
-console.log(`Sandbox: ${await sandbox.info()}`)
+console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`)
 ```
 
 ---
@@ -224,55 +224,8 @@ Gets a Sandbox by its ID.
 
 ```ts
 const sandbox = await daytona.get('my-sandbox-id')
-console.log(`Sandbox state: ${sandbox.instance.state}`)
+console.log(`Sandbox state: ${sandbox.state}`)
 ```
-
----
-
-#### getCurrentSandbox()
-
-```ts
-getCurrentSandbox(sandboxId: string): Promise<Sandbox>
-```
-
-Gets the Sandbox by ID.
-
-**Parameters**:
-
-- `sandboxId` _string_ - The ID of the Sandbox to retrieve
-
-**Returns**:
-
-- `Promise<Sandbox>` - The Sandbox
-
-**Example:**
-
-```ts
-const sandbox = await daytona.getCurrentSandbox('my-sandbox-id')
-console.log(`Current sandbox state: ${sandbox.instance.state}`)
-```
-
----
-
-#### ~~getCurrentWorkspace()~~
-
-```ts
-getCurrentWorkspace(workspaceId: string): Promise<Sandbox>
-```
-
-Gets the Sandbox by ID.
-
-**Parameters**:
-
-- `workspaceId` _string_ - The ID of the Sandbox to retrieve
-
-**Returns**:
-
-- `Promise<Sandbox>` - The Sandbox
-
-##### Deprecated
-
-Use `getCurrentSandbox` instead. This method will be removed in a future version.
 
 ---
 
@@ -297,7 +250,7 @@ Lists all Sandboxes filtered by labels.
 ```ts
 const sandboxes = await daytona.list({ 'my-label': 'my-value' })
 for (const sandbox of sandboxes) {
-  console.log(`${sandbox.id}: ${sandbox.instance.state}`)
+  console.log(`${sandbox.id}: ${sandbox.state}`)
 }
 ```
 
@@ -369,7 +322,6 @@ Base parameters for creating a new Sandbox.
 
 **Properties**:
 
-- `async?` _boolean_ - If true, will not wait for the Sandbox to be ready before returning
 - `autoArchiveInterval?` _number_ - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
 - `autoStopInterval?` _number_ - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
 - `envVars?` _Record\<string, string\>_ - Optional environment variables to set in the Sandbox
@@ -385,7 +337,6 @@ Parameters for creating a new Sandbox.
 
 **Properties**:
 
-- `async?` _boolean_
 - `autoArchiveInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
@@ -405,7 +356,6 @@ Parameters for creating a new Sandbox from a snapshot.
 
 **Properties**:
 
-- `async?` _boolean_
 - `autoArchiveInterval?` _number_
 - `autoStopInterval?` _number_
 - `envVars?` _Record\<string, string\>_
@@ -430,7 +380,7 @@ Configuration options for initializing the Daytona client.
 - `organizationId?` _string_ - Organization ID used for JWT-based authentication. Required if a JWT token
   is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
 - ~~`serverUrl?`~~ _string_ - **_Deprecated_** - Use `apiUrl` instead. This property will be removed in future versions.
-- `target?` _CreateSandboxTargetEnum_ - Target location for Sandboxes
+- `target?` _string_ - Target location for Sandboxes
 
 **Example:**
 
