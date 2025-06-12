@@ -20,17 +20,11 @@ from deprecated import deprecated
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
 from ..common.lsp_server import LspLanguageId, Position
-from ..common.protocols import SandboxInstance
 
 
 class LspServer:
     """Provides Language Server Protocol functionality for code intelligence to provide
     IDE-like features such as code completion, symbol search, and more.
-
-    Attributes:
-        language_id (LspLanguageId): The language server type (e.g., "python", "typescript").
-        path_to_project (str): Absolute path to the project root directory.
-        instance (SandboxInstance): The Sandbox instance this server belongs to.
     """
 
     def __init__(
@@ -38,7 +32,7 @@ class LspServer:
         language_id: LspLanguageId,
         path_to_project: str,
         toolbox_api: ToolboxApi,
-        instance: SandboxInstance,
+        sandbox_id: str,
     ):
         """Initializes a new LSP server instance.
 
@@ -48,10 +42,10 @@ class LspServer:
             toolbox_api (ToolboxApi): API client for Sandbox operations.
             instance (SandboxInstance): The Sandbox instance this server belongs to.
         """
-        self.language_id = str(language_id)
-        self.path_to_project = path_to_project
-        self.toolbox_api = toolbox_api
-        self.instance = instance
+        self._language_id = str(language_id)
+        self._path_to_project = path_to_project
+        self._toolbox_api = toolbox_api
+        self._sandbox_id = sandbox_id
 
     @intercept_errors(message_prefix="Failed to start LSP server: ")
     def start(self) -> None:
@@ -67,11 +61,11 @@ class LspServer:
             # Now ready for LSP operations
             ```
         """
-        self.toolbox_api.lsp_start(
-            self.instance.id,
+        self._toolbox_api.lsp_start(
+            self._sandbox_id,
             lsp_server_request=LspServerRequest(
-                language_id=self.language_id,
-                path_to_project=self.path_to_project,
+                language_id=self._language_id,
+                path_to_project=self._path_to_project,
             ),
         )
 
@@ -88,11 +82,11 @@ class LspServer:
             lsp.stop()  # Clean up resources
             ```
         """
-        self.toolbox_api.lsp_stop(
-            self.instance.id,
+        self._toolbox_api.lsp_stop(
+            self._sandbox_id,
             lsp_server_request=LspServerRequest(
-                language_id=self.language_id,
-                path_to_project=self.path_to_project,
+                language_id=self._language_id,
+                path_to_project=self._path_to_project,
             ),
         )
 
@@ -115,12 +109,12 @@ class LspServer:
             # Now can get completions, symbols, etc. for this file
             ```
         """
-        path = prefix_relative_path(self.path_to_project, path)
-        self.toolbox_api.lsp_did_open(
-            self.instance.id,
+        path = prefix_relative_path(self._path_to_project, path)
+        self._toolbox_api.lsp_did_open(
+            self._sandbox_id,
             lsp_document_request=LspDocumentRequest(
-                language_id=self.language_id,
-                path_to_project=self.path_to_project,
+                language_id=self._language_id,
+                path_to_project=self._path_to_project,
                 uri=f"file://{path}",
             ),
         )
@@ -142,12 +136,12 @@ class LspServer:
             lsp.did_close("workspace/project/src/index.ts")
             ```
         """
-        self.toolbox_api.lsp_did_close(
-            self.instance.id,
+        self._toolbox_api.lsp_did_close(
+            self._sandbox_id,
             lsp_document_request=LspDocumentRequest(
-                language_id=self.language_id,
-                path_to_project=self.path_to_project,
-                uri=f"file://{prefix_relative_path(self.path_to_project, path)}",
+                language_id=self._language_id,
+                path_to_project=self._path_to_project,
+                uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
             ),
         )
 
@@ -173,11 +167,11 @@ class LspServer:
                 print(f"{symbol.kind} {symbol.name}: {symbol.location}")
             ```
         """
-        return self.toolbox_api.lsp_document_symbols(
-            self.instance.id,
-            language_id=self.language_id,
-            path_to_project=self.path_to_project,
-            uri=f"file://{prefix_relative_path(self.path_to_project, path)}",
+        return self._toolbox_api.lsp_document_symbols(
+            self._sandbox_id,
+            language_id=self._language_id,
+            path_to_project=self._path_to_project,
+            uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
         )
 
     @deprecated(
@@ -218,10 +212,10 @@ class LspServer:
                 print(f"{symbol.name} in {symbol.location}")
             ```
         """
-        return self.toolbox_api.lsp_sandbox_symbols(
-            self.instance.id,
-            language_id=self.language_id,
-            path_to_project=self.path_to_project,
+        return self._toolbox_api.lsp_workspace_symbols(
+            self._sandbox_id,
+            language_id=self._language_id,
+            path_to_project=self._path_to_project,
             query=query,
         )
 
@@ -255,12 +249,12 @@ class LspServer:
                 print(f"{item.label} ({item.kind}): {item.detail}")
             ```
         """
-        return self.toolbox_api.lsp_completions(
-            self.instance.id,
+        return self._toolbox_api.lsp_completions(
+            self._sandbox_id,
             lsp_completion_params=LspCompletionParams(
-                language_id=self.language_id,
-                path_to_project=self.path_to_project,
-                uri=f"file://{prefix_relative_path(self.path_to_project, path)}",
+                language_id=self._language_id,
+                path_to_project=self._path_to_project,
+                uri=f"file://{prefix_relative_path(self._path_to_project, path)}",
                 position=position,
             ),
         )

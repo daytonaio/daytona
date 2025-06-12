@@ -44,6 +44,7 @@ type CommonCaptureProps = {
   error?: string
   source: string
   isDeprecated?: boolean
+  sdkVersion?: string
 }
 
 @Injectable()
@@ -102,6 +103,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     const distinctId = request.user?.userId || 'anonymous'
     const userAgent = request.get('user-agent')
     const source = request.get(CustomHeaders.SOURCE.name)
+    const sdkVersion = request.get(CustomHeaders.SDK_VERSION.name)
 
     const props: CommonCaptureProps = {
       distinctId,
@@ -112,6 +114,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       error,
       source: Array.isArray(source) ? source[0] : source,
       isDeprecated: request.route.path.includes('/workspace') || request.route.path.includes('/images'),
+      sdkVersion,
     }
 
     switch (request.method) {
@@ -761,6 +764,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       error: props.error,
       source: props.source,
       is_deprecated: props.isDeprecated,
+      sdk_version: props.sdkVersion,
     }
   }
 

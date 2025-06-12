@@ -212,9 +212,8 @@ export class SnapshotService {
     }
 
     if (createdSnapshot.state === SnapshotState.ERROR || createdSnapshot.state === SnapshotState.BUILD_FAILED) {
-      throw new DaytonaError(
-        `Failed to create snapshot. Name: ${createdSnapshot.name} Reason: ${createdSnapshot.errorReason}`,
-      )
+      const errMsg = `Failed to create snapshot. Name: ${createdSnapshot.name} Reason: ${createdSnapshot.errorReason}`
+      throw new DaytonaError(errMsg)
     }
 
     return createdSnapshot as Snapshot

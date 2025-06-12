@@ -16,9 +16,6 @@ It can be initialized either with explicit configuration or using environment va
 
 **Attributes**:
 
-- `api_key` _str_ - API key for authentication.
-- `api_url` _str_ - URL of the Daytona API.
-- `target` _str_ - Target location for Sandboxes.
 - `volume` _VolumeService_ - Service for managing volumes.
 - `snapshot` _SnapshotService_ - Service for managing snapshots.
 
@@ -55,7 +52,7 @@ If no config is provided, reads from environment variables:
 
 - `DAYTONA_API_KEY`: Required API key for authentication
 - `DAYTONA_API_URL`: Required api URL
-- `DAYTONA_TARGET`: Optional target environment (defaults to SandboxTargetRegion.US)
+- `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
 
 **Arguments**:
 
@@ -219,30 +216,11 @@ sandbox = daytona.create()
 daytona.delete(sandbox)  # Clean up when done
 ```
 
-#### Daytona.get_current_workspace
-
-```python
-@deprecated(reason=(
-    "Method is deprecated. Use `get_current_sandbox` instead. This method will be removed in a future version."
-))
-def get_current_workspace(workspace_id: str) -> Workspace
-```
-
-Gets a Sandbox by its ID.
-
-**Arguments**:
-
-- `workspace_id` _str_ - The ID of the Sandbox to retrieve.
-
-**Returns**:
-
-- `Workspace` - The Sandbox instance.
-
-#### Daytona.get_current_sandbox
+#### Daytona.get
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox: ")
-def get_current_sandbox(sandbox_id: str) -> Sandbox
+def get(sandbox_id: str) -> Sandbox
 ```
 
 Gets a Sandbox by its ID.
@@ -262,7 +240,7 @@ Gets a Sandbox by its ID.
 **Example**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox-id")
+sandbox = daytona.get("my-sandbox-id")
 print(sandbox.status)
 ```
 
@@ -293,7 +271,7 @@ Finds a Sandbox by its ID or labels.
 
 ```python
 sandbox = daytona.find_one(labels={"my-label": "my-value"})
-print(sandbox.info())
+print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 ```
 
 #### Daytona.list

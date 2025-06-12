@@ -36,7 +36,7 @@ export type {
   ScatterChart,
 } from './types/Charts'
 
-export { SandboxState, CreateSandboxTargetEnum as SandboxTargetRegion } from '@daytonaio/api-client'
+export { SandboxState } from '@daytonaio/api-client'
 export type {
   FileInfo,
   GitStatus,
@@ -45,33 +45,3 @@ export type {
   ReplaceResult,
   SearchFilesResponse,
 } from '@daytonaio/api-client'
-
-// Re-export necessary Workspace-related types for backward compatibility
-import { CreateSandboxTargetEnum, SandboxState as SS } from '@daytonaio/api-client'
-import type { CreateSandboxFromImageParams, Resources } from './Daytona'
-import type { SandboxCodeToolbox } from './Sandbox'
-import { Sandbox } from './Sandbox'
-
-/** @deprecated `CreateWorkspaceParams` is deprecated. Please use `CreateSandboxParams` instead. This will be removed in a future version. */
-export type CreateWorkspaceParams = CreateSandboxFromImageParams
-
-/** @deprecated `Workspace` is deprecated. Please use `Sandbox` instead. This will be removed in a future version. */
-export const Workspace = Sandbox
-/** @deprecated `Workspace` is deprecated. Please use `Sandbox` instead. This will be removed in a future version. */
-export type Workspace = Sandbox
-
-/** @deprecated `WorkspaceCodeToolbox` is deprecated. Please use `SandboxCodeToolbox` instead. This will be removed in a future version. */
-export type WorkspaceCodeToolbox = SandboxCodeToolbox
-
-/** @deprecated `WorkspaceResources` is deprecated. Please use `SandboxResources` instead. This will be removed in a future version. */
-export type WorkspaceResources = Resources
-
-/** @deprecated `WorkspaceState` is deprecated. Please use `SandboxState` instead. This will be removed in a future version. */
-export type WorkspaceState = SS
-/** @deprecated `WorkspaceState` is deprecated. Please use `SandboxState` instead. This will be removed in a future version. */
-export const WorkspaceState = SS
-
-/** @deprecated `WorkspaceTargetRegion` is deprecated. Please use `SandboxTargetRegion` instead. This will be removed in a future version. */
-export const WorkspaceTargetRegion = CreateSandboxTargetEnum
-/** @deprecated `WorkspaceTargetRegion` is deprecated. Please use `SandboxTargetRegion` instead. This will be removed in a future version. */
-export type WorkspaceTargetRegion = CreateSandboxTargetEnum

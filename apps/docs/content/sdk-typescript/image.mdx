@@ -190,14 +190,14 @@ const image = Image.debianSlim('3.12').cmd(['/bin/bash'])
 #### dockerfileCommands()
 
 ```ts
-dockerfileCommands(dockerfileCommands: (string | string[])[], contextDir?: string): Image
+dockerfileCommands(dockerfileCommands: string[], contextDir?: string): Image
 ```
 
 Extends an image with arbitrary Dockerfile-like commands.
 
 **Parameters**:
 
-- `dockerfileCommands` _\(string \| string\[\]\)\[\]_ - The commands to add to the Dockerfile.
+- `dockerfileCommands` _string\[\]_ - The commands to add to the Dockerfile.
 - `contextDir?` _string_ - The path to the context directory.
 
 **Returns**:
@@ -356,7 +356,7 @@ Runs commands in the image.
 **Example:**
 
 ```ts
-const image = Image.debianSlim('3.12').runCommands('echo "Hello, world!"')
+const image = Image.debianSlim('3.12').runCommands('echo "Hello, world!"', ['bash', '-c', 'echo Hello, world, again!'])
 ```
 
 ---

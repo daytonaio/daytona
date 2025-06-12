@@ -4,7 +4,7 @@
  */
 
 import { Command, Session, SessionExecuteRequest, SessionExecuteResponse, ToolboxApi } from '@daytonaio/api-client'
-import { SandboxCodeToolbox, SandboxInstance } from './Sandbox'
+import { SandboxCodeToolbox } from './Sandbox'
 import { ExecuteResponse } from './types/ExecuteResponse'
 import { ArtifactParser } from './utils/ArtifactParser'
 import { processStreamingResponse } from './utils/Stream'
@@ -30,9 +30,9 @@ export class CodeRunParams {
  */
 export class Process {
   constructor(
+    private readonly sandboxId: string,
     private readonly codeToolbox: SandboxCodeToolbox,
     private readonly toolboxApi: ToolboxApi,
-    private readonly instance: SandboxInstance,
     private readonly getRootDir: () => Promise<string>,
   ) {}
 
@@ -84,7 +84,7 @@ export class Process {
 
     command = `sh -c "${command}"`
 
-    const response = await this.toolboxApi.executeCommand(this.instance.id, {
+    const response = await this.toolboxApi.executeCommand(this.sandboxId, {
       command,
       timeout,
       cwd: cwd ?? (await this.getRootDir()),
@@ -183,7 +183,7 @@ export class Process {
    * await process.deleteSession(sessionId);
    */
   public async createSession(sessionId: string): Promise<void> {
-    await this.toolboxApi.createSession(this.instance.id, {
+    await this.toolboxApi.createSession(this.sandboxId, {
       sessionId,
     })
   }
@@ -203,7 +203,7 @@ export class Process {
    * });
    */
   public async getSession(sessionId: string): Promise<Session> {
-    const response = await this.toolboxApi.getSession(this.instance.id, sessionId)
+    const response = await this.toolboxApi.getSession(this.sandboxId, sessionId)
     return response.data
   }
 
@@ -224,7 +224,7 @@ export class Process {
    * }
    */
   public async getSessionCommand(sessionId: string, commandId: string): Promise<Command> {
-    const response = await this.toolboxApi.getSessionCommand(this.instance.id, sessionId, commandId)
+    const response = await this.toolboxApi.getSessionCommand(this.sandboxId, sessionId, commandId)
     return response.data
   }
 
@@ -262,7 +262,7 @@ export class Process {
     timeout?: number,
   ): Promise<SessionExecuteResponse> {
     const response = await this.toolboxApi.executeSessionCommand(
-      this.instance.id,
+      this.sandboxId,
       sessionId,
       req,
       undefined,
@@ -307,13 +307,13 @@ export class Process {
     onLogs?: (chunk: string) => void,
   ): Promise<string | void> {
     if (!onLogs) {
-      const response = await this.toolboxApi.getSessionCommandLogs(this.instance.id, sessionId, commandId)
+      const response = await this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId)
       return response.data
     }
 
     await processStreamingResponse(
       () =>
-        this.toolboxApi.getSessionCommandLogs(this.instance.id, sessionId, commandId, undefined, true, {
+        this.toolboxApi.getSessionCommandLogs(this.sandboxId, sessionId, commandId, undefined, true, {
           responseType: 'stream',
         }),
       onLogs,
@@ -337,7 +337,7 @@ export class Process {
    * });
    */
   public async listSessions(): Promise<Session[]> {
-    const response = await this.toolboxApi.listSessions(this.instance.id)
+    const response = await this.toolboxApi.listSessions(this.sandboxId)
     return response.data
   }
 
@@ -352,6 +352,6 @@ export class Process {
    * await process.deleteSession('my-session');
    */
   public async deleteSession(sessionId: string): Promise<void> {
-    await this.toolboxApi.deleteSession(this.instance.id, sessionId)
+    await this.toolboxApi.deleteSession(this.sandboxId, sessionId)
   }
 }

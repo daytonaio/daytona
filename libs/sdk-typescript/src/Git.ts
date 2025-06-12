@@ -4,7 +4,6 @@
  */
 
 import { ToolboxApi, ListBranchResponse, GitStatus } from '@daytonaio/api-client'
-import { Sandbox, SandboxInstance } from './Sandbox'
 import { prefixRelativePath } from './utils/Path'
 
 /**
@@ -24,9 +23,8 @@ export interface GitCommitResponse {
  */
 export class Git {
   constructor(
-    private readonly sandbox: Sandbox,
+    private readonly sandboxId: string,
     private readonly toolboxApi: ToolboxApi,
-    private readonly instance: SandboxInstance,
     private readonly getRootDir: () => Promise<string>,
   ) {}
 
@@ -48,7 +46,7 @@ export class Git {
    * await git.add('workspace/repo', ['.']);
    */
   public async add(path: string, files: string[]): Promise<void> {
-    await this.toolboxApi.gitAddFiles(this.instance.id, {
+    await this.toolboxApi.gitAddFiles(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       files,
     })
@@ -67,7 +65,7 @@ export class Git {
    */
   public async branches(path: string): Promise<ListBranchResponse> {
     const response = await this.toolboxApi.gitListBranches(
-      this.instance.id,
+      this.sandboxId,
       prefixRelativePath(await this.getRootDir(), path),
     )
     return response.data
@@ -120,7 +118,7 @@ export class Git {
     username?: string,
     password?: string,
   ): Promise<void> {
-    await this.toolboxApi.gitCloneRepository(this.instance.id, {
+    await this.toolboxApi.gitCloneRepository(this.sandboxId, {
       url: url,
       branch: branch,
       path: prefixRelativePath(await this.getRootDir(), path),
@@ -151,7 +149,7 @@ export class Git {
    * );
    */
   public async commit(path: string, message: string, author: string, email: string): Promise<GitCommitResponse> {
-    const response = await this.toolboxApi.gitCommitChanges(this.instance.id, {
+    const response = await this.toolboxApi.gitCommitChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       message,
       author,
@@ -184,7 +182,7 @@ export class Git {
    * );
    */
   public async push(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPushChanges(this.instance.id, {
+    await this.toolboxApi.gitPushChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -213,7 +211,7 @@ export class Git {
    * );
    */
   public async pull(path: string, username?: string, password?: string): Promise<void> {
-    await this.toolboxApi.gitPullChanges(this.instance.id, {
+    await this.toolboxApi.gitPullChanges(this.sandboxId, {
       path: prefixRelativePath(await this.getRootDir(), path),
       username,
       password,
@@ -240,7 +238,7 @@ export class Git {
    */
   public async status(path: string): Promise<GitStatus> {
     const response = await this.toolboxApi.gitGetStatus(
-      this.instance.id,
+      this.sandboxId,
       prefixRelativePath(await this.getRootDir(), path),
     )
     return response.data

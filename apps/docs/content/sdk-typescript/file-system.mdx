@@ -13,14 +13,14 @@ Provides file system operations within a Sandbox.
 
 ```ts
 new FileSystem(
-   instance: SandboxInstance,
+   sandboxId: string,
    toolboxApi: ToolboxApi,
    getRootDir: () => Promise<string>): FileSystem
 ```
 
 **Parameters**:
 
-- `instance` _SandboxInstance_
+- `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 

@@ -29,4 +29,12 @@ export const CustomHeaders: {
       type: 'string',
     },
   },
+  SDK_VERSION: {
+    name: 'X-Daytona-SDK-Version',
+    description: 'Use to specify the version of the SDK',
+    required: false,
+    schema: {
+      type: 'string',
+    },
+  },
 }

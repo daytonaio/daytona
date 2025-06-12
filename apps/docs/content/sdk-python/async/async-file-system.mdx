@@ -14,14 +14,10 @@ Provides file system operations within a Sandbox.
 This class implements a high-level interface to file system operations that can
 be performed within a Daytona Sandbox.
 
-**Attributes**:
-
-- `instance` _SandboxInstance_ - The Sandbox instance this file system belongs to.
-
 #### AsyncFileSystem.\_\_init\_\_
 
 ```python
-def __init__(instance: SandboxInstance, toolbox_api: ToolboxApi,
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
              get_root_dir: Callable[[], Awaitable[str]])
 ```
 
@@ -29,7 +25,7 @@ Initializes a new FileSystem instance.
 
 **Arguments**:
 
-- `instance` _SandboxInstance_ - The Sandbox instance this file system belongs to.
+- `sandbox_id` _str_ - The Sandbox ID.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 

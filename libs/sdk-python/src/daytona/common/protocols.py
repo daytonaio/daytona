@@ -15,7 +15,3 @@ class SandboxCodeToolbox(Protocol):
         ...
 
     # ... other protocol methods
-
-
-class SandboxInstance(Protocol):
-    id: str

@@ -1,44 +1,67 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: AGPL-3.0
 
-import json
 import time
 from typing import Dict, Optional
 
 from daytona_api_client_async import PortPreviewUrl
-from daytona_api_client_async import Sandbox as ApiSandbox
+from daytona_api_client_async import Sandbox as SandboxDto
 from daytona_api_client_async import SandboxApi, ToolboxApi
-from deprecated import deprecated
+from pydantic import ConfigDict, PrivateAttr
 
-from .._utils.enum import to_enum
 from .._utils.errors import intercept_errors
 from .._utils.path import prefix_relative_path
 from .._utils.timeout import with_timeout
 from ..common.errors import DaytonaError
 from ..common.protocols import SandboxCodeToolbox
-from ..common.sandbox import Resources, SandboxInfo, SandboxInstance, SandboxTargetRegion
 from .filesystem import AsyncFileSystem
 from .git import AsyncGit
 from .lsp_server import AsyncLspServer, LspLanguageId
 from .process import AsyncProcess
 
 
-class AsyncSandbox:
+class AsyncSandbox(SandboxDto):
     """Represents a Daytona Sandbox.
 
     Attributes:
-        id (str): Unique identifier for the Sandbox.
-        instance (SandboxInstance): The underlying Sandbox instance.
-        code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
         fs (AsyncFileSystem): File system operations interface.
         git (AsyncGit): Git operations interface.
         process (AsyncProcess): Process execution interface.
+        id (str): Unique identifier for the Sandbox.
+        organization_id (str): Organization ID of the Sandbox.
+        snapshot (str): Daytona snapshot used to create the Sandbox.
+        user (str): OS user running in the Sandbox.
+        env (Dict[str, str]): Environment variables set in the Sandbox.
+        labels (Dict[str, str]): Custom labels attached to the Sandbox.
+        public (bool): Whether the Sandbox is publicly accessible.
+        target (str): Target location of the runner where the Sandbox runs.
+        cpu (int): Number of CPUs allocated to the Sandbox.
+        gpu (int): Number of GPUs allocated to the Sandbox.
+        memory (int): Amount of memory allocated to the Sandbox in GiB.
+        disk (int): Amount of disk space allocated to the Sandbox in GiB.
+        state (SandboxState): Current state of the Sandbox (e.g., "started", "stopped").
+        error_reason (str): Error message if Sandbox is in error state.
+        backup_state (SandboxBackupStateEnum): Current state of Sandbox backup.
+        backup_created_at (str): When the backup was created.
+        auto_stop_interval (int): Auto-stop interval in minutes.
+        auto_archive_interval (int): Auto-archive interval in minutes.
+        runner_domain (str): Domain name of the Sandbox runner.
+        volumes (List[str]): Volumes attached to the Sandbox.
+        build_info (str): Build information for the Sandbox if it was created from dynamic build.
+        created_at (str): When the Sandbox was created.
+        updated_at (str): When the Sandbox was last updated.
     """
+
+    _fs: AsyncFileSystem = PrivateAttr()
+    _git: AsyncGit = PrivateAttr()
+    _process: AsyncProcess = PrivateAttr()
+
+    # TODO: Remove model_config once everything is migrated to pydantic # pylint: disable=fixme
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
     def __init__(
         self,
-        id: str,
-        instance: SandboxInstance,
+        sandbox_dto: SandboxDto,
         sandbox_api: SandboxApi,
         toolbox_api: ToolboxApi,
         code_toolbox: SandboxCodeToolbox,
@@ -52,34 +75,42 @@ class AsyncSandbox:
             toolbox_api (ToolboxApi): API client for toolbox operations.
             code_toolbox (SandboxCodeToolbox): Language-specific toolbox implementation.
         """
-        self.id = id
-        self.instance = instance
-        self.sandbox_api = sandbox_api
-        self.toolbox_api = toolbox_api
+        super().__init__(**sandbox_dto.model_dump())
+        self.__process_sandbox_dto(sandbox_dto)
+        self._sandbox_api = sandbox_api
+        self._toolbox_api = toolbox_api
         self._code_toolbox = code_toolbox
         self._root_dir = ""
 
-        self.fs = AsyncFileSystem(instance, toolbox_api, self.__get_root_dir)
-        self.git = AsyncGit(toolbox_api, instance, self.__get_root_dir)
-        self.process = AsyncProcess(code_toolbox, toolbox_api, instance, self.__get_root_dir)
+        self._fs = AsyncFileSystem(self.id, toolbox_api, self.__get_root_dir)
+        self._git = AsyncGit(self.id, toolbox_api, self.__get_root_dir)
+        self._process = AsyncProcess(self.id, code_toolbox, toolbox_api, self.__get_root_dir)
 
-    async def info(self) -> SandboxInfo:
-        """Gets structured information about the Sandbox.
+    @property
+    def fs(self) -> AsyncFileSystem:
+        return self._fs
 
-        Returns:
-            SandboxInfo: Detailed information about the Sandbox including its
-                configuration, resources, and current state.
+    @property
+    def git(self) -> AsyncGit:
+        return self._git
+
+    @property
+    def process(self) -> AsyncProcess:
+        return self._process
+
+    async def refresh_data(self) -> None:
+        """Refreshes the Sandbox data from the API.
 
         Example:
             ```python
-            info = await sandbox.info()
-            print(f"Sandbox {info.id}:")
-            print(f"State: {info.state}")
-            print(f"Resources: {info.resources.cpu} CPU, {info.resources.memory} RAM")
+            await sandbox.refresh_data()
+            print(f"Sandbox {sandbox.id}:")
+            print(f"State: {sandbox.state}")
+            print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
             ```
         """
-        instance = await self.sandbox_api.get_sandbox(self.id)
-        return AsyncSandbox.to_sandbox_info(instance)
+        instance = await self._sandbox_api.get_sandbox(self.id)
+        self.__process_sandbox_dto(instance)
 
     @intercept_errors(message_prefix="Failed to get sandbox root directory: ")
     async def get_user_root_dir(self) -> str:
@@ -94,14 +125,8 @@ class AsyncSandbox:
             print(f"Sandbox root: {root_dir}")
             ```
         """
-        response = await self.toolbox_api.get_project_dir(self.instance.id)
+        response = await self._toolbox_api.get_project_dir(self.id)
         return response.dir
-
-    @deprecated(
-        reason="Method is deprecated. Use `get_user_root_dir` instead. This method will be removed in a future version."
-    )
-    def get_workspace_root_dir(self) -> str:
-        return self.get_user_root_dir()
 
     def create_lsp_server(self, language_id: LspLanguageId, path_to_project: str) -> AsyncLspServer:
         """Creates a new Language Server Protocol (LSP) server instance.
@@ -125,8 +150,8 @@ class AsyncSandbox:
         return AsyncLspServer(
             language_id,
             prefix_relative_path(self._root_dir, path_to_project),
-            self.toolbox_api,
-            self.instance,
+            self._toolbox_api,
+            self.id,
         )
 
     @intercept_errors(message_prefix="Failed to set labels: ")
@@ -154,7 +179,7 @@ class AsyncSandbox:
         # Convert all values to strings and create the expected labels structure
         string_labels = {k: str(v).lower() if isinstance(v, bool) else str(v) for k, v in labels.items()}
         labels_payload = {"labels": string_labels}
-        return await self.sandbox_api.replace_labels(self.id, labels_payload)
+        return await self._sandbox_api.replace_labels(self.id, labels_payload)
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout(
@@ -178,7 +203,7 @@ class AsyncSandbox:
             print("Sandbox started successfully")
             ```
         """
-        await self.sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
         await self.wait_for_sandbox_start()
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
@@ -203,30 +228,12 @@ class AsyncSandbox:
             print("Sandbox stopped successfully")
             ```
         """
-        await self.sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
         await self.wait_for_sandbox_stop()
 
     async def delete(self) -> None:
         """Deletes the Sandbox."""
-        await self.sandbox_api.delete_sandbox(self.id, force=True)
-
-    @deprecated(
-        reason=(
-            "Method is deprecated. Use `wait_for_sandbox_start` instead. This method will be removed in a future"
-            " version."
-        )
-    )
-    async def wait_for_workspace_start(self, timeout: Optional[float] = 60) -> None:
-        """Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
-        reaches the 'started' state, encounters an error or times out.
-
-        Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-
-        Raises:
-            DaytonaError: If timeout is negative; If Sandbox fails to start or times out
-        """
-        await self.wait_for_sandbox_start(timeout)
+        await self._sandbox_api.delete_sandbox(self.id, force=True)
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout(
@@ -247,36 +254,16 @@ class AsyncSandbox:
         Raises:
             DaytonaError: If timeout is negative; If Sandbox fails to start or times out
         """
-        state = (await self.info()).state
-        while state != "started":
-            response = await self.sandbox_api.get_sandbox(self.id)
-            state = response.state
+        while self.state != "started":
+            await self.refresh_data()
 
-            if state in ["error", "build_failed"]:
-                raise DaytonaError(
-                    f"Sandbox {self.id} failed to start with state: {state}, error reason: {response.error_reason}"
+            if self.state in ["error", "build_failed"]:
+                err_msg = (
+                    f"Sandbox {self.id} failed to start with state: {self.state}, error reason: {self.error_reason}"
                 )
+                raise DaytonaError(err_msg)
 
             time.sleep(0.1)  # Wait 100ms between checks
-
-    @deprecated(
-        reason=(
-            "Method is deprecated. Use `wait_for_sandbox_stop` instead. This method will be removed in a future"
-            " version."
-        )
-    )
-    async def wait_for_workspace_stop(self, timeout: Optional[float] = 60) -> None:
-        """Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
-        reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
-        for the Sandbox to stop.
-
-        Args:
-            timeout (Optional[float]): Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-
-        Raises:
-            DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
-        """
-        await self.wait_for_sandbox_stop(timeout)
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout(
@@ -298,16 +285,15 @@ class AsyncSandbox:
         Raises:
             DaytonaError: If timeout is negative. If Sandbox fails to stop or times out.
         """
-        state = (await self.info()).state
-        while state != "stopped":
+        while self.state != "stopped":
             try:
-                response = await self.sandbox_api.get_sandbox(self.id)
-                state = response.state
+                await self.refresh_data()
 
-                if state in ["error", "build_failed"]:
-                    raise DaytonaError(
-                        f"Sandbox {self.id} failed to stop with status: {state}, error reason: {response.error_reason}"
+                if self.state in ["error", "build_failed"]:
+                    err_msg = (
+                        f"Sandbox {self.id} failed to stop with status: {self.state}, error reason: {self.error_reason}"
                     )
+                    raise DaytonaError(err_msg)
             except Exception as e:
                 # If there's a validation error, continue waiting
                 if "validation error" not in str(e):
@@ -341,8 +327,8 @@ class AsyncSandbox:
         if not isinstance(interval, int) or interval < 0:
             raise DaytonaError("Auto-stop interval must be a non-negative integer")
 
-        await self.sandbox_api.set_autostop_interval(self.id, interval)
-        self.instance.auto_stop_interval = interval
+        await self._sandbox_api.set_autostop_interval(self.id, interval)
+        self.auto_stop_interval = interval
 
     @intercept_errors(message_prefix="Failed to set auto-archive interval: ")
     async def set_auto_archive_interval(self, interval: int) -> None:
@@ -367,8 +353,8 @@ class AsyncSandbox:
         """
         if not isinstance(interval, int) or interval < 0:
             raise DaytonaError("Auto-archive interval must be a non-negative integer")
-        await self.sandbox_api.set_auto_archive_interval(self.id, interval)
-        self.instance.auto_archive_interval = interval
+        await self._sandbox_api.set_auto_archive_interval(self.id, interval)
+        self.auto_archive_interval = interval
 
     @intercept_errors(message_prefix="Failed to get preview link: ")
     async def get_preview_link(self, port: int) -> PortPreviewUrl:
@@ -390,7 +376,7 @@ class AsyncSandbox:
             print(f"Token: {preview_link.token}")
             ```
         """
-        return await self.sandbox_api.get_port_preview_url(self.id, port)
+        return await self._sandbox_api.get_port_preview_url(self.id, port)
 
     @intercept_errors(message_prefix="Failed to archive sandbox: ")
     async def archive(self) -> None:
@@ -400,55 +386,34 @@ class AsyncSandbox:
         and stopped states is that starting an archived sandbox takes more time, depending on its size.
         Sandbox must be stopped before archiving.
         """
-        await self.sandbox_api.archive_sandbox(self.id)
-
-    @staticmethod
-    def to_sandbox_info(instance: ApiSandbox) -> SandboxInfo:
-        """Converts an API Sandbox instance to a SandboxInfo object.
-
-        Args:
-            instance (ApiSandbox): The API Sandbox instance to convert
-
-        Returns:
-            SandboxInfo: The converted SandboxInfo object
-        """
-        provider_metadata = json.loads(instance.info.provider_metadata or "{}")
-
-        # Extract resources with defaults
-        resources = Resources(
-            cpu=instance.cpu,
-            gpu=instance.gpu,
-            memory=instance.memory,
-            disk=instance.disk,
-        )
-
-        enum_target = to_enum(SandboxTargetRegion, instance.target)
-
-        return SandboxInfo(
-            id=instance.id,
-            snapshot=instance.snapshot,
-            user=instance.user,
-            env=instance.env or {},
-            labels=instance.labels or {},
-            public=instance.public,
-            target=enum_target or instance.target,
-            resources=resources,
-            state=instance.state,
-            error_reason=instance.error_reason,
-            backup_state=instance.backup_state,
-            backup_created_at=instance.backup_created_at,
-            auto_stop_interval=instance.auto_stop_interval,
-            auto_archive_interval=instance.auto_archive_interval,
-            created=instance.info.created or "",
-            node_domain=provider_metadata.get("nodeDomain", ""),
-            region=provider_metadata.get("region", ""),
-            class_name=provider_metadata.get("class", ""),
-            updated_at=provider_metadata.get("updatedAt", ""),
-            last_backup=provider_metadata.get("lastBackup"),
-            provider_metadata=instance.info.provider_metadata,
-        )
+        await self._sandbox_api.archive_sandbox(self.id)
 
     async def __get_root_dir(self) -> str:
         if not self._root_dir:
             self._root_dir = await self.get_user_root_dir()
         return self._root_dir
+
+    def __process_sandbox_dto(self, sandbox_dto: SandboxDto) -> None:
+        self.id = sandbox_dto.id
+        self.organization_id = sandbox_dto.organization_id
+        self.snapshot = sandbox_dto.snapshot
+        self.user = sandbox_dto.user
+        self.env = sandbox_dto.env
+        self.labels = sandbox_dto.labels
+        self.public = sandbox_dto.public
+        self.target = sandbox_dto.target
+        self.cpu = sandbox_dto.cpu
+        self.gpu = sandbox_dto.gpu
+        self.memory = sandbox_dto.memory
+        self.disk = sandbox_dto.disk
+        self.state = sandbox_dto.state
+        self.error_reason = sandbox_dto.error_reason
+        self.backup_state = sandbox_dto.backup_state
+        self.backup_created_at = sandbox_dto.backup_created_at
+        self.auto_stop_interval = sandbox_dto.auto_stop_interval
+        self.auto_archive_interval = sandbox_dto.auto_archive_interval
+        self.runner_domain = sandbox_dto.runner_domain
+        self.volumes = sandbox_dto.volumes
+        self.build_info = sandbox_dto.build_info
+        self.created_at = sandbox_dto.created_at
+        self.updated_at = sandbox_dto.updated_at
