@@ -77,6 +77,10 @@ models/range.ts
 models/registry-push-access-dto.ts
 models/replace-request.ts
 models/replace-result.ts
+models/runner-region.ts
+models/runner-state.ts
+models/runner.ts
+models/sandbox-class.ts
 models/sandbox-info.ts
 models/sandbox-labels.ts
 models/sandbox-state.ts

@@ -25,9 +25,7 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
     super(organizationService, organizationUserService)
   }
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    if (!(await super.canActivate(context))) {
-      return false
-    }
+    const canActivate = await super.canActivate(context)
 
     const request = context.switchToHttp().getRequest()
     // TODO: initialize authContext safely
@@ -35,6 +33,10 @@ export class OrganizationResourceActionGuard extends OrganizationAccessGuard {
 
     if (authContext.role === SystemRole.ADMIN) {
       return true
+    }
+
+    if (!canActivate) {
+      return false
     }
 
     if (!authContext.organizationUser) {
