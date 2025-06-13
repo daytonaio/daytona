@@ -4,7 +4,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -54,12 +53,12 @@ func SortSandboxes(sandboxList *[]daytonaapiclient.Sandbox) {
 			return pi < pj
 		}
 
-		if (*sandboxList)[i].Info == nil || (*sandboxList)[j].Info == nil {
+		if (*sandboxList)[i].CreatedAt == nil || (*sandboxList)[j].CreatedAt == nil {
 			return true
 		}
 
 		// If two sandboxes have the same state priority, compare the UpdatedAt property
-		return (*sandboxList)[i].Info.Created > (*sandboxList)[j].Info.Created
+		return *(*sandboxList)[i].CreatedAt > *(*sandboxList)[j].CreatedAt
 	})
 }
 
@@ -70,15 +69,13 @@ func getTableRowData(sandbox daytonaapiclient.Sandbox) *RowData {
 		rowData.State = getStateLabel(*sandbox.State)
 	}
 
-	providerMetadataString := sandbox.Info.GetProviderMetadata()
+	rowData.Region = sandbox.Target
+	if sandbox.Class != nil {
+		rowData.Class = *sandbox.Class
+	}
 
-	var providerMetadata providerMetadata
-
-	err := json.Unmarshal([]byte(providerMetadataString), &providerMetadata)
-	if err == nil {
-		rowData.Region = providerMetadata.Region
-		rowData.Class = providerMetadata.Class
-		rowData.LastEvent = util.GetTimeSinceLabelFromString(providerMetadata.UpdatedAt)
+	if sandbox.UpdatedAt != nil {
+		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)
 	}
 
 	return &rowData

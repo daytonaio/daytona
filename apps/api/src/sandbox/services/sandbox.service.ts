@@ -625,7 +625,7 @@ export class SandboxService {
 
   private getValidatedOrDefaultRegion(region: RunnerRegion): RunnerRegion {
     if (!region) {
-      return RunnerRegion.EU
+      return RunnerRegion.US
     }
 
     if (Object.values(RunnerRegion).includes(region)) {

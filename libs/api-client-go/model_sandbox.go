@@ -24,9 +24,6 @@ var _ MappedNullable = &Sandbox{}
 type Sandbox struct {
 	// The ID of the sandbox
 	Id string `json:"id"`
-	// The name of the sandbox
-	// Deprecated
-	Name string `json:"name"`
 	// The organization ID of the sandbox
 	OrganizationId string `json:"organizationId"`
 	// The snapshot used for the sandbox
@@ -41,16 +38,14 @@ type Sandbox struct {
 	Public bool `json:"public"`
 	// The target environment for the sandbox
 	Target string `json:"target"`
-	// Additional information about the sandbox
-	Info *SandboxInfo `json:"info,omitempty"`
 	// The CPU quota for the sandbox
-	Cpu *float32 `json:"cpu,omitempty"`
+	Cpu float32 `json:"cpu"`
 	// The GPU quota for the sandbox
-	Gpu *float32 `json:"gpu,omitempty"`
+	Gpu float32 `json:"gpu"`
 	// The memory quota for the sandbox
-	Memory *float32 `json:"memory,omitempty"`
+	Memory float32 `json:"memory"`
 	// The disk quota for the sandbox
-	Disk *float32 `json:"disk,omitempty"`
+	Disk float32 `json:"disk"`
 	// The state of the sandbox
 	State *SandboxState `json:"state,omitempty"`
 	// The error reason of the sandbox
@@ -63,10 +58,19 @@ type Sandbox struct {
 	AutoStopInterval *float32 `json:"autoStopInterval,omitempty"`
 	// Auto-archive interval in minutes
 	AutoArchiveInterval *float32 `json:"autoArchiveInterval,omitempty"`
+	// The domain name of the runner
+	RunnerDomain *string `json:"runnerDomain,omitempty"`
 	// Array of volumes attached to the sandbox
 	Volumes []SandboxVolume `json:"volumes,omitempty"`
 	// Build information for the sandbox
 	BuildInfo *BuildInfo `json:"buildInfo,omitempty"`
+	// The creation timestamp of the sandbox
+	CreatedAt *string `json:"createdAt,omitempty"`
+	// The last update timestamp of the sandbox
+	UpdatedAt *string `json:"updatedAt,omitempty"`
+	// The class of the sandbox
+	// Deprecated
+	Class *string `json:"class,omitempty"`
 }
 
 type _Sandbox Sandbox
@@ -75,16 +79,19 @@ type _Sandbox Sandbox
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSandbox(id string, name string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, target string) *Sandbox {
+func NewSandbox(id string, organizationId string, user string, env map[string]string, labels map[string]string, public bool, target string, cpu float32, gpu float32, memory float32, disk float32) *Sandbox {
 	this := Sandbox{}
 	this.Id = id
-	this.Name = name
 	this.OrganizationId = organizationId
 	this.User = user
 	this.Env = env
 	this.Labels = labels
 	this.Public = public
 	this.Target = target
+	this.Cpu = cpu
+	this.Gpu = gpu
+	this.Memory = memory
+	this.Disk = disk
 	return &this
 }
 
@@ -93,8 +100,6 @@ func NewSandbox(id string, name string, organizationId string, user string, env 
 // but it doesn't guarantee that properties required by API are set
 func NewSandboxWithDefaults() *Sandbox {
 	this := Sandbox{}
-	var name string = ""
-	this.Name = name
 	return &this
 }
 
@@ -120,33 +125,6 @@ func (o *Sandbox) GetIdOk() (*string, bool) {
 // SetId sets field value
 func (o *Sandbox) SetId(v string) {
 	o.Id = v
-}
-
-// GetName returns the Name field value
-// Deprecated
-func (o *Sandbox) GetName() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Name
-}
-
-// GetNameOk returns a tuple with the Name field value
-// and a boolean to check if the value has been set.
-// Deprecated
-func (o *Sandbox) GetNameOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Name, true
-}
-
-// SetName sets field value
-// Deprecated
-func (o *Sandbox) SetName(v string) {
-	o.Name = v
 }
 
 // GetOrganizationId returns the OrganizationId field value
@@ -325,164 +303,100 @@ func (o *Sandbox) SetTarget(v string) {
 	o.Target = v
 }
 
-// GetInfo returns the Info field value if set, zero value otherwise.
-func (o *Sandbox) GetInfo() SandboxInfo {
-	if o == nil || IsNil(o.Info) {
-		var ret SandboxInfo
-		return ret
-	}
-	return *o.Info
-}
-
-// GetInfoOk returns a tuple with the Info field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *Sandbox) GetInfoOk() (*SandboxInfo, bool) {
-	if o == nil || IsNil(o.Info) {
-		return nil, false
-	}
-	return o.Info, true
-}
-
-// HasInfo returns a boolean if a field has been set.
-func (o *Sandbox) HasInfo() bool {
-	if o != nil && !IsNil(o.Info) {
-		return true
-	}
-
-	return false
-}
-
-// SetInfo gets a reference to the given SandboxInfo and assigns it to the Info field.
-func (o *Sandbox) SetInfo(v SandboxInfo) {
-	o.Info = &v
-}
-
-// GetCpu returns the Cpu field value if set, zero value otherwise.
+// GetCpu returns the Cpu field value
 func (o *Sandbox) GetCpu() float32 {
-	if o == nil || IsNil(o.Cpu) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Cpu
+
+	return o.Cpu
 }
 
-// GetCpuOk returns a tuple with the Cpu field value if set, nil otherwise
+// GetCpuOk returns a tuple with the Cpu field value
 // and a boolean to check if the value has been set.
 func (o *Sandbox) GetCpuOk() (*float32, bool) {
-	if o == nil || IsNil(o.Cpu) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Cpu, true
+	return &o.Cpu, true
 }
 
-// HasCpu returns a boolean if a field has been set.
-func (o *Sandbox) HasCpu() bool {
-	if o != nil && !IsNil(o.Cpu) {
-		return true
-	}
-
-	return false
-}
-
-// SetCpu gets a reference to the given float32 and assigns it to the Cpu field.
+// SetCpu sets field value
 func (o *Sandbox) SetCpu(v float32) {
-	o.Cpu = &v
+	o.Cpu = v
 }
 
-// GetGpu returns the Gpu field value if set, zero value otherwise.
+// GetGpu returns the Gpu field value
 func (o *Sandbox) GetGpu() float32 {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Gpu
+
+	return o.Gpu
 }
 
-// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
+// GetGpuOk returns a tuple with the Gpu field value
 // and a boolean to check if the value has been set.
 func (o *Sandbox) GetGpuOk() (*float32, bool) {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Gpu, true
+	return &o.Gpu, true
 }
 
-// HasGpu returns a boolean if a field has been set.
-func (o *Sandbox) HasGpu() bool {
-	if o != nil && !IsNil(o.Gpu) {
-		return true
-	}
-
-	return false
-}
-
-// SetGpu gets a reference to the given float32 and assigns it to the Gpu field.
+// SetGpu sets field value
 func (o *Sandbox) SetGpu(v float32) {
-	o.Gpu = &v
+	o.Gpu = v
 }
 
-// GetMemory returns the Memory field value if set, zero value otherwise.
+// GetMemory returns the Memory field value
 func (o *Sandbox) GetMemory() float32 {
-	if o == nil || IsNil(o.Memory) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Memory
+
+	return o.Memory
 }
 
-// GetMemoryOk returns a tuple with the Memory field value if set, nil otherwise
+// GetMemoryOk returns a tuple with the Memory field value
 // and a boolean to check if the value has been set.
 func (o *Sandbox) GetMemoryOk() (*float32, bool) {
-	if o == nil || IsNil(o.Memory) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Memory, true
+	return &o.Memory, true
 }
 
-// HasMemory returns a boolean if a field has been set.
-func (o *Sandbox) HasMemory() bool {
-	if o != nil && !IsNil(o.Memory) {
-		return true
-	}
-
-	return false
-}
-
-// SetMemory gets a reference to the given float32 and assigns it to the Memory field.
+// SetMemory sets field value
 func (o *Sandbox) SetMemory(v float32) {
-	o.Memory = &v
+	o.Memory = v
 }
 
-// GetDisk returns the Disk field value if set, zero value otherwise.
+// GetDisk returns the Disk field value
 func (o *Sandbox) GetDisk() float32 {
-	if o == nil || IsNil(o.Disk) {
+	if o == nil {
 		var ret float32
 		return ret
 	}
-	return *o.Disk
+
+	return o.Disk
 }
 
-// GetDiskOk returns a tuple with the Disk field value if set, nil otherwise
+// GetDiskOk returns a tuple with the Disk field value
 // and a boolean to check if the value has been set.
 func (o *Sandbox) GetDiskOk() (*float32, bool) {
-	if o == nil || IsNil(o.Disk) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Disk, true
+	return &o.Disk, true
 }
 
-// HasDisk returns a boolean if a field has been set.
-func (o *Sandbox) HasDisk() bool {
-	if o != nil && !IsNil(o.Disk) {
-		return true
-	}
-
-	return false
-}
-
-// SetDisk gets a reference to the given float32 and assigns it to the Disk field.
+// SetDisk sets field value
 func (o *Sandbox) SetDisk(v float32) {
-	o.Disk = &v
+	o.Disk = v
 }
 
 // GetState returns the State field value if set, zero value otherwise.
@@ -677,6 +591,38 @@ func (o *Sandbox) SetAutoArchiveInterval(v float32) {
 	o.AutoArchiveInterval = &v
 }
 
+// GetRunnerDomain returns the RunnerDomain field value if set, zero value otherwise.
+func (o *Sandbox) GetRunnerDomain() string {
+	if o == nil || IsNil(o.RunnerDomain) {
+		var ret string
+		return ret
+	}
+	return *o.RunnerDomain
+}
+
+// GetRunnerDomainOk returns a tuple with the RunnerDomain field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetRunnerDomainOk() (*string, bool) {
+	if o == nil || IsNil(o.RunnerDomain) {
+		return nil, false
+	}
+	return o.RunnerDomain, true
+}
+
+// HasRunnerDomain returns a boolean if a field has been set.
+func (o *Sandbox) HasRunnerDomain() bool {
+	if o != nil && !IsNil(o.RunnerDomain) {
+		return true
+	}
+
+	return false
+}
+
+// SetRunnerDomain gets a reference to the given string and assigns it to the RunnerDomain field.
+func (o *Sandbox) SetRunnerDomain(v string) {
+	o.RunnerDomain = &v
+}
+
 // GetVolumes returns the Volumes field value if set, zero value otherwise.
 func (o *Sandbox) GetVolumes() []SandboxVolume {
 	if o == nil || IsNil(o.Volumes) {
@@ -741,6 +687,105 @@ func (o *Sandbox) SetBuildInfo(v BuildInfo) {
 	o.BuildInfo = &v
 }
 
+// GetCreatedAt returns the CreatedAt field value if set, zero value otherwise.
+func (o *Sandbox) GetCreatedAt() string {
+	if o == nil || IsNil(o.CreatedAt) {
+		var ret string
+		return ret
+	}
+	return *o.CreatedAt
+}
+
+// GetCreatedAtOk returns a tuple with the CreatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetCreatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.CreatedAt) {
+		return nil, false
+	}
+	return o.CreatedAt, true
+}
+
+// HasCreatedAt returns a boolean if a field has been set.
+func (o *Sandbox) HasCreatedAt() bool {
+	if o != nil && !IsNil(o.CreatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreatedAt gets a reference to the given string and assigns it to the CreatedAt field.
+func (o *Sandbox) SetCreatedAt(v string) {
+	o.CreatedAt = &v
+}
+
+// GetUpdatedAt returns the UpdatedAt field value if set, zero value otherwise.
+func (o *Sandbox) GetUpdatedAt() string {
+	if o == nil || IsNil(o.UpdatedAt) {
+		var ret string
+		return ret
+	}
+	return *o.UpdatedAt
+}
+
+// GetUpdatedAtOk returns a tuple with the UpdatedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetUpdatedAtOk() (*string, bool) {
+	if o == nil || IsNil(o.UpdatedAt) {
+		return nil, false
+	}
+	return o.UpdatedAt, true
+}
+
+// HasUpdatedAt returns a boolean if a field has been set.
+func (o *Sandbox) HasUpdatedAt() bool {
+	if o != nil && !IsNil(o.UpdatedAt) {
+		return true
+	}
+
+	return false
+}
+
+// SetUpdatedAt gets a reference to the given string and assigns it to the UpdatedAt field.
+func (o *Sandbox) SetUpdatedAt(v string) {
+	o.UpdatedAt = &v
+}
+
+// GetClass returns the Class field value if set, zero value otherwise.
+// Deprecated
+func (o *Sandbox) GetClass() string {
+	if o == nil || IsNil(o.Class) {
+		var ret string
+		return ret
+	}
+	return *o.Class
+}
+
+// GetClassOk returns a tuple with the Class field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// Deprecated
+func (o *Sandbox) GetClassOk() (*string, bool) {
+	if o == nil || IsNil(o.Class) {
+		return nil, false
+	}
+	return o.Class, true
+}
+
+// HasClass returns a boolean if a field has been set.
+func (o *Sandbox) HasClass() bool {
+	if o != nil && !IsNil(o.Class) {
+		return true
+	}
+
+	return false
+}
+
+// SetClass gets a reference to the given string and assigns it to the Class field.
+// Deprecated
+func (o *Sandbox) SetClass(v string) {
+	o.Class = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -752,7 +797,6 @@ func (o Sandbox) MarshalJSON() ([]byte, error) {
 func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["name"] = o.Name
 	toSerialize["organizationId"] = o.OrganizationId
 	if !IsNil(o.Snapshot) {
 		toSerialize["snapshot"] = o.Snapshot
@@ -762,21 +806,10 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	toSerialize["labels"] = o.Labels
 	toSerialize["public"] = o.Public
 	toSerialize["target"] = o.Target
-	if !IsNil(o.Info) {
-		toSerialize["info"] = o.Info
-	}
-	if !IsNil(o.Cpu) {
-		toSerialize["cpu"] = o.Cpu
-	}
-	if !IsNil(o.Gpu) {
-		toSerialize["gpu"] = o.Gpu
-	}
-	if !IsNil(o.Memory) {
-		toSerialize["memory"] = o.Memory
-	}
-	if !IsNil(o.Disk) {
-		toSerialize["disk"] = o.Disk
-	}
+	toSerialize["cpu"] = o.Cpu
+	toSerialize["gpu"] = o.Gpu
+	toSerialize["memory"] = o.Memory
+	toSerialize["disk"] = o.Disk
 	if !IsNil(o.State) {
 		toSerialize["state"] = o.State
 	}
@@ -795,11 +828,23 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.AutoArchiveInterval) {
 		toSerialize["autoArchiveInterval"] = o.AutoArchiveInterval
 	}
+	if !IsNil(o.RunnerDomain) {
+		toSerialize["runnerDomain"] = o.RunnerDomain
+	}
 	if !IsNil(o.Volumes) {
 		toSerialize["volumes"] = o.Volumes
 	}
 	if !IsNil(o.BuildInfo) {
 		toSerialize["buildInfo"] = o.BuildInfo
+	}
+	if !IsNil(o.CreatedAt) {
+		toSerialize["createdAt"] = o.CreatedAt
+	}
+	if !IsNil(o.UpdatedAt) {
+		toSerialize["updatedAt"] = o.UpdatedAt
+	}
+	if !IsNil(o.Class) {
+		toSerialize["class"] = o.Class
 	}
 	return toSerialize, nil
 }
@@ -810,13 +855,16 @@ func (o *Sandbox) UnmarshalJSON(data []byte) (err error) {
 	// that every required field exists as a key in the generic map.
 	requiredProperties := []string{
 		"id",
-		"name",
 		"organizationId",
 		"user",
 		"env",
 		"labels",
 		"public",
 		"target",
+		"cpu",
+		"gpu",
+		"memory",
+		"disk",
 	}
 
 	allProperties := make(map[string]interface{})

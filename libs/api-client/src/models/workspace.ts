@@ -38,13 +38,6 @@ export interface Workspace {
    */
   id: string
   /**
-   * The name of the sandbox
-   * @type {string}
-   * @memberof Workspace
-   * @deprecated
-   */
-  name: string
-  /**
    * The organization ID of the sandbox
    * @type {string}
    * @memberof Workspace
@@ -87,35 +80,29 @@ export interface Workspace {
    */
   target: string
   /**
-   * Additional information about the sandbox
-   * @type {SandboxInfo}
-   * @memberof Workspace
-   */
-  info?: SandboxInfo
-  /**
    * The CPU quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  cpu?: number
+  cpu: number
   /**
    * The GPU quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  gpu?: number
+  gpu: number
   /**
    * The memory quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  memory?: number
+  memory: number
   /**
    * The disk quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  disk?: number
+  disk: number
   /**
    * The state of the sandbox
    * @type {SandboxState}
@@ -153,6 +140,12 @@ export interface Workspace {
    */
   autoArchiveInterval?: number
   /**
+   * The domain name of the runner
+   * @type {string}
+   * @memberof Workspace
+   */
+  runnerDomain?: string
+  /**
    * Array of volumes attached to the sandbox
    * @type {Array<SandboxVolume>}
    * @memberof Workspace
@@ -164,6 +157,31 @@ export interface Workspace {
    * @memberof Workspace
    */
   buildInfo?: BuildInfo
+  /**
+   * The creation timestamp of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  createdAt?: string
+  /**
+   * The last update timestamp of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  updatedAt?: string
+  /**
+   * The class of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   * @deprecated
+   */
+  class?: WorkspaceClassEnum
+  /**
+   * The name of the workspace
+   * @type {string}
+   * @memberof Workspace
+   */
+  name: string
   /**
    * The image used for the workspace
    * @type {string}
@@ -182,6 +200,12 @@ export interface Workspace {
    * @memberof Workspace
    */
   snapshotCreatedAt?: string
+  /**
+   * Additional information about the sandbox
+   * @type {SandboxInfo}
+   * @memberof Workspace
+   */
+  info?: SandboxInfo
 }
 
 export const WorkspaceBackupStateEnum = {
@@ -193,6 +217,13 @@ export const WorkspaceBackupStateEnum = {
 } as const
 
 export type WorkspaceBackupStateEnum = (typeof WorkspaceBackupStateEnum)[keyof typeof WorkspaceBackupStateEnum]
+export const WorkspaceClassEnum = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large',
+} as const
+
+export type WorkspaceClassEnum = (typeof WorkspaceClassEnum)[keyof typeof WorkspaceClassEnum]
 export const WorkspaceSnapshotStateEnum = {
   NONE: 'None',
   PENDING: 'Pending',

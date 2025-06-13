@@ -152,8 +152,8 @@ export class LspSymbolDto {
   name: string
 }
 
-@ApiSchema({ name: 'SandboxSymbolParams' })
-export class SandboxSymbolParamsDto {
+@ApiSchema({ name: 'WorkspaceSymbolParams' })
+export class WorkspaceSymbolParamsDto {
   @ApiProperty()
   @IsString()
   query: string

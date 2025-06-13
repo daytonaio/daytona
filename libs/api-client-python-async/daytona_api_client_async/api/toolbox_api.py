@@ -9037,334 +9037,6 @@ class ToolboxApi:
 
 
     @validate_call
-    async def lsp_sandbox_symbols(
-        self,
-        sandbox_id: StrictStr,
-        language_id: StrictStr,
-        path_to_project: StrictStr,
-        query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[LspSymbol]:
-        """Call Lsp SandboxSymbols
-
-        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param language_id: (required)
-        :type language_id: str
-        :param path_to_project: (required)
-        :type path_to_project: str
-        :param query: (required)
-        :type query: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._lsp_sandbox_symbols_serialize(
-            sandbox_id=sandbox_id,
-            language_id=language_id,
-            path_to_project=path_to_project,
-            query=query,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        ).data
-
-
-    @validate_call
-    async def lsp_sandbox_symbols_with_http_info(
-        self,
-        sandbox_id: StrictStr,
-        language_id: StrictStr,
-        path_to_project: StrictStr,
-        query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[LspSymbol]]:
-        """Call Lsp SandboxSymbols
-
-        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param language_id: (required)
-        :type language_id: str
-        :param path_to_project: (required)
-        :type path_to_project: str
-        :param query: (required)
-        :type query: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._lsp_sandbox_symbols_serialize(
-            sandbox_id=sandbox_id,
-            language_id=language_id,
-            path_to_project=path_to_project,
-            query=query,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        await response_data.read()
-        return self.api_client.response_deserialize(
-            response_data=response_data,
-            response_types_map=_response_types_map,
-        )
-
-
-    @validate_call
-    async def lsp_sandbox_symbols_without_preload_content(
-        self,
-        sandbox_id: StrictStr,
-        language_id: StrictStr,
-        path_to_project: StrictStr,
-        query: StrictStr,
-        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
-        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> RESTResponseType:
-        """Call Lsp SandboxSymbols
-
-        The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-
-        :param sandbox_id: (required)
-        :type sandbox_id: str
-        :param language_id: (required)
-        :type language_id: str
-        :param path_to_project: (required)
-        :type path_to_project: str
-        :param query: (required)
-        :type query: str
-        :param x_daytona_organization_id: Use with JWT to specify the organization ID
-        :type x_daytona_organization_id: str
-        :param _request_timeout: timeout setting for this request. If one
-                                 number provided, it will be total request
-                                 timeout. It can also be a pair (tuple) of
-                                 (connection, read) timeouts.
-        :type _request_timeout: int, tuple(int, int), optional
-        :param _request_auth: set to override the auth_settings for an a single
-                              request; this effectively ignores the
-                              authentication in the spec for a single request.
-        :type _request_auth: dict, optional
-        :param _content_type: force content-type for the request.
-        :type _content_type: str, Optional
-        :param _headers: set to override the headers for a single
-                         request; this effectively ignores the headers
-                         in the spec for a single request.
-        :type _headers: dict, optional
-        :param _host_index: set to override the host_index for a single
-                            request; this effectively ignores the host_index
-                            in the spec for a single request.
-        :type _host_index: int, optional
-        :return: Returns the result object.
-        """ # noqa: E501
-
-        _param = self._lsp_sandbox_symbols_serialize(
-            sandbox_id=sandbox_id,
-            language_id=language_id,
-            path_to_project=path_to_project,
-            query=query,
-            x_daytona_organization_id=x_daytona_organization_id,
-            _request_auth=_request_auth,
-            _content_type=_content_type,
-            _headers=_headers,
-            _host_index=_host_index
-        )
-
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[LspSymbol]",
-        }
-        response_data = await self.api_client.call_api(
-            *_param,
-            _request_timeout=_request_timeout
-        )
-        return response_data.response
-
-
-    def _lsp_sandbox_symbols_serialize(
-        self,
-        sandbox_id,
-        language_id,
-        path_to_project,
-        query,
-        x_daytona_organization_id,
-        _request_auth,
-        _content_type,
-        _headers,
-        _host_index,
-    ) -> RequestSerialized:
-
-        _host = None
-
-        _collection_formats: Dict[str, str] = {
-        }
-
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
-        ] = {}
-        _body_params: Optional[bytes] = None
-
-        # process the path parameters
-        if sandbox_id is not None:
-            _path_params['sandboxId'] = sandbox_id
-        # process the query parameters
-        if language_id is not None:
-            
-            _query_params.append(('languageId', language_id))
-            
-        if path_to_project is not None:
-            
-            _query_params.append(('pathToProject', path_to_project))
-            
-        if query is not None:
-            
-            _query_params.append(('query', query))
-            
-        # process the header parameters
-        if x_daytona_organization_id is not None:
-            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
-        # process the form parameters
-        # process the body parameter
-
-
-        # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
-                [
-                    'application/json'
-                ]
-            )
-
-
-        # authentication setting
-        _auth_settings: List[str] = [
-            'bearer', 
-            'oauth2'
-        ]
-
-        return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols',
-            path_params=_path_params,
-            query_params=_query_params,
-            header_params=_header_params,
-            body=_body_params,
-            post_params=_form_params,
-            files=_files,
-            auth_settings=_auth_settings,
-            collection_formats=_collection_formats,
-            _host=_host,
-            _request_auth=_request_auth
-        )
-
-
-
-
-    @validate_call
     async def lsp_start(
         self,
         sandbox_id: StrictStr,
@@ -9945,6 +9617,334 @@ class ToolboxApi:
         return self.api_client.param_serialize(
             method='POST',
             resource_path='/toolbox/{sandboxId}/toolbox/lsp/stop',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def lsp_workspace_symbols(
+        self,
+        sandbox_id: StrictStr,
+        language_id: StrictStr,
+        path_to_project: StrictStr,
+        query: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> List[LspSymbol]:
+        """Call Lsp WorkspaceSymbols
+
+        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param language_id: (required)
+        :type language_id: str
+        :param path_to_project: (required)
+        :type path_to_project: str
+        :param query: (required)
+        :type query: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lsp_workspace_symbols_serialize(
+            sandbox_id=sandbox_id,
+            language_id=language_id,
+            path_to_project=path_to_project,
+            query=query,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[LspSymbol]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def lsp_workspace_symbols_with_http_info(
+        self,
+        sandbox_id: StrictStr,
+        language_id: StrictStr,
+        path_to_project: StrictStr,
+        query: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[List[LspSymbol]]:
+        """Call Lsp WorkspaceSymbols
+
+        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param language_id: (required)
+        :type language_id: str
+        :param path_to_project: (required)
+        :type path_to_project: str
+        :param query: (required)
+        :type query: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lsp_workspace_symbols_serialize(
+            sandbox_id=sandbox_id,
+            language_id=language_id,
+            path_to_project=path_to_project,
+            query=query,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[LspSymbol]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def lsp_workspace_symbols_without_preload_content(
+        self,
+        sandbox_id: StrictStr,
+        language_id: StrictStr,
+        path_to_project: StrictStr,
+        query: StrictStr,
+        x_daytona_organization_id: Annotated[Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Call Lsp WorkspaceSymbols
+
+        The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+
+        :param sandbox_id: (required)
+        :type sandbox_id: str
+        :param language_id: (required)
+        :type language_id: str
+        :param path_to_project: (required)
+        :type path_to_project: str
+        :param query: (required)
+        :type query: str
+        :param x_daytona_organization_id: Use with JWT to specify the organization ID
+        :type x_daytona_organization_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._lsp_workspace_symbols_serialize(
+            sandbox_id=sandbox_id,
+            language_id=language_id,
+            path_to_project=path_to_project,
+            query=query,
+            x_daytona_organization_id=x_daytona_organization_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[LspSymbol]",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _lsp_workspace_symbols_serialize(
+        self,
+        sandbox_id,
+        language_id,
+        path_to_project,
+        query,
+        x_daytona_organization_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if sandbox_id is not None:
+            _path_params['sandboxId'] = sandbox_id
+        # process the query parameters
+        if language_id is not None:
+            
+            _query_params.append(('languageId', language_id))
+            
+        if path_to_project is not None:
+            
+            _query_params.append(('pathToProject', path_to_project))
+            
+        if query is not None:
+            
+            _query_params.append(('query', query))
+            
+        # process the header parameters
+        if x_daytona_organization_id is not None:
+            _header_params['X-Daytona-Organization-ID'] = x_daytona_organization_id
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'bearer', 
+            'oauth2'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/toolbox/{sandboxId}/toolbox/lsp/workspace-symbols',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -151,12 +151,7 @@ export class DockerProvider implements OnModuleInit {
       //  name: sandbox.id,
       Image: imageName,
       // Remove Volumes configuration since we're using direct binding
-      Env: [
-        'DAYTONA_WS_ID=init-image',
-        'DAYTONA_WS_NAME=init-image',
-        'DAYTONA_WS_USER=root',
-        `DAYTONA_WS_IMAGE=${imageName}`,
-      ],
+      Env: ['DAYTONA_SANDBOX_ID=init-image', 'DAYTONA_SANDBOX_USER=root', `DAYTONA_SANDBOX_SNAPSHOT=${imageName}`],
       Entrypoint: entrypoint,
       HostConfig: {
         Binds: [
@@ -185,11 +180,14 @@ export class DockerProvider implements OnModuleInit {
     return container.id
   }
 
-  async deleteSandboxRepository(repository: string, registry: DockerRegistry): Promise<void> {
+  private async deleteRepositoryWithPrefix(
+    repository: string,
+    prefix: string,
+    registry: DockerRegistry,
+  ): Promise<void> {
     const registryUrl = this.dockerRegistryService.getRegistryUrl(registry)
     const encodedCredentials = Buffer.from(`${registry.username}:${registry.password}`).toString('base64')
-
-    const repoPath = `${registry.project}/backup-${repository}`
+    const repoPath = `${registry.project}/${prefix}${repository}`
 
     try {
       // Step 1: List all tags in the repository
@@ -276,6 +274,17 @@ export class DockerProvider implements OnModuleInit {
       this.logger.debug(`Repository ${repoPath} cleanup completed`)
     } catch (error) {
       this.logger.error(`Exception when deleting repository ${repoPath}: ${error.message}`)
+      throw error
+    }
+  }
+
+  async deleteSandboxRepository(repository: string, registry: DockerRegistry): Promise<void> {
+    try {
+      // Delete both backup and snapshot repositories - necessary due to renaming
+      await this.deleteRepositoryWithPrefix(repository, 'backup-', registry)
+      await this.deleteRepositoryWithPrefix(repository, 'snapshot-', registry)
+    } catch (error) {
+      this.logger.error(`Failed to delete repositories for ${repository}: ${error.message}`)
       throw error
     }
   }

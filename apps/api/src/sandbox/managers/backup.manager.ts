@@ -118,21 +118,21 @@ export class BackupManager {
     })
 
     await Promise.all(
-      sandboxes.map(async (w) => {
-        const lockKey = `sandbox-backup-${w.id}`
+      sandboxes.map(async (s) => {
+        const lockKey = `sandbox-backup-${s.id}`
         const hasLock = await this.redisLockProvider.lock(lockKey, 60)
         if (!hasLock) {
           return
         }
 
-        const runner = await this.runnerService.findOne(w.runnerId)
+        const runner = await this.runnerService.findOne(s.runnerId)
         if (runner.state !== RunnerState.READY) {
           return
         }
 
         //  get the latest sandbox state
         const sandbox = await this.sandboxRepository.findOneByOrFail({
-          id: w.id,
+          id: s.id,
         })
 
         try {
