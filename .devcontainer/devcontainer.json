@@ -67,7 +67,7 @@
     // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
     "env": "test -f .env.local || touch .env.local"
   },
-  "postStartCommand": "yarn && yarn --cwd libs/sdk-typescript install && pip install --upgrade pip && pip install -e ./libs/sdk-python[dev]",
+  "postStartCommand": "yarn && pip install --upgrade pip && pip install -e ./libs/sdk-python[dev]",
   "postAttachCommand": "",
   "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001", "jaeger:16686"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.

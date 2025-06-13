@@ -174,7 +174,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/client-s3@npm:^3.445.0, @aws-sdk/client-s3@npm:^3.787.0":
+"@aws-sdk/client-s3@npm:^3.787.0":
   version: 3.828.0
   resolution: "@aws-sdk/client-s3@npm:3.828.0"
   dependencies:
@@ -2314,56 +2314,6 @@ __metadata:
   checksum: 10c0/411e9d4303b10951f6fd0189d18fb845f0d934a575df2176bc10daf664282c765fb6b057a977e446bbb1229151d89e7788978600a019f1fc24b5c75276d496bd
   languageName: node
   linkType: hard
-
-"@daytonaio/api-client@workspace:libs/api-client":
-  version: 0.0.0-use.local
-  resolution: "@daytonaio/api-client@workspace:libs/api-client"
-  dependencies:
-    "@types/node": "npm:12.11.5 - 12.20.42"
-    axios: "npm:^1.6.1"
-    typescript: "npm:^4.0 || ^5.0"
-  languageName: unknown
-  linkType: soft
-
-"@daytonaio/runner-api-client@workspace:libs/runner-api-client":
-  version: 0.0.0-use.local
-  resolution: "@daytonaio/runner-api-client@workspace:libs/runner-api-client"
-  dependencies:
-    "@types/node": "npm:12.11.5 - 12.20.42"
-    axios: "npm:^1.6.1"
-    typescript: "npm:^4.0 || ^5.0"
-  languageName: unknown
-  linkType: soft
-
-"@daytonaio/sdk@workspace:libs/sdk-typescript":
-  version: 0.0.0-use.local
-  resolution: "@daytonaio/sdk@workspace:libs/sdk-typescript"
-  dependencies:
-    "@aws-sdk/client-s3": "npm:^3.445.0"
-    "@aws-sdk/lib-storage": "npm:^3.798.0"
-    "@babel/preset-env": "npm:^7.22.0"
-    "@babel/preset-typescript": "npm:^7.22.0"
-    "@dotenvx/dotenvx": "npm:^1.25.1"
-    "@iarna/toml": "npm:^2.2.5"
-    "@types/jest": "npm:^29.5.0"
-    "@types/node": "npm:^22.10.0"
-    "@types/shell-quote": "npm:^1.7.5"
-    "@types/tar": "npm:^6.1.13"
-    axios: "npm:^1.6.1"
-    fast-glob: "npm:^3.3.0"
-    form-data: "npm:^4.0.0"
-    jest: "npm:^29.5.0"
-    shell-quote: "npm:^1.8.2"
-    tar: "npm:^6.2.0"
-    ts-jest: "npm:^29.1.0"
-    typedoc: "npm:~0.27.7"
-    typedoc-plugin-markdown: "npm:~4.4.2"
-    typedoc-plugin-merge-modules: "npm:~6.1.0"
-    typescript: "npm:^5.0.0"
-    untildify: "npm:^5.0.0"
-    uuid: "npm:^11.0.3"
-  languageName: unknown
-  linkType: soft
 
 "@discoveryjs/json-ext@npm:^0.5.0":
   version: 0.5.7
@@ -8501,7 +8451,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:^29.5.0, @types/jest@npm:^29.5.12":
+"@types/jest@npm:^29.5.12":
   version: 29.5.14
   resolution: "@types/jest@npm:29.5.14"
   dependencies:
@@ -8631,13 +8581,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:12.11.5 - 12.20.42":
-  version: 12.20.42
-  resolution: "@types/node@npm:12.20.42"
-  checksum: 10c0/f5963e2401f13eb360ee82389eec10c68f5931313d72dfb73702fe45b10bbacbe47a529509c9baa1af40d85368253509d2b95ef1a444b7237926fd1ed14dd0db
-  languageName: node
-  linkType: hard
-
 "@types/node@npm:^18.11.18":
   version: 18.19.111
   resolution: "@types/node@npm:18.19.111"
@@ -8647,7 +8590,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.10.0, @types/node@npm:^22.13.4":
+"@types/node@npm:^22.13.4":
   version: 22.15.31
   resolution: "@types/node@npm:22.15.31"
   dependencies:
@@ -12663,8 +12606,13 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.787.0"
     "@aws-sdk/client-sts": "npm:^3.803.0"
+    "@aws-sdk/lib-storage": "npm:^3.798.0"
+    "@babel/preset-env": "npm:^7.22.0"
+    "@babel/preset-typescript": "npm:^7.22.0"
+    "@dotenvx/dotenvx": "npm:^1.25.1"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
+    "@iarna/toml": "npm:^2.2.5"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.0"
     "@nestjs/cache-manager": "npm:^3.0.0"
@@ -12733,6 +12681,8 @@ __metadata:
     "@types/passport-jwt": "npm:^4.0.1"
     "@types/react": "npm:19.0.0"
     "@types/react-dom": "npm:19.0.0"
+    "@types/shell-quote": "npm:^1.7.5"
+    "@types/tar": "npm:^6.1.13"
     "@vitejs/plugin-react": "npm:^4.2.0"
     "@vitest/ui": "npm:^1.3.1"
     autoprefixer: "npm:10.4.13"
@@ -12757,6 +12707,8 @@ __metadata:
     eslint-plugin-react-hooks: "npm:5.0.0"
     express-openid-connect: "npm:^2.18.0"
     express-session: "npm:^1.18.1"
+    fast-glob: "npm:^3.3.0"
+    form-data: "npm:^4.0.0"
     husky: "npm:^9.1.7"
     ioredis: "npm:^5.5.0"
     is-ci: "npm:^4.1.0"
@@ -12794,6 +12746,7 @@ __metadata:
     run-script-webpack-plugin: "npm:^0.2.2"
     rxjs: "npm:^7.8.0"
     sass: "npm:^1.55.0"
+    shell-quote: "npm:^1.8.2"
     socket.io-client: "npm:^4.8.1"
     sonner: "npm:^1.7.4"
     sqlite3: "npm:^5.1.7"
@@ -12802,12 +12755,18 @@ __metadata:
     tailwind-merge: "npm:^3.0.1"
     tailwindcss: "npm:3.4.3"
     tailwindcss-animate: "npm:^1.0.7"
+    tar: "npm:^6.2.0"
     ts-jest: "npm:^29.1.0"
     ts-node: "npm:10.9.1"
     tslib: "npm:^2.8.1"
+    typedoc: "npm:~0.27.7"
+    typedoc-plugin-markdown: "npm:~4.4.2"
+    typedoc-plugin-merge-modules: "npm:~6.1.0"
     typeorm: "npm:^0.3.20"
     typescript: "npm:~5.7.2"
     typescript-eslint: "npm:^8.19.0"
+    untildify: "npm:^5.0.0"
+    uuid: "npm:^11.0.3"
     verdaccio: "npm:6.0.5"
     vite: "npm:6.3.4"
     vite-plugin-checker: "npm:^0.8.0"
@@ -17606,7 +17565,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest@npm:^29.5.0, jest@npm:^29.7.0":
+"jest@npm:^29.7.0":
   version: 29.7.0
   resolution: "jest@npm:29.7.0"
   dependencies:
@@ -23390,12 +23349,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"sdk-python-e594e4@workspace:libs/sdk-python":
-  version: 0.0.0-use.local
-  resolution: "sdk-python-e594e4@workspace:libs/sdk-python"
-  languageName: unknown
-  linkType: soft
-
 "secure-compare@npm:3.0.1":
   version: 3.0.1
   resolution: "secure-compare@npm:3.0.1"
@@ -25745,16 +25698,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.0 || ^5.0, typescript@npm:^5.0.0":
-  version: 5.8.3
-  resolution: "typescript@npm:5.8.3"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/5f8bb01196e542e64d44db3d16ee0e4063ce4f3e3966df6005f2588e86d91c03e1fb131c2581baf0fb65ee79669eea6e161cd448178986587e9f6844446dbb48
-  languageName: node
-  linkType: hard
-
 "typescript@npm:~5.7.2":
   version: 5.7.3
   resolution: "typescript@npm:5.7.3"
@@ -25762,16 +25705,6 @@ __metadata:
     tsc: bin/tsc
     tsserver: bin/tsserver
   checksum: 10c0/b7580d716cf1824736cc6e628ab4cd8b51877408ba2be0869d2866da35ef8366dd6ae9eb9d0851470a39be17cbd61df1126f9e211d8799d764ea7431d5435afa
-  languageName: node
-  linkType: hard
-
-"typescript@patch:typescript@npm%3A^4.0 || ^5.0#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.0.0#optional!builtin<compat/typescript>":
-  version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#optional!builtin<compat/typescript>::version=5.8.3&hash=5786d5"
-  bin:
-    tsc: bin/tsc
-    tsserver: bin/tsserver
-  checksum: 10c0/39117e346ff8ebd87ae1510b3a77d5d92dae5a89bde588c747d25da5c146603a99c8ee588c7ef80faaf123d89ed46f6dbd918d534d641083177d5fac38b8a1cb
   languageName: node
   linkType: hard
 
