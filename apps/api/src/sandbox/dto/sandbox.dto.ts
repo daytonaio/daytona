@@ -10,31 +10,7 @@ import { BackupState } from '../enums/backup-state.enum'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { BuildInfoDto } from './build-info.dto'
-
-@ApiSchema({ name: 'SandboxInfo' })
-export class SandboxInfoDto {
-  @ApiProperty({
-    description: 'The creation timestamp of the project',
-    example: '2023-10-01T12:00:00Z',
-  })
-  created: string
-
-  @ApiProperty({
-    description: 'Deprecated: The name of the sandbox',
-    example: 'MySandbox',
-    deprecated: true,
-    default: '',
-  })
-  name: string
-
-  @ApiPropertyOptional({
-    description: 'Additional metadata provided by the provider',
-    example: '{"key": "value"}',
-    required: false,
-  })
-  @IsOptional()
-  providerMetadata?: string
-}
+import { SandboxClass } from '../enums/sandbox-class.enum'
 
 @ApiSchema({ name: 'SandboxVolume' })
 export class SandboxVolume {
@@ -58,14 +34,6 @@ export class SandboxDto {
     example: 'sandbox123',
   })
   id: string
-
-  @ApiProperty({
-    description: 'The name of the sandbox',
-    example: 'MySandbox',
-    deprecated: true,
-    default: '',
-  })
-  name: string
 
   @ApiProperty({
     description: 'The organization ID of the sandbox',
@@ -113,45 +81,29 @@ export class SandboxDto {
   })
   target: string
 
-  @ApiPropertyOptional({
-    description: 'Additional information about the sandbox',
-    type: SandboxInfoDto,
-    required: false,
-  })
-  @IsOptional()
-  info?: SandboxInfoDto
-
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The CPU quota for the sandbox',
     example: 2,
-    required: false,
   })
-  @IsOptional()
-  cpu?: number
+  cpu: number
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The GPU quota for the sandbox',
     example: 0,
-    required: false,
   })
-  @IsOptional()
-  gpu?: number
+  gpu: number
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The memory quota for the sandbox',
     example: 4,
-    required: false,
   })
-  @IsOptional()
-  memory?: number
+  memory: number
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'The disk quota for the sandbox',
     example: 10,
-    required: false,
   })
-  @IsOptional()
-  disk?: number
+  disk: number
 
   @ApiPropertyOptional({
     description: 'The state of the sandbox',
@@ -207,6 +159,14 @@ export class SandboxDto {
   autoArchiveInterval?: number
 
   @ApiPropertyOptional({
+    description: 'The domain name of the runner',
+    example: 'runner.example.com',
+    required: false,
+  })
+  @IsOptional()
+  runnerDomain?: string
+
+  @ApiPropertyOptional({
     description: 'Array of volumes attached to the sandbox',
     type: [SandboxVolume],
     required: false,
@@ -222,16 +182,36 @@ export class SandboxDto {
   @IsOptional()
   buildInfo?: BuildInfoDto
 
-  constructor() {
-    if (this.name === '') {
-      this.name = this.id
-    }
-  }
+  @ApiPropertyOptional({
+    description: 'The creation timestamp of the sandbox',
+    example: '2024-10-01T12:00:00Z',
+    required: false,
+  })
+  @IsOptional()
+  createdAt?: string
+
+  @ApiPropertyOptional({
+    description: 'The last update timestamp of the sandbox',
+    example: '2024-10-01T12:00:00Z',
+    required: false,
+  })
+  @IsOptional()
+  updatedAt?: string
+
+  @ApiPropertyOptional({
+    description: 'The class of the sandbox',
+    enum: SandboxClass,
+    example: Object.values(SandboxClass)[0],
+    required: false,
+    deprecated: true,
+  })
+  @IsEnum(SandboxClass)
+  @IsOptional()
+  class?: SandboxClass
 
   static fromSandbox(sandbox: Sandbox, runnerDomain: string): SandboxDto {
     return {
       id: sandbox.id,
-      name: sandbox.id,
       organizationId: sandbox.organizationId,
       target: sandbox.region,
       snapshot: sandbox.snapshot,
@@ -250,6 +230,9 @@ export class SandboxDto {
       backupCreatedAt: sandbox.lastBackupAt?.toISOString(),
       autoStopInterval: sandbox.autoStopInterval,
       autoArchiveInterval: sandbox.autoArchiveInterval,
+      class: sandbox.class,
+      createdAt: sandbox.createdAt?.toISOString(),
+      updatedAt: sandbox.updatedAt?.toISOString(),
       buildInfo: sandbox.buildInfo
         ? {
             dockerfileContent: sandbox.buildInfo.dockerfileContent,
@@ -258,24 +241,7 @@ export class SandboxDto {
             updatedAt: sandbox.buildInfo.updatedAt,
           }
         : undefined,
-      info: {
-        name: sandbox.id,
-        created: sandbox.createdAt?.toISOString(),
-        providerMetadata: JSON.stringify({
-          state: this.getSandboxState(sandbox),
-          runnerDomain: runnerDomain,
-          region: sandbox.region,
-          class: sandbox.class,
-          updatedAt: sandbox.updatedAt?.toISOString(),
-          lastBackup: sandbox.lastBackupAt,
-          cpu: sandbox.cpu,
-          gpu: sandbox.gpu,
-          memory: sandbox.mem,
-          disk: sandbox.disk,
-          autoStopInterval: sandbox.autoStopInterval,
-          autoArchiveInterval: sandbox.autoArchiveInterval,
-        }),
-      },
+      runnerDomain: runnerDomain,
     }
   }
 

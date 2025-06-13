@@ -4,7 +4,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -31,19 +30,18 @@ func RenderInfo(sandbox *daytonaapiclient.Sandbox, forceUnstyled bool) {
 		output += getInfoLine("Snapshot", *sandbox.Snapshot) + "\n"
 	}
 
-	providerMetadataString := sandbox.Info.GetProviderMetadata()
+	output += getInfoLine("Region", sandbox.Target) + "\n"
 
-	var providerMetadata providerMetadata
-
-	err := json.Unmarshal([]byte(providerMetadataString), &providerMetadata)
-	if err == nil {
-		output += getInfoLine("Region", providerMetadata.Region) + "\n"
-		output += getInfoLine("Class", providerMetadata.Class) + "\n"
-		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(providerMetadata.UpdatedAt)) + "\n"
+	if sandbox.Class != nil {
+		output += getInfoLine("Class", *sandbox.Class) + "\n"
 	}
 
-	if sandbox.Info != nil {
-		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(sandbox.Info.Created)) + "\n"
+	if sandbox.CreatedAt != nil {
+		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(*sandbox.CreatedAt)) + "\n"
+	}
+
+	if sandbox.UpdatedAt != nil {
+		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)) + "\n"
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -75,12 +73,6 @@ func RenderInfo(sandbox *daytonaapiclient.Sandbox, forceUnstyled bool) {
 	}
 
 	renderTUIView(output, common.GetContainerBreakpointWidth(terminalWidth))
-}
-
-type providerMetadata struct {
-	Region    string `json:"region"`
-	Class     string `json:"class"`
-	UpdatedAt string `json:"updatedAt"`
 }
 
 func renderUnstyledInfo(output string) {

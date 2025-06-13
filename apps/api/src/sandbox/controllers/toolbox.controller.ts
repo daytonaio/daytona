@@ -1065,12 +1065,12 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
-  @Get(':sandboxId/toolbox/lsp/sandbox-symbols')
+  @Get(':sandboxId/toolbox/lsp/workspace-symbols')
   @ApiOperation({
-    summary: 'Call Lsp SandboxSymbols',
+    summary: 'Call Lsp WorkspaceSymbols',
     description:
-      'The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.',
-    operationId: 'LspSandboxSymbols',
+      'The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.',
+    operationId: 'LspWorkspaceSymbols',
   })
   @ApiResponse({
     status: 200,
@@ -1081,7 +1081,7 @@ export class ToolboxController {
   @ApiQuery({ name: 'pathToProject', type: String, required: true })
   @ApiQuery({ name: 'languageId', type: String, required: true })
   @ApiParam({ name: 'sandboxId', type: String, required: true })
-  async getLspSandboxSymbols(
+  async getLspWorkspaceSymbols(
     @Request() req: RawBodyRequest<IncomingMessage>,
     @Res() res: ServerResponse<IncomingMessage>,
     @Next() next: NextFunction,

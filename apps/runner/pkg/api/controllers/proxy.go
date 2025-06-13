@@ -63,7 +63,6 @@ var proxyClient = &http.Client{
 //	@Summary		Proxy requests to the sandbox toolbox
 //	@Description	Forwards the request to the specified sandbox's container
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
-//	@Param			projectId	path		string	true	"Project ID"
 //	@Param			path		path		string	true	"Path to forward"
 //	@Success		200			{object}	string	"Proxied response"
 //	@Failure		400			{object}	string	"Bad request"
@@ -71,7 +70,7 @@ var proxyClient = &http.Client{
 //	@Failure		404			{object}	string	"Sandbox container not found"
 //	@Failure		409			{object}	string	"Sandbox container conflict"
 //	@Failure		500			{object}	string	"Internal server error"
-//	@Router			/sandboxes/{sandboxId}/{projectId}/toolbox/{path} [get]
+//	@Router			/sandboxes/{sandboxId}/toolbox/{path} [get]
 func ProxyRequest(ctx *gin.Context) {
 	target, fullTargetURL, err := getProxyTarget(ctx)
 	if err != nil {

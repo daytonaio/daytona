@@ -17,9 +17,6 @@
 import type { BuildInfo } from './build-info'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { SandboxInfo } from './sandbox-info'
-// May contain unused imports in some cases
-// @ts-ignore
 import type { SandboxState } from './sandbox-state'
 // May contain unused imports in some cases
 // @ts-ignore
@@ -37,13 +34,6 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   id: string
-  /**
-   * The name of the sandbox
-   * @type {string}
-   * @memberof Sandbox
-   * @deprecated
-   */
-  name: string
   /**
    * The organization ID of the sandbox
    * @type {string}
@@ -87,35 +77,29 @@ export interface Sandbox {
    */
   target: string
   /**
-   * Additional information about the sandbox
-   * @type {SandboxInfo}
-   * @memberof Sandbox
-   */
-  info?: SandboxInfo
-  /**
    * The CPU quota for the sandbox
    * @type {number}
    * @memberof Sandbox
    */
-  cpu?: number
+  cpu: number
   /**
    * The GPU quota for the sandbox
    * @type {number}
    * @memberof Sandbox
    */
-  gpu?: number
+  gpu: number
   /**
    * The memory quota for the sandbox
    * @type {number}
    * @memberof Sandbox
    */
-  memory?: number
+  memory: number
   /**
    * The disk quota for the sandbox
    * @type {number}
    * @memberof Sandbox
    */
-  disk?: number
+  disk: number
   /**
    * The state of the sandbox
    * @type {SandboxState}
@@ -153,6 +137,12 @@ export interface Sandbox {
    */
   autoArchiveInterval?: number
   /**
+   * The domain name of the runner
+   * @type {string}
+   * @memberof Sandbox
+   */
+  runnerDomain?: string
+  /**
    * Array of volumes attached to the sandbox
    * @type {Array<SandboxVolume>}
    * @memberof Sandbox
@@ -164,6 +154,25 @@ export interface Sandbox {
    * @memberof Sandbox
    */
   buildInfo?: BuildInfo
+  /**
+   * The creation timestamp of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  createdAt?: string
+  /**
+   * The last update timestamp of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  updatedAt?: string
+  /**
+   * The class of the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   * @deprecated
+   */
+  class?: SandboxClassEnum
 }
 
 export const SandboxBackupStateEnum = {
@@ -175,3 +184,10 @@ export const SandboxBackupStateEnum = {
 } as const
 
 export type SandboxBackupStateEnum = (typeof SandboxBackupStateEnum)[keyof typeof SandboxBackupStateEnum]
+export const SandboxClassEnum = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large',
+} as const
+
+export type SandboxClassEnum = (typeof SandboxClassEnum)[keyof typeof SandboxClassEnum]

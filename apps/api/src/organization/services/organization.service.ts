@@ -129,12 +129,12 @@ export class OrganizationService implements OnModuleInit {
     })
 
     // Get running sandboxes
-    const runningSandboxes = sandboxes.filter((w) => w.state === SandboxState.STARTED)
+    const runningSandboxes = sandboxes.filter((s) => s.state === SandboxState.STARTED)
 
     // Calculate current usage
-    const currentCpuUsage = runningSandboxes.reduce((sum, w) => sum + w.cpu, 0)
-    const currentMemoryUsage = runningSandboxes.reduce((sum, w) => sum + w.mem, 0)
-    const currentDiskUsage = sandboxes.reduce((sum, w) => sum + w.disk, 0)
+    const currentCpuUsage = runningSandboxes.reduce((sum, s) => sum + s.cpu, 0)
+    const currentMemoryUsage = runningSandboxes.reduce((sum, s) => sum + s.mem, 0)
+    const currentDiskUsage = sandboxes.reduce((sum, s) => sum + s.disk, 0)
 
     return {
       totalCpuQuota: organization.totalCpuQuota,

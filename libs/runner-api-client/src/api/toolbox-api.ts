@@ -41,26 +41,21 @@ export const ToolboxApiAxiosParamCreator = function (configuration?: Configurati
      * Forwards the request to the specified sandbox\'s container
      * @summary Proxy requests to the sandbox toolbox
      * @param {string} sandboxId Sandbox ID
-     * @param {string} projectId Project ID
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    sandboxesSandboxIdProjectIdToolboxPathGet: async (
+    sandboxesSandboxIdToolboxPathGet: async (
       sandboxId: string,
-      projectId: string,
       path: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'sandboxId' is not null or undefined
-      assertParamExists('sandboxesSandboxIdProjectIdToolboxPathGet', 'sandboxId', sandboxId)
-      // verify required parameter 'projectId' is not null or undefined
-      assertParamExists('sandboxesSandboxIdProjectIdToolboxPathGet', 'projectId', projectId)
+      assertParamExists('sandboxesSandboxIdToolboxPathGet', 'sandboxId', sandboxId)
       // verify required parameter 'path' is not null or undefined
-      assertParamExists('sandboxesSandboxIdProjectIdToolboxPathGet', 'path', path)
-      const localVarPath = `/sandboxes/{sandboxId}/{projectId}/toolbox/{path}`
+      assertParamExists('sandboxesSandboxIdToolboxPathGet', 'path', path)
+      const localVarPath = `/sandboxes/{sandboxId}/toolbox/{path}`
         .replace(`{${'sandboxId'}}`, encodeURIComponent(String(sandboxId)))
-        .replace(`{${'projectId'}}`, encodeURIComponent(String(projectId)))
         .replace(`{${'path'}}`, encodeURIComponent(String(path)))
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -99,26 +94,23 @@ export const ToolboxApiFp = function (configuration?: Configuration) {
      * Forwards the request to the specified sandbox\'s container
      * @summary Proxy requests to the sandbox toolbox
      * @param {string} sandboxId Sandbox ID
-     * @param {string} projectId Project ID
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    async sandboxesSandboxIdProjectIdToolboxPathGet(
+    async sandboxesSandboxIdToolboxPathGet(
       sandboxId: string,
-      projectId: string,
       path: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<string>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.sandboxesSandboxIdProjectIdToolboxPathGet(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.sandboxesSandboxIdToolboxPathGet(
         sandboxId,
-        projectId,
         path,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['ToolboxApi.sandboxesSandboxIdProjectIdToolboxPathGet']?.[localVarOperationServerIndex]?.url
+        operationServerMap['ToolboxApi.sandboxesSandboxIdToolboxPathGet']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -141,19 +133,17 @@ export const ToolboxApiFactory = function (configuration?: Configuration, basePa
      * Forwards the request to the specified sandbox\'s container
      * @summary Proxy requests to the sandbox toolbox
      * @param {string} sandboxId Sandbox ID
-     * @param {string} projectId Project ID
      * @param {string} path Path to forward
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      */
-    sandboxesSandboxIdProjectIdToolboxPathGet(
+    sandboxesSandboxIdToolboxPathGet(
       sandboxId: string,
-      projectId: string,
       path: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<string> {
       return localVarFp
-        .sandboxesSandboxIdProjectIdToolboxPathGet(sandboxId, projectId, path, options)
+        .sandboxesSandboxIdToolboxPathGet(sandboxId, path, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -170,20 +160,14 @@ export class ToolboxApi extends BaseAPI {
    * Forwards the request to the specified sandbox\'s container
    * @summary Proxy requests to the sandbox toolbox
    * @param {string} sandboxId Sandbox ID
-   * @param {string} projectId Project ID
    * @param {string} path Path to forward
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}
    * @memberof ToolboxApi
    */
-  public sandboxesSandboxIdProjectIdToolboxPathGet(
-    sandboxId: string,
-    projectId: string,
-    path: string,
-    options?: RawAxiosRequestConfig,
-  ) {
+  public sandboxesSandboxIdToolboxPathGet(sandboxId: string, path: string, options?: RawAxiosRequestConfig) {
     return ToolboxApiFp(this.configuration)
-      .sandboxesSandboxIdProjectIdToolboxPathGet(sandboxId, projectId, path, options)
+      .sandboxesSandboxIdToolboxPathGet(sandboxId, path, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }
