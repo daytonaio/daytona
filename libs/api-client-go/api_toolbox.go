@@ -464,21 +464,6 @@ type ToolboxAPI interface {
 	LspDocumentSymbolsExecute(r ToolboxAPILspDocumentSymbolsRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
-		LspSandboxSymbols Call Lsp SandboxSymbols
-
-		The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-
-		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-		@param sandboxId
-		@return ToolboxAPILspSandboxSymbolsRequest
-	*/
-	LspSandboxSymbols(ctx context.Context, sandboxId string) ToolboxAPILspSandboxSymbolsRequest
-
-	// LspSandboxSymbolsExecute executes the request
-	//  @return []LspSymbol
-	LspSandboxSymbolsExecute(r ToolboxAPILspSandboxSymbolsRequest) ([]LspSymbol, *http.Response, error)
-
-	/*
 		LspStart Start Lsp server
 
 		Start Lsp server process inside sandbox project
@@ -505,6 +490,21 @@ type ToolboxAPI interface {
 
 	// LspStopExecute executes the request
 	LspStopExecute(r ToolboxAPILspStopRequest) (*http.Response, error)
+
+	/*
+		LspWorkspaceSymbols Call Lsp WorkspaceSymbols
+
+		The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param sandboxId
+		@return ToolboxAPILspWorkspaceSymbolsRequest
+	*/
+	LspWorkspaceSymbols(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsRequest
+
+	// LspWorkspaceSymbolsExecute executes the request
+	//  @return []LspSymbol
+	LspWorkspaceSymbolsExecute(r ToolboxAPILspWorkspaceSymbolsRequest) ([]LspSymbol, *http.Response, error)
 
 	/*
 		MoveFile Move file
@@ -4189,150 +4189,6 @@ func (a *ToolboxAPIService) LspDocumentSymbolsExecute(r ToolboxAPILspDocumentSym
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
-type ToolboxAPILspSandboxSymbolsRequest struct {
-	ctx                    context.Context
-	ApiService             ToolboxAPI
-	sandboxId              string
-	languageId             *string
-	pathToProject          *string
-	query                  *string
-	xDaytonaOrganizationID *string
-}
-
-func (r ToolboxAPILspSandboxSymbolsRequest) LanguageId(languageId string) ToolboxAPILspSandboxSymbolsRequest {
-	r.languageId = &languageId
-	return r
-}
-
-func (r ToolboxAPILspSandboxSymbolsRequest) PathToProject(pathToProject string) ToolboxAPILspSandboxSymbolsRequest {
-	r.pathToProject = &pathToProject
-	return r
-}
-
-func (r ToolboxAPILspSandboxSymbolsRequest) Query(query string) ToolboxAPILspSandboxSymbolsRequest {
-	r.query = &query
-	return r
-}
-
-// Use with JWT to specify the organization ID
-func (r ToolboxAPILspSandboxSymbolsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPILspSandboxSymbolsRequest {
-	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
-	return r
-}
-
-func (r ToolboxAPILspSandboxSymbolsRequest) Execute() ([]LspSymbol, *http.Response, error) {
-	return r.ApiService.LspSandboxSymbolsExecute(r)
-}
-
-/*
-LspSandboxSymbols Call Lsp SandboxSymbols
-
-The sandbox symbol request is sent from the client to the server to list project-wide symbols matching the query string.
-
-	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
-	@param sandboxId
-	@return ToolboxAPILspSandboxSymbolsRequest
-*/
-func (a *ToolboxAPIService) LspSandboxSymbols(ctx context.Context, sandboxId string) ToolboxAPILspSandboxSymbolsRequest {
-	return ToolboxAPILspSandboxSymbolsRequest{
-		ApiService: a,
-		ctx:        ctx,
-		sandboxId:  sandboxId,
-	}
-}
-
-// Execute executes the request
-//
-//	@return []LspSymbol
-func (a *ToolboxAPIService) LspSandboxSymbolsExecute(r ToolboxAPILspSandboxSymbolsRequest) ([]LspSymbol, *http.Response, error) {
-	var (
-		localVarHTTPMethod  = http.MethodGet
-		localVarPostBody    interface{}
-		formFiles           []formFile
-		localVarReturnValue []LspSymbol
-	)
-
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspSandboxSymbols")
-	if err != nil {
-		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
-	}
-
-	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols"
-	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
-
-	localVarHeaderParams := make(map[string]string)
-	localVarQueryParams := url.Values{}
-	localVarFormParams := url.Values{}
-	if r.languageId == nil {
-		return localVarReturnValue, nil, reportError("languageId is required and must be specified")
-	}
-	if r.pathToProject == nil {
-		return localVarReturnValue, nil, reportError("pathToProject is required and must be specified")
-	}
-	if r.query == nil {
-		return localVarReturnValue, nil, reportError("query is required and must be specified")
-	}
-
-	parameterAddToHeaderOrQuery(localVarQueryParams, "languageId", r.languageId, "form", "")
-	parameterAddToHeaderOrQuery(localVarQueryParams, "pathToProject", r.pathToProject, "form", "")
-	parameterAddToHeaderOrQuery(localVarQueryParams, "query", r.query, "form", "")
-	// to determine the Content-Type header
-	localVarHTTPContentTypes := []string{}
-
-	// set Content-Type header
-	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
-	if localVarHTTPContentType != "" {
-		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
-	}
-
-	// to determine the Accept header
-	localVarHTTPHeaderAccepts := []string{"application/json"}
-
-	// set Accept header
-	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
-	if localVarHTTPHeaderAccept != "" {
-		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
-	}
-	if r.xDaytonaOrganizationID != nil {
-		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
-	}
-	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
-	if err != nil {
-		return localVarReturnValue, nil, err
-	}
-
-	localVarHTTPResponse, err := a.client.callAPI(req)
-	if err != nil || localVarHTTPResponse == nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
-	localVarHTTPResponse.Body.Close()
-	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
-	if err != nil {
-		return localVarReturnValue, localVarHTTPResponse, err
-	}
-
-	if localVarHTTPResponse.StatusCode >= 300 {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: localVarHTTPResponse.Status,
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
-	if err != nil {
-		newErr := &GenericOpenAPIError{
-			body:  localVarBody,
-			error: err.Error(),
-		}
-		return localVarReturnValue, localVarHTTPResponse, newErr
-	}
-
-	return localVarReturnValue, localVarHTTPResponse, nil
-}
-
 type ToolboxAPILspStartRequest struct {
 	ctx                    context.Context
 	ApiService             ToolboxAPI
@@ -4557,6 +4413,150 @@ func (a *ToolboxAPIService) LspStopExecute(r ToolboxAPILspStopRequest) (*http.Re
 	}
 
 	return localVarHTTPResponse, nil
+}
+
+type ToolboxAPILspWorkspaceSymbolsRequest struct {
+	ctx                    context.Context
+	ApiService             ToolboxAPI
+	sandboxId              string
+	languageId             *string
+	pathToProject          *string
+	query                  *string
+	xDaytonaOrganizationID *string
+}
+
+func (r ToolboxAPILspWorkspaceSymbolsRequest) LanguageId(languageId string) ToolboxAPILspWorkspaceSymbolsRequest {
+	r.languageId = &languageId
+	return r
+}
+
+func (r ToolboxAPILspWorkspaceSymbolsRequest) PathToProject(pathToProject string) ToolboxAPILspWorkspaceSymbolsRequest {
+	r.pathToProject = &pathToProject
+	return r
+}
+
+func (r ToolboxAPILspWorkspaceSymbolsRequest) Query(query string) ToolboxAPILspWorkspaceSymbolsRequest {
+	r.query = &query
+	return r
+}
+
+// Use with JWT to specify the organization ID
+func (r ToolboxAPILspWorkspaceSymbolsRequest) XDaytonaOrganizationID(xDaytonaOrganizationID string) ToolboxAPILspWorkspaceSymbolsRequest {
+	r.xDaytonaOrganizationID = &xDaytonaOrganizationID
+	return r
+}
+
+func (r ToolboxAPILspWorkspaceSymbolsRequest) Execute() ([]LspSymbol, *http.Response, error) {
+	return r.ApiService.LspWorkspaceSymbolsExecute(r)
+}
+
+/*
+LspWorkspaceSymbols Call Lsp WorkspaceSymbols
+
+The workspace symbol request is sent from the client to the server to list project-wide symbols matching the query string.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param sandboxId
+	@return ToolboxAPILspWorkspaceSymbolsRequest
+*/
+func (a *ToolboxAPIService) LspWorkspaceSymbols(ctx context.Context, sandboxId string) ToolboxAPILspWorkspaceSymbolsRequest {
+	return ToolboxAPILspWorkspaceSymbolsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		sandboxId:  sandboxId,
+	}
+}
+
+// Execute executes the request
+//
+//	@return []LspSymbol
+func (a *ToolboxAPIService) LspWorkspaceSymbolsExecute(r ToolboxAPILspWorkspaceSymbolsRequest) ([]LspSymbol, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue []LspSymbol
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ToolboxAPIService.LspWorkspaceSymbols")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/toolbox/{sandboxId}/toolbox/lsp/workspace-symbols"
+	localVarPath = strings.Replace(localVarPath, "{"+"sandboxId"+"}", url.PathEscape(parameterValueToString(r.sandboxId, "sandboxId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.languageId == nil {
+		return localVarReturnValue, nil, reportError("languageId is required and must be specified")
+	}
+	if r.pathToProject == nil {
+		return localVarReturnValue, nil, reportError("pathToProject is required and must be specified")
+	}
+	if r.query == nil {
+		return localVarReturnValue, nil, reportError("query is required and must be specified")
+	}
+
+	parameterAddToHeaderOrQuery(localVarQueryParams, "languageId", r.languageId, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "pathToProject", r.pathToProject, "form", "")
+	parameterAddToHeaderOrQuery(localVarQueryParams, "query", r.query, "form", "")
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	if r.xDaytonaOrganizationID != nil {
+		parameterAddToHeaderOrQuery(localVarHeaderParams, "X-Daytona-Organization-ID", r.xDaytonaOrganizationID, "simple", "")
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ToolboxAPIMoveFileRequest struct {

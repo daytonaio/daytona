@@ -426,7 +426,7 @@ export class SandboxManager {
     })
 
     //  if the sandbox is already in progress, continue
-    if (!inProgressOnRunner.find((w) => w.id === sandbox.id)) {
+    if (!inProgressOnRunner.find((s) => s.id === sandbox.id)) {
       //  max 3 sandboxs can be archived at the same time on the same runner
       //  this is to prevent the runner from being overloaded
       if (inProgressOnRunner.length > 2) {
@@ -1104,7 +1104,7 @@ export class SandboxManager {
     const sandbox = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
     })
-    if (sandbox.state === state) {
+    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
       return
     }
     sandbox.state = state

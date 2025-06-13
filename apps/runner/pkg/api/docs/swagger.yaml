@@ -341,53 +341,6 @@ paths:
       summary: Get sandbox info
       tags:
         - sandbox
-  /sandboxes/{sandboxId}/{projectId}/toolbox/{path}:
-    get:
-      description: Forwards the request to the specified sandbox's container
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: sandboxId
-          required: true
-          type: string
-        - description: Project ID
-          in: path
-          name: projectId
-          required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
-      responses:
-        '200':
-          description: Proxied response
-          schema:
-            type: string
-        '400':
-          description: Bad request
-          schema:
-            type: string
-        '401':
-          description: Unauthorized
-          schema:
-            type: string
-        '404':
-          description: Sandbox container not found
-          schema:
-            type: string
-        '409':
-          description: Sandbox container conflict
-          schema:
-            type: string
-        '500':
-          description: Internal server error
-          schema:
-            type: string
-      summary: Proxy requests to the sandbox toolbox
-      tags:
-        - toolbox
   /sandboxes/{sandboxId}/backup:
     post:
       description: Create sandbox backup
@@ -600,6 +553,48 @@ paths:
       summary: Stop sandbox
       tags:
         - sandbox
+  /sandboxes/{sandboxId}/toolbox/{path}:
+    get:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema:
+            type: string
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
   /snapshots/build:
     post:
       description: Build a snapshot from a Dockerfile and context hashes

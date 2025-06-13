@@ -16,7 +16,7 @@ import (
 var InfoCmd = &cobra.Command{
 	Use:     "info [SANDBOX_ID]",
 	Short:   "Get sandbox info",
-	Args:    cobra.NoArgs,
+	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()

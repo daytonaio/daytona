@@ -5,7 +5,6 @@ package tools
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -79,15 +78,9 @@ func PreviewLink(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		}
 	}
 
-	// Extract domain information from sandbox metadata
-	var metadata map[string]interface{}
-	if err := json.Unmarshal([]byte(*sandbox.Info.ProviderMetadata), &metadata); err != nil {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error parsing provider metadata: %v", err)
-	}
-
-	runnerDomain, ok := metadata["runnerDomain"].(string)
-	if !ok {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("runner domain not found in metadata")
+	var runnerDomain string
+	if sandbox.RunnerDomain != nil {
+		runnerDomain = *sandbox.RunnerDomain
 	}
 
 	// Format preview URL

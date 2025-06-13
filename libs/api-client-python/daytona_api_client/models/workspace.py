@@ -34,7 +34,6 @@ class Workspace(BaseModel):
     """  # noqa: E501
 
     id: StrictStr = Field(description="The ID of the sandbox")
-    name: StrictStr = Field(description="The name of the sandbox")
     organization_id: StrictStr = Field(description="The organization ID of the sandbox", alias="organizationId")
     snapshot: Optional[StrictStr] = Field(default=None, description="The snapshot used for the sandbox")
     user: StrictStr = Field(description="The user associated with the project")
@@ -42,13 +41,10 @@ class Workspace(BaseModel):
     labels: Dict[str, StrictStr] = Field(description="Labels for the sandbox")
     public: StrictBool = Field(description="Whether the sandbox http preview is public")
     target: StrictStr = Field(description="The target environment for the sandbox")
-    info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
-    cpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The CPU quota for the sandbox")
-    gpu: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The GPU quota for the sandbox")
-    memory: Optional[Union[StrictFloat, StrictInt]] = Field(
-        default=None, description="The memory quota for the sandbox"
-    )
-    disk: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, description="The disk quota for the sandbox")
+    cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU quota for the sandbox")
+    gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU quota for the sandbox")
+    memory: Union[StrictFloat, StrictInt] = Field(description="The memory quota for the sandbox")
+    disk: Union[StrictFloat, StrictInt] = Field(description="The disk quota for the sandbox")
     state: Optional[SandboxState] = Field(default=None, description="The state of the sandbox")
     error_reason: Optional[StrictStr] = Field(
         default=None, description="The error reason of the sandbox", alias="errorReason"
@@ -63,10 +59,21 @@ class Workspace(BaseModel):
     auto_archive_interval: Optional[Union[StrictFloat, StrictInt]] = Field(
         default=None, description="Auto-archive interval in minutes", alias="autoArchiveInterval"
     )
+    runner_domain: Optional[StrictStr] = Field(
+        default=None, description="The domain name of the runner", alias="runnerDomain"
+    )
     volumes: Optional[List[SandboxVolume]] = Field(default=None, description="Array of volumes attached to the sandbox")
     build_info: Optional[BuildInfo] = Field(
         default=None, description="Build information for the sandbox", alias="buildInfo"
     )
+    created_at: Optional[StrictStr] = Field(
+        default=None, description="The creation timestamp of the sandbox", alias="createdAt"
+    )
+    updated_at: Optional[StrictStr] = Field(
+        default=None, description="The last update timestamp of the sandbox", alias="updatedAt"
+    )
+    var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
+    name: StrictStr = Field(description="The name of the workspace")
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     snapshot_state: Optional[StrictStr] = Field(
         default=None, description="The state of the snapshot", alias="snapshotState"
@@ -74,10 +81,10 @@ class Workspace(BaseModel):
     snapshot_created_at: Optional[StrictStr] = Field(
         default=None, description="The creation timestamp of the last snapshot", alias="snapshotCreatedAt"
     )
+    info: Optional[SandboxInfo] = Field(default=None, description="Additional information about the sandbox")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
         "id",
-        "name",
         "organizationId",
         "snapshot",
         "user",
@@ -85,7 +92,6 @@ class Workspace(BaseModel):
         "labels",
         "public",
         "target",
-        "info",
         "cpu",
         "gpu",
         "memory",
@@ -96,11 +102,17 @@ class Workspace(BaseModel):
         "backupCreatedAt",
         "autoStopInterval",
         "autoArchiveInterval",
+        "runnerDomain",
         "volumes",
         "buildInfo",
+        "createdAt",
+        "updatedAt",
+        "class",
+        "name",
         "image",
         "snapshotState",
         "snapshotCreatedAt",
+        "info",
     ]
 
     @field_validator("backup_state")
@@ -111,6 +123,16 @@ class Workspace(BaseModel):
 
         if value not in set(["None", "Pending", "InProgress", "Completed", "Error"]):
             raise ValueError("must be one of enum values ('None', 'Pending', 'InProgress', 'Completed', 'Error')")
+        return value
+
+    @field_validator("var_class")
+    def var_class_validate_enum(cls, value):
+        """Validates the enum"""
+        if value is None:
+            return value
+
+        if value not in set(["small", "medium", "large"]):
+            raise ValueError("must be one of enum values ('small', 'medium', 'large')")
         return value
 
     @field_validator("snapshot_state")
@@ -165,9 +187,6 @@ class Workspace(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of info
-        if self.info:
-            _dict["info"] = self.info.to_dict()
         # override the default output from pydantic by calling `to_dict()` of each item in volumes (list)
         _items = []
         if self.volumes:
@@ -178,6 +197,9 @@ class Workspace(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of build_info
         if self.build_info:
             _dict["buildInfo"] = self.build_info.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of info
+        if self.info:
+            _dict["info"] = self.info.to_dict()
         # puts key-value pairs in additional_properties in the top level
         if self.additional_properties is not None:
             for _key, _value in self.additional_properties.items():
@@ -197,7 +219,6 @@ class Workspace(BaseModel):
         _obj = cls.model_validate(
             {
                 "id": obj.get("id"),
-                "name": obj.get("name") if obj.get("name") is not None else "",
                 "organizationId": obj.get("organizationId"),
                 "snapshot": obj.get("snapshot"),
                 "user": obj.get("user"),
@@ -205,7 +226,6 @@ class Workspace(BaseModel):
                 "labels": obj.get("labels"),
                 "public": obj.get("public"),
                 "target": obj.get("target"),
-                "info": SandboxInfo.from_dict(obj["info"]) if obj.get("info") is not None else None,
                 "cpu": obj.get("cpu"),
                 "gpu": obj.get("gpu"),
                 "memory": obj.get("memory"),
@@ -216,13 +236,19 @@ class Workspace(BaseModel):
                 "backupCreatedAt": obj.get("backupCreatedAt"),
                 "autoStopInterval": obj.get("autoStopInterval"),
                 "autoArchiveInterval": obj.get("autoArchiveInterval"),
+                "runnerDomain": obj.get("runnerDomain"),
                 "volumes": [SandboxVolume.from_dict(_item) for _item in obj["volumes"]]
                 if obj.get("volumes") is not None
                 else None,
                 "buildInfo": BuildInfo.from_dict(obj["buildInfo"]) if obj.get("buildInfo") is not None else None,
+                "createdAt": obj.get("createdAt"),
+                "updatedAt": obj.get("updatedAt"),
+                "class": obj.get("class"),
+                "name": obj.get("name") if obj.get("name") is not None else "",
                 "image": obj.get("image"),
                 "snapshotState": obj.get("snapshotState"),
                 "snapshotCreatedAt": obj.get("snapshotCreatedAt"),
+                "info": SandboxInfo.from_dict(obj["info"]) if obj.get("info") is not None else None,
             }
         )
         # store additional fields in additional_properties

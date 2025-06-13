@@ -5,7 +5,6 @@ package sandbox
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -163,21 +162,22 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 		}
 
-		runnerDomain, err := getRunnerDomainForSandbox(ctx, apiClient, sandbox)
-		if err != nil {
+		runnerDomain := sandbox.RunnerDomain
+		if runnerDomain == nil {
 			// Reload the sandbox info if the runner hadn't been assigned yet
 			var getSandboxErr error
 			sandbox, res, getSandboxErr = apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
 			if getSandboxErr != nil {
 				return apiclient.HandleErrorResponse(res, getSandboxErr)
 			}
-			runnerDomain, err = getRunnerDomainForSandbox(ctx, apiClient, sandbox)
-			if err != nil {
-				return err
-			}
+			runnerDomain = sandbox.RunnerDomain
 		}
 
-		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, sandbox.Id, runnerDomain)
+		if runnerDomain == nil {
+			return fmt.Errorf("failed to get runner domain")
+		}
+
+		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, sandbox.Id, *runnerDomain)
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(sandboxUrl)))
 		return nil
@@ -223,17 +223,4 @@ func init() {
 
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "context")
-}
-
-func getRunnerDomainForSandbox(ctx context.Context, apiClient *daytonaapiclient.APIClient, sandbox *daytonaapiclient.Sandbox) (string, error) {
-	if sandbox.Info != nil && sandbox.Info.ProviderMetadata != nil {
-		metadata := make(map[string]interface{})
-		if err := json.Unmarshal([]byte(*sandbox.Info.ProviderMetadata), &metadata); err == nil {
-			if domain, ok := metadata["runnerDomain"].(string); ok {
-				return domain, nil
-			}
-		}
-	}
-
-	return "", fmt.Errorf("runner domain not found in metadata")
 }

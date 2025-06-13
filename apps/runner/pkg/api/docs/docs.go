@@ -534,7 +534,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/sandboxes/{sandboxId}/{projectId}/toolbox/{path}": {
+        "/sandboxes/{sandboxId}/toolbox/{path}": {
             "get": {
                 "description": "Forwards the request to the specified sandbox's container",
                 "tags": [
@@ -546,13 +546,6 @@ const docTemplate = `{
                         "type": "string",
                         "description": "Sandbox ID",
                         "name": "sandboxId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
                         "in": "path",
                         "required": true
                     },

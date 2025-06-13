@@ -268,32 +268,11 @@ const getStateIcon = (state?: SandboxState) => {
 }
 
 const getLastEvent = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
-  const parsed = getProviderMetadata(sandbox.info?.providerMetadata)
-  return getRelativeTimeString(parsed?.updatedAt)
+  return getRelativeTimeString(sandbox.updatedAt)
 }
 
 const getCreatedAt = (sandbox: Sandbox): { date: Date; relativeTimeString: string } => {
-  return getRelativeTimeString(sandbox.info?.created)
-}
-
-const getProviderMetadata = (metadata: string | undefined) => {
-  if (!metadata) return null
-  try {
-    return JSON.parse(metadata)
-  } catch (e) {
-    console.error('Error parsing provider metadata:', e)
-    return null
-  }
-}
-
-const getProviderClass = (sandbox: Sandbox): string => {
-  const parsed = getProviderMetadata(sandbox.info?.providerMetadata)
-  return parsed?.class || 'unknown'
-}
-
-const getRunnerDomain = (metadata: string | undefined): string | null => {
-  const parsed = getProviderMetadata(metadata)
-  return parsed?.runnerDomain || null
+  return getRelativeTimeString(sandbox.createdAt)
 }
 
 const getStateColor = (state?: SandboxState) => {
@@ -522,31 +501,6 @@ const getColumns = ({
       },
       accessorKey: 'target',
     },
-    // {
-    //   id: 'class',
-    //   header: ({ column }) => {
-    //     return (
-    //       <Button
-    //         variant="ghost"
-    //         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-    //         className="px-2 hover:bg-muted/50"
-    //       >
-    //         Class
-    //         {column.getIsSorted() === 'asc' ? (
-    //           <ArrowUp className="ml-2 h-4 w-4" />
-    //         ) : column.getIsSorted() === 'desc' ? (
-    //           <ArrowDown className="ml-2 h-4 w-4" />
-    //         ) : (
-    //           <ArrowUpDown className="ml-2 h-4 w-4" />
-    //         )}
-    //       </Button>
-    //     )
-    //   },
-    //   cell: ({ row }) => {
-    //     return <span className="px-2">{getProviderClass(row.original)}</span>
-    //   },
-    //   accessorFn: (row) => getProviderClass(row),
-    // },
     {
       id: 'labels',
       header: () => {
@@ -630,10 +584,13 @@ const getColumns = ({
       id: 'access',
       header: 'Access',
       cell: ({ row }) => {
-        const runnerDomain = getRunnerDomain(row.original.info?.providerMetadata)
-        if (!runnerDomain || row.original.state !== SandboxState.STARTED) return ''
+        if (!row.original.runnerDomain || row.original.state !== SandboxState.STARTED) return ''
         return (
-          <a href={`https://22222-${row.original.id}.${runnerDomain}`} target="_blank" rel="noopener noreferrer">
+          <a
+            href={`https://22222-${row.original.id}.${row.original.runnerDomain}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Terminal className="w-4 h-4" />
           </a>
         )

@@ -3337,11 +3337,11 @@ paths:
       summary: Stop Lsp server
       tags:
         - toolbox
-  /toolbox/{sandboxId}/toolbox/lsp/sandbox-symbols:
+  /toolbox/{sandboxId}/toolbox/lsp/workspace-symbols:
     get:
-      description: The sandbox symbol request is sent from the client to the server
+      description: The workspace symbol request is sent from the client to the server
         to list project-wide symbols matching the query string.
-      operationId: LspSandboxSymbols
+      operationId: LspWorkspaceSymbols
       parameters:
         - description: Use with JWT to specify the organization ID
           explode: false
@@ -3394,7 +3394,7 @@ paths:
             - openid
             - profile
             - email
-      summary: Call Lsp SandboxSymbols
+      summary: Call Lsp WorkspaceSymbols
       tags:
         - toolbox
   /snapshots:
@@ -5578,26 +5578,6 @@ components:
         - provider
         - userId
       type: object
-    SandboxInfo:
-      properties:
-        created:
-          description: The creation timestamp of the project
-          example: 2023-10-01T12:00:00Z
-          type: string
-        name:
-          default: ''
-          deprecated: true
-          description: 'Deprecated: The name of the sandbox'
-          example: MySandbox
-          type: string
-        providerMetadata:
-          description: Additional metadata provided by the provider
-          example: '{"key": "value"}'
-          type: string
-      required:
-        - created
-        - name
-      type: object
     SandboxState:
       description: The state of the sandbox
       enum:
@@ -5685,27 +5665,23 @@ components:
           daytona.io/public: 'true'
         target: local
         organizationId: organization123
+        createdAt: 2024-10-01T12:00:00Z
         disk: 10
         public: false
         errorReason: The sandbox is not running
-        name: MySandbox
+        runnerDomain: runner.example.com
         id: sandbox123
         state: creating
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
+        class: small
         snapshot: daytonaio/sandbox:latest
-        info: ''
+        updatedAt: 2024-10-01T12:00:00Z
       properties:
         id:
           description: The ID of the sandbox
           example: sandbox123
-          type: string
-        name:
-          default: ''
-          deprecated: true
-          description: The name of the sandbox
-          example: MySandbox
           type: string
         organizationId:
           description: The organization ID of the sandbox
@@ -5741,10 +5717,6 @@ components:
           description: The target environment for the sandbox
           example: local
           type: string
-        info:
-          allOf:
-            - $ref: '#/components/schemas/SandboxInfo'
-          description: Additional information about the sandbox
         cpu:
           description: The CPU quota for the sandbox
           example: 2
@@ -5792,6 +5764,10 @@ components:
           description: Auto-archive interval in minutes
           example: 10080
           type: number
+        runnerDomain:
+          description: The domain name of the runner
+          example: runner.example.com
+          type: string
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -5801,11 +5777,31 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the sandbox
+        createdAt:
+          description: The creation timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        class:
+          deprecated: true
+          description: The class of the sandbox
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
       required:
+        - cpu
+        - disk
         - env
+        - gpu
         - id
         - labels
-        - name
+        - memory
         - organizationId
         - public
         - target
@@ -6948,17 +6944,41 @@ components:
       required:
         - general
       type: object
+    SandboxInfo:
+      properties:
+        created:
+          description: The creation timestamp of the project
+          example: 2023-10-01T12:00:00Z
+          type: string
+        name:
+          default: ''
+          deprecated: true
+          description: 'Deprecated: The name of the sandbox'
+          example: MySandbox
+          type: string
+        providerMetadata:
+          description: Additional metadata provided by the provider
+          example: '{"key": "value"}'
+          type: string
+      required:
+        - created
+        - name
+      type: object
     Workspace:
       example:
         memory: 4
         buildInfo: ''
         autoStopInterval: 30
         organizationId: organization123
+        createdAt: 2024-10-01T12:00:00Z
         snapshotState: None
         public: false
         errorReason: The sandbox is not running
+        runnerDomain: runner.example.com
         id: sandbox123
         state: creating
+        class: small
+        updatedAt: 2024-10-01T12:00:00Z
         info: ''
         image: daytonaio/workspace:latest
         volumes:
@@ -6976,7 +6996,7 @@ components:
           daytona.io/public: 'true'
         target: local
         disk: 10
-        name: MySandbox
+        name: MyWorkspace
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
@@ -6985,12 +7005,6 @@ components:
         id:
           description: The ID of the sandbox
           example: sandbox123
-          type: string
-        name:
-          default: ''
-          deprecated: true
-          description: The name of the sandbox
-          example: MySandbox
           type: string
         organizationId:
           description: The organization ID of the sandbox
@@ -7026,10 +7040,6 @@ components:
           description: The target environment for the sandbox
           example: local
           type: string
-        info:
-          allOf:
-            - $ref: '#/components/schemas/SandboxInfo'
-          description: Additional information about the sandbox
         cpu:
           description: The CPU quota for the sandbox
           example: 2
@@ -7077,6 +7087,10 @@ components:
           description: Auto-archive interval in minutes
           example: 10080
           type: number
+        runnerDomain:
+          description: The domain name of the runner
+          example: runner.example.com
+          type: string
         volumes:
           description: Array of volumes attached to the sandbox
           items:
@@ -7086,6 +7100,28 @@ components:
           allOf:
             - $ref: '#/components/schemas/BuildInfo'
           description: Build information for the sandbox
+        createdAt:
+          description: The creation timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        updatedAt:
+          description: The last update timestamp of the sandbox
+          example: 2024-10-01T12:00:00Z
+          type: string
+        class:
+          deprecated: true
+          description: The class of the sandbox
+          enum:
+            - small
+            - medium
+            - large
+          example: small
+          type: string
+        name:
+          default: ''
+          description: The name of the workspace
+          example: MyWorkspace
+          type: string
         image:
           description: The image used for the workspace
           example: daytonaio/workspace:latest
@@ -7104,10 +7140,18 @@ components:
           description: The creation timestamp of the last snapshot
           example: 2024-10-01T12:00:00Z
           type: string
+        info:
+          allOf:
+            - $ref: '#/components/schemas/SandboxInfo'
+          description: Additional information about the sandbox
       required:
+        - cpu
+        - disk
         - env
+        - gpu
         - id
         - labels
+        - memory
         - name
         - organizationId
         - public

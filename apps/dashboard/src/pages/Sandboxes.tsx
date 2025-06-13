@@ -70,7 +70,7 @@ const Sandboxes: React.FC = () => {
 
   useEffect(() => {
     const handleSandboxCreatedEvent = (sandbox: Sandbox) => {
-      if (!sandboxes.some((w) => w.id === sandbox.id)) {
+      if (!sandboxes.some((s) => s.id === sandbox.id)) {
         setSandboxes((prev) => [sandbox, ...prev])
       }
     }
@@ -81,11 +81,11 @@ const Sandboxes: React.FC = () => {
       newState: SandboxState
     }) => {
       if (data.newState === SandboxState.DESTROYED) {
-        setSandboxes((prev) => prev.filter((w) => w.id !== data.sandbox.id))
-      } else if (!sandboxes.some((w) => w.id === data.sandbox.id)) {
+        setSandboxes((prev) => prev.filter((s) => s.id !== data.sandbox.id))
+      } else if (!sandboxes.some((s) => s.id === data.sandbox.id)) {
         setSandboxes((prev) => [data.sandbox, ...prev])
       } else {
-        setSandboxes((prev) => prev.map((w) => (w.id === data.sandbox.id ? data.sandbox : w)))
+        setSandboxes((prev) => prev.map((s) => (s.id === data.sandbox.id ? data.sandbox : s)))
       }
     }
 
@@ -102,11 +102,11 @@ const Sandboxes: React.FC = () => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
     // Save the current state
-    const sandboxToStart = sandboxes.find((w) => w.id === id)
+    const sandboxToStart = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToStart?.state
 
     // Optimistically update the sandbox state
-    setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: SandboxState.STARTING } : w)))
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STARTING } : s)))
 
     try {
       await sandboxApi.startSandbox(id, selectedOrganization?.id)
@@ -124,7 +124,7 @@ const Sandboxes: React.FC = () => {
         ) : undefined,
       )
       // Revert the optimistic update
-      setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -134,11 +134,11 @@ const Sandboxes: React.FC = () => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
     // Save the current state
-    const sandboxToStop = sandboxes.find((w) => w.id === id)
+    const sandboxToStop = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToStop?.state
 
     // Optimistically update the sandbox state
-    setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: SandboxState.STOPPING } : w)))
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.STOPPING } : s)))
 
     try {
       await sandboxApi.stopSandbox(id, selectedOrganization?.id)
@@ -146,7 +146,7 @@ const Sandboxes: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to stop sandbox')
       // Revert the optimistic update
-      setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -156,11 +156,11 @@ const Sandboxes: React.FC = () => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
     // Save the current state
-    const sandboxToDelete = sandboxes.find((w) => w.id === id)
+    const sandboxToDelete = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToDelete?.state
 
     // Optimistically update the sandbox state
-    setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: SandboxState.DESTROYING } : w)))
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
 
     try {
       await sandboxApi.deleteSandbox(id, true, selectedOrganization?.id)
@@ -170,7 +170,7 @@ const Sandboxes: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to delete sandbox')
       // Revert the optimistic update
-      setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
@@ -181,11 +181,11 @@ const Sandboxes: React.FC = () => {
 
     for (const id of ids) {
       // Save the current state
-      const sandboxToDelete = sandboxes.find((w) => w.id === id)
+      const sandboxToDelete = sandboxes.find((s) => s.id === id)
       const previousState = sandboxToDelete?.state
 
       // Optimistically update the sandbox state
-      setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: SandboxState.DESTROYING } : w)))
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.DESTROYING } : s)))
 
       try {
         await sandboxApi.deleteSandbox(id, true, selectedOrganization?.id)
@@ -194,7 +194,7 @@ const Sandboxes: React.FC = () => {
         handleApiError(error, 'Failed to delete sandbox')
 
         // Revert the optimistic update
-        setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
+        setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
 
         // Wait for user decision
         const shouldContinue = window.confirm(
@@ -214,11 +214,11 @@ const Sandboxes: React.FC = () => {
     setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
 
     // Save the current state
-    const sandboxToArchive = sandboxes.find((w) => w.id === id)
+    const sandboxToArchive = sandboxes.find((s) => s.id === id)
     const previousState = sandboxToArchive?.state
 
     // Optimistically update the sandbox state
-    setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: SandboxState.ARCHIVING } : w)))
+    setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: SandboxState.ARCHIVING } : s)))
 
     try {
       await sandboxApi.archiveSandbox(id, selectedOrganization?.id)
@@ -226,7 +226,7 @@ const Sandboxes: React.FC = () => {
     } catch (error) {
       handleApiError(error, 'Failed to archive sandbox')
       // Revert the optimistic update
-      setSandboxes((prev) => prev.map((w) => (w.id === id ? { ...w, state: previousState } : w)))
+      setSandboxes((prev) => prev.map((s) => (s.id === id ? { ...s, state: previousState } : s)))
     } finally {
       setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
     }
