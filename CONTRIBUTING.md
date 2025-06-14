@@ -101,7 +101,7 @@ API and service method conventions:
 
 Here is what being a contributor means for you:
 
-- License all our contributions to the project under the Apache License, Version 2.0
+- License all our contributions to the project under the AGPL 3.0 License or the Apache 2.0 License
 - Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
 
 For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://go.daytona.io/slack).

@@ -97,8 +97,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Check License Header
+      - name: Check AGPL License Headers
         uses: apache/skywalking-eyes/header@main
         with:
           token: ${{ github.token }}
+          config: .licenserc.yaml
+          mode: 'check'
+
+      - name: Check Apache License Headers
+        uses: apache/skywalking-eyes/header@main
+        with:
+          token: ${{ github.token }}
+          config: .licenserc-clients.yaml
           mode: 'check'
