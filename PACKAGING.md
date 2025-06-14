@@ -12,7 +12,7 @@ While we encourage packaging and distribution of our open-source project, we hav
 
 ## General Guidelines
 
-1. **License Compliance**: Ensure that the Apache 2.0 license is included with the package and that all copyright notices are preserved.
+1. **License Compliance**: Ensure that the AGPL 3.0/Apache 2.0 license is included with the package and that all copyright notices are preserved.
 
 2. **Version Accuracy**: Use the exact version number of Daytona that you are packaging. Do not modify the version number or add custom suffixes without explicit permission.
 
@@ -23,8 +23,8 @@ While we encourage packaging and distribution of our open-source project, we hav
 5. **Standard Note**: Please include the following standard note in your package description or metadata:
 
    ```
-   This package contains an unofficial distribution of Daytona, an open source project 
-   developed by Daytona Platforms Inc. This package is not officially supported or endorsed 
+   This package contains an unofficial distribution of Daytona, an open source project
+   developed by Daytona Platforms Inc. This package is not officially supported or endorsed
    by the Daytona project. For the official version, please visit https://github.com/daytonaio/daytona.
    ```
 

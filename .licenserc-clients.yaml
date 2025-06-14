@@ -1,0 +1,16 @@
+header:
+  license:
+    spdx-id: Apache-2.0
+    copyright-owner: Daytona Platforms Inc.
+    content: |
+      Copyright 2025 Daytona Platforms Inc.
+      SPDX-License-Identifier: Apache-2.0
+  paths:
+    - 'libs/**/*.go'
+    - 'libs/**/*.sh'
+    - 'libs/**/*.js'
+    - 'libs/**/*.ts'
+    - 'libs/**/*.tsx'
+    - 'libs/**/*.py'
+
+  comment: on-failure

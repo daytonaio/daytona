@@ -9,7 +9,7 @@
     "url": "git+https://github.com/daytonaio/daytona.git"
   },
   "author": "Daytona Platforms Inc.",
-  "license": "AGPL-3.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/daytonaio/sdk/issues"
   },

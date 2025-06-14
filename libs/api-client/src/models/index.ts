@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export * from './account-provider'
 export * from './api-key-list'
 export * from './api-key-response'

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export * from './build-snapshot-request-dto'
 export * from './create-backup-dto'
 export * from './create-sandbox-dto'
