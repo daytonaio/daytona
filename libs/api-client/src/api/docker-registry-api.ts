@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -185,7 +190,7 @@ export const DockerRegistryApiAxiosParamCreator = function (configuration?: Conf
     },
     /**
      *
-     * @summary Get temporary registry access for pushing images
+     * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -453,7 +458,7 @@ export const DockerRegistryApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get temporary registry access for pushing images
+     * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -613,7 +618,7 @@ export const DockerRegistryApiFactory = function (
     },
     /**
      *
-     * @summary Get temporary registry access for pushing images
+     * @summary Get temporary registry access for pushing snapshots
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -736,7 +741,7 @@ export class DockerRegistryApi extends BaseAPI {
 
   /**
    *
-   * @summary Get temporary registry access for pushing images
+   * @summary Get temporary registry access for pushing snapshots
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
    * @throws {RequiredError}

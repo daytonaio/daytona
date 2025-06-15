@@ -14,10 +14,10 @@ func NotifyEmptySandboxList(tip bool) {
 	}
 }
 
-func NotifyEmptyImageList(tip bool) {
-	common.RenderInfoMessageBold("No images found")
+func NotifyEmptySnapshotList(tip bool) {
+	common.RenderInfoMessageBold("No snapshots found")
 	if tip {
-		common.RenderTip("Use 'daytona image push' to push an image.")
+		common.RenderTip("Use 'daytona snapshot push' to push a snapshot.")
 	}
 }
 

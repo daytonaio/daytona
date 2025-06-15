@@ -1,4 +1,7 @@
 # coding: utf-8
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 
 """
     Daytona
@@ -27,7 +30,7 @@ class ToggleState(BaseModel):
     """
     ToggleState
     """ # noqa: E501
-    enabled: StrictBool = Field(description="Enable or disable the image/tag")
+    enabled: StrictBool = Field(description="Enable or disable the snapshot/tag")
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = ["enabled"]
 

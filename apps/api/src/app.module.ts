@@ -9,7 +9,7 @@ import { AppService } from './app.service'
 import { UserModule } from './user/user.module'
 import { TeamModule } from './team/team.module'
 import { TypeOrmModule } from '@nestjs/typeorm'
-import { WorkspaceModule } from './workspace/workspace.module'
+import { SandboxModule } from './sandbox/sandbox.module'
 import { AuthModule } from './auth/auth.module'
 import { ServeStaticModule } from '@nestjs/serve-static'
 import { join } from 'path'
@@ -86,7 +86,7 @@ import { MaintenanceMiddleware } from './common/middleware/maintenance.middlewar
     AuthModule,
     UserModule,
     TeamModule,
-    WorkspaceModule,
+    SandboxModule,
     DockerRegistryModule,
     ScheduleModule.forRoot(),
     UsageModule,

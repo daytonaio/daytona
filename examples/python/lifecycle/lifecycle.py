@@ -1,6 +1,4 @@
-from pprint import pprint
-
-from daytona_sdk import Daytona
+from daytona import Daytona
 
 
 def main():
@@ -25,7 +23,7 @@ def main():
     print("Sandbox started")
 
     print("Getting existing sandbox")
-    existing_sandbox = daytona.get_current_sandbox(sandbox.id)
+    existing_sandbox = daytona.get(sandbox.id)
     print("Get existing sandbox")
 
     response = existing_sandbox.process.exec('echo "Hello World from exec!"', cwd="/home/daytona", timeout=10)
@@ -36,8 +34,8 @@ def main():
 
     sandboxes = daytona.list()
     print("Total sandboxes count:", len(sandboxes))
-    # This will show all attributes of the first sandbox
-    pprint(vars(sandboxes[0].info()))
+
+    print(f"Printing sandboxes[0] -> id: {sandboxes[0].id} state: {sandboxes[0].state}")
 
     print("Removing sandbox")
     daytona.delete(sandbox)

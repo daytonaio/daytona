@@ -1,6 +1,6 @@
 #!/bin/bash
 # Copyright 2025 Daytona Platforms Inc.
-# SPDX-License-Identifier: AGPL-3.0
+# SPDX-License-Identifier: Apache-2.0
 
 if [[ $# -ne 1 ]]; then
   echo "Usage: $0 <file>"

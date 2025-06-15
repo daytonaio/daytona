@@ -5,7 +5,6 @@ package sandbox
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -34,14 +33,14 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
-		createWorkspace := daytonaapiclient.NewCreateWorkspace()
+		createSandbox := daytonaapiclient.NewCreateSandbox()
 
 		// Add non-zero values to the request
-		if imageFlag != "" {
-			createWorkspace.SetImage(imageFlag)
+		if snapshotFlag != "" {
+			createSandbox.SetSnapshot(snapshotFlag)
 		}
 		if userFlag != "" {
-			createWorkspace.SetUser(userFlag)
+			createSandbox.SetUser(userFlag)
 		}
 		if len(envFlag) > 0 {
 			env := make(map[string]string)
@@ -51,7 +50,7 @@ var CreateCmd = &cobra.Command{
 					env[parts[0]] = parts[1]
 				}
 			}
-			createWorkspace.SetEnv(env)
+			createSandbox.SetEnv(env)
 		}
 		if len(labelsFlag) > 0 {
 			labels := make(map[string]string)
@@ -61,34 +60,34 @@ var CreateCmd = &cobra.Command{
 					labels[parts[0]] = parts[1]
 				}
 			}
-			createWorkspace.SetLabels(labels)
+			createSandbox.SetLabels(labels)
 		}
 		if publicFlag {
-			createWorkspace.SetPublic(true)
+			createSandbox.SetPublic(true)
 		}
 		if classFlag != "" {
-			createWorkspace.SetClass(classFlag)
+			createSandbox.SetClass(classFlag)
 		}
 		if targetFlag != "" {
-			createWorkspace.SetTarget(targetFlag)
+			createSandbox.SetTarget(targetFlag)
 		}
 		if cpuFlag > 0 {
-			createWorkspace.SetCpu(cpuFlag)
+			createSandbox.SetCpu(cpuFlag)
 		}
 		if gpuFlag > 0 {
-			createWorkspace.SetGpu(gpuFlag)
+			createSandbox.SetGpu(gpuFlag)
 		}
 		if memoryFlag > 0 {
-			createWorkspace.SetMemory(memoryFlag)
+			createSandbox.SetMemory(memoryFlag)
 		}
 		if diskFlag > 0 {
-			createWorkspace.SetDisk(diskFlag)
+			createSandbox.SetDisk(diskFlag)
 		}
 		if autoStopFlag > 0 {
-			createWorkspace.SetAutoStopInterval(autoStopFlag)
+			createSandbox.SetAutoStopInterval(autoStopFlag)
 		}
 		if autoArchiveFlag >= 0 {
-			createWorkspace.SetAutoArchiveInterval(autoArchiveFlag)
+			createSandbox.SetAutoArchiveInterval(autoArchiveFlag)
 		}
 
 		if dockerfileFlag != "" {
@@ -96,17 +95,17 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			createWorkspace.SetBuildInfo(*createBuildInfoDto)
+			createSandbox.SetBuildInfo(*createBuildInfoDto)
 		}
 
 		if len(volumesFlag) > 0 {
-			volumes := make([]daytonaapiclient.WorkspaceVolume, 0, len(volumesFlag))
+			volumes := make([]daytonaapiclient.SandboxVolume, 0, len(volumesFlag))
 			for _, v := range volumesFlag {
 				parts := strings.SplitN(v, ":", 2)
 				if len(parts) == 2 {
 					volumeId := parts[0]
 					mountPath := parts[1]
-					volume := daytonaapiclient.WorkspaceVolume{
+					volume := daytonaapiclient.SandboxVolume{
 						VolumeId:  volumeId,
 						MountPath: mountPath,
 					}
@@ -114,18 +113,18 @@ var CreateCmd = &cobra.Command{
 				}
 			}
 			if len(volumes) > 0 {
-				createWorkspace.SetVolumes(volumes)
+				createSandbox.SetVolumes(volumes)
 			}
 		}
 
-		var workspace *daytonaapiclient.Workspace
+		var sandbox *daytonaapiclient.Sandbox
 
-		workspace, res, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).CreateWorkspace(*createWorkspace).Execute()
+		sandbox, res, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandbox).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
 
-		if workspace.State != nil && *workspace.State == daytonaapiclient.WORKSPACESTATE_PENDING_BUILD {
+		if sandbox.State != nil && *sandbox.State == daytonaapiclient.SANDBOXSTATE_PENDING_BUILD {
 			c, err := config.GetConfig()
 			if err != nil {
 				return err
@@ -136,7 +135,7 @@ var CreateCmd = &cobra.Command{
 				return err
 			}
 
-			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_BUILDING_IMAGE)
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, daytonaapiclient.SANDBOXSTATE_BUILDING_SNAPSHOT)
 			if err != nil {
 				return err
 			}
@@ -145,15 +144,15 @@ var CreateCmd = &cobra.Command{
 			defer stopLogs()
 
 			go common.ReadBuildLogs(logsContext, common.ReadLogParams{
-				Id:                   workspace.Id,
+				Id:                   sandbox.Id,
 				ServerUrl:            activeProfile.Api.Url,
 				ServerApi:            activeProfile.Api,
 				ActiveOrganizationId: activeProfile.ActiveOrganizationId,
 				Follow:               util.Pointer(true),
-				ResourceType:         common.ResourceTypeWorkspace,
+				ResourceType:         common.ResourceTypeSandbox,
 			})
 
-			err = common.AwaitSandboxState(ctx, apiClient, workspace.Id, daytonaapiclient.WORKSPACESTATE_STARTED)
+			err = common.AwaitSandboxState(ctx, apiClient, sandbox.Id, daytonaapiclient.SANDBOXSTATE_STARTED)
 			if err != nil {
 				return err
 			}
@@ -163,17 +162,22 @@ var CreateCmd = &cobra.Command{
 			stopLogs()
 		}
 
-		var nodeDomain string
-		if workspace.Info != nil && workspace.Info.ProviderMetadata != nil {
-			metadata := make(map[string]interface{})
-			if err := json.Unmarshal([]byte(*workspace.Info.ProviderMetadata), &metadata); err == nil {
-				if domain, ok := metadata["nodeDomain"].(string); ok {
-					nodeDomain = domain
-				}
+		runnerDomain := sandbox.RunnerDomain
+		if runnerDomain == nil {
+			// Reload the sandbox info if the runner hadn't been assigned yet
+			var getSandboxErr error
+			sandbox, res, getSandboxErr = apiClient.SandboxAPI.GetSandbox(ctx, sandbox.Id).Execute()
+			if getSandboxErr != nil {
+				return apiclient.HandleErrorResponse(res, getSandboxErr)
 			}
+			runnerDomain = sandbox.RunnerDomain
 		}
 
-		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, workspace.Id, nodeDomain)
+		if runnerDomain == nil {
+			return fmt.Errorf("failed to get runner domain")
+		}
+
+		sandboxUrl := fmt.Sprintf("https://%d-%s.%s", SANDBOX_TERMINAL_PORT, sandbox.Id, *runnerDomain)
 
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Sandbox is accessible at %s", views_common.LinkStyle.Render(sandboxUrl)))
 		return nil
@@ -181,7 +185,7 @@ var CreateCmd = &cobra.Command{
 }
 
 var (
-	imageFlag       string
+	snapshotFlag    string
 	userFlag        string
 	envFlag         []string
 	labelsFlag      []string
@@ -200,12 +204,12 @@ var (
 )
 
 func init() {
-	CreateCmd.Flags().StringVar(&imageFlag, "image", "", "Image to use for the sandbox")
+	CreateCmd.Flags().StringVar(&snapshotFlag, "snapshot", "", "Snapshot to use for the sandbox")
 	CreateCmd.Flags().StringVar(&userFlag, "user", "", "User associated with the sandbox")
 	CreateCmd.Flags().StringArrayVarP(&envFlag, "env", "e", []string{}, "Environment variables (format: KEY=VALUE)")
 	CreateCmd.Flags().StringArrayVarP(&labelsFlag, "label", "l", []string{}, "Labels (format: KEY=VALUE)")
 	CreateCmd.Flags().BoolVar(&publicFlag, "public", false, "Make sandbox publicly accessible")
-	CreateCmd.Flags().StringVar(&classFlag, "class", "", "Workspace class type (small, medium, large)")
+	CreateCmd.Flags().StringVar(&classFlag, "class", "", "Sandbox class type (small, medium, large)")
 	CreateCmd.Flags().StringVar(&targetFlag, "target", "", "Target region (eu, us)")
 	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores allocated to the sandbox")
 	CreateCmd.Flags().Int32Var(&gpuFlag, "gpu", 0, "GPU units allocated to the sandbox")
@@ -214,6 +218,9 @@ func init() {
 	CreateCmd.Flags().Int32Var(&autoStopFlag, "auto-stop", 0, "Auto-stop interval in minutes (0 means disabled)")
 	CreateCmd.Flags().Int32Var(&autoArchiveFlag, "auto-archive", 10080, "Auto-archive interval in minutes (0 means the maximum interval will be used)")
 	CreateCmd.Flags().StringArrayVarP(&volumesFlag, "volume", "v", []string{}, "Volumes to mount (format: VOLUME_NAME:MOUNT_PATH)")
-	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox image")
+	CreateCmd.Flags().StringVarP(&dockerfileFlag, "dockerfile", "f", "", "Path to Dockerfile for Sandbox snapshot")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
+
+	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "dockerfile")
+	CreateCmd.MarkFlagsMutuallyExclusive("snapshot", "context")
 }

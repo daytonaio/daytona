@@ -1,4 +1,7 @@
 # coding: utf-8
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 
 # flake8: noqa
 """
@@ -18,7 +21,7 @@
 from daytona_api_client.models.account_provider import AccountProvider
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
-from daytona_api_client.models.build_image import BuildImage
+from daytona_api_client.models.build_info import BuildInfo
 from daytona_api_client.models.command import Command
 from daytona_api_client.models.completion_context import CompletionContext
 from daytona_api_client.models.completion_item import CompletionItem
@@ -26,14 +29,15 @@ from daytona_api_client.models.completion_list import CompletionList
 from daytona_api_client.models.create_api_key import CreateApiKey
 from daytona_api_client.models.create_build_info import CreateBuildInfo
 from daytona_api_client.models.create_docker_registry import CreateDockerRegistry
-from daytona_api_client.models.create_image import CreateImage
 from daytona_api_client.models.create_linked_account import CreateLinkedAccount
-from daytona_api_client.models.create_node import CreateNode
 from daytona_api_client.models.create_organization import CreateOrganization
 from daytona_api_client.models.create_organization_invitation import CreateOrganizationInvitation
 from daytona_api_client.models.create_organization_quota import CreateOrganizationQuota
 from daytona_api_client.models.create_organization_role import CreateOrganizationRole
+from daytona_api_client.models.create_runner import CreateRunner
+from daytona_api_client.models.create_sandbox import CreateSandbox
 from daytona_api_client.models.create_session_request import CreateSessionRequest
+from daytona_api_client.models.create_snapshot import CreateSnapshot
 from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
@@ -52,8 +56,6 @@ from daytona_api_client.models.git_commit_response import GitCommitResponse
 from daytona_api_client.models.git_delete_branch_request import GitDeleteBranchRequest
 from daytona_api_client.models.git_repo_request import GitRepoRequest
 from daytona_api_client.models.git_status import GitStatus
-from daytona_api_client.models.image_dto import ImageDto
-from daytona_api_client.models.image_state import ImageState
 from daytona_api_client.models.list_branch_response import ListBranchResponse
 from daytona_api_client.models.lsp_completion_params import LspCompletionParams
 from daytona_api_client.models.lsp_document_request import LspDocumentRequest
@@ -66,7 +68,7 @@ from daytona_api_client.models.organization_invitation import OrganizationInvita
 from daytona_api_client.models.organization_role import OrganizationRole
 from daytona_api_client.models.organization_suspension import OrganizationSuspension
 from daytona_api_client.models.organization_user import OrganizationUser
-from daytona_api_client.models.paginated_images_dto import PaginatedImagesDto
+from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
 from daytona_api_client.models.project_dir_response import ProjectDirResponse
@@ -74,11 +76,18 @@ from daytona_api_client.models.range import Range
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
 from daytona_api_client.models.replace_request import ReplaceRequest
 from daytona_api_client.models.replace_result import ReplaceResult
+from daytona_api_client.models.sandbox import Sandbox
+from daytona_api_client.models.sandbox_info import SandboxInfo
+from daytona_api_client.models.sandbox_labels import SandboxLabels
+from daytona_api_client.models.sandbox_state import SandboxState
+from daytona_api_client.models.sandbox_volume import SandboxVolume
 from daytona_api_client.models.search_files_response import SearchFilesResponse
 from daytona_api_client.models.session import Session
 from daytona_api_client.models.session_execute_request import SessionExecuteRequest
 from daytona_api_client.models.session_execute_response import SessionExecuteResponse
-from daytona_api_client.models.set_image_general_status import SetImageGeneralStatus
+from daytona_api_client.models.set_snapshot_general_status_dto import SetSnapshotGeneralStatusDto
+from daytona_api_client.models.snapshot_dto import SnapshotDto
+from daytona_api_client.models.snapshot_state import SnapshotState
 from daytona_api_client.models.storage_access_dto import StorageAccessDto
 from daytona_api_client.models.toggle_state import ToggleState
 from daytona_api_client.models.update_assigned_organization_roles import UpdateAssignedOrganizationRoles
@@ -93,7 +102,3 @@ from daytona_api_client.models.user_public_key import UserPublicKey
 from daytona_api_client.models.volume_dto import VolumeDto
 from daytona_api_client.models.volume_state import VolumeState
 from daytona_api_client.models.workspace import Workspace
-from daytona_api_client.models.workspace_info import WorkspaceInfo
-from daytona_api_client.models.workspace_labels import WorkspaceLabels
-from daytona_api_client.models.workspace_state import WorkspaceState
-from daytona_api_client.models.workspace_volume import WorkspaceVolume

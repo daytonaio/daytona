@@ -1,5 +1,4 @@
 import { Daytona } from '@daytonaio/sdk'
-import { inspect } from 'util'
 
 async function main() {
   const daytona = new Daytona()
@@ -24,7 +23,12 @@ async function main() {
   const existingSandbox = await daytona.get(sandbox.id)
   console.log('Got existing sandbox')
 
-  const response = await existingSandbox.process.executeCommand('echo "Hello World from exec!"', '/home/daytona', 10)
+  const response = await existingSandbox.process.executeCommand(
+    'echo "Hello World from exec!"',
+    undefined,
+    undefined,
+    10,
+  )
   if (response.exitCode !== 0) {
     console.error(`Error: ${response.exitCode} ${response.result}`)
   } else {
@@ -33,12 +37,12 @@ async function main() {
 
   const sandboxes = await daytona.list()
   console.log('Total sandboxes count:', sandboxes.length)
-  // Use util.inspect to pretty print the sandbox info like Python's pprint
-  console.log(inspect(await sandboxes[0].info(), { depth: null, colors: true }))
 
-  console.log('Removing sandbox')
+  console.log(`Printing sandboxes[0] -> id: ${sandboxes[0].id} state: ${sandboxes[0].state}`)
+
+  console.log('Deleting sandbox')
   await sandbox.delete()
-  console.log('Sandbox removed')
+  console.log('Sandbox deleted')
 }
 
 main().catch(console.error)

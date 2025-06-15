@@ -44,7 +44,7 @@ func (s *Server) GetProjectDir(ctx *gin.Context) {
 
 func (s *Server) Start() error {
 	// Set Gin to release mode in production
-	if os.Getenv("NODE_ENV") == "production" {
+	if os.Getenv("ENVIRONMENT") == "production" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 
 /**
@@ -14,11 +19,12 @@
 
 export * from './api/api-keys-api'
 export * from './api/docker-registry-api'
-export * from './api/images-api'
-export * from './api/nodes-api'
 export * from './api/object-storage-api'
 export * from './api/organizations-api'
 export * from './api/preview-api'
+export * from './api/runners-api'
+export * from './api/sandbox-api'
+export * from './api/snapshots-api'
 export * from './api/toolbox-api'
 export * from './api/users-api'
 export * from './api/volumes-api'

@@ -1,7 +1,7 @@
 import asyncio
 import os
 
-from daytona_sdk import AsyncDaytona, CreateSandboxParams, VolumeMount
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, VolumeMount
 
 
 async def main():
@@ -12,7 +12,7 @@ async def main():
         # Mount the volume to the sandbox
         mount_dir_1 = "/home/daytona/volume"
 
-        params = CreateSandboxParams(
+        params = CreateSandboxFromSnapshotParams(
             language="python",
             volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
         )
@@ -30,7 +30,7 @@ async def main():
         # and mount it to the different path
         mount_dir_2 = "/home/daytona/my-files"
 
-        params = CreateSandboxParams(
+        params = CreateSandboxFromSnapshotParams(
             language="python",
             volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_2)],
         )

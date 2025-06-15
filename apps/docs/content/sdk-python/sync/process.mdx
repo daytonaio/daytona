@@ -11,26 +11,20 @@ class Process()
 
 Handles process and code execution within a Sandbox.
 
-**Attributes**:
-
-- `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `instance` _SandboxInstance_ - The Sandbox instance this process belongs to.
-
 #### Process.\_\_init\_\_
 
 ```python
-def __init__(code_toolbox: SandboxPythonCodeToolbox, toolbox_api: ToolboxApi,
-             instance: SandboxInstance, get_root_dir: Callable[[], str])
+def __init__(sandbox_id: str, code_toolbox: SandboxPythonCodeToolbox,
+             toolbox_api: ToolboxApi, get_root_dir: Callable[[], str])
 ```
 
 Initialize a new Process instance.
 
 **Arguments**:
 
+- `sandbox_id` _str_ - The ID of the Sandbox.
 - `code_toolbox` _SandboxPythonCodeToolbox_ - Language-specific code execution toolbox.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `instance` _SandboxInstance_ - The Sandbox instance this process belongs to.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### Process.exec

@@ -1,13 +1,20 @@
 import time
 
-from daytona_sdk import CreateSandboxParams, Daytona, Image
+from daytona import (
+    CreateSandboxFromImageParams,
+    CreateSandboxFromSnapshotParams,
+    CreateSnapshotParams,
+    Daytona,
+    Image,
+    Resources,
+)
 
 
 def main():
     daytona = Daytona()
 
-    # Generate unique name for the image to avoid conflicts
-    image_name = f"python-example:{int(time.time())}"
+    # Generate unique name for the snapshot to avoid conflicts
+    snapshot_name = f"python-example:{int(time.time())}"
 
     # Create local file with some data and add it to the image
     with open("file_example.txt", "w") as f:
@@ -18,26 +25,33 @@ def main():
         Image.debian_slim("3.12")
         .pip_install(["numpy", "pandas", "matplotlib", "scipy", "scikit-learn", "jupyter"])
         .run_commands(
-            [
-                "apt-get update && apt-get install -y git",
-                "groupadd -r daytona && useradd -r -g daytona -m daytona",
-                "mkdir -p /home/daytona/workspace",
-            ]
+            "apt-get update && apt-get install -y git",
+            "groupadd -r daytona && useradd -r -g daytona -m daytona",
+            "mkdir -p /home/daytona/workspace",
         )
         .workdir("/home/daytona/workspace")
         .env({"MY_ENV_VAR": "My Environment Variable"})
         .add_local_file("file_example.txt", "/home/daytona/workspace/file_example.txt")
     )
 
-    # Create the image
-    print(f"=== Creating Image: {image_name} ===")
-    daytona.create_image(image_name, image, on_logs=lambda chunk: print(chunk, end=""))
+    # Create the snapshot
+    print(f"=== Creating Snapshot: {snapshot_name} ===")
+    daytona.snapshot.create(
+        CreateSnapshotParams(
+            name=snapshot_name,
+            image=image,
+            resources=Resources(
+                cpu=1,
+                memory=1,
+                disk=3,
+            ),
+        ),
+        on_logs=print,
+    )
 
     # Create first sandbox using the pre-built image
     print("\n=== Creating Sandbox from Pre-built Image ===")
-    sandbox1 = daytona.create(
-        CreateSandboxParams(image=image_name), on_image_build_logs=lambda chunk: print(chunk, end="")
-    )
+    sandbox1 = daytona.create(CreateSandboxFromSnapshotParams(snapshot=snapshot_name))
 
     try:
         # Verify the first sandbox environment
@@ -52,7 +66,7 @@ def main():
         print(response.result)
     finally:
         # Clean up first sandbox
-        daytona.remove(sandbox1)
+        daytona.delete(sandbox1)
 
     # Create second sandbox with a new dynamic image
     print("=== Creating Sandbox with Dynamic Image ===")
@@ -61,18 +75,18 @@ def main():
     dynamic_image = (
         Image.debian_slim("3.11")
         .pip_install(["pytest", "pytest-cov", "black", "isort", "mypy", "ruff"])
-        .run_commands(["apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project"])
+        .run_commands("apt-get update && apt-get install -y git", "mkdir -p /home/daytona/project")
         .workdir("/home/daytona/project")
         .env({"ENV_VAR": "My Environment Variable"})
     )
 
     # Create sandbox with the dynamic image
     sandbox2 = daytona.create(
-        CreateSandboxParams(
+        CreateSandboxFromImageParams(
             image=dynamic_image,
         ),
         timeout=0,
-        on_image_build_logs=print,
+        on_snapshot_create_logs=print,
     )
 
     try:
@@ -83,7 +97,7 @@ def main():
         print(response.result)
     finally:
         # Clean up second sandbox
-        daytona.remove(sandbox2)
+        daytona.delete(sandbox2)
 
 
 if __name__ == "__main__":

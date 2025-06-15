@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -63,7 +68,7 @@ export interface VolumeDto {
    * @type {string}
    * @memberof VolumeDto
    */
-  lastUsedAt: string | null
+  lastUsedAt?: string | null
   /**
    * The error reason of the volume
    * @type {string}

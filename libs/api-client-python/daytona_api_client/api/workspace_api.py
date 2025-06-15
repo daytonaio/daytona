@@ -1,4 +1,7 @@
 # coding: utf-8
+# Copyright 2025 Daytona Platforms Inc.
+# SPDX-License-Identifier: Apache-2.0
+
 
 """
     Daytona
@@ -22,8 +25,8 @@ from typing import List, Optional, Union
 from typing_extensions import Annotated
 from daytona_api_client.models.create_workspace import CreateWorkspace
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
+from daytona_api_client.models.sandbox_labels import SandboxLabels
 from daytona_api_client.models.workspace import Workspace
-from daytona_api_client.models.workspace_labels import WorkspaceLabels
 
 from daytona_api_client.api_client import ApiClient, RequestSerialized
 from daytona_api_client.api_response import ApiResponse
@@ -43,7 +46,7 @@ class WorkspaceApi:
         self.api_client = api_client
 
     @validate_call
-    def archive_workspace(
+    def archive_workspace_deprecated(
         self,
         workspace_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -59,7 +62,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Archive workspace
+        """(Deprecated) [DEPRECATED] Archive workspace
 
 
         :param workspace_id: (required)
@@ -87,8 +90,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/archive is deprecated.", DeprecationWarning)
 
-        _param = self._archive_workspace_serialize(
+        _param = self._archive_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -108,7 +112,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def archive_workspace_with_http_info(
+    def archive_workspace_deprecated_with_http_info(
         self,
         workspace_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -124,7 +128,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Archive workspace
+        """(Deprecated) [DEPRECATED] Archive workspace
 
 
         :param workspace_id: (required)
@@ -152,8 +156,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/archive is deprecated.", DeprecationWarning)
 
-        _param = self._archive_workspace_serialize(
+        _param = self._archive_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -173,7 +178,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def archive_workspace_without_preload_content(
+    def archive_workspace_deprecated_without_preload_content(
         self,
         workspace_id: StrictStr,
         x_daytona_organization_id: Annotated[
@@ -189,7 +194,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Archive workspace
+        """(Deprecated) [DEPRECATED] Archive workspace
 
 
         :param workspace_id: (required)
@@ -217,8 +222,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/archive is deprecated.", DeprecationWarning)
 
-        _param = self._archive_workspace_serialize(
+        _param = self._archive_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -233,7 +239,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _archive_workspace_serialize(
+    def _archive_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -282,7 +288,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_snapshot(
+    def create_backup_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -298,7 +304,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> Workspace:
-        """Create workspace snapshot
+        """(Deprecated) [DEPRECATED] Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -326,8 +332,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/backup is deprecated.", DeprecationWarning)
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -347,7 +354,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def create_snapshot_with_http_info(
+    def create_backup_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -363,7 +370,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[Workspace]:
-        """Create workspace snapshot
+        """(Deprecated) [DEPRECATED] Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -391,8 +398,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/backup is deprecated.", DeprecationWarning)
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -412,7 +420,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_snapshot_without_preload_content(
+    def create_backup_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -428,7 +436,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create workspace snapshot
+        """(Deprecated) [DEPRECATED] Create workspace backup
 
 
         :param workspace_id: ID of the workspace (required)
@@ -456,8 +464,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/backup is deprecated.", DeprecationWarning)
 
-        _param = self._create_snapshot_serialize(
+        _param = self._create_backup_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -472,7 +481,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _create_snapshot_serialize(
+    def _create_backup_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -511,7 +520,7 @@ class WorkspaceApi:
 
         return self.api_client.param_serialize(
             method="POST",
-            resource_path="/workspace/{workspaceId}/snapshot",
+            resource_path="/workspace/{workspaceId}/backup",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -525,7 +534,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_workspace(
+    def create_workspace_deprecated(
         self,
         create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[
@@ -541,7 +550,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> Workspace:
-        """Create a new workspace
+        """(Deprecated) [DEPRECATED] Create a new workspace
 
 
         :param create_workspace: (required)
@@ -569,8 +578,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._create_workspace_serialize(
+        _param = self._create_workspace_deprecated_serialize(
             create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -590,7 +600,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def create_workspace_with_http_info(
+    def create_workspace_deprecated_with_http_info(
         self,
         create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[
@@ -606,7 +616,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[Workspace]:
-        """Create a new workspace
+        """(Deprecated) [DEPRECATED] Create a new workspace
 
 
         :param create_workspace: (required)
@@ -634,8 +644,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._create_workspace_serialize(
+        _param = self._create_workspace_deprecated_serialize(
             create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -655,7 +666,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def create_workspace_without_preload_content(
+    def create_workspace_deprecated_without_preload_content(
         self,
         create_workspace: CreateWorkspace,
         x_daytona_organization_id: Annotated[
@@ -671,7 +682,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Create a new workspace
+        """(Deprecated) [DEPRECATED] Create a new workspace
 
 
         :param create_workspace: (required)
@@ -699,8 +710,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._create_workspace_serialize(
+        _param = self._create_workspace_deprecated_serialize(
             create_workspace=create_workspace,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -715,7 +727,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _create_workspace_serialize(
+    def _create_workspace_deprecated_serialize(
         self,
         create_workspace,
         x_daytona_organization_id,
@@ -776,7 +788,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def delete_workspace(
+    def delete_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         force: StrictBool,
@@ -793,7 +805,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Delete workspace
+        """(Deprecated) [DEPRECATED] Delete workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -823,8 +835,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("DELETE /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_workspace_serialize(
+        _param = self._delete_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -845,7 +858,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def delete_workspace_with_http_info(
+    def delete_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         force: StrictBool,
@@ -862,7 +875,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Delete workspace
+        """(Deprecated) [DEPRECATED] Delete workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -892,8 +905,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("DELETE /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_workspace_serialize(
+        _param = self._delete_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -914,7 +928,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def delete_workspace_without_preload_content(
+    def delete_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         force: StrictBool,
@@ -931,7 +945,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Delete workspace
+        """(Deprecated) [DEPRECATED] Delete workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -961,8 +975,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("DELETE /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._delete_workspace_serialize(
+        _param = self._delete_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             force=force,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -978,7 +993,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _delete_workspace_serialize(
+    def _delete_workspace_deprecated_serialize(
         self,
         workspace_id,
         force,
@@ -1031,7 +1046,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_build_logs(
+    def get_build_logs_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1048,7 +1063,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Get build logs
+        """(Deprecated) [DEPRECATED] Get build logs
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1078,8 +1093,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/build-logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_build_logs_serialize(
+        _param = self._get_build_logs_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
@@ -1100,7 +1116,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def get_build_logs_with_http_info(
+    def get_build_logs_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1117,7 +1133,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Get build logs
+        """(Deprecated) [DEPRECATED] Get build logs
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1147,8 +1163,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/build-logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_build_logs_serialize(
+        _param = self._get_build_logs_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
@@ -1169,7 +1186,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_build_logs_without_preload_content(
+    def get_build_logs_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1186,7 +1203,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get build logs
+        """(Deprecated) [DEPRECATED] Get build logs
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1216,8 +1233,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/build-logs is deprecated.", DeprecationWarning)
 
-        _param = self._get_build_logs_serialize(
+        _param = self._get_build_logs_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             follow=follow,
@@ -1233,7 +1251,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _get_build_logs_serialize(
+    def _get_build_logs_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -1286,7 +1304,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_port_preview_url(
+    def get_port_preview_url_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
@@ -1303,7 +1321,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PortPreviewUrl:
-        """Get preview URL for a workspace port
+        """(Deprecated) [DEPRECATED] Get preview URL for a workspace port
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1333,8 +1351,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/ports/{port}/preview-url is deprecated.", DeprecationWarning)
 
-        _param = self._get_port_preview_url_serialize(
+        _param = self._get_port_preview_url_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1355,7 +1374,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def get_port_preview_url_with_http_info(
+    def get_port_preview_url_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
@@ -1372,7 +1391,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PortPreviewUrl]:
-        """Get preview URL for a workspace port
+        """(Deprecated) [DEPRECATED] Get preview URL for a workspace port
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1402,8 +1421,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/ports/{port}/preview-url is deprecated.", DeprecationWarning)
 
-        _param = self._get_port_preview_url_serialize(
+        _param = self._get_port_preview_url_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1424,7 +1444,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_port_preview_url_without_preload_content(
+    def get_port_preview_url_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         port: Annotated[Union[StrictFloat, StrictInt], Field(description="Port number to get preview URL for")],
@@ -1441,7 +1461,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get preview URL for a workspace port
+        """(Deprecated) [DEPRECATED] Get preview URL for a workspace port
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1471,8 +1491,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId}/ports/{port}/preview-url is deprecated.", DeprecationWarning)
 
-        _param = self._get_port_preview_url_serialize(
+        _param = self._get_port_preview_url_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             port=port,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -1488,7 +1509,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _get_port_preview_url_serialize(
+    def _get_port_preview_url_workspace_deprecated_serialize(
         self,
         workspace_id,
         port,
@@ -1544,7 +1565,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_workspace(
+    def get_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1561,7 +1582,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> Workspace:
-        """Get workspace details
+        """(Deprecated) [DEPRECATED] Get workspace details
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1591,8 +1612,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_workspace_serialize(
+        _param = self._get_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
@@ -1613,7 +1635,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def get_workspace_with_http_info(
+    def get_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1630,7 +1652,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[Workspace]:
-        """Get workspace details
+        """(Deprecated) [DEPRECATED] Get workspace details
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1660,8 +1682,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_workspace_serialize(
+        _param = self._get_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
@@ -1682,7 +1705,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def get_workspace_without_preload_content(
+    def get_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -1699,7 +1722,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get workspace details
+        """(Deprecated) [DEPRECATED] Get workspace details
 
 
         :param workspace_id: ID of the workspace (required)
@@ -1729,8 +1752,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace/{workspaceId} is deprecated.", DeprecationWarning)
 
-        _param = self._get_workspace_serialize(
+        _param = self._get_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
@@ -1746,7 +1770,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _get_workspace_serialize(
+    def _get_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -1803,7 +1827,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def list_workspaces(
+    def list_workspaces_deprecated(
         self,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1820,7 +1844,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> List[Workspace]:
-        """List all workspaces
+        """(Deprecated) [DEPRECATED] List all workspaces
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1850,8 +1874,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._list_workspaces_serialize(
+        _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
@@ -1872,7 +1897,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def list_workspaces_with_http_info(
+    def list_workspaces_deprecated_with_http_info(
         self,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1889,7 +1914,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[List[Workspace]]:
-        """List all workspaces
+        """(Deprecated) [DEPRECATED] List all workspaces
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1919,8 +1944,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._list_workspaces_serialize(
+        _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
@@ -1941,7 +1967,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def list_workspaces_without_preload_content(
+    def list_workspaces_deprecated_without_preload_content(
         self,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
@@ -1958,7 +1984,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List all workspaces
+        """(Deprecated) [DEPRECATED] List all workspaces
 
 
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
@@ -1988,8 +2014,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("GET /workspace is deprecated.", DeprecationWarning)
 
-        _param = self._list_workspaces_serialize(
+        _param = self._list_workspaces_deprecated_serialize(
             x_daytona_organization_id=x_daytona_organization_id,
             verbose=verbose,
             labels=labels,
@@ -2005,7 +2032,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _list_workspaces_serialize(
+    def _list_workspaces_deprecated_serialize(
         self,
         x_daytona_organization_id,
         verbose,
@@ -2063,10 +2090,10 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def replace_labels(
+    def replace_labels_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        workspace_labels: WorkspaceLabels,
+        sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2079,14 +2106,14 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> WorkspaceLabels:
-        """Replace workspace labels
+    ) -> SandboxLabels:
+        """(Deprecated) [DEPRECATED] Replace workspace labels
 
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param workspace_labels: (required)
-        :type workspace_labels: WorkspaceLabels
+        :param sandbox_labels: (required)
+        :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2110,10 +2137,11 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("PUT /workspace/{workspaceId}/labels is deprecated.", DeprecationWarning)
 
-        _param = self._replace_labels_serialize(
+        _param = self._replace_labels_workspace_deprecated_serialize(
             workspace_id=workspace_id,
-            workspace_labels=workspace_labels,
+            sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2122,7 +2150,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "WorkspaceLabels",
+            "200": "SandboxLabels",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
@@ -2132,10 +2160,10 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def replace_labels_with_http_info(
+    def replace_labels_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        workspace_labels: WorkspaceLabels,
+        sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2148,14 +2176,14 @@ class WorkspaceApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[WorkspaceLabels]:
-        """Replace workspace labels
+    ) -> ApiResponse[SandboxLabels]:
+        """(Deprecated) [DEPRECATED] Replace workspace labels
 
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param workspace_labels: (required)
-        :type workspace_labels: WorkspaceLabels
+        :param sandbox_labels: (required)
+        :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2179,10 +2207,11 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("PUT /workspace/{workspaceId}/labels is deprecated.", DeprecationWarning)
 
-        _param = self._replace_labels_serialize(
+        _param = self._replace_labels_workspace_deprecated_serialize(
             workspace_id=workspace_id,
-            workspace_labels=workspace_labels,
+            sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2191,7 +2220,7 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "WorkspaceLabels",
+            "200": "SandboxLabels",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         response_data.read()
@@ -2201,10 +2230,10 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def replace_labels_without_preload_content(
+    def replace_labels_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
-        workspace_labels: WorkspaceLabels,
+        sandbox_labels: SandboxLabels,
         x_daytona_organization_id: Annotated[
             Optional[StrictStr], Field(description="Use with JWT to specify the organization ID")
         ] = None,
@@ -2218,13 +2247,13 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Replace workspace labels
+        """(Deprecated) [DEPRECATED] Replace workspace labels
 
 
         :param workspace_id: ID of the workspace (required)
         :type workspace_id: str
-        :param workspace_labels: (required)
-        :type workspace_labels: WorkspaceLabels
+        :param sandbox_labels: (required)
+        :type sandbox_labels: SandboxLabels
         :param x_daytona_organization_id: Use with JWT to specify the organization ID
         :type x_daytona_organization_id: str
         :param _request_timeout: timeout setting for this request. If one
@@ -2248,10 +2277,11 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("PUT /workspace/{workspaceId}/labels is deprecated.", DeprecationWarning)
 
-        _param = self._replace_labels_serialize(
+        _param = self._replace_labels_workspace_deprecated_serialize(
             workspace_id=workspace_id,
-            workspace_labels=workspace_labels,
+            sandbox_labels=sandbox_labels,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2260,15 +2290,15 @@ class WorkspaceApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            "200": "WorkspaceLabels",
+            "200": "SandboxLabels",
         }
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _replace_labels_serialize(
+    def _replace_labels_workspace_deprecated_serialize(
         self,
         workspace_id,
-        workspace_labels,
+        sandbox_labels,
         x_daytona_organization_id,
         _request_auth,
         _content_type,
@@ -2295,8 +2325,8 @@ class WorkspaceApi:
             _header_params["X-Daytona-Organization-ID"] = x_daytona_organization_id
         # process the form parameters
         # process the body parameter
-        if workspace_labels is not None:
-            _body_params = workspace_labels
+        if sandbox_labels is not None:
+            _body_params = sandbox_labels
 
         # set the HTTP header `Accept`
         if "Accept" not in _header_params:
@@ -2329,7 +2359,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def set_auto_archive_interval(
+    def set_auto_archive_interval_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2349,7 +2379,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Set workspace auto-archive interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-archive interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2379,8 +2409,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autoarchive/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_auto_archive_interval_serialize(
+        _param = self._set_auto_archive_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2401,7 +2432,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def set_auto_archive_interval_with_http_info(
+    def set_auto_archive_interval_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2421,7 +2452,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Set workspace auto-archive interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-archive interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2451,8 +2482,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autoarchive/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_auto_archive_interval_serialize(
+        _param = self._set_auto_archive_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2473,7 +2505,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def set_auto_archive_interval_without_preload_content(
+    def set_auto_archive_interval_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2493,7 +2525,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Set workspace auto-archive interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-archive interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2523,8 +2555,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autoarchive/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_auto_archive_interval_serialize(
+        _param = self._set_auto_archive_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2540,7 +2573,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _set_auto_archive_interval_serialize(
+    def _set_auto_archive_interval_workspace_deprecated_serialize(
         self,
         workspace_id,
         interval,
@@ -2592,7 +2625,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def set_autostop_interval(
+    def set_autostop_interval_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2611,7 +2644,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Set workspace auto-stop interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-stop interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2641,8 +2674,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autostop/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_autostop_interval_serialize(
+        _param = self._set_autostop_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2663,7 +2697,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def set_autostop_interval_with_http_info(
+    def set_autostop_interval_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2682,7 +2716,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Set workspace auto-stop interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-stop interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2712,8 +2746,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autostop/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_autostop_interval_serialize(
+        _param = self._set_autostop_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2734,7 +2769,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def set_autostop_interval_without_preload_content(
+    def set_autostop_interval_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         interval: Annotated[
@@ -2753,7 +2788,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Set workspace auto-stop interval
+        """(Deprecated) [DEPRECATED] Set workspace auto-stop interval
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2783,8 +2818,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/autostop/{interval} is deprecated.", DeprecationWarning)
 
-        _param = self._set_autostop_interval_serialize(
+        _param = self._set_autostop_interval_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             interval=interval,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -2800,7 +2836,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _set_autostop_interval_serialize(
+    def _set_autostop_interval_workspace_deprecated_serialize(
         self,
         workspace_id,
         interval,
@@ -2852,7 +2888,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def start_workspace(
+    def start_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -2868,7 +2904,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Start workspace
+        """(Deprecated) [DEPRECATED] Start workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2896,8 +2932,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_workspace_serialize(
+        _param = self._start_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2917,7 +2954,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def start_workspace_with_http_info(
+    def start_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -2933,7 +2970,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Start workspace
+        """(Deprecated) [DEPRECATED] Start workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -2961,8 +2998,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_workspace_serialize(
+        _param = self._start_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -2982,7 +3020,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def start_workspace_without_preload_content(
+    def start_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -2998,7 +3036,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Start workspace
+        """(Deprecated) [DEPRECATED] Start workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3026,8 +3064,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/start is deprecated.", DeprecationWarning)
 
-        _param = self._start_workspace_serialize(
+        _param = self._start_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3042,7 +3081,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _start_workspace_serialize(
+    def _start_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -3091,7 +3130,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def stop_workspace(
+    def stop_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -3107,7 +3146,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Stop workspace
+        """(Deprecated) [DEPRECATED] Stop workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3135,8 +3174,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_workspace_serialize(
+        _param = self._stop_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3156,7 +3196,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def stop_workspace_with_http_info(
+    def stop_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -3172,7 +3212,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Stop workspace
+        """(Deprecated) [DEPRECATED] Stop workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3200,8 +3240,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_workspace_serialize(
+        _param = self._stop_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3221,7 +3262,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def stop_workspace_without_preload_content(
+    def stop_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         x_daytona_organization_id: Annotated[
@@ -3237,7 +3278,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Stop workspace
+        """(Deprecated) [DEPRECATED] Stop workspace
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3265,8 +3306,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/stop is deprecated.", DeprecationWarning)
 
-        _param = self._stop_workspace_serialize(
+        _param = self._stop_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             x_daytona_organization_id=x_daytona_organization_id,
             _request_auth=_request_auth,
@@ -3281,7 +3323,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _stop_workspace_serialize(
+    def _stop_workspace_deprecated_serialize(
         self,
         workspace_id,
         x_daytona_organization_id,
@@ -3330,7 +3372,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def update_public_status(
+    def update_public_status_workspace_deprecated(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
@@ -3347,7 +3389,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> None:
-        """Update public status
+        """(Deprecated) [DEPRECATED] Update public status
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3377,8 +3419,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/public/{isPublic} is deprecated.", DeprecationWarning)
 
-        _param = self._update_public_status_serialize(
+        _param = self._update_public_status_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3399,7 +3442,7 @@ class WorkspaceApi:
         ).data
 
     @validate_call
-    def update_public_status_with_http_info(
+    def update_public_status_workspace_deprecated_with_http_info(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
@@ -3416,7 +3459,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[None]:
-        """Update public status
+        """(Deprecated) [DEPRECATED] Update public status
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3446,8 +3489,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/public/{isPublic} is deprecated.", DeprecationWarning)
 
-        _param = self._update_public_status_serialize(
+        _param = self._update_public_status_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3468,7 +3512,7 @@ class WorkspaceApi:
         )
 
     @validate_call
-    def update_public_status_without_preload_content(
+    def update_public_status_workspace_deprecated_without_preload_content(
         self,
         workspace_id: Annotated[StrictStr, Field(description="ID of the workspace")],
         is_public: Annotated[StrictBool, Field(description="Public status to set")],
@@ -3485,7 +3529,7 @@ class WorkspaceApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Update public status
+        """(Deprecated) [DEPRECATED] Update public status
 
 
         :param workspace_id: ID of the workspace (required)
@@ -3515,8 +3559,9 @@ class WorkspaceApi:
         :type _host_index: int, optional
         :return: Returns the result object.
         """  # noqa: E501
+        warnings.warn("POST /workspace/{workspaceId}/public/{isPublic} is deprecated.", DeprecationWarning)
 
-        _param = self._update_public_status_serialize(
+        _param = self._update_public_status_workspace_deprecated_serialize(
             workspace_id=workspace_id,
             is_public=is_public,
             x_daytona_organization_id=x_daytona_organization_id,
@@ -3532,7 +3577,7 @@ class WorkspaceApi:
         response_data = self.api_client.call_api(*_param, _request_timeout=_request_timeout)
         return response_data.response
 
-    def _update_public_status_serialize(
+    def _update_public_status_workspace_deprecated_serialize(
         self,
         workspace_id,
         is_public,

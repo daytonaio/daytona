@@ -16,10 +16,8 @@ It can be initialized either with explicit configuration or using environment va
 
 **Attributes**:
 
-- `api_key` _str_ - API key for authentication.
-- `api_url` _str_ - URL of the Daytona API.
-- `target` _str_ - Default target location for Sandboxes.
 - `volume` _VolumeService_ - Service for managing volumes.
+- `snapshot` _SnapshotService_ - Service for managing snapshots.
 
 **Example**:
 
@@ -54,7 +52,7 @@ If no config is provided, reads from environment variables:
 
 - `DAYTONA_API_KEY`: Required API key for authentication
 - `DAYTONA_API_URL`: Required api URL
-- `DAYTONA_TARGET`: Optional target environment (defaults to SandboxTargetRegion.US)
+- `DAYTONA_TARGET`: Optional target environment (defaults to 'us')
 
 **Arguments**:
 
@@ -67,7 +65,7 @@ If no config is provided, reads from environment variables:
 **Example**:
 
 ```python
-from daytona_sdk import Daytona, DaytonaConfig
+from daytona import Daytona, DaytonaConfig
 # Using environment variables
 daytona1 = Daytona()
 
@@ -84,25 +82,21 @@ daytona2 = Daytona(config)
 #### Daytona.create
 
 ```python
-@intercept_errors(message_prefix="Failed to create sandbox: ")
-def create(params: Optional[CreateSandboxParams] = None,
-           timeout: Optional[float] = 60,
+@overload
+def create(params: Optional[CreateSandboxFromSnapshotParams] = None,
            *,
-           on_image_build_logs: Callable[[str], None] = None) -> Sandbox
+           timeout: Optional[float] = 60) -> Sandbox
 ```
 
-Creates Sandboxes with default or custom configurations. You can specify various parameters,
-including language, image, resources, environment variables, and volumes for the Sandbox.
+Creates Sandboxes from specified or default snapshot. You can specify various parameters,
+including language, image, environment variables, and volumes.
 
 **Arguments**:
 
-- `params` _Optional[CreateSandboxParams]_ - Parameters for Sandbox creation. If not provided,
-  defaults to Python language.
+- `params` _Optional[CreateSandboxFromSnapshotParams]_ - Parameters for Sandbox creation. If not provided,
+  defaults to default Daytona snapshot and Python language.
 - `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
   Default is 60 seconds.
-- `on_image_build_logs` _Callable[[str], None]_ - This callback function handles image build logs.
-  It's invoked only when `params.image` is an instance of `Image` and there's no existing
-  image in Daytona with the same configuration.
 
 **Returns**:
 
@@ -124,15 +118,75 @@ sandbox = daytona.create()
 Create a custom Sandbox:
 
 ```python
-params = CreateSandboxParams(
+params = CreateSandboxFromSnapshotParams(
     language="python",
-    image="debian:12.9",
+    snapshot="my-snapshot-id",
     env_vars={"DEBUG": "true"},
-    resources=SandboxResources(cpu=2, memory=4),
     auto_stop_interval=0,
     auto_archive_interval=60
 )
-sandbox = daytona.create(params, 40)
+sandbox = daytona.create(params, timeout=40)
+```
+
+#### Daytona.create
+
+```python
+@overload
+def create(params: Optional[CreateSandboxFromImageParams] = None,
+           *,
+           timeout: Optional[float] = 60,
+           on_snapshot_create_logs: Callable[[str], None] = None) -> Sandbox
+```
+
+Creates Sandboxes from specified image available on some registry or declarative Daytona Image.
+You can specify various parameters, including resources, language, image, environment variables,
+and volumes. Daytona creates snapshot from provided image and uses it to create Sandbox.
+
+**Arguments**:
+
+- `params` _Optional[CreateSandboxFromImageParams]_ - Parameters for Sandbox creation from image.
+- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox creation. 0 means no timeout.
+  Default is 60 seconds.
+- `on_snapshot_create_logs` _Callable[[str], None]_ - This callback function handles snapshot creation logs.
+
+**Returns**:
+
+- `Sandbox` - The created Sandbox instance.
+
+**Raises**:
+
+- `DaytonaError` - If timeout, auto_stop_interval or auto_archive_interval is negative;
+  If sandbox fails to start or times out
+
+**Example**:
+
+Create a default Python Sandbox from image:
+
+```python
+sandbox = daytona.create(CreateSandboxFromImageParams(image="debian:12.9"))
+```
+
+Create a custom Sandbox from declarative Image definition:
+
+```python
+declarative_image = (
+    Image.base("alpine:3.18")
+    .pipInstall(["numpy", "pandas"])
+    .env({"MY_ENV_VAR": "My Environment Variable"})
+)
+params = CreateSandboxFromImageParams(
+    language="python",
+    image=declarative_image,
+    env_vars={"DEBUG": "true"},
+    resources=Resources(cpu=2, memory=4),
+    auto_stop_interval=0,
+    auto_archive_interval=60,
+)
+sandbox = daytona.create(
+    params,
+    timeout=40,
+    on_snapshot_create_logs=lambda chunk: print(chunk, end=""),
+)
 ```
 
 #### Daytona.delete
@@ -162,30 +216,11 @@ sandbox = daytona.create()
 daytona.delete(sandbox)  # Clean up when done
 ```
 
-#### Daytona.get_current_workspace
-
-```python
-@deprecated(reason=(
-    "Method is deprecated. Use `get_current_sandbox` instead. This method will be removed in a future version."
-))
-def get_current_workspace(workspace_id: str) -> Workspace
-```
-
-Gets a Sandbox by its ID.
-
-**Arguments**:
-
-- `workspace_id` _str_ - The ID of the Sandbox to retrieve.
-
-**Returns**:
-
-- `Workspace` - The Sandbox instance.
-
-#### Daytona.get_current_sandbox
+#### Daytona.get
 
 ```python
 @intercept_errors(message_prefix="Failed to get sandbox: ")
-def get_current_sandbox(sandbox_id: str) -> Sandbox
+def get(sandbox_id: str) -> Sandbox
 ```
 
 Gets a Sandbox by its ID.
@@ -205,7 +240,7 @@ Gets a Sandbox by its ID.
 **Example**:
 
 ```python
-sandbox = daytona.get_current_sandbox("my-sandbox-id")
+sandbox = daytona.get("my-sandbox-id")
 print(sandbox.status)
 ```
 
@@ -236,7 +271,7 @@ Finds a Sandbox by its ID or labels.
 
 ```python
 sandbox = daytona.find_one(labels={"my-label": "my-value"})
-print(sandbox.info())
+print(f"Sandbox ID: {sandbox.id} State: {sandbox.state}")
 ```
 
 #### Daytona.list
@@ -300,35 +335,6 @@ Stops a Sandbox and waits for it to be stopped.
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to stop or times out
 
-#### Daytona.create_image
-
-```python
-@intercept_errors(message_prefix="Failed to build image: ")
-@with_timeout(error_message=lambda self, timeout: (
-    f"Failed to build image within {timeout} seconds timeout period."))
-def create_image(name: str,
-                 image: Image,
-                 *,
-                 on_logs: Callable[[str], None] = None,
-                 timeout: Optional[float] = 0) -> None
-```
-
-Creates and registers a new image from the given Image definition.
-
-**Arguments**:
-
-- `name` _str_ - The name of the image to create.
-- `image` _Image_ - The Image instance.
-- `on_logs` _Callable[[str], None]_ - This callback function handles image build logs.
-- `timeout` _Optional[float]_ - Default is no timeout. Timeout in seconds (0 means no timeout).
-
-**Example**:
-
-```python
-image = Image.debianSlim('3.12').pipInstall('numpy')
-daytona.create_image('my-image', image, on_logs=print)
-```
-
 ## CodeLanguage
 
 ```python
@@ -373,56 +379,21 @@ config = DaytonaConfig(api_key="your-api-key")
 config = DaytonaConfig(jwt_token="your-jwt-token", organization_id="your-organization-id")
 ```
 
-## SandboxResources
+## CreateSandboxBaseParams
 
 ```python
-@dataclass
-class SandboxResources()
+class CreateSandboxBaseParams(BaseModel)
 ```
 
-Resources configuration for Sandbox.
+Base parameters for creating a new Sandbox.
 
 **Attributes**:
 
-- `cpu` _Optional[int]_ - Number of CPU cores to allocate.
-- `memory` _Optional[int]_ - Amount of memory in GB to allocate.
-- `disk` _Optional[int]_ - Amount of disk space in GB to allocate.
-- `gpu` _Optional[int]_ - Number of GPUs to allocate.
-
-**Example**:
-
-```python
-resources = SandboxResources(
-    cpu=2,
-    memory=4,  # 4GB RAM
-    disk=20,   # 20GB disk
-    gpu=1
-)
-params = CreateSandboxParams(
-    language="python",
-    resources=resources
-)
-```
-
-## CreateSandboxParams
-
-```python
-class CreateSandboxParams(BaseModel)
-```
-
-Parameters for creating a new Sandbox.
-
-**Attributes**:
-
-- `language` _Optional[CodeLanguage]_ - Programming language for the Sandbox ("python", "javascript", "typescript").
-  Defaults to "python".
-- `image` _Optional[Union[str, Image]]_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
-  the image will be dynamically built.
+- `language` _Optional[CodeLanguage]_ - Programming language for the Sandbox. Defaults to "python".
 - `os_user` _Optional[str]_ - OS user for the Sandbox.
 - `env_vars` _Optional[Dict[str, str]]_ - Environment variables to set in the Sandbox.
 - `labels` _Optional[Dict[str, str]]_ - Custom labels for the Sandbox.
 - `public` _Optional[bool]_ - Whether the Sandbox should be public.
-- `resources` _Optional[SandboxResources]_ - Resource configuration for the Sandbox.
 - `timeout` _Optional[float]_ - Timeout in seconds for Sandbox to be created and started.
 - `auto_stop_interval` _Optional[int]_ - Interval in minutes after which Sandbox will
   automatically stop if no Sandbox event occurs during that time. Default is 15 minutes.
@@ -431,14 +402,29 @@ Parameters for creating a new Sandbox.
   automatically archive. Default is 7 days.
   0 means the maximum interval will be used.
 
-**Example**:
+## CreateSandboxFromImageParams
 
 ```python
-params = CreateSandboxParams(
-    language="python",
-    env_vars={"DEBUG": "true"},
-    resources=SandboxResources(cpu=2, memory=4),
-    auto_stop_interval=20,
-    auto_archive_interval=60
-)
+class CreateSandboxFromImageParams(CreateSandboxBaseParams)
 ```
+
+Parameters for creating a new Sandbox from an image.
+
+**Attributes**:
+
+- `image` _Union[str, Image]_ - Custom Docker image to use for the Sandbox. If an Image object is provided,
+  the image will be dynamically built.
+- `resources` _Optional[Resources]_ - Resource configuration for the Sandbox. If not provided, sandbox will
+  have default resources.
+
+## CreateSandboxFromSnapshotParams
+
+```python
+class CreateSandboxFromSnapshotParams(CreateSandboxBaseParams)
+```
+
+Parameters for creating a new Sandbox from a snapshot.
+
+**Attributes**:
+
+- `snapshot` _Optional[str]_ - Name of the snapshot to use for the Sandbox.

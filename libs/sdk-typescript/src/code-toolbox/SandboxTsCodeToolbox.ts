@@ -1,16 +1,12 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { SandboxCodeToolbox } from '../Sandbox'
 import { CodeRunParams } from '../Process'
 
 export class SandboxTsCodeToolbox implements SandboxCodeToolbox {
-  public getDefaultImage(): string {
-    return 'daytonaio/sdk-typescript:v0.49.0-3'
-  }
-
   public getRunCommand(code: string, params?: CodeRunParams): string {
     const base64Code = Buffer.from(code).toString('base64')
     const argv = params?.argv ? params.argv.join(' ') : ''

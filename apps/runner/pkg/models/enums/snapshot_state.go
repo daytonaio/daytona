@@ -3,16 +3,16 @@
 
 package enums
 
-type SnapshotState string
+type BackupState string
 
 const (
-	SnapshotStateNone       SnapshotState = "NONE"
-	SnapshotStatePending    SnapshotState = "PENDING"
-	SnapshotStateInProgress SnapshotState = "IN_PROGRESS"
-	SnapshotStateCompleted  SnapshotState = "COMPLETED"
-	SnapshotStateFailed     SnapshotState = "FAILED"
+	BackupStateNone       BackupState = "NONE"
+	BackupStatePending    BackupState = "PENDING"
+	BackupStateInProgress BackupState = "IN_PROGRESS"
+	BackupStateCompleted  BackupState = "COMPLETED"
+	BackupStateFailed     BackupState = "FAILED"
 )
 
-func (s SnapshotState) String() string {
+func (s BackupState) String() string {
 	return string(s)
 }

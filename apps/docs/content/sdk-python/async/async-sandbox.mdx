@@ -6,24 +6,44 @@ hideTitleOnPage: true
 ## AsyncSandbox
 
 ```python
-class AsyncSandbox()
+class AsyncSandbox(SandboxDto)
 ```
 
 Represents a Daytona Sandbox.
 
 **Attributes**:
 
-- `id` _str_ - Unique identifier for the Sandbox.
-- `instance` _SandboxInstance_ - The underlying Sandbox instance.
-- `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
 - `fs` _AsyncFileSystem_ - File system operations interface.
 - `git` _AsyncGit_ - Git operations interface.
 - `process` _AsyncProcess_ - Process execution interface.
+- `id` _str_ - Unique identifier for the Sandbox.
+- `organization_id` _str_ - Organization ID of the Sandbox.
+- `snapshot` _str_ - Daytona snapshot used to create the Sandbox.
+- `user` _str_ - OS user running in the Sandbox.
+- `env` _Dict[str, str]_ - Environment variables set in the Sandbox.
+- `labels` _Dict[str, str]_ - Custom labels attached to the Sandbox.
+- `public` _bool_ - Whether the Sandbox is publicly accessible.
+- `target` _str_ - Target location of the runner where the Sandbox runs.
+- `cpu` _int_ - Number of CPUs allocated to the Sandbox.
+- `gpu` _int_ - Number of GPUs allocated to the Sandbox.
+- `memory` _int_ - Amount of memory allocated to the Sandbox in GiB.
+- `disk` _int_ - Amount of disk space allocated to the Sandbox in GiB.
+- `state` _SandboxState_ - Current state of the Sandbox (e.g., "started", "stopped").
+- `error_reason` _str_ - Error message if Sandbox is in error state.
+- `backup_state` _SandboxBackupStateEnum_ - Current state of Sandbox backup.
+- `backup_created_at` _str_ - When the backup was created.
+- `auto_stop_interval` _int_ - Auto-stop interval in minutes.
+- `auto_archive_interval` _int_ - Auto-archive interval in minutes.
+- `runner_domain` _str_ - Domain name of the Sandbox runner.
+- `volumes` _List[str]_ - Volumes attached to the Sandbox.
+- `build_info` _str_ - Build information for the Sandbox if it was created from dynamic build.
+- `created_at` _str_ - When the Sandbox was created.
+- `updated_at` _str_ - When the Sandbox was last updated.
 
 #### AsyncSandbox.\_\_init\_\_
 
 ```python
-def __init__(id: str, instance: SandboxInstance, sandbox_api: SandboxApi,
+def __init__(sandbox_dto: SandboxDto, sandbox_api: SandboxApi,
              toolbox_api: ToolboxApi, code_toolbox: SandboxCodeToolbox)
 ```
 
@@ -37,26 +57,21 @@ Initialize a new Sandbox instance.
 - `toolbox_api` _ToolboxApi_ - API client for toolbox operations.
 - `code_toolbox` _SandboxCodeToolbox_ - Language-specific toolbox implementation.
 
-#### AsyncSandbox.info
+#### AsyncSandbox.refresh_data
 
 ```python
-async def info() -> SandboxInfo
+async def refresh_data() -> None
 ```
 
-Gets structured information about the Sandbox.
-
-**Returns**:
-
-- `SandboxInfo` - Detailed information about the Sandbox including its
-  configuration, resources, and current state.
+Refreshes the Sandbox data from the API.
 
 **Example**:
 
 ```python
-info = await sandbox.info()
-print(f"Sandbox {info.id}:")
-print(f"State: {info.state}")
-print(f"Resources: {info.resources.cpu} CPU, {info.resources.memory} RAM")
+await sandbox.refresh_data()
+print(f"Sandbox {sandbox.id}:")
+print(f"State: {sandbox.state}")
+print(f"Resources: {sandbox.cpu} CPU, {sandbox.memory} GiB RAM")
 ```
 
 #### AsyncSandbox.get_user_root_dir
@@ -201,26 +216,6 @@ async def delete() -> None
 
 Deletes the Sandbox.
 
-#### AsyncSandbox.wait_for_workspace_start
-
-```python
-@deprecated(reason=(
-    "Method is deprecated. Use `wait_for_sandbox_start` instead. This method will be removed in a future"
-    " version."))
-async def wait_for_workspace_start(timeout: Optional[float] = 60) -> None
-```
-
-Waits for the Sandbox to reach the 'started' state. Polls the Sandbox status until it
-reaches the 'started' state, encounters an error or times out.
-
-**Arguments**:
-
-- `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-
-**Raises**:
-
-- `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
-
 #### AsyncSandbox.wait_for_sandbox_start
 
 ```python
@@ -242,27 +237,6 @@ reaches the 'started' state, encounters an error or times out.
 **Raises**:
 
 - `DaytonaError` - If timeout is negative; If Sandbox fails to start or times out
-
-#### AsyncSandbox.wait_for_workspace_stop
-
-```python
-@deprecated(reason=(
-    "Method is deprecated. Use `wait_for_sandbox_stop` instead. This method will be removed in a future"
-    " version."))
-async def wait_for_workspace_stop(timeout: Optional[float] = 60) -> None
-```
-
-Waits for the Sandbox to reach the 'stopped' state. Polls the Sandbox status until it
-reaches the 'stopped' state, encounters an error or times out. It will wait up to 60 seconds
-for the Sandbox to stop.
-
-**Arguments**:
-
-- `timeout` _Optional[float]_ - Maximum time to wait in seconds. 0 means no timeout. Default is 60 seconds.
-
-**Raises**:
-
-- `DaytonaError` - If timeout is negative. If Sandbox fails to stop or times out.
 
 #### AsyncSandbox.wait_for_sandbox_stop
 
@@ -388,95 +362,33 @@ possible to keep sandboxes available for an extended period. The tradeoff betwee
 and stopped states is that starting an archived sandbox takes more time, depending on its size.
 Sandbox must be stopped before archiving.
 
-#### AsyncSandbox.to_sandbox_info
-
-```python
-@staticmethod
-def to_sandbox_info(instance: ApiSandbox) -> SandboxInfo
-```
-
-Converts an API Sandbox instance to a SandboxInfo object.
-
-**Arguments**:
-
-- `instance` _ApiSandbox_ - The API Sandbox instance to convert
-
-**Returns**:
-
-- `SandboxInfo` - The converted SandboxInfo object
-
-## SandboxTargetRegion
+## Resources
 
 ```python
 @dataclass
-class SandboxTargetRegion(str, Enum)
+class Resources()
 ```
 
-Target regions for Sandboxes
-
-**Enum Members**: - `EU` ("eu") - `US` ("us") - `ASIA` ("asia")
-
-## SandboxResources
-
-```python
-@dataclass
-class SandboxResources()
-```
-
-Resources allocated to a Sandbox.
+Resources configuration for Sandbox.
 
 **Attributes**:
 
-- `cpu` _str_ - Nu, "1", "2").
-- `gpu` _Optional[str]_ - Number of GPUs allocated mber of CPU cores allocated (e.g.(e.g., "1") or None if no GPU.
-- `memory` _str_ - Amount of memory allocated with unit (e.g., "2Gi", "4Gi").
-- `disk` _str_ - Amount of disk space allocated with unit (e.g., "10Gi", "20Gi").
+- `cpu` _Optional[int]_ - Number of CPU cores to allocate.
+- `memory` _Optional[int]_ - Amount of memory in GiB to allocate.
+- `disk` _Optional[int]_ - Amount of disk space in GiB to allocate.
+- `gpu` _Optional[int]_ - Number of GPUs to allocate.
 
 **Example**:
 
 ```python
-resources = SandboxResources(
-    cpu="2",
-    gpu="1",
-    memory="4Gi",
-    disk="20Gi"
+resources = Resources(
+    cpu=2,
+    memory=4,  # 4GiB RAM
+    disk=20,   # 20GiB disk
+    gpu=1
+)
+params = CreateSandboxParams(
+    language="python",
+    resources=resources
 )
 ```
-
-## SandboxInfo
-
-```python
-class SandboxInfo(ApiSandboxInfo, AsyncApiSandboxInfo)
-```
-
-Structured information about a Sandbox.
-
-**Attributes**:
-
-- `id` _str_ - Unique identifier for the Sandbox.
-- `image` _Optional[str]_ - Docker image used for the Sandbox.
-- `user` _str_ - OS user running in the Sandbox.
-- `env` _Dict[str, str]_ - Environment variables set in the Sandbox.
-- `labels` _Dict[str, str]_ - Custom labels attached to the Sandbox.
-- `public` _bool_ - Whether the Sandbox is publicly accessible.
-- `target` _str_ - Target environment where the Sandbox runs.
-- `resources` _SandboxResources_ - Resource allocations for the Sandbox.
-- `state` _str_ - Current state of the Sandbox (e.g., "started", "stopped").
-- `error_reason` _Optional[str]_ - Error message if Sandbox is in error state.
-- `snapshot_state` _Optional[str]_ - Current state of Sandbox snapshot.
-- `snapshot_created_at` _Optional[str]_ - When the snapshot was created.
-- `node_domain` _str_ - Domain name of the Sandbox node.
-- `region` _str_ - Region of the Sandbox node.
-- `class_name` _str_ - Sandbox class.
-- `updated_at` _str_ - When the Sandbox was last updated.
-- `last_snapshot` _Optional[str]_ - When the last snapshot was created.
-- `auto_stop_interval` _int_ - Auto-stop interval in minutes.
-- `auto_archive_interval` _int_ - Auto-archive interval in minutes.
-
-## SandboxInstance
-
-```python
-class SandboxInstance(ApiSandbox)
-```
-
-Represents a Daytona Sandbox instance.

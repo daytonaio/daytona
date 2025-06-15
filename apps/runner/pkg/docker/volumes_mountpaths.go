@@ -23,7 +23,7 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 
 	for _, vol := range volumes {
 		volumeIdPrefixed := fmt.Sprintf("daytona-volume-%s", vol.VolumeId)
-		nodeVolumeMountPath := d.getNodeVolumeMountPath(volumeIdPrefixed)
+		runnerVolumeMountPath := d.getRunnerVolumeMountPath(volumeIdPrefixed)
 
 		// Get or create mutex for this volume
 		d.volumeMutexesMutex.Lock()
@@ -38,36 +38,36 @@ func (d *DockerClient) getVolumesMountPathBinds(ctx context.Context, volumes []d
 		volumeMutex.Lock()
 		defer volumeMutex.Unlock()
 
-		if d.isDirectoryMounted(nodeVolumeMountPath) {
-			log.Infof("volume %s is already mounted to %s", volumeIdPrefixed, nodeVolumeMountPath)
-			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", nodeVolumeMountPath, vol.MountPath))
+		if d.isDirectoryMounted(runnerVolumeMountPath) {
+			log.Infof("volume %s is already mounted to %s", volumeIdPrefixed, runnerVolumeMountPath)
+			volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 			continue
 		}
 
-		err := os.MkdirAll(nodeVolumeMountPath, 0755)
+		err := os.MkdirAll(runnerVolumeMountPath, 0755)
 		if err != nil {
-			return nil, fmt.Errorf("failed to create mount directory %s: %s", nodeVolumeMountPath, err)
+			return nil, fmt.Errorf("failed to create mount directory %s: %s", runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounting S3 volume %s to %s", volumeIdPrefixed, nodeVolumeMountPath)
+		log.Infof("mounting S3 volume %s to %s", volumeIdPrefixed, runnerVolumeMountPath)
 
-		cmd := d.getMountCmd(ctx, volumeIdPrefixed, nodeVolumeMountPath)
+		cmd := d.getMountCmd(ctx, volumeIdPrefixed, runnerVolumeMountPath)
 		err = cmd.Run()
 		if err != nil {
-			return nil, fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeIdPrefixed, nodeVolumeMountPath, err)
+			return nil, fmt.Errorf("failed to mount S3 volume %s to %s: %s", volumeIdPrefixed, runnerVolumeMountPath, err)
 		}
 
-		log.Infof("mounted S3 volume %s to %s", volumeIdPrefixed, nodeVolumeMountPath)
+		log.Infof("mounted S3 volume %s to %s", volumeIdPrefixed, runnerVolumeMountPath)
 
-		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", nodeVolumeMountPath, vol.MountPath))
+		volumeMountPathBinds = append(volumeMountPathBinds, fmt.Sprintf("%s/:%s/", runnerVolumeMountPath, vol.MountPath))
 	}
 
 	return volumeMountPathBinds, nil
 }
 
-func (d *DockerClient) getNodeVolumeMountPath(volumeId string) string {
+func (d *DockerClient) getRunnerVolumeMountPath(volumeId string) string {
 	volumePath := filepath.Join("/mnt", volumeId)
-	if config.GetNodeEnv() == "development" {
+	if config.GetEnvironment() == "development" {
 		volumePath = filepath.Join("/tmp", volumeId)
 	}
 

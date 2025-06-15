@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -36,9 +41,9 @@ import type { CreateWorkspace } from '../models'
 // @ts-ignore
 import type { PortPreviewUrl } from '../models'
 // @ts-ignore
-import type { Workspace } from '../models'
+import type { SandboxLabels } from '../models'
 // @ts-ignore
-import type { WorkspaceLabels } from '../models'
+import type { Workspace } from '../models'
 /**
  * WorkspaceApi - axios parameter creator
  * @export
@@ -47,19 +52,20 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
   return {
     /**
      *
-     * @summary Archive workspace
+     * @summary [DEPRECATED] Archive workspace
      * @param {string} workspaceId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    archiveWorkspace: async (
+    archiveWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('archiveWorkspace', 'workspaceId', workspaceId)
+      assertParamExists('archiveWorkspaceDeprecated', 'workspaceId', workspaceId)
       const localVarPath = `/workspace/{workspaceId}/archive`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -95,20 +101,21 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary [DEPRECATED] Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createSnapshot: async (
+    createBackupWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('createSnapshot', 'workspaceId', workspaceId)
-      const localVarPath = `/workspace/{workspaceId}/snapshot`.replace(
+      assertParamExists('createBackupWorkspaceDeprecated', 'workspaceId', workspaceId)
+      const localVarPath = `/workspace/{workspaceId}/backup`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
       )
@@ -143,19 +150,20 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Create a new workspace
+     * @summary [DEPRECATED] Create a new workspace
      * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createWorkspace: async (
+    createWorkspaceDeprecated: async (
       createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'createWorkspace' is not null or undefined
-      assertParamExists('createWorkspace', 'createWorkspace', createWorkspace)
+      assertParamExists('createWorkspaceDeprecated', 'createWorkspace', createWorkspace)
       const localVarPath = `/workspace`
       // use dummy base URL string because the URL constructor only accepts absolute URLs.
       const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL)
@@ -191,23 +199,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Delete workspace
+     * @summary [DEPRECATED] Delete workspace
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} force
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteWorkspace: async (
+    deleteWorkspaceDeprecated: async (
       workspaceId: string,
       force: boolean,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('deleteWorkspace', 'workspaceId', workspaceId)
+      assertParamExists('deleteWorkspaceDeprecated', 'workspaceId', workspaceId)
       // verify required parameter 'force' is not null or undefined
-      assertParamExists('deleteWorkspace', 'force', force)
+      assertParamExists('deleteWorkspaceDeprecated', 'force', force)
       const localVarPath = `/workspace/{workspaceId}`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -247,21 +256,22 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Get build logs
+     * @summary [DEPRECATED] Get build logs
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getBuildLogs: async (
+    getBuildLogsWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getBuildLogs', 'workspaceId', workspaceId)
+      assertParamExists('getBuildLogsWorkspaceDeprecated', 'workspaceId', workspaceId)
       const localVarPath = `/workspace/{workspaceId}/build-logs`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -301,23 +311,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Get preview URL for a workspace port
+     * @summary [DEPRECATED] Get preview URL for a workspace port
      * @param {string} workspaceId ID of the workspace
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getPortPreviewUrl: async (
+    getPortPreviewUrlWorkspaceDeprecated: async (
       workspaceId: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getPortPreviewUrl', 'workspaceId', workspaceId)
+      assertParamExists('getPortPreviewUrlWorkspaceDeprecated', 'workspaceId', workspaceId)
       // verify required parameter 'port' is not null or undefined
-      assertParamExists('getPortPreviewUrl', 'port', port)
+      assertParamExists('getPortPreviewUrlWorkspaceDeprecated', 'port', port)
       const localVarPath = `/workspace/{workspaceId}/ports/{port}/preview-url`
         .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
         .replace(`{${'port'}}`, encodeURIComponent(String(port)))
@@ -352,21 +363,22 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Get workspace details
+     * @summary [DEPRECATED] Get workspace details
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWorkspace: async (
+    getWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('getWorkspace', 'workspaceId', workspaceId)
+      assertParamExists('getWorkspaceDeprecated', 'workspaceId', workspaceId)
       const localVarPath = `/workspace/{workspaceId}`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -406,14 +418,15 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary List all workspaces
+     * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listWorkspaces: async (
+    listWorkspacesDeprecated: async (
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
@@ -459,23 +472,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Replace workspace labels
+     * @summary [DEPRECATED] Replace workspace labels
      * @param {string} workspaceId ID of the workspace
-     * @param {WorkspaceLabels} workspaceLabels
+     * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    replaceLabels: async (
+    replaceLabelsWorkspaceDeprecated: async (
       workspaceId: string,
-      workspaceLabels: WorkspaceLabels,
+      sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('replaceLabels', 'workspaceId', workspaceId)
-      // verify required parameter 'workspaceLabels' is not null or undefined
-      assertParamExists('replaceLabels', 'workspaceLabels', workspaceLabels)
+      assertParamExists('replaceLabelsWorkspaceDeprecated', 'workspaceId', workspaceId)
+      // verify required parameter 'sandboxLabels' is not null or undefined
+      assertParamExists('replaceLabelsWorkspaceDeprecated', 'sandboxLabels', sandboxLabels)
       const localVarPath = `/workspace/{workspaceId}/labels`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -505,7 +519,7 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
       setSearchParams(localVarUrlObj, localVarQueryParameter)
       let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {}
       localVarRequestOptions.headers = { ...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers }
-      localVarRequestOptions.data = serializeDataIfNeeded(workspaceLabels, localVarRequestOptions, configuration)
+      localVarRequestOptions.data = serializeDataIfNeeded(sandboxLabels, localVarRequestOptions, configuration)
 
       return {
         url: toPathString(localVarUrlObj),
@@ -514,23 +528,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Set workspace auto-archive interval
+     * @summary [DEPRECATED] Set workspace auto-archive interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setAutoArchiveInterval: async (
+    setAutoArchiveIntervalWorkspaceDeprecated: async (
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('setAutoArchiveInterval', 'workspaceId', workspaceId)
+      assertParamExists('setAutoArchiveIntervalWorkspaceDeprecated', 'workspaceId', workspaceId)
       // verify required parameter 'interval' is not null or undefined
-      assertParamExists('setAutoArchiveInterval', 'interval', interval)
+      assertParamExists('setAutoArchiveIntervalWorkspaceDeprecated', 'interval', interval)
       const localVarPath = `/workspace/{workspaceId}/autoarchive/{interval}`
         .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
         .replace(`{${'interval'}}`, encodeURIComponent(String(interval)))
@@ -565,23 +580,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Set workspace auto-stop interval
+     * @summary [DEPRECATED] Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setAutostopInterval: async (
+    setAutostopIntervalWorkspaceDeprecated: async (
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('setAutostopInterval', 'workspaceId', workspaceId)
+      assertParamExists('setAutostopIntervalWorkspaceDeprecated', 'workspaceId', workspaceId)
       // verify required parameter 'interval' is not null or undefined
-      assertParamExists('setAutostopInterval', 'interval', interval)
+      assertParamExists('setAutostopIntervalWorkspaceDeprecated', 'interval', interval)
       const localVarPath = `/workspace/{workspaceId}/autostop/{interval}`
         .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
         .replace(`{${'interval'}}`, encodeURIComponent(String(interval)))
@@ -616,19 +632,20 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Start workspace
+     * @summary [DEPRECATED] Start workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    startWorkspace: async (
+    startWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('startWorkspace', 'workspaceId', workspaceId)
+      assertParamExists('startWorkspaceDeprecated', 'workspaceId', workspaceId)
       const localVarPath = `/workspace/{workspaceId}/start`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -664,19 +681,20 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Stop workspace
+     * @summary [DEPRECATED] Stop workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    stopWorkspace: async (
+    stopWorkspaceDeprecated: async (
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('stopWorkspace', 'workspaceId', workspaceId)
+      assertParamExists('stopWorkspaceDeprecated', 'workspaceId', workspaceId)
       const localVarPath = `/workspace/{workspaceId}/stop`.replace(
         `{${'workspaceId'}}`,
         encodeURIComponent(String(workspaceId)),
@@ -712,23 +730,24 @@ export const WorkspaceApiAxiosParamCreator = function (configuration?: Configura
     },
     /**
      *
-     * @summary Update public status
+     * @summary [DEPRECATED] Update public status
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    updatePublicStatus: async (
+    updatePublicStatusWorkspaceDeprecated: async (
       workspaceId: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options: RawAxiosRequestConfig = {},
     ): Promise<RequestArgs> => {
       // verify required parameter 'workspaceId' is not null or undefined
-      assertParamExists('updatePublicStatus', 'workspaceId', workspaceId)
+      assertParamExists('updatePublicStatusWorkspaceDeprecated', 'workspaceId', workspaceId)
       // verify required parameter 'isPublic' is not null or undefined
-      assertParamExists('updatePublicStatus', 'isPublic', isPublic)
+      assertParamExists('updatePublicStatusWorkspaceDeprecated', 'isPublic', isPublic)
       const localVarPath = `/workspace/{workspaceId}/public/{isPublic}`
         .replace(`{${'workspaceId'}}`, encodeURIComponent(String(workspaceId)))
         .replace(`{${'isPublic'}}`, encodeURIComponent(String(isPublic)))
@@ -773,25 +792,26 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
   return {
     /**
      *
-     * @summary Archive workspace
+     * @summary [DEPRECATED] Archive workspace
      * @param {string} workspaceId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async archiveWorkspace(
+    async archiveWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.archiveWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.archiveWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.archiveWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.archiveWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -802,25 +822,26 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary [DEPRECATED] Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async createSnapshot(
+    async createBackupWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createSnapshot(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createBackupWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.createSnapshot']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.createBackupWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -831,25 +852,26 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Create a new workspace
+     * @summary [DEPRECATED] Create a new workspace
      * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async createWorkspace(
+    async createWorkspaceDeprecated(
       createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.createWorkspaceDeprecated(
         createWorkspace,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.createWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.createWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -860,20 +882,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Delete workspace
+     * @summary [DEPRECATED] Delete workspace
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} force
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async deleteWorkspace(
+    async deleteWorkspaceDeprecated(
       workspaceId: string,
       force: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.deleteWorkspaceDeprecated(
         workspaceId,
         force,
         xDaytonaOrganizationID,
@@ -881,7 +904,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.deleteWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.deleteWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -892,20 +915,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get build logs
+     * @summary [DEPRECATED] Get build logs
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getBuildLogs(
+    async getBuildLogsWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogs(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getBuildLogsWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         follow,
@@ -913,7 +937,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.getBuildLogs']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.getBuildLogsWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -924,20 +948,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get preview URL for a workspace port
+     * @summary [DEPRECATED] Get preview URL for a workspace port
      * @param {string} workspaceId ID of the workspace
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getPortPreviewUrl(
+    async getPortPreviewUrlWorkspaceDeprecated(
       workspaceId: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<PortPreviewUrl>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getPortPreviewUrl(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getPortPreviewUrlWorkspaceDeprecated(
         workspaceId,
         port,
         xDaytonaOrganizationID,
@@ -945,7 +970,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.getPortPreviewUrl']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.getPortPreviewUrlWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -956,20 +981,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Get workspace details
+     * @summary [DEPRECATED] Get workspace details
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async getWorkspace(
+    async getWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Workspace>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         verbose,
@@ -977,7 +1003,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.getWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.getWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -988,20 +1014,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary List all workspaces
+     * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async listWorkspaces(
+    async listWorkspacesDeprecated(
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Workspace>>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.listWorkspaces(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.listWorkspacesDeprecated(
         xDaytonaOrganizationID,
         verbose,
         labels,
@@ -1009,7 +1036,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.listWorkspaces']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.listWorkspacesDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1020,28 +1047,29 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Replace workspace labels
+     * @summary [DEPRECATED] Replace workspace labels
      * @param {string} workspaceId ID of the workspace
-     * @param {WorkspaceLabels} workspaceLabels
+     * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async replaceLabels(
+    async replaceLabelsWorkspaceDeprecated(
       workspaceId: string,
-      workspaceLabels: WorkspaceLabels,
+      sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkspaceLabels>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.replaceLabels(
+    ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<SandboxLabels>> {
+      const localVarAxiosArgs = await localVarAxiosParamCreator.replaceLabelsWorkspaceDeprecated(
         workspaceId,
-        workspaceLabels,
+        sandboxLabels,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.replaceLabels']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.replaceLabelsWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1052,20 +1080,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Set workspace auto-archive interval
+     * @summary [DEPRECATED] Set workspace auto-archive interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async setAutoArchiveInterval(
+    async setAutoArchiveIntervalWorkspaceDeprecated(
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.setAutoArchiveInterval(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.setAutoArchiveIntervalWorkspaceDeprecated(
         workspaceId,
         interval,
         xDaytonaOrganizationID,
@@ -1073,7 +1102,8 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.setAutoArchiveInterval']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.setAutoArchiveIntervalWorkspaceDeprecated']?.[localVarOperationServerIndex]
+          ?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1084,20 +1114,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Set workspace auto-stop interval
+     * @summary [DEPRECATED] Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async setAutostopInterval(
+    async setAutostopIntervalWorkspaceDeprecated(
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.setAutostopInterval(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.setAutostopIntervalWorkspaceDeprecated(
         workspaceId,
         interval,
         xDaytonaOrganizationID,
@@ -1105,7 +1136,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.setAutostopInterval']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.setAutostopIntervalWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1116,25 +1147,26 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Start workspace
+     * @summary [DEPRECATED] Start workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async startWorkspace(
+    async startWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.startWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.startWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.startWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.startWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1145,25 +1177,26 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Stop workspace
+     * @summary [DEPRECATED] Stop workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async stopWorkspace(
+    async stopWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.stopWorkspace(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.stopWorkspaceDeprecated(
         workspaceId,
         xDaytonaOrganizationID,
         options,
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.stopWorkspace']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.stopWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1174,20 +1207,21 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
     },
     /**
      *
-     * @summary Update public status
+     * @summary [DEPRECATED] Update public status
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    async updatePublicStatus(
+    async updatePublicStatusWorkspaceDeprecated(
       workspaceId: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-      const localVarAxiosArgs = await localVarAxiosParamCreator.updatePublicStatus(
+      const localVarAxiosArgs = await localVarAxiosParamCreator.updatePublicStatusWorkspaceDeprecated(
         workspaceId,
         isPublic,
         xDaytonaOrganizationID,
@@ -1195,7 +1229,7 @@ export const WorkspaceApiFp = function (configuration?: Configuration) {
       )
       const localVarOperationServerIndex = configuration?.serverIndex ?? 0
       const localVarOperationServerBasePath =
-        operationServerMap['WorkspaceApi.updatePublicStatus']?.[localVarOperationServerIndex]?.url
+        operationServerMap['WorkspaceApi.updatePublicStatusWorkspaceDeprecated']?.[localVarOperationServerIndex]?.url
       return (axios, basePath) =>
         createRequestFunction(
           localVarAxiosArgs,
@@ -1216,258 +1250,272 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
   return {
     /**
      *
-     * @summary Archive workspace
+     * @summary [DEPRECATED] Archive workspace
      * @param {string} workspaceId
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    archiveWorkspace(
+    archiveWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .archiveWorkspace(workspaceId, xDaytonaOrganizationID, options)
+        .archiveWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Create workspace snapshot
+     * @summary [DEPRECATED] Create workspace backup
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createSnapshot(
+    createBackupWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Workspace> {
       return localVarFp
-        .createSnapshot(workspaceId, xDaytonaOrganizationID, options)
+        .createBackupWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Create a new workspace
+     * @summary [DEPRECATED] Create a new workspace
      * @param {CreateWorkspace} createWorkspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    createWorkspace(
+    createWorkspaceDeprecated(
       createWorkspace: CreateWorkspace,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Workspace> {
       return localVarFp
-        .createWorkspace(createWorkspace, xDaytonaOrganizationID, options)
+        .createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Delete workspace
+     * @summary [DEPRECATED] Delete workspace
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} force
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    deleteWorkspace(
+    deleteWorkspaceDeprecated(
       workspaceId: string,
       force: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .deleteWorkspace(workspaceId, force, xDaytonaOrganizationID, options)
+        .deleteWorkspaceDeprecated(workspaceId, force, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get build logs
+     * @summary [DEPRECATED] Get build logs
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [follow] Whether to follow the logs stream
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getBuildLogs(
+    getBuildLogsWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       follow?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .getBuildLogs(workspaceId, xDaytonaOrganizationID, follow, options)
+        .getBuildLogsWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, follow, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get preview URL for a workspace port
+     * @summary [DEPRECATED] Get preview URL for a workspace port
      * @param {string} workspaceId ID of the workspace
      * @param {number} port Port number to get preview URL for
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getPortPreviewUrl(
+    getPortPreviewUrlWorkspaceDeprecated(
       workspaceId: string,
       port: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<PortPreviewUrl> {
       return localVarFp
-        .getPortPreviewUrl(workspaceId, port, xDaytonaOrganizationID, options)
+        .getPortPreviewUrlWorkspaceDeprecated(workspaceId, port, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Get workspace details
+     * @summary [DEPRECATED] Get workspace details
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    getWorkspace(
+    getWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Workspace> {
       return localVarFp
-        .getWorkspace(workspaceId, xDaytonaOrganizationID, verbose, options)
+        .getWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, verbose, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary List all workspaces
+     * @summary [DEPRECATED] List all workspaces
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {boolean} [verbose] Include verbose output
      * @param {string} [labels] JSON encoded labels to filter by
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    listWorkspaces(
+    listWorkspacesDeprecated(
       xDaytonaOrganizationID?: string,
       verbose?: boolean,
       labels?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<Array<Workspace>> {
       return localVarFp
-        .listWorkspaces(xDaytonaOrganizationID, verbose, labels, options)
+        .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Replace workspace labels
+     * @summary [DEPRECATED] Replace workspace labels
      * @param {string} workspaceId ID of the workspace
-     * @param {WorkspaceLabels} workspaceLabels
+     * @param {SandboxLabels} sandboxLabels
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    replaceLabels(
+    replaceLabelsWorkspaceDeprecated(
       workspaceId: string,
-      workspaceLabels: WorkspaceLabels,
+      sandboxLabels: SandboxLabels,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
-    ): AxiosPromise<WorkspaceLabels> {
+    ): AxiosPromise<SandboxLabels> {
       return localVarFp
-        .replaceLabels(workspaceId, workspaceLabels, xDaytonaOrganizationID, options)
+        .replaceLabelsWorkspaceDeprecated(workspaceId, sandboxLabels, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Set workspace auto-archive interval
+     * @summary [DEPRECATED] Set workspace auto-archive interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setAutoArchiveInterval(
+    setAutoArchiveIntervalWorkspaceDeprecated(
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .setAutoArchiveInterval(workspaceId, interval, xDaytonaOrganizationID, options)
+        .setAutoArchiveIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Set workspace auto-stop interval
+     * @summary [DEPRECATED] Set workspace auto-stop interval
      * @param {string} workspaceId ID of the workspace
      * @param {number} interval Auto-stop interval in minutes (0 to disable)
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    setAutostopInterval(
+    setAutostopIntervalWorkspaceDeprecated(
       workspaceId: string,
       interval: number,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .setAutostopInterval(workspaceId, interval, xDaytonaOrganizationID, options)
+        .setAutostopIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Start workspace
+     * @summary [DEPRECATED] Start workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    startWorkspace(
+    startWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .startWorkspace(workspaceId, xDaytonaOrganizationID, options)
+        .startWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Stop workspace
+     * @summary [DEPRECATED] Stop workspace
      * @param {string} workspaceId ID of the workspace
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    stopWorkspace(
+    stopWorkspaceDeprecated(
       workspaceId: string,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .stopWorkspace(workspaceId, xDaytonaOrganizationID, options)
+        .stopWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
     /**
      *
-     * @summary Update public status
+     * @summary [DEPRECATED] Update public status
      * @param {string} workspaceId ID of the workspace
      * @param {boolean} isPublic Public status to set
      * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
      * @param {*} [options] Override http request option.
+     * @deprecated
      * @throws {RequiredError}
      */
-    updatePublicStatus(
+    updatePublicStatusWorkspaceDeprecated(
       workspaceId: string,
       isPublic: boolean,
       xDaytonaOrganizationID?: string,
       options?: RawAxiosRequestConfig,
     ): AxiosPromise<void> {
       return localVarFp
-        .updatePublicStatus(workspaceId, isPublic, xDaytonaOrganizationID, options)
+        .updatePublicStatusWorkspaceDeprecated(workspaceId, isPublic, xDaytonaOrganizationID, options)
         .then((request) => request(axios, basePath))
     },
   }
@@ -1482,269 +1530,299 @@ export const WorkspaceApiFactory = function (configuration?: Configuration, base
 export class WorkspaceApi extends BaseAPI {
   /**
    *
-   * @summary Archive workspace
+   * @summary [DEPRECATED] Archive workspace
    * @param {string} workspaceId
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public archiveWorkspace(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public archiveWorkspaceDeprecated(
+    workspaceId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return WorkspaceApiFp(this.configuration)
-      .archiveWorkspace(workspaceId, xDaytonaOrganizationID, options)
+      .archiveWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Create workspace snapshot
+   * @summary [DEPRECATED] Create workspace backup
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public createSnapshot(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public createBackupWorkspaceDeprecated(
+    workspaceId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return WorkspaceApiFp(this.configuration)
-      .createSnapshot(workspaceId, xDaytonaOrganizationID, options)
+      .createBackupWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Create a new workspace
+   * @summary [DEPRECATED] Create a new workspace
    * @param {CreateWorkspace} createWorkspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public createWorkspace(
+  public createWorkspaceDeprecated(
     createWorkspace: CreateWorkspace,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .createWorkspace(createWorkspace, xDaytonaOrganizationID, options)
+      .createWorkspaceDeprecated(createWorkspace, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Delete workspace
+   * @summary [DEPRECATED] Delete workspace
    * @param {string} workspaceId ID of the workspace
    * @param {boolean} force
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public deleteWorkspace(
+  public deleteWorkspaceDeprecated(
     workspaceId: string,
     force: boolean,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .deleteWorkspace(workspaceId, force, xDaytonaOrganizationID, options)
+      .deleteWorkspaceDeprecated(workspaceId, force, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get build logs
+   * @summary [DEPRECATED] Get build logs
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [follow] Whether to follow the logs stream
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public getBuildLogs(
+  public getBuildLogsWorkspaceDeprecated(
     workspaceId: string,
     xDaytonaOrganizationID?: string,
     follow?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .getBuildLogs(workspaceId, xDaytonaOrganizationID, follow, options)
+      .getBuildLogsWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, follow, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get preview URL for a workspace port
+   * @summary [DEPRECATED] Get preview URL for a workspace port
    * @param {string} workspaceId ID of the workspace
    * @param {number} port Port number to get preview URL for
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public getPortPreviewUrl(
+  public getPortPreviewUrlWorkspaceDeprecated(
     workspaceId: string,
     port: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .getPortPreviewUrl(workspaceId, port, xDaytonaOrganizationID, options)
+      .getPortPreviewUrlWorkspaceDeprecated(workspaceId, port, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Get workspace details
+   * @summary [DEPRECATED] Get workspace details
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [verbose] Include verbose output
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public getWorkspace(
+  public getWorkspaceDeprecated(
     workspaceId: string,
     xDaytonaOrganizationID?: string,
     verbose?: boolean,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .getWorkspace(workspaceId, xDaytonaOrganizationID, verbose, options)
+      .getWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, verbose, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary List all workspaces
+   * @summary [DEPRECATED] List all workspaces
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {boolean} [verbose] Include verbose output
    * @param {string} [labels] JSON encoded labels to filter by
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public listWorkspaces(
+  public listWorkspacesDeprecated(
     xDaytonaOrganizationID?: string,
     verbose?: boolean,
     labels?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .listWorkspaces(xDaytonaOrganizationID, verbose, labels, options)
+      .listWorkspacesDeprecated(xDaytonaOrganizationID, verbose, labels, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Replace workspace labels
+   * @summary [DEPRECATED] Replace workspace labels
    * @param {string} workspaceId ID of the workspace
-   * @param {WorkspaceLabels} workspaceLabels
+   * @param {SandboxLabels} sandboxLabels
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public replaceLabels(
+  public replaceLabelsWorkspaceDeprecated(
     workspaceId: string,
-    workspaceLabels: WorkspaceLabels,
+    sandboxLabels: SandboxLabels,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .replaceLabels(workspaceId, workspaceLabels, xDaytonaOrganizationID, options)
+      .replaceLabelsWorkspaceDeprecated(workspaceId, sandboxLabels, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Set workspace auto-archive interval
+   * @summary [DEPRECATED] Set workspace auto-archive interval
    * @param {string} workspaceId ID of the workspace
    * @param {number} interval Auto-archive interval in minutes (0 means the maximum interval will be used)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public setAutoArchiveInterval(
+  public setAutoArchiveIntervalWorkspaceDeprecated(
     workspaceId: string,
     interval: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .setAutoArchiveInterval(workspaceId, interval, xDaytonaOrganizationID, options)
+      .setAutoArchiveIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Set workspace auto-stop interval
+   * @summary [DEPRECATED] Set workspace auto-stop interval
    * @param {string} workspaceId ID of the workspace
    * @param {number} interval Auto-stop interval in minutes (0 to disable)
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public setAutostopInterval(
+  public setAutostopIntervalWorkspaceDeprecated(
     workspaceId: string,
     interval: number,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .setAutostopInterval(workspaceId, interval, xDaytonaOrganizationID, options)
+      .setAutostopIntervalWorkspaceDeprecated(workspaceId, interval, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Start workspace
+   * @summary [DEPRECATED] Start workspace
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public startWorkspace(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public startWorkspaceDeprecated(
+    workspaceId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return WorkspaceApiFp(this.configuration)
-      .startWorkspace(workspaceId, xDaytonaOrganizationID, options)
+      .startWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Stop workspace
+   * @summary [DEPRECATED] Stop workspace
    * @param {string} workspaceId ID of the workspace
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public stopWorkspace(workspaceId: string, xDaytonaOrganizationID?: string, options?: RawAxiosRequestConfig) {
+  public stopWorkspaceDeprecated(
+    workspaceId: string,
+    xDaytonaOrganizationID?: string,
+    options?: RawAxiosRequestConfig,
+  ) {
     return WorkspaceApiFp(this.configuration)
-      .stopWorkspace(workspaceId, xDaytonaOrganizationID, options)
+      .stopWorkspaceDeprecated(workspaceId, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 
   /**
    *
-   * @summary Update public status
+   * @summary [DEPRECATED] Update public status
    * @param {string} workspaceId ID of the workspace
    * @param {boolean} isPublic Public status to set
    * @param {string} [xDaytonaOrganizationID] Use with JWT to specify the organization ID
    * @param {*} [options] Override http request option.
+   * @deprecated
    * @throws {RequiredError}
    * @memberof WorkspaceApi
    */
-  public updatePublicStatus(
+  public updatePublicStatusWorkspaceDeprecated(
     workspaceId: string,
     isPublic: boolean,
     xDaytonaOrganizationID?: string,
     options?: RawAxiosRequestConfig,
   ) {
     return WorkspaceApiFp(this.configuration)
-      .updatePublicStatus(workspaceId, isPublic, xDaytonaOrganizationID, options)
+      .updatePublicStatusWorkspaceDeprecated(workspaceId, isPublic, xDaytonaOrganizationID, options)
       .then((request) => request(this.axios, this.basePath))
   }
 }

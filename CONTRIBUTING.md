@@ -25,7 +25,7 @@ You might find things that can be improved while you are using Daytona. You can 
 
 - A new feature or an enhancement to an existing feature will improve the utility or usability of Daytona.
 - Daytona crashes, or you encounter a bug that can only be resolved by restarting Daytona.
-- An error occurs that is unrecoverable, causes workspace integrity problems or loss, or generally prevents you from using a workspace.
+- An error occurs that is unrecoverable, causes Sandbox integrity problems or loss, or generally prevents you from using a Sandbox.
 
 Before creating a new issue, please confirm that an existing issue doesn't already exist.
 
@@ -85,7 +85,7 @@ While working on a PR, if you see something that can be refactored to comply, go
 API and service method conventions:
 
 1. Avoid using model names in service methods
-   - e.g. `Create` instead of `CreateWorkspace`, `Find` instead of `FindWorkspace`
+   - e.g. `Create` instead of `CreateSandbox`, `Find` instead of `FindSandbox`
 1. Use appropriate verbs in the UI
    - e.g. `Create API Key` instead of `Generate API Key` since the method is called `Create`
 1. Refer to the table below for a connection between API and service methods
@@ -101,7 +101,7 @@ API and service method conventions:
 
 Here is what being a contributor means for you:
 
-- License all our contributions to the project under the Apache License, Version 2.0
+- License all our contributions to the project under the AGPL 3.0 License or the Apache 2.0 License
 - Have the legal rights to license our contributions ourselves, or get permission to license them from our employers, clients, or others who may have them
 
 For more information, see the [README](README.md) and feel free to reach out to us on [Slack](https://go.daytona.io/slack).

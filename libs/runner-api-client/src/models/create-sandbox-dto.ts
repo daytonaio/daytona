@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -63,12 +68,6 @@ export interface CreateSandboxDTO {
   id: string
   /**
    *
-   * @type {string}
-   * @memberof CreateSandboxDTO
-   */
-  image: string
-  /**
-   *
    * @type {number}
    * @memberof CreateSandboxDTO
    */
@@ -85,6 +84,12 @@ export interface CreateSandboxDTO {
    * @memberof CreateSandboxDTO
    */
   registry?: RegistryDTO
+  /**
+   *
+   * @type {string}
+   * @memberof CreateSandboxDTO
+   */
+  snapshot: string
   /**
    *
    * @type {number}

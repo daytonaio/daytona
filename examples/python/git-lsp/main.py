@@ -1,10 +1,23 @@
-from daytona_sdk import Daytona
+from daytona import CreateSandboxFromImageParams, Daytona, Image
 
 
 def main():
     daytona = Daytona()
 
-    sandbox = daytona.create()
+    sandbox = daytona.create(
+        CreateSandboxFromImageParams(
+            image=(
+                Image.base("ubuntu:25.10").run_commands(
+                    "apt-get update && apt-get install -y --no-install-recommends nodejs npm coreutils",
+                    "curl -fsSL https://deb.nodesource.com/setup_20.x | bash -",
+                    "apt-get install -y nodejs",
+                    "npm install -g ts-node typescript typescript-language-server",
+                )
+            ),
+        ),
+        timeout=200,
+        on_snapshot_create_logs=print,
+    )
 
     try:
         project_dir = "learn-typescript"
@@ -45,7 +58,7 @@ def main():
         print("Completions:", completions)
 
     except Exception as error:
-        print("Error creating sandbox:", error)
+        print("Error executing example:", error)
     finally:
         # Cleanup
         daytona.delete(sandbox)

@@ -1,10 +1,9 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { CompletionList, LspSymbol, ToolboxApi } from '@daytonaio/api-client'
-import { SandboxInstance } from './Sandbox'
 import { prefixRelativePath } from './utils/Path'
 
 /**
@@ -53,7 +52,7 @@ export class LspServer {
     private readonly languageId: LspLanguageId,
     private readonly pathToProject: string,
     private readonly toolboxApi: ToolboxApi,
-    private readonly instance: SandboxInstance,
+    private readonly sandboxId: string,
   ) {
     if (!Object.values(LspLanguageId).includes(this.languageId)) {
       throw new Error(
@@ -74,7 +73,7 @@ export class LspServer {
    * // Now ready for LSP operations
    */
   public async start(): Promise<void> {
-    await this.toolboxApi.lspStart(this.instance.id, {
+    await this.toolboxApi.lspStart(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
     })
@@ -91,7 +90,7 @@ export class LspServer {
    * await lsp.stop();  // Clean up resources
    */
   public async stop(): Promise<void> {
-    await this.toolboxApi.lspStop(this.instance.id, {
+    await this.toolboxApi.lspStop(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
     })
@@ -112,7 +111,7 @@ export class LspServer {
    * // Now can get completions, symbols, etc. for this file
    */
   public async didOpen(path: string): Promise<void> {
-    await this.toolboxApi.lspDidOpen(this.instance.id, {
+    await this.toolboxApi.lspDidOpen(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
       uri: 'file://' + prefixRelativePath(this.pathToProject, path),
@@ -132,7 +131,7 @@ export class LspServer {
    * await lsp.didClose('workspace/project/src/index.ts');
    */
   public async didClose(path: string): Promise<void> {
-    await this.toolboxApi.lspDidClose(this.instance.id, {
+    await this.toolboxApi.lspDidClose(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
       uri: 'file://' + prefixRelativePath(this.pathToProject, path),
@@ -158,7 +157,7 @@ export class LspServer {
    */
   public async documentSymbols(path: string): Promise<LspSymbol[]> {
     const response = await this.toolboxApi.lspDocumentSymbols(
-      this.instance.id,
+      this.sandboxId,
       this.languageId,
       this.pathToProject,
       'file://' + prefixRelativePath(this.pathToProject, path),
@@ -199,7 +198,7 @@ export class LspServer {
    */
   public async sandboxSymbols(query: string): Promise<LspSymbol[]> {
     const response = await this.toolboxApi.lspWorkspaceSymbols(
-      this.instance.id,
+      this.sandboxId,
       this.languageId,
       this.pathToProject,
       query,
@@ -235,7 +234,7 @@ export class LspServer {
    * });
    */
   public async completions(path: string, position: Position): Promise<CompletionList> {
-    const response = await this.toolboxApi.lspCompletions(this.instance.id, {
+    const response = await this.toolboxApi.lspCompletions(this.sandboxId, {
       languageId: this.languageId,
       pathToProject: this.pathToProject,
       uri: 'file://' + prefixRelativePath(this.pathToProject, path),

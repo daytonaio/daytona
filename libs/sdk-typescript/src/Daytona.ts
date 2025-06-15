@@ -1,19 +1,18 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import {
   Configuration,
-  ImagesApi,
-  ImageState,
+  SnapshotsApi,
   ObjectStorageApi,
-  WorkspaceApi as SandboxApi,
-  WorkspaceState as SandboxState,
-  CreateWorkspaceTargetEnum as SandboxTargetRegion,
+  SandboxApi,
+  SandboxState,
+  CreateSandboxTargetEnum,
   ToolboxApi,
   VolumesApi,
-  WorkspaceVolume,
+  SandboxVolume,
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import * as dotenv from 'dotenv'
@@ -21,10 +20,11 @@ import { SandboxPythonCodeToolbox } from './code-toolbox/SandboxPythonCodeToolbo
 import { SandboxTsCodeToolbox } from './code-toolbox/SandboxTsCodeToolbox'
 import { DaytonaError, DaytonaNotFoundError } from './errors/DaytonaError'
 import { Image } from './Image'
-import { ObjectStorage } from './ObjectStorage'
-import { Sandbox, SandboxInstance, Sandbox as Workspace } from './Sandbox'
-import { processStreamingResponse } from './utils/Stream'
+import { Sandbox } from './Sandbox'
+import { SnapshotService } from './Snapshot'
 import { VolumeService } from './Volume'
+import * as packageJson from '../package.json'
+import { processStreamingResponse } from './utils/Stream'
 
 /**
  * Represents a volume mount for a Sandbox.
@@ -34,7 +34,7 @@ import { VolumeService } from './Volume'
  * @property {string} mountPath - Path on the Sandbox to mount the Volume
  */
 
-export interface VolumeMount extends WorkspaceVolume {
+export interface VolumeMount extends SandboxVolume {
   volumeId: string
   mountPath: string
 }
@@ -50,7 +50,7 @@ export interface VolumeMount extends WorkspaceVolume {
  * is provided, and must be set either here or in the environment variable `DAYTONA_ORGANIZATION_ID`.
  * @property {string} apiUrl - URL of the Daytona API. Defaults to 'https://app.daytona.io/api'
  * if not set here and not set in environment variable DAYTONA_API_URL.
- * @property {CreateSandboxTargetEnum} target - Target location for Sandboxes
+ * @property {string} target - Target location for Sandboxes
  *
  * @example
  * const config: DaytonaConfig = {
@@ -75,7 +75,7 @@ export interface DaytonaConfig {
    */
   serverUrl?: string
   /** Target environment for sandboxes */
-  target?: SandboxTargetRegion
+  target?: string
 }
 
 /**
@@ -93,84 +93,72 @@ export enum CodeLanguage {
  * @interface
  * @property {number} [cpu] - CPU allocation for the Sandbox in cores
  * @property {number} [gpu] - GPU allocation for the Sandbox in units
- * @property {number} [memory] - Memory allocation for the Sandbox in GB
- * @property {number} [disk] - Disk space allocation for the Sandbox in GB
+ * @property {number} [memory] - Memory allocation for the Sandbox in GiB
+ * @property {number} [disk] - Disk space allocation for the Sandbox in GiB
  *
  * @example
  * const resources: SandboxResources = {
  *     cpu: 2,
- *     memory: 4,  // 4GB RAM
- *     disk: 20    // 20GB disk
+ *     memory: 4,  // 4GiB RAM
+ *     disk: 20    // 20GiB disk
  * };
  */
-export interface SandboxResources {
+export interface Resources {
   /** CPU allocation for the Sandbox */
   cpu?: number
   /** GPU allocation for the Sandbox */
   gpu?: number
-  /** Memory allocation for the Sandbox in GB */
+  /** Memory allocation for the Sandbox in GiB */
   memory?: number
-  /** Disk space allocation for the Sandbox in GB */
+  /** Disk space allocation for the Sandbox in GiB */
   disk?: number
+}
+
+/**
+ * Base parameters for creating a new Sandbox.
+ *
+ * @interface
+ * @property {string} [user] - Optional os user to use for the Sandbox
+ * @property {CodeLanguage | string} [language] - Programming language for direct code execution
+ * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
+ * @property {Record<string, string>} [labels] - Sandbox labels
+ * @property {boolean} [public] - Is the Sandbox port preview public
+ * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled). Default is 15 minutes.
+ * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used). Default is 7 days.
+ */
+export type CreateSandboxBaseParams = {
+  user?: string
+  language?: CodeLanguage | string
+  envVars?: Record<string, string>
+  labels?: Record<string, string>
+  public?: boolean
+  autoStopInterval?: number
+  autoArchiveInterval?: number
+  volumes?: VolumeMount[]
 }
 
 /**
  * Parameters for creating a new Sandbox.
  *
  * @interface
- * @property {string | Image} [image] - Optional Docker image to use for the Sandbox or an Image instance
- * @property {string} [user] - Optional os user to use for the Sandbox
- * @property {CodeLanguage | string} [language] - Programming language for direct code execution
- * @property {Record<string, string>} [envVars] - Optional environment variables to set in the Sandbox
- * @property {Record<string, string>} [labels] - Sandbox labels
- * @property {boolean} [public] - Is the Sandbox port preview public
- * @property {SandboxResources} [resources] - Resource allocation for the Sandbox
- * @property {boolean} [async] - If true, will not wait for the Sandbox to be ready before returning
- * @property {number} [timeout] - Timeout in seconds for the Sandbox to be ready (0 means no timeout)
- * @property {number} [autoStopInterval] - Auto-stop interval in minutes (0 means disabled)
- * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes (0 means the maximum interval will be used)
- *
- * @example
- * const params: CreateSandboxParams = {
- *     language: 'typescript',
- *     envVars: { NODE_ENV: 'development' },
- *     resources: {
- *         cpu: 2,
- *         memory: 4 // 4GB RAM
- *     },
- *     autoStopInterval: 60,  // Auto-stop after 1 hour of inactivity
- *     autoArchiveInterval: 60 // Auto-archive after a Sandbox has been stopped for 1 hour
- * };
- * const sandbox = await daytona.create(params, 50);
+ * @property {string | Image} [image] - Custom Docker image to use for the Sandbox. If an Image object is provided,
+ * the image will be dynamically built.
+ * @property {Resources} [resources] - Resource allocation for the Sandbox. If not provided, sandbox will
+ * have default resources.
  */
-export type CreateSandboxParams = {
-  /** Optional Docker image to use for the Sandbox or an Image instance */
-  image?: string | Image
-  /** Optional os user to use for the Sandbox */
-  user?: string
-  /** Programming language for direct code execution */
-  language?: CodeLanguage | string
-  /** Optional environment variables to set in the sandbox */
-  envVars?: Record<string, string>
-  /** Sandbox labels */
-  labels?: Record<string, string>
-  /** Is the Sandbox port preview public */
-  public?: boolean
-  /** Resource allocation for the Sandbox */
-  resources?: SandboxResources
-  /** If true, will not wait for the Sandbox to be ready before returning */
-  async?: boolean
-  /**
-   * Timeout in seconds, for the Sandbox to be ready (0 means no timeout)
-   * @deprecated Use methods with `timeout` parameter instead
-   */
-  timeout?: number
-  /** Auto-stop interval in minutes (0 means disabled) (must be a non-negative integer) */
-  autoStopInterval?: number
-  /** Auto-archive interval in minutes (0 means the maximum interval will be used) (must be a non-negative integer) */
-  autoArchiveInterval?: number
-  /** List of volumes to mount in the Sandbox */
-  volumes?: VolumeMount[]
+export type CreateSandboxFromImageParams = CreateSandboxBaseParams & {
+  image: string | Image
+  resources?: Resources
+}
+
+/**
+ * Parameters for creating a new Sandbox from a snapshot.
+ *
+ * @interface
+ * @property {string} [snapshot] - Name of the snapshot to use for the Sandbox.
+ */
+export type CreateSandboxFromSnapshotParams = CreateSandboxBaseParams & {
+  snapshot?: string
 }
 
 /**
@@ -191,6 +179,7 @@ export type SandboxFilter = {
  * Can be initialized either with explicit configuration or using environment variables.
  *
  * @property {VolumeService} volume - Service for managing Daytona Volumes
+ * @property {SnapshotService} snapshot - Service for managing Daytona Snapshots
  *
  * @example
  * // Using environment variables
@@ -212,14 +201,14 @@ export type SandboxFilter = {
 export class Daytona {
   private readonly sandboxApi: SandboxApi
   private readonly toolboxApi: ToolboxApi
-  private readonly imagesApi: ImagesApi
   private readonly objectStorageApi: ObjectStorageApi
-  private readonly target: SandboxTargetRegion
+  private readonly target?: string
   private readonly apiKey?: string
   private readonly jwtToken?: string
   private readonly organizationId?: string
   private readonly apiUrl: string
   public readonly volume: VolumeService
+  public readonly snapshot: SnapshotService
 
   /**
    * Creates a new Daytona client instance.
@@ -228,8 +217,6 @@ export class Daytona {
    * @throws {DaytonaError} - `DaytonaError` - When API key is missing
    */
   constructor(config?: DaytonaConfig) {
-    this.remove = this.delete.bind(this)
-
     dotenv.config()
     dotenv.config({ path: '.env.local', override: true })
     const apiKey = !config?.apiKey && config?.jwtToken ? undefined : config?.apiKey || process?.env['DAYTONA_API_KEY']
@@ -244,8 +231,8 @@ export class Daytona {
       process?.env['DAYTONA_API_URL'] ||
       process?.env['DAYTONA_SERVER_URL'] ||
       'https://app.daytona.io/api'
-    const envTarget = process?.env['DAYTONA_TARGET'] as SandboxTargetRegion
-    const target = config?.target || envTarget || SandboxTargetRegion.US
+    const envTarget = process?.env['DAYTONA_TARGET']
+    const target = config?.target || envTarget
 
     if (process?.env['DAYTONA_SERVER_URL'] && !process?.env['DAYTONA_API_URL']) {
       console.warn(
@@ -273,6 +260,7 @@ export class Daytona {
         headers: {
           Authorization: `Bearer ${this.apiKey || this.jwtToken}`,
           'X-Daytona-Source': 'typescript-sdk',
+          'X-Daytona-SDK-Version': packageJson.version,
           ...orgHeader,
         },
       },
@@ -311,64 +299,55 @@ export class Daytona {
 
     this.sandboxApi = new SandboxApi(configuration, '', axiosInstance)
     this.toolboxApi = new ToolboxApi(configuration, '', axiosInstance)
-    this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
-    this.imagesApi = new ImagesApi(configuration, '', axiosInstance)
     this.objectStorageApi = new ObjectStorageApi(configuration, '', axiosInstance)
+    this.volume = new VolumeService(new VolumesApi(configuration, '', axiosInstance))
+    this.snapshot = new SnapshotService(new SnapshotsApi(configuration, '', axiosInstance), this.objectStorageApi)
   }
 
   /**
-   * @deprecated Use `create` with `options` object instead. This method will be removed in a future version.
+   * Creates Sandboxes from specified or default snapshot. You can specify various parameters,
+   * including language, image, environment variables, and volumes.
    *
-   * Creates Sandboxes with default or custom configurations. You can specify various parameters,
-   * including language, image, resources, environment variables, and volumes for the Sandbox.
-   *
-   * @param {CreateSandboxParams} [params] - Parameters for Sandbox creation
-   * @param {number} [timeout] - Timeout in seconds (0 means no timeout, default is 60)
+   * @param {CreateSandboxFromSnapshotParams} [params] - Parameters for Sandbox creation from snapshot
+   * @param {object} [options] - Options for the create operation
+   * @param {number} [options.timeout] - Timeout in seconds (0 means no timeout, default is 60)
    * @returns {Promise<Sandbox>} The created Sandbox instance
    *
    * @example
-   * // Create a default sandbox
    * const sandbox = await daytona.create();
    *
    * @example
    * // Create a custom sandbox
-   * const params: CreateSandboxParams = {
+   * const params: CreateSandboxFromSnapshotParams = {
    *     language: 'typescript',
-   *     image: 'node:18',
+   *     snapshot: 'my-snapshot-id',
    *     envVars: {
    *         NODE_ENV: 'development',
    *         DEBUG: 'true'
    *     },
-   *     resources: {
-   *         cpu: 2,
-   *         memory: 4 // 4GB RAM
-   *     },
-   *     autoStopInterval: 60,
-   *     autoArchiveInterval: 60
+   *     autoStopInterval: 60
    * };
-   * const sandbox = await daytona.create(params, 40);
+   * const sandbox = await daytona.create(params, { timeout: 100 });
    */
-  public async create(params?: CreateSandboxParams, options?: number): Promise<Sandbox>
+  public async create(params?: CreateSandboxFromSnapshotParams, options?: { timeout?: number }): Promise<Sandbox>
   /**
-   * Creates Sandboxes with default or custom configurations. You can specify various parameters,
-   * including language, image, resources, environment variables, and volumes for the Sandbox.
+   * Creates Sandboxes from specified image available on some registry or declarative Daytona Image. You can specify various parameters,
+   * including resources, language, image, environment variables, and volumes. Daytona creates snapshot from
+   * provided image and uses it to create Sandbox.
    *
-   * @param {CreateSandboxParams} [params] - Parameters for Sandbox creation
+   * @param {CreateSandboxFromImageParams} [params] - Parameters for Sandbox creation from image
    * @param {object} [options] - Options for the create operation
    * @param {number} [options.timeout] - Timeout in seconds (0 means no timeout, default is 60)
-   * @param {function} [options.onImageBuildLogs] - Callback function to handle image build logs.
-   * It's invoked only when `params.image` is an instance of `Image` and there's no existing
-   * image in Daytona with the same configuration.
+   * @param {function} [options.onSnapshotCreateLogs] - Callback function to handle snapshot creation logs.
    * @returns {Promise<Sandbox>} The created Sandbox instance
    *
    * @example
-   * const image = Image.debianSlim('3.12').pipInstall('numpy');
-   * const sandbox = await daytona.create({ image }, { timeout: 90, onImageBuildLogs: console.log });
+   * const sandbox = await daytona.create({ image: 'debian:12.9' }, { timeout: 90, onSnapshotCreateLogs: console.log });
    *
    * @example
    * // Create a custom sandbox
-   * const image = Image.debianSlim('3.12').pipInstall('numpy');
-   * const params: CreateSandboxParams = {
+   * const image = Image.base('alpine:3.18').pipInstall('numpy');
+   * const params: CreateSandboxFromImageParams = {
    *     language: 'typescript',
    *     image,
    *     envVars: {
@@ -381,15 +360,15 @@ export class Daytona {
    *     },
    *     autoStopInterval: 60
    * };
-   * const sandbox = await daytona.create(params, { timeout: 100, onImageBuildLogs: console.log });
+   * const sandbox = await daytona.create(params, { timeout: 100, onSnapshotCreateLogs: console.log });
    */
   public async create(
-    params?: CreateSandboxParams,
-    options?: { onImageBuildLogs?: (chunk: string) => void; timeout?: number },
+    params?: CreateSandboxFromImageParams,
+    options?: { onSnapshotCreateLogs?: (chunk: string) => void; timeout?: number },
   ): Promise<Sandbox>
   public async create(
-    params?: CreateSandboxParams,
-    options: number | { onImageBuildLogs?: (chunk: string) => void; timeout?: number } = { timeout: 60 },
+    params?: CreateSandboxFromSnapshotParams | CreateSandboxFromImageParams,
+    options: { onSnapshotCreateLogs?: (chunk: string) => void; timeout?: number } = { timeout: 60 },
   ): Promise<Sandbox> {
     const startTime = Date.now()
 
@@ -407,9 +386,7 @@ export class Daytona {
       labels['code-toolbox-language'] = params.language
     }
 
-    // remove this when params.timeout is removed
-    const effectiveTimeout = params.timeout || options.timeout
-    if (effectiveTimeout < 0) {
+    if (options.timeout < 0) {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
 
@@ -430,88 +407,92 @@ export class Daytona {
     const codeToolbox = this.getCodeToolbox(params.language as CodeLanguage)
 
     try {
-      // Handle Image instance if provided
-      let imageStr: string | undefined
       let buildInfo: any | undefined
+      let snapshot: string | undefined
+      let resources: Resources | undefined
 
-      if (typeof params.image === 'string') {
-        imageStr = params.image
-      } else if (params.image instanceof Image) {
-        const contextHashes = await this.processImageContext(params.image)
-        buildInfo = {
-          contextHashes,
-          dockerfileContent: params.image.dockerfile,
+      if ('snapshot' in params) {
+        snapshot = params.snapshot
+      }
+
+      if ('image' in params) {
+        if (typeof params.image === 'string') {
+          buildInfo = {
+            dockerfileContent: Image.base(params.image).dockerfile,
+          }
+        } else if (params.image instanceof Image) {
+          const contextHashes = await SnapshotService.processImageContext(this.objectStorageApi, params.image)
+          buildInfo = {
+            contextHashes,
+            dockerfileContent: params.image.dockerfile,
+          }
         }
       }
 
-      const response = await this.sandboxApi.createWorkspace(
+      if ('resources' in params) {
+        resources = params.resources
+      }
+
+      const response = await this.sandboxApi.createSandbox(
         {
-          image: imageStr,
+          snapshot: snapshot,
           buildInfo,
           user: params.user,
           env: params.envVars || {},
           labels: params.labels,
           public: params.public,
-          target: this.target,
-          cpu: params.resources?.cpu,
-          gpu: params.resources?.gpu,
-          memory: params.resources?.memory,
-          disk: params.resources?.disk,
+          target: this.target as CreateSandboxTargetEnum,
+          cpu: resources?.cpu,
+          gpu: resources?.gpu,
+          memory: resources?.memory,
+          disk: resources?.disk,
           autoStopInterval: params.autoStopInterval,
           autoArchiveInterval: params.autoArchiveInterval,
           volumes: params.volumes,
         },
         undefined,
         {
-          timeout: effectiveTimeout * 1000,
+          timeout: options.timeout * 1000,
         },
       )
 
       let sandboxInstance = response.data
 
-      if (sandboxInstance.state === SandboxState.PENDING_BUILD && options.onImageBuildLogs) {
-        const terminalStates: SandboxState[] = [SandboxState.STARTED, SandboxState.STARTING, SandboxState.ERROR]
+      if (sandboxInstance.state === SandboxState.PENDING_BUILD && options.onSnapshotCreateLogs) {
+        const terminalStates: SandboxState[] = [
+          SandboxState.STARTED,
+          SandboxState.STARTING,
+          SandboxState.ERROR,
+          SandboxState.BUILD_FAILED,
+        ]
 
         while (sandboxInstance.state === SandboxState.PENDING_BUILD) {
           await new Promise((resolve) => setTimeout(resolve, 1000))
-          sandboxInstance = (await this.sandboxApi.getWorkspace(sandboxInstance.id)).data
+          sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
         }
 
         await processStreamingResponse(
           () => this.sandboxApi.getBuildLogs(sandboxInstance.id, undefined, true, { responseType: 'stream' }),
-          options.onImageBuildLogs,
+          (chunk) => options.onSnapshotCreateLogs?.(chunk.trimEnd()),
           async () => {
-            sandboxInstance = (await this.sandboxApi.getWorkspace(sandboxInstance.id)).data
+            sandboxInstance = (await this.sandboxApi.getSandbox(sandboxInstance.id)).data
             return sandboxInstance.state !== undefined && terminalStates.includes(sandboxInstance.state)
           },
         )
       }
 
-      const sandboxInfo = Sandbox.toSandboxInfo(sandboxInstance)
-      sandboxInstance.info = {
-        ...sandboxInfo,
-        name: '',
-      }
+      const sandbox = new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
 
-      const sandbox = new Sandbox(
-        sandboxInstance.id,
-        sandboxInstance as SandboxInstance,
-        this.sandboxApi,
-        this.toolboxApi,
-        codeToolbox,
-      )
-
-      if (!params.async && sandbox.instance.state !== 'started') {
+      if (sandbox.state !== 'started') {
         const timeElapsed = Date.now() - startTime
-        await sandbox.waitUntilStarted(effectiveTimeout ? effectiveTimeout - timeElapsed / 1000 : 0)
+        await sandbox.waitUntilStarted(options.timeout ? options.timeout - timeElapsed / 1000 : 0)
       }
 
       return sandbox
     } catch (error) {
       if (error instanceof DaytonaError && error.message.includes('Operation timed out')) {
-        throw new DaytonaError(
-          `Failed to create and start sandbox within ${effectiveTimeout} seconds. Operation timed out.`,
-        )
+        const errMsg = `Failed to create and start sandbox within ${options.timeout} seconds. Operation timed out.`
+        throw new DaytonaError(errMsg)
       }
       throw error
     }
@@ -525,20 +506,15 @@ export class Daytona {
    *
    * @example
    * const sandbox = await daytona.get('my-sandbox-id');
-   * console.log(`Sandbox state: ${sandbox.instance.state}`);
+   * console.log(`Sandbox state: ${sandbox.state}`);
    */
   public async get(sandboxId: string): Promise<Sandbox> {
-    const response = await this.sandboxApi.getWorkspace(sandboxId)
+    const response = await this.sandboxApi.getSandbox(sandboxId)
     const sandboxInstance = response.data
     const language = sandboxInstance.labels && sandboxInstance.labels['code-toolbox-language']
     const codeToolbox = this.getCodeToolbox(language as CodeLanguage)
-    const sandboxInfo = Sandbox.toSandboxInfo(sandboxInstance)
-    sandboxInstance.info = {
-      ...sandboxInfo,
-      name: '',
-    }
 
-    return new Sandbox(sandboxId, sandboxInstance as SandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
+    return new Sandbox(sandboxInstance, this.sandboxApi, this.toolboxApi, codeToolbox)
   }
 
   /**
@@ -549,7 +525,7 @@ export class Daytona {
    *
    * @example
    * const sandbox = await daytona.findOne({ labels: { 'my-label': 'my-value' } });
-   * console.log(`Sandbox: ${await sandbox.info()}`);
+   * console.log(`Sandbox ID: ${sandbox.id}, State: ${sandbox.state}`);
    */
   public async findOne(filter: SandboxFilter): Promise<Sandbox> {
     if (filter.id) {
@@ -558,7 +534,8 @@ export class Daytona {
 
     const sandboxes = await this.list(filter.labels)
     if (sandboxes.length === 0) {
-      throw new DaytonaError(`No sandbox found with labels ${JSON.stringify(filter.labels)}`)
+      const errMsg = `No sandbox found with labels ${JSON.stringify(filter.labels)}`
+      throw new DaytonaError(errMsg)
     }
     return sandboxes[0]
   }
@@ -572,30 +549,19 @@ export class Daytona {
    * @example
    * const sandboxes = await daytona.list({ 'my-label': 'my-value' });
    * for (const sandbox of sandboxes) {
-   *     console.log(`${sandbox.id}: ${sandbox.instance.state}`);
+   *     console.log(`${sandbox.id}: ${sandbox.state}`);
    * }
    */
   public async list(labels?: Record<string, string>): Promise<Sandbox[]> {
-    const response = await this.sandboxApi.listWorkspaces(
+    const response = await this.sandboxApi.listSandboxes(
       undefined,
       undefined,
       labels ? JSON.stringify(labels) : undefined,
     )
     return response.data.map((sandbox) => {
       const language = sandbox.labels?.['code-toolbox-language'] as CodeLanguage
-      const sandboxInfo = Sandbox.toSandboxInfo(sandbox)
-      sandbox.info = {
-        ...sandboxInfo,
-        name: '',
-      }
 
-      return new Sandbox(
-        sandbox.id,
-        sandbox as SandboxInstance,
-        this.sandboxApi,
-        this.toolboxApi,
-        this.getCodeToolbox(language),
-      )
+      return new Sandbox(sandbox, this.sandboxApi, this.toolboxApi, this.getCodeToolbox(language))
     })
   }
 
@@ -641,123 +607,7 @@ export class Daytona {
    * await daytona.delete(sandbox);
    */
   public async delete(sandbox: Sandbox, timeout = 60) {
-    await this.sandboxApi.deleteWorkspace(sandbox.id, true, undefined, { timeout: timeout * 1000 })
-  }
-
-  /** @hidden */
-  public remove!: (sandbox: Sandbox, timeout?: number) => Promise<void>
-
-  /**
-   * Gets the Sandbox by ID.
-   *
-   * @param {string} workspaceId - The ID of the Sandbox to retrieve
-   * @returns {Promise<Workspace>} The Sandbox
-   *
-   * @deprecated Use `getCurrentSandbox` instead. This method will be removed in a future version.
-   */
-  public async getCurrentWorkspace(workspaceId: string): Promise<Workspace> {
-    return await this.getCurrentSandbox(workspaceId)
-  }
-
-  /**
-   * Gets the Sandbox by ID.
-   *
-   * @param {string} sandboxId - The ID of the Sandbox to retrieve
-   * @returns {Promise<Sandbox>} The Sandbox
-   *
-   * @example
-   * const sandbox = await daytona.getCurrentSandbox('my-sandbox-id');
-   * console.log(`Current sandbox state: ${sandbox.instance.state}`);
-   */
-  public async getCurrentSandbox(sandboxId: string): Promise<Sandbox> {
-    return await this.get(sandboxId)
-  }
-
-  /**
-   * Creates and registers a new image from the given Image definition.
-   *
-   * @param {string} name - The name of the image to create.
-   * @param {Image} image - The Image instance.
-   * @param {object} options - Options for the create operation.
-   * @param {boolean} options.verbose - Default is false. Whether to log progress information upon each state change of the image.
-   * @param {number} options.timeout - Default is no timeout. Timeout in seconds (0 means no timeout).
-   * @returns {Promise<void>}
-   *
-   * @example
-   * const image = Image.debianSlim('3.12').pipInstall('numpy');
-   * await daytona.createImage('my-python-image', image);
-   */
-  public async createImage(
-    name: string,
-    image: Image,
-    options: { onLogs?: (chunk: string) => void; timeout?: number } = {},
-  ): Promise<void> {
-    const contextHashes = await this.processImageContext(image)
-    let builtImage = (
-      await this.imagesApi.buildImage(
-        {
-          name,
-          buildInfo: {
-            contextHashes,
-            dockerfileContent: image.dockerfile,
-          },
-        },
-        undefined,
-        {
-          timeout: (options.timeout || 0) * 1000,
-        },
-      )
-    ).data
-
-    const terminalStates: ImageState[] = [ImageState.ACTIVE, ImageState.ERROR]
-    const imageRef = { builtImage }
-    let streamPromise: Promise<void> | undefined
-    const startLogStreaming = async () => {
-      if (!streamPromise) {
-        streamPromise = processStreamingResponse(
-          () => this.imagesApi.getImageBuildLogs(builtImage.id, undefined, true, { responseType: 'stream' }),
-          options.onLogs!,
-          async () => terminalStates.includes(imageRef.builtImage.state),
-        )
-      }
-    }
-
-    if (options.onLogs) {
-      options.onLogs(`Building image ${builtImage.name} (${builtImage.state})`)
-
-      if (builtImage.state !== ImageState.BUILD_PENDING) {
-        await startLogStreaming()
-      }
-    }
-
-    let previousState = builtImage.state
-    while (!terminalStates.includes(builtImage.state)) {
-      if (options.onLogs && previousState !== builtImage.state) {
-        if (builtImage.state !== ImageState.BUILD_PENDING && !streamPromise) {
-          await startLogStreaming()
-        }
-        options.onLogs(`Building image ${builtImage.name} (${builtImage.state})`)
-        previousState = builtImage.state
-      }
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      builtImage = (await this.imagesApi.getImage(builtImage.id)).data
-      imageRef.builtImage = builtImage
-    }
-
-    if (options.onLogs) {
-      if (streamPromise) {
-        await streamPromise
-      }
-      if (builtImage.state === ImageState.ACTIVE) {
-        options.onLogs(`Built image ${builtImage.name} (${builtImage.state})`)
-      }
-    }
-
-    if (builtImage.state === ImageState.ERROR) {
-      throw new DaytonaError(
-        `Failed to build image. Image ended in the ERROR state. name: ${builtImage.name}; error reason: ${builtImage.errorReason}`,
-      )
-    }
+    await this.sandboxApi.deleteSandbox(sandbox.id, true, undefined, { timeout: timeout * 1000 })
   }
 
   /**
@@ -776,44 +626,10 @@ export class Daytona {
       case CodeLanguage.PYTHON:
       case undefined:
         return new SandboxPythonCodeToolbox()
-      default:
-        throw new DaytonaError(
-          `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`,
-        )
+      default: {
+        const errMsg = `Unsupported language: ${language}, supported languages: ${Object.values(CodeLanguage).join(', ')}`
+        throw new DaytonaError(errMsg)
+      }
     }
-  }
-
-  /**
-   * Processes the image contexts by uploading them to object storage
-   *
-   * @private
-   * @param {Image} image - The Image instance.
-   * @returns {Promise<string[]>} The list of context hashes stored in object storage.
-   */
-  private async processImageContext(image: Image): Promise<string[]> {
-    if (!image.contextList || !image.contextList.length) {
-      return []
-    }
-
-    const pushAccessCreds = (await this.objectStorageApi.getPushAccess()).data
-    const objectStorage = new ObjectStorage({
-      endpointUrl: pushAccessCreds.storageUrl,
-      accessKeyId: pushAccessCreds.accessKey,
-      secretAccessKey: pushAccessCreds.secret,
-      sessionToken: pushAccessCreds.sessionToken,
-      bucketName: pushAccessCreds.bucket,
-    })
-
-    const contextHashes = []
-    for (const context of image.contextList) {
-      const contextHash = await objectStorage.upload(
-        context.sourcePath,
-        pushAccessCreds.organizationId,
-        context.archivePath,
-      )
-      contextHashes.push(contextHash)
-    }
-
-    return contextHashes
   }
 }

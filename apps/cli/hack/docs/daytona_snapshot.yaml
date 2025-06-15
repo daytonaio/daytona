@@ -1,0 +1,13 @@
+name: daytona snapshot
+synopsis: Manage Daytona snapshots
+description: Commands for managing Daytona snapshots
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona - Daytona CLI
+  - daytona snapshot create - Create a snapshot
+  - daytona snapshot delete - Delete a snapshot
+  - daytona snapshot list - List all snapshots
+  - daytona snapshot push - Push local snapshot

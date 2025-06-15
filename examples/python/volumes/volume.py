@@ -1,6 +1,6 @@
 import os
 
-from daytona_sdk import CreateSandboxParams, Daytona, VolumeMount
+from daytona import CreateSandboxFromSnapshotParams, Daytona, VolumeMount
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     # Mount the volume to the sandbox
     mount_dir_1 = "/home/daytona/volume"
 
-    params = CreateSandboxParams(
+    params = CreateSandboxFromSnapshotParams(
         language="python",
         volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_1)],
     )
@@ -30,7 +30,7 @@ def main():
     # and mount it to the different path
     mount_dir_2 = "/home/daytona/my-files"
 
-    params = CreateSandboxParams(
+    params = CreateSandboxFromSnapshotParams(
         language="python",
         volumes=[VolumeMount(volumeId=volume.id, mountPath=mount_dir_2)],
     )

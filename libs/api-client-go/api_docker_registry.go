@@ -1,3 +1,6 @@
+// Copyright 2025 Daytona Platforms Inc.
+// SPDX-License-Identifier: Apache-2.0
+
 /*
 Daytona
 
@@ -60,7 +63,7 @@ type DockerRegistryAPI interface {
 	GetRegistryExecute(r DockerRegistryAPIGetRegistryRequest) (*DockerRegistry, *http.Response, error)
 
 	/*
-		GetTransientPushAccess Get temporary registry access for pushing images
+		GetTransientPushAccess Get temporary registry access for pushing snapshots
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return DockerRegistryAPIGetTransientPushAccessRequest
@@ -461,7 +464,7 @@ func (r DockerRegistryAPIGetTransientPushAccessRequest) Execute() (*RegistryPush
 }
 
 /*
-GetTransientPushAccess Get temporary registry access for pushing images
+GetTransientPushAccess Get temporary registry access for pushing snapshots
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return DockerRegistryAPIGetTransientPushAccessRequest

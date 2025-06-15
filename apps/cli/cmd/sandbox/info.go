@@ -16,7 +16,7 @@ import (
 var InfoCmd = &cobra.Command{
 	Use:     "info [SANDBOX_ID]",
 	Short:   "Get sandbox info",
-	Args:    cobra.NoArgs,
+	Args:    cobra.ExactArgs(1),
 	Aliases: common.GetAliases("info"),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ctx := context.Background()
@@ -26,7 +26,7 @@ var InfoCmd = &cobra.Command{
 			return err
 		}
 
-		sandboxList, res, err := apiClient.WorkspaceAPI.ListWorkspaces(ctx).Execute()
+		sandboxList, res, err := apiClient.SandboxAPI.ListSandboxes(ctx).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -34,9 +34,9 @@ var InfoCmd = &cobra.Command{
 		infoArg := args[0]
 		var sandboxCount int
 
-		for _, w := range sandboxList {
-			if w.Id == args[0] {
-				infoArg = w.Id
+		for _, s := range sandboxList {
+			if s.Id == args[0] {
+				infoArg = s.Id
 				sandboxCount++
 			}
 		}
@@ -45,7 +45,7 @@ var InfoCmd = &cobra.Command{
 		case 0:
 			return fmt.Errorf("sandbox %s not found", args[0])
 		case 1:
-			sb, res, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, infoArg).Verbose(verboseFlag).Execute()
+			sb, res, err := apiClient.SandboxAPI.GetSandbox(ctx, infoArg).Verbose(verboseFlag).Execute()
 			if err != nil {
 				return apiclient.HandleErrorResponse(res, err)
 			}

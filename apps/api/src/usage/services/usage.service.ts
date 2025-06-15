@@ -6,78 +6,79 @@
 import { Injectable, Logger } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { IsNull, LessThan, Not, Repository } from 'typeorm'
-import { WorkspaceUsagePeriod } from '../entities/workspace-usage-period.entity'
+import { SandboxUsagePeriod } from '../entities/sandbox-usage-period.entity'
 import { OnEvent } from '@nestjs/event-emitter'
-import { WorkspaceStateUpdatedEvent } from '../../workspace/events/workspace-state-updated.event'
-import { WorkspaceState } from '../../workspace/enums/workspace-state.enum'
-import { WorkspaceEvents } from './../../workspace/constants/workspace-events.constants'
+import { SandboxStateUpdatedEvent } from '../../sandbox/events/sandbox-state-updated.event'
+import { SandboxState } from '../../sandbox/enums/sandbox-state.enum'
+import { SandboxEvents } from './../../sandbox/constants/sandbox-events.constants'
 import { Cron, CronExpression } from '@nestjs/schedule'
-import { RedisLockProvider } from '../../workspace/common/redis-lock.provider'
-import { WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../workspace/constants/workspace.constants'
+import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
+import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../../sandbox/constants/sandbox.constants'
 @Injectable()
 export class UsageService {
   private readonly logger = new Logger(UsageService.name)
 
   constructor(
-    @InjectRepository(WorkspaceUsagePeriod)
-    private workspaceUsagePeriodRepository: Repository<WorkspaceUsagePeriod>,
+    @InjectRepository(SandboxUsagePeriod)
+    private sandboxUsagePeriodRepository: Repository<SandboxUsagePeriod>,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
-  @OnEvent(WorkspaceEvents.STATE_UPDATED)
-  async handleWorkspaceStateUpdate(event: WorkspaceStateUpdatedEvent) {
-    await this.waitForLock(event.workspace.id)
+  @OnEvent(SandboxEvents.STATE_UPDATED)
+  async handleSandboxStateUpdate(event: SandboxStateUpdatedEvent) {
+    await this.waitForLock(event.sandbox.id)
 
     try {
       switch (event.newState) {
-        case WorkspaceState.STARTED: {
-          await this.closeUsagePeriod(event.workspace.id)
+        case SandboxState.STARTED: {
+          await this.closeUsagePeriod(event.sandbox.id)
           await this.createUsagePeriod(event)
           break
         }
-        case WorkspaceState.STOPPED:
-          await this.closeUsagePeriod(event.workspace.id)
+        case SandboxState.STOPPED:
+          await this.closeUsagePeriod(event.sandbox.id)
           await this.createUsagePeriod(event, true)
           break
-        case WorkspaceState.ERROR:
-        case WorkspaceState.ARCHIVED:
-        case WorkspaceState.DESTROYED: {
-          await this.closeUsagePeriod(event.workspace.id)
+        case SandboxState.ERROR:
+        case SandboxState.BUILD_FAILED:
+        case SandboxState.ARCHIVED:
+        case SandboxState.DESTROYED: {
+          await this.closeUsagePeriod(event.sandbox.id)
           break
         }
       }
     } finally {
-      this.releaseLock(event.workspace.id).catch((error) => {
-        this.logger.error(`Error releasing lock for workspace ${event.workspace.id}`, error)
+      this.releaseLock(event.sandbox.id).catch((error) => {
+        this.logger.error(`Error releasing lock for sandbox ${event.sandbox.id}`, error)
       })
     }
   }
 
-  private async createUsagePeriod(event: WorkspaceStateUpdatedEvent, diskOnly = false) {
-    const usagePeriod = new WorkspaceUsagePeriod()
-    usagePeriod.workspaceId = event.workspace.id
+  private async createUsagePeriod(event: SandboxStateUpdatedEvent, diskOnly = false) {
+    const usagePeriod = new SandboxUsagePeriod()
+    usagePeriod.sandboxId = event.sandbox.id
     usagePeriod.startAt = new Date()
     usagePeriod.endAt = null
     if (!diskOnly) {
-      usagePeriod.cpu = event.workspace.cpu
-      usagePeriod.gpu = event.workspace.gpu
-      usagePeriod.mem = event.workspace.mem
+      usagePeriod.cpu = event.sandbox.cpu
+      usagePeriod.gpu = event.sandbox.gpu
+      usagePeriod.mem = event.sandbox.mem
     } else {
       usagePeriod.cpu = 0
       usagePeriod.gpu = 0
       usagePeriod.mem = 0
     }
-    usagePeriod.disk = event.workspace.disk
-    usagePeriod.organizationId = event.workspace.organizationId
-    usagePeriod.region = event.workspace.region
+    usagePeriod.disk = event.sandbox.disk
+    usagePeriod.organizationId = event.sandbox.organizationId
+    usagePeriod.region = event.sandbox.region
 
-    await this.workspaceUsagePeriodRepository.save(usagePeriod)
+    await this.sandboxUsagePeriodRepository.save(usagePeriod)
   }
 
-  private async closeUsagePeriod(workspaceId: string) {
-    const lastUsagePeriod = await this.workspaceUsagePeriodRepository.findOne({
+  private async closeUsagePeriod(sandboxId: string) {
+    const lastUsagePeriod = await this.sandboxUsagePeriodRepository.findOne({
       where: {
-        workspaceId,
+        sandboxId,
         endAt: null,
       },
       order: {
@@ -87,7 +88,7 @@ export class UsageService {
 
     if (lastUsagePeriod) {
       lastUsagePeriod.endAt = new Date()
-      await this.workspaceUsagePeriodRepository.save(lastUsagePeriod)
+      await this.sandboxUsagePeriodRepository.save(lastUsagePeriod)
     }
   }
 
@@ -97,12 +98,12 @@ export class UsageService {
       return
     }
 
-    const usagePeriods = await this.workspaceUsagePeriodRepository.find({
+    const usagePeriods = await this.sandboxUsagePeriodRepository.find({
       where: {
         endAt: IsNull(),
         // 1 day ago
         startAt: LessThan(new Date(Date.now() - 1000 * 60 * 60 * 24)),
-        organizationId: Not(WORKSPACE_WARM_POOL_UNASSIGNED_ORGANIZATION),
+        organizationId: Not(SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION),
       },
       order: {
         startAt: 'ASC',
@@ -111,44 +112,44 @@ export class UsageService {
     })
 
     for (const usagePeriod of usagePeriods) {
-      if (!(await this.aquireLock(usagePeriod.workspaceId))) {
+      if (!(await this.aquireLock(usagePeriod.sandboxId))) {
         continue
       }
 
       try {
-        await this.workspaceUsagePeriodRepository.manager.transaction(async (transactionalEntityManager) => {
+        await this.sandboxUsagePeriodRepository.manager.transaction(async (transactionalEntityManager) => {
           // Close usage period
           const closeTime = new Date()
           usagePeriod.endAt = closeTime
           await transactionalEntityManager.save(usagePeriod)
 
           // Create new usage period
-          const newUsagePeriod = WorkspaceUsagePeriod.fromUsagePeriod(usagePeriod)
+          const newUsagePeriod = SandboxUsagePeriod.fromUsagePeriod(usagePeriod)
           newUsagePeriod.startAt = closeTime
           newUsagePeriod.endAt = null
           await transactionalEntityManager.save(newUsagePeriod)
         })
       } catch (error) {
-        this.logger.error(`Error closing and reopening usage period ${usagePeriod.workspaceId}`, error)
+        this.logger.error(`Error closing and reopening usage period ${usagePeriod.sandboxId}`, error)
       } finally {
-        await this.releaseLock(usagePeriod.workspaceId)
+        await this.releaseLock(usagePeriod.sandboxId)
       }
     }
 
     await this.redisLockProvider.unlock('close-and-reopen-usage-periods')
   }
 
-  private async waitForLock(workspaceId: string) {
-    while (!(await this.aquireLock(workspaceId))) {
+  private async waitForLock(sandboxId: string) {
+    while (!(await this.aquireLock(sandboxId))) {
       await new Promise((resolve) => setTimeout(resolve, 500))
     }
   }
 
-  private async aquireLock(workspaceId: string): Promise<boolean> {
-    return await this.redisLockProvider.lock(`usage-period-${workspaceId}`, 60)
+  private async aquireLock(sandboxId: string): Promise<boolean> {
+    return await this.redisLockProvider.lock(`usage-period-${sandboxId}`, 60)
   }
 
-  private async releaseLock(workspaceId: string) {
-    await this.redisLockProvider.unlock(`usage-period-${workspaceId}`)
+  private async releaseLock(sandboxId: string) {
+    await this.redisLockProvider.unlock(`usage-period-${sandboxId}`)
   }
 }

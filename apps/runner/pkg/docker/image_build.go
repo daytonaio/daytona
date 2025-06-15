@@ -20,8 +20,8 @@ import (
 	"github.com/docker/docker/pkg/jsonmessage"
 )
 
-func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildImageRequestDTO) error {
-	if !strings.Contains(buildImageDto.Image, ":") || strings.HasSuffix(buildImageDto.Image, ":") {
+func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildSnapshotRequestDTO) error {
+	if !strings.Contains(buildImageDto.Snapshot, ":") || strings.HasSuffix(buildImageDto.Snapshot, ":") {
 		return fmt.Errorf("invalid image format: must contain exactly one colon (e.g., 'myimage:1.0')")
 	}
 
@@ -30,7 +30,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildIm
 	}
 
 	// Check if image already exists
-	exists, err := d.ImageExists(ctx, buildImageDto.Image, true)
+	exists, err := d.ImageExists(ctx, buildImageDto.Snapshot, true)
 	if err != nil {
 		return fmt.Errorf("failed to check if image exists: %w", err)
 	}
@@ -142,7 +142,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildIm
 	buildContext := io.NopCloser(buildContextTar)
 
 	resp, err := d.apiClient.ImageBuild(ctx, buildContext, types.ImageBuildOptions{
-		Tags:        []string{buildImageDto.Image},
+		Tags:        []string{buildImageDto.Snapshot},
 		Dockerfile:  "Dockerfile",
 		Remove:      true,
 		ForceRemove: true,
@@ -155,7 +155,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildIm
 	defer resp.Body.Close()
 
 	// Extract image name without tag
-	filePath := buildImageDto.Image[:strings.LastIndex(buildImageDto.Image, ":")]
+	filePath := buildImageDto.Snapshot[:strings.LastIndex(buildImageDto.Snapshot, ":")]
 
 	logFilePath, err := config.GetBuildLogFilePath(filePath)
 	if err != nil {
@@ -172,7 +172,7 @@ func (d *DockerClient) BuildImage(ctx context.Context, buildImageDto dto.BuildIm
 
 	err = jsonmessage.DisplayJSONMessagesStream(resp.Body, multiWriter, 0, true, nil)
 	if err != nil {
-		return fmt.Errorf("failed to stream build output: %w", err)
+		return err
 	}
 
 	if d.logWriter != nil {

@@ -31,19 +31,19 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 	}
 
 	if sandboxId != "" {
-		sandbox, _, err := apiClient.WorkspaceAPI.GetWorkspace(ctx, sandboxId).Execute()
-		if err == nil && sandbox.State != nil && *sandbox.State == daytonaapiclient.WORKSPACESTATE_STARTED {
+		sandbox, _, err := apiClient.SandboxAPI.GetSandbox(ctx, sandboxId).Execute()
+		if err == nil && sandbox.State != nil && *sandbox.State == daytonaapiclient.SANDBOXSTATE_STARTED {
 			return mcp.NewToolResultText(fmt.Sprintf("Reusing existing sandbox %s", sandboxId)), nil
 		}
 
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox %s not found or not running", sandboxId)
 	}
 
-	createSandbox := daytonaapiclient.NewCreateWorkspace()
+	createSandbox := daytonaapiclient.NewCreateSandbox()
 
-	if image, ok := request.Params.Arguments["image"]; ok && image != nil {
-		if imageStr, ok := image.(string); ok && imageStr != "" {
-			createSandbox.SetImage(imageStr)
+	if snapshot, ok := request.Params.Arguments["snapshot"]; ok && snapshot != nil {
+		if snapshotStr, ok := snapshot.(string); ok && snapshotStr != "" {
+			createSandbox.SetSnapshot(snapshotStr)
 		}
 	}
 
@@ -82,7 +82,7 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 	retryDelay := time.Second * 2
 
 	for retry := range maxRetries {
-		sandbox, _, err := apiClient.WorkspaceAPI.CreateWorkspace(ctx).CreateWorkspace(*createSandbox).Execute()
+		sandbox, _, err := apiClient.SandboxAPI.CreateSandbox(ctx).CreateSandbox(*createSandbox).Execute()
 		if err != nil {
 			if strings.Contains(err.Error(), "Total CPU quota exceeded") {
 				return &mcp.CallToolResult{IsError: true}, fmt.Errorf("CPU quota exceeded. Please delete unused sandboxes or upgrade your plan")

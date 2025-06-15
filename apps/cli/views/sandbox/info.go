@@ -4,7 +4,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -16,7 +15,7 @@ import (
 	"golang.org/x/term"
 )
 
-func RenderInfo(sandbox *daytonaapiclient.Workspace, forceUnstyled bool) {
+func RenderInfo(sandbox *daytonaapiclient.Sandbox, forceUnstyled bool) {
 	var output string
 
 	output += "\n"
@@ -27,23 +26,22 @@ func RenderInfo(sandbox *daytonaapiclient.Workspace, forceUnstyled bool) {
 		output += getInfoLine("State", getStateLabel(*sandbox.State)) + "\n"
 	}
 
-	if sandbox.Image != nil {
-		output += getInfoLine("Image", *sandbox.Image) + "\n"
+	if sandbox.Snapshot != nil {
+		output += getInfoLine("Snapshot", *sandbox.Snapshot) + "\n"
 	}
 
-	providerMetadataString := sandbox.Info.GetProviderMetadata()
+	output += getInfoLine("Region", sandbox.Target) + "\n"
 
-	var providerMetadata providerMetadata
-
-	err := json.Unmarshal([]byte(providerMetadataString), &providerMetadata)
-	if err == nil {
-		output += getInfoLine("Region", providerMetadata.Region) + "\n"
-		output += getInfoLine("Class", providerMetadata.Class) + "\n"
-		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(providerMetadata.UpdatedAt)) + "\n"
+	if sandbox.Class != nil {
+		output += getInfoLine("Class", *sandbox.Class) + "\n"
 	}
 
-	if sandbox.Info != nil {
-		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(sandbox.Info.Created)) + "\n"
+	if sandbox.CreatedAt != nil {
+		output += getInfoLine("Created", util.GetTimeSinceLabelFromString(*sandbox.CreatedAt)) + "\n"
+	}
+
+	if sandbox.UpdatedAt != nil {
+		output += getInfoLine("Last Event", util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)) + "\n"
 	}
 
 	terminalWidth, _, err := term.GetSize(int(os.Stdout.Fd()))
@@ -77,12 +75,6 @@ func RenderInfo(sandbox *daytonaapiclient.Workspace, forceUnstyled bool) {
 	renderTUIView(output, common.GetContainerBreakpointWidth(terminalWidth))
 }
 
-type providerMetadata struct {
-	Region    string `json:"region"`
-	Class     string `json:"class"`
-	UpdatedAt string `json:"updatedAt"`
-}
-
 func renderUnstyledInfo(output string) {
 	fmt.Println(output)
 }
@@ -101,33 +93,35 @@ func getInfoLine(key, value string) string {
 	return util.PropertyNameStyle.Render(fmt.Sprintf("%-*s", util.PropertyNameWidth, key)) + util.PropertyValueStyle.Render(value) + "\n"
 }
 
-func getStateLabel(state daytonaapiclient.WorkspaceState) string {
+func getStateLabel(state daytonaapiclient.SandboxState) string {
 	switch state {
-	case daytonaapiclient.WORKSPACESTATE_CREATING:
+	case daytonaapiclient.SANDBOXSTATE_CREATING:
 		return common.CreatingStyle.Render("CREATING")
-	case daytonaapiclient.WORKSPACESTATE_RESTORING:
+	case daytonaapiclient.SANDBOXSTATE_RESTORING:
 		return common.CreatingStyle.Render("RESTORING")
-	case daytonaapiclient.WORKSPACESTATE_DESTROYED:
+	case daytonaapiclient.SANDBOXSTATE_DESTROYED:
 		return common.DeletedStyle.Render("DESTROYED")
-	case daytonaapiclient.WORKSPACESTATE_DESTROYING:
+	case daytonaapiclient.SANDBOXSTATE_DESTROYING:
 		return common.DeletedStyle.Render("DESTROYING")
-	case daytonaapiclient.WORKSPACESTATE_STARTED:
+	case daytonaapiclient.SANDBOXSTATE_STARTED:
 		return common.StartedStyle.Render("STARTED")
-	case daytonaapiclient.WORKSPACESTATE_STOPPED:
+	case daytonaapiclient.SANDBOXSTATE_STOPPED:
 		return common.StoppedStyle.Render("STOPPED")
-	case daytonaapiclient.WORKSPACESTATE_STARTING:
+	case daytonaapiclient.SANDBOXSTATE_STARTING:
 		return common.StartingStyle.Render("STARTING")
-	case daytonaapiclient.WORKSPACESTATE_STOPPING:
+	case daytonaapiclient.SANDBOXSTATE_STOPPING:
 		return common.StoppingStyle.Render("STOPPING")
-	case daytonaapiclient.WORKSPACESTATE_PULLING_IMAGE:
-		return common.CreatingStyle.Render("PULLING IMAGE")
-	case daytonaapiclient.WORKSPACESTATE_ARCHIVING:
+	case daytonaapiclient.SANDBOXSTATE_PULLING_SNAPSHOT:
+		return common.CreatingStyle.Render("PULLING SNAPSHOT")
+	case daytonaapiclient.SANDBOXSTATE_ARCHIVING:
 		return common.CreatingStyle.Render("ARCHIVING")
-	case daytonaapiclient.WORKSPACESTATE_ARCHIVED:
+	case daytonaapiclient.SANDBOXSTATE_ARCHIVED:
 		return common.StoppedStyle.Render("ARCHIVED")
-	case daytonaapiclient.WORKSPACESTATE_ERROR:
+	case daytonaapiclient.SANDBOXSTATE_ERROR:
 		return common.ErrorStyle.Render("ERROR")
-	case daytonaapiclient.WORKSPACESTATE_UNKNOWN:
+	case daytonaapiclient.SANDBOXSTATE_BUILD_FAILED:
+		return common.ErrorStyle.Render("BUILD FAILED")
+	case daytonaapiclient.SANDBOXSTATE_UNKNOWN:
 		return common.UndefinedStyle.Render("UNKNOWN")
 	default:
 		return common.UndefinedStyle.Render("/")

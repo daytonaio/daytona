@@ -13,17 +13,15 @@ Provides Git operations within a Sandbox.
 
 ```ts
 new Git(
-   sandbox: Sandbox,
+   sandboxId: string,
    toolboxApi: ToolboxApi,
-   instance: SandboxInstance,
    getRootDir: () => Promise<string>): Git
 ```
 
 **Parameters**:
 
-- `sandbox` _Sandbox_
+- `sandboxId` _string_
 - `toolboxApi` _ToolboxApi_
-- `instance` _SandboxInstance_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 
 **Returns**:

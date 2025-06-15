@@ -1,0 +1,24 @@
+name: daytona snapshot create
+synopsis: Create a snapshot
+usage: daytona snapshot create [SNAPSHOT] [flags]
+options:
+  - name: context
+    shorthand: c
+    default_value: '[]'
+    usage: |
+      Files or directories to include in the build context (can be specified multiple times)
+  - name: dockerfile
+    shorthand: f
+    usage: Path to Dockerfile to build
+  - name: entrypoint
+    shorthand: e
+    usage: The entrypoint command for the snapshot
+  - name: image
+    shorthand: i
+    usage: The image name for the snapshot
+inherited_options:
+  - name: help
+    default_value: 'false'
+    usage: help for daytona
+see_also:
+  - daytona snapshot - Manage Daytona snapshots

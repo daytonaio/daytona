@@ -34,17 +34,17 @@ Handles process and code execution within a Sandbox.
 
 ```ts
 new Process(
+   sandboxId: string,
    codeToolbox: SandboxCodeToolbox,
    toolboxApi: ToolboxApi,
-   instance: SandboxInstance,
    getRootDir: () => Promise<string>): Process
 ```
 
 **Parameters**:
 
+- `sandboxId` _string_
 - `codeToolbox` _SandboxCodeToolbox_
 - `toolboxApi` _ToolboxApi_
-- `instance` _SandboxInstance_
 - `getRootDir` _\(\) =\> Promise\<string\>_
 
 **Returns**:

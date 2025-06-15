@@ -1,18 +1,17 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import {
   ToolboxApi,
-  WorkspaceState as SandboxState,
-  WorkspaceApi as SandboxApi,
-  Workspace as ApiSandbox,
-  WorkspaceInfo as ApiSandboxInfo,
-  CreateNodeClassEnum as SandboxClass,
-  CreateNodeRegionEnum as SandboxTargetRegion,
-  Workspace as ApiWorkspace,
+  SandboxState,
+  SandboxApi,
+  Sandbox as SandboxDto,
   PortPreviewUrl,
+  SandboxVolume,
+  BuildInfo,
+  SandboxBackupStateEnum,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -20,119 +19,6 @@ import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError } from './errors/DaytonaError'
 import { prefixRelativePath } from './utils/Path'
-
-/** @deprecated Use SandboxInfo instead. This type will be removed in a future version. */
-type WorkspaceInfo = SandboxInfo
-
-export interface SandboxInstance extends Omit<ApiSandbox, 'info'> {
-  info?: SandboxInfo
-}
-
-/**
- * Resources allocated to a Sandbox
- *
- * @interface
- * @property {string} cpu - Number of CPU cores allocated (e.g., "1", "2")
- * @property {string | null} gpu - Number of GPUs allocated (e.g., "1") or null if no GPU
- * @property {string} memory - Amount of memory allocated with unit (e.g., "2Gi", "4Gi")
- * @property {string} disk - Amount of disk space allocated with unit (e.g., "10Gi", "20Gi")
- *
- * @example
- * const resources: SandboxResources = {
- *   cpu: "2",
- *   gpu: "1",
- *   memory: "4Gi",
- *   disk: "20Gi"
- * };
- */
-export interface SandboxResources {
-  /** CPU allocation */
-  cpu: string
-  /** GPU allocation */
-  gpu: string | null
-  /** Memory allocation */
-  memory: string
-  /** Disk allocation */
-  disk: string
-}
-
-/**
- * Structured information about a Sandbox
- *
- * This interface provides detailed information about a Sandbox's configuration,
- * resources, and current state.
- *
- * @interface
- * @property {string} id - Unique identifier for the Sandbox
- * @property {string} [image] - Docker image used for the Sandbox
- * @property {string} user - OS user running in the Sandbox
- * @property {Record<string, string>} env - Environment variables set in the Sandbox
- * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
- * @property {boolean} public - Whether the Sandbox is publicly accessible
- * @property {string} target - Target environment where the Sandbox runs
- * @property {SandboxResources} resources - Resource allocations for the Sandbox
- * @property {string} state - Current state of the Sandbox (e.g., "started", "stopped")
- * @property {string | null} errorReason - Error message if Sandbox is in error state
- * @property {string | null} snapshotState - Current state of Sandbox snapshot
- * @property {string | null} snapshotCreatedAt - When the snapshot was created
- * @property {string} nodeDomain - Domain name of the Sandbox node
- * @property {string} region - Region of the Sandbox node
- * @property {string} class - Sandbox class
- * @property {string} updatedAt - When the Sandbox was last updated
- * @property {string | null} lastSnapshot - When the last snapshot was created
- * @property {number} autoStopInterval - Auto-stop interval in minutes
- * @property {number} autoArchiveInterval - Auto-archive interval in minutes
- *
- * @example
- * const sandbox = await daytona.create();
- * const info = await sandbox.info();
- * console.log(`Sandbox ${info.id} is ${info.state}`);
- * console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
- */
-export interface SandboxInfo extends Omit<ApiSandboxInfo, 'name'> {
-  /** Unique identifier */
-  id: string
-  /** Docker image */
-  image?: string
-  /** OS user */
-  user: string
-  /** Environment variables */
-  env: Record<string, string>
-  /** Sandbox labels */
-  labels: Record<string, string>
-  /** Public access flag */
-  public: boolean
-  /** Target location */
-  target: SandboxTargetRegion | string
-  /** Resource allocations */
-  resources: SandboxResources
-  /** Current state */
-  state: SandboxState
-  /** Error reason if any */
-  errorReason: string | null
-  /** Snapshot state */
-  snapshotState: string | null
-  /** Snapshot creation time */
-  snapshotCreatedAt: string | null
-  /** Node domain */
-  nodeDomain: string
-  /** Region */
-  region: SandboxTargetRegion
-  /** Class */
-  class: SandboxClass
-  /** Updated at */
-  updatedAt: string
-  /** Last snapshot */
-  lastSnapshot: string | null
-  /** Auto-stop interval in minutes*/
-  autoStopInterval: number
-  /** Auto-archive interval in minutes */
-  autoArchiveInterval: number
-  /**
-   * @deprecated Use `state`, `nodeDomain`, `region`, `class`, `updatedAt`, `lastSnapshot`, `resources`, `autoStopInterval`, `autoArchiveInterval` instead.
-   */
-  providerMetadata?: string
-}
 
 /**
  * Interface defining methods that a code toolbox must implement
@@ -146,47 +32,85 @@ export interface SandboxCodeToolbox {
 /**
  * Represents a Daytona Sandbox.
  *
- * @property {string} id - Unique identifier for the Sandbox
- * @property {SandboxInstance} instance - The underlying Sandbox instance
- * @property {SandboxApi} sandboxApi - API client for Sandbox operations
- * @property {ToolboxApi} toolboxApi - API client for toolbox operations
- * @property {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
  * @property {FileSystem} fs - File system operations interface
  * @property {Git} git - Git operations interface
  * @property {Process} process - Process execution interface
+ * @property {string} id - Unique identifier for the Sandbox
+ * @property {string} organizationId - Organization ID of the Sandbox
+ * @property {string} [snapshot] - Daytona snapshot used to create the Sandbox
+ * @property {string} user - OS user running in the Sandbox
+ * @property {Record<string, string>} env - Environment variables set in the Sandbox
+ * @property {Record<string, string>} labels - Custom labels attached to the Sandbox
+ * @property {boolean} public - Whether the Sandbox is publicly accessible
+ * @property {string} target - Target location of the runner where the Sandbox runs
+ * @property {number} cpu - Number of CPUs allocated to the Sandbox
+ * @property {number} gpu - Number of GPUs allocated to the Sandbox
+ * @property {number} memory - Amount of memory allocated to the Sandbox in GiB
+ * @property {number} disk - Amount of disk space allocated to the Sandbox in GiB
+ * @property {SandboxState} state - Current state of the Sandbox (e.g., "started", "stopped")
+ * @property {string} [errorReason] - Error message if Sandbox is in error state
+ * @property {SandboxBackupStateEnum} [backupState] - Current state of Sandbox backup
+ * @property {string} [backupCreatedAt] - When the backup was created
+ * @property {number} [autoStopInterval] - Auto-stop interval in minutes
+ * @property {number} [autoArchiveInterval] - Auto-archive interval in minutes
+ * @property {string} [runnerDomain] - Domain name of the Sandbox runner
+ * @property {Array<SandboxVolume>} [volumes] - Volumes attached to the Sandbox
+ * @property {BuildInfo} [buildInfo] - Build information for the Sandbox if it was created from dynamic build
+ * @property {string} [createdAt] - When the Sandbox was created
+ * @property {string} [updatedAt] - When the Sandbox was last updated
  *
  * @class
  */
-export class Sandbox {
-  /** File system operations for the Sandbox */
+export class Sandbox implements SandboxDto {
   public readonly fs: FileSystem
-  /** Git operations for the Sandbox */
   public readonly git: Git
-  /** Process and code execution operations */
   public readonly process: Process
-  /** Default root directory for the Sandbox */
+
+  public id!: string
+  public organizationId!: string
+  public snapshot?: string
+  public user!: string
+  public env!: Record<string, string>
+  public labels!: Record<string, string>
+  public public!: boolean
+  public target!: string
+  public cpu!: number
+  public gpu!: number
+  public memory!: number
+  public disk!: number
+  public state?: SandboxState
+  public errorReason?: string
+  public backupState?: SandboxBackupStateEnum
+  public backupCreatedAt?: string
+  public autoStopInterval?: number
+  public autoArchiveInterval?: number
+  public runnerDomain?: string
+  public volumes?: Array<SandboxVolume>
+  public buildInfo?: BuildInfo
+  public createdAt?: string
+  public updatedAt?: string
+
   private rootDir: string
 
   /**
    * Creates a new Sandbox instance
    *
-   * @param {string} id - Unique identifier for the Sandbox
-   * @param {SandboxInstance} instance - The underlying Sandbox instance
+   * @param {SandboxDto} sandboxDto - The API Sandbox instance
    * @param {SandboxApi} sandboxApi - API client for Sandbox operations
    * @param {ToolboxApi} toolboxApi - API client for toolbox operations
    * @param {SandboxCodeToolbox} codeToolbox - Language-specific toolbox implementation
    */
   constructor(
-    public readonly id: string,
-    public readonly instance: SandboxInstance,
-    public readonly sandboxApi: SandboxApi,
-    public readonly toolboxApi: ToolboxApi,
+    sandboxDto: SandboxDto,
+    private readonly sandboxApi: SandboxApi,
+    private readonly toolboxApi: ToolboxApi,
     private readonly codeToolbox: SandboxCodeToolbox,
   ) {
+    this.processSandboxDto(sandboxDto)
     this.rootDir = ''
-    this.fs = new FileSystem(instance, this.toolboxApi, async () => await this.getRootDir())
-    this.git = new Git(this, this.toolboxApi, instance, async () => await this.getRootDir())
-    this.process = new Process(this.codeToolbox, this.toolboxApi, instance, async () => await this.getRootDir())
+    this.fs = new FileSystem(this.id, this.toolboxApi, async () => await this.getRootDir())
+    this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
+    this.process = new Process(this.id, this.codeToolbox, this.toolboxApi, async () => await this.getRootDir())
   }
 
   /**
@@ -199,15 +123,8 @@ export class Sandbox {
    * console.log(`Sandbox root: ${rootDir}`);
    */
   public async getUserRootDir(): Promise<string | undefined> {
-    const response = await this.toolboxApi.getProjectDir(this.instance.id)
+    const response = await this.toolboxApi.getProjectDir(this.id)
     return response.data.dir
-  }
-
-  /**
-   * @deprecated Use `getUserRootDir` instead. This method will be removed in a future version.
-   */
-  public async getWorkspaceRootDir(): Promise<string | undefined> {
-    return this.getUserRootDir()
   }
 
   /**
@@ -229,7 +146,7 @@ export class Sandbox {
       languageId as LspLanguageId,
       prefixRelativePath(await this.getRootDir(), pathToProject),
       this.toolboxApi,
-      this.instance,
+      this.id,
     )
   }
 
@@ -250,7 +167,7 @@ export class Sandbox {
    * });
    */
   public async setLabels(labels: Record<string, string>): Promise<void> {
-    await this.sandboxApi.replaceLabels(this.instance.id, { labels })
+    await this.sandboxApi.replaceLabels(this.id, { labels })
   }
 
   /**
@@ -273,7 +190,7 @@ export class Sandbox {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.startWorkspace(this.instance.id, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -297,7 +214,7 @@ export class Sandbox {
       throw new DaytonaError('Timeout must be a non-negative number')
     }
     const startTime = Date.now()
-    await this.sandboxApi.stopWorkspace(this.instance.id, undefined, { timeout: timeout * 1000 })
+    await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -307,7 +224,7 @@ export class Sandbox {
    * @returns {Promise<void>}
    */
   public async delete(): Promise<void> {
-    await this.sandboxApi.deleteWorkspace(this.instance.id, true)
+    await this.sandboxApi.deleteSandbox(this.id, true)
   }
 
   /**
@@ -329,16 +246,12 @@ export class Sandbox {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    let state: SandboxState | undefined = (await this.info()).state
+    while (this.state !== 'started') {
+      await this.refreshData()
 
-    while (state !== 'started') {
-      const response = await this.sandboxApi.getWorkspace(this.id)
-      state = response.data.state
-
-      if (state === 'error') {
-        throw new DaytonaError(
-          `Sandbox ${this.id} failed to start with status: ${state}, error reason: ${response.data.errorReason}`,
-        )
+      if (this.state === 'error') {
+        const errMsg = `Sandbox ${this.id} failed to start with status: ${this.state}, error reason: ${this.errorReason}`
+        throw new DaytonaError(errMsg)
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
@@ -368,16 +281,12 @@ export class Sandbox {
     const checkInterval = 100 // Wait 100 ms between checks
     const startTime = Date.now()
 
-    let state: SandboxState | undefined = (await this.info()).state
+    while (this.state !== 'stopped') {
+      await this.refreshData()
 
-    while (state !== 'stopped') {
-      const response = await this.sandboxApi.getWorkspace(this.id)
-      state = response.data.state
-
-      if (state === 'error') {
-        throw new DaytonaError(
-          `Sandbox failed to stop with status: ${state}, error reason: ${response.data.errorReason}`,
-        )
+      if (this.state === 'error') {
+        const errMsg = `Sandbox failed to stop with status: ${this.state}, error reason: ${this.errorReason}`
+        throw new DaytonaError(errMsg)
       }
 
       if (timeout !== 0 && Date.now() - startTime > timeout * 1000) {
@@ -389,74 +298,19 @@ export class Sandbox {
   }
 
   /**
-   * Gets structured information about the Sandbox.
+   * Refreshes the Sandbox data from the API.
    *
-   * @returns {Promise<SandboxInfo>} Detailed information about the Sandbox including its
-   *                                   configuration, resources, and current state
+   * @returns {Promise<void>}
    *
    * @example
-   * const info = await sandbox.info();
-   * console.log(`Sandbox ${info.id}:`);
-   * console.log(`State: ${info.state}`);
-   * console.log(`Resources: ${info.resources.cpu} CPU, ${info.resources.memory} RAM`);
+   * await sandbox.refreshData();
+   * console.log(`Sandbox ${sandbox.id}:`);
+   * console.log(`State: ${sandbox.state}`);
+   * console.log(`Resources: ${sandbox.cpu} CPU, ${sandbox.memory} GiB RAM`);
    */
-  public async info(): Promise<SandboxInfo> {
-    const response = await this.sandboxApi.getWorkspace(this.id)
-    const instance = response.data
-    return Sandbox.toSandboxInfo(instance)
-  }
-
-  /**
-   * Converts an API workspace instance to a WorkspaceInfo object.
-   *
-   * @param {ApiWorkspace} instance - The API workspace instance to convert
-   * @returns {WorkspaceInfo} The converted WorkspaceInfo object
-   *
-   * @deprecated Use `toSandboxInfo` instead. This method will be removed in a future version.
-   */
-  public static toWorkspaceInfo(instance: ApiWorkspace): WorkspaceInfo {
-    return Sandbox.toSandboxInfo(instance)
-  }
-  /**
-   * Converts an API sandbox instance to a SandboxInfo object.
-   *
-   * @param {ApiSandbox} instance - The API sandbox instance to convert
-   * @returns {SandboxInfo} The converted SandboxInfo object
-   */
-  public static toSandboxInfo(instance: ApiSandbox): SandboxInfo {
-    const providerMetadata = JSON.parse(instance.info?.providerMetadata || '{}')
-
-    // Extract resources with defaults
-    const resources: SandboxResources = {
-      cpu: String(instance.cpu || '1'),
-      gpu: instance.gpu ? String(instance.gpu) : null,
-      memory: `${instance.memory ?? 2}Gi`,
-      disk: `${instance.disk ?? 10}Gi`,
-    }
-
-    return {
-      id: instance.id,
-      image: instance.image,
-      user: instance.user,
-      env: instance.env || {},
-      labels: instance.labels || {},
-      public: instance.public || false,
-      target: instance.target,
-      resources,
-      state: instance.state || SandboxState.UNKNOWN,
-      errorReason: instance.errorReason || null,
-      snapshotState: instance.snapshotState || null,
-      snapshotCreatedAt: instance.snapshotCreatedAt || null,
-      autoStopInterval: instance.autoStopInterval || 15,
-      autoArchiveInterval: instance.autoArchiveInterval || 7 * 24 * 60,
-      created: instance.info?.created || '',
-      nodeDomain: providerMetadata.nodeDomain || '',
-      region: providerMetadata.region || '',
-      class: providerMetadata.class || '',
-      updatedAt: providerMetadata.updatedAt || '',
-      lastSnapshot: providerMetadata.lastSnapshot || null,
-      providerMetadata: instance.info?.providerMetadata,
-    }
+  public async refreshData(): Promise<void> {
+    const response = await this.sandboxApi.getSandbox(this.id)
+    this.processSandboxDto(response.data)
   }
 
   /**
@@ -483,7 +337,7 @@ export class Sandbox {
     }
 
     await this.sandboxApi.setAutostopInterval(this.id, interval)
-    this.instance.autoStopInterval = interval
+    this.autoStopInterval = interval
   }
 
   /**
@@ -507,7 +361,7 @@ export class Sandbox {
       throw new DaytonaError('autoArchiveInterval must be a non-negative integer')
     }
     await this.sandboxApi.setAutoArchiveInterval(this.id, interval)
-    this.instance.autoArchiveInterval = interval
+    this.autoArchiveInterval = interval
   }
 
   /**
@@ -535,7 +389,7 @@ export class Sandbox {
    * Sandbox must be stopped before archiving.
    */
   public async archive(): Promise<void> {
-    await this.sandboxApi.archiveWorkspace(this.id)
+    await this.sandboxApi.archiveSandbox(this.id)
   }
 
   private async getRootDir(): Promise<string> {
@@ -543,5 +397,37 @@ export class Sandbox {
       this.rootDir = (await this.getUserRootDir()) || ''
     }
     return this.rootDir
+  }
+
+  /**
+   * Assigns the API sandbox data to the Sandbox object.
+   *
+   * @param {SandboxDto} sandboxDto - The API sandbox instance to assign data from
+   * @returns {void}
+   */
+  private processSandboxDto(sandboxDto: SandboxDto) {
+    this.id = sandboxDto.id
+    this.organizationId = sandboxDto.organizationId
+    this.snapshot = sandboxDto.snapshot
+    this.user = sandboxDto.user
+    this.env = sandboxDto.env
+    this.labels = sandboxDto.labels
+    this.public = sandboxDto.public
+    this.target = sandboxDto.target
+    this.cpu = sandboxDto.cpu
+    this.gpu = sandboxDto.gpu
+    this.memory = sandboxDto.memory
+    this.disk = sandboxDto.disk
+    this.state = sandboxDto.state
+    this.errorReason = sandboxDto.errorReason
+    this.backupState = sandboxDto.backupState
+    this.backupCreatedAt = sandboxDto.backupCreatedAt
+    this.autoStopInterval = sandboxDto.autoStopInterval
+    this.autoArchiveInterval = sandboxDto.autoArchiveInterval
+    this.runnerDomain = sandboxDto.runnerDomain
+    this.volumes = sandboxDto.volumes
+    this.buildInfo = sandboxDto.buildInfo
+    this.createdAt = sandboxDto.createdAt
+    this.updatedAt = sandboxDto.updatedAt
   }
 }

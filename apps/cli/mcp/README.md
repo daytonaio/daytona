@@ -122,26 +122,26 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
     - `folder_path`: Path to the folder to create
     - `mode`: Mode of the folder to create (defaults to 0755)
 
-- `get_file_info`: Get information about a file in the Daytona workspace
+- `get_file_info`: Get information about a file in the Daytona sandbox
 
   - Parameters:
     - `id` (optional): Sandbox ID
     - `file_path`: Path to the file to get information about
 
-- `list_files`: List files in a directory in the Daytona workspace
+- `list_files`: List files in a directory in the Daytona sandbox
 
   - Parameters:
     - `id` (optional): Sandbox ID
     - `path`: Path to the directory to list files from (defaults to current directory)
 
-- `move_file`: Move or rename a file in the Daytona workspace
+- `move_file`: Move or rename a file in the Daytona sandbox
 
   - Parameters:
     - `id` (optional): Sandbox ID
     - `source_path`: Source path of the file to move
     - `dest_path`: Destination path where to move the file
 
-- `delete_file`: Delete a file or directory in the Daytona workspace
+- `delete_file`: Delete a file or directory in the Daytona sandbox
 
   - Parameters:
     - `id` (optional): Sandbox ID
@@ -149,7 +149,7 @@ Note: if you are running Daytona MCP Server on Windows OS, add the following to 
 
 ### Git Operations
 
-- `git_clone`: Clone a Git repository into the Daytona workspace
+- `git_clone`: Clone a Git repository into the Daytona sandbox
 
   - Parameters:
     - `id` (optional): Sandbox ID

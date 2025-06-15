@@ -76,7 +76,7 @@ func (a *ApiServer) Start() error {
 	a.router.Use(gin.Recovery())
 
 	gin.SetMode(gin.ReleaseMode)
-	if config.GetNodeEnv() == "development" {
+	if config.GetEnvironment() == "development" {
 		gin.SetMode(gin.DebugMode)
 	}
 
@@ -87,36 +87,36 @@ func (a *ApiServer) Start() error {
 	public.GET("", controllers.HealthCheck)
 	public.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
-	if config.GetNodeEnv() == "development" {
+	if config.GetEnvironment() == "development" {
 		public.GET("/api/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	}
 
 	protected := a.router.Group("/")
 	protected.Use(middlewares.AuthMiddleware())
 
-	sandboxController := protected.Group("/workspaces")
+	sandboxController := protected.Group("/sandboxes")
 	{
 		sandboxController.POST("", controllers.Create)
-		sandboxController.GET("/:workspaceId", controllers.Info)
-		sandboxController.POST("/:workspaceId/destroy", controllers.Destroy)
-		sandboxController.POST("/:workspaceId/start", controllers.Start)
-		sandboxController.POST("/:workspaceId/stop", controllers.Stop)
-		sandboxController.POST("/:workspaceId/snapshot", controllers.CreateSnapshot)
-		sandboxController.POST("/:workspaceId/resize", controllers.Resize)
-		sandboxController.DELETE("/:workspaceId", controllers.RemoveDestroyed)
+		sandboxController.GET("/:sandboxId", controllers.Info)
+		sandboxController.POST("/:sandboxId/destroy", controllers.Destroy)
+		sandboxController.POST("/:sandboxId/start", controllers.Start)
+		sandboxController.POST("/:sandboxId/stop", controllers.Stop)
+		sandboxController.POST("/:sandboxId/backup", controllers.CreateBackup)
+		sandboxController.POST("/:sandboxId/resize", controllers.Resize)
+		sandboxController.DELETE("/:sandboxId", controllers.RemoveDestroyed)
 
-		// Add proxy endpoint within the workspace controller for toolbox
+		// Add proxy endpoint within the sandbox controller for toolbox
 		// Using Any() to handle all HTTP methods for the toolbox proxy
-		sandboxController.Any("/:workspaceId/:projectId/toolbox/*path", controllers.ProxyRequest)
+		sandboxController.Any("/:sandboxId/toolbox/*path", controllers.ProxyRequest)
 	}
 
-	imageController := protected.Group("/images")
+	snapshotController := protected.Group("/snapshots")
 	{
-		imageController.POST("/pull", controllers.PullImage)
-		imageController.POST("/build", controllers.BuildImage)
-		imageController.GET("/exists", controllers.ImageExists)
-		imageController.POST("/remove", controllers.RemoveImage)
-		imageController.GET("/logs", controllers.GetBuildLogs)
+		snapshotController.POST("/pull", controllers.PullSnapshot)
+		snapshotController.POST("/build", controllers.BuildSnapshot)
+		snapshotController.GET("/exists", controllers.SnapshotExists)
+		snapshotController.POST("/remove", controllers.RemoveSnapshot)
+		snapshotController.GET("/logs", controllers.GetBuildLogs)
 	}
 
 	a.httpServer = &http.Server{

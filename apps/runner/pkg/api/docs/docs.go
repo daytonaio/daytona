@@ -36,302 +36,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/images/build": {
-            "post": {
-                "description": "Build a Docker image from a Dockerfile and context hashes",
-                "tags": [
-                    "images"
-                ],
-                "summary": "Build a Docker image",
-                "operationId": "BuildImage",
-                "parameters": [
-                    {
-                        "description": "Build image request",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/BuildImageRequestDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Image successfully built",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/images/exists": {
-            "get": {
-                "description": "Check if a specified Docker image exists locally",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "images"
-                ],
-                "summary": "Check if a Docker image exists",
-                "operationId": "ImageExists",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Image name and tag",
-                        "name": "image",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/ImageExistsResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/images/logs": {
-            "get": {
-                "description": "Stream build logs",
-                "tags": [
-                    "images"
-                ],
-                "summary": "Get build logs",
-                "operationId": "GetBuildLogs",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Image ID or image ref without the tag",
-                        "name": "imageRef",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
-                        "type": "boolean",
-                        "description": "Whether to follow the log output",
-                        "name": "follow",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Build logs stream",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/images/pull": {
-            "post": {
-                "description": "Pull a Docker image from a registry",
-                "tags": [
-                    "images"
-                ],
-                "summary": "Pull a Docker image",
-                "operationId": "PullImage",
-                "parameters": [
-                    {
-                        "description": "Pull image",
-                        "name": "request",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/PullImageRequestDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Image successfully pulled",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/images/remove": {
-            "post": {
-                "description": "Remove a specified Docker image from the local system",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "images"
-                ],
-                "summary": "Remove a Docker image",
-                "operationId": "RemoveImage",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Image name and tag",
-                        "name": "image",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Image successfully removed",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/workspaces": {
+        "/sandboxes": {
             "post": {
                 "description": "Create a sandbox",
                 "produces": [
@@ -393,7 +98,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}": {
+        "/sandboxes/{sandboxId}": {
             "get": {
                 "description": "Get sandbox info",
                 "produces": [
@@ -408,7 +113,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     }
@@ -466,7 +171,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     }
@@ -511,7 +216,76 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}/destroy": {
+        "/sandboxes/{sandboxId}/backup": {
+            "post": {
+                "description": "Create sandbox backup",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "sandbox"
+                ],
+                "summary": "Create sandbox backup",
+                "operationId": "CreateBackup",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Sandbox ID",
+                        "name": "sandboxId",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Create backup",
+                        "name": "sandbox",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/CreateBackupDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Backup created",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/sandboxes/{sandboxId}/destroy": {
             "post": {
                 "description": "Destroy sandbox",
                 "produces": [
@@ -526,7 +300,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     }
@@ -571,7 +345,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}/resize": {
+        "/sandboxes/{sandboxId}/resize": {
             "post": {
                 "description": "Resize sandbox",
                 "produces": [
@@ -586,7 +360,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     },
@@ -640,76 +414,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}/snapshot": {
-            "post": {
-                "description": "Create sandbox snapshot",
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "sandbox"
-                ],
-                "summary": "Create sandbox snapshot",
-                "operationId": "CreateSnapshot",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Sandbox ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "Create snapshot",
-                        "name": "sandbox",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/CreateSnapshotDTO"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Snapshot created",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "409": {
-                        "description": "Conflict",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/ErrorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/workspaces/{workspaceId}/start": {
+        "/sandboxes/{sandboxId}/start": {
             "post": {
                 "description": "Start sandbox",
                 "produces": [
@@ -724,7 +429,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     }
@@ -769,7 +474,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}/stop": {
+        "/sandboxes/{sandboxId}/stop": {
             "post": {
                 "description": "Stop sandbox",
                 "produces": [
@@ -784,7 +489,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     }
@@ -829,7 +534,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/workspaces/{workspaceId}/{projectId}/toolbox/{path}": {
+        "/sandboxes/{sandboxId}/toolbox/{path}": {
             "get": {
                 "description": "Forwards the request to the specified sandbox's container",
                 "tags": [
@@ -840,14 +545,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Sandbox ID",
-                        "name": "workspaceId",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "Project ID",
-                        "name": "projectId",
+                        "name": "sandboxId",
                         "in": "path",
                         "required": true
                     },
@@ -898,10 +596,305 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/snapshots/build": {
+            "post": {
+                "description": "Build a snapshot from a Dockerfile and context hashes",
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Build a snapshot",
+                "operationId": "BuildSnapshot",
+                "parameters": [
+                    {
+                        "description": "Build snapshot request",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/BuildSnapshotRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Snapshot successfully built",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/snapshots/exists": {
+            "get": {
+                "description": "Check if a specified snapshot exists locally",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Check if a snapshot exists",
+                "operationId": "SnapshotExists",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/SnapshotExistsResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/snapshots/logs": {
+            "get": {
+                "description": "Stream build logs",
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Get build logs",
+                "operationId": "GetBuildLogs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snapshot ID or snapshot ref without the tag",
+                        "name": "snapshotRef",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Whether to follow the log output",
+                        "name": "follow",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Build logs stream",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/snapshots/pull": {
+            "post": {
+                "description": "Pull a snapshot from a registry",
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Pull a snapshot",
+                "operationId": "PullSnapshot",
+                "parameters": [
+                    {
+                        "description": "Pull snapshot",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/PullSnapshotRequestDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Snapshot successfully pulled",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/snapshots/remove": {
+            "post": {
+                "description": "Remove a specified snapshot from the local system",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "snapshots"
+                ],
+                "summary": "Remove a snapshot",
+                "operationId": "RemoveSnapshot",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Snapshot name and tag",
+                        "name": "snapshot",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Snapshot successfully removed",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
-        "BuildImageRequestDTO": {
+        "BuildSnapshotRequestDTO": {
             "type": "object",
             "required": [
                 "dockerfile",
@@ -917,10 +910,6 @@ const docTemplate = `{
                 "dockerfile": {
                     "type": "string"
                 },
-                "image": {
-                    "description": "Image ID and tag or the build's hash",
-                    "type": "string"
-                },
                 "organizationId": {
                     "type": "string"
                 },
@@ -929,6 +918,25 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "description": "Snapshot ID and tag or the build's hash",
+                    "type": "string"
+                }
+            }
+        },
+        "CreateBackupDTO": {
+            "type": "object",
+            "required": [
+                "registry",
+                "snapshot"
+            ],
+            "properties": {
+                "registry": {
+                    "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 }
             }
         },
@@ -936,8 +944,8 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "id",
-                "image",
                 "osUser",
+                "snapshot",
                 "userId"
             ],
             "properties": {
@@ -967,9 +975,6 @@ const docTemplate = `{
                 "id": {
                     "type": "string"
                 },
-                "image": {
-                    "type": "string"
-                },
                 "memoryQuota": {
                     "type": "integer",
                     "minimum": 1
@@ -979,6 +984,9 @@ const docTemplate = `{
                 },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 },
                 "storageQuota": {
                     "type": "integer",
@@ -992,21 +1000,6 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.VolumeDTO"
                     }
-                }
-            }
-        },
-        "CreateSnapshotDTO": {
-            "type": "object",
-            "required": [
-                "image",
-                "registry"
-            ],
-            "properties": {
-                "image": {
-                    "type": "string"
-                },
-                "registry": {
-                    "$ref": "#/definitions/RegistryDTO"
                 }
             }
         },
@@ -1048,26 +1041,17 @@ const docTemplate = `{
                 }
             }
         },
-        "ImageExistsResponse": {
-            "type": "object",
-            "properties": {
-                "exists": {
-                    "type": "boolean",
-                    "example": true
-                }
-            }
-        },
-        "PullImageRequestDTO": {
+        "PullSnapshotRequestDTO": {
             "type": "object",
             "required": [
-                "image"
+                "snapshot"
             ],
             "properties": {
-                "image": {
-                    "type": "string"
-                },
                 "registry": {
                     "$ref": "#/definitions/RegistryDTO"
+                },
+                "snapshot": {
+                    "type": "string"
                 }
             }
         },
@@ -1113,11 +1097,20 @@ const docTemplate = `{
         "SandboxInfoResponse": {
             "type": "object",
             "properties": {
-                "snapshotState": {
-                    "$ref": "#/definitions/enums.SnapshotState"
+                "backupState": {
+                    "$ref": "#/definitions/enums.BackupState"
                 },
                 "state": {
                     "$ref": "#/definitions/enums.SandboxState"
+                }
+            }
+        },
+        "SnapshotExistsResponse": {
+            "type": "object",
+            "properties": {
+                "exists": {
+                    "type": "boolean",
+                    "example": true
                 }
             }
         },
@@ -1131,6 +1124,23 @@ const docTemplate = `{
                     "type": "string"
                 }
             }
+        },
+        "enums.BackupState": {
+            "type": "string",
+            "enum": [
+                "NONE",
+                "PENDING",
+                "IN_PROGRESS",
+                "COMPLETED",
+                "FAILED"
+            ],
+            "x-enum-varnames": [
+                "BackupStateNone",
+                "BackupStatePending",
+                "BackupStateInProgress",
+                "BackupStateCompleted",
+                "BackupStateFailed"
+            ]
         },
         "enums.SandboxState": {
             "type": "string",
@@ -1146,7 +1156,7 @@ const docTemplate = `{
                 "resizing",
                 "error",
                 "unknown",
-                "pulling_image"
+                "pulling_snapshot"
             ],
             "x-enum-varnames": [
                 "SandboxStateCreating",
@@ -1160,24 +1170,7 @@ const docTemplate = `{
                 "SandboxStateResizing",
                 "SandboxStateError",
                 "SandboxStateUnknown",
-                "SandboxStatePullingImage"
-            ]
-        },
-        "enums.SnapshotState": {
-            "type": "string",
-            "enum": [
-                "NONE",
-                "PENDING",
-                "IN_PROGRESS",
-                "COMPLETED",
-                "FAILED"
-            ],
-            "x-enum-varnames": [
-                "SnapshotStateNone",
-                "SnapshotStatePending",
-                "SnapshotStateInProgress",
-                "SnapshotStateCompleted",
-                "SnapshotStateFailed"
+                "SandboxStatePullingSnapshot"
             ]
         }
     },

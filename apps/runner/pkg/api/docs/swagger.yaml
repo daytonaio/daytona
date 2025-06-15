@@ -1,5 +1,5 @@
 definitions:
-  BuildImageRequestDTO:
+  BuildSnapshotRequestDTO:
     properties:
       context:
         items:
@@ -7,18 +7,28 @@ definitions:
         type: array
       dockerfile:
         type: string
-      image:
-        description: Image ID and tag or the build's hash
-        type: string
       organizationId:
         type: string
       pushToInternalRegistry:
         type: boolean
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        description: Snapshot ID and tag or the build's hash
+        type: string
     required:
       - dockerfile
       - organizationId
+    type: object
+  CreateBackupDTO:
+    properties:
+      registry:
+        $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
+    required:
+      - registry
+      - snapshot
     type: object
   CreateSandboxDTO:
     properties:
@@ -40,8 +50,6 @@ definitions:
         type: integer
       id:
         type: string
-      image:
-        type: string
       memoryQuota:
         minimum: 1
         type: integer
@@ -49,6 +57,8 @@ definitions:
         type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
       storageQuota:
         minimum: 1
         type: integer
@@ -60,19 +70,9 @@ definitions:
         type: array
     required:
       - id
-      - image
       - osUser
+      - snapshot
       - userId
-    type: object
-  CreateSnapshotDTO:
-    properties:
-      image:
-        type: string
-      registry:
-        $ref: '#/definitions/RegistryDTO'
-    required:
-      - image
-      - registry
     type: object
   ErrorResponse:
     description: Error response
@@ -103,20 +103,14 @@ definitions:
       - statusCode
       - timestamp
     type: object
-  ImageExistsResponse:
+  PullSnapshotRequestDTO:
     properties:
-      exists:
-        example: true
-        type: boolean
-    type: object
-  PullImageRequestDTO:
-    properties:
-      image:
-        type: string
       registry:
         $ref: '#/definitions/RegistryDTO'
+      snapshot:
+        type: string
     required:
-      - image
+      - snapshot
     type: object
   RegistryDTO:
     properties:
@@ -147,10 +141,16 @@ definitions:
     type: object
   SandboxInfoResponse:
     properties:
-      snapshotState:
-        $ref: '#/definitions/enums.SnapshotState'
+      backupState:
+        $ref: '#/definitions/enums.BackupState'
       state:
         $ref: '#/definitions/enums.SandboxState'
+    type: object
+  SnapshotExistsResponse:
+    properties:
+      exists:
+        example: true
+        type: boolean
     type: object
   dto.VolumeDTO:
     properties:
@@ -159,6 +159,20 @@ definitions:
       volumeId:
         type: string
     type: object
+  enums.BackupState:
+    enum:
+      - NONE
+      - PENDING
+      - IN_PROGRESS
+      - COMPLETED
+      - FAILED
+    type: string
+    x-enum-varnames:
+      - BackupStateNone
+      - BackupStatePending
+      - BackupStateInProgress
+      - BackupStateCompleted
+      - BackupStateFailed
   enums.SandboxState:
     enum:
       - creating
@@ -172,7 +186,7 @@ definitions:
       - resizing
       - error
       - unknown
-      - pulling_image
+      - pulling_snapshot
     type: string
     x-enum-varnames:
       - SandboxStateCreating
@@ -186,21 +200,7 @@ definitions:
       - SandboxStateResizing
       - SandboxStateError
       - SandboxStateUnknown
-      - SandboxStatePullingImage
-  enums.SnapshotState:
-    enum:
-      - NONE
-      - PENDING
-      - IN_PROGRESS
-      - COMPLETED
-      - FAILED
-    type: string
-    x-enum-varnames:
-      - SnapshotStateNone
-      - SnapshotStatePending
-      - SnapshotStateInProgress
-      - SnapshotStateCompleted
-      - SnapshotStateFailed
+      - SandboxStatePullingSnapshot
 info:
   contact: {}
   description: Daytona Runner API
@@ -221,203 +221,7 @@ paths:
               type: string
             type: object
       summary: Health check
-  /images/build:
-    post:
-      description: Build a Docker image from a Dockerfile and context hashes
-      operationId: BuildImage
-      parameters:
-        - description: Build image request
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/BuildImageRequestDTO'
-      responses:
-        '200':
-          description: Image successfully built
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Build a Docker image
-      tags:
-        - images
-  /images/exists:
-    get:
-      description: Check if a specified Docker image exists locally
-      operationId: ImageExists
-      parameters:
-        - description: Image name and tag
-          in: query
-          name: image
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: OK
-          schema:
-            $ref: '#/definitions/ImageExistsResponse'
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Check if a Docker image exists
-      tags:
-        - images
-  /images/logs:
-    get:
-      description: Stream build logs
-      operationId: GetBuildLogs
-      parameters:
-        - description: Image ID or image ref without the tag
-          in: query
-          name: imageRef
-          required: true
-          type: string
-        - description: Whether to follow the log output
-          in: query
-          name: follow
-          type: boolean
-      responses:
-        '200':
-          description: Build logs stream
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Get build logs
-      tags:
-        - images
-  /images/pull:
-    post:
-      description: Pull a Docker image from a registry
-      operationId: PullImage
-      parameters:
-        - description: Pull image
-          in: body
-          name: request
-          required: true
-          schema:
-            $ref: '#/definitions/PullImageRequestDTO'
-      responses:
-        '200':
-          description: Image successfully pulled
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Pull a Docker image
-      tags:
-        - images
-  /images/remove:
-    post:
-      description: Remove a specified Docker image from the local system
-      operationId: RemoveImage
-      parameters:
-        - description: Image name and tag
-          in: query
-          name: image
-          required: true
-          type: string
-      produces:
-        - application/json
-      responses:
-        '200':
-          description: Image successfully removed
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Remove a Docker image
-      tags:
-        - images
-  /workspaces:
+  /sandboxes:
     post:
       description: Create a sandbox
       operationId: Create
@@ -458,14 +262,14 @@ paths:
       summary: Create a sandbox
       tags:
         - sandbox
-  /workspaces/{workspaceId}:
+  /sandboxes/{sandboxId}:
     delete:
       description: Remove a sandbox that has been previously destroyed
       operationId: RemoveDestroyed
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
       produces:
@@ -504,7 +308,7 @@ paths:
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
       produces:
@@ -537,61 +341,60 @@ paths:
       summary: Get sandbox info
       tags:
         - sandbox
-  /workspaces/{workspaceId}/{projectId}/toolbox/{path}:
-    get:
-      description: Forwards the request to the specified sandbox's container
+  /sandboxes/{sandboxId}/backup:
+    post:
+      description: Create sandbox backup
+      operationId: CreateBackup
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
-        - description: Project ID
-          in: path
-          name: projectId
+        - description: Create backup
+          in: body
+          name: sandbox
           required: true
-          type: string
-        - description: Path to forward
-          in: path
-          name: path
-          required: true
-          type: string
+          schema:
+            $ref: '#/definitions/CreateBackupDTO'
+      produces:
+        - application/json
       responses:
-        '200':
-          description: Proxied response
+        '201':
+          description: Backup created
           schema:
             type: string
         '400':
-          description: Bad request
+          description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/ErrorResponse'
         '401':
           description: Unauthorized
           schema:
-            type: string
+            $ref: '#/definitions/ErrorResponse'
         '404':
-          description: Sandbox container not found
+          description: Not Found
           schema:
-            type: string
+            $ref: '#/definitions/ErrorResponse'
         '409':
-          description: Sandbox container conflict
+          description: Conflict
           schema:
-            type: string
+            $ref: '#/definitions/ErrorResponse'
         '500':
-          description: Internal server error
+          description: Internal Server Error
           schema:
-            type: string
-      summary: Proxy requests to the sandbox toolbox
+            $ref: '#/definitions/ErrorResponse'
+      summary: Create sandbox backup
       tags:
-        - toolbox
-  /workspaces/{workspaceId}/destroy:
+        - sandbox
+  /sandboxes/{sandboxId}/destroy:
     post:
       description: Destroy sandbox
       operationId: Destroy
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
       produces:
@@ -624,14 +427,14 @@ paths:
       summary: Destroy sandbox
       tags:
         - sandbox
-  /workspaces/{workspaceId}/resize:
+  /sandboxes/{sandboxId}/resize:
     post:
       description: Resize sandbox
       operationId: Resize
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
         - description: Resize sandbox
@@ -670,60 +473,14 @@ paths:
       summary: Resize sandbox
       tags:
         - sandbox
-  /workspaces/{workspaceId}/snapshot:
-    post:
-      description: Create sandbox snapshot
-      operationId: CreateSnapshot
-      parameters:
-        - description: Sandbox ID
-          in: path
-          name: workspaceId
-          required: true
-          type: string
-        - description: Create snapshot
-          in: body
-          name: sandbox
-          required: true
-          schema:
-            $ref: '#/definitions/CreateSnapshotDTO'
-      produces:
-        - application/json
-      responses:
-        '201':
-          description: Snapshot created
-          schema:
-            type: string
-        '400':
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '401':
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '404':
-          description: Not Found
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '409':
-          description: Conflict
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-        '500':
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/ErrorResponse'
-      summary: Create sandbox snapshot
-      tags:
-        - sandbox
-  /workspaces/{workspaceId}/start:
+  /sandboxes/{sandboxId}/start:
     post:
       description: Start sandbox
       operationId: Start
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
       produces:
@@ -756,14 +513,14 @@ paths:
       summary: Start sandbox
       tags:
         - sandbox
-  /workspaces/{workspaceId}/stop:
+  /sandboxes/{sandboxId}/stop:
     post:
       description: Stop sandbox
       operationId: Stop
       parameters:
         - description: Sandbox ID
           in: path
-          name: workspaceId
+          name: sandboxId
           required: true
           type: string
       produces:
@@ -796,6 +553,244 @@ paths:
       summary: Stop sandbox
       tags:
         - sandbox
+  /sandboxes/{sandboxId}/toolbox/{path}:
+    get:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema:
+            type: string
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+  /snapshots/build:
+    post:
+      description: Build a snapshot from a Dockerfile and context hashes
+      operationId: BuildSnapshot
+      parameters:
+        - description: Build snapshot request
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/BuildSnapshotRequestDTO'
+      responses:
+        '200':
+          description: Snapshot successfully built
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Build a snapshot
+      tags:
+        - snapshots
+  /snapshots/exists:
+    get:
+      description: Check if a specified snapshot exists locally
+      operationId: SnapshotExists
+      parameters:
+        - description: Snapshot name and tag
+          in: query
+          name: snapshot
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SnapshotExistsResponse'
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Check if a snapshot exists
+      tags:
+        - snapshots
+  /snapshots/logs:
+    get:
+      description: Stream build logs
+      operationId: GetBuildLogs
+      parameters:
+        - description: Snapshot ID or snapshot ref without the tag
+          in: query
+          name: snapshotRef
+          required: true
+          type: string
+        - description: Whether to follow the log output
+          in: query
+          name: follow
+          type: boolean
+      responses:
+        '200':
+          description: Build logs stream
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Get build logs
+      tags:
+        - snapshots
+  /snapshots/pull:
+    post:
+      description: Pull a snapshot from a registry
+      operationId: PullSnapshot
+      parameters:
+        - description: Pull snapshot
+          in: body
+          name: request
+          required: true
+          schema:
+            $ref: '#/definitions/PullSnapshotRequestDTO'
+      responses:
+        '200':
+          description: Snapshot successfully pulled
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Pull a snapshot
+      tags:
+        - snapshots
+  /snapshots/remove:
+    post:
+      description: Remove a specified snapshot from the local system
+      operationId: RemoveSnapshot
+      parameters:
+        - description: Snapshot name and tag
+          in: query
+          name: snapshot
+          required: true
+          type: string
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: Snapshot successfully removed
+          schema:
+            type: string
+        '400':
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '404':
+          description: Not Found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '409':
+          description: Conflict
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      summary: Remove a snapshot
+      tags:
+        - snapshots
 security:
   - Bearer: []
 securityDefinitions:

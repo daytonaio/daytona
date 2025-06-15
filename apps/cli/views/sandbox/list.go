@@ -4,7 +4,6 @@
 package sandbox
 
 import (
-	"encoding/json"
 	"fmt"
 	"sort"
 
@@ -21,7 +20,7 @@ type RowData struct {
 	LastEvent string
 }
 
-func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationName *string) {
+func ListSandboxes(sandboxList []daytonaapiclient.Sandbox, activeOrganizationName *string) {
 	if len(sandboxList) == 0 {
 		util.NotifyEmptySandboxList(true)
 		return
@@ -31,11 +30,11 @@ func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationN
 
 	data := [][]string{}
 
-	for _, w := range sandboxList {
+	for _, s := range sandboxList {
 		var rowData *RowData
 		var row []string
 
-		rowData = getTableRowData(w)
+		rowData = getTableRowData(s)
 		row = getRowFromRowData(*rowData)
 		data = append(data, row)
 	}
@@ -47,44 +46,42 @@ func ListSandboxes(sandboxList []daytonaapiclient.Workspace, activeOrganizationN
 	fmt.Println(table)
 }
 
-func SortSandboxes(sandboxList *[]daytonaapiclient.Workspace) {
+func SortSandboxes(sandboxList *[]daytonaapiclient.Sandbox) {
 	sort.Slice(*sandboxList, func(i, j int) bool {
 		pi, pj := getStateSortPriorities(*(*sandboxList)[i].State, *(*sandboxList)[j].State)
 		if pi != pj {
 			return pi < pj
 		}
 
-		if (*sandboxList)[i].Info == nil || (*sandboxList)[j].Info == nil {
+		if (*sandboxList)[i].CreatedAt == nil || (*sandboxList)[j].CreatedAt == nil {
 			return true
 		}
 
 		// If two sandboxes have the same state priority, compare the UpdatedAt property
-		return (*sandboxList)[i].Info.Created > (*sandboxList)[j].Info.Created
+		return *(*sandboxList)[i].CreatedAt > *(*sandboxList)[j].CreatedAt
 	})
 }
 
-func getTableRowData(sandbox daytonaapiclient.Workspace) *RowData {
+func getTableRowData(sandbox daytonaapiclient.Sandbox) *RowData {
 	rowData := RowData{"", "", "", "", ""}
 	rowData.Name = sandbox.Id + util.AdditionalPropertyPadding
 	if sandbox.State != nil {
 		rowData.State = getStateLabel(*sandbox.State)
 	}
 
-	providerMetadataString := sandbox.Info.GetProviderMetadata()
+	rowData.Region = sandbox.Target
+	if sandbox.Class != nil {
+		rowData.Class = *sandbox.Class
+	}
 
-	var providerMetadata providerMetadata
-
-	err := json.Unmarshal([]byte(providerMetadataString), &providerMetadata)
-	if err == nil {
-		rowData.Region = providerMetadata.Region
-		rowData.Class = providerMetadata.Class
-		rowData.LastEvent = util.GetTimeSinceLabelFromString(providerMetadata.UpdatedAt)
+	if sandbox.UpdatedAt != nil {
+		rowData.LastEvent = util.GetTimeSinceLabelFromString(*sandbox.UpdatedAt)
 	}
 
 	return &rowData
 }
 
-func renderUnstyledList(sandboxList []daytonaapiclient.Workspace) {
+func renderUnstyledList(sandboxList []daytonaapiclient.Sandbox) {
 	for _, sandbox := range sandboxList {
 		RenderInfo(&sandbox, true)
 
@@ -107,7 +104,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 daytonaapiclient.WorkspaceState) (int, int) {
+func getStateSortPriorities(state1, state2 daytonaapiclient.SandboxState) (int, int) {
 	pi, ok := sandboxListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -121,7 +118,7 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.WorkspaceState) (int
 }
 
 // Sandboxes that have actions being performed on them have a higher priority when listing
-var sandboxListStatePriorities = map[daytonaapiclient.WorkspaceState]int{
+var sandboxListStatePriorities = map[daytonaapiclient.SandboxState]int{
 	"pending":       1,
 	"pending-start": 1,
 	"deleting":      1,
@@ -129,5 +126,6 @@ var sandboxListStatePriorities = map[daytonaapiclient.WorkspaceState]int{
 	"started":       2,
 	"undefined":     2,
 	"error":         3,
+	"build-failed":  3,
 	"stopped":       4,
 }

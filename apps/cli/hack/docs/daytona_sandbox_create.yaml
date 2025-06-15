@@ -10,7 +10,7 @@ options:
     default_value: '0'
     usage: Auto-stop interval in minutes (0 means disabled)
   - name: class
-    usage: Workspace class type (small, medium, large)
+    usage: Sandbox class type (small, medium, large)
   - name: context
     shorthand: c
     default_value: '[]'
@@ -24,7 +24,7 @@ options:
     usage: Disk space allocated to the sandbox in GB
   - name: dockerfile
     shorthand: f
-    usage: Path to Dockerfile for Sandbox image
+    usage: Path to Dockerfile for Sandbox snapshot
   - name: env
     shorthand: e
     default_value: '[]'
@@ -32,8 +32,6 @@ options:
   - name: gpu
     default_value: '0'
     usage: GPU units allocated to the sandbox
-  - name: image
-    usage: Image to use for the sandbox
   - name: label
     shorthand: l
     default_value: '[]'
@@ -44,6 +42,8 @@ options:
   - name: public
     default_value: 'false'
     usage: Make sandbox publicly accessible
+  - name: snapshot
+    usage: Snapshot to use for the sandbox
   - name: target
     usage: Target region (eu, us)
   - name: user

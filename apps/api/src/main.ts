@@ -17,9 +17,9 @@ import { MetricsInterceptor } from './interceptors/metrics.interceptor'
 import { HttpsOptions } from '@nestjs/common/interfaces/external/https-options.interface'
 import { TypedConfigService } from './config/typed-config.service'
 import { DataSource, MigrationExecutor } from 'typeorm'
-import { NodeService } from './workspace/services/node.service'
-import { NodeRegion } from './workspace/enums/node-region.enum'
-import { WorkspaceClass } from './workspace/enums/workspace-class.enum'
+import { RunnerService } from './sandbox/services/runner.service'
+import { RunnerRegion } from './sandbox/enums/runner-region.enum'
+import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
 
@@ -94,12 +94,12 @@ async function bootstrap() {
     },
   })
 
-  // Auto create nodes only in local development environment
+  // Auto create runners only in local development environment
   if (!configService.get('production')) {
-    const nodeService = app.get(NodeService)
-    const nodes = await nodeService.findAll()
-    if (!nodes.find((node) => node.domain === 'localtest.me:3003')) {
-      await nodeService.create({
+    const runnerService = app.get(RunnerService)
+    const runners = await runnerService.findAll()
+    if (!runners.find((runner) => runner.domain === 'localtest.me:3003')) {
+      await runnerService.create({
         apiUrl: 'http://localhost:3003',
         apiKey: 'secret_api_token',
         cpu: 4,
@@ -108,8 +108,8 @@ async function bootstrap() {
         gpu: 0,
         gpuType: 'none',
         capacity: 100,
-        region: NodeRegion.US,
-        class: WorkspaceClass.SMALL,
+        region: RunnerRegion.US,
+        class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
       })
     }

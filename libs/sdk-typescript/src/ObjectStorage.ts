@@ -1,6 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: Apache-2.0
  */
 
 import { ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3'
@@ -64,7 +64,8 @@ export class ObjectStorage {
    */
   async upload(path: string, organizationId: string, archiveBasePath?: string): Promise<string> {
     if (!fs.existsSync(path)) {
-      throw new DaytonaError(`Path does not exist: ${path}`)
+      const errMsg = `Path does not exist: ${path}`
+      throw new DaytonaError(errMsg)
     }
 
     // Compute hash for the path

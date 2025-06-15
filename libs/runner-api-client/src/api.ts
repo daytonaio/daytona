@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 
 /**
@@ -13,6 +18,6 @@
  */
 
 export * from './api/default-api'
-export * from './api/images-api'
 export * from './api/sandbox-api'
+export * from './api/snapshots-api'
 export * from './api/toolbox-api'

@@ -1,3 +1,8 @@
+/*
+ * Copyright 2025 Daytona Platforms Inc.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 /* tslint:disable */
 /* eslint-disable */
 /**
@@ -14,13 +19,16 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
-import type { WorkspaceInfo } from './workspace-info'
+import type { BuildInfo } from './build-info'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { WorkspaceState } from './workspace-state'
+import type { SandboxInfo } from './sandbox-info'
 // May contain unused imports in some cases
 // @ts-ignore
-import type { WorkspaceVolume } from './workspace-volume'
+import type { SandboxState } from './sandbox-state'
+// May contain unused imports in some cases
+// @ts-ignore
+import type { SandboxVolume } from './sandbox-volume'
 
 /**
  *
@@ -29,30 +37,23 @@ import type { WorkspaceVolume } from './workspace-volume'
  */
 export interface Workspace {
   /**
-   * The ID of the workspace
+   * The ID of the sandbox
    * @type {string}
    * @memberof Workspace
    */
   id: string
   /**
-   * The name of the workspace
-   * @type {string}
-   * @memberof Workspace
-   * @deprecated
-   */
-  name: string
-  /**
-   * The organization ID of the workspace
+   * The organization ID of the sandbox
    * @type {string}
    * @memberof Workspace
    */
   organizationId: string
   /**
-   * The image used for the workspace
+   * The snapshot used for the sandbox
    * @type {string}
    * @memberof Workspace
    */
-  image?: string
+  snapshot?: string
   /**
    * The user associated with the project
    * @type {string}
@@ -60,83 +61,77 @@ export interface Workspace {
    */
   user: string
   /**
-   * Environment variables for the workspace
+   * Environment variables for the sandbox
    * @type {{ [key: string]: string; }}
    * @memberof Workspace
    */
   env: { [key: string]: string }
   /**
-   * Labels for the workspace
+   * Labels for the sandbox
    * @type {{ [key: string]: string; }}
    * @memberof Workspace
    */
   labels: { [key: string]: string }
   /**
-   * Whether the workspace http preview is public
+   * Whether the sandbox http preview is public
    * @type {boolean}
    * @memberof Workspace
    */
   public: boolean
   /**
-   * The target environment for the workspace
+   * The target environment for the sandbox
    * @type {string}
    * @memberof Workspace
    */
   target: string
   /**
-   * Additional information about the workspace
-   * @type {WorkspaceInfo}
-   * @memberof Workspace
-   */
-  info?: WorkspaceInfo
-  /**
-   * The CPU quota for the workspace
+   * The CPU quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  cpu?: number
+  cpu: number
   /**
-   * The GPU quota for the workspace
+   * The GPU quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  gpu?: number
+  gpu: number
   /**
-   * The memory quota for the workspace
+   * The memory quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  memory?: number
+  memory: number
   /**
-   * The disk quota for the workspace
+   * The disk quota for the sandbox
    * @type {number}
    * @memberof Workspace
    */
-  disk?: number
+  disk: number
   /**
-   * The state of the workspace
-   * @type {WorkspaceState}
+   * The state of the sandbox
+   * @type {SandboxState}
    * @memberof Workspace
    */
-  state?: WorkspaceState
+  state?: SandboxState
   /**
-   * The error reason of the workspace
+   * The error reason of the sandbox
    * @type {string}
    * @memberof Workspace
    */
   errorReason?: string
   /**
-   * The state of the snapshot
+   * The state of the backup
    * @type {string}
    * @memberof Workspace
    */
-  snapshotState?: WorkspaceSnapshotStateEnum
+  backupState?: WorkspaceBackupStateEnum
   /**
-   * The creation timestamp of the last snapshot
+   * The creation timestamp of the last backup
    * @type {string}
    * @memberof Workspace
    */
-  snapshotCreatedAt?: string
+  backupCreatedAt?: string
   /**
    * Auto-stop interval in minutes (0 means disabled)
    * @type {number}
@@ -150,13 +145,90 @@ export interface Workspace {
    */
   autoArchiveInterval?: number
   /**
-   * Array of volumes attached to the workspace
-   * @type {Array<WorkspaceVolume>}
+   * The domain name of the runner
+   * @type {string}
    * @memberof Workspace
    */
-  volumes?: Array<WorkspaceVolume>
+  runnerDomain?: string
+  /**
+   * Array of volumes attached to the sandbox
+   * @type {Array<SandboxVolume>}
+   * @memberof Workspace
+   */
+  volumes?: Array<SandboxVolume>
+  /**
+   * Build information for the sandbox
+   * @type {BuildInfo}
+   * @memberof Workspace
+   */
+  buildInfo?: BuildInfo
+  /**
+   * The creation timestamp of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  createdAt?: string
+  /**
+   * The last update timestamp of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  updatedAt?: string
+  /**
+   * The class of the sandbox
+   * @type {string}
+   * @memberof Workspace
+   * @deprecated
+   */
+  class?: WorkspaceClassEnum
+  /**
+   * The name of the workspace
+   * @type {string}
+   * @memberof Workspace
+   */
+  name: string
+  /**
+   * The image used for the workspace
+   * @type {string}
+   * @memberof Workspace
+   */
+  image?: string
+  /**
+   * The state of the snapshot
+   * @type {string}
+   * @memberof Workspace
+   */
+  snapshotState?: WorkspaceSnapshotStateEnum
+  /**
+   * The creation timestamp of the last snapshot
+   * @type {string}
+   * @memberof Workspace
+   */
+  snapshotCreatedAt?: string
+  /**
+   * Additional information about the sandbox
+   * @type {SandboxInfo}
+   * @memberof Workspace
+   */
+  info?: SandboxInfo
 }
 
+export const WorkspaceBackupStateEnum = {
+  NONE: 'None',
+  PENDING: 'Pending',
+  IN_PROGRESS: 'InProgress',
+  COMPLETED: 'Completed',
+  ERROR: 'Error',
+} as const
+
+export type WorkspaceBackupStateEnum = (typeof WorkspaceBackupStateEnum)[keyof typeof WorkspaceBackupStateEnum]
+export const WorkspaceClassEnum = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large',
+} as const
+
+export type WorkspaceClassEnum = (typeof WorkspaceClassEnum)[keyof typeof WorkspaceClassEnum]
 export const WorkspaceSnapshotStateEnum = {
   NONE: 'None',
   PENDING: 'Pending',

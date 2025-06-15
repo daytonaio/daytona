@@ -75,8 +75,8 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
       { icon: <KeyRound className="w-5 h-5" />, label: 'Keys', path: RoutePath.KEYS },
       {
         icon: <Box className="w-5 h-5" />,
-        label: 'Images',
-        path: RoutePath.IMAGES,
+        label: 'Snapshots',
+        path: RoutePath.SNAPSHOTS,
       },
       { icon: <PackageOpen className="w-5 h-5" />, label: 'Registries', path: RoutePath.REGISTRIES },
     ]

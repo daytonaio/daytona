@@ -36,7 +36,7 @@ func (s *DaytonaMCPServer) addTools() {
 		mcp.WithDescription("Create a new sandbox with Daytona"),
 		mcp.WithString("id", mcp.Description("If a sandbox ID is provided it is first checked if it exists and is running, if so, the existing sandbox will be used. However, a model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if the intention is to create a new sandbox.")),
 		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
-		mcp.WithString("image", mcp.Description("Image of the sandbox (don't specify any if not explicitly instructed from user).")),
+		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user).")),
 		mcp.WithString("auto_stop_interval", mcp.DefaultString("15"), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
 		mcp.WithString("auto_archive_interval", mcp.DefaultString("10080"), mcp.Description("Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox.")),
 	)
@@ -135,7 +135,7 @@ func (s *DaytonaMCPServer) addTools() {
 	s.AddTool(moveFileTool, tools.MoveFile)
 
 	deleteFileTool := mcp.NewTool("delete_file",
-		mcp.WithDescription("Delete a file or directory in the Daytona workspace."),
+		mcp.WithDescription("Delete a file or directory in the Daytona sandbox."),
 		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file or directory to delete.")),
 		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to delete the file in.")),
 	)

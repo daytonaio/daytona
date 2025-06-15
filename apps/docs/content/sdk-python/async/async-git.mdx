@@ -11,11 +11,6 @@ class AsyncGit()
 
 Provides Git operations within a Sandbox.
 
-**Attributes**:
-
-- `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
-
 **Example**:
 
 ```python
@@ -42,7 +37,7 @@ await sandbox.git.commit(
 #### AsyncGit.\_\_init\_\_
 
 ```python
-def __init__(toolbox_api: ToolboxApi, instance: SandboxInstance,
+def __init__(sandbox_id: str, toolbox_api: ToolboxApi,
              get_root_dir: Callable[[], Awaitable[str]])
 ```
 
@@ -50,8 +45,8 @@ Initializes a new Git handler instance.
 
 **Arguments**:
 
+- `sandbox_id` _str_ - The Sandbox ID.
 - `toolbox_api` _ToolboxApi_ - API client for Sandbox operations.
-- `instance` _SandboxInstance_ - The Sandbox instance this Git handler belongs to.
 - `get_root_dir` _Callable[[], str]_ - A function to get the default root directory of the Sandbox.
 
 #### AsyncGit.add

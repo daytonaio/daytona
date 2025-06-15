@@ -3,12 +3,12 @@ import json
 import os
 from datetime import datetime
 
-from daytona_sdk import AsyncDaytona, CreateSandboxParams, FileUpload
+from daytona import AsyncDaytona, CreateSandboxFromSnapshotParams, FileUpload
 
 
 async def main():
     async with AsyncDaytona() as daytona:
-        params = CreateSandboxParams(
+        params = CreateSandboxFromSnapshotParams(
             language="python",
         )
 

@@ -14,7 +14,7 @@ import (
 
 type IRunnerCache interface {
 	SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState)
-	SetSnapshotState(ctx context.Context, sandboxId string, state enums.SnapshotState)
+	SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState)
 
 	Set(ctx context.Context, sandboxId string, data models.CacheData)
 	Get(ctx context.Context, sandboxId string) *models.CacheData
@@ -59,7 +59,7 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 	if !ok {
 		data = &models.CacheData{
 			SandboxState:    state,
-			SnapshotState:   enums.SnapshotStateNone,
+			BackupState:     enums.BackupStateNone,
 			DestructionTime: nil,
 		}
 	} else {
@@ -69,7 +69,7 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 	c.cache[sandboxId] = data
 }
 
-func (c *InMemoryRunnerCache) SetSnapshotState(ctx context.Context, sandboxId string, state enums.SnapshotState) {
+func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state enums.BackupState) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
@@ -77,11 +77,11 @@ func (c *InMemoryRunnerCache) SetSnapshotState(ctx context.Context, sandboxId st
 	if !ok {
 		data = &models.CacheData{
 			SandboxState:    enums.SandboxStateUnknown,
-			SnapshotState:   state,
+			BackupState:     state,
 			DestructionTime: nil,
 		}
 	} else {
-		data.SnapshotState = state
+		data.BackupState = state
 	}
 
 	c.cache[sandboxId] = data
@@ -93,7 +93,7 @@ func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data mo
 
 	c.cache[sandboxId] = &models.CacheData{
 		SandboxState:    data.SandboxState,
-		SnapshotState:   data.SnapshotState,
+		BackupState:     data.BackupState,
 		DestructionTime: data.DestructionTime,
 	}
 }
@@ -106,7 +106,7 @@ func (c *InMemoryRunnerCache) Get(ctx context.Context, sandboxId string) *models
 	if !ok {
 		data = &models.CacheData{
 			SandboxState:    enums.SandboxStateUnknown,
-			SnapshotState:   enums.SnapshotStateNone,
+			BackupState:     enums.BackupStateNone,
 			DestructionTime: nil,
 		}
 	}
@@ -121,7 +121,7 @@ func (c *InMemoryRunnerCache) Remove(ctx context.Context, sandboxId string) {
 	destructionTime := time.Now().Add(time.Duration(c.retentionDays) * 24 * time.Hour)
 	c.cache[sandboxId] = &models.CacheData{
 		SandboxState:    enums.SandboxStateDestroyed,
-		SnapshotState:   enums.SnapshotStateNone,
+		BackupState:     enums.BackupStateNone,
 		DestructionTime: &destructionTime,
 	}
 }

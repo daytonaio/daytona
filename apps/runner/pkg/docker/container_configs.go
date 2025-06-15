@@ -27,9 +27,9 @@ func (d *DockerClient) getContainerConfigs(ctx context.Context, sandboxDto dto.C
 
 func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO) *container.Config {
 	envVars := []string{
-		"DAYTONA_WS_ID=" + sandboxDto.Id,
-		"DAYTONA_WS_IMAGE=" + sandboxDto.Image,
-		"DAYTONA_WS_USER=" + sandboxDto.OsUser,
+		"DAYTONA_SANDBOX_ID=" + sandboxDto.Id,
+		"DAYTONA_SANDBOX_SNAPSHOT=" + sandboxDto.Snapshot,
+		"DAYTONA_SANDBOX_USER=" + sandboxDto.OsUser,
 	}
 
 	for key, value := range sandboxDto.Env {
@@ -38,7 +38,7 @@ func (d *DockerClient) getContainerCreateConfig(sandboxDto dto.CreateSandboxDTO)
 
 	return &container.Config{
 		Hostname: sandboxDto.Id,
-		Image:    sandboxDto.Image,
+		Image:    sandboxDto.Snapshot,
 		// User:         sandboxDto.OsUser,
 		Env:          envVars,
 		Entrypoint:   sandboxDto.Entrypoint,
