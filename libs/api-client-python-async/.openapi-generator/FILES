@@ -76,7 +76,11 @@ daytona_api_client_async/models/range.py
 daytona_api_client_async/models/registry_push_access_dto.py
 daytona_api_client_async/models/replace_request.py
 daytona_api_client_async/models/replace_result.py
+daytona_api_client_async/models/runner.py
+daytona_api_client_async/models/runner_region.py
+daytona_api_client_async/models/runner_state.py
 daytona_api_client_async/models/sandbox.py
+daytona_api_client_async/models/sandbox_class.py
 daytona_api_client_async/models/sandbox_info.py
 daytona_api_client_async/models/sandbox_labels.py
 daytona_api_client_async/models/sandbox_state.py

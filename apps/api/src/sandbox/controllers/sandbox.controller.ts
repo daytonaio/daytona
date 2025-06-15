@@ -58,6 +58,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { ProxyGuard } from '../../auth/proxy.guard'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -177,7 +178,7 @@ export class SandboxController {
     description: 'Sandbox details',
     type: SandboxDto,
   })
-  @UseGuards(SandboxAccessGuard)
+  @UseGuards(SandboxAccessGuard, ProxyGuard)
   async getSandbox(
     @Sandbox() sandbox: SandboxEntity,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

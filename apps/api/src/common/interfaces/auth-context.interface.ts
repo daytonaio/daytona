@@ -8,7 +8,11 @@ import { OrganizationUser } from '../../organization/entities/organization-user.
 import { Organization } from '../../organization/entities/organization.entity'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
-export interface AuthContext {
+export interface IAuthContext {
+  role: string
+}
+
+export interface AuthContext extends IAuthContext {
   userId: string
   email: string
   role: SystemRole
@@ -16,8 +20,16 @@ export interface AuthContext {
   organizationId?: string
 }
 
+export function isAuthContext(user: IAuthContext): user is AuthContext {
+  return 'userId' in user
+}
+
 export interface OrganizationAuthContext extends AuthContext {
   organizationId: string
   organization: Organization
   organizationUser?: OrganizationUser
+}
+
+export function isOrganizationAuthContext(user: IAuthContext): user is OrganizationAuthContext {
+  return 'organizationId' in user
 }

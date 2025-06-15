@@ -11,6 +11,7 @@ import (
 	"os"
 	"path"
 
+	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
@@ -19,6 +20,7 @@ import (
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
+	"github.com/daytonaio/daemon/pkg/toolbox/proxy"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
@@ -144,6 +146,11 @@ func (s *Server) Start() error {
 	{
 		portController.GET("", portDetector.GetPorts)
 		portController.GET("/:port/in-use", portDetector.IsPortInUse)
+	}
+
+	proxyController := r.Group("/proxy")
+	{
+		proxyController.Any("/:port/*path", common_proxy.NewProxyRequestHandler(proxy.GetProxyTarget))
 	}
 
 	go portDetector.Start(context.Background())
