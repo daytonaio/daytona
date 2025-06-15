@@ -89,6 +89,32 @@ console.log(`Branches: ${response.branches}`)
 
 ---
 
+#### checkoutBranch()
+
+```ts
+checkoutBranch(path: string, branch: string): Promise<void>
+```
+
+Checkout branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _string_ - Name of the branch to checkout
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.checkoutBranch('workspace/repo', 'new-feature')
+```
+
+---
+
 #### clone()
 
 ```ts
@@ -174,6 +200,58 @@ Commits staged changes.
 // Stage and commit changes
 await git.add('workspace/repo', ['README.md'])
 await git.commit('workspace/repo', 'Update documentation', 'John Doe', 'john@example.com')
+```
+
+---
+
+#### createBranch()
+
+```ts
+createBranch(path: string, name: string): Promise<void>
+```
+
+Create branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _string_ - Name of the new branch to create
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.createBranch('workspace/repo', 'new-feature')
+```
+
+---
+
+#### deleteBranch()
+
+```ts
+deleteBranch(path: string, name: string): Promise<void>
+```
+
+Delete branche in the repository.
+
+**Parameters**:
+
+- `path` _string_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _string_ - Name of the branch to delete
+
+**Returns**:
+
+- `Promise<void>`
+
+**Example:**
+
+```ts
+await git.deleteBranch('workspace/repo', 'new-feature')
 ```
 
 ---
