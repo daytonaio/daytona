@@ -1,0 +1,41 @@
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 60px;
+}
+
+body {
+  background-color: var(--bg-color);
+}
+
+main {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-color);
+  gap: 16px;
+}
+
+section {
+  max-width: 1248px;
+  //margin: 0 80px;
+  padding-bottom: 0 !important;
+
+  @include for-laptop-screen-sizes {
+    margin: 0 40px;
+  }
+
+  @include for-mobile-screen-sizes {
+    margin: 0 20px;
+  }
+}
+
+a {
+  text-decoration: unset;
+}
+pre > code {
+  text-wrap: wrap !important;
+  white-space: pre-wrap;
+}

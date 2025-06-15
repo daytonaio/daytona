@@ -1,0 +1,29 @@
+@mixin for-mobile-screen-sizes {
+  @media screen and (max-width: #{$screen-xs}) {
+    @content;
+  }
+}
+
+@mixin for-tablet-screen-sizes {
+  @media screen and (max-width: #{$screen-lg}) {
+    @content;
+  }
+}
+
+@mixin for-laptop-screen-sizes {
+  @media screen and (max-width: #{$screen-l}) {
+    @content;
+  }
+}
+
+@mixin for-pc-screen-sizes {
+  @media screen and (max-width: #{$screen-xl}) {
+    @content;
+  }
+}
+
+@mixin for-hover-state {
+  @media (hover: hover) and (pointer: fine) {
+    @content;
+  }
+}

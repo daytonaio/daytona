@@ -1,0 +1,210 @@
+{
+  "$ref": "#/definitions/i18n",
+  "definitions": {
+    "i18n": {
+      "type": "object",
+      "properties": {
+        "skipLink.label": {
+          "type": "string",
+          "description": "Text displayed in the accessible “Skip link” when a keyboard user first tabs into a page.",
+          "markdownDescription": "Text displayed in the accessible “Skip link” when a keyboard user first tabs into a page."
+        },
+        "search.label": {
+          "type": "string",
+          "description": "Text displayed in the search bar.",
+          "markdownDescription": "Text displayed in the search bar."
+        },
+        "search.shortcutLabel": {
+          "type": "string",
+          "description": "Accessible label for the shortcut key to open the search modal.",
+          "markdownDescription": "Accessible label for the shortcut key to open the search modal."
+        },
+        "search.cancelLabel": {
+          "type": "string",
+          "description": "Text for the “Cancel” button that closes the search modal.",
+          "markdownDescription": "Text for the “Cancel” button that closes the search modal."
+        },
+        "search.devWarning": {
+          "type": "string",
+          "description": "Warning displayed when opening the Search in a dev environment.",
+          "markdownDescription": "Warning displayed when opening the Search in a dev environment."
+        },
+        "themeSelect.accessibleLabel": {
+          "type": "string",
+          "description": "Accessible label for the theme selection dropdown.",
+          "markdownDescription": "Accessible label for the theme selection dropdown."
+        },
+        "themeSelect.dark": {
+          "type": "string",
+          "description": "Name of the dark color theme.",
+          "markdownDescription": "Name of the dark color theme."
+        },
+        "themeSelect.light": {
+          "type": "string",
+          "description": "Name of the light color theme.",
+          "markdownDescription": "Name of the light color theme."
+        },
+        "themeSelect.auto": {
+          "type": "string",
+          "description": "Name of the automatic color theme that syncs with system preferences.",
+          "markdownDescription": "Name of the automatic color theme that syncs with system preferences."
+        },
+        "languageSelect.accessibleLabel": {
+          "type": "string",
+          "description": "Accessible label for the language selection dropdown.",
+          "markdownDescription": "Accessible label for the language selection dropdown."
+        },
+        "menuButton.accessibleLabel": {
+          "type": "string",
+          "description": "Accessible label for the mobile menu button.",
+          "markdownDescription": "Accessible label for the mobile menu button."
+        },
+        "sidebarNav.accessibleLabel": {
+          "type": "string",
+          "description": "Accessible label for the main sidebar `<nav>` element to distinguish it fom other `<nav>` landmarks on the page.",
+          "markdownDescription": "Accessible label for the main sidebar `<nav>` element to distinguish it fom other `<nav>` landmarks on the page."
+        },
+        "tableOfContents.onThisPage": {
+          "type": "string",
+          "description": "Title for the table of contents component.",
+          "markdownDescription": "Title for the table of contents component."
+        },
+        "tableOfContents.overview": {
+          "type": "string",
+          "description": "Label used for the first link in the table of contents, linking to the page title.",
+          "markdownDescription": "Label used for the first link in the table of contents, linking to the page title."
+        },
+        "i18n.untranslatedContent": {
+          "type": "string",
+          "description": "Notice informing users they are on a page that is not yet translated to their language.",
+          "markdownDescription": "Notice informing users they are on a page that is not yet translated to their language."
+        },
+        "page.editLink": {
+          "type": "string",
+          "description": "Text for the link to edit a page.",
+          "markdownDescription": "Text for the link to edit a page."
+        },
+        "page.lastUpdated": {
+          "type": "string",
+          "description": "Text displayed in front of the last updated date in the page footer.",
+          "markdownDescription": "Text displayed in front of the last updated date in the page footer."
+        },
+        "page.previousLink": {
+          "type": "string",
+          "description": "Label shown on the “previous page” pagination arrow in the page footer.",
+          "markdownDescription": "Label shown on the “previous page” pagination arrow in the page footer."
+        },
+        "page.nextLink": {
+          "type": "string",
+          "description": "Label shown on the “next page” pagination arrow in the page footer.",
+          "markdownDescription": "Label shown on the “next page” pagination arrow in the page footer."
+        },
+        "page.draft": {
+          "type": "string",
+          "description": "Development-only notice informing users they are on a page that is a draft which will not be included in production builds.",
+          "markdownDescription": "Development-only notice informing users they are on a page that is a draft which will not be included in production builds."
+        },
+        "404.text": {
+          "type": "string",
+          "description": "Text shown on Starlight’s default 404 page",
+          "markdownDescription": "Text shown on Starlight’s default 404 page"
+        },
+        "aside.tip": {
+          "type": "string",
+          "description": "Text shown on the tip aside variant",
+          "markdownDescription": "Text shown on the tip aside variant"
+        },
+        "aside.note": {
+          "type": "string",
+          "description": "Text shown on the note aside variant",
+          "markdownDescription": "Text shown on the note aside variant"
+        },
+        "aside.caution": {
+          "type": "string",
+          "description": "Text shown on the warning aside variant",
+          "markdownDescription": "Text shown on the warning aside variant"
+        },
+        "aside.danger": {
+          "type": "string",
+          "description": "Text shown on the danger aside variant",
+          "markdownDescription": "Text shown on the danger aside variant"
+        },
+        "fileTree.directory": {
+          "type": "string",
+          "description": "Label for the directory icon in the file tree component.",
+          "markdownDescription": "Label for the directory icon in the file tree component."
+        },
+        "pagefind.clear_search": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"Clear\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"Clear\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.load_more": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"Load more results\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"Load more results\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.search_label": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"Search this site\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"Search this site\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.filters_label": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"Filters\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"Filters\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.zero_results": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.many_results": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"[COUNT] results for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"[COUNT] results for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.one_result": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"[COUNT] result for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"[COUNT] result for [SEARCH_TERM]\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.alt_search": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]. Showing results for [DIFFERENT_TERM] instead\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.search_suggestion": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]. Try one of the following searches:\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"No results for [SEARCH_TERM]. Try one of the following searches:\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "pagefind.searching": {
+          "type": "string",
+          "description": "Pagefind UI translation. English default value: `\"Searching for [SEARCH_TERM]...\"`. See https://pagefind.app/docs/ui/#translations",
+          "markdownDescription": "Pagefind UI translation. English default value: `\"Searching for [SEARCH_TERM]...\"`. See https://pagefind.app/docs/ui/#translations"
+        },
+        "expressiveCode.copyButtonCopied": {
+          "type": "string",
+          "description": "Expressive Code UI translation. English default value: `\"Copied!\"`",
+          "markdownDescription": "Expressive Code UI translation. English default value: `\"Copied!\"`"
+        },
+        "expressiveCode.copyButtonTooltip": {
+          "type": "string",
+          "description": "Expressive Code UI translation. English default value: `\"Copy to clipboard\"`",
+          "markdownDescription": "Expressive Code UI translation. English default value: `\"Copy to clipboard\"`"
+        },
+        "expressiveCode.terminalWindowFallbackTitle": {
+          "type": "string",
+          "description": "Expressive Code UI translation. English default value: `\"Terminal window\"`",
+          "markdownDescription": "Expressive Code UI translation. English default value: `\"Terminal window\"`"
+        },
+        "$schema": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#"
+}

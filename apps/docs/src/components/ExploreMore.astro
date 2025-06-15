@@ -1,0 +1,78 @@
+---
+import { getExploreMoreData } from '../utils/navigation'
+import { sidebarConfig } from '../content/config'
+
+const { expanded } = Astro.props
+const exploreMoreData = getExploreMoreData(sidebarConfig, Astro.url.pathname)
+const gridColumn = expanded ? 'span 2' : 'inherit'
+const style = `grid-column: ${gridColumn};`
+---
+
+{
+  exploreMoreData.map(group => (
+    <section>
+      <h1>{group.title || 'Explore More'}</h1>
+      <ul>
+        {group.items.map(item => (
+          <a href={item.href} style={style}>
+            <li>
+              <span class="document-title">{item.title}</span>
+              <br />
+              <span class="subtitle">{item.subtitle}</span>
+            </li>
+          </a>
+        ))}
+      </ul>
+    </section>
+  ))
+}
+
+<style>
+  section {
+    all: unset;
+  }
+
+  h1 {
+    all: unset;
+    font-family: 'Berkeley Mono', monospace;
+    font-weight: 700;
+    font-size: 2em;
+  }
+
+  ul {
+    all: unset;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1em;
+  }
+
+  a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--block-bg-color);
+    border: var(--border);
+    border-color: var(--block-bg-color);
+  }
+
+  a:hover {
+    background: var(--secondary-text-color);
+    border-color: var(--secondary-text-color);
+  }
+
+  li {
+    display: inline-block;
+    padding: 1em;
+    width: 100%;
+    height: 100%;
+  }
+
+  .document-title {
+    font-weight: bold;
+  }
+
+  .subtitle {
+    font-weight: normal;
+    font-size: 0.8em;
+  }
+</style>

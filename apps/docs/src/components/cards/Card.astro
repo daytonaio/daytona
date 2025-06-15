@@ -1,0 +1,11 @@
+---
+const { icon, title, link } = Astro.props
+---
+
+<a class="description-card" href={link}>
+  <figure>
+    <Fragment set:html={icon} />
+  </figure>
+  <h6>{title}</h6>
+  <slot />
+</a>

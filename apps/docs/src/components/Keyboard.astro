@@ -1,0 +1,22 @@
+---
+interface Props {
+  shortcuts: string | string[]
+}
+const { shortcuts } = Astro.props
+---
+
+{
+  !Array.isArray(shortcuts) ? (
+    <span class="keyboard-shortcut">{shortcuts}</span>
+  ) : (
+    shortcuts.map((shortcut, index) => {
+      return (
+        <>
+          {' '}
+          <span class="keyboard-shortcut">{shortcut}</span>
+          {index === shortcuts.length - 1 ? ' ' : ' + '}
+        </>
+      )
+    })
+  )
+}

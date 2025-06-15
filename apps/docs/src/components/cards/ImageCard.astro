@@ -1,0 +1,11 @@
+---
+import { Image } from 'astro:assets'
+const { imageDark, imageAlt, link, icon } = Astro.props
+---
+
+<a href={link} class="image-card">
+  <figure>
+    {!icon && <Image src={imageDark} alt={imageAlt} />}
+    {icon && <Image src={icon} alt={imageAlt} width={46} height={46} />}
+  </figure>
+</a>

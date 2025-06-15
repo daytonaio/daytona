@@ -1,0 +1,67 @@
+---
+const {
+  gridNumber,
+  mobileGridNumber,
+  colsMinWidth,
+  colsMinWidthMobile,
+  gridGap = '16px',
+} = Astro.props
+---
+
+<div class:list={'card-grid'}><slot /></div>
+
+<style
+  define:vars={{
+    gridNumber,
+    mobileGridNumber,
+    colsMinWidth,
+    gridGap,
+    colsMinWidthMobile,
+  }}
+>
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(
+        min(
+          (
+            100% / var(--mobileGridNumber) - var(--gridGap) *
+              (var(--mobileGridNumber) - 1) / var(--mobileGridNumber)
+          ),
+          max(
+            var(--colsMinWidth),
+            (
+              100% / var(--gridNumber) - var(--gridGap) *
+                (var(--gridNumber) - 1) / var(--gridNumber)
+            )
+          )
+        ),
+        1fr
+      )
+    );
+    gap: 16px;
+    justify-items: center;
+    @media (max-width: 650px) {
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(
+          min(
+            (
+              100% / var(--mobileGridNumber) - var(--gridGap) *
+                (var(--mobileGridNumber) - 1) / var(--mobileGridNumber)
+            ),
+            max(
+              var(--colsMinWidthMobile),
+              (
+                100% / var(--gridNumber) - var(--gridGap) *
+                  (var(--gridNumber) - 1) / var(--gridNumber)
+              )
+            )
+          ),
+          1fr
+        )
+      );
+    }
+  }
+</style>

@@ -1,0 +1,115 @@
+---
+import menuIcon from '@assets/icons/menu.svg?raw'
+import closeXIcon from '@assets/icons/closeX.svg?raw'
+const { labels } = Astro.props
+---
+
+<starlight-menu-button>
+  <div id="blur-overlay"></div>
+  <button
+    aria-expanded="false"
+    aria-label={labels['menuButton.accessibleLabel']}
+    aria-controls="starlight__sidebar"
+  >
+    <Fragment set:html={menuIcon} />
+    <Fragment set:html={closeXIcon} />
+  </button>
+</starlight-menu-button>
+
+<script>
+  class StarlightMenuButton extends HTMLElement {
+    btn = this.querySelector('button')!
+
+    constructor() {
+      super()
+      // Toggle `aria-expanded` state when a user clicks the button.
+      this.btn.addEventListener('click', () => this.toggleExpanded())
+
+      // Close the menu when a user presses the escape key.
+      const parentNav = this.closest('nav')
+      if (parentNav) {
+        parentNav.addEventListener('keyup', e => this.closeOnEscape(e))
+      }
+    }
+
+    setExpanded(expanded: boolean) {
+      this.setAttribute('aria-expanded', String(expanded))
+      document.body.toggleAttribute('data-mobile-menu-expanded', expanded)
+    }
+
+    toggleExpanded() {
+      this.setExpanded(this.getAttribute('aria-expanded') !== 'true')
+    }
+
+    closeOnEscape(e: KeyboardEvent) {
+      if (e.code === 'Escape') {
+        this.setExpanded(false)
+        this.btn.focus()
+      }
+    }
+  }
+
+  customElements.define('starlight-menu-button', StarlightMenuButton)
+</script>
+
+<style>
+  button {
+    display: none;
+    position: fixed;
+    top: calc((74px - var(--sl-menu-button-size)) / 2);
+    inset-inline-end: var(--sl-nav-pad-x);
+    z-index: var(--sl-z-index-navbar);
+    padding: 0.5rem;
+    background-color: unset;
+    border: var(--border);
+    cursor: pointer;
+    right: 40px;
+
+    > svg:last-child {
+      display: none;
+    }
+
+    > svg path {
+      fill: var(--primary-text-color);
+    }
+
+    @media (max-width: 1024px) {
+      display: flex;
+    }
+    @media (max-width: 650px) {
+      right: 20px;
+    }
+  }
+  [aria-expanded='true'] button {
+    box-shadow: none;
+    > svg:first-child {
+      display: none;
+    }
+    > svg:last-child {
+      display: block;
+    }
+  }
+
+  [aria-expanded='true'] #blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 4;
+    background-color: rgba(22, 22, 22, 0.8);
+    backdrop-filter: blur(2px);
+  }
+</style>
+
+<style is:global>
+  [data-mobile-menu-expanded] {
+    overflow: auto;
+  }
+
+  @media (max-width: 1024px) {
+    [data-mobile-menu-expanded] {
+      overflow: hidden;
+    }
+  }
+</style>

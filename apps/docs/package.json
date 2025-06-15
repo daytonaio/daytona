@@ -1,0 +1,67 @@
+{
+  "name": "docs",
+  "license": "Apache-2.0",
+  "type": "module",
+  "version": "0.21.0",
+  "scripts": {
+    "postinstall": "is-ci || husky",
+    "dev": "astro dev --host",
+    "start": "yarn run dev",
+    "build": "yarn update-search && yarn update-llms && astro build",
+    "preview": "astro preview --host",
+    "astro": "astro",
+    "update-cli-reference": "node ./tools/update-cli-reference.js",
+    "update-api-reference": "node ./tools/update-api-reference.js",
+    "update-sdk-reference": "node ./tools/update-sdk-reference.js",
+    "update-llms": "node ./tools/update-llms.js",
+    "update-search": "node ./tools/update-search.js",
+    "prepare": "husky",
+    "format": "prettier --write \"**/src/**/*.{ts,tsx,astro}\" && markdownlint-cli2 \"**/*.{mdx,md}\" \"#node_modules\" --fix"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "2.2.4",
+    "@astrojs/node": "8.2.5",
+    "@astrojs/react": "^3.1.1",
+    "@astrojs/starlight": "^0.22.0",
+    "@astrojs/starlight-tailwind": "^2.0.1",
+    "@astrojs/tailwind": "5.1.0",
+    "algoliasearch": "^5.12.0",
+    "astro": "4.16.18",
+    "astro-expressive-code": "^0.34.1",
+    "dotenv": "^16.4.5",
+    "envalid": "^8.0.0",
+    "express": "^4.20.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-instantsearch": "^7.13.7",
+    "react-instantsearch-dom": "^6.40.4",
+    "sass": "^1.74.1",
+    "semver": "^7.6.0",
+    "sharp": "^0.33.3",
+    "starlight-openapi": "^0.6.0",
+    "tailwindcss": "^3.4.3",
+    "vite": "^5.4.19",
+    "vite-plugin-svgr": "^4.2.0",
+    "yaml": "^2.4.3"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/react": "^18.2.74",
+    "@types/react-instantsearch-dom": "^6",
+    "husky": "^9.0.11",
+    "is-ci": "^3.0.1",
+    "lint-staged": "^15.2.7",
+    "markdownlint-cli2": "^0.13.0",
+    "prettier": "^3.3.2",
+    "prettier-plugin-astro": "^0.14.0",
+    "typescript": "^5.6.3"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,astro}": [
+      "prettier --write"
+    ],
+    "*.mdx": [
+      "markdownlint-cli2 --fix"
+    ]
+  }
+}
