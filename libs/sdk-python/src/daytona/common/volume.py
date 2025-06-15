@@ -1,5 +1,5 @@
 # Copyright 2025 Daytona Platforms Inc.
-# SPDX-License-Identifier: AGPL-3.0
+# SPDX-License-Identifier: Apache-2.0
 
 from daytona_api_client import SandboxVolume as ApiVolumeMount
 from daytona_api_client import VolumeDto
