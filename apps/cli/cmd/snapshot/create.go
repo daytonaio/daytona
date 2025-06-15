@@ -40,8 +40,16 @@ var CreateCmd = &cobra.Command{
 			return err
 		}
 
-		createSnapshotDto := daytonaapiclient.CreateSnapshot{
-			Name: snapshotName,
+		createSnapshot := daytonaapiclient.NewCreateSnapshot(snapshotName)
+
+		if cpuFlag != 0 {
+			createSnapshot.SetCpu(cpuFlag)
+		}
+		if memoryFlag != 0 {
+			createSnapshot.SetMemory(memoryFlag)
+		}
+		if diskFlag != 0 {
+			createSnapshot.SetDisk(diskFlag)
 		}
 
 		if usingDockerfile {
@@ -49,22 +57,22 @@ var CreateCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			createSnapshotDto.BuildInfo = createBuildInfoDto
+			createSnapshot.SetBuildInfo(*createBuildInfoDto)
 		} else if usingImage {
 			err := common.ValidateImageName(imageNameFlag)
 			if err != nil {
 				return err
 			}
-			createSnapshotDto.ImageName = &imageNameFlag
+			createSnapshot.SetImageName(imageNameFlag)
 			if entrypointFlag != "" {
-				createSnapshotDto.Entrypoint = strings.Split(entrypointFlag, " ")
+				createSnapshot.SetEntrypoint(strings.Split(entrypointFlag, " "))
 			}
 		} else if entrypointFlag != "" {
-			createSnapshotDto.Entrypoint = strings.Split(entrypointFlag, " ")
+			createSnapshot.SetEntrypoint(strings.Split(entrypointFlag, " "))
 		}
 
 		// Send create request
-		snapshot, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(createSnapshotDto).Execute()
+		snapshot, res, err := apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -121,6 +129,9 @@ var (
 	imageNameFlag      string
 	dockerfilePathFlag string
 	contextFlag        []string
+	cpuFlag            int32
+	memoryFlag         int32
+	diskFlag           int32
 )
 
 func init() {
@@ -128,6 +139,9 @@ func init() {
 	CreateCmd.Flags().StringVarP(&imageNameFlag, "image", "i", "", "The image name for the snapshot")
 	CreateCmd.Flags().StringVarP(&dockerfilePathFlag, "dockerfile", "f", "", "Path to Dockerfile to build")
 	CreateCmd.Flags().StringArrayVarP(&contextFlag, "context", "c", []string{}, "Files or directories to include in the build context (can be specified multiple times)")
+	CreateCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
+	CreateCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
+	CreateCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
 
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "dockerfile")
 	CreateCmd.MarkFlagsMutuallyExclusive("image", "context")
