@@ -7,8 +7,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"net"
-	"net/url"
 	"strings"
 	"time"
 
@@ -103,24 +101,7 @@ func (d *DockerClient) Create(ctx context.Context, sandboxDto dto.CreateSandboxD
 		return "", errors.New("container has no IP address, it might not be running")
 	}
 
-	// Build the target URL
-	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
-	target, err := url.Parse(targetURL)
-	if err != nil {
-		return "", common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
-	}
-
-	for i := 0; i < 10; i++ {
-		conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
-		if err != nil {
-			time.Sleep(50 * time.Millisecond)
-			continue
-		}
-		conn.Close()
-		break
-	}
-
-	return c.ID, nil
+	return c.ID, d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
 }
 
 func (p *DockerClient) validateImageArchitecture(ctx context.Context, image string) error {

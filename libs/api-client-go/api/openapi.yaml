@@ -5677,6 +5677,16 @@ components:
       example:
         memory: 4
         buildInfo: ''
+        autoStopInterval: 30
+        organizationId: organization123
+        createdAt: 2024-10-01T12:00:00Z
+        public: false
+        errorReason: The sandbox is not running
+        runnerDomain: runner.example.com
+        id: sandbox123
+        state: creating
+        class: small
+        updatedAt: 2024-10-01T12:00:00Z
         volumes:
           - mountPath: /data
             volumeId: volume123
@@ -5686,25 +5696,16 @@ components:
         env:
           NODE_ENV: production
         gpu: 0
+        daemonVersion: 1.0.0
         backupCreatedAt: 2024-10-01T12:00:00Z
-        autoStopInterval: 30
         labels:
           daytona.io/public: 'true'
         target: local
-        organizationId: organization123
-        createdAt: 2024-10-01T12:00:00Z
         disk: 10
-        public: false
-        errorReason: The sandbox is not running
-        runnerDomain: runner.example.com
-        id: sandbox123
-        state: creating
         backupState: None
         user: daytona
         autoArchiveInterval: 10080
-        class: small
         snapshot: daytonaio/sandbox:latest
-        updatedAt: 2024-10-01T12:00:00Z
       properties:
         id:
           description: The ID of the sandbox
@@ -5820,6 +5821,10 @@ components:
             - medium
             - large
           example: small
+          type: string
+        daemonVersion:
+          description: The version of the daemon running in the sandbox
+          example: 1.0.0
           type: string
       required:
         - cpu
@@ -7155,6 +7160,7 @@ components:
           NODE_ENV: production
         snapshotCreatedAt: 2024-10-01T12:00:00Z
         gpu: 0
+        daemonVersion: 1.0.0
         backupCreatedAt: 2024-10-01T12:00:00Z
         labels:
           daytona.io/public: 'true'
@@ -7280,6 +7286,10 @@ components:
             - medium
             - large
           example: small
+          type: string
+        daemonVersion:
+          description: The version of the daemon running in the sandbox
+          example: 1.0.0
           type: string
         name:
           default: ''

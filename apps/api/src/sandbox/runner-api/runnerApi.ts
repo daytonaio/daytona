@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import { SandboxApi, DefaultApi, SnapshotsApi, Configuration } from '@daytonaio/runner-api-client'
+import { SandboxApi, DefaultApi, SnapshotsApi, Configuration, ToolboxApi } from '@daytonaio/runner-api-client'
 import { Runner } from '../entities/runner.entity'
 import { Injectable } from '@nestjs/common'
 import axios from 'axios'
@@ -87,5 +87,21 @@ export class RunnerApiFactory {
     }
 
     return new SandboxApi(new Configuration(), '', axiosInstance)
+  }
+
+  createToolboxApi(runner: Runner): ToolboxApi {
+    const axiosInstance = axios.create({
+      baseURL: runner.apiUrl,
+      headers: {
+        Authorization: `Bearer ${runner.apiKey}`,
+      },
+      timeout: 1 * 60 * 60 * 1000, // 1 hour
+    })
+
+    if (isDebugEnabled) {
+      axiosDebug.addLogger(axiosInstance)
+    }
+
+    return new ToolboxApi(new Configuration(), '', axiosInstance)
   }
 }

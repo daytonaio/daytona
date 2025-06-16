@@ -12,6 +12,7 @@ import (
 	"path"
 
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
+	"github.com/daytonaio/daemon/internal"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
@@ -55,6 +56,12 @@ func (s *Server) Start() error {
 	r.Use(middlewares.LoggingMiddleware())
 	r.Use(middlewares.ErrorMiddleware())
 	binding.Validator = new(DefaultValidator)
+
+	r.GET("/version", func(ctx *gin.Context) {
+		ctx.JSON(http.StatusOK, gin.H{
+			"version": internal.Version,
+		})
+	})
 
 	r.GET("/project-dir", s.GetProjectDir)
 

@@ -75,6 +75,9 @@ class Sandbox(BaseModel):
         default=None, description="The last update timestamp of the sandbox", alias="updatedAt"
     )
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
+    daemon_version: Optional[StrictStr] = Field(
+        default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion"
+    )
     additional_properties: Dict[str, Any] = {}
     __properties: ClassVar[List[str]] = [
         "id",
@@ -101,6 +104,7 @@ class Sandbox(BaseModel):
         "createdAt",
         "updatedAt",
         "class",
+        "daemonVersion",
     ]
 
     @field_validator("backup_state")
@@ -219,6 +223,7 @@ class Sandbox(BaseModel):
                 "createdAt": obj.get("createdAt"),
                 "updatedAt": obj.get("updatedAt"),
                 "class": obj.get("class"),
+                "daemonVersion": obj.get("daemonVersion"),
             }
         )
         # store additional fields in additional_properties

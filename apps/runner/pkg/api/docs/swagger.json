@@ -516,9 +516,121 @@
         "responses": {
           "200": {
             "description": "Proxied response",
+            "schema": {}
+          },
+          "400": {
+            "description": "Bad request",
             "schema": {
               "type": "string"
             }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Sandbox container not found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "409": {
+            "description": "Sandbox container conflict",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Forwards the request to the specified sandbox's container",
+        "tags": ["toolbox"],
+        "summary": "Proxy requests to the sandbox toolbox",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Path to forward",
+            "name": "path",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response",
+            "schema": {}
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "404": {
+            "description": "Sandbox container not found",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "409": {
+            "description": "Sandbox container conflict",
+            "schema": {
+              "type": "string"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "delete": {
+        "description": "Forwards the request to the specified sandbox's container",
+        "tags": ["toolbox"],
+        "summary": "Proxy requests to the sandbox toolbox",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "Sandbox ID",
+            "name": "sandboxId",
+            "in": "path",
+            "required": true
+          },
+          {
+            "type": "string",
+            "description": "Path to forward",
+            "name": "path",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Proxied response",
+            "schema": {}
           },
           "400": {
             "description": "Bad request",

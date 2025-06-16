@@ -74,6 +74,8 @@ type Workspace struct {
 	// The class of the sandbox
 	// Deprecated
 	Class *string `json:"class,omitempty"`
+	// The version of the daemon running in the sandbox
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
 	// The name of the workspace
 	Name string `json:"name"`
 	// The image used for the workspace
@@ -802,6 +804,38 @@ func (o *Workspace) SetClass(v string) {
 	o.Class = &v
 }
 
+// GetDaemonVersion returns the DaemonVersion field value if set, zero value otherwise.
+func (o *Workspace) GetDaemonVersion() string {
+	if o == nil || IsNil(o.DaemonVersion) {
+		var ret string
+		return ret
+	}
+	return *o.DaemonVersion
+}
+
+// GetDaemonVersionOk returns a tuple with the DaemonVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Workspace) GetDaemonVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.DaemonVersion) {
+		return nil, false
+	}
+	return o.DaemonVersion, true
+}
+
+// HasDaemonVersion returns a boolean if a field has been set.
+func (o *Workspace) HasDaemonVersion() bool {
+	if o != nil && !IsNil(o.DaemonVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetDaemonVersion gets a reference to the given string and assigns it to the DaemonVersion field.
+func (o *Workspace) SetDaemonVersion(v string) {
+	o.DaemonVersion = &v
+}
+
 // GetName returns the Name field value
 func (o *Workspace) GetName() string {
 	if o == nil {
@@ -1013,6 +1047,9 @@ func (o Workspace) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Class) {
 		toSerialize["class"] = o.Class
+	}
+	if !IsNil(o.DaemonVersion) {
+		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
 	toSerialize["name"] = o.Name
 	if !IsNil(o.Image) {

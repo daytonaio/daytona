@@ -171,6 +171,9 @@ export class Sandbox {
   @JoinColumn()
   buildInfo?: BuildInfo
 
+  @Column({ nullable: true })
+  daemonVersion?: string
+
   @BeforeUpdate()
   updateAccessToken() {
     if (this.state === SandboxState.STARTED) {

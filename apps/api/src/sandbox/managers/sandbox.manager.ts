@@ -35,6 +35,7 @@ import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OtelSpan } from '../../common/decorators/otel.decorator'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
+import { Runner } from '../entities/runner.entity'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
 const SYNC_AGAIN = true
@@ -615,6 +616,12 @@ export class SandboxManager {
           })
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.backupState = BackupState.NONE
+          try {
+            const daemonVersion = await this.getSandboxDaemonVersion(sandbox, runner)
+            sandboxToUpdate.daemonVersion = daemonVersion
+          } catch (e) {
+            this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, e)
+          }
           await this.sandboxRepository.save(sandboxToUpdate)
         }
       }
@@ -1016,6 +1023,12 @@ export class SandboxManager {
 
     switch (sandboxInfo.state) {
       case RunnerSandboxState.SandboxStateStarted: {
+        let daemonVersion: string | undefined
+        try {
+          daemonVersion = await this.getSandboxDaemonVersion(sandbox, runner)
+        } catch (e) {
+          this.logger.error(`Failed to get sandbox daemon version for sandbox ${sandbox.id}:`, e)
+        }
         //  if previous backup state is error or completed, set backup state to none
         if ([BackupState.ERROR, BackupState.COMPLETED].includes(sandbox.backupState)) {
           sandbox.backupState = BackupState.NONE
@@ -1025,9 +1038,12 @@ export class SandboxManager {
           })
           sandboxToUpdate.state = SandboxState.STARTED
           sandboxToUpdate.backupState = BackupState.NONE
+          if (daemonVersion) {
+            sandboxToUpdate.daemonVersion = daemonVersion
+          }
           await this.sandboxRepository.save(sandboxToUpdate)
         } else {
-          await this.updateSandboxState(sandbox.id, SandboxState.STARTED)
+          await this.updateSandboxState(sandbox.id, SandboxState.STARTED, undefined, undefined, daemonVersion)
         }
 
         //  if sandbox was transferred to a new runner, remove it from the old runner
@@ -1100,6 +1116,7 @@ export class SandboxManager {
     state: SandboxState,
     runnerId?: string | null | undefined,
     errorReason?: string,
+    daemonVersion?: string,
   ) {
     const sandbox = await this.sandboxRepository.findOneByOrFail({
       id: sandboxId,
@@ -1114,8 +1131,20 @@ export class SandboxManager {
     if (errorReason !== undefined) {
       sandbox.errorReason = errorReason
     }
-
+    if (daemonVersion !== undefined) {
+      sandbox.daemonVersion = daemonVersion
+    }
     await this.sandboxRepository.save(sandbox)
+  }
+
+  private async getSandboxDaemonVersion(sandbox: Sandbox, runner: Runner): Promise<string> {
+    const runnerSandboxApi = this.runnerApiFactory.createToolboxApi(runner)
+    const getVersionResponse = await runnerSandboxApi.sandboxesSandboxIdToolboxPathGet(sandbox.id, 'version')
+    if (!getVersionResponse.data || !(getVersionResponse.data as any).version) {
+      throw new Error('Failed to get sandbox daemon version')
+    }
+
+    return (getVersionResponse.data as any).version
   }
 
   @OnEvent(SandboxEvents.ARCHIVED)
