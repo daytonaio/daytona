@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { usePersistedTableSort } from '@/hooks/usePersistedTableSort'
 import { SnapshotDto, SnapshotState, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -71,7 +72,7 @@ export function SnapshotTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = usePersistedTableSort('snapshot')
 
   const columns = useMemo(
     () =>
