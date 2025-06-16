@@ -60,6 +60,7 @@ interface DataTableProps {
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
   handleArchive: (id: string) => void
+  onRowClick?: (sandbox: Sandbox) => void
 }
 
 export function SandboxTable({
@@ -71,6 +72,7 @@ export function SandboxTable({
   handleDelete,
   handleBulkDelete,
   handleArchive,
+  onRowClick,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
@@ -188,7 +190,8 @@ export function SandboxTable({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && 'selected'}
-                  className={`${loadingSandboxes[row.original.id] || row.original.state === SandboxState.DESTROYING ? 'opacity-50 pointer-events-none' : ''}`}
+                  className={`${loadingSandboxes[row.original.id] || row.original.state === SandboxState.DESTROYING ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:bg-muted/50'}`}
+                  onClick={() => onRowClick?.(row.original)}
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
@@ -359,6 +362,7 @@ const getColumns = ({
           <Checkbox
             checked={row.getIsSelected()}
             onCheckedChange={(value) => row.toggleSelected(!!value)}
+            onClick={(e) => e.stopPropagation()}
             aria-label="Select row"
             className="translate-y-[2px]"
           />
@@ -606,7 +610,12 @@ const getColumns = ({
           return null
         }
         return (
-          <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
+          <a
+            href={terminalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+          >
             <Terminal className="w-4 h-4" />
           </a>
         )
@@ -625,7 +634,7 @@ const getColumns = ({
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="ghost" className="h-8 w-8 p-0" onClick={(e) => e.stopPropagation()}>
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal />
               </Button>
