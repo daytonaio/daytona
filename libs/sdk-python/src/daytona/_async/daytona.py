@@ -1,8 +1,8 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import asyncio
 import json
-import time
 import warnings
 from typing import Callable, Dict, List, Optional, Union, overload
 
@@ -427,7 +427,7 @@ class AsyncDaytona:
                 ]
 
             while response_ref["response"].state == SandboxState.PENDING_BUILD:
-                time.sleep(1)
+                await asyncio.sleep(1)
                 response_ref["response"] = await self._sandbox_api.get_sandbox(response_ref["response"].id)
 
             await process_streaming_response(

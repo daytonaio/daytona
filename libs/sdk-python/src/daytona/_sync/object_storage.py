@@ -108,7 +108,7 @@ class ObjectStorage:
 
         if os.path.isfile(abs_path_str):
             with open(abs_path_str, "rb") as f:
-                for chunk in iter(lambda: f.read(8192), b""):
+                while chunk := f.read(8192):
                     md5_hasher.update(chunk)
         else:
             for root, dirs, files in os.walk(abs_path_str):
@@ -124,7 +124,7 @@ class ObjectStorage:
 
                     # Incorporate file contents
                     with open(file_path, "rb") as f:
-                        for chunk in iter(lambda: f.read(8192), b""):
+                        while chunk := f.read(8192):
                             md5_hasher.update(chunk)
 
         return md5_hasher.hexdigest()

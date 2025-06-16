@@ -8,6 +8,8 @@ import tarfile
 import threading
 
 import aioboto3
+import aiofiles
+import aiofiles.os
 
 from .._utils.docs_ignore import docs_ignore
 
@@ -43,17 +45,19 @@ class AsyncObjectStorage:
         # unasync: delete start
         self._client_ctx = None
 
-    async def open_client(self):
+    async def __aenter__(self):
         try:
             self._client_ctx = self.s3_client
             # pylint: disable=unnecessary-dunder-call
             self.s3_client = await self._client_ctx.__aenter__()
+            return self
         except Exception as e:
             raise Exception(f"Error opening S3 client: {e}") from e
 
-    async def close_client(self):
+    async def __aexit__(self, exc_type, exc, tb):
         try:
-            await self._client_ctx.__aexit__(None, None, None)
+            if self._client_ctx:
+                await self._client_ctx.__aexit__(exc_type, exc, tb)
             self.s3_client = None
             self._client_ctx = None
         except Exception as e:
@@ -69,11 +73,11 @@ class AsyncObjectStorage:
             organization_id (str): The organization ID to use.
             archive_base_path (str): The base path to use for the archive.
         """
-        if not os.path.exists(path):
+        if not await aiofiles.os.path.exists(path):
             raise FileNotFoundError(f"Path does not exist: {path}")
 
         # Compute hash for the path
-        path_hash = self._compute_hash_for_path_md5(path, archive_base_path)
+        path_hash = await self._compute_hash_for_path_md5(path, archive_base_path)
 
         # Define the S3 prefix
         prefix = f"{organization_id}/{path_hash}/"
@@ -106,7 +110,7 @@ class AsyncObjectStorage:
         # Remove leading separators (both / and \)
         return path_without_drive.lstrip("/").lstrip("\\")
 
-    def _compute_hash_for_path_md5(self, path_str, archive_base_path=None):
+    async def _compute_hash_for_path_md5(self, path_str, archive_base_path=None):
         """Computes the MD5 hash for a given path.
 
         Args:
@@ -117,18 +121,18 @@ class AsyncObjectStorage:
             str: The MD5 hash for the given path.
         """
         md5_hasher = hashlib.md5()
-        abs_path_str = os.path.abspath(path_str)
+        abs_path_str = await aiofiles.os.path.abspath(path_str)
 
         if archive_base_path is None:
             archive_base_path = self.compute_archive_base_path(path_str)
         md5_hasher.update(archive_base_path.encode("utf-8"))
 
-        if os.path.isfile(abs_path_str):
-            with open(abs_path_str, "rb") as f:
-                for chunk in iter(lambda: f.read(8192), b""):
+        if await aiofiles.os.path.isfile(abs_path_str):
+            async with aiofiles.open(abs_path_str, "rb") as f:
+                while chunk := await f.read(8192):
                     md5_hasher.update(chunk)
         else:
-            for root, dirs, files in os.walk(abs_path_str):
+            for root, dirs, files in await self._async_os_walk(abs_path_str):
                 if not dirs and not files:
                     rel_dir = os.path.relpath(root, path_str)
                     md5_hasher.update(rel_dir.encode("utf-8"))
@@ -140,8 +144,8 @@ class AsyncObjectStorage:
                     md5_hasher.update(rel_path.encode("utf-8"))
 
                     # Incorporate file contents
-                    with open(file_path, "rb") as f:
-                        for chunk in iter(lambda: f.read(8192), b""):
+                    async with aiofiles.open(file_path, "rb") as f:
+                        while chunk := await f.read(8192):
                             md5_hasher.update(chunk)
 
         return md5_hasher.hexdigest()
@@ -187,3 +191,9 @@ class AsyncObjectStorage:
 
         read_file.close()
         await asyncio.to_thread(thread.join)
+
+    # unasync: delete start
+    async def _async_os_walk(self, path):
+        return await asyncio.to_thread(lambda: list(os.walk(path)))
+
+    # unasync: delete end

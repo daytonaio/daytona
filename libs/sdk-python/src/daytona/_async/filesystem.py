@@ -7,6 +7,7 @@ from contextlib import ExitStack
 from typing import Awaitable, Callable, List, Union, overload
 
 import aiofiles
+import aiofiles.os
 import httpx
 from daytona_api_client_async import FileInfo, Match, ReplaceRequest, ReplaceResult, SearchFilesResponse, ToolboxApi
 
@@ -160,7 +161,7 @@ class AsyncFileSystem:
                 response.raise_for_status()
                 parent = os.path.dirname(local_path)
                 if parent:
-                    os.makedirs(parent, exist_ok=True)
+                    await aiofiles.os.makedirs(parent, exist_ok=True)
 
                 async with aiofiles.open(local_path, "wb") as f:
                     async for chunk in response.aiter_bytes(chunk_size=10 * 1024):

@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import time
+import asyncio
 from typing import Dict, Optional
 
 from daytona_api_client_async import PortPreviewUrl
@@ -263,7 +263,7 @@ class AsyncSandbox(SandboxDto):
                 )
                 raise DaytonaError(err_msg)
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout(
@@ -299,7 +299,7 @@ class AsyncSandbox(SandboxDto):
                 if "validation error" not in str(e):
                     raise e
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     async def set_autostop_interval(self, interval: int) -> None:

@@ -167,27 +167,26 @@ class SnapshotService:
                 )
             )
 
-        thread_started = False
+        log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            thread = threading.Thread(target=start_log_streaming)
             if created_snapshot.state != SnapshotState.BUILD_PENDING:
-                thread.start()
-                thread_started = True
+                log_task = threading.Thread(target=start_log_streaming)
+                log_task.start()
 
         previous_state = created_snapshot.state
         while created_snapshot.state not in terminal_states:
             if on_logs and previous_state != created_snapshot.state:
-                if created_snapshot.state != SnapshotState.BUILD_PENDING and not thread_started:
-                    thread.start()
-                    thread_started = True
+                if created_snapshot.state != SnapshotState.BUILD_PENDING and not log_task:
+                    log_task = threading.Thread(target=start_log_streaming)
+                    log_task.start()
                 on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state
             time.sleep(1)
             created_snapshot = self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
-            thread.join()
+            log_task.join()
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
@@ -210,6 +209,7 @@ class SnapshotService:
             return []
 
         push_access_creds = object_storage_api.get_push_access()
+
         object_storage = ObjectStorage(
             push_access_creds.storage_url,
             push_access_creds.access_key,
@@ -217,7 +217,6 @@ class SnapshotService:
             push_access_creds.session_token,
             push_access_creds.bucket,
         )
-
         context_hashes = []
         for context in image._context_list:  # pylint: disable=protected-access
             context_hash = object_storage.upload(

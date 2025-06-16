@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
-import threading
-import time
 from typing import Callable, List, Optional
 
 from daytona_api_client_async import ObjectStorageApi, SnapshotsApi
@@ -139,7 +137,7 @@ class AsyncSnapshotService:
 
         terminal_states = [SnapshotState.ACTIVE, SnapshotState.ERROR, SnapshotState.BUILD_FAILED]
 
-        def start_log_streaming():
+        async def start_log_streaming():
             _, url, *_ = self.__snapshots_api._get_snapshot_build_logs_serialize(  # pylint: disable=protected-access
                 id=created_snapshot.id,
                 follow=True,
@@ -154,36 +152,31 @@ class AsyncSnapshotService:
                 latest_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
                 return latest_snapshot.state in terminal_states
 
-            asyncio.run(
-                process_streaming_response(
-                    url=url,
-                    headers=self.__snapshots_api.api_client.default_headers,
-                    on_chunk=lambda chunk: on_logs(chunk.rstrip()),
-                    should_terminate=should_terminate,
-                )
+            await process_streaming_response(
+                url=url,
+                headers=self.__snapshots_api.api_client.default_headers,
+                on_chunk=lambda chunk: on_logs(chunk.rstrip()),
+                should_terminate=should_terminate,
             )
 
-        thread_started = False
+        log_task = None
         if on_logs:
             on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
-            thread = threading.Thread(target=start_log_streaming)
             if created_snapshot.state != SnapshotState.BUILD_PENDING:
-                thread.start()
-                thread_started = True
+                log_task = asyncio.create_task(start_log_streaming())
 
         previous_state = created_snapshot.state
         while created_snapshot.state not in terminal_states:
             if on_logs and previous_state != created_snapshot.state:
-                if created_snapshot.state != SnapshotState.BUILD_PENDING and not thread_started:
-                    thread.start()
-                    thread_started = True
+                if created_snapshot.state != SnapshotState.BUILD_PENDING and not log_task:
+                    log_task = asyncio.create_task(start_log_streaming())
                 on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state
-            time.sleep(1)
+            await asyncio.sleep(1)
             created_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
-            await asyncio.to_thread(thread.join)
+            await log_task
             if created_snapshot.state == SnapshotState.ACTIVE:
                 on_logs(f"Created snapshot {created_snapshot.name} ({created_snapshot.state})")
 
@@ -206,19 +199,19 @@ class AsyncSnapshotService:
             return []
 
         push_access_creds = await object_storage_api.get_push_access()
-        object_storage = AsyncObjectStorage(
+
+        async with AsyncObjectStorage(
             push_access_creds.storage_url,
             push_access_creds.access_key,
             push_access_creds.secret,
             push_access_creds.session_token,
             push_access_creds.bucket,
-        )
-
-        context_hashes = []
-        for context in image._context_list:  # pylint: disable=protected-access
-            context_hash = await object_storage.upload(
-                context.source_path, push_access_creds.organization_id, context.archive_path
-            )
-            context_hashes.append(context_hash)
+        ) as object_storage:
+            context_hashes = []
+            for context in image._context_list:  # pylint: disable=protected-access
+                context_hash = await object_storage.upload(
+                    context.source_path, push_access_creds.organization_id, context.archive_path
+                )
+                context_hashes.append(context_hash)
 
         return context_hashes
