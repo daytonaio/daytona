@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { usePersistedTableSort } from '@/hooks/usePersistedTableSort'
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -38,6 +39,7 @@ interface DataTableProps {
 }
 
 export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProps) {
+  const [sorting, setSorting] = usePersistedTableSort('registry')
   const { authenticatedUserHasPermission } = useSelectedOrganization()
 
   const writePermitted = useMemo(
