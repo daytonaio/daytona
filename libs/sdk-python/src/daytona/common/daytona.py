@@ -70,7 +70,7 @@ class DaytonaConfig(BaseModel):
             default=None,
             deprecated="`server_url` is deprecated and will be removed in a future version. Use `api_url` instead.",
         ),
-    ]
+    ] = None
     target: Optional[str] = None
     jwt_token: Optional[str] = None
     organization_id: Optional[str] = None
