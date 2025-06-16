@@ -483,7 +483,6 @@ class AsyncDaytona:
             case _:
                 raise DaytonaError(f"Unsupported language: {language}")
 
-    @intercept_errors(message_prefix="Failed to remove sandbox: ")
     async def delete(self, sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None:
         """Deletes a Sandbox.
 
@@ -502,7 +501,7 @@ class AsyncDaytona:
             await daytona.delete(sandbox)  # Clean up when done
             ```
         """
-        return await self._sandbox_api.delete_sandbox(sandbox.id, force=True, _request_timeout=timeout or None)
+        return await sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
     async def get(self, sandbox_id: str) -> AsyncSandbox:

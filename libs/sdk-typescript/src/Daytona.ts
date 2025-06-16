@@ -607,7 +607,7 @@ export class Daytona {
    * await daytona.delete(sandbox);
    */
   public async delete(sandbox: Sandbox, timeout = 60) {
-    await this.sandboxApi.deleteSandbox(sandbox.id, true, undefined, { timeout: timeout * 1000 })
+    await sandbox.delete(timeout)
   }
 
   /**

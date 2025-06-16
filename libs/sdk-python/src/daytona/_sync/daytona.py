@@ -447,7 +447,6 @@ class Daytona:
             case _:
                 raise DaytonaError(f"Unsupported language: {language}")
 
-    @intercept_errors(message_prefix="Failed to remove sandbox: ")
     def delete(self, sandbox: Sandbox, timeout: Optional[float] = 60) -> None:
         """Deletes a Sandbox.
 
@@ -466,7 +465,7 @@ class Daytona:
             daytona.delete(sandbox)  # Clean up when done
             ```
         """
-        return self._sandbox_api.delete_sandbox(sandbox.id, force=True, _request_timeout=timeout or None)
+        return sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
     def get(self, sandbox_id: str) -> Sandbox:
