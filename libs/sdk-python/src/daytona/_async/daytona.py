@@ -459,7 +459,7 @@ class AsyncDaytona:
         """Helper method to get the appropriate code toolbox based on language.
 
         Args:
-            params (Optional[CreateSandboxParams]): Sandbox parameters. If not provided, defaults to Python toolbox.
+            language (Optional[CodeLanguage]): Language of the code toolbox. If not provided, defaults to Python.
 
         Returns:
             The appropriate code toolbox instance for the specified language.

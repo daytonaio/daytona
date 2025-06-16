@@ -40,6 +40,11 @@ classifiers = [
 keywords = ["daytona", "sdk"]
 license = {text = "Apache-2.0"}
 
+[project.urls]
+Documentation = "https://www.daytona.io/docs"
+Repository = "https://github.com/daytonaio/daytona"
+Issues = "https://github.com/daytonaio/daytona/issues"
+
 [project.optional-dependencies]
 dev = [
     "pydoc-markdown>=4.8.2",

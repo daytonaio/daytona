@@ -56,7 +56,7 @@ Or using environment variables:
 You can also customize sandbox creation:
 
 ```python
-sandbox = daytona.create(CreateSandboxParams(
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
     language="python",
     env_vars={"PYTHON_ENV": "development"},
     auto_stop_interval=60,  # Auto-stop after 1 hour of inactivity
