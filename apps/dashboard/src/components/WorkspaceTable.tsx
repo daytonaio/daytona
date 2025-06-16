@@ -534,7 +534,7 @@ const getColumns = ({
     //     return <span className="px-2">{getProviderClass(row.original)}</span>
     //   },
     //   accessorFn: (row) => getProviderClass(row),
-    // },
+    // }
     {
       id: 'labels',
       header: () => {
