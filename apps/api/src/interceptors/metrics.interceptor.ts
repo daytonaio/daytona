@@ -33,6 +33,8 @@ import { UpdateOrganizationInvitationDto } from '../organization/dto/update-orga
 import { CustomHeaders } from '../common/constants/header.constants'
 import { CreateVolumeDto } from '../sandbox/dto/create-volume.dto'
 import { VolumeDto } from '../sandbox/dto/volume.dto'
+import { CreateWorkspaceDto } from '../sandbox/dto/create-workspace.deprecated.dto'
+import { WorkspaceDto } from '../sandbox/dto/workspace.deprecated.dto'
 
 type RequestWithUser = Request & { user?: { userId: string; organizationId: string } }
 type CommonCaptureProps = {
@@ -132,22 +134,30 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
           case '/api/sandbox':
             this.captureCreateSandbox(props, request.body, response)
             break
+          case '/api/workspace':
+            this.captureCreateWorkspace_deprecated(props, request.body, response)
+            break
           case '/api/sandbox/:sandboxId/start':
+          case '/api/workspace/:workspaceId/start':
             this.captureStartSandbox(props, request.params.sandboxId)
             break
           case '/api/sandbox/:sandboxId/stop':
+          case '/api/workspace/:workspaceId/stop':
             this.captureStopSandbox(props, request.params.sandboxId)
             break
           case '/api/sandbox/:sandboxId/backup':
             this.captureCreateBackup(props, request.params.sandboxId)
             break
           case '/api/sandbox/:sandboxId/public/:isPublic':
+          case '/api/workspace/:workspaceId/public/:isPublic':
             this.captureUpdatePublicStatus(props, request.params.sandboxId, request.params.isPublic === 'true')
             break
           case '/api/sandbox/:sandboxId/autostop/:interval':
+          case '/api/workspace/:workspaceId/autostop/:interval':
             this.captureSetAutostopInterval(props, request.params.sandboxId, parseInt(request.params.interval))
             break
           case '/api/sandbox/:sandboxId/autoarchive/:interval':
+          case '/api/workspace/:workspaceId/autoarchive/:interval':
             this.captureSetAutoArchiveInterval(props, request.params.sandboxId, parseInt(request.params.interval))
             break
           case '/api/organizations/invitations/:invitationId/accept':
@@ -195,6 +205,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case 'DELETE':
         switch (request.route.path) {
           case '/api/sandbox/:sandboxId':
+          case '/api/workspace/:workspaceId':
             this.captureDeleteSandbox(props, request.params.sandboxId)
             break
           case '/api/snapshots/:snapshotId':
@@ -217,6 +228,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       case 'PUT':
         switch (request.route.path) {
           case '/api/sandbox/:sandboxId/labels':
+          case '/api/workspace/:workspaceId/labels':
             this.captureUpdateSandboxLabels(props, request.params.sandboxId)
             break
           case '/api/organizations/:organizationId/roles/:roleId':
@@ -455,6 +467,49 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
     const records = {
       sandbox_id: response.id,
       sandbox_snapshot_request: request.snapshot,
+      sandbox_snapshot: response.snapshot,
+      sandbox_user_request: request.user,
+      sandbox_user: response.user,
+      sandbox_cpu_request: request.cpu,
+      sandbox_cpu: response.cpu,
+      sandbox_gpu_request: request.gpu,
+      sandbox_gpu: response.gpu,
+      sandbox_memory_mb_request: request.memory * 1024,
+      sandbox_memory_mb: response.memory * 1024,
+      sandbox_disk_gb_request: request.disk,
+      sandbox_disk_gb: response.disk,
+      sandbox_target_request: request.target,
+      sandbox_target: response.target,
+      sandbox_auto_stop_interval_min_request: request.autoStopInterval,
+      sandbox_auto_stop_interval_min: response.autoStopInterval,
+      sandbox_auto_archive_interval_min_request: request.autoArchiveInterval,
+      sandbox_auto_archive_interval_min: response.autoArchiveInterval,
+      sandbox_public_request: request.public,
+      sandbox_public: response.public,
+      sandbox_labels_request: request.labels,
+      sandbox_labels: response.labels,
+      sandbox_env_vars_length_request: envVarsLength,
+      sandbox_volumes_length_request: request.volumes?.length,
+    }
+
+    if (request.buildInfo) {
+      records['sandbox_is_dynamic_build'] = true
+      records['sandbox_build_info_context_hashes_length'] = request.buildInfo.contextHashes?.length
+    }
+
+    this.capture('api_sandbox_created', props, 'api_sandbox_creation_failed', records)
+  }
+
+  private captureCreateWorkspace_deprecated(
+    props: CommonCaptureProps,
+    request: CreateWorkspaceDto,
+    response: WorkspaceDto,
+  ) {
+    const envVarsLength = request.env ? Object.keys(request.env).length : 0
+
+    const records = {
+      sandbox_id: response.id,
+      sandbox_snapshot_request: request.image,
       sandbox_snapshot: response.snapshot,
       sandbox_user_request: request.user,
       sandbox_user: response.user,
