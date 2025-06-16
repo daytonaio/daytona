@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { usePersistedTableSort } from '@/hooks/usePersistedTableSort'
 import { ApiKeyList } from '@daytonaio/api-client'
 import {
   ColumnDef,
@@ -41,7 +42,7 @@ interface DataTableProps {
 }
 
 export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const [sorting, setSorting] = usePersistedTableSort('apikey')
   const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,
