@@ -490,6 +490,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       sandbox_labels: response.labels,
       sandbox_env_vars_length_request: envVarsLength,
       sandbox_volumes_length_request: request.volumes?.length,
+      sandbox_daemon_version: response.daemonVersion,
     }
 
     if (request.buildInfo) {
@@ -533,6 +534,7 @@ export class MetricsInterceptor implements NestInterceptor, OnApplicationShutdow
       sandbox_labels: response.labels,
       sandbox_env_vars_length_request: envVarsLength,
       sandbox_volumes_length_request: request.volumes?.length,
+      sandbox_daemon_version: response.daemonVersion,
     }
 
     if (request.buildInfo) {

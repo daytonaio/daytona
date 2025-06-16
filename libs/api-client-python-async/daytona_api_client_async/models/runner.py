@@ -2,6 +2,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+
 """
     Daytona
 
@@ -28,51 +29,37 @@ from daytona_api_client_async.models.sandbox_class import SandboxClass
 from typing import Optional, Set
 from typing_extensions import Self
 
-
 class Runner(BaseModel):
     """
     Runner
-    """  # noqa: E501
+    """ # noqa: E501
     id: StrictStr = Field(description="The ID of the runner")
     domain: StrictStr = Field(description="The domain of the runner")
-    api_url: StrictStr = Field(
-        description="The API URL of the runner", alias="apiUrl")
-    api_key: StrictStr = Field(
-        description="The API key for the runner", alias="apiKey")
-    cpu: Union[StrictFloat, StrictInt] = Field(
-        description="The CPU capacity of the runner")
-    memory: Union[StrictFloat, StrictInt] = Field(
-        description="The memory capacity of the runner in GB")
-    disk: Union[StrictFloat, StrictInt] = Field(
-        description="The disk capacity of the runner in GB")
-    gpu: Union[StrictFloat, StrictInt] = Field(
-        description="The GPU capacity of the runner")
+    api_url: StrictStr = Field(description="The API URL of the runner", alias="apiUrl")
+    api_key: StrictStr = Field(description="The API key for the runner", alias="apiKey")
+    cpu: Union[StrictFloat, StrictInt] = Field(description="The CPU capacity of the runner")
+    memory: Union[StrictFloat, StrictInt] = Field(description="The memory capacity of the runner in GB")
+    disk: Union[StrictFloat, StrictInt] = Field(description="The disk capacity of the runner in GB")
+    gpu: Union[StrictFloat, StrictInt] = Field(description="The GPU capacity of the runner")
     gpu_type: StrictStr = Field(description="The type of GPU", alias="gpuType")
-    var_class: SandboxClass = Field(
-        description="The class of the runner", alias="class")
-    used: Union[StrictFloat, StrictInt] = Field(
-        description="The current usage of the runner")
-    capacity: Union[StrictFloat, StrictInt] = Field(
-        description="The capacity of the runner")
+    var_class: SandboxClass = Field(description="The class of the runner", alias="class")
+    used: Union[StrictFloat, StrictInt] = Field(description="The current usage of the runner")
+    capacity: Union[StrictFloat, StrictInt] = Field(description="The capacity of the runner")
     region: RunnerRegion = Field(description="The region of the runner")
     state: RunnerState = Field(description="The state of the runner")
-    last_checked: Optional[StrictStr] = Field(
-        default=None, description="The last time the runner was checked", alias="lastChecked")
-    unschedulable: StrictBool = Field(
-        description="Whether the runner is unschedulable")
-    created_at: StrictStr = Field(
-        description="The creation timestamp of the runner", alias="createdAt")
-    updated_at: StrictStr = Field(
-        description="The last update timestamp of the runner", alias="updatedAt")
+    last_checked: Optional[StrictStr] = Field(default=None, description="The last time the runner was checked", alias="lastChecked")
+    unschedulable: StrictBool = Field(description="Whether the runner is unschedulable")
+    created_at: StrictStr = Field(description="The creation timestamp of the runner", alias="createdAt")
+    updated_at: StrictStr = Field(description="The last update timestamp of the runner", alias="updatedAt")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType",
-                                         "class", "used", "capacity", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
+    __properties: ClassVar[List[str]] = ["id", "domain", "apiUrl", "apiKey", "cpu", "memory", "disk", "gpu", "gpuType", "class", "used", "capacity", "region", "state", "lastChecked", "unschedulable", "createdAt", "updatedAt"]
 
     model_config = ConfigDict(
         populate_by_name=True,
         validate_assignment=True,
         protected_namespaces=(),
     )
+
 
     def to_str(self) -> str:
         """Returns the string representation of the model using alias"""
@@ -150,3 +137,5 @@ class Runner(BaseModel):
                 _obj.additional_properties[_key] = obj.get(_key)
 
         return _obj
+
+

@@ -74,6 +74,8 @@ type Sandbox struct {
 	// The class of the sandbox
 	// Deprecated
 	Class *string `json:"class,omitempty"`
+	// The version of the daemon running in the sandbox
+	DaemonVersion *string `json:"daemonVersion,omitempty"`
 }
 
 type _Sandbox Sandbox
@@ -789,6 +791,38 @@ func (o *Sandbox) SetClass(v string) {
 	o.Class = &v
 }
 
+// GetDaemonVersion returns the DaemonVersion field value if set, zero value otherwise.
+func (o *Sandbox) GetDaemonVersion() string {
+	if o == nil || IsNil(o.DaemonVersion) {
+		var ret string
+		return ret
+	}
+	return *o.DaemonVersion
+}
+
+// GetDaemonVersionOk returns a tuple with the DaemonVersion field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Sandbox) GetDaemonVersionOk() (*string, bool) {
+	if o == nil || IsNil(o.DaemonVersion) {
+		return nil, false
+	}
+	return o.DaemonVersion, true
+}
+
+// HasDaemonVersion returns a boolean if a field has been set.
+func (o *Sandbox) HasDaemonVersion() bool {
+	if o != nil && !IsNil(o.DaemonVersion) {
+		return true
+	}
+
+	return false
+}
+
+// SetDaemonVersion gets a reference to the given string and assigns it to the DaemonVersion field.
+func (o *Sandbox) SetDaemonVersion(v string) {
+	o.DaemonVersion = &v
+}
+
 func (o Sandbox) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -848,6 +882,9 @@ func (o Sandbox) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Class) {
 		toSerialize["class"] = o.Class
+	}
+	if !IsNil(o.DaemonVersion) {
+		toSerialize["daemonVersion"] = o.DaemonVersion
 	}
 	return toSerialize, nil
 }

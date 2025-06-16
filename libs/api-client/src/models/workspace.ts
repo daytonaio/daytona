@@ -182,6 +182,12 @@ export interface Workspace {
    */
   class?: WorkspaceClassEnum
   /**
+   * The version of the daemon running in the sandbox
+   * @type {string}
+   * @memberof Workspace
+   */
+  daemonVersion?: string
+  /**
    * The name of the workspace
    * @type {string}
    * @memberof Workspace

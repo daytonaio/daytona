@@ -554,6 +554,46 @@ paths:
       tags:
         - sandbox
   /sandboxes/{sandboxId}/toolbox/{path}:
+    delete:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
+          schema:
+            type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
     get:
       description: Forwards the request to the specified sandbox's container
       parameters:
@@ -570,8 +610,47 @@ paths:
       responses:
         '200':
           description: Proxied response
+          schema: {}
+        '400':
+          description: Bad request
           schema:
             type: string
+        '401':
+          description: Unauthorized
+          schema:
+            type: string
+        '404':
+          description: Sandbox container not found
+          schema:
+            type: string
+        '409':
+          description: Sandbox container conflict
+          schema:
+            type: string
+        '500':
+          description: Internal server error
+          schema:
+            type: string
+      summary: Proxy requests to the sandbox toolbox
+      tags:
+        - toolbox
+    post:
+      description: Forwards the request to the specified sandbox's container
+      parameters:
+        - description: Sandbox ID
+          in: path
+          name: sandboxId
+          required: true
+          type: string
+        - description: Path to forward
+          in: path
+          name: path
+          required: true
+          type: string
+      responses:
+        '200':
+          description: Proxied response
+          schema: {}
         '400':
           description: Bad request
           schema:
