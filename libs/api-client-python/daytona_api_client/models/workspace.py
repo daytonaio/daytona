@@ -76,6 +76,9 @@ class Workspace(BaseModel):
         default=None, description="The last update timestamp of the sandbox", alias="updatedAt"
     )
     var_class: Optional[StrictStr] = Field(default=None, description="The class of the sandbox", alias="class")
+    daemon_version: Optional[StrictStr] = Field(
+        default=None, description="The version of the daemon running in the sandbox", alias="daemonVersion"
+    )
     name: StrictStr = Field(description="The name of the workspace")
     image: Optional[StrictStr] = Field(default=None, description="The image used for the workspace")
     snapshot_state: Optional[StrictStr] = Field(
@@ -111,6 +114,7 @@ class Workspace(BaseModel):
         "createdAt",
         "updatedAt",
         "class",
+        "daemonVersion",
         "name",
         "image",
         "snapshotState",
@@ -247,6 +251,7 @@ class Workspace(BaseModel):
                 "createdAt": obj.get("createdAt"),
                 "updatedAt": obj.get("updatedAt"),
                 "class": obj.get("class"),
+                "daemonVersion": obj.get("daemonVersion"),
                 "name": obj.get("name") if obj.get("name") is not None else "",
                 "image": obj.get("image"),
                 "snapshotState": obj.get("snapshotState"),

@@ -21,7 +21,8 @@
       "executor": "@nx-go/nx-go:build",
       "options": {
         "main": "{projectRoot}/cmd/daemon/main.go",
-        "outputPath": "dist/apps/daemon"
+        "outputPath": "dist/apps/daemon",
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
       },
       "configurations": {
         "production": {}
@@ -36,7 +37,8 @@
         "env": {
           "GOARCH": "amd64",
           "GOOS": "linux"
-        }
+        },
+        "flags": ["-ldflags \"-X 'github.com/daytonaio/daemon/internal.Version=${npm_package_version}'\""]
       },
       "dependsOn": ["prepare"]
     },

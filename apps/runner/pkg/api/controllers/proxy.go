@@ -23,13 +23,15 @@ import (
 //	@Description	Forwards the request to the specified sandbox's container
 //	@Param			sandboxId	path		string	true	"Sandbox ID"
 //	@Param			path		path		string	true	"Path to forward"
-//	@Success		200			{object}	string	"Proxied response"
+//	@Success		200			{object}	any		"Proxied response"
 //	@Failure		400			{object}	string	"Bad request"
 //	@Failure		401			{object}	string	"Unauthorized"
 //	@Failure		404			{object}	string	"Sandbox container not found"
 //	@Failure		409			{object}	string	"Sandbox container conflict"
 //	@Failure		500			{object}	string	"Internal server error"
 //	@Router			/sandboxes/{sandboxId}/toolbox/{path} [get]
+//	@Router			/sandboxes/{sandboxId}/toolbox/{path} [post]
+//	@Router			/sandboxes/{sandboxId}/toolbox/{path} [delete]
 func ProxyRequest(ctx *gin.Context) {
 	if regexp.MustCompile(`^/process/session/.+/command/.+/logs$`).MatchString(ctx.Param("path")) {
 		if ctx.Query("follow") == "true" {

@@ -586,6 +586,18 @@ const getColumns = ({
       cell: ({ row }) => {
         if (row.original.state !== SandboxState.STARTED) return ''
 
+        if (!row.original.daemonVersion) {
+          return (
+            <a
+              href={`https://22222-${row.original.id}.${row.original.runnerDomain}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Terminal className="w-4 h-4" />
+            </a>
+          )
+        }
+
         const terminalUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
           '{{sandboxId}}',
           row.original.id,

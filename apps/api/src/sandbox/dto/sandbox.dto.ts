@@ -209,6 +209,14 @@ export class SandboxDto {
   @IsOptional()
   class?: SandboxClass
 
+  @ApiPropertyOptional({
+    description: 'The version of the daemon running in the sandbox',
+    example: '1.0.0',
+    required: false,
+  })
+  @IsOptional()
+  daemonVersion?: string
+
   static fromSandbox(sandbox: Sandbox, runnerDomain: string): SandboxDto {
     return {
       id: sandbox.id,
@@ -242,6 +250,7 @@ export class SandboxDto {
           }
         : undefined,
       runnerDomain: runnerDomain,
+      daemonVersion: sandbox.daemonVersion,
     }
   }
 

@@ -6,8 +6,11 @@ package docker
 import (
 	"context"
 	"fmt"
+	"net"
+	"net/url"
 	"time"
 
+	"github.com/daytonaio/runner/pkg/common"
 	"github.com/daytonaio/runner/pkg/models/enums"
 	"github.com/docker/docker/api/types/container"
 
@@ -22,7 +25,18 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 		return err
 	}
 
+	var containerIP string
+	for _, network := range c.NetworkSettings.Networks {
+		containerIP = network.IPAddress
+		break
+	}
+
 	if c.State.Running {
+		err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+		if err != nil {
+			return err
+		}
+
 		d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 		return nil
 	}
@@ -38,8 +52,6 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 		return err
 	}
 
-	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
-
 	processesCtx := context.Background()
 
 	go func() {
@@ -47,6 +59,13 @@ func (d *DockerClient) Start(ctx context.Context, containerId string) error {
 			log.Errorf("Failed to start Daytona daemon: %s\n", err.Error())
 		}
 	}()
+
+	err = d.waitForDaemonRunning(ctx, containerIP, 10*time.Second)
+	if err != nil {
+		return err
+	}
+
+	d.cache.SetSandboxState(ctx, containerId, enums.SandboxStateStarted)
 
 	return nil
 }
@@ -73,4 +92,25 @@ func (d *DockerClient) waitForContainerRunning(ctx context.Context, containerId 
 			}
 		}
 	}
+}
+
+func (d *DockerClient) waitForDaemonRunning(ctx context.Context, containerIP string, timeout time.Duration) error {
+	// Build the target URL
+	targetURL := fmt.Sprintf("http://%s:2280", containerIP)
+	target, err := url.Parse(targetURL)
+	if err != nil {
+		return common.NewBadRequestError(fmt.Errorf("failed to parse target URL: %w", err))
+	}
+
+	for i := 0; i < 10; i++ {
+		conn, err := net.DialTimeout("tcp", target.Host, 1*time.Second)
+		if err != nil {
+			time.Sleep(50 * time.Millisecond)
+			continue
+		}
+		conn.Close()
+		break
+	}
+
+	return nil
 }

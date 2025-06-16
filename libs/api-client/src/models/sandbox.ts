@@ -178,6 +178,12 @@ export interface Sandbox {
    * @deprecated
    */
   class?: SandboxClassEnum
+  /**
+   * The version of the daemon running in the sandbox
+   * @type {string}
+   * @memberof Sandbox
+   */
+  daemonVersion?: string
 }
 
 export const SandboxBackupStateEnum = {
