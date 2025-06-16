@@ -12,6 +12,7 @@ staticClients:
       - 'http://localhost:3000'
       - 'http://localhost:3000/api/oauth2-redirect.html'
       - 'http://localhost:3009/callback'
+      - 'http://proxy.localhost:4000/callback'
     name: 'Daytona'
     public: true
 enablePasswordDB: true
