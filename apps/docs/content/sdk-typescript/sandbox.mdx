@@ -276,10 +276,14 @@ const lsp = await sandbox.createLspServer('typescript', 'workspace/project')
 #### delete()
 
 ```ts
-delete(): Promise<void>
+delete(timeout: number): Promise<void>
 ```
 
 Deletes the Sandbox.
+
+**Parameters**:
+
+- `timeout` _number = 60_
 
 **Returns**:
 
@@ -433,7 +437,7 @@ await sandbox.setAutostopInterval(0)
 #### setLabels()
 
 ```ts
-setLabels(labels: Record<string, string>): Promise<void>
+setLabels(labels: Record<string, string>): Promise<Record<string, string>>
 ```
 
 Sets labels for the Sandbox.
@@ -446,7 +450,7 @@ Labels are key-value pairs that can be used to organize and identify Sandboxes.
 
 **Returns**:
 
-- `Promise<void>`
+- `Promise<Record<string, string>>`
 
 **Example:**
 

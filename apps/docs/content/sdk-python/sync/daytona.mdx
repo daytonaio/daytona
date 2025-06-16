@@ -192,7 +192,6 @@ sandbox = daytona.create(
 #### Daytona.delete
 
 ```python
-@intercept_errors(message_prefix="Failed to remove sandbox: ")
 def delete(sandbox: Sandbox, timeout: Optional[float] = 60) -> None
 ```
 

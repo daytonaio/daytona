@@ -243,7 +243,6 @@ sandbox = await daytona.create(
 #### AsyncDaytona.delete
 
 ```python
-@intercept_errors(message_prefix="Failed to remove sandbox: ")
 async def delete(sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None
 ```
 

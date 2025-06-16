@@ -211,10 +211,16 @@ print("Sandbox stopped successfully")
 #### AsyncSandbox.delete
 
 ```python
-async def delete() -> None
+@intercept_errors(message_prefix="Failed to remove sandbox: ")
+async def delete(timeout: Optional[float] = 60) -> None
 ```
 
 Deletes the Sandbox.
+
+**Arguments**:
+
+- `timeout` _Optional[float]_ - Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+  Default is 60 seconds.
 
 #### AsyncSandbox.wait_for_sandbox_start
 
