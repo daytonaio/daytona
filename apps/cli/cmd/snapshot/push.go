@@ -104,12 +104,12 @@ var PushCmd = &cobra.Command{
 			return err
 		}
 
-		createSnapshot := daytonaapiclient.CreateSnapshot{
-			Name: targetImage,
-		}
+		createSnapshot := daytonaapiclient.NewCreateSnapshot(nameFlag)
+
+		createSnapshot.SetImageName(targetImage)
 
 		if entrypointFlag != "" {
-			createSnapshot.Entrypoint = strings.Split(entrypointFlag, " ")
+			createSnapshot.SetEntrypoint(strings.Split(entrypointFlag, " "))
 		}
 
 		// Poll until the image is really available on the registry
@@ -123,7 +123,17 @@ var PushCmd = &cobra.Command{
 			time.Sleep(time.Second)
 		}
 
-		_, res, err = apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(createSnapshot).Execute()
+		if cpuFlag != 0 {
+			createSnapshot.SetCpu(cpuFlag)
+		}
+		if memoryFlag != 0 {
+			createSnapshot.SetMemory(memoryFlag)
+		}
+		if diskFlag != 0 {
+			createSnapshot.SetDisk(diskFlag)
+		}
+
+		_, res, err = apiClient.SnapshotsAPI.CreateSnapshot(ctx).CreateSnapshot(*createSnapshot).Execute()
 		if err != nil {
 			return apiclient.HandleErrorResponse(res, err)
 		}
@@ -131,7 +141,7 @@ var PushCmd = &cobra.Command{
 		views_common.RenderInfoMessageBold(fmt.Sprintf("Successfully pushed %s to Daytona", sourceImage))
 
 		err = views_util.WithInlineSpinner("Waiting for the snapshot to be validated", func() error {
-			return common.AwaitSnapshotState(ctx, apiClient, targetImage, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
+			return common.AwaitSnapshotState(ctx, apiClient, nameFlag, daytonaapiclient.SNAPSHOTSTATE_ACTIVE)
 		})
 		if err != nil {
 			return err
@@ -142,6 +152,16 @@ var PushCmd = &cobra.Command{
 	},
 }
 
+var (
+	nameFlag string
+)
+
 func init() {
 	PushCmd.Flags().StringVarP(&entrypointFlag, "entrypoint", "e", "", "The entrypoint command for the image")
+	PushCmd.Flags().StringVarP(&nameFlag, "name", "n", "", "Specify the Snapshot name")
+	PushCmd.Flags().Int32Var(&cpuFlag, "cpu", 0, "CPU cores that will be allocated to the underlying sandboxes (default: 1)")
+	PushCmd.Flags().Int32Var(&memoryFlag, "memory", 0, "Memory that will be allocated to the underlying sandboxes in GB (default: 1)")
+	PushCmd.Flags().Int32Var(&diskFlag, "disk", 0, "Disk space that will be allocated to the underlying sandboxes in GB (default: 3)")
+
+	_ = PushCmd.MarkFlagRequired("name")
 }
