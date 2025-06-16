@@ -179,7 +179,7 @@ class AsyncSnapshotService:
                     thread_started = True
                 on_logs(f"Creating snapshot {created_snapshot.name} ({created_snapshot.state})")
                 previous_state = created_snapshot.state
-            time.sleep(1)
+            await asyncio.sleep(1)
             created_snapshot = await self.__snapshots_api.get_snapshot(created_snapshot.id)
 
         if on_logs:
