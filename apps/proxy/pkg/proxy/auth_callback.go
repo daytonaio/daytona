@@ -79,7 +79,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 	oauth2Config := oauth2.Config{
 		ClientID:     p.config.Oidc.ClientId,
 		ClientSecret: p.config.Oidc.ClientSecret,
-		RedirectURL:  fmt.Sprintf("http://%s/callback", ctx.Request.Host),
+		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, ctx.Request.Host),
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
@@ -92,7 +92,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 
 	hasAccess := p.hasSandboxAccess(ctx, sandboxId, token.AccessToken)
 	if !hasAccess {
-		ctx.Error(common_errors.NewUnauthorizedError(errors.New("sandbox not found")))
+		ctx.Error(common_errors.NewNotFoundError(errors.New("sandbox not found")))
 		return
 	}
 
@@ -119,15 +119,10 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 		return "", fmt.Errorf("failed to initialize OIDC provider: %w", err)
 	}
 
-	scheme := "http"
-	if p.config.EnableTLS {
-		scheme = "https"
-	}
-
 	oauth2Config := oauth2.Config{
 		ClientID:     p.config.Oidc.ClientId,
 		ClientSecret: p.config.Oidc.ClientSecret,
-		RedirectURL:  fmt.Sprintf("%s://%s/callback", scheme, p.config.ProxyDomain),
+		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, p.config.ProxyDomain),
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
@@ -140,7 +135,7 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 	// Store the original request URL in the state
 	stateData := map[string]string{
 		"state":     state,
-		"returnTo":  fmt.Sprintf("%s://%s%s", scheme, ctx.Request.Host, ctx.Request.URL.String()),
+		"returnTo":  fmt.Sprintf("%s://%s%s", p.config.ProxyProtocol, ctx.Request.Host, ctx.Request.URL.String()),
 		"sandboxId": sandboxId,
 	}
 	stateJson, err := json.Marshal(stateData)
