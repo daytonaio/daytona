@@ -31,7 +31,7 @@ import { OrganizationInvitationService } from '../services/organization-invitati
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
 import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
+import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'

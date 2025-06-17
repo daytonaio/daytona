@@ -8,19 +8,20 @@ import { OrganizationUser } from '../../organization/entities/organization-user.
 import { Organization } from '../../organization/entities/organization.entity'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
-export interface IAuthContext {
-  role: string
+export interface BaseAuthContext {
+  role: ApiRole
 }
 
-export interface AuthContext extends IAuthContext {
+export type ApiRole = SystemRole | 'proxy'
+
+export interface AuthContext extends BaseAuthContext {
   userId: string
   email: string
-  role: SystemRole
   apiKey?: ApiKey
   organizationId?: string
 }
 
-export function isAuthContext(user: IAuthContext): user is AuthContext {
+export function isAuthContext(user: BaseAuthContext): user is AuthContext {
   return 'userId' in user
 }
 
@@ -30,6 +31,6 @@ export interface OrganizationAuthContext extends AuthContext {
   organizationUser?: OrganizationUser
 }
 
-export function isOrganizationAuthContext(user: IAuthContext): user is OrganizationAuthContext {
+export function isOrganizationAuthContext(user: BaseAuthContext): user is OrganizationAuthContext {
   return 'organizationId' in user
 }
