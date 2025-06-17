@@ -4,6 +4,7 @@
 package proxy
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/http"
@@ -98,8 +99,22 @@ func StartProxy(config *config.Config) error {
 	}))
 
 	router.Any("/*path", func(ctx *gin.Context) {
-		if ctx.Request.Host == config.ProxyDomain && ctx.Request.Method == "GET" && ctx.Request.URL.Path == "/callback" {
-			proxy.AuthCallback(ctx)
+		_, _, err := proxy.parseHost(ctx.Request.Host)
+		// if the host is not valid, we don't proxy the request
+		if err != nil {
+			switch ctx.Request.Method {
+			case "GET":
+				switch ctx.Request.URL.Path {
+				case "/callback":
+					proxy.AuthCallback(ctx)
+					return
+				case "/health":
+					ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
+					return
+				}
+			}
+
+			ctx.Error(common_errors.NewNotFoundError(errors.New("not found")))
 			return
 		}
 
