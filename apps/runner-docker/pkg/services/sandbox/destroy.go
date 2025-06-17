@@ -13,7 +13,6 @@ import (
 	"github.com/daytonaio/runner-docker/pkg/services/common"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/errdefs"
-	log "github.com/sirupsen/logrus"
 )
 
 func (s *SandboxService) DestroySandbox(ctx context.Context, req *pb.DestroySandboxRequest) (*pb.DestroySandboxResponse, error) {
@@ -60,36 +59,5 @@ func (s *SandboxService) DestroySandbox(ctx context.Context, req *pb.DestroySand
 
 	return &pb.DestroySandboxResponse{
 		Message: fmt.Sprintf("Sandbox %s destroyed", req.GetSandboxId()),
-	}, nil
-}
-
-func (s *SandboxService) RemoveDestroyedSandbox(ctx context.Context, req *pb.RemoveDestroyedSandboxRequest) (*pb.RemoveDestroyedSandboxResponse, error) {
-	// Check if container exists and is in destroyed state
-	state, err := s.getSandboxState(ctx, req.GetSandboxId())
-	if err != nil {
-		return nil, err
-	}
-
-	if state != pb.SandboxState_SANDBOX_STATE_DESTROYED {
-		return nil, fmt.Errorf("sandbox %s is not in destroyed state", req.GetSandboxId())
-	}
-
-	// Remove the container
-	err = s.dockerClient.ContainerRemove(ctx, req.GetSandboxId(), container.RemoveOptions{
-		Force: true,
-	})
-	if err != nil {
-		if errdefs.IsNotFound(err) {
-			return &pb.RemoveDestroyedSandboxResponse{
-				Message: fmt.Sprintf("Destroyed sandbox %s already removed", req.GetSandboxId()),
-			}, nil
-		}
-		return nil, common.MapDockerError(err)
-	}
-
-	log.Infof("Destroyed sandbox %s removed successfully", req.GetSandboxId())
-
-	return &pb.RemoveDestroyedSandboxResponse{
-		Message: fmt.Sprintf("Destroyed sandbox %s removed", req.GetSandboxId()),
 	}, nil
 }

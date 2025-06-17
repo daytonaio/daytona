@@ -48,7 +48,7 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 			return err
 		}
 
-		return stream.Send(&pb.LogLine{Content: "Fetching build logs finished"})
+		return stream.Send(&pb.GetSnapshotLogsResponse{Content: "Fetching build logs finished"})
 	}
 
 	reader := bufio.NewReader(file)
@@ -74,7 +74,7 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 			}
 
 			if len(line) > 0 {
-				err := stream.Send(&pb.LogLine{Content: string(line)})
+				err := stream.Send(&pb.GetSnapshotLogsResponse{Content: string(line)})
 				if err != nil {
 					log.Errorf("Error writing to response: %v", err)
 					break
@@ -101,7 +101,7 @@ func (s *SnapshotService) GetSnapshotLogs(req *pb.GetSnapshotLogsRequest, stream
 		time.Sleep(250 * time.Millisecond)
 	}
 
-	return stream.Send(&pb.LogLine{
+	return stream.Send(&pb.GetSnapshotLogsResponse{
 		Content: "Build completed successfully",
 	})
 }

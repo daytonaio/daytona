@@ -163,6 +163,8 @@ func ProxyRequest(w http.ResponseWriter, r *http.Request) {
 
 func getProxyTarget(ctx context.Context, sandboxId string, path string, rawQuery string) (*url.URL, string, error) {
 	// Get container details
+
+	// TODO: Check if this is correct, ln 167 - 171
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Error(err)

@@ -26,7 +26,7 @@ service SnapshotService {
   rpc BuildSnapshot(BuildSnapshotRequest) returns (BuildSnapshotResponse) {}
   rpc SnapshotExists(SnapshotExistsRequest) returns (SnapshotExistsResponse) {}
   rpc RemoveSnapshot(RemoveSnapshotRequest) returns (RemoveSnapshotResponse) {}
-  rpc GetSnapshotLogs(GetSnapshotLogsRequest) returns (stream LogLine) {}
+  rpc GetSnapshotLogs(GetSnapshotLogsRequest) returns (stream GetSnapshotLogsResponse) {}
 }
 
 enum HealthStatus {
@@ -55,7 +55,7 @@ enum BackupState {
   BACKUP_STATE_PENDING = 1;
   BACKUP_STATE_IN_PROGRESS = 2;
   BACKUP_STATE_COMPLETED = 3;
-  SNAPSHOT_STATE_FAILED = 4;
+  BACKUP_STATE_FAILED = 4;
 }
 
 // Health messages
@@ -191,7 +191,7 @@ message GetSnapshotLogsRequest {
   bool follow = 2;
 }
 
-message LogLine {
+message GetSnapshotLogsResponse {
   string content = 1;
 }
 
