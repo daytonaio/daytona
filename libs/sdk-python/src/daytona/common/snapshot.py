@@ -3,7 +3,8 @@
 
 from typing import List, Optional, Union
 
-from daytona_api_client import SnapshotDto
+from daytona_api_client import BuildInfo, SnapshotDto
+from daytona_api_client_async import BuildInfo as AsyncBuildInfo
 from pydantic import BaseModel
 
 from .daytona import Resources
@@ -32,6 +33,8 @@ class Snapshot(SnapshotDto):
         updated_at (StrictStr): Timestamp when the Snapshot was last updated.
         last_used_at (StrictStr): Timestamp when the Snapshot was last used.
     """
+
+    build_info: Optional[Union[BuildInfo, AsyncBuildInfo]] = None
 
     @classmethod
     def from_dto(cls, dto: SnapshotDto) -> "Snapshot":

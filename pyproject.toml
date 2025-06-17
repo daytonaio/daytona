@@ -29,6 +29,7 @@ disable = [
     "R0912",  # too-many-branches
     "R1702",  # too-many-nested-blocks
     "R0916",  # too-many-boolean-expressions
+    "C0302",  # too-many-lines
 ]
 const-rgx = "(([A-Z_][A-Z0-9_]*)|([a-z_][a-z0-9_]*))"
 allowed-redefined-builtins = ["id"]

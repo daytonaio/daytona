@@ -1,8 +1,8 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
+import asyncio
 import json
-import time
 import warnings
 from typing import Callable, Dict, List, Optional, Union, overload
 
@@ -427,7 +427,7 @@ class AsyncDaytona:
                 ]
 
             while response_ref["response"].state == SandboxState.PENDING_BUILD:
-                time.sleep(1)
+                await asyncio.sleep(1)
                 response_ref["response"] = await self._sandbox_api.get_sandbox(response_ref["response"].id)
 
             await process_streaming_response(
@@ -459,7 +459,7 @@ class AsyncDaytona:
         """Helper method to get the appropriate code toolbox based on language.
 
         Args:
-            params (Optional[CreateSandboxParams]): Sandbox parameters. If not provided, defaults to Python toolbox.
+            language (Optional[CodeLanguage]): Language of the code toolbox. If not provided, defaults to Python.
 
         Returns:
             The appropriate code toolbox instance for the specified language.
@@ -483,7 +483,6 @@ class AsyncDaytona:
             case _:
                 raise DaytonaError(f"Unsupported language: {language}")
 
-    @intercept_errors(message_prefix="Failed to remove sandbox: ")
     async def delete(self, sandbox: AsyncSandbox, timeout: Optional[float] = 60) -> None:
         """Deletes a Sandbox.
 
@@ -502,7 +501,7 @@ class AsyncDaytona:
             await daytona.delete(sandbox)  # Clean up when done
             ```
         """
-        return await self._sandbox_api.delete_sandbox(sandbox.id, force=True, _request_timeout=timeout or None)
+        return await sandbox.delete(timeout)
 
     @intercept_errors(message_prefix="Failed to get sandbox: ")
     async def get(self, sandbox_id: str) -> AsyncSandbox:

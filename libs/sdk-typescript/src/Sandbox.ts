@@ -12,6 +12,7 @@ import {
   SandboxVolume,
   BuildInfo,
   SandboxBackupStateEnum,
+  SandboxLabels,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -166,8 +167,9 @@ export class Sandbox implements SandboxDto {
    *   team: 'backend'
    * });
    */
-  public async setLabels(labels: Record<string, string>): Promise<void> {
-    await this.sandboxApi.replaceLabels(this.id, { labels })
+  public async setLabels(labels: Record<string, string>): Promise<Record<string, string>> {
+    this.labels = (await this.sandboxApi.replaceLabels(this.id, { labels })).data.labels
+    return this.labels
   }
 
   /**
@@ -191,6 +193,7 @@ export class Sandbox implements SandboxDto {
     }
     const startTime = Date.now()
     await this.sandboxApi.startSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    await this.refreshData()
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStarted(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -215,6 +218,7 @@ export class Sandbox implements SandboxDto {
     }
     const startTime = Date.now()
     await this.sandboxApi.stopSandbox(this.id, undefined, { timeout: timeout * 1000 })
+    await this.refreshData()
     const timeElapsed = Date.now() - startTime
     await this.waitUntilStopped(timeout ? timeout - timeElapsed / 1000 : 0)
   }
@@ -223,8 +227,9 @@ export class Sandbox implements SandboxDto {
    * Deletes the Sandbox.
    * @returns {Promise<void>}
    */
-  public async delete(): Promise<void> {
-    await this.sandboxApi.deleteSandbox(this.id, true)
+  public async delete(timeout = 60): Promise<void> {
+    await this.sandboxApi.deleteSandbox(this.id, true, undefined, { timeout: timeout * 1000 })
+    await this.refreshData()
   }
 
   /**
@@ -390,6 +395,7 @@ export class Sandbox implements SandboxDto {
    */
   public async archive(): Promise<void> {
     await this.sandboxApi.archiveSandbox(this.id)
+    await this.refreshData()
   }
 
   private async getRootDir(): Promise<string> {

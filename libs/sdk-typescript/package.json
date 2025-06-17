@@ -11,9 +11,9 @@
   "author": "Daytona Platforms Inc.",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/daytonaio/sdk/issues"
+    "url": "https://github.com/daytonaio/daytona/issues"
   },
-  "homepage": "https://github.com/daytonaio/sdk#readme",
+  "homepage": "https://www.daytona.io/docs",
   "config": {
     "docsDir": "../../apps/docs/content/sdk-typescript"
   },

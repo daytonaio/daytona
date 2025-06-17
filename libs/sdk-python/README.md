@@ -56,7 +56,7 @@ Or using environment variables:
 You can also customize sandbox creation:
 
 ```python
-sandbox = daytona.create(CreateSandboxParams(
+sandbox = daytona.create(CreateSandboxFromSnapshotParams(
     language="python",
     env_vars={"PYTHON_ENV": "development"},
     auto_stop_interval=60,  # Auto-stop after 1 hour of inactivity
@@ -135,6 +135,6 @@ completions = lsp.completions('path/to/file.ts', {"line": 10, "character": 15})
 
 ## Contributing
 
-Daytona is Open Source under the [GNU AFFERO GENERAL PUBLIC LICENSE](LICENSE), and is the [copyright of its contributors](NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](CONTRIBUTING.md) to get started.
+Daytona is Open Source under the [Apache License 2.0](/libs/sdk-python/LICENSE), and is the [copyright of its contributors](/NOTICE). If you would like to contribute to the software, read the Developer Certificate of Origin Version 1.1 (https://developercertificate.org/). Afterwards, navigate to the [contributing guide](/CONTRIBUTING.md) to get started.
 
-Code in [\_sync](src/daytona/_sync/) directory shouldn't be edited directly. It should be generated from the corresponding async code in the [\_async](src/daytona/_async/) directory using the [sync_generator.py](scripts/sync_generator.py) script.
+Code in [\_sync](/libs/sdk-python/src/daytona/_sync/) directory shouldn't be edited directly. It should be generated from the corresponding async code in the [\_async](/libs/sdk-python/src/daytona/_async/) directory using the [sync_generator.py](/libs/sdk-python/scripts/sync_generator.py) script.
