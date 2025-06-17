@@ -1,7 +1,7 @@
 # Copyright 2025 Daytona Platforms Inc.
 # SPDX-License-Identifier: Apache-2.0
 
-import time
+import asyncio
 from typing import Dict, Optional
 
 from daytona_api_client_async import PortPreviewUrl
@@ -179,7 +179,8 @@ class AsyncSandbox(SandboxDto):
         # Convert all values to strings and create the expected labels structure
         string_labels = {k: str(v).lower() if isinstance(v, bool) else str(v) for k, v in labels.items()}
         labels_payload = {"labels": string_labels}
-        return await self._sandbox_api.replace_labels(self.id, labels_payload)
+        self.labels = (await self._sandbox_api.replace_labels(self.id, labels_payload)).labels
+        return self.labels
 
     @intercept_errors(message_prefix="Failed to start sandbox: ")
     @with_timeout(
@@ -204,6 +205,7 @@ class AsyncSandbox(SandboxDto):
             ```
         """
         await self._sandbox_api.start_sandbox(self.id, _request_timeout=timeout or None)
+        await self.refresh_data()
         await self.wait_for_sandbox_start()
 
     @intercept_errors(message_prefix="Failed to stop sandbox: ")
@@ -229,11 +231,19 @@ class AsyncSandbox(SandboxDto):
             ```
         """
         await self._sandbox_api.stop_sandbox(self.id, _request_timeout=timeout or None)
+        await self.refresh_data()
         await self.wait_for_sandbox_stop()
 
-    async def delete(self) -> None:
-        """Deletes the Sandbox."""
-        await self._sandbox_api.delete_sandbox(self.id, force=True)
+    @intercept_errors(message_prefix="Failed to remove sandbox: ")
+    async def delete(self, timeout: Optional[float] = 60) -> None:
+        """Deletes the Sandbox.
+
+        Args:
+            timeout (Optional[float]): Timeout (in seconds) for sandbox deletion. 0 means no timeout.
+                Default is 60 seconds.
+        """
+        await self._sandbox_api.delete_sandbox(self.id, force=True, _request_timeout=timeout or None)
+        await self.refresh_data()
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to start: ")
     @with_timeout(
@@ -263,7 +273,7 @@ class AsyncSandbox(SandboxDto):
                 )
                 raise DaytonaError(err_msg)
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failure during waiting for sandbox to stop: ")
     @with_timeout(
@@ -299,7 +309,7 @@ class AsyncSandbox(SandboxDto):
                 if "validation error" not in str(e):
                     raise e
 
-            time.sleep(0.1)  # Wait 100ms between checks
+            await asyncio.sleep(0.1)  # Wait 100ms between checks
 
     @intercept_errors(message_prefix="Failed to set auto-stop interval: ")
     async def set_autostop_interval(self, interval: int) -> None:
@@ -387,6 +397,7 @@ class AsyncSandbox(SandboxDto):
         Sandbox must be stopped before archiving.
         """
         await self._sandbox_api.archive_sandbox(self.id)
+        await self.refresh_data()
 
     async def __get_root_dir(self) -> str:
         if not self._root_dir:

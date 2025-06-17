@@ -87,8 +87,24 @@ POST_REPLACEMENTS = [
     (re.compile(r"\basynchronously\b"), ""),
     # Replace aiofiles.open with built-in open
     (re.compile(r"\baiofiles\.open\b"), "open"),
-    # Remove aiofiles imports
-    (re.compile(r"^import aiofiles\s*$", flags=re.MULTILINE), ""),
+    # Replace aiofiles.os calls with os calls
+    (re.compile(r"\baiofiles\.os\.makedirs\b"), "os.makedirs"),
+    (re.compile(r"\baiofiles\.os\.path\.exists\b"), "os.path.exists"),
+    (re.compile(r"\baiofiles\.os\.path\.abspath\b"), "os.path.abspath"),
+    (re.compile(r"\baiofiles\.os\.path\.isfile\b"), "os.path.isfile"),
+    (re.compile(r"\baiofiles\.os\.path\.isdir\b"), "os.path.isdir"),
+    (re.compile(r"\baiofiles\.os\.path\.join\b"), "os.path.join"),
+    (re.compile(r"\baiofiles\.os\.path\.dirname\b"), "os.path.dirname"),
+    (re.compile(r"\baiofiles\.os\.path\.basename\b"), "os.path.basename"),
+    (re.compile(r"\baiofiles\.os\.path\.normpath\b"), "os.path.normpath"),
+    (re.compile(r"\baiofiles\.os\.path\.relpath\b"), "os.path.relpath"),
+    (re.compile(r"\baiofiles\.os\.path\.splitdrive\b"), "os.path.splitdrive"),
+    (re.compile(r"\baiofiles\.os\.path\.lstrip\b"), "os.path.lstrip"),
+    (re.compile(r"\baiofiles\.os\.walk\b"), "os.walk"),
+    # Replace _async_os_walk with os.walk
+    (re.compile(r"\bself\._async_os_walk\b"), "os.walk"),
+    # Remove aiofiles imports (including submodules)
+    (re.compile(r"^import aiofiles(?:\.[\w_]+)?\s*$", flags=re.MULTILINE), ""),
     (re.compile(r"^from aiofiles(?:\.[\w_]+)? import .+$", flags=re.MULTILINE), ""),
 ]
 
@@ -581,27 +597,222 @@ def replace_unwrapped_process_streaming(text: str) -> str:
     return "".join(result_parts)
 
 
+def replace_asyncio_sleep_calls(text: str) -> str:
+    """
+    Replace occurrences of:
+      await asyncio.sleep(<some-value>)
+      asyncio.sleep(<some-value>)
+    with:
+      time.sleep(<some-value>)
+    """
+    # First handle "await asyncio.sleep" pattern
+    result = []
+    i = 0
+    pattern = "await asyncio.sleep"
+    plen = len(pattern)
+
+    while True:
+        idx = text.find(pattern, i)
+        if idx == -1:
+            result.append(text[i:])
+            break
+
+        # Append text up to the match
+        result.append(text[i:idx])
+
+        # Find the opening parenthesis after the pattern
+        start_paren = text.find("(", idx + plen)
+        if start_paren == -1:
+            # Malformed usage; just copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Now find the matching closing parenthesis for this call
+        paren_count = 0
+        j = start_paren
+        end_paren = None
+        while j < len(text):
+            if text[j] == "(":
+                paren_count += 1
+            elif text[j] == ")":
+                paren_count -= 1
+                if paren_count == 0:
+                    end_paren = j
+                    break
+            j += 1
+
+        if end_paren is None:
+            # Unbalanced parentheses; copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Extract the inside of the parentheses
+        call_args = text[start_paren + 1 : end_paren]
+
+        # Reconstruct the replacement:
+        #   "time.sleep(" + call_args + ")"
+        replacement = f"time.sleep({call_args})"
+        result.append(replacement)
+
+        # Advance i past the original call
+        i = end_paren + 1
+
+    text = "".join(result)
+
+    # Then handle "asyncio.sleep" pattern (after unasync removes await)
+    result = []
+    i = 0
+    pattern = "asyncio.sleep"
+    plen = len(pattern)
+
+    while True:
+        idx = text.find(pattern, i)
+        if idx == -1:
+            result.append(text[i:])
+            break
+
+        # Append text up to the match
+        result.append(text[i:idx])
+
+        # Find the opening parenthesis after the pattern
+        start_paren = text.find("(", idx + plen)
+        if start_paren == -1:
+            # Malformed usage; just copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Now find the matching closing parenthesis for this call
+        paren_count = 0
+        j = start_paren
+        end_paren = None
+        while j < len(text):
+            if text[j] == "(":
+                paren_count += 1
+            elif text[j] == ")":
+                paren_count -= 1
+                if paren_count == 0:
+                    end_paren = j
+                    break
+            j += 1
+
+        if end_paren is None:
+            # Unbalanced parentheses; copy pattern and move on
+            result.append(pattern)
+            i = idx + plen
+            continue
+
+        # Extract the inside of the parentheses
+        call_args = text[start_paren + 1 : end_paren]
+
+        # Reconstruct the replacement:
+        #   "time.sleep(" + call_args + ")"
+        replacement = f"time.sleep({call_args})"
+        result.append(replacement)
+
+        # Advance i past the original call
+        i = end_paren + 1
+
+    return "".join(result)
+
+
+def replace_asyncio_create_task_with_threading(text: str) -> str:
+    """
+    Replace:
+      <var> = asyncio.create_task(<some_method>())
+    with:
+      <var> = threading.Thread(target=<some_method>)
+      <var>.start()
+    and replace any line that is just <var> with <var>.join()
+    Also, ensure 'import threading' is present if any such replacement is made.
+    """
+    import_vars = set()
+    lines = text.splitlines(keepends=True)
+    new_lines = []
+    pattern = re.compile(r"^(\s*)(\w+)\s*=\s*asyncio\.create_task\(\s*([\w\.]+)\s*\(\s*\)\s*\)\s*$")
+    # Pass 1: Replace assignments and collect variable names
+    for line in lines:
+        m = pattern.match(line)
+        if m:
+            indent, var, method = m.groups()
+            new_lines.append(f"{indent}{var} = threading.Thread(target={method})\n{indent}{var}.start()\n")
+            import_vars.add(var)
+        else:
+            new_lines.append(line)
+    # Pass 2: Replace usages of the variable alone on a line with .join()
+    final_lines = []
+    for line in new_lines:
+        stripped = line.strip()
+        replaced = False
+        for var in import_vars:
+            if stripped == var:
+                indent = line[: line.index(var)]
+                final_lines.append(f"{indent}{var}.join()\n")
+                replaced = True
+                break
+        if not replaced:
+            final_lines.append(line)
+    # Pass 3: Ensure import threading is present if needed
+    if import_vars:
+        has_threading_import = any(re.match(r"^\s*import threading\s*$", l) for l in final_lines)
+        if not has_threading_import:
+            # Insert after the last import but before other code
+            insert_idx = 0
+            for i, l in enumerate(final_lines):
+                if (
+                    l.strip().startswith("import")
+                    or l.strip().startswith("from")
+                    or l.strip().startswith("#")
+                    or not l.strip()
+                ):
+                    insert_idx = i + 1
+                else:
+                    break
+            final_lines.insert(insert_idx, "import threading\n")
+    return "".join(final_lines)
+
+
 def manage_asyncio_imports(text: str) -> str:
     """
-    Manage asyncio imports based on usage:
+    Manage asyncio, time, and aiofiles imports based on usage:
     - If asyncio is used in the text but not imported, add "import asyncio"
     - If asyncio is not used, remove any existing asyncio imports
+    - If time is used in the text but not imported, add "import time"
+    - If time is not used, remove any existing time imports
+    - If aiofiles is not used, remove any existing aiofiles imports
     """
     lines = text.splitlines(keepends=True)
 
-    # Check if asyncio is used anywhere in the text (excluding import lines)
+    # Check if asyncio, time, and aiofiles are used anywhere in the text (excluding import lines)
     asyncio_used = False
+    time_used = False
+    aiofiles_used = False
     non_import_text = ""
     for line in lines:
-        if not (line.strip().startswith("import asyncio") or line.strip().startswith("from asyncio import")):
+        if not (
+            line.strip().startswith("import asyncio")
+            or line.strip().startswith("from asyncio import")
+            or line.strip().startswith("import time")
+            or line.strip().startswith("from time import")
+            or line.strip().startswith("import aiofiles")
+            or line.strip().startswith("from aiofiles import")
+        ):
             non_import_text += line
 
     if re.search(r"\basyncio\.", non_import_text):
         asyncio_used = True
+    if re.search(r"\btime\.", non_import_text):
+        time_used = True
+    if re.search(r"\baiofiles\.", non_import_text):
+        aiofiles_used = True
 
-    # Check if asyncio is already imported
+    # Check if asyncio, time, and aiofiles are already imported
     has_asyncio_import = False
+    has_time_import = False
     import_asyncio_line_idx = None
+    import_time_line_idx = None
 
     new_lines = []
     for i, line in enumerate(lines):
@@ -609,6 +820,21 @@ def manage_asyncio_imports(text: str) -> str:
         if re.match(r"^\s*import asyncio\s*$", line):
             has_asyncio_import = True
             if asyncio_used:
+                new_lines.append(line)  # Keep the import
+            # else: skip this line (remove unused import)
+            continue
+
+        # Check for existing time imports
+        if re.match(r"^\s*import time\s*$", line):
+            has_time_import = True
+            if time_used:
+                new_lines.append(line)  # Keep the import
+            # else: skip this line (remove unused import)
+            continue
+
+        # Check for existing aiofiles imports
+        if re.match(r"^\s*import aiofiles(?:\.[\w_]+)?\s*$", line):
+            if aiofiles_used:
                 new_lines.append(line)  # Keep the import
             # else: skip this line (remove unused import)
             continue
@@ -630,9 +856,43 @@ def manage_asyncio_imports(text: str) -> str:
             # else: skip this line (remove unused import)
             continue
 
+        # Check for "from time import X, Y" - remove if not used
+        m = re.match(r"^\s*from time import (.+)$", line)
+        if m:
+            if time_used:
+                # Keep specific imports only if those specific names are used
+                imported = [imp.strip() for imp in m.group(1).split(",")]
+                used_imports = []
+                for imp in imported:
+                    pattern = rf"\b{re.escape(imp)}\b"
+                    if re.search(pattern, non_import_text):
+                        used_imports.append(imp)
+
+                if used_imports:
+                    new_lines.append(f"from time import {', '.join(used_imports)}\n")
+            # else: skip this line (remove unused import)
+            continue
+
+        # Check for "from aiofiles import X, Y" - remove if not used
+        m = re.match(r"^\s*from aiofiles(?:\.[\w_]+)? import (.+)$", line)
+        if m:
+            if aiofiles_used:
+                # Keep specific imports only if those specific names are used
+                imported = [imp.strip() for imp in m.group(1).split(",")]
+                used_imports = []
+                for imp in imported:
+                    pattern = rf"\b{re.escape(imp)}\b"
+                    if re.search(pattern, non_import_text):
+                        used_imports.append(imp)
+
+                if used_imports:
+                    new_lines.append(f"from aiofiles import {', '.join(used_imports)}\n")
+            # else: skip this line (remove unused import)
+            continue
+
         new_lines.append(line)
 
-        # Track where we could insert import asyncio (after other imports)
+        # Track where we could insert imports (after other imports)
         if (
             not has_asyncio_import
             and import_asyncio_line_idx is None
@@ -642,6 +902,16 @@ def manage_asyncio_imports(text: str) -> str:
             and not line.strip().startswith("from")
         ):
             import_asyncio_line_idx = len(new_lines) - 1
+
+        if (
+            not has_time_import
+            and import_time_line_idx is None
+            and line.strip()
+            and not line.strip().startswith("#")
+            and not line.strip().startswith("import")
+            and not line.strip().startswith("from")
+        ):
+            import_time_line_idx = len(new_lines) - 1
 
     # If asyncio is used but not imported, add the import
     if asyncio_used and not has_asyncio_import:
@@ -671,7 +941,128 @@ def manage_asyncio_imports(text: str) -> str:
                     break
             new_lines.insert(license_end, "import asyncio\n")
 
+    # If time is used but not imported, add the import
+    if time_used and not has_time_import:
+        if import_time_line_idx is not None:
+            # Insert after the last import but before other code
+            # Find the best position - after imports but before other code
+            insert_idx = 0
+            for i, line in enumerate(new_lines):
+                if (
+                    line.strip().startswith("import")
+                    or line.strip().startswith("from")
+                    or line.strip().startswith("#")
+                    or not line.strip()
+                ):
+                    insert_idx = i + 1
+                else:
+                    break
+            new_lines.insert(insert_idx, "import time\n")
+        else:
+            # If no good position found, add at the beginning after license/comments
+            license_end = 0
+            for i, line in enumerate(new_lines):
+                stripped = line.strip()
+                if not stripped or stripped.startswith("#"):
+                    license_end = i + 1
+                else:
+                    break
+            new_lines.insert(license_end, "import time\n")
+
     return "".join(new_lines)
+
+
+def replace_with_constructor_as_var(text: str) -> str:
+    """
+    Convert:
+        with ObjectStorage(...) as <var>:
+            <block>
+    to:
+        <var> = ObjectStorage(...) (preserving multi-line formatting)
+        <block> (at the same indentation as the original 'with')
+    Handles multi-line constructor calls, including when 'as <var>:' is on a separate line.
+    Uses block unindentation logic similar to transform_docstrings, but preserves parent indentation.
+    Only processes ObjectStorage constructor calls.
+    """
+    lines = text.splitlines(keepends=True)
+    out = []
+    i = 0
+    n = len(lines)
+    while i < n:
+        line = lines[i]
+        match = re.match(r"^(\s*)with (.*)", line)
+        if match:
+            with_indent = match.group(1)
+            with_indent_len = len(with_indent)
+            # Accumulate lines until we find 'as <var>:'
+            constructor_lines = [line]
+            j = i + 1
+            while j < n and not re.search(r"as \w+:\s*$", "".join(constructor_lines)):
+                constructor_lines.append(lines[j])
+                j += 1
+            full_with = "".join(constructor_lines)
+            as_match = re.search(r"with (.*) as (\w+):\s*$", full_with.replace("\n", " "), re.DOTALL)
+            if as_match:
+                # Check if this is an ObjectStorage constructor call
+                constructor_call = as_match.group(1).strip()
+                if "ObjectStorage" not in constructor_call:
+                    # Not an ObjectStorage call, keep as is
+                    out.append(line)
+                    i += 1
+                    continue
+
+                # Find the line where 'as <var>:' occurs
+                for idx, cl in enumerate(constructor_lines):
+                    if re.search(r"as \w+:\s*$", cl):
+                        as_line_idx = idx
+                        break
+                else:
+                    as_line_idx = len(constructor_lines) - 1
+                # Everything up to and including as_line_idx is the constructor call
+                constructor_call_lines = constructor_lines[: as_line_idx + 1]
+                # Remove 'with ' from the first line, and ' as <var>:' from the last
+                first = constructor_call_lines[0]
+                first = re.sub(r"^(\s*)with ", r"\1", first)
+                last = constructor_call_lines[-1]
+                last = re.sub(r" as \w+:\s*$", "", last)
+                constructor_call_lines[0] = first
+                constructor_call_lines[-1] = last
+                # Write the assignment, preserving multi-line formatting and parent indentation
+                out.append(f"{with_indent}{as_match.group(2)} = ")
+                for l in constructor_call_lines:
+                    out.append(l[with_indent_len:])
+                if not out[-1].endswith("\n"):
+                    out[-1] += "\n"
+                # Now robustly unindent the following block, preserving parent indentation
+                k = j
+                # Find the first non-blank line to determine block_indent
+                block_indent = None
+                while k < n:
+                    next_line = lines[k]
+                    if next_line.strip() == "":
+                        out.append(next_line)
+                        k += 1
+                        continue
+                    block_indent = len(next_line) - len(next_line.lstrip())
+                    break
+                # Unindent all lines at block_indent or deeper, stop at less indented line
+                while k < n:
+                    block_line = lines[k]
+                    if block_line.strip() == "":
+                        out.append(block_line)
+                        k += 1
+                        continue
+                    curr_indent = len(block_line) - len(block_line.lstrip())
+                    if curr_indent < (block_indent or 0):
+                        break
+                    # Remove block_indent, add with_indent
+                    out.append(with_indent + block_line[(block_indent or 0) :])
+                    k += 1
+                i = k
+                continue
+        out.append(line)
+        i += 1
+    return "".join(out)
 
 
 def restore_blocks(path: Path, block_map: dict):
@@ -691,15 +1082,19 @@ def post_process(path: Path):
     3) Translate await asyncio.to_thread(...) calls
     4) Convert await process_streaming_response(...) calls
     5) Wrap any unwrapped process_streaming_response(...) calls
-    6) Strip Awaitable[...] wrappers
-    7) Clean up typing imports
-    8) Remove any leftover daytona.close() lines
-    9) Collapse >2 blank lines into exactly 2
-    10) Manage asyncio imports (add if needed based on usage, remove if unused)
-    11) Inject auto‐gen banner if missing
+    6) Convert await asyncio.sleep(...) calls to time.sleep(...)
+    7) Strip Awaitable[...] wrappers
+    8) Clean up typing imports
+    9) Remove any leftover daytona.close() lines
+    10) Collapse >2 blank lines into exactly 2
+    11) Manage asyncio and time imports (add if needed based on usage, remove if unused)
+    12) Inject auto‐gen banner if missing
     """
     text = path.read_text(encoding="utf-8")
     original = text
+
+    # 0) Convert 'with <constructor-call> as <var>:' to '<var> = <constructor-call>' and unindent block
+    text = replace_with_constructor_as_var(text)
 
     # 1) Transform docstrings so that code‐block examples go from async→sync
     text = transform_docstrings(text)
@@ -717,10 +1112,16 @@ def post_process(path: Path):
     #    (skipping lines where it appears inside an import statement)
     text = replace_unwrapped_process_streaming(text)
 
-    # 6) Strip type Awaitable[...] wrappers
+    # 6) Convert "await asyncio.sleep(...)" calls into "time.sleep(...)"
+    text = replace_asyncio_sleep_calls(text)
+
+    # 6.5) Convert 'asyncio.create_task' to 'threading.Thread' and usages
+    text = replace_asyncio_create_task_with_threading(text)
+
+    # 7) Strip type Awaitable[...] wrappers
     text = re.sub(r"Awaitable\[(.*?)\]", r"\1", text)
 
-    # 7) Clean up typing imports, dropping "Awaitable"
+    # 8) Clean up typing imports, dropping "Awaitable"
     def clean_imports(m):
         imps = [i.strip() for i in m.group(1).split(",") if i.strip() != "Awaitable"]
         return f"from typing import {', '.join(imps)}" if imps else ""
@@ -732,16 +1133,16 @@ def post_process(path: Path):
         flags=re.MULTILINE,
     )
 
-    # 8) Remove any leftover "daytona.close()" lines
+    # 9) Remove any leftover "daytona.close()" lines
     text = re.sub(r"^\s*daytona\w*\.close\(\)\s*$", "", text, flags=re.MULTILINE)
 
-    # 9) Collapse more than two blank lines into exactly two
+    # 10) Collapse more than two blank lines into exactly two
     text = re.sub(r"\n\s*\n\s*\n", "\n\n", text)
 
-    # 10) Manage asyncio imports (add if needed based on usage, remove if unused)
+    # 11) Manage asyncio and time imports (add if needed based on usage, remove if unused)
     text = manage_asyncio_imports(text)
 
-    # 11) Inject auto‐gen banner if it's missing in the first few lines
+    # 12) Inject auto‐gen banner if it's missing in the first few lines
     lines = text.splitlines(keepends=True)
     if not any("auto-generated by the unasync conversion script" in l for l in lines[:10]):
         idx = find_license_end(lines)

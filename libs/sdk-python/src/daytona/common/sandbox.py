@@ -23,7 +23,8 @@ class Resources:
             disk=20,   # 20GiB disk
             gpu=1
         )
-        params = CreateSandboxParams(
+        params = CreateSandboxFromImageParams(
+            image=Image.debian_slim("3.12"),
             language="python",
             resources=resources
         )

@@ -24,7 +24,7 @@ async def main():
         print("Sandbox started")
 
         print("Getting existing sandbox")
-        existing_sandbox = await daytona.get_current_sandbox(sandbox.id)
+        existing_sandbox = await daytona.get(sandbox.id)
         print("Get existing sandbox")
 
         response = await existing_sandbox.process.exec('echo "Hello World from exec!"', cwd="/home/daytona", timeout=10)
