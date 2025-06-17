@@ -18,6 +18,9 @@ import { OrganizationMemberRole } from '../organization/enums/organization-membe
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
 import { SystemRole } from '../user/enums/system-role.enum'
+import { Audit } from '../audit/decorators/audit.decorator'
+import { AuditAction } from '../audit/enums/audit-action.enum'
+import { AuditTarget } from '../audit/enums/audit-target.enum'
 
 @ApiTags('api-keys')
 @Controller('api-keys')
@@ -28,6 +31,11 @@ import { SystemRole } from '../user/enums/system-role.enum'
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.API_KEY,
+    targetIdResolver: (result) => result?.name,
+  })
   @Post()
   @ApiOperation({
     summary: 'Create API key',
@@ -107,6 +115,11 @@ export class ApiKeyController {
     return ApiKeyListDto.fromApiKey(apiKey)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.API_KEY,
+    targetIdParam: 'name',
+  })
   @Delete(':name')
   @ApiOperation({
     summary: 'Delete API key',
