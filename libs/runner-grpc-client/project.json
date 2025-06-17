@@ -1,0 +1,19 @@
+{
+  "name": "runner-grpc-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/runner-grpc-client/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/runner-grpc-client",
+        "main": "libs/runner-grpc-client/src/index.ts",
+        "tsConfig": "libs/runner-grpc-client/tsconfig.lib.json",
+        "assets": ["libs/runner-grpc-client/*.md"]
+      }
+    }
+  },
+  "tags": []
+}

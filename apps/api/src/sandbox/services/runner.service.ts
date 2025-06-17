@@ -212,12 +212,7 @@ export class RunnerService {
 
         await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Runner not reachable')
-        } else {
-          this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-          this.logger.error(e)
-        }
+        this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
 
         await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
       }
@@ -266,7 +261,7 @@ export class RunnerService {
         runnerDiskGiB: runner.diskGiB,
       })
     } else {
-      this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
+      this.logger.warn(`Runner ${runnerId} didn't send usage metrics`)
     }
 
     await this.runnerRepository.update(runnerId, updateData)

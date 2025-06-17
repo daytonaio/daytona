@@ -21,6 +21,11 @@
             "input": "apps/api/src/assets",
             "glob": "**/*",
             "output": "./assets/"
+          },
+          {
+            "input": "proto",
+            "glob": "**/*",
+            "output": "./proto/"
           }
         ]
       },
