@@ -1,0 +1,234 @@
+syntax = "proto3";
+
+package runner.v1;
+
+option go_package = "github.com/daytonaio/runner-docker/gen/pb/runner/v1";
+
+// Health service
+service HealthService {
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse) {}
+}
+
+// Runner service
+service RunnerService {
+  rpc RunnerInfo(RunnerInfoRequest) returns (RunnerInfoResponse) {}
+}
+
+// Sandbox service
+service SandboxService {
+  rpc CreateSandbox(CreateSandboxRequest) returns (CreateSandboxResponse) {}
+  rpc DestroySandbox(DestroySandboxRequest) returns (DestroySandboxResponse) {}
+  rpc CreateBackup(CreateBackupRequest) returns (CreateBackupResponse) {}
+  rpc StartSandbox(StartSandboxRequest) returns (StartSandboxResponse) {}
+  rpc StopSandbox(StopSandboxRequest) returns (StopSandboxResponse) {}
+  rpc SandboxInfo(SandboxInfoRequest) returns (SandboxInfoResponse) {}
+  rpc RemoveDestroyedSandbox(RemoveDestroyedSandboxRequest) returns (RemoveDestroyedSandboxResponse) {}
+  rpc SandboxDaemonVersion(SandboxDaemonVersionRequest) returns (SandboxDaemonVersionResponse) {}
+}
+
+// Snapshot service
+service SnapshotService {
+  rpc PullSnapshot (PullSnapshotRequest) returns (PullSnapshotResponse) {}
+  rpc BuildSnapshot(BuildSnapshotRequest) returns (BuildSnapshotResponse) {}
+  rpc SnapshotExists(SnapshotExistsRequest) returns (SnapshotExistsResponse) {}
+  rpc RemoveSnapshot(RemoveSnapshotRequest) returns (RemoveSnapshotResponse) {}
+  rpc GetSnapshotLogs(GetSnapshotLogsRequest) returns (stream GetSnapshotLogsResponse) {}
+}
+
+enum HealthStatus {
+  HEALTH_STATUS_UNSPECIFIED = 0;
+  HEALTH_STATUS_HEALTHY = 1;
+  HEALTH_STATUS_UNHEALTHY = 2;
+}
+
+enum SandboxState {
+  SANDBOX_STATE_UNSPECIFIED = 0;
+  SANDBOX_STATE_CREATING = 1;
+  SANDBOX_STATE_RESTORING = 2;
+  SANDBOX_STATE_DESTROYED = 3;
+  SANDBOX_STATE_DESTROYING = 4;
+  SANDBOX_STATE_STARTED = 5;
+  SANDBOX_STATE_STOPPED = 6;
+  SANDBOX_STATE_STARTING = 7;
+  SANDBOX_STATE_STOPPING = 8;
+  SANDBOX_STATE_RESIZING = 9;
+  SANDBOX_STATE_ERROR = 10;
+  SANDBOX_STATE_PULLING_SNAPSHOT = 11;
+}
+
+enum BackupState {
+  BACKUP_STATE_UNSPECIFIED = 0;
+  BACKUP_STATE_PENDING = 1;
+  BACKUP_STATE_IN_PROGRESS = 2;
+  BACKUP_STATE_COMPLETED = 3;
+  BACKUP_STATE_FAILED = 4;
+}
+
+// Health messages
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  HealthStatus status = 1;
+  string version = 2;
+}
+
+// Runner messages
+message RunnerInfoRequest {}
+
+message RunnerInfoResponse {
+  optional RunnerMetrics metrics = 1;
+}
+
+// Sandbox messages
+message CreateSandboxRequest {
+  string id = 1;
+  optional string from_volume_id = 2;
+  string user_id = 3;
+  string snapshot = 4;
+  string os_user = 5;
+  int64 cpu_quota = 6;
+  int64 gpu_quota = 7;
+  int64 memory_quota = 8;
+  int64 storage_quota = 9;
+  map<string, string> env = 10;
+  optional Registry registry = 11;
+  repeated string entrypoint = 12;
+  repeated Volume volumes = 13;
+}
+
+message CreateSandboxResponse {
+  string sandbox_id = 1;
+}
+
+message DestroySandboxRequest {
+  string sandbox_id = 1;
+}
+
+message DestroySandboxResponse {
+  string message = 1;
+}
+
+message CreateBackupRequest {
+  string sandbox_id = 1;
+  Registry registry = 2;
+  string snapshot = 3;
+}
+
+message CreateBackupResponse {
+  string message = 1;
+}
+
+message StartSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message StartSandboxResponse {
+  string message = 1;
+}
+
+message StopSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message StopSandboxResponse {
+  string message = 1;
+}
+
+message SandboxInfoRequest {
+  string sandbox_id = 1;
+}
+
+message SandboxInfoResponse {
+  SandboxState state = 1;
+  BackupState backup_state = 2;
+}
+
+message RemoveDestroyedSandboxRequest {
+  string sandbox_id = 1;
+}
+
+message RemoveDestroyedSandboxResponse {
+  string message = 1;
+}
+
+message SandboxDaemonVersionRequest {
+  string sandbox_id = 1;
+}
+
+message SandboxDaemonVersionResponse {
+  string daemon_version = 1;
+}
+
+// Snapshot messages
+message Registry {
+  string url = 1;
+  optional string project = 2;
+  optional string username = 3;
+  optional string password = 4;
+}
+
+message PullSnapshotRequest {
+  string snapshot = 1;
+  Registry registry = 2;
+}
+
+message PullSnapshotResponse {
+  string message = 1;
+}
+
+message BuildSnapshotRequest {
+  optional string snapshot = 1;
+  optional Registry registry = 2;
+  string dockerfile = 3;
+  string organization_id = 4;
+  repeated string context = 5;
+  optional bool push_to_internal_registry = 6;
+}
+
+message BuildSnapshotResponse {
+  string message = 1;
+}
+
+message SnapshotExistsRequest {
+  string snapshot = 1;
+  bool include_latest = 2;
+}
+
+message SnapshotExistsResponse {
+  bool exists = 1;
+}
+
+message RemoveSnapshotRequest {
+  string snapshot = 1;
+  bool force = 2;
+}
+
+message RemoveSnapshotResponse {
+  string message = 1;
+}
+
+message GetSnapshotLogsRequest {
+  string snapshot_ref = 1;
+  bool follow = 2;
+}
+
+message GetSnapshotLogsResponse {
+  string content = 1;
+}
+
+// Add Volume message for CreateSandboxRequest
+message Volume {
+  string volume_id = 1;
+  string mount_path = 2;
+}
+
+// Add RunnerMetrics message for RunnerInfoResponse
+message RunnerMetrics {
+  int64 current_allocated_cpu = 1;
+  int64 current_allocated_disk_gi_b = 2;
+  int64 current_allocated_memory_gi_b = 3;
+  double current_cpu_usage_percentage = 4;
+  double current_disk_usage_percentage = 5;
+  double current_memory_usage_percentage = 6;
+  int64 current_snapshot_count = 7;
+}
