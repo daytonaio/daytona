@@ -2335,7 +2335,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@daytonaio/sdk@workspace:libs/sdk-typescript":
+"@daytonaio/sdk@workspace:^, @daytonaio/sdk@workspace:libs/sdk-typescript":
   version: 0.0.0-use.local
   resolution: "@daytonaio/sdk@workspace:libs/sdk-typescript"
   dependencies:
@@ -12663,6 +12663,7 @@ __metadata:
   dependencies:
     "@aws-sdk/client-s3": "npm:^3.787.0"
     "@aws-sdk/client-sts": "npm:^3.803.0"
+    "@daytonaio/sdk": "workspace:^"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
