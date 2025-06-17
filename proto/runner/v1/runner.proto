@@ -50,11 +50,11 @@ enum SandboxState {
   SANDBOX_STATE_PULLING_IMAGE = 11;
 }
 
-enum SnapshotState {
-  SNAPSHOT_STATE_UNSPECIFIED = 0;
-  SNAPSHOT_STATE_PENDING = 1;
-  SNAPSHOT_STATE_IN_PROGRESS = 2;
-  SNAPSHOT_STATE_COMPLETED = 3;
+enum BackupState {
+  BACKUP_STATE_UNSPECIFIED = 0;
+  BACKUP_STATE_PENDING = 1;
+  BACKUP_STATE_IN_PROGRESS = 2;
+  BACKUP_STATE_COMPLETED = 3;
   SNAPSHOT_STATE_FAILED = 4;
 }
 
@@ -127,7 +127,7 @@ message GetSandboxInfoRequest {
 
 message GetSandboxInfoResponse {
   SandboxState state = 1;
-  SnapshotState snapshot_state = 2;
+  BackupState backup_state = 2;
 }
 
 message RemoveDestroyedSandboxRequest {

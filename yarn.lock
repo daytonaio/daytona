@@ -2335,6 +2335,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"@daytonaio/runner-grpc-client@workspace:libs/runner-grpc-client":
+  version: 0.0.0-use.local
+  resolution: "@daytonaio/runner-grpc-client@workspace:libs/runner-grpc-client"
+  dependencies:
+    tslib: "npm:^2.3.0"
+  languageName: unknown
+  linkType: soft
+
 "@daytonaio/sdk@workspace:libs/sdk-typescript":
   version: 0.0.0-use.local
   resolution: "@daytonaio/sdk@workspace:libs/sdk-typescript"

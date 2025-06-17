@@ -8,29 +8,34 @@ import (
 	"sync"
 	"time"
 
-	"github.com/daytonaio/runner-docker/pkg/models"
-	"github.com/daytonaio/runner-docker/pkg/models/enums"
+	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
 )
 
-type IRunnerCache interface {
-	SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState)
-	SetSnapshotState(ctx context.Context, sandboxId string, state enums.SnapshotState)
+type CacheData struct {
+	SandboxState    pb.SandboxState
+	BackupState     pb.BackupState
+	DestructionTime *time.Time
+}
 
-	Set(ctx context.Context, sandboxId string, data models.CacheData)
-	Get(ctx context.Context, sandboxId string) *models.CacheData
+type IRunnerCache interface {
+	SetSandboxState(ctx context.Context, sandboxId string, state pb.SandboxState)
+	SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState)
+
+	Set(ctx context.Context, sandboxId string, data CacheData)
+	Get(ctx context.Context, sandboxId string) *CacheData
 	Remove(ctx context.Context, sandboxId string)
 	List(ctx context.Context) []string
 	Cleanup(ctx context.Context)
 }
 
 type InMemoryRunnerCacheConfig struct {
-	Cache         map[string]*models.CacheData
+	Cache         map[string]*CacheData
 	RetentionDays int
 }
 
 type InMemoryRunnerCache struct {
 	mutex         sync.RWMutex
-	cache         map[string]*models.CacheData
+	cache         map[string]*CacheData
 	retentionDays int
 }
 
@@ -42,7 +47,7 @@ func NewInMemoryRunnerCache(config InMemoryRunnerCacheConfig) IRunnerCache {
 
 	cache := config.Cache
 	if cache == nil {
-		cache = make(map[string]*models.CacheData)
+		cache = make(map[string]*CacheData)
 	}
 
 	return &InMemoryRunnerCache{
@@ -51,15 +56,15 @@ func NewInMemoryRunnerCache(config InMemoryRunnerCacheConfig) IRunnerCache {
 	}
 }
 
-func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId string, state enums.SandboxState) {
+func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId string, state pb.SandboxState) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	data, ok := c.cache[sandboxId]
 	if !ok {
-		data = &models.CacheData{
+		data = &CacheData{
 			SandboxState:    state,
-			SnapshotState:   enums.SnapshotStateNone,
+			BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 			DestructionTime: nil,
 		}
 	} else {
@@ -69,44 +74,44 @@ func (c *InMemoryRunnerCache) SetSandboxState(ctx context.Context, sandboxId str
 	c.cache[sandboxId] = data
 }
 
-func (c *InMemoryRunnerCache) SetSnapshotState(ctx context.Context, sandboxId string, state enums.SnapshotState) {
+func (c *InMemoryRunnerCache) SetBackupState(ctx context.Context, sandboxId string, state pb.BackupState) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
 	data, ok := c.cache[sandboxId]
 	if !ok {
-		data = &models.CacheData{
-			SandboxState:    enums.SandboxStateUnknown,
-			SnapshotState:   state,
+		data = &CacheData{
+			SandboxState:    pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
+			BackupState:     state,
 			DestructionTime: nil,
 		}
 	} else {
-		data.SnapshotState = state
+		data.BackupState = state
 	}
 
 	c.cache[sandboxId] = data
 }
 
-func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data models.CacheData) {
+func (c *InMemoryRunnerCache) Set(ctx context.Context, sandboxId string, data CacheData) {
 	c.mutex.Lock()
 	defer c.mutex.Unlock()
 
-	c.cache[sandboxId] = &models.CacheData{
+	c.cache[sandboxId] = &CacheData{
 		SandboxState:    data.SandboxState,
-		SnapshotState:   data.SnapshotState,
+		BackupState:     data.BackupState,
 		DestructionTime: data.DestructionTime,
 	}
 }
 
-func (c *InMemoryRunnerCache) Get(ctx context.Context, sandboxId string) *models.CacheData {
+func (c *InMemoryRunnerCache) Get(ctx context.Context, sandboxId string) *CacheData {
 	c.mutex.RLock()
 	defer c.mutex.RUnlock()
 
 	data, ok := c.cache[sandboxId]
 	if !ok {
-		data = &models.CacheData{
-			SandboxState:    enums.SandboxStateUnknown,
-			SnapshotState:   enums.SnapshotStateNone,
+		data = &CacheData{
+			SandboxState:    pb.SandboxState_SANDBOX_STATE_UNSPECIFIED,
+			BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 			DestructionTime: nil,
 		}
 	}
@@ -119,9 +124,9 @@ func (c *InMemoryRunnerCache) Remove(ctx context.Context, sandboxId string) {
 	defer c.mutex.Unlock()
 
 	destructionTime := time.Now().Add(time.Duration(c.retentionDays) * 24 * time.Hour)
-	c.cache[sandboxId] = &models.CacheData{
-		SandboxState:    enums.SandboxStateDestroyed,
-		SnapshotState:   enums.SnapshotStateNone,
+	c.cache[sandboxId] = &CacheData{
+		SandboxState:    pb.SandboxState_SANDBOX_STATE_DESTROYED,
+		BackupState:     pb.BackupState_BACKUP_STATE_UNSPECIFIED,
 		DestructionTime: &destructionTime,
 	}
 }

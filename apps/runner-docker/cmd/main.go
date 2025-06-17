@@ -16,13 +16,17 @@ import (
 	"syscall"
 	"time"
 
+	pb "github.com/daytonaio/runner-docker/gen/pb/runner/v1"
+
 	"github.com/daytonaio/runner-docker/cmd/config"
 	"github.com/daytonaio/runner-docker/internal/util"
 	"github.com/daytonaio/runner-docker/pkg/cache"
 	"github.com/daytonaio/runner-docker/pkg/daemon"
-	"github.com/daytonaio/runner-docker/pkg/models"
-	"github.com/daytonaio/runner-docker/pkg/server"
-	"github.com/daytonaio/runner-docker/pkg/server/middlewares"
+	"github.com/daytonaio/runner-docker/pkg/interceptors"
+	"github.com/daytonaio/runner-docker/pkg/proxy"
+	"github.com/daytonaio/runner-docker/pkg/services/health"
+	"github.com/daytonaio/runner-docker/pkg/services/sandbox"
+	"github.com/daytonaio/runner-docker/pkg/services/snapshot"
 	"github.com/docker/docker/client"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"google.golang.org/grpc"
@@ -45,7 +49,7 @@ func main() {
 
 	log.Info("Config loaded")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Error(err)
 		return
@@ -54,7 +58,7 @@ func main() {
 	log.Info("Docker APIClient created")
 
 	cache := cache.NewInMemoryRunnerCache(cache.InMemoryRunnerCacheConfig{
-		Cache:         make(map[string]*models.CacheData),
+		Cache:         make(map[string]*cache.CacheData),
 		RetentionDays: cfg.CacheRetentionDays,
 	})
 
@@ -76,18 +80,22 @@ func main() {
 
 	log.Info("Daemon copied")
 
-	runner := server.NewRunnerServer(server.RunnerServerConfig{
-		ApiClient:          cli,
+	healthService := health.NewHealthService()
+	sandboxService := sandbox.NewSandboxService(sandbox.SandboxServiceConfig{
+		DockerClient:       dockerClient,
 		Cache:              cache,
 		LogWriter:          os.Stdout,
-		AWSRegion:          cfg.AWSRegion,
-		AWSEndpointUrl:     cfg.AWSEndpointUrl,
+		DaemonPath:         daemonPath,
 		AWSAccessKeyId:     cfg.AWSAccessKeyId,
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
-		DaemonPath:         daemonPath,
+		AWSRegion:          cfg.AWSRegion,
+		AWSEndpointUrl:     cfg.AWSEndpointUrl,
 	})
-
-	log.Info("Created runner")
+	snapshotService := snapshot.NewSnapshotService(snapshot.SnapshotServiceConfig{
+		DockerClient: dockerClient,
+		Cache:        cache,
+		LogWriter:    os.Stdout,
+	})
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", cfg.Port))
 	if err != nil {
@@ -96,8 +104,8 @@ func main() {
 
 	s := grpc.NewServer(
 		grpc.UnaryInterceptor(
-			middlewares.ChainUnaryServer(
-				middlewares.GetDefaultInterceptors()...,
+			interceptors.ChainUnaryServer(
+				interceptors.GetDefaultInterceptors()...,
 			),
 		),
 	)
@@ -122,14 +130,18 @@ func main() {
 		s = grpc.NewServer(
 			grpc.Creds(creds),
 			grpc.UnaryInterceptor(
-				middlewares.ChainUnaryServer(
-					middlewares.GetDefaultInterceptors()...,
+				interceptors.ChainUnaryServer(
+					interceptors.GetDefaultInterceptors()...,
 				),
 			),
 		)
 	}
 
-	log.Info("Created gRPC server with runner")
+	s.RegisterService(&pb.HealthService_ServiceDesc, healthService)
+	s.RegisterService(&pb.SandboxService_ServiceDesc, sandboxService)
+	s.RegisterService(&pb.SnapshotService_ServiceDesc, snapshotService)
+
+	log.Info("Created Runner gRPC server")
 
 	// Create a channel to listen for errors coming from the listener.
 	serverErrors := make(chan error, 1)
@@ -154,7 +166,7 @@ func main() {
 
 	proxyServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.ProxyPort),
-		Handler: http.HandlerFunc(runner.ProxyRequest),
+		Handler: http.HandlerFunc(proxy.ProxyRequest),
 	}
 
 	proxyErrors := make(chan error, 1)
