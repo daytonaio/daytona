@@ -25,8 +25,9 @@ import (
 )
 
 type RunnerInfo struct {
-	ApiUrl string `json:"apiUrl"`
-	ApiKey string `json:"apiKey"`
+	ApiUrl   string `json:"apiUrl"`
+	ApiKey   string `json:"apiKey"`
+	ProxyUrl string `json:"proxyUrl"`
 }
 
 const DAYTONA_SANDBOX_AUTH_KEY_HEADER = "X-Daytona-Preview-Token"

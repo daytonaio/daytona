@@ -72,3 +72,5 @@ examples/**/*.png
 **/poetry.lock
 !/poetry.lock
 .astro
+
+*.pem

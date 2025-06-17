@@ -250,8 +250,7 @@ export class BackupManager {
           await this.sandboxRepository.save(sandboxToUpdate)
           break
         }
-        case 'FAILED':
-        case 'ERROR': {
+        case BackupState.ERROR: {
           await this.updateWorkspacBackupState(sandbox.id, BackupState.ERROR)
           break
         }

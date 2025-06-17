@@ -60,7 +60,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	}
 
 	// Build the target URL
-	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
+	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ProxyUrl, sandboxID, targetPort)
 
 	// Get the wildcard path and normalize it
 	path := ctx.Param("path")
@@ -101,8 +101,9 @@ func (p *Proxy) getRunnerInfo(ctx context.Context, sandboxId string) (*RunnerInf
 	}
 
 	info := RunnerInfo{
-		ApiUrl: runner.ApiUrl,
-		ApiKey: runner.ApiKey,
+		ApiUrl:   runner.ApiUrl,
+		ApiKey:   runner.ApiKey,
+		ProxyUrl: runner.ProxyUrl,
 	}
 
 	err = p.runnerCache.Set(ctx, sandboxId, info, 2*time.Minute)
