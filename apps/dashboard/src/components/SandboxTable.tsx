@@ -48,6 +48,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/t
 import { useSelectedOrganization } from '@/hooks/useSelectedOrganization'
 import { DebouncedInput } from './DebouncedInput'
 import { DataTableFacetedFilter, FacetedFilterOption } from './ui/data-table-faceted-filter'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from './TableEmptyState'
 
@@ -84,16 +85,13 @@ export function SandboxTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([
-    {
-      id: 'state',
-      desc: false,
-    },
-    {
-      id: 'lastEvent',
-      desc: true,
-    },
-  ])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'sandbox-table',
+    defaultSorting: [
+      { id: 'state', desc: false },
+      { id: 'lastEvent', desc: true },
+    ],
+  })
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
