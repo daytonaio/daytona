@@ -36,8 +36,7 @@ export class ApiKeyStrategy extends PassportStrategy(Strategy, 'api-key') implem
     const proxyApiKey = this.configService.getOrThrow('proxy.apiKey')
     if (proxyApiKey === token) {
       return {
-        proxy: true,
-        role: 'admin',
+        role: 'proxy',
       }
     }
 

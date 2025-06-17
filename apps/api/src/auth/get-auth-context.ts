@@ -4,11 +4,11 @@
  */
 
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common'
-import { IAuthContext } from '../common/interfaces/auth-context.interface'
+import { BaseAuthContext } from '../common/interfaces/auth-context.interface'
 
-export function getAuthContext<T extends IAuthContext>(
+export function getAuthContext<T extends BaseAuthContext>(
   context: ExecutionContext,
-  isFunction: (user: IAuthContext) => user is T,
+  isFunction: (user: BaseAuthContext) => user is T,
 ): T {
   const request = context.switchToHttp().getRequest()
 
