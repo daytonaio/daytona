@@ -10,22 +10,12 @@ import { In, Not, Raw, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
 import { RunnerService } from '../services/runner.service'
-import { EnumsSandboxState as RunnerSandboxState } from '@daytonaio/runner-api-client'
 import { RunnerState } from '../enums/runner-state.enum'
-import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
-import { BackupState } from '../enums/backup-state.enum'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
-import { SnapshotService } from '../services/snapshot.service'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
-import { DockerProvider } from '../docker/docker-provider'
-import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { BuildInfo } from '../entities/build-info.entity'
-import { CreateSandboxDTO } from '@daytonaio/runner-api-client'
-import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
@@ -34,13 +24,52 @@ import { SandboxArchivedEvent } from '../events/sandbox-archived.event'
 import { SandboxDestroyedEvent } from '../events/sandbox-destroyed.event'
 import { SandboxCreatedEvent } from '../events/sandbox-create.event'
 import { OtelSpan } from '../../common/decorators/otel.decorator'
-import { SnapshotRunner } from '../entities/snapshot-runner.entity'
-import { Runner } from '../entities/runner.entity'
 
-const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
-const SYNC_AGAIN = 'sync-again'
-const DONT_SYNC_AGAIN = 'dont-sync-again'
-type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
+import { SandboxStartAction } from './sandbox-actions/sandbox-start.action'
+import { SandboxStopAction } from './sandbox-actions/sandbox-stop.action'
+import { SandboxDestroyAction } from './sandbox-actions/sandbox-destroy.action'
+import { SandboxArchiveAction } from './sandbox-actions/sandbox-archive.action'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
+
+export const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
+export const SYNC_AGAIN = 'sync-again'
+export const DONT_SYNC_AGAIN = 'dont-sync-again'
+export type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
+
+@Injectable()
+export abstract class SandboxAction {
+  constructor(
+    protected readonly runnerService: RunnerService,
+    protected runnerAdapterFactory: RunnerAdapterFactory,
+    @InjectRepository(Sandbox)
+    protected readonly sandboxRepository: Repository<Sandbox>,
+  ) {}
+
+  abstract run(sandbox: Sandbox): Promise<SyncState>
+
+  protected async updateSandboxState(
+    sandboxId: string,
+    state: SandboxState,
+    runnerId?: string | null | undefined,
+    errorReason?: string,
+  ) {
+    const sandbox = await this.sandboxRepository.findOneByOrFail({
+      id: sandboxId,
+    })
+    if (sandbox.state === state && sandbox.runnerId === runnerId && sandbox.errorReason === errorReason) {
+      return
+    }
+    sandbox.state = state
+    if (runnerId !== undefined) {
+      sandbox.runnerId = runnerId
+    }
+    if (errorReason !== undefined) {
+      sandbox.errorReason = errorReason
+    }
+
+    await this.sandboxRepository.save(sandbox)
+  }
+}
 
 @Injectable()
 export class SandboxManager {
@@ -49,15 +78,13 @@ export class SandboxManager {
   constructor(
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
-    @InjectRepository(SnapshotRunner)
-    private readonly snapshotRunnerRepository: Repository<SnapshotRunner>,
     private readonly runnerService: RunnerService,
-    private readonly runnerApiFactory: RunnerApiFactory,
-    private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
-    private readonly snapshotService: SnapshotService,
     private readonly redisLockProvider: RedisLockProvider,
-    private readonly dockerProvider: DockerProvider,
+    private readonly sandboxStartAction: SandboxStartAction,
+    private readonly sandboxStopAction: SandboxStopAction,
+    private readonly sandboxDestroyAction: SandboxDestroyAction,
+    private readonly sandboxArchiveAction: SandboxArchiveAction,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE, { name: 'auto-stop-check' })
@@ -109,7 +136,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+              this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`)
             }
           }),
         )
@@ -166,7 +193,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+              this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
             }
           }),
         )
@@ -269,38 +296,35 @@ export class SandboxManager {
     try {
       switch (sandbox.desiredState) {
         case SandboxDesiredState.STARTED: {
-          syncState = await this.handleSandboxDesiredStateStarted(sandbox)
+          syncState = await this.sandboxStartAction.run(sandbox)
           break
         }
         case SandboxDesiredState.STOPPED: {
-          syncState = await this.handleSandboxDesiredStateStopped(sandbox)
+          syncState = await this.sandboxStopAction.run(sandbox)
           break
         }
         case SandboxDesiredState.DESTROYED: {
-          syncState = await this.handleSandboxDesiredStateDestroyed(sandbox)
+          syncState = await this.sandboxDestroyAction.run(sandbox)
           break
         }
         case SandboxDesiredState.ARCHIVED: {
-          syncState = await this.handleSandboxDesiredStateArchived(sandbox)
+          syncState = await this.sandboxArchiveAction.run(sandbox)
           break
         }
       }
     } catch (error) {
-      if (error.code === 'ECONNRESET') {
-        syncState = SYNC_AGAIN
-      } else {
-        const sandboxError = fromAxiosError(error)
-        this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, sandboxError)
+      this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
-        const sandbox = await this.sandboxRepository.findOneBy({
-          id: sandboxId,
-        })
-        if (!sandbox) {
-          //  edge case where sandbox is deleted while desired state is being processed
-          return
-        }
-        await this.updateSandboxState(sandbox.id, SandboxState.ERROR, undefined, sandboxError.message || String(error))
+      const sandbox = await this.sandboxRepository.findOneBy({
+        id: sandboxId,
+      })
+      if (!sandbox) {
+        //  edge case where sandbox is deleted while desired state is being processed
+        return
       }
+      sandbox.state = SandboxState.ERROR
+      sandbox.errorReason = error.message || String(error)
+      await this.sandboxRepository.save(sandbox)
     }
 
     await this.redisLockProvider.unlock(lockKey)

@@ -11,7 +11,6 @@ import { Runner } from '../entities/runner.entity'
 import { CreateRunnerDto } from '../dto/create-runner.dto'
 import { SandboxClass } from '../enums/sandbox-class.enum'
 import { RunnerRegion } from '../enums/runner-region.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
 import { RunnerState } from '../enums/runner-state.enum'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
@@ -23,6 +22,7 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
 import { Snapshot } from '../entities/snapshot.entity'
 import { RunnerSnapshotDto } from '../dto/runner-snapshot.dto'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 
 @Injectable()
 export class RunnerService {
@@ -32,7 +32,7 @@ export class RunnerService {
   constructor(
     @InjectRepository(Runner)
     private readonly runnerRepository: Repository<Runner>,
-    private readonly runnerApiFactory: RunnerApiFactory,
+    protected runnerAdapterFactory: RunnerAdapterFactory,
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     @InjectRepository(SnapshotRunner)
@@ -179,18 +179,17 @@ export class RunnerService {
       this.logger.debug(`Checking runner ${runner.id}`)
       try {
         // Do something with the runner
-        const runnerApi = this.runnerApiFactory.createRunnerApi(runner)
-        await runnerApi.healthCheck()
-        await this.updateRunnerState(runner.id, RunnerState.READY)
+        const runnerAdapter = await this.runnerAdapterFactory.create(runner)
+        await runnerAdapter.healthCheck()
+        await this.runnerRepository.update(runner.id, {
+          state: RunnerState.READY,
+          lastChecked: new Date(),
+        })
 
         await this.recalculateRunnerUsage(runner.id)
       } catch (e) {
-        if (e.code === 'ECONNREFUSED') {
-          this.logger.error('Runner not reachable')
-        } else {
-          this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
-          this.logger.error(e)
-        }
+        this.logger.error(`Error checking runner ${runner.id}: ${e.message}`)
+        this.logger.error(e)
 
         await this.updateRunnerState(runner.id, RunnerState.UNRESPONSIVE)
       }

@@ -115,6 +115,7 @@ async function bootstrap() {
         region: RunnerRegion.US,
         class: SandboxClass.SMALL,
         domain: 'localtest.me:3003',
+        version: '1',
       })
     }
   }

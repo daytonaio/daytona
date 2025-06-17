@@ -59,4 +59,8 @@ export class CreateRunnerDto {
     example: Object.values(RunnerRegion)[0],
   })
   region: RunnerRegion
+
+  @IsString()
+  @ApiProperty()
+  version: string
 }
