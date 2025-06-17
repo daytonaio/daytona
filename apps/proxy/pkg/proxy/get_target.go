@@ -19,29 +19,11 @@ import (
 func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, string, map[string]string, error) {
 	// Extract port and sandbox ID from the host header
 	// Expected format: 1234-some-id-uuid.proxy.domain
-	host := ctx.Request.Host
-	if host == "" {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("host header is required")))
-		return nil, "", nil, errors.New("host header is required")
+	targetPort, sandboxID, err := p.parseHost(ctx.Request.Host)
+	if err != nil {
+		ctx.Error(common_errors.NewBadRequestError(err))
+		return nil, "", nil, err
 	}
-
-	// Split the host to extract the port and sandbox ID
-	parts := strings.Split(host, ".")
-	if len(parts) == 0 {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("invalid host format")))
-		return nil, "", nil, errors.New("invalid host format")
-	}
-
-	// Extract port from the first part (e.g., "1234-some-id-uuid")
-	hostPrefix := parts[0]
-	dashIndex := strings.Index(hostPrefix, "-")
-	if dashIndex == -1 {
-		ctx.Error(common_errors.NewBadRequestError(errors.New("invalid host format: port and sandbox ID not found")))
-		return nil, "", nil, errors.New("invalid host format: port and sandbox ID not found")
-	}
-
-	targetPort := hostPrefix[:dashIndex]
-	sandboxID := hostPrefix[dashIndex+1:]
 
 	if targetPort == "" {
 		ctx.Error(common_errors.NewBadRequestError(errors.New("target port is required")))
@@ -169,4 +151,30 @@ func (p *Proxy) getSandboxAuthKeyValid(ctx context.Context, sandboxId string, au
 	p.sandboxAuthKeyValidCache.Set(ctx, authKey, isValid, 2*time.Minute)
 
 	return &isValid, nil
+}
+
+func (p *Proxy) parseHost(host string) (targetPort string, sandboxID string, err error) {
+	// Extract port and sandbox ID from the host header
+	// Expected format: 1234-some-id-uuid.proxy.domain
+	if host == "" {
+		return "", "", errors.New("host is required")
+	}
+
+	// Split the host to extract the port and sandbox ID
+	parts := strings.Split(host, ".")
+	if len(parts) == 0 {
+		return "", "", errors.New("invalid host format")
+	}
+
+	// Extract port from the first part (e.g., "1234-some-id-uuid")
+	hostPrefix := parts[0]
+	dashIndex := strings.Index(hostPrefix, "-")
+	if dashIndex == -1 {
+		return "", "", errors.New("invalid host format: port and sandbox ID not found")
+	}
+
+	targetPort = hostPrefix[:dashIndex]
+	sandboxID = hostPrefix[dashIndex+1:]
+
+	return targetPort, sandboxID, nil
 }
