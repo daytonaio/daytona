@@ -1,0 +1,11 @@
+{
+  "name": "@daytonaio/runner-grpc-client",
+  "version": "0.0.0-dev",
+  "private": true,
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
+  "dependencies": {
+    "tslib": "^2.3.0"
+  }
+}
