@@ -27,6 +27,7 @@ COPY go.work.sum /app/go.work.sum
 COPY ./libs/api-client-go /app/libs/api-client-go
 COPY ./libs/common-go /app/libs/common-go
 COPY ./apps/runner /app/apps/runner
+COPY ./apps/runner-docker /app/apps/runner-docker
 COPY ./apps/cli /app/apps/cli
 COPY ./apps/proxy /app/apps/proxy
 COPY ./apps/daemon /app/apps/daemon

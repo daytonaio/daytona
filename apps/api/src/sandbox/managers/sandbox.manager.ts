@@ -12,7 +12,6 @@ import { SandboxState } from '../enums/sandbox-state.enum'
 import { SandboxDesiredState } from '../enums/sandbox-desired-state.enum'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
-
 import { RedisLockProvider } from '../common/redis-lock.provider'
 
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'

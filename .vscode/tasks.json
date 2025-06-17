@@ -13,6 +13,19 @@
         "reveal": "silent"
       },
       "problemMatcher": ["$go"]
+    },
+    {
+      "label": "debug-build-runner-docker",
+      "type": "shell",
+      "command": "yarn nx build runner-docker",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent"
+      },
+      "problemMatcher": ["$go"]
     }
   ]
 }

@@ -60,7 +60,7 @@ func (p *Proxy) GetProxyTarget(ctx *gin.Context) (*url.URL, map[string]string, e
 	}
 
 	// Build the target URL
-	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ApiUrl, sandboxID, targetPort)
+	targetURL := fmt.Sprintf("%s/sandboxes/%s/toolbox/proxy/%s", runnerInfo.ProxyUrl, sandboxID, targetPort)
 
 	// Get the wildcard path and normalize it
 	path := ctx.Param("path")

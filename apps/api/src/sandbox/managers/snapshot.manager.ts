@@ -847,10 +847,10 @@ export class SnapshotManager implements TrackableJobExecutions, OnApplicationShu
 
     const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
-    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, dockerRegistry)
+    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, registry)
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {

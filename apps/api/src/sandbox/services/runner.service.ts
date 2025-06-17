@@ -324,7 +324,7 @@ export class RunnerService {
         runnerDiskGiB: runner.diskGiB,
       })
     } else {
-      this.logger.warn(`Runner ${runnerId} didn't send health metrics`)
+      this.logger.warn(`Runner ${runnerId} didn't send usage metrics`)
     }
 
     await this.runnerRepository.update(runnerId, updateData)

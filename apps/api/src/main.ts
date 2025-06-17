@@ -152,6 +152,25 @@ async function bootstrap() {
         await new Promise((resolve) => setTimeout(resolve, 1000))
       }
     }
+
+    const localGrpcRunnerDomain = 'localhost.me'
+    if (!runners.find((runner) => runner.domain === localGrpcRunnerDomain)) {
+      await runnerService.create({
+        apiUrl: 'grpc://localhost:3003',
+        proxyUrl: 'http://localhost:3004',
+        apiKey: 'secret_api_token',
+        cpu: 4,
+        memoryGiB: 8,
+        diskGiB: 50,
+        gpu: 0,
+        gpuType: 'none',
+        capacity: 100,
+        region: 'us',
+        class: SandboxClass.SMALL,
+        domain: localGrpcRunnerDomain,
+        version: '1',
+      })
+    }
   }
 
   // Replace dashboard api url before serving
