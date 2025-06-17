@@ -1,0 +1,72 @@
+{
+  "name": "runner-docker",
+  "$schema": "../../runner_docker_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/runner-docker",
+  "tags": [],
+  "targets": {
+    "copy-daemon-bin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        }
+      ]
+    },
+    "build": {
+      "executor": "@nx-go/nx-go:build",
+      "options": {
+        "main": "{projectRoot}/cmd/main.go",
+        "outputPath": "dist/apps/runner-docker"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        },
+        {
+          "target": "build-amd64",
+          "projects": "daemon"
+        },
+        "copy-daemon-bin"
+      ]
+    },
+    "serve": {
+      "executor": "@nx-go/nx-go:serve",
+      "options": {
+        "cmd": "gow",
+        "cwd": ".",
+        "main": "{projectRoot}/cmd/main.go"
+      },
+      "configurations": {
+        "production": {}
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "daemon"
+        },
+        "copy-daemon-bin"
+      ]
+    },
+    "format": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cd {projectRoot} && go fmt ./... && prettier --write \"**/*.{yaml,json}\""
+      }
+    },
+    "test": {
+      "executor": "@nx-go/nx-go:test"
+    },
+    "lint": {
+      "executor": "@nx-go/nx-go:lint"
+    }
+  }
+}
