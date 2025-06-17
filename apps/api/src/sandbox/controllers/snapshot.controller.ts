@@ -50,7 +50,7 @@ import { OrganizationResourcePermission } from '../../organization/enums/organiz
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
+import { RequiredSystemRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'

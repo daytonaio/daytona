@@ -9,7 +9,7 @@ import { Runner } from '../entities/runner.entity'
 import { RunnerService } from '../services/runner.service'
 import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger'
 import { SystemActionGuard } from '../../auth/system-action.guard'
-import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
+import { RequiredApiRole } from '../../common/decorators/required-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { ProxyGuard } from '../../auth/proxy.guard'
 import { RunnerDto } from '../dto/runner.dto'
@@ -18,7 +18,7 @@ import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 @ApiTags('runners')
 @Controller('runners')
 @UseGuards(CombinedAuthGuard, SystemActionGuard, ProxyGuard)
-@RequiredSystemRole(SystemRole.ADMIN)
+@RequiredApiRole([SystemRole.ADMIN, 'proxy'])
 @ApiOAuth2(['openid', 'profile', 'email'])
 @ApiBearerAuth()
 export class RunnerController {
