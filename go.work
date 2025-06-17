@@ -5,6 +5,7 @@ use (
 	./apps/daemon
 	./apps/proxy
 	./apps/runner
+	./apps/runner-docker
 	./libs/api-client-go
 	./libs/common-go
 	./libs/computer-use

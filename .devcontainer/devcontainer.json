@@ -60,7 +60,14 @@
     },
     "./tools-feature": {
       "pipPackages": ["poetry==2.1.3"],
-      "goTools": ["github.com/swaggo/swag/cmd/swag@v1.16.4", "github.com/mitranim/gow@latest"]
+      "goTools": [
+        "github.com/swaggo/swag/cmd/swag@v1.16.4",
+        "github.com/mitranim/gow@latest",
+        "github.com/bufbuild/buf/cmd/buf@v1.52.1",
+        "google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.6",
+        "google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.5.1",
+        "github.com/fullstorydev/grpcurl/cmd/grpcurl@latest"
+      ]
     }
   },
   "onCreateCommand": {
