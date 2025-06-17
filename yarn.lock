@@ -2266,7 +2266,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bufbuild/protobuf@npm:^2.5.0":
+"@bufbuild/protobuf@npm:^2.0.0, @bufbuild/protobuf@npm:^2.5.0":
   version: 2.5.2
   resolution: "@bufbuild/protobuf@npm:2.5.2"
   checksum: 10c0/30f0ede04b5318eda502759044329f44af27e0bebd9853d7d9baf5bcb4f4b17f813eb8904d98718d991bd56d33565ed18f8c9c65067626c3d4e55a4e039fe9b6
@@ -3077,7 +3077,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/grpc-js@npm:^1.11.1, @grpc/grpc-js@npm:^1.7.1":
+"@grpc/grpc-js@npm:^1.11.1, @grpc/grpc-js@npm:^1.13.4, @grpc/grpc-js@npm:^1.7.1":
   version: 1.13.4
   resolution: "@grpc/grpc-js@npm:1.13.4"
   dependencies:
@@ -3087,7 +3087,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grpc/proto-loader@npm:^0.7.13":
+"@grpc/proto-loader@npm:^0.7.13, @grpc/proto-loader@npm:^0.7.15":
   version: 0.7.15
   resolution: "@grpc/proto-loader@npm:0.7.15"
   dependencies:
@@ -11236,6 +11236,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"case-anything@npm:^2.1.13":
+  version: 2.1.13
+  resolution: "case-anything@npm:2.1.13"
+  checksum: 10c0/b02ffa51d7d58b9a32df7b40973836e16afad131eae7d343e64cb3ca7be57a936bf3d6c9d57a7aa242cf2f545d9a33990b755e93bcac2517761d77773a4a6a30
+  languageName: node
+  linkType: hard
+
 "caseless@npm:~0.12.0":
   version: 0.12.0
   resolution: "caseless@npm:0.12.0"
@@ -12665,6 +12672,8 @@ __metadata:
     "@aws-sdk/client-sts": "npm:^3.803.0"
     "@eslint/js": "npm:^9.8.0"
     "@esm2cjs/cacheable-lookup": "npm:^7.0.0"
+    "@grpc/grpc-js": "npm:^1.13.4"
+    "@grpc/proto-loader": "npm:^0.7.15"
     "@nestjs-modules/ioredis": "npm:^2.0.2"
     "@nestjs/axios": "npm:^4.0.0"
     "@nestjs/cache-manager": "npm:^3.0.0"
@@ -12804,6 +12813,7 @@ __metadata:
     tailwindcss-animate: "npm:^1.0.7"
     ts-jest: "npm:^29.1.0"
     ts-node: "npm:10.9.1"
+    ts-proto: "npm:^2.7.5"
     tslib: "npm:^2.8.1"
     typeorm: "npm:^0.3.20"
     typescript: "npm:~5.7.2"
@@ -13337,6 +13347,15 @@ __metadata:
   version: 16.5.0
   resolution: "dotenv@npm:16.5.0"
   checksum: 10c0/5bc94c919fbd955bf0ba44d33922a1e93d1078e64a1db5c30faeded1d996e7a83c55332cb8ea4fae5a9ca4d0be44cbceb95c5811e70f9f095298df09d1997dd9
+  languageName: node
+  linkType: hard
+
+"dprint-node@npm:^1.0.8":
+  version: 1.0.8
+  resolution: "dprint-node@npm:1.0.8"
+  dependencies:
+    detect-libc: "npm:^1.0.3"
+  checksum: 10c0/39c1f8511833226cde773129afc5862dfd05babe062375e6b1f5824e221a5743a4d9c48626f32f7c2080113566270fe80521a50acb9029a20a2e80a3cd5e4106
   languageName: node
   linkType: hard
 
@@ -25403,6 +25422,38 @@ __metadata:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 10c0/95187932fb83f3901e22546bd2feeac7d2feb4f412f42ac3a595f049a23e8dcf70516dffb51866391228ea2dbcfaea039e250fb2bb334d48a86ab2b6aea0ae2d
+  languageName: node
+  linkType: hard
+
+"ts-poet@npm:^6.12.0":
+  version: 6.12.0
+  resolution: "ts-poet@npm:6.12.0"
+  dependencies:
+    dprint-node: "npm:^1.0.8"
+  checksum: 10c0/605ac770055259b618ba657b88995f7851d8a6106d9c335e71c8442be51a9b8a87c501aa7ab4babb43700a32ff47dc1cd877f78892c15166ded87c311c878735
+  languageName: node
+  linkType: hard
+
+"ts-proto-descriptors@npm:2.0.0":
+  version: 2.0.0
+  resolution: "ts-proto-descriptors@npm:2.0.0"
+  dependencies:
+    "@bufbuild/protobuf": "npm:^2.0.0"
+  checksum: 10c0/a4f47a6db7de6b328a5b22bb0bed2a0dac929c28002567613db7980e0a8392b9148530e432a602a8c6b2cfda9909be9568a2e5c545f5624bb5d5eba52031c059
+  languageName: node
+  linkType: hard
+
+"ts-proto@npm:^2.7.5":
+  version: 2.7.5
+  resolution: "ts-proto@npm:2.7.5"
+  dependencies:
+    "@bufbuild/protobuf": "npm:^2.0.0"
+    case-anything: "npm:^2.1.13"
+    ts-poet: "npm:^6.12.0"
+    ts-proto-descriptors: "npm:2.0.0"
+  bin:
+    protoc-gen-ts_proto: protoc-gen-ts_proto
+  checksum: 10c0/5182f7d79b1db95fa76ff6018998fc449a821ad2fdd1a17390350638ee286ef6e99f90d7e324141fac759b1674ebb3e75599022d4559970bf83761c803a33658
   languageName: node
   linkType: hard
 
