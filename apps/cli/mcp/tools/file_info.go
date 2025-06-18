@@ -14,31 +14,35 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func GetFileInfo(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type FileInfoArgs struct {
+	Id       *string `json:"id,omitempty"`
+	FilePath *string `json:"file_path,omitempty"`
+}
+
+func GetFileInfoTool() mcp.Tool {
+	return mcp.NewTool("get_file_info",
+		mcp.WithDescription("Get information about a file in the Daytona sandbox."),
+		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to get information about.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to get the file information from.")),
+	)
+}
+
+func FileInfo(ctx context.Context, request mcp.CallToolRequest, args FileInfoArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	// Get file path from request arguments
-	filePath, ok := request.Params.Arguments["file_path"].(string)
-	if !ok {
+	if args.FilePath == nil || *args.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
 	// Get file info
-	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, sandboxId).Path(filePath).Execute()
+	fileInfo, _, err := apiClient.ToolboxAPI.GetFileInfo(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error getting file info: %v", err)
 	}
@@ -49,7 +53,7 @@ func GetFileInfo(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error marshaling file info: %v", err)
 	}
 
-	log.Infof("Retrieved file info for: %s", filePath)
+	log.Infof("Retrieved file info for: %s", *args.FilePath)
 
 	return mcp.NewToolResultText(string(fileInfoJSON)), nil
 }

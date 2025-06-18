@@ -14,31 +14,37 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func ListFiles(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type ListFilesArgs struct {
+	Id   *string `json:"id,omitempty"`
+	Path *string `json:"path,omitempty"`
+}
+
+func GetListFilesTool() mcp.Tool {
+	return mcp.NewTool("list_files",
+		mcp.WithDescription("List files in a directory in the Daytona sandbox."),
+		mcp.WithString("path", mcp.Description("Path to the directory to list files from (defaults to current directory).")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to list the files from.")),
+	)
+}
+
+func ListFiles(ctx context.Context, request mcp.CallToolRequest, args ListFilesArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
 	// Get directory path from request arguments (optional)
 	dirPath := "."
-	if path, ok := request.Params.Arguments["path"].(string); ok && path != "" {
-		dirPath = path
+	if args.Path != nil && *args.Path != "" {
+		dirPath = *args.Path
 	}
 
 	// List files
-	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, sandboxId).Path(dirPath).Execute()
+	files, _, err := apiClient.ToolboxAPI.ListFiles(ctx, *args.Id).Path(dirPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error listing files: %v", err)
 	}

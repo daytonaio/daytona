@@ -11,9 +11,13 @@ import (
 	"path/filepath"
 
 	"github.com/daytonaio/daytona/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 )
+
+type FileDownloadArgs struct {
+	Id       *string `json:"id,omitempty"`
+	FilePath *string `json:"file_path,omitempty"`
+}
 
 type Content struct {
 	Type string `json:"type"`
@@ -21,43 +25,30 @@ type Content struct {
 	Data string `json:"data,omitempty"`
 }
 
-func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+func GetFileDownloadTool() mcp.Tool {
+	return mcp.NewTool("file_download",
+		mcp.WithDescription("Download a file from the Daytona sandbox. Returns the file content either as text or as a base64 encoded image. Handles special cases like matplotlib plots stored as JSON with embedded base64 images."),
+		mcp.WithString("file_path", mcp.Required(), mcp.Description("Path to the file to download.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to download the file from.")),
+	)
+}
+
+func FileDownload(ctx context.Context, request mcp.CallToolRequest, args FileDownloadArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	// Get file path from request arguments
-	filePath, ok := request.Params.Arguments["file_path"].(string)
-	if !ok {
+	if args.FilePath == nil || *args.FilePath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file_path parameter is required")
 	}
 
-	// Check if file exists using execute command
-	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
-		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("test -f %s && echo 'exists' || echo 'not exists'", filePath))).
-		Execute()
-	if err != nil {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error checking file existence: %v", err)
-	}
-
-	if execResponse.Result != "exists" {
-		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("file not found: %s", filePath)
-	}
-
 	// Download the file
-	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, sandboxId).Path(filePath).Execute()
+	file, _, err := apiClient.ToolboxAPI.DownloadFile(ctx, *args.Id).Path(*args.FilePath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error downloading file: %v", err)
 	}
@@ -70,7 +61,7 @@ func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 	}
 
 	// Process file content based on file type
-	ext := filepath.Ext(filePath)
+	ext := filepath.Ext(*args.FilePath)
 	var result []Content
 
 	switch ext {
