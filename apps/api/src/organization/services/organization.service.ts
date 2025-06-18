@@ -57,7 +57,7 @@ export class OrganizationService implements OnModuleInit, TrackableJobExecutions
     private readonly eventEmitter: EventEmitter2,
     private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
-  ) { }
+  ) {}
 
   async onApplicationShutdown() {
     //  wait for all active jobs to finish

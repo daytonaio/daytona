@@ -10,10 +10,8 @@ app.use((req, res, next) => {
   next()
 })
 app.use('/docs', express.static('dist/client/'))
-app.use((req, res, next) => {
-  ssrHandler(req, res, next)
-})
-app.get('*', (req, res) => {
+app.use(ssrHandler)
+app.use((req, res) => {
   res.sendFile('404.html', { root: 'dist/client/' })
 })
 

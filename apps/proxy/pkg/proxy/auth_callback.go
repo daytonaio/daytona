@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
@@ -69,7 +70,7 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 	}
 
 	// Exchange code for token
-	provider, err := oidc.NewProvider(ctx, p.config.Oidc.Domain)
+	authContext, endpoint, err := p.getOidcEndpoint(ctx)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to initialize OIDC provider: %w", err)))
 		return
@@ -79,11 +80,11 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 		ClientID:     p.config.Oidc.ClientId,
 		ClientSecret: p.config.Oidc.ClientSecret,
 		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, ctx.Request.Host),
-		Endpoint:     provider.Endpoint(),
+		Endpoint:     *endpoint,
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
 
-	token, err := oauth2Config.Exchange(ctx, code)
+	token, err := oauth2Config.Exchange(authContext, code)
 	if err != nil {
 		ctx.Error(common_errors.NewBadRequestError(fmt.Errorf("failed to exchange token: %w", err)))
 		return
@@ -108,16 +109,16 @@ func (p *Proxy) AuthCallback(ctx *gin.Context) {
 }
 
 func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
-	provider, err := oidc.NewProvider(ctx, p.config.Oidc.Domain)
+	_, endpoint, err := p.getOidcEndpoint(ctx)
 	if err != nil {
-		return "", fmt.Errorf("failed to initialize OIDC provider: %w", err)
+		return "", fmt.Errorf("failed to initialize OIDC endpoint: %w", err)
 	}
 
 	oauth2Config := oauth2.Config{
 		ClientID:     p.config.Oidc.ClientId,
 		ClientSecret: p.config.Oidc.ClientSecret,
 		RedirectURL:  fmt.Sprintf("%s://%s/callback", p.config.ProxyProtocol, p.config.ProxyDomain),
-		Endpoint:     provider.Endpoint(),
+		Endpoint:     *endpoint,
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
 
@@ -160,6 +161,29 @@ func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToke
 	res, _ := apiClient.PreviewAPI.HasSandboxAccess(ctx, sandboxId).Execute()
 
 	return res != nil && res.StatusCode == http.StatusOK
+}
+
+func (p *Proxy) getOidcEndpoint(ctx context.Context) (context.Context, *oauth2.Endpoint, error) {
+	providerCtx := ctx
+	// If the public domain is set, override the issuer URL to the private domain
+	if p.config.Oidc.PublicDomain != nil && *p.config.Oidc.PublicDomain != "" {
+		providerCtx = oidc.InsecureIssuerURLContext(ctx, p.config.Oidc.Domain)
+	}
+	provider, err := oidc.NewProvider(providerCtx, p.config.Oidc.Domain)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to initialize OIDC provider: %w", err)
+	}
+
+	endpoint := provider.Endpoint()
+
+	// Override endpoints to use internal domain
+	if p.config.Oidc.PublicDomain != nil && *p.config.Oidc.PublicDomain != "" {
+		endpoint.TokenURL = strings.Replace(endpoint.TokenURL, *p.config.Oidc.PublicDomain, p.config.Oidc.Domain, 1)
+		// endpoint.AuthURL = strings.Replace(endpoint.AuthURL, *p.config.Oidc.PublicDomain, p.config.Oidc.Domain, 1)
+		endpoint.DeviceAuthURL = strings.Replace(endpoint.DeviceAuthURL, *p.config.Oidc.PublicDomain, p.config.Oidc.Domain, 1)
+	}
+
+	return providerCtx, &endpoint, nil
 }
 
 func GenerateRandomState() (string, error) {

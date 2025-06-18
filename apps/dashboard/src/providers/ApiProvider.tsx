@@ -13,8 +13,8 @@ import { useConfig } from '@/hooks/useConfig'
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isAuthenticated, isLoading, signinRedirect } = useAuth()
-  const location = useLocation()
   const config = useConfig()
+  const location = useLocation()
 
   const apiRef = useRef<ApiClient | null>(null)
   const [isApiReady, setIsApiReady] = useState(false)
@@ -31,7 +31,7 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     } else {
       setIsApiReady(false)
     }
-  }, [user])
+  }, [user, config])
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

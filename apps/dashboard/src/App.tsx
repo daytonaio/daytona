@@ -118,90 +118,91 @@ function App() {
   }
 
   return (
-    <ThemeProvider>
-      <Routes>
-        <Route path={RoutePath.LANDING} element={<LandingPage />} />
-        <Route path={RoutePath.LOGOUT} element={<Logout />} />
-        <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
-        <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
-        <Route
-          path={RoutePath.DASHBOARD}
-          element={
-            <Suspense fallback={<LoadingFallback />}>
-              <ApiProvider>
-                <OrganizationsProvider>
-                  <SelectedOrganizationProvider>
-                    <BillingProvider>
-                      <UserOrganizationInvitationsProvider>
-                        <NotificationSocketProvider>
-                          <Dashboard />
-                        </NotificationSocketProvider>
-                      </UserOrganizationInvitationsProvider>
-                    </BillingProvider>
-                  </SelectedOrganizationProvider>
-                </OrganizationsProvider>
-              </ApiProvider>
-            </Suspense>
-          }
-        >
+    <>
+      <ThemeProvider>
+        <Routes>
+          <Route path={RoutePath.LANDING} element={<LandingPage />} />
+          <Route path={RoutePath.LOGOUT} element={<Logout />} />
+          <Route path={RoutePath.DOCS} element={<DocsRedirect />} />
+          <Route path={RoutePath.SLACK} element={<SlackRedirect />} />
           <Route
-            index
-            element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
-          />
-          <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
-          <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
-          <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
-          <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
-          <Route
-            path={getRouteSubPath(RoutePath.VOLUMES)}
+            path={RoutePath.DASHBOARD}
             element={
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
-              >
-                <Volumes />
-              </RequiredPermissionsOrganizationPageWrapper>
+              <Suspense fallback={<LoadingFallback />}>
+                <ApiProvider>
+                  <OrganizationsProvider>
+                    <SelectedOrganizationProvider>
+                      <BillingProvider>
+                        <UserOrganizationInvitationsProvider>
+                          <NotificationSocketProvider>
+                            <Dashboard />
+                          </NotificationSocketProvider>
+                        </UserOrganizationInvitationsProvider>
+                      </BillingProvider>
+                    </SelectedOrganizationProvider>
+                  </OrganizationsProvider>
+                </ApiProvider>
+              </Suspense>
             }
-          />
-          <Route
-            path={getRouteSubPath(RoutePath.LIMITS)}
-            element={
-              <OwnerAccessOrganizationPageWrapper>
-                <Limits />
-              </OwnerAccessOrganizationPageWrapper>
-            }
-          />
-          {config.billingApiUrl && (
-            <>
-              <Route
-                path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
-                element={
-                  <OwnerAccessOrganizationPageWrapper>
-                    <Spending />
-                  </OwnerAccessOrganizationPageWrapper>
-                }
-              />
-              <Route
-                path={getRouteSubPath(RoutePath.BILLING_WALLET)}
-                element={
-                  <OwnerAccessOrganizationPageWrapper>
-                    <Wallet />
-                  </OwnerAccessOrganizationPageWrapper>
-                }
-              />
-              <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
-            </>
-          )}
-          <Route
-            path={getRouteSubPath(RoutePath.MEMBERS)}
-            element={
-              <NonPersonalOrganizationPageWrapper>
-                <OrganizationMembers />
-              </NonPersonalOrganizationPageWrapper>
-            }
-          />
-          {
-            // TODO: uncomment when we allow creating custom roles
-            /* <Route
+          >
+            <Route
+              index
+              element={<Navigate to={`${getRouteSubPath(RoutePath.SANDBOXES)}${location.search}`} replace />}
+            />
+            <Route path={getRouteSubPath(RoutePath.KEYS)} element={<Keys />} />
+            <Route path={getRouteSubPath(RoutePath.SANDBOXES)} element={<Sandboxes />} />
+            <Route path={getRouteSubPath(RoutePath.SNAPSHOTS)} element={<Snapshots />} />
+            <Route path={getRouteSubPath(RoutePath.REGISTRIES)} element={<Registries />} />
+            <Route
+              path={getRouteSubPath(RoutePath.VOLUMES)}
+              element={
+                <RequiredPermissionsOrganizationPageWrapper
+                  requiredPermissions={[OrganizationRolePermissionsEnum.READ_VOLUMES]}
+                >
+                  <Volumes />
+                </RequiredPermissionsOrganizationPageWrapper>
+              }
+            />
+            <Route
+              path={getRouteSubPath(RoutePath.LIMITS)}
+              element={
+                <OwnerAccessOrganizationPageWrapper>
+                  <Limits />
+                </OwnerAccessOrganizationPageWrapper>
+              }
+            />
+            {config.billingApiUrl && (
+              <>
+                <Route
+                  path={getRouteSubPath(RoutePath.BILLING_SPENDING)}
+                  element={
+                    <OwnerAccessOrganizationPageWrapper>
+                      <Spending />
+                    </OwnerAccessOrganizationPageWrapper>
+                  }
+                />
+                <Route
+                  path={getRouteSubPath(RoutePath.BILLING_WALLET)}
+                  element={
+                    <OwnerAccessOrganizationPageWrapper>
+                      <Wallet />
+                    </OwnerAccessOrganizationPageWrapper>
+                  }
+                />
+                <Route path={getRouteSubPath(RoutePath.EMAIL_VERIFY)} element={<EmailVerify />} />
+              </>
+            )}
+            <Route
+              path={getRouteSubPath(RoutePath.MEMBERS)}
+              element={
+                <NonPersonalOrganizationPageWrapper>
+                  <OrganizationMembers />
+                </NonPersonalOrganizationPageWrapper>
+              }
+            />
+            {
+              // TODO: uncomment when we allow creating custom roles
+              /* <Route
             path={getRouteSubPath(RoutePath.ROLES)}
             element={
               <NonPersonalOrganizationPageWrapper>
@@ -211,28 +212,58 @@ function App() {
               </NonPersonalOrganizationPageWrapper>
             }
           /> */
-          }
-          <Route
-            path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
-            element={
-              <RequiredPermissionsOrganizationPageWrapper
-                requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
-              >
-                <AuditLogs />
-              </RequiredPermissionsOrganizationPageWrapper>
             }
-          />
-          <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
-          <Route
-            path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
-            element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
-          />
-          <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
-          <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
-        </Route>
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    </ThemeProvider>
+            <Route
+              path={getRouteSubPath(RoutePath.AUDIT_LOGS)}
+              element={
+                <RequiredPermissionsOrganizationPageWrapper
+                  requiredPermissions={[OrganizationRolePermissionsEnum.READ_AUDIT_LOGS]}
+                >
+                  <AuditLogs />
+                </RequiredPermissionsOrganizationPageWrapper>
+              }
+            />
+            <Route path={getRouteSubPath(RoutePath.SETTINGS)} element={<OrganizationSettings />} />
+            <Route
+              path={getRouteSubPath(RoutePath.ACCOUNT_SETTINGS)}
+              element={<AccountSettings linkedAccountsEnabled={config.linkedAccountsEnabled} />}
+            />
+            <Route path={getRouteSubPath(RoutePath.USER_INVITATIONS)} element={<UserOrganizationInvitations />} />
+            <Route path={getRouteSubPath(RoutePath.ONBOARDING)} element={<Onboarding />} />
+          </Route>
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ThemeProvider>
+      {config.pylonAppId && (
+        <script>{`
+            ;(function () {
+              var e = window
+              var t = document
+              var n = function () {
+                n.e(arguments)
+              }
+              n.q = []
+              n.e = function (e) {
+                n.q.push(e)
+              }
+              e.Pylon = n
+              var r = function () {
+                var e = t.createElement('script')
+                e.setAttribute('type', 'text/javascript')
+                e.setAttribute('async', 'true')
+                e.setAttribute('src', 'https://widget.usepylon.com/widget/${config.pylonAppId}')
+                var n = t.getElementsByTagName('script')[0]
+                n.parentNode.insertBefore(e, n)
+              }
+              if (t.readyState === 'complete') {
+                r()
+              } else if (e.addEventListener) {
+                e.addEventListener('load', r, false)
+              }
+            })()
+          `}</script>
+      )}
+    </>
   )
 }
 

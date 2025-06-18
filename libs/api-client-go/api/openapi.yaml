@@ -6580,22 +6580,28 @@ components:
       type: object
     DaytonaConfiguration:
       example:
+        dashboardUrl: https://dashboard.example.com
+        billingApiUrl: https://billing.example.com
+        linkedAccountsEnabled: true
+        version: 0.0.1
+        oidc: ''
+        posthog: ''
+        maxAutoArchiveInterval: 43200
         pylonAppId: pylon-app-123
         proxyTemplateUrl: 'https://{{PORT}}-{{sandboxId}}.proxy.example.com'
-        dashboardUrl: https://dashboard.example.com
         maintananceMode: false
         environment: production
         defaultSnapshot: ubuntu:22.04
-        billingApiUrl: https://billing.example.com
-        linkedAccountsEnabled: true
-        oidc: ''
+        sshGatewayCommand: 'ssh -p 2222 {{TOKEN}}@localhost'
         announcements:
           feature-update:
             text: New feature available!
             learnMoreUrl: https://example.com
-        posthog: ''
-        maxAutoArchiveInterval: 43200
       properties:
+        version:
+          description: Daytona version
+          example: 0.0.1
+          type: string
         posthog:
           allOf:
             - $ref: '#/components/schemas/PosthogConfig'
@@ -6649,6 +6655,10 @@ components:
           description: Billing API URL
           example: https://billing.example.com
           type: string
+        sshGatewayCommand:
+          description: SSH Gateway command
+          example: 'ssh -p 2222 {{TOKEN}}@localhost'
+          type: string
       required:
         - announcements
         - dashboardUrl
@@ -6659,6 +6669,7 @@ components:
         - maxAutoArchiveInterval
         - oidc
         - proxyTemplateUrl
+        - version
       type: object
     CreateApiKey:
       example:

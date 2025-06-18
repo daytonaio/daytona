@@ -6,6 +6,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/daytonaio/runner/internal"
 	"github.com/daytonaio/runner/pkg/api/dto"
 	"github.com/daytonaio/runner/pkg/runner"
 	"github.com/gin-gonic/gin"
@@ -36,6 +37,7 @@ func RunnerInfo(ctx *gin.Context) {
 			CurrentAllocatedDiskGiB:      metrics.AllocatedDisk,
 			CurrentSnapshotCount:         metrics.SnapshotCount,
 		},
+		Version: internal.Version,
 	}
 
 	ctx.JSON(http.StatusOK, response)
