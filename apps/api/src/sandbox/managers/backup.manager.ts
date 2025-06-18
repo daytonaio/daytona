@@ -9,7 +9,7 @@ import { Cron, CronExpression } from '@nestjs/schedule'
 import { In, Not, Repository } from 'typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
 import { SandboxState } from '../enums/sandbox-state.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { RunnerService } from '../services/runner.service'
 import { RunnerState } from '../enums/runner-state.enum'
 import { ResourceNotFoundError } from '../../exceptions/not-found.exception'
@@ -36,7 +36,7 @@ export class BackupManager {
     @InjectRepository(Sandbox)
     private readonly sandboxRepository: Repository<Sandbox>,
     private readonly runnerService: RunnerService,
-    private readonly runnerApiFactory: RunnerApiFactory,
+    private readonly runnerAdapterFactory: RunnerAdapterFactory,
     private readonly dockerRegistryService: DockerRegistryService,
     @InjectRedis() private readonly redis: Redis,
     private readonly dockerProvider: DockerProvider,
@@ -233,12 +233,12 @@ export class BackupManager {
   private async checkBackupProgress(sandbox: Sandbox): Promise<void> {
     try {
       const runner = await this.runnerService.findOne(sandbox.runnerId)
-      const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       // Get sandbox info from runner
-      const sandboxInfo = await runnerSandboxApi.info(sandbox.id)
+      const sandboxInfo = await runnerAdapter.info(sandbox.id)
 
-      switch (sandboxInfo.data.backupState?.toUpperCase()) {
+      switch (sandboxInfo.backupState?.toUpperCase()) {
         case 'COMPLETED': {
           sandbox.backupState = BackupState.COMPLETED
           sandbox.lastBackupAt = new Date()
@@ -285,24 +285,16 @@ export class BackupManager {
       }
 
       const runner = await this.runnerService.findOne(sandbox.runnerId)
-      const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
+      const runnerAdapter = await this.runnerAdapterFactory.create(runner)
 
       //  check if backup is already in progress on the runner
-      const runnerSandboxResponse = await runnerSandboxApi.info(sandbox.id)
-      const runnerSandbox = runnerSandboxResponse.data
-      if (runnerSandbox.backupState?.toUpperCase() === 'IN_PROGRESS') {
+      const runnerSandboxInfo = await runnerAdapter.info(sandbox.id)
+      if (runnerSandboxInfo.backupState?.toUpperCase() === 'IN_PROGRESS') {
         return
       }
 
       // Initiate backup on runner
-      await runnerSandboxApi.createBackup(sandbox.id, {
-        registry: {
-          url: registry.url,
-          username: registry.username,
-          password: registry.password,
-        },
-        snapshot: sandbox.backupSnapshot,
-      })
+      await runnerAdapter.createBackup(sandbox.id, sandbox.backupSnapshot)
 
       await this.updateWorkspacBackupState(sandbox.id, BackupState.IN_PROGRESS)
     } catch (error) {

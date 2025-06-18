@@ -15,7 +15,7 @@ import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 import { Runner } from '../entities/runner.entity'
 import { RunnerState } from '../enums/runner-state.enum'
 import { SnapshotRunnerState } from '../enums/snapshot-runner-state.enum'
-import { RunnerApiFactory } from '../runner-api/runnerApi'
+import { RunnerAdapterFactory } from '../runner-adapter/runnerAdapter'
 import { v4 as uuidv4 } from 'uuid'
 import { RunnerNotReadyError } from '../errors/runner-not-ready.error'
 import { RegistryType } from '../../docker-registry/enums/registry-type.enum'
@@ -47,7 +47,7 @@ export class SnapshotManager {
     private readonly runnerService: RunnerService,
     private readonly dockerRegistryService: DockerRegistryService,
     private readonly dockerProvider: DockerProvider,
-    private readonly runnerApiFactory: RunnerApiFactory,
+    private readonly runnerSandboxAdapterFactory: RunnerAdapterFactory,
     private readonly redisLockProvider: RedisLockProvider,
     private readonly organizationService: OrganizationService,
   ) {}
@@ -241,21 +241,12 @@ export class SnapshotManager {
   }
 
   async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
-    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
-
-    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
     let retries = 0
     while (retries < 10) {
       try {
-        await snapshotApi.pullSnapshot({
-          snapshot: internalSnapshotName,
-          registry: {
-            url: dockerRegistry.url,
-            username: dockerRegistry.username,
-            password: dockerRegistry.password,
-          },
-        })
+        await runnerAdapter.pullSnapshot(internalSnapshotName)
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
           throw err
@@ -273,9 +264,9 @@ export class SnapshotManager {
       },
     })
 
-    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
-    const response = (await snapshotApi.snapshotExists(snapshotRunner.snapshotRef)).data
-    if (response.exists) {
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
+    const response = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
+    if (response) {
       snapshotRunner.state = SnapshotRunnerState.READY
       await this.snapshotRunnerRepository.save(snapshotRunner)
       return
@@ -305,9 +296,9 @@ export class SnapshotManager {
       },
     })
 
-    const runnerSandboxApi = this.runnerApiFactory.createSnapshotApi(runner)
-    const response = (await runnerSandboxApi.snapshotExists(snapshotRunner.snapshotRef)).data
-    if (response && response.exists) {
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
+    const response = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
+    if (response) {
       snapshotRunner.state = SnapshotRunnerState.READY
       await this.snapshotRunnerRepository.save(snapshotRunner)
       return
@@ -432,10 +423,10 @@ export class SnapshotManager {
       return
     }
 
-    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
-    const snapshotExists = (await snapshotApi.snapshotExists(snapshotRunner.snapshotRef)).data
-    if (snapshotExists.exists) {
-      await snapshotApi.removeSnapshot(snapshotRunner.snapshotRef)
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
+    const snapshotExists = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
+    if (snapshotExists) {
+      await runnerAdapter.destroy(snapshotRunner.snapshotRef)
     }
 
     snapshotRunner.state = SnapshotRunnerState.REMOVING
@@ -469,13 +460,13 @@ export class SnapshotManager {
       return
     }
 
-    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
-    const response = await snapshotApi.snapshotExists(snapshotRunner.snapshotRef)
-    if (response.data && !response.data.exists) {
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
+    const response = await runnerAdapter.snapshotExists(snapshotRunner.snapshotRef)
+    if (!response) {
       await this.snapshotRunnerRepository.delete(snapshotRunner.id)
     } else {
       //  just in case the snapshot is still there
-      snapshotApi.removeSnapshot(snapshotRunner.snapshotRef).catch((err) => {
+      runnerAdapter.destroy(snapshotRunner.snapshotRef).catch((err) => {
         //  this should not happen, and is not critical
         //  if the runner can not remote the snapshot, just delete the runner record
         this.snapshotRunnerRepository.delete(snapshotRunner.id).catch((err) => {
@@ -540,21 +531,9 @@ export class SnapshotManager {
 
       const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
 
-      const runnerSnapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
+      const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
-      await runnerSnapshotApi.buildSnapshot({
-        snapshot: snapshot.buildInfo.snapshotRef, // Name doesn't matter for runner, it uses the snapshot ID when pushing to internal registry
-        registry: {
-          url: registry.url,
-          project: registry.project,
-          username: registry.username,
-          password: registry.password,
-        },
-        organizationId: snapshot.organizationId,
-        dockerfile: snapshot.buildInfo.dockerfileContent,
-        context: snapshot.buildInfo.contextHashes,
-        pushToInternalRegistry: true,
-      })
+      await runnerAdapter.buildSnapshot(snapshot.buildInfo, snapshot.organizationId)
 
       // save snapshotRunner
 
@@ -782,19 +761,12 @@ export class SnapshotManager {
       },
     })
 
-    const snapshotApi = this.runnerApiFactory.createSnapshotApi(runner)
+    const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
     const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await snapshotApi.pullSnapshot({
-      snapshot: snapshotRunner.snapshotRef,
-      registry: {
-        url: dockerRegistry.url,
-        username: dockerRegistry.username,
-        password: dockerRegistry.password,
-      },
-    })
+    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef)
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
