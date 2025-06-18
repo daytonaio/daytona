@@ -39,11 +39,13 @@ import SandboxDetailsSheet from '@/components/SandboxDetailsSheet'
 import { formatDuration } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { Check, Copy } from 'lucide-react'
+import { useConfig } from '@/hooks/useConfig'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi, toolboxApi, snapshotApi } = useApi()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
+  const config = useConfig()
 
   const [sandboxes, setSandboxes] = useState<Sandbox[]>([])
   const [snapshots, setSnapshots] = useState<SnapshotDto[]>([])
@@ -196,7 +198,7 @@ const Sandboxes: React.FC = () => {
         error,
         'Failed to start sandbox',
         error instanceof OrganizationSuspendedError &&
-          import.meta.env.VITE_BILLING_API_URL &&
+          config.billingApiUrl &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
           <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING_WALLET)}>
             Go to billing

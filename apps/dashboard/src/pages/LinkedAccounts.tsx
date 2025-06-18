@@ -17,17 +17,7 @@ import { useLocation } from 'react-router-dom'
 import { AccountProviderIcon } from '@/components/AccountProviderIcon'
 import { AccountProvider as AccountProviderApi } from '@daytonaio/api-client'
 import { UserManager } from 'oidc-client-ts'
-
-const linkingUserManager = new UserManager({
-  authority: import.meta.env.VITE_OIDC_DOMAIN,
-  client_id: import.meta.env.VITE_OIDC_CLIENT_ID,
-  extraQueryParams: {
-    audience: import.meta.env.VITE_OIDC_AUDIENCE,
-  },
-  scope: 'openid profile email offline_access',
-  redirect_uri: window.location.origin,
-  automaticSilentRenew: false,
-})
+import { useConfig } from '@/hooks/useConfig'
 
 export interface UserProfileIdentity {
   provider: string
@@ -46,9 +36,23 @@ const LinkedAccounts: React.FC = () => {
   const { userApi } = useApi()
   const { user, signinSilent } = useAuth()
   const location = useLocation()
+  const config = useConfig()
 
   const [loadingProviders, setLoadingProviders] = useState(true)
   const [providers, setProviders] = useState<AccountProviderApi[]>([])
+
+  const linkingUserManager = useMemo(() => {
+    return new UserManager({
+      authority: config.oidc.issuer,
+      client_id: config.oidc.clientId,
+      extraQueryParams: {
+        audience: config.oidc.audience,
+      },
+      scope: 'openid profile email offline_access',
+      redirect_uri: window.location.origin,
+      automaticSilentRenew: false,
+    })
+  }, [config.oidc.issuer, config.oidc.clientId, config.oidc.audience])
 
   const fetchAvailableProviders = useCallback(async () => {
     try {
