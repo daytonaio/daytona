@@ -843,11 +843,9 @@ export class SandboxManager {
         if (runningSandboxsCount > usageThreshold) {
           //  TODO: usage should be based on compute usage
 
-          const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
           const availableRunners = await this.runnerService.findAvailableRunners({
             region: sandbox.region,
             sandboxClass: sandbox.class,
-            snapshotRef: snapshot.internalName,
           })
           const lessUsedRunners = availableRunners.filter((runner) => runner.id !== sandbox.runnerId)
 
@@ -877,7 +875,7 @@ export class SandboxManager {
       //  if sandbox has no runner, check if backup is completed
       //  if not, set sandbox to error
       //  if backup is completed, get random available runner and start sandbox
-      //  use the backup snapshot to start the sandbox
+      //  use the backup to start the sandbox
 
       if (sandbox.backupState !== BackupState.COMPLETED) {
         await this.updateSandboxState(
@@ -891,24 +889,24 @@ export class SandboxManager {
 
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
       if (!registry) {
-        throw new Error('No registry found for snapshot')
+        throw new Error('No registry found for backup')
       }
 
-      const existingSnapshots = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
-      let validBackupSnapshot
+      const existingBackups = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
+      let validBackup
       let exists = false
 
-      while (existingSnapshots.length > 0) {
+      while (existingBackups.length > 0) {
         try {
-          if (!validBackupSnapshot) {
+          if (!validBackup) {
             //  last snapshot is the current snapshot, so we don't need to check it
             //  just in case, we'll use the value from the backupSnapshot property
-            validBackupSnapshot = sandbox.backupSnapshot
-            existingSnapshots.pop()
+            validBackup = sandbox.backupSnapshot
+            existingBackups.pop()
           } else {
-            validBackupSnapshot = existingSnapshots.pop()
+            validBackup = existingBackups.pop()
           }
-          if (await this.dockerProvider.checkImageExistsInRegistry(validBackupSnapshot, registry)) {
+          if (await this.dockerProvider.checkImageExistsInRegistry(validBackup, registry)) {
             exists = true
             break
           }
@@ -925,14 +923,11 @@ export class SandboxManager {
         return SYNC_AGAIN
       }
 
-      const snapshot = await this.snapshotService.getSnapshotByName(sandbox.snapshot, sandbox.organizationId)
-
       //  exclude the runner that the last runner sandbox was on
       const availableRunners = (
         await this.runnerService.findAvailableRunners({
           region: sandbox.region,
           sandboxClass: sandbox.class,
-          snapshotRef: snapshot.internalName,
         })
       ).filter((runner) => runner.id != sandbox.prevRunnerId)
 
@@ -946,7 +941,7 @@ export class SandboxManager {
 
       await runnerSandboxApi.create({
         id: sandbox.id,
-        snapshot: validBackupSnapshot,
+        snapshot: validBackup,
         osUser: sandbox.osUser,
         // TODO: organizationId: sandbox.organizationId,
         userId: sandbox.organizationId,
