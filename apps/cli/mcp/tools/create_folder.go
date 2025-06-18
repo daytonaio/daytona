@@ -13,42 +13,47 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateFolder(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type CreateFolderArgs struct {
+	Id         *string `json:"id,omitempty"`
+	FolderPath *string `json:"folder_path,omitempty"`
+	Mode       *string `json:"mode,omitempty"`
+}
+
+func GetCreateFolderTool() mcp.Tool {
+	return mcp.NewTool("create_folder",
+		mcp.WithDescription("Create a new folder in the Daytona sandbox."),
+		mcp.WithString("folder_path", mcp.Required(), mcp.Description("Path to the folder to create.")),
+		mcp.WithString("mode", mcp.Description("Mode of the folder to create (defaults to 0755).")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to create the folder in.")),
+	)
+}
+
+func CreateFolder(ctx context.Context, request mcp.CallToolRequest, args CreateFolderArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
-	// Get folder path from request arguments
-	folderPath, ok := request.Params.Arguments["folder_path"].(string)
-	if !ok {
+	if args.FolderPath == nil || *args.FolderPath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("folder_path parameter is required")
 	}
 
-	mode := "0755"
-	modeArg, ok := request.Params.Arguments["mode"].(string)
-	if ok && modeArg != "" {
-		mode = modeArg
+	mode := "0755" // default mode
+	if args.Mode == nil || *args.Mode == "" {
+		args.Mode = &mode
 	}
 
 	// Create the folder
-	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, sandboxId).Path(folderPath).Mode(mode).Execute()
+	_, err = apiClient.ToolboxAPI.CreateFolder(ctx, *args.Id).Path(*args.FolderPath).Mode(*args.Mode).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error creating folder: %v", err)
 	}
 
-	log.Infof("Created folder: %s", folderPath)
+	log.Infof("Created folder: %s", *args.FolderPath)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Created folder: %s", folderPath)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Created folder: %s", *args.FolderPath)), nil
 }

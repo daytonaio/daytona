@@ -6,7 +6,6 @@ package tools
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,17 +16,34 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type CreateSandboxArgs struct {
+	Id                  *string `json:"id,omitempty"`
+	Target              *string `json:"target,omitempty"`
+	Snapshot            *string `json:"snapshot,omitempty"`
+	AutoStopInterval    *int32  `json:"autoStopInterval,omitempty"`
+	AutoArchiveInterval *int32  `json:"autoArchiveInterval,omitempty"`
+}
+
+func GetCreateSandboxTool() mcp.Tool {
+	return mcp.NewTool("create_sandbox",
+		mcp.WithDescription("Create a new sandbox with Daytona"),
+		mcp.WithString("id", mcp.Description("If a sandbox ID is provided it is first checked if it exists and is running, if so, the existing sandbox will be used. However, a model is not able to provide custom sandbox ID but only the ones Daytona commands return and should always leave ID field empty if the intention is to create a new sandbox.")),
+		mcp.WithString("target", mcp.DefaultString("us"), mcp.Description("Target region of the sandbox.")),
+		mcp.WithString("snapshot", mcp.Description("Snapshot of the sandbox (don't specify any if not explicitly instructed from user).")),
+		mcp.WithNumber("auto_stop_interval", mcp.DefaultNumber(15), mcp.Min(0), mcp.Description("Auto-stop interval in minutes (0 means disabled) for the sandbox.")),
+		mcp.WithNumber("auto_archive_interval", mcp.DefaultNumber(10080), mcp.Min(0), mcp.Description("Auto-archive interval in minutes (0 means the maximum interval will be used) for the sandbox.")),
+	)
+}
+
+func CreateSandbox(ctx context.Context, request mcp.CallToolRequest, args CreateSandboxArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
 	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
+	if args.Id != nil && *args.Id != "" {
+		sandboxId = *args.Id
 	}
 
 	if sandboxId != "" {
@@ -41,40 +57,20 @@ func CreateSandbox(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallT
 
 	createSandbox := daytonaapiclient.NewCreateSandbox()
 
-	if snapshot, ok := request.Params.Arguments["snapshot"]; ok && snapshot != nil {
-		if snapshotStr, ok := snapshot.(string); ok && snapshotStr != "" {
-			createSandbox.SetSnapshot(snapshotStr)
-		}
+	if args.Snapshot != nil && *args.Snapshot != "" {
+		createSandbox.SetSnapshot(*args.Snapshot)
 	}
 
-	if target, ok := request.Params.Arguments["target"]; ok && target != nil {
-		if targetStr, ok := target.(string); ok && targetStr != "" {
-			createSandbox.SetTarget(targetStr)
-		}
+	if args.Target != nil && *args.Target != "" {
+		createSandbox.SetTarget(*args.Target)
 	}
 
-	if autoStopInterval, ok := request.Params.Arguments["auto_stop_interval"]; ok && autoStopInterval != nil {
-		if autoStopIntervalStr, ok := autoStopInterval.(string); ok && autoStopIntervalStr != "" {
-			autoStopIntervalValue, err := strconv.Atoi(autoStopIntervalStr)
-			if err != nil {
-				log.Error(fmt.Errorf("invalid auto stop interval value, fallback to default (15m)"))
-				autoStopIntervalValue = 15
-			}
-
-			createSandbox.SetAutoStopInterval(int32(autoStopIntervalValue))
-		}
+	if args.AutoStopInterval != nil {
+		createSandbox.SetAutoStopInterval(*args.AutoStopInterval)
 	}
 
-	if autoArchiveInterval, ok := request.Params.Arguments["auto_archive_interval"]; ok && autoArchiveInterval != nil {
-		if autoArchiveIntervalStr, ok := autoArchiveInterval.(string); ok && autoArchiveIntervalStr != "" {
-			autoArchiveIntervalValue, err := strconv.Atoi(autoArchiveIntervalStr)
-			if err != nil {
-				log.Error(fmt.Errorf("invalid auto archive interval value, fallback to default (7d)"))
-				autoArchiveIntervalValue = 7 * 24 * 60
-			}
-
-			createSandbox.SetAutoArchiveInterval(int32(autoArchiveIntervalValue))
-		}
+	if args.AutoArchiveInterval != nil {
+		createSandbox.SetAutoArchiveInterval(*args.AutoArchiveInterval)
 	}
 
 	// Create new sandbox with retries

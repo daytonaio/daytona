@@ -8,7 +8,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.1.0
 	github.com/daytonaio/daytona/daytonaapiclient v0.0.0-00010101000000-000000000000
 	github.com/docker/docker v27.5.1+incompatible
-	github.com/mark3labs/mcp-go v0.20.1
+	github.com/mark3labs/mcp-go v0.32.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 	golang.org/x/oauth2 v0.25.0
@@ -65,6 +65,7 @@ require (
 	github.com/rs/xid v1.6.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sahilm/fuzzy v0.1.1 // indirect
+	github.com/spf13/cast v1.7.1 // indirect
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	go.opentelemetry.io/auto/sdk v1.1.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.59.0 // indirect
