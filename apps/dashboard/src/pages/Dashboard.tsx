@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils'
 import { useBilling } from '@/hooks/useBilling'
 import { RoutePath } from '@/enums/RoutePath'
 import { useNavigate } from 'react-router-dom'
+import { useConfig } from '@/hooks/useConfig'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
@@ -24,6 +25,7 @@ const Dashboard: React.FC = () => {
   const { wallet } = useBilling()
   const navigate = useNavigate()
   const location = useLocation()
+  const config = useConfig()
 
   useEffect(() => {
     if (
@@ -35,7 +37,7 @@ const Dashboard: React.FC = () => {
   }, [selectedOrganization])
 
   useEffect(() => {
-    if (!import.meta.env.VITE_BILLING_API_URL) {
+    if (!config.billingApiUrl) {
       return
     }
 
@@ -45,10 +47,11 @@ const Dashboard: React.FC = () => {
     if ((!wallet || wallet?.ongoingBalanceCents <= 0) && !shouldSkipRedirect) {
       navigate(RoutePath.BILLING_WALLET)
     }
-  }, [wallet]) // Only depend on wallet to avoid infinite loops from navigation
+  }, [wallet, config.billingApiUrl]) // Only depend on wallet to avoid infinite loops from navigation
 
-  const bannerText = import.meta.env.VITE_ANNOUNCEMENT_BANNER_TEXT
-  const bannerLearnMoreUrl = import.meta.env.VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL
+  // TODO
+  const bannerText = 'config.announcements'
+  const bannerLearnMoreUrl = 'config.announcementBannerLearnMoreUrl'
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
@@ -78,8 +81,11 @@ const Dashboard: React.FC = () => {
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
-        <Sidebar isBannerVisible={isBannerVisible} />
-
+        <Sidebar
+          isBannerVisible={isBannerVisible}
+          billingEnabled={!!config.billingApiUrl}
+          linkedAccountsEnabled={config.linkedAccountsEnabled}
+        />
         <SidebarInset className="overflow-hidden">
           <div className="relative md:hidden px-6 pt-4">
             <SidebarTrigger className="[&_svg]:size-5" />
