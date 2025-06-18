@@ -75,6 +75,7 @@ const configuration = {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
+    templateUrl: process.env.PROXY_TEMPLATE_URL,
   },
   audit: {
     toolboxRequestsEnabled: process.env.AUDIT_TOOLBOX_REQUESTS_ENABLED === 'true',
@@ -89,6 +90,8 @@ const configuration = {
     authToken: process.env.SVIX_AUTH_TOKEN,
     serverUrl: process.env.SVIX_SERVER_URL,
   },
+  pylonAppId: process.env.PYLON_APP_ID,
+  billingApiUrl: process.env.BILLING_API_URL,
 }
 
 export { configuration }

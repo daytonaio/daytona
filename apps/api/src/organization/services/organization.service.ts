@@ -22,7 +22,6 @@ import { EventEmitter2 } from '@nestjs/event-emitter'
 import { OrganizationEvents } from '../constants/organization-events.constant'
 import { CreateOrganizationQuotaDto } from '../dto/create-organization-quota.dto'
 import { DEFAULT_ORGANIZATION_QUOTA } from '../../common/constants/default-organization-quota'
-import { ConfigService } from '@nestjs/config'
 import { UserEmailVerifiedEvent } from '../../user/events/user-email-verified.event'
 import { Cron, CronExpression } from '@nestjs/schedule'
 import { RedisLockProvider } from '../../sandbox/common/redis-lock.provider'
@@ -31,6 +30,7 @@ import { SandboxDesiredState } from '../../sandbox/enums/sandbox-desired-state.e
 import { SystemRole } from '../../user/enums/system-role.enum'
 import { SnapshotState } from '../../sandbox/enums/snapshot-state.enum'
 import { OrganizationSuspendedSnapshotDeactivatedEvent } from '../events/organization-suspended-snapshot-deactivated.event'
+import { TypedConfigService } from '../../config/typed-config.service'
 
 @Injectable()
 export class OrganizationService implements OnModuleInit {
@@ -44,7 +44,7 @@ export class OrganizationService implements OnModuleInit {
     @InjectRepository(Snapshot)
     private readonly snapshotRepository: Repository<Snapshot>,
     private readonly eventEmitter: EventEmitter2,
-    private readonly configService: ConfigService,
+    private readonly configService: TypedConfigService,
     private readonly redisLockProvider: RedisLockProvider,
   ) {}
 
@@ -212,7 +212,7 @@ export class OrganizationService implements OnModuleInit {
       organization.suspended = true
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Please verify your email address'
-    } else if (this.configService.get<boolean>('BILLING_ENABLED') && !personal) {
+    } else if (this.configService.get('billingApiUrl') && !personal) {
       organization.suspended = true
       organization.suspendedAt = new Date()
       organization.suspensionReason = 'Payment method required'

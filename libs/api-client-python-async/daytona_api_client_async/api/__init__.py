@@ -3,6 +3,7 @@
 # import apis into api package
 from daytona_api_client_async.api.api_keys_api import ApiKeysApi
 from daytona_api_client_async.api.audit_api import AuditApi
+from daytona_api_client_async.api.config_api import ConfigApi
 from daytona_api_client_async.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client_async.api.object_storage_api import ObjectStorageApi
 from daytona_api_client_async.api.organizations_api import OrganizationsApi
