@@ -3,9 +3,13 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { SandboxClass } from '../sandbox/enums/sandbox-class.enum'
+
 const configuration = {
   production: process.env.NODE_ENV === 'production',
+  version: process.env.VERSION || '0.0.0-dev',
   environment: process.env.ENVIRONMENT,
+  runMigrations: process.env.RUN_MIGRATIONS === 'true',
   port: parseInt(process.env.PORT, 10),
   appUrl: process.env.APP_URL,
   database: {
@@ -23,10 +27,12 @@ const configuration = {
   posthog: {
     apiKey: process.env.POSTHOG_API_KEY,
     host: process.env.POSTHOG_HOST,
+    environment: process.env.POSTHOG_ENVIRONMENT,
   },
   oidc: {
     clientId: process.env.OIDC_CLIENT_ID || process.env.OID_CLIENT_ID,
     issuer: process.env.OIDC_ISSUER_BASE_URL || process.env.OID_ISSUER_BASE_URL,
+    publicIssuer: process.env.PUBLIC_OIDC_DOMAIN,
     audience: process.env.OIDC_AUDIENCE || process.env.OID_AUDIENCE,
     managementApi: {
       enabled: process.env.OIDC_MANAGEMENT_API_ENABLED === 'true',
@@ -93,10 +99,26 @@ const configuration = {
     serverUrl: process.env.SVIX_SERVER_URL,
   },
   sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
+  sshGatewayCommand: process.env.SSH_GATEWAY_COMMAND,
   organizationSandboxDefaultLimitedNetworkEgress:
     process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
   pylonAppId: process.env.PYLON_APP_ID,
   billingApiUrl: process.env.BILLING_API_URL,
+  defaultRunner: {
+    domain: process.env.DEFAULT_RUNNER_DOMAIN,
+    apiKey: process.env.DEFAULT_RUNNER_API_KEY,
+    proxyUrl: process.env.DEFAULT_RUNNER_PROXY_URL,
+    apiUrl: process.env.DEFAULT_RUNNER_API_URL,
+    cpu: parseInt(process.env.DEFAULT_RUNNER_CPU || '4', 10),
+    memory: parseInt(process.env.DEFAULT_RUNNER_MEMORY || '8', 10),
+    disk: parseInt(process.env.DEFAULT_RUNNER_DISK || '50', 10),
+    gpu: parseInt(process.env.DEFAULT_RUNNER_GPU || '0', 10),
+    gpuType: process.env.DEFAULT_RUNNER_GPU_TYPE,
+    capacity: parseInt(process.env.DEFAULT_RUNNER_CAPACITY || '100', 10),
+    region: process.env.DEFAULT_RUNNER_REGION,
+    class: process.env.DEFAULT_RUNNER_CLASS ? (process.env.DEFAULT_RUNNER_CLASS as SandboxClass) : undefined,
+    version: process.env.DEFAULT_RUNNER_VERSION || '0',
+  },
 }
 
 export { configuration }

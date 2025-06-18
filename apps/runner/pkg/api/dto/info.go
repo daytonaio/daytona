@@ -15,4 +15,5 @@ type RunnerMetrics struct {
 
 type RunnerInfoResponseDTO struct {
 	Metrics *RunnerMetrics `json:"metrics,omitempty"`
+	Version string         `json:"version"`
 } //	@name	RunnerInfoResponseDTO

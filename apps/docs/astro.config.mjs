@@ -75,6 +75,7 @@ export default defineConfig({
   adapter: node({
     mode: 'middleware',
   }),
+  outDir: '../../dist/apps/docs',
   vite: {
     ssr: {
       noExternal: ['path-to-regexp', '@astrojs/react'],

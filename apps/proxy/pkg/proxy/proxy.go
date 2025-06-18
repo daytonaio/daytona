@@ -14,6 +14,7 @@ import (
 
 	apiclient "github.com/daytonaio/apiclient"
 	"github.com/daytonaio/proxy/cmd/proxy/config"
+	"github.com/daytonaio/proxy/internal"
 	"github.com/daytonaio/proxy/pkg/cache"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -138,7 +139,7 @@ func StartProxy(config *config.Config) error {
 					proxy.AuthCallback(ctx)
 					return
 				case "/health":
-					ctx.JSON(http.StatusOK, gin.H{"status": "ok"})
+					ctx.JSON(http.StatusOK, gin.H{"status": "ok", "version": internal.Version})
 					return
 				}
 			}

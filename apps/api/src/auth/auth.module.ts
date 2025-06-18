@@ -46,11 +46,19 @@ import { catchError, map } from 'rxjs/operators'
           ),
         )
 
+        let jwksUri = metadata.jwks_uri
+
+        const internalIssuer = configService.getOrThrow('oidc.issuer')
+        const publicIssuer = configService.get('oidc.publicIssuer')
+        if (publicIssuer) {
+          // Replace localhost URLs with Docker network URLs for internal API use
+          jwksUri = metadata.jwks_uri.replace(publicIssuer, internalIssuer)
+        }
         return new JwtStrategy(
           {
             audience: configService.get('oidc.audience'),
             issuer: metadata.issuer,
-            jwksUri: metadata.jwks_uri,
+            jwksUri: jwksUri,
           },
           userService,
         )
