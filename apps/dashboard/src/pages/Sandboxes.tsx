@@ -28,11 +28,13 @@ import { useAuth } from 'react-oidc-context'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
+import { useConfig } from '@/hooks/useConfig'
 
 const Sandboxes: React.FC = () => {
   const { sandboxApi, apiKeyApi } = useApi()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
+  const config = useConfig()
 
   const [sandboxes, setSandboxes] = useState<Sandbox[]>([])
   const [loadingSandboxes, setLoadingSandboxes] = useState<Record<string, boolean>>({})
@@ -116,7 +118,7 @@ const Sandboxes: React.FC = () => {
         error,
         'Failed to start sandbox',
         error instanceof OrganizationSuspendedError &&
-          import.meta.env.VITE_BILLING_API_URL &&
+          config.billingApiUrl &&
           authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER ? (
           <Button variant="secondary" onClick={() => navigate(RoutePath.BILLING)}>
             Go to billing
@@ -294,6 +296,7 @@ const Sandboxes: React.FC = () => {
         handleArchive={handleArchive}
         data={sandboxes}
         loading={loadingTable}
+        proxyTemplateUrl={config.proxyTemplateUrl}
       />
 
       {sandboxToDelete && (

@@ -2,6 +2,7 @@
 .npmignore
 api.ts
 api/api-keys-api.ts
+api/config-api.ts
 api/docker-registry-api.ts
 api/object-storage-api.ts
 api/organizations-api.ts
@@ -19,6 +20,7 @@ configuration.ts
 git_push.sh
 index.ts
 models/account-provider.ts
+models/announcement.ts
 models/api-key-list.ts
 models/api-key-response.ts
 models/build-info.ts
@@ -41,6 +43,7 @@ models/create-snapshot.ts
 models/create-user.ts
 models/create-volume.ts
 models/create-workspace.ts
+models/daytona-configuration.ts
 models/docker-registry.ts
 models/execute-request.ts
 models/execute-response.ts
@@ -64,6 +67,7 @@ models/lsp-location.ts
 models/lsp-server-request.ts
 models/lsp-symbol.ts
 models/match.ts
+models/oidc-config.ts
 models/organization-invitation.ts
 models/organization-role.ts
 models/organization-suspension.ts
@@ -72,6 +76,7 @@ models/organization.ts
 models/paginated-snapshots-dto.ts
 models/port-preview-url.ts
 models/position.ts
+models/posthog-config.ts
 models/project-dir-response.ts
 models/range.ts
 models/registry-push-access-dto.ts
