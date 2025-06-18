@@ -45,6 +45,8 @@ const configuration = {
   },
   defaultSnapshot: process.env.DEFAULT_SNAPSHOT,
   dashboardUrl: process.env.DASHBOARD_URL,
+  // Default to empty string - dashboard will then hit '/api'
+  dashboardBaseApiUrl: process.env.DASHBOARD_BASE_API_URL || '',
   transientRegistry: {
     url: process.env.TRANSIENT_REGISTRY_URL,
     admin: process.env.TRANSIENT_REGISTRY_ADMIN,
@@ -75,6 +77,7 @@ const configuration = {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
+    templateUrl: process.env.PROXY_TEMPLATE_URL,
   },
   audit: {
     toolboxRequestsEnabled: process.env.AUDIT_TOOLBOX_REQUESTS_ENABLED === 'true',
@@ -92,7 +95,8 @@ const configuration = {
   sshGatewayApiKey: process.env.SSH_GATEWAY_API_KEY,
   organizationSandboxDefaultLimitedNetworkEgress:
     process.env.ORGANIZATION_SANDBOX_DEFAULT_LIMITED_NETWORK_EGRESS === 'true',
-  billingEnabled: process.env.BILLING_ENABLED === 'true',
+  pylonAppId: process.env.PYLON_APP_ID,
+  billingApiUrl: process.env.BILLING_API_URL,
 }
 
 export { configuration }
