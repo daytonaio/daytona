@@ -37,10 +37,9 @@ import { OtelSpan } from '../../common/decorators/otel.decorator'
 import { SnapshotRunner } from '../entities/snapshot-runner.entity'
 
 const SYNC_INSTANCE_STATE_LOCK_KEY = 'sync-instance-state-'
-const SYNC_AGAIN = true
-const DONT_SYNC_AGAIN = false
-type ShouldSyncAgain = boolean
-type StateSyncHandler = (sandbox: Sandbox) => Promise<ShouldSyncAgain>
+const SYNC_AGAIN = 'sync-again'
+const DONT_SYNC_AGAIN = 'dont-sync-again'
+type SyncState = typeof SYNC_AGAIN | typeof DONT_SYNC_AGAIN
 
 @Injectable()
 export class SandboxManager {
@@ -262,30 +261,30 @@ export class SandboxManager {
       return
     }
 
-    let shouldSyncAgain = DONT_SYNC_AGAIN
+    let syncState = DONT_SYNC_AGAIN
 
     try {
       switch (sandbox.desiredState) {
         case SandboxDesiredState.STARTED: {
-          shouldSyncAgain = await this.handleSandboxDesiredStateStarted(sandbox)
+          syncState = await this.handleSandboxDesiredStateStarted(sandbox)
           break
         }
         case SandboxDesiredState.STOPPED: {
-          shouldSyncAgain = await this.handleSandboxDesiredStateStopped(sandbox)
+          syncState = await this.handleSandboxDesiredStateStopped(sandbox)
           break
         }
         case SandboxDesiredState.DESTROYED: {
-          shouldSyncAgain = await this.handleSandboxDesiredStateDestroyed(sandbox)
+          syncState = await this.handleSandboxDesiredStateDestroyed(sandbox)
           break
         }
         case SandboxDesiredState.ARCHIVED: {
-          shouldSyncAgain = await this.handleSandboxDesiredStateArchived(sandbox)
+          syncState = await this.handleSandboxDesiredStateArchived(sandbox)
           break
         }
       }
     } catch (error) {
       if (error.code === 'ECONNRESET') {
-        shouldSyncAgain = SYNC_AGAIN
+        syncState = SYNC_AGAIN
       } else {
         this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, fromAxiosError(error))
 
@@ -301,12 +300,12 @@ export class SandboxManager {
     }
 
     await this.redisLockProvider.unlock(lockKey)
-    if (shouldSyncAgain) {
+    if (syncState === SYNC_AGAIN) {
       this.syncInstanceState(sandboxId)
     }
   }
 
-  private handleUnassignedBuildSandbox: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
+  private async handleUnassignedBuildSandbox(sandbox: Sandbox): Promise<SyncState> {
     // Try to assign an available runner with the snapshot build
     let runnerId: string
     try {
@@ -408,7 +407,7 @@ export class SandboxManager {
     await this.runnerService.createSnapshotRunner(runnerId, buildInfo.snapshotRef, state)
   }
 
-  private handleSandboxDesiredStateArchived: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
+  private async handleSandboxDesiredStateArchived(sandbox: Sandbox): Promise<SyncState> {
     const lockKey = 'archive-lock-' + sandbox.runnerId
     if (!(await this.redisLockProvider.lock(lockKey, 10))) {
       return DONT_SYNC_AGAIN
@@ -515,7 +514,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleSandboxDesiredStateDestroyed: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
+  private async handleSandboxDesiredStateDestroyed(sandbox: Sandbox): Promise<SyncState> {
     if (sandbox.state === SandboxState.ARCHIVED) {
       await this.updateSandboxState(sandbox.id, SandboxState.DESTROYED)
       return DONT_SYNC_AGAIN
@@ -575,7 +574,7 @@ export class SandboxManager {
     }
   }
 
-  private handleSandboxDesiredStateStarted: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
+  private async handleSandboxDesiredStateStarted(sandbox: Sandbox): Promise<SyncState> {
     switch (sandbox.state) {
       case SandboxState.PENDING_BUILD: {
         return this.handleUnassignedBuildSandbox(sandbox)
@@ -623,7 +622,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleSandboxDesiredStateStopped: StateSyncHandler = async (sandbox: Sandbox): Promise<ShouldSyncAgain> => {
+  private async handleSandboxDesiredStateStopped(sandbox: Sandbox): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       //  console.debug(`Runner ${runner.id} is not ready`);
@@ -684,9 +683,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private async handleRunnerSandboxBuildingSnapshotStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
     const snapshotRunner = await this.runnerService.getSnapshotRunner(sandbox.runnerId, sandbox.buildInfo.snapshotRef)
     if (snapshotRunner) {
       switch (snapshotRunner.state) {
@@ -710,9 +707,7 @@ export class SandboxManager {
     return DONT_SYNC_AGAIN
   }
 
-  private handleRunnerSandboxUnknownStateOnDesiredStateStart: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private async handleRunnerSandboxUnknownStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     if (runner.state !== RunnerState.READY) {
       //  console.debug(`Runner ${runner.id} is not ready`);
@@ -807,9 +802,7 @@ export class SandboxManager {
     return ['sleep', 'infinity']
   }
 
-  private handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private async handleRunnerSandboxStoppedOrArchivedStateOnDesiredStateStart(sandbox: Sandbox): Promise<SyncState> {
     //  check if sandbox is assigned to a runner and if that runner is unschedulable
     //  if it is, move sandbox to prevRunnerId, and set runnerId to null
     //  this will assign a new runner to the sandbox and restore the sandbox from the latest backup
@@ -886,7 +879,7 @@ export class SandboxManager {
           undefined,
           'Sandbox has no runner and backup is not completed',
         )
-        return true
+        return DONT_SYNC_AGAIN
       }
 
       const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
@@ -980,9 +973,7 @@ export class SandboxManager {
   }
 
   //  used to check if sandbox is pulling snapshot on runner and update sandbox state accordingly
-  private handleRunnerSandboxPullingSnapshotStateCheck: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private async handleRunnerSandboxPullingSnapshotStateCheck(sandbox: Sandbox): Promise<SyncState> {
     //  edge case when sandbox is being transferred to a new runner
     if (!sandbox.runnerId) {
       return SYNC_AGAIN
@@ -1006,9 +997,7 @@ export class SandboxManager {
 
   //  used to check if sandbox is started on runner and update sandbox state accordingly
   //  also used to handle the case where a sandbox is started on a runner and then transferred to a new runner
-  private handleRunnerSandboxStartedStateCheck: StateSyncHandler = async (
-    sandbox: Sandbox,
-  ): Promise<ShouldSyncAgain> => {
+  private async handleRunnerSandboxStartedStateCheck(sandbox: Sandbox): Promise<SyncState> {
     const runner = await this.runnerService.findOne(sandbox.runnerId)
     const runnerSandboxApi = this.runnerApiFactory.createSandboxApi(runner)
     const sandboxInfoResponse = await runnerSandboxApi.info(sandbox.id)
