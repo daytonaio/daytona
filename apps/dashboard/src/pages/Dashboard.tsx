@@ -14,10 +14,12 @@ import { VerifyEmailDialog } from '@/components/VerifyEmailDialog'
 import { AnnouncementBanner } from '@/components/AnnouncementBanner'
 import { LocalStorageKey } from '@/enums/LocalStorageKey'
 import { cn } from '@/lib/utils'
+import { useConfig } from '@/hooks/useConfig'
 
 const Dashboard: React.FC = () => {
   const { selectedOrganization } = useSelectedOrganization()
   const [showVerifyEmailDialog, setShowVerifyEmailDialog] = useState(false)
+  const config = useConfig()
 
   useEffect(() => {
     if (
@@ -28,8 +30,9 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedOrganization])
 
-  const bannerText = import.meta.env.VITE_ANNOUNCEMENT_BANNER_TEXT
-  const bannerLearnMoreUrl = import.meta.env.VITE_ANNOUNCEMENT_BANNER_LEARN_MORE_URL
+  // TODO
+  const bannerText = 'config.announcements'
+  const bannerLearnMoreUrl = 'config.announcementBannerLearnMoreUrl'
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
@@ -59,8 +62,11 @@ const Dashboard: React.FC = () => {
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
-        <Sidebar isBannerVisible={isBannerVisible} />
-
+        <Sidebar
+          isBannerVisible={isBannerVisible}
+          billingEnabled={!!config.billingApiUrl}
+          linkedAccountsEnabled={config.linkedAccountsEnabled}
+        />
         <SidebarInset className="overflow-hidden">
           <div className="relative md:hidden px-6 pt-4">
             <SidebarTrigger className="[&_svg]:size-5" />
