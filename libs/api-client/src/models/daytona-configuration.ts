@@ -29,6 +29,12 @@ import type { PosthogConfig } from './posthog-config'
  */
 export interface DaytonaConfiguration {
   /**
+   * Daytona version
+   * @type {string}
+   * @memberof DaytonaConfiguration
+   */
+  version: string
+  /**
    * PostHog configuration
    * @type {PosthogConfig}
    * @memberof DaytonaConfiguration
@@ -100,4 +106,10 @@ export interface DaytonaConfiguration {
    * @memberof DaytonaConfiguration
    */
   billingApiUrl?: string
+  /**
+   * SSH Gateway command
+   * @type {string}
+   * @memberof DaytonaConfiguration
+   */
+  sshGatewayCommand?: string
 }

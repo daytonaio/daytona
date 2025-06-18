@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { Sidebar } from '@/components/Sidebar'
@@ -49,9 +49,13 @@ const Dashboard: React.FC = () => {
     }
   }, [wallet, config.billingApiUrl]) // Only depend on wallet to avoid infinite loops from navigation
 
-  // TODO
-  const bannerText = 'config.announcements'
-  const bannerLearnMoreUrl = 'config.announcementBannerLearnMoreUrl'
+  const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
+    if (!config.announcements || Object.entries(config.announcements).length === 0) {
+      return [null, null]
+    }
+
+    return [Object.values(config.announcements)[0].text, Object.values(config.announcements)[0].learnMoreUrl]
+  }, [config.announcements])
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
@@ -81,11 +85,7 @@ const Dashboard: React.FC = () => {
         <AnnouncementBanner text={bannerText} onDismiss={handleDismissBanner} learnMoreUrl={bannerLearnMoreUrl} />
       )}
       <SidebarProvider isBannerVisible={isBannerVisible} defaultOpen={true}>
-        <Sidebar
-          isBannerVisible={isBannerVisible}
-          billingEnabled={!!config.billingApiUrl}
-          linkedAccountsEnabled={config.linkedAccountsEnabled}
-        />
+        <Sidebar isBannerVisible={isBannerVisible} billingEnabled={!!config.billingApiUrl} version={config.version} />
         <SidebarInset className="overflow-hidden">
           <div className="relative md:hidden px-6 pt-4">
             <SidebarTrigger className="[&_svg]:size-5" />

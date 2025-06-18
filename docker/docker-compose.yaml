@@ -1,0 +1,142 @@
+name: daytona
+services:
+  api:
+    image: daytonaio/daytona-api
+    privileged: true
+    ports:
+      - 3000:3000
+    networks:
+      - daytona-network
+
+  proxy:
+    image: daytonaio/daytona-proxy
+    networks:
+      - daytona-network
+    ports:
+      - 4000:4000
+
+  runner:
+    image: daytonaio/daytona-runner
+    privileged: true
+    networks:
+      - daytona-network
+    ports:
+      - 3003:3003
+
+  ssh-gateway:
+    image: daytonaio/daytona-ssh-gateway
+    networks:
+      - daytona-network
+    ports:
+      - 2222:2222
+
+  dex:
+    image: dexidp/dex:v2.42.0
+    volumes:
+      - ./dex/config.yaml:/etc/dex/config.yaml
+    command: ['dex', 'serve', '/etc/dex/config.yaml']
+    networks:
+      - daytona-network
+    ports:
+      - 5556:5556
+
+  db:
+    image: postgres:11.9
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=user
+      - POSTGRES_DB=daytona
+    networks:
+      - daytona-network
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@daytona.io
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    user: root
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./pgadmin4/pgpass:/pgpass
+    depends_on:
+      - db
+    ports:
+      - 5050:80
+    networks:
+      - daytona-network
+
+  redis:
+    image: redis:latest
+    networks:
+      - daytona-network
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main
+    restart: always
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Docker Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://localhost:6000
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=1000
+    networks:
+      - daytona-network
+    ports:
+      - 5100:5100
+
+  registry:
+    image: registry:2.8.2
+    restart: always
+    environment:
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '[http://registry-ui.example.com]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_HTTP_ADDR: registry:6000
+    volumes:
+      - registry:/var/lib/registry
+    networks:
+      - daytona-network
+    ports:
+      - 6000:6000
+
+  maildev:
+    image: maildev/maildev
+    networks:
+      - daytona-network
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_IDENTITY_STS_EXPIRY="24h"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - daytona-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.67.0
+    networks:
+      - daytona-network
+
+volumes:
+  registry: {}
+  minio_data: {}
+
+networks:
+  daytona-network:
+    driver: bridge

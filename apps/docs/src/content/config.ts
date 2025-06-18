@@ -404,6 +404,15 @@ export const getSidebarConfig = (
             icon: 'chart.svg',
           },
         },
+        {
+          type: 'link',
+          href: localizePath('/docs/running-locally', locale),
+          label: labels['sidebarconfig.runningLocally'],
+          disablePagination: true,
+          attrs: {
+            icon: 'computer.svg',
+          },
+        },
       ],
     },
     {

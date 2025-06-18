@@ -1380,6 +1380,9 @@ const docTemplate = `{
             "properties": {
                 "metrics": {
                     "$ref": "#/definitions/RunnerMetrics"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },

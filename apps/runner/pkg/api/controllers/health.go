@@ -5,6 +5,7 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/daytonaio/runner/internal"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,6 +21,6 @@ import (
 func HealthCheck(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{
 		"status":  "ok",
-		"version": "0.0.1",
+		"version": internal.Version,
 	})
 }

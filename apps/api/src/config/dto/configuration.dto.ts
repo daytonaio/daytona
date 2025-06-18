@@ -69,6 +69,13 @@ export class OidcConfig {
 @ApiExtraModels(Announcement)
 @ApiSchema({ name: 'DaytonaConfiguration' })
 export class ConfigurationDto {
+  @ApiProperty({
+    description: 'Daytona version',
+    example: '0.0.1',
+  })
+  @IsString()
+  version: string
+
   @ApiPropertyOptional({
     description: 'PostHog configuration',
     type: PosthogConfig,
@@ -154,9 +161,19 @@ export class ConfigurationDto {
   @IsOptional()
   billingApiUrl?: string
 
+  @ApiPropertyOptional({
+    description: 'SSH Gateway command',
+    example: 'ssh -p 2222 {{TOKEN}}@localhost',
+  })
+  @IsOptional()
+  @IsString()
+  sshGatewayCommand?: string
+
   constructor(configService: TypedConfigService) {
+    this.version = configService.getOrThrow('version')
+
     this.oidc = {
-      issuer: configService.getOrThrow('oidc.issuer'),
+      issuer: configService.get('oidc.publicIssuer') || configService.getOrThrow('oidc.issuer'),
       clientId: configService.getOrThrow('oidc.clientId'),
       audience: configService.getOrThrow('oidc.audience'),
     }
@@ -167,6 +184,8 @@ export class ConfigurationDto {
     this.maxAutoArchiveInterval = configService.getOrThrow('maxAutoArchiveInterval')
     this.maintananceMode = configService.getOrThrow('maintananceMode')
     this.environment = configService.getOrThrow('environment')
+
+    this.sshGatewayCommand = configService.get('sshGatewayCommand')
 
     if (configService.get('billingApiUrl')) {
       this.billingApiUrl = configService.get('billingApiUrl')

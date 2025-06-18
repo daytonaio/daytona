@@ -30,6 +30,7 @@ class DaytonaConfiguration(BaseModel):
     """
     DaytonaConfiguration
     """ # noqa: E501
+    version: StrictStr = Field(description="Daytona version")
     posthog: Optional[PosthogConfig] = Field(default=None, description="PostHog configuration")
     oidc: OidcConfig = Field(description="OIDC configuration")
     linked_accounts_enabled: StrictBool = Field(description="Whether linked accounts are enabled", alias="linkedAccountsEnabled")
@@ -42,8 +43,9 @@ class DaytonaConfiguration(BaseModel):
     maintanance_mode: StrictBool = Field(description="Whether maintenance mode is enabled", alias="maintananceMode")
     environment: StrictStr = Field(description="Current environment")
     billing_api_url: Optional[StrictStr] = Field(default=None, description="Billing API URL", alias="billingApiUrl")
+    ssh_gateway_command: Optional[StrictStr] = Field(default=None, description="SSH Gateway command", alias="sshGatewayCommand")
     additional_properties: Dict[str, Any] = {}
-    __properties: ClassVar[List[str]] = ["posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl"]
+    __properties: ClassVar[List[str]] = ["version", "posthog", "oidc", "linkedAccountsEnabled", "announcements", "pylonAppId", "proxyTemplateUrl", "defaultSnapshot", "dashboardUrl", "maxAutoArchiveInterval", "maintananceMode", "environment", "billingApiUrl", "sshGatewayCommand"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -116,6 +118,7 @@ class DaytonaConfiguration(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
+            "version": obj.get("version"),
             "posthog": PosthogConfig.from_dict(obj["posthog"]) if obj.get("posthog") is not None else None,
             "oidc": OidcConfig.from_dict(obj["oidc"]) if obj.get("oidc") is not None else None,
             "linkedAccountsEnabled": obj.get("linkedAccountsEnabled"),
@@ -132,7 +135,8 @@ class DaytonaConfiguration(BaseModel):
             "maxAutoArchiveInterval": obj.get("maxAutoArchiveInterval"),
             "maintananceMode": obj.get("maintananceMode"),
             "environment": obj.get("environment"),
-            "billingApiUrl": obj.get("billingApiUrl")
+            "billingApiUrl": obj.get("billingApiUrl"),
+            "sshGatewayCommand": obj.get("sshGatewayCommand")
         })
         # store additional fields in additional_properties
         for _key in obj.keys():

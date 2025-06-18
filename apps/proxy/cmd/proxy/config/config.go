@@ -25,10 +25,11 @@ type Config struct {
 }
 
 type OidcConfig struct {
-	ClientId     string `envconfig:"CLIENT_ID" validate:"required"`
-	ClientSecret string `envconfig:"CLIENT_SECRET"`
-	Domain       string `envconfig:"DOMAIN" validate:"required"`
-	Audience     string `envconfig:"AUDIENCE" validate:"required"`
+	ClientId     string  `envconfig:"CLIENT_ID" validate:"required"`
+	ClientSecret string  `envconfig:"CLIENT_SECRET"`
+	Domain       string  `envconfig:"DOMAIN" validate:"required"`
+	PublicDomain *string `envconfig:"PUBLIC_DOMAIN"`
+	Audience     string  `envconfig:"AUDIENCE" validate:"required"`
 }
 
 type RedisConfig struct {

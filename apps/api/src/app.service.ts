@@ -15,7 +15,7 @@ import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 import { SchedulerRegistry } from '@nestjs/schedule'
 
-const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
+export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap, OnApplicationShutdown {
@@ -78,7 +78,15 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       role: SystemRole.ADMIN,
     })
     const personalOrg = await this.organizationService.findPersonal(user.id)
-    await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
+    const { value } = await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
+    this.logger.log(
+      `
+=========================================
+=========================================
+Admin user created with API key: ${value}
+=========================================
+=========================================`,
+    )
   }
 
   private async initializeTransientRegistry(): Promise<void> {
@@ -168,5 +176,7 @@ export class AppService implements OnApplicationBootstrap, OnApplicationShutdown
       },
       true,
     )
+
+    this.logger.log('Default snapshot created successfully')
   }
 }
