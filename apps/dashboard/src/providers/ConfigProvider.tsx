@@ -22,8 +22,11 @@ type Props = {
 export function ConfigProvider(props: Props) {
   const config = getConfig()
 
-  const oidcConfig: AuthProviderProps = useMemo(
-    () => ({
+  const oidcConfig: AuthProviderProps = useMemo(() => {
+    const isLocalhost = window.location.hostname === 'localhost'
+    const stateStore = isLocalhost ? window.sessionStorage : new InMemoryWebStorage()
+
+    return {
       authority: config.oidc.issuer,
       client_id: config.oidc.clientId,
       extraQueryParams: {
@@ -33,7 +36,7 @@ export function ConfigProvider(props: Props) {
       redirect_uri: window.location.origin,
       staleStateAgeInSeconds: 60,
       accessTokenExpiringNotificationTimeInSeconds: 290,
-      userStore: new WebStorageStateStore({ store: new InMemoryWebStorage() }),
+      userStore: new WebStorageStateStore({ store: stateStore }),
       onSigninCallback: (user) => {
         const state = user?.state as { returnTo?: string } | undefined
         const targetUrl = state?.returnTo || RoutePath.DASHBOARD
@@ -41,9 +44,8 @@ export function ConfigProvider(props: Props) {
         window.dispatchEvent(new PopStateEvent('popstate'))
       },
       post_logout_redirect_uri: window.location.origin,
-    }),
-    [config],
-  )
+    }
+  }, [config])
 
   return (
     <ConfigContext.Provider value={{ ...config, apiUrl }}>

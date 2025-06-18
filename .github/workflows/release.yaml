@@ -26,12 +26,11 @@ env:
   NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILDX_NO_DEFAULT_ATTESTATIONS: 1
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/daytonaio/daytona-devcontainer:main
+    runs-on: release-runner
 
     steps:
       - name: Checkout code
@@ -40,13 +39,35 @@ jobs:
           fetch-tags: true
           fetch-depth: 0
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: 'temurin'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+
       - name: Configure git
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
           git config --global user.name "Daytona Release Bot"
           git config --global user.email "daytona-release@users.noreply.github.com"
 
-      - name: Dependencies
+      - name: Project dependencies
         run: |
           corepack enable
           python3 -m pip install --upgrade pip
@@ -88,8 +109,106 @@ jobs:
       - name: Create release
         run: yarn nx release ${{ inputs.version }} --skip-publish --verbose
 
+      - name: Upload computer-use artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: computer-use-amd64
+          path: dist/libs/computer-use-amd64
+          retention-days: 1
+          overwrite: true
+
       # Don't publish projects with nx for now
       - name: Publish projects
         run: |
           source .venv/bin/activate
           yarn publish
+
+  # Separately build docker images for AMD64 and ARM64
+  docker_build:
+    needs: publish
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - runner: release-runner
+            arch: amd64
+          - runner: ['self-hosted', 'ARM64']
+            arch: arm64
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+
+      - name: Download computer-use artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: computer-use-amd64
+          path: dist/libs/
+
+      - name: Check computer-use artifact
+        run: |
+          ls -la dist/libs/
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: System dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y gcc libx11-dev libxtst-dev
+          corepack enable
+          python3 -m pip install --upgrade pip
+          python3 -m pip install "poetry==2.1.3"
+          go install github.com/swaggo/swag/cmd/swag@v1.16.4
+      - name: Project dependencies
+        run: |
+          yarn install --immutable
+          poetry lock
+          poetry install
+          go work sync
+          go env -w GOFLAGS="-buildvcs=false"
+
+      - name: Publish docker images
+        run: VERSION=${{ inputs.version }} ARCH="-${{ matrix.arch }}" yarn docker:production
+
+  # Push combined manifest
+  docker_push_manifest:
+    needs: docker_build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Project dependencies
+        run: |
+          corepack enable
+          yarn install --immutable
+      - name: Log in to the Container registry
+        uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
+        with:
+          registry: docker.io
+          username: daytonaio
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: Push manifest
+        run: |
+          VERSION=${{ inputs.version }} yarn push-manifest

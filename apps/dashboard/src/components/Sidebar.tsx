@@ -59,10 +59,10 @@ import { useWebhooks } from '@/hooks/useWebhooks'
 interface SidebarProps {
   isBannerVisible: boolean
   billingEnabled: boolean
-  linkedAccountsEnabled: boolean
+  version: string
 }
 
-export function Sidebar({ isBannerVisible, billingEnabled, linkedAccountsEnabled }: SidebarProps) {
+export function Sidebar({ isBannerVisible, billingEnabled, version }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
@@ -372,6 +372,11 @@ export function Sidebar({ isBannerVisible, billingEnabled, linkedAccountsEnabled
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+          </SidebarMenuItem>
+          <SidebarMenuItem key="version">
+            <div className="flex items-center w-full justify-center gap-2 pt-2">
+              <span className="text-xs text-muted-foreground">Version {version}</span>
+            </div>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>

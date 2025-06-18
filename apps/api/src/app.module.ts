@@ -51,7 +51,7 @@ import { OpenFeaturePostHogProvider } from './common/providers/openfeature-posth
           database: configService.getOrThrow('database.database'),
           autoLoadEntities: true,
           migrations: [join(__dirname, 'migrations/**/*{.ts,.js}')],
-          migrationsRun: !configService.getOrThrow('production'),
+          migrationsRun: configService.get('runMigrations') || !configService.getOrThrow('production'),
           namingStrategy: new CustomNamingStrategy(),
           manualInitialization: configService.get('skipConnections'),
         }

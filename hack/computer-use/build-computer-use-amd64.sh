@@ -2,6 +2,12 @@
 
 set -e
 
+# Skip build if SKIP_COMPUTER_USE_BUILD is set
+if [ -n "$SKIP_COMPUTER_USE_BUILD" ]; then
+    echo "Skipping computer-use build"
+    exit 0
+fi
+
 # Check if current architecture is amd64
 if [ "$(uname -m)" = "x86_64" ]; then
     echo "Building computer-use for amd64 architecture (native build)..."
