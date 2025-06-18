@@ -675,8 +675,7 @@ export class SnapshotManager {
 
       if (!snapshot.buildInfo) {
         // Snapshots that have gone through the build process are already in the internal registry
-        const internalSnapshotName = await this.pushSnapshotToInternalRegistry(snapshot.id)
-        snapshot.internalName = internalSnapshotName
+        snapshot.internalName = await this.pushSnapshotToInternalRegistry(snapshot.id)
       }
       const runner = await this.runnerRepository.findOne({
         where: {

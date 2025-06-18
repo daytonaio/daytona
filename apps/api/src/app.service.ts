@@ -14,7 +14,7 @@ import { SnapshotService } from './sandbox/services/snapshot.service'
 import { SystemRole } from './user/enums/system-role.enum'
 import { TypedConfigService } from './config/typed-config.service'
 
-const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
+export const DAYTONA_ADMIN_USER_ID = 'daytona-admin'
 
 @Injectable()
 export class AppService implements OnApplicationBootstrap {
@@ -60,7 +60,15 @@ export class AppService implements OnApplicationBootstrap {
       role: SystemRole.ADMIN,
     })
     const personalOrg = await this.organizationService.findPersonal(user.id)
-    await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
+    const { value } = await this.apiKeyService.createApiKey(personalOrg.id, user.id, DAYTONA_ADMIN_USER_ID, [])
+    this.logger.log(
+      `
+=========================================
+=========================================
+Admin user created with API key: ${value}
+=========================================
+=========================================`,
+    )
   }
 
   private async initializeTransientRegistry(): Promise<void> {
@@ -150,5 +158,7 @@ export class AppService implements OnApplicationBootstrap {
       },
       true,
     )
+
+    this.logger.log('Default snapshot created successfully')
   }
 }

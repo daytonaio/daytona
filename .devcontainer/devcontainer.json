@@ -67,7 +67,7 @@
     // "install-deps": "git config --global --add safe.directory ${containerWorkspaceFolder} && yarn",
     "env": "test -f .env.local || touch .env.local"
   },
-  "postStartCommand": "yarn && poetry lock && poetry install",
+  "postStartCommand": "yarn && poetry lock && poetry install && docker buildx create --name builder --driver-opt network=host --config .devcontainer/buildkitd.toml --driver docker-container --use",
   "postAttachCommand": "",
   "forwardPorts": [5556, "pgadmin:80", "registry-ui:5100", "maildev:1080", "minio:9000", "minio:9001", "jaeger:16686"],
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
