@@ -74,7 +74,10 @@ const configuration = {
     domain: process.env.PROXY_DOMAIN,
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
+    templateUrl: process.env.PROXY_TEMPLATE_URL,
   },
+  pylonAppId: process.env.PYLON_APP_ID,
+  billingApiUrl: process.env.BILLING_API_URL,
 }
 
 export { configuration }
