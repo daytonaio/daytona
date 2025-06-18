@@ -58,9 +58,11 @@ import { DAYTONA_DOCS_URL, DAYTONA_SLACK_URL } from '@/constants/ExternalLinks'
 
 interface SidebarProps {
   isBannerVisible: boolean
+  billingEnabled: boolean
+  linkedAccountsEnabled: boolean
 }
 
-export function Sidebar({ isBannerVisible }: SidebarProps) {
+export function Sidebar({ isBannerVisible, billingEnabled, linkedAccountsEnabled }: SidebarProps) {
   const { theme, setTheme } = useTheme()
   const { user, signoutRedirect } = useAuth()
   const navigate = useNavigate()
@@ -89,10 +91,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
       arr.push({ icon: <LockKeyhole className="w-5 h-5" />, label: 'Limits', path: RoutePath.LIMITS })
     }
 
-    if (
-      import.meta.env.VITE_BILLING_API_URL &&
-      authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER
-    ) {
+    if (billingEnabled && authenticatedUserOrganizationMember?.role === OrganizationUserRoleEnum.OWNER) {
       arr.push({ icon: <CreditCard className="w-5 h-5" />, label: 'Billing', path: RoutePath.BILLING })
     }
 
@@ -106,7 +105,12 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
     }
     arr.push({ icon: <Settings className="w-5 h-5" />, label: 'Settings', path: RoutePath.SETTINGS })
     return arr
-  }, [authenticatedUserOrganizationMember?.role, selectedOrganization?.personal, authenticatedUserHasPermission])
+  }, [
+    authenticatedUserOrganizationMember?.role,
+    selectedOrganization?.personal,
+    authenticatedUserHasPermission,
+    billingEnabled,
+  ])
 
   const handleSignOut = () => {
     signoutRedirect()
@@ -249,7 +253,7 @@ export function Sidebar({ isBannerVisible }: SidebarProps) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent side="top" className="w-[--radix-popper-anchor-width]">
-                {import.meta.env.VITE_LINKED_ACCOUNTS_ENABLED === 'true' && (
+                {linkedAccountsEnabled && (
                   <DropdownMenuItem asChild>
                     <Button
                       variant="ghost"

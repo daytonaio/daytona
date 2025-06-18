@@ -55,6 +55,7 @@ interface DataTableProps {
   data: Sandbox[]
   loadingSandboxes: Record<string, boolean>
   loading: boolean
+  proxyTemplateUrl: string
   handleStart: (id: string) => void
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
@@ -66,6 +67,7 @@ export function SandboxTable({
   data,
   loadingSandboxes,
   loading,
+  proxyTemplateUrl,
   handleStart,
   handleStop,
   handleDelete,
@@ -114,6 +116,7 @@ export function SandboxTable({
     loadingSandboxes,
     writePermitted,
     deletePermitted,
+    proxyTemplateUrl,
   })
   const table = useReactTable({
     data,
@@ -323,6 +326,7 @@ const getColumns = ({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  proxyTemplateUrl,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -331,6 +335,7 @@ const getColumns = ({
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  proxyTemplateUrl: string
 }): ColumnDef<Sandbox>[] => {
   const columns: ColumnDef<Sandbox>[] = [
     {
@@ -598,10 +603,7 @@ const getColumns = ({
           )
         }
 
-        const terminalUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-          '{{sandboxId}}',
-          row.original.id,
-        )
+        const terminalUrl = proxyTemplateUrl.replace('{{PORT}}', '22222').replace('{{sandboxId}}', row.original.id)
         if (!terminalUrl) {
           return null
         }
