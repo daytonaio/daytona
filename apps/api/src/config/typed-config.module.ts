@@ -7,6 +7,7 @@ import { Global, Module, DynamicModule } from '@nestjs/common'
 import { ConfigModule as NestConfigModule, ConfigModuleOptions } from '@nestjs/config'
 import { TypedConfigService } from './typed-config.service'
 import { configuration } from './configuration'
+import { ConfigController } from './config.controller'
 
 @Global()
 @Module({
@@ -16,6 +17,7 @@ import { configuration } from './configuration'
       load: [() => configuration],
     }),
   ],
+  controllers: [ConfigController],
   providers: [TypedConfigService],
   exports: [TypedConfigService],
 })

@@ -18,6 +18,7 @@ import {
 } from '@daytonaio/api-client'
 import axios, { AxiosError } from 'axios'
 import { DaytonaError } from './errors'
+import { DashboardConfig } from '@/types/DashboardConfig'
 
 export class ApiClient {
   private config: Configuration
@@ -32,9 +33,9 @@ export class ApiClient {
   private _toolboxApi: ToolboxApi
   private _auditApi: AuditApi
 
-  constructor(accessToken: string) {
+  constructor(config: DashboardConfig, accessToken: string) {
     this.config = new Configuration({
-      basePath: import.meta.env.VITE_API_URL,
+      basePath: config.apiUrl,
       accessToken: accessToken,
     })
 
@@ -63,7 +64,7 @@ export class ApiClient {
     this._apiKeyApi = new ApiKeysApi(this.config, undefined, axiosInstance)
     this._dockerRegistryApi = new DockerRegistryApi(this.config, undefined, axiosInstance)
     this._organizationsApi = new OrganizationsApi(this.config, undefined, axiosInstance)
-    this._billingApi = new BillingApiClient(import.meta.env.VITE_BILLING_API_URL || window.location.origin, accessToken)
+    this._billingApi = new BillingApiClient(config.billingApiUrl || window.location.origin, accessToken)
     this._volumeApi = new VolumesApi(this.config, undefined, axiosInstance)
     this._toolboxApi = new ToolboxApi(this.config, undefined, axiosInstance)
     this._auditApi = new AuditApi(this.config, undefined, axiosInstance)
@@ -116,7 +117,7 @@ export class ApiClient {
   public async webhookRequest(method: string, url: string, data?: any) {
     // Use the existing axios instance that's already configured with interceptors
     const axiosInstance = axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: this.config.basePath,
       headers: {
         Authorization: `Bearer ${this.config.accessToken}`,
       },
@@ -131,7 +132,7 @@ export class ApiClient {
 
   public get axiosInstance() {
     return axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: this.config.basePath,
       headers: {
         Authorization: `Bearer ${this.config.accessToken}`,
       },
