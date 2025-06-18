@@ -17,10 +17,12 @@
         "cwd": "{projectRoot}",
         "command": "astro build"
       },
-      "dependsOn": [
-        "update-llms",
-        "update-search"
-      ]
+      "configurations": {
+        "production": {
+          "command": "astro build --prod"
+        }
+      },
+      "dependsOn": ["update-llms", "update-search"]
     },
     "update-cli-reference": {
       "executor": "nx:run-commands",
@@ -49,6 +51,12 @@
       "options": {
         "cwd": "{projectRoot}/tools",
         "command": "node ./update-search.js"
+      }
+    },
+    "check-version-env": {},
+    "docker": {
+      "options": {
+        "target": "docs"
       }
     }
   },

@@ -1,0 +1,105 @@
+name: daytona
+services:
+  api:
+    image: daytonaio/daytona-api:0.2.4
+    privileged: true
+    ports:
+      - 3000:3000
+      - 3003:3003
+      - 4000:4000
+      - 6000:6000
+      - 5556:5556
+      - 5100:5100
+  proxy:
+    image: daytonaio/daytona-proxy:0.2.13
+    network_mode: service:api
+
+  runner:
+    image: daytonaio/daytona-runner:0.2.3
+    privileged: true
+    network_mode: service:api
+
+  dex:
+    image: dexidp/dex:v2.42.0
+    volumes:
+      - ./dex/config.yaml:/etc/dex/config.yaml
+    command: ['dex', 'serve', '/etc/dex/config.yaml']
+    network_mode: service:api
+
+  db:
+    image: postgres:11.9
+    environment:
+      - POSTGRES_PASSWORD=pass
+      - POSTGRES_USER=user
+      - POSTGRES_DB=daytona
+
+  pgadmin:
+    image: dpage/pgadmin4:9.2.0
+    entrypoint: ['sh', '-c', 'chmod 600 /pgpass && exec /entrypoint.sh']
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dev@daytona.io
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: 'False'
+    user: root
+    volumes:
+      - ./pgadmin4/servers.json:/pgadmin4/servers.json
+      - ./pgadmin4/pgpass:/pgpass
+    depends_on:
+      - db
+    ports:
+      - 5050:80
+
+  redis:
+    image: redis:latest
+
+  registry-ui:
+    image: joxit/docker-registry-ui:main
+    restart: always
+    environment:
+      - SINGLE_REGISTRY=true
+      - REGISTRY_TITLE=Docker Registry UI
+      - DELETE_IMAGES=true
+      - SHOW_CONTENT_DIGEST=true
+      - NGINX_PROXY_PASS_URL=http://localhost:6000
+      - SHOW_CATALOG_NB_TAGS=true
+      - CATALOG_MIN_BRANCHES=1
+      - CATALOG_MAX_BRANCHES=1
+      - TAGLIST_PAGE_SIZE=100
+      - REGISTRY_SECURED=false
+      - CATALOG_ELEMENTS_LIMIT=1000
+    network_mode: service:api
+  registry:
+    image: registry:2.8.2
+    restart: always
+    environment:
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Origin: '[http://registry-ui.example.com]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Methods: '[HEAD,GET,OPTIONS,DELETE]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Credentials: '[true]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Allow-Headers: '[Authorization,Accept,Cache-Control]'
+      REGISTRY_HTTP_HEADERS_Access-Control-Expose-Headers: '[Docker-Content-Digest]'
+      REGISTRY_STORAGE_DELETE_ENABLED: 'true'
+      REGISTRY_HTTP_ADDR: localhost:6000
+    volumes:
+      - registry:/var/lib/registry
+    network_mode: service:api
+
+  maildev:
+    image: maildev/maildev
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+      - MINIO_IDENTITY_STS_EXPIRY="24h"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.67.0
+
+volumes:
+  registry: {}
+  minio_data: {}

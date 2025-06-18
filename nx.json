@@ -12,7 +12,11 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml", "{workspaceRoot}/go.work"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci.yml",
+      "{workspaceRoot}/go.work",
+      "{workspaceRoot}/go.work.sum"
+    ]
   },
   "neverConnectToCloud": true,
   "plugins": [
@@ -92,6 +96,42 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "check-version-env": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "if [ -z \"$VERSION\" ]; then echo \"VERSION is not set\" && exit 1; else echo \"VERSION is set to: $VERSION\"; fi"
+      }
+    },
+    "docker": {
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "context": "{workspaceRoot}",
+        "platforms": ["linux/amd64", "linux/arm64"],
+        "file": "docker/Dockerfile",
+        "tags": ["daytonaio/daytona-{projectName}:$VERSION"],
+        "build-args": [
+          "VERSION=$VERSION",
+          "PUBLIC_ALGOLIA_APP_ID=$PUBLIC_ALGOLIA_APP_ID",
+          "PUBLIC_ALGOLIA_API_KEY=$PUBLIC_ALGOLIA_API_KEY"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "push": true
+        },
+        "local-registry": {
+          "push": true,
+          "tags": ["registry:5000/daytonaio/daytona-{projectName}:$VERSION"]
+        }
+      },
+      "dependsOn": [
+        "check-version-env",
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
     }
   },
   "release": {
