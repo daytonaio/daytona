@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { Sidebar } from '@/components/Sidebar'
@@ -30,9 +30,14 @@ const Dashboard: React.FC = () => {
     }
   }, [selectedOrganization])
 
-  // TODO
-  const bannerText = 'config.announcements'
-  const bannerLearnMoreUrl = 'config.announcementBannerLearnMoreUrl'
+  const [bannerText, bannerLearnMoreUrl] = useMemo(() => {
+    if (!config.announcements || Object.entries(config.announcements).length === 0) {
+      return [null, null]
+    }
+
+    return [Object.values(config.announcements)[0].text, Object.values(config.announcements)[0].learnMoreUrl]
+  }, [config.announcements])
+
   const [isBannerVisible, setIsBannerVisible] = useState(false)
 
   useEffect(() => {
