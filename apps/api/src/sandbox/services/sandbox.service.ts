@@ -560,10 +560,6 @@ export class SandboxService {
       if (runner.state !== RunnerState.READY) {
         throw new SandboxError('Runner is not ready')
       }
-
-      if (runner.unschedulable && sandbox.backupState !== BackupState.COMPLETED) {
-        throw new SandboxError('Runner is unschedulable - can not start sandbox until the backup is completed')
-      }
     } else {
       //  restore operation
       //  like a new sandbox creation, we need to validate quotas
