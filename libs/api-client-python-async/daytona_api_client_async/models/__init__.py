@@ -16,6 +16,7 @@
 
 # import models into model package
 from daytona_api_client_async.models.account_provider import AccountProvider
+from daytona_api_client_async.models.announcement import Announcement
 from daytona_api_client_async.models.api_key_list import ApiKeyList
 from daytona_api_client_async.models.api_key_response import ApiKeyResponse
 from daytona_api_client_async.models.build_info import BuildInfo
@@ -38,6 +39,7 @@ from daytona_api_client_async.models.create_snapshot import CreateSnapshot
 from daytona_api_client_async.models.create_user import CreateUser
 from daytona_api_client_async.models.create_volume import CreateVolume
 from daytona_api_client_async.models.create_workspace import CreateWorkspace
+from daytona_api_client_async.models.daytona_configuration import DaytonaConfiguration
 from daytona_api_client_async.models.docker_registry import DockerRegistry
 from daytona_api_client_async.models.execute_request import ExecuteRequest
 from daytona_api_client_async.models.execute_response import ExecuteResponse
@@ -60,6 +62,7 @@ from daytona_api_client_async.models.lsp_location import LspLocation
 from daytona_api_client_async.models.lsp_server_request import LspServerRequest
 from daytona_api_client_async.models.lsp_symbol import LspSymbol
 from daytona_api_client_async.models.match import Match
+from daytona_api_client_async.models.oidc_config import OidcConfig
 from daytona_api_client_async.models.organization import Organization
 from daytona_api_client_async.models.organization_invitation import OrganizationInvitation
 from daytona_api_client_async.models.organization_role import OrganizationRole
@@ -68,6 +71,7 @@ from daytona_api_client_async.models.organization_user import OrganizationUser
 from daytona_api_client_async.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client_async.models.port_preview_url import PortPreviewUrl
 from daytona_api_client_async.models.position import Position
+from daytona_api_client_async.models.posthog_config import PosthogConfig
 from daytona_api_client_async.models.project_dir_response import ProjectDirResponse
 from daytona_api_client_async.models.range import Range
 from daytona_api_client_async.models.registry_push_access_dto import RegistryPushAccessDto

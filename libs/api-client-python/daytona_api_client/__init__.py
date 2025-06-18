@@ -19,6 +19,7 @@ __version__ = "0.0.0-dev"
 
 # import apis into sdk package
 from daytona_api_client.api.api_keys_api import ApiKeysApi
+from daytona_api_client.api.config_api import ConfigApi
 from daytona_api_client.api.docker_registry_api import DockerRegistryApi
 from daytona_api_client.api.object_storage_api import ObjectStorageApi
 from daytona_api_client.api.organizations_api import OrganizationsApi
@@ -44,6 +45,7 @@ from daytona_api_client.exceptions import ApiException
 
 # import models into sdk package
 from daytona_api_client.models.account_provider import AccountProvider
+from daytona_api_client.models.announcement import Announcement
 from daytona_api_client.models.api_key_list import ApiKeyList
 from daytona_api_client.models.api_key_response import ApiKeyResponse
 from daytona_api_client.models.build_info import BuildInfo
@@ -66,6 +68,7 @@ from daytona_api_client.models.create_snapshot import CreateSnapshot
 from daytona_api_client.models.create_user import CreateUser
 from daytona_api_client.models.create_volume import CreateVolume
 from daytona_api_client.models.create_workspace import CreateWorkspace
+from daytona_api_client.models.daytona_configuration import DaytonaConfiguration
 from daytona_api_client.models.docker_registry import DockerRegistry
 from daytona_api_client.models.execute_request import ExecuteRequest
 from daytona_api_client.models.execute_response import ExecuteResponse
@@ -88,6 +91,7 @@ from daytona_api_client.models.lsp_location import LspLocation
 from daytona_api_client.models.lsp_server_request import LspServerRequest
 from daytona_api_client.models.lsp_symbol import LspSymbol
 from daytona_api_client.models.match import Match
+from daytona_api_client.models.oidc_config import OidcConfig
 from daytona_api_client.models.organization import Organization
 from daytona_api_client.models.organization_invitation import OrganizationInvitation
 from daytona_api_client.models.organization_role import OrganizationRole
@@ -96,6 +100,7 @@ from daytona_api_client.models.organization_user import OrganizationUser
 from daytona_api_client.models.paginated_snapshots_dto import PaginatedSnapshotsDto
 from daytona_api_client.models.port_preview_url import PortPreviewUrl
 from daytona_api_client.models.position import Position
+from daytona_api_client.models.posthog_config import PosthogConfig
 from daytona_api_client.models.project_dir_response import ProjectDirResponse
 from daytona_api_client.models.range import Range
 from daytona_api_client.models.registry_push_access_dto import RegistryPushAccessDto
