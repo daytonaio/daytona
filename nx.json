@@ -12,7 +12,11 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml", "{workspaceRoot}/go.work"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci.yml",
+      "{workspaceRoot}/go.work",
+      "{workspaceRoot}/go.work.sum"
+    ]
   },
   "neverConnectToCloud": true,
   "plugins": [
@@ -92,6 +96,51 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "check-version-env": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "if [ -z \"$VERSION\" ]; then echo \"VERSION is not set\" && exit 1; else echo \"VERSION is set to: $VERSION\"; fi"
+      }
+    },
+    "docker": {
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "context": "{workspaceRoot}",
+        "file": "{projectRoot}/Dockerfile",
+        "tags": ["daytonaio/daytona-{projectName}:$VERSION$ARCH"],
+        "build-args": ["VERSION=$VERSION"]
+      },
+      "configurations": {
+        "production": {
+          "push": true
+        },
+        "production-multi-platform": {
+          "push": true,
+          "platforms": ["linux/amd64", "linux/arm64"],
+          "tags": ["daytonaio/daytona-{projectName}:$VERSION"]
+        },
+        "local-registry": {
+          "push": true,
+          "tags": [
+            "registry:5000/daytonaio/daytona-{projectName}:$VERSION",
+            "registry:5000/daytonaio/daytona-{projectName}:latest"
+          ]
+        }
+      },
+      "dependsOn": ["check-version-env"]
+    },
+    "push-manifest": {
+      "executor": "nx:run-commands",
+      "options": {
+        "parallel": false,
+        "commands": [
+          "docker manifest create daytonaio/daytona-{projectName}:$VERSION daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push daytonaio/daytona-{projectName}:$VERSION",
+          "docker manifest create daytonaio/daytona-{projectName}:latest daytonaio/daytona-{projectName}:$VERSION-amd64 daytonaio/daytona-{projectName}:$VERSION-arm64",
+          "docker manifest push daytonaio/daytona-{projectName}:latest"
+        ]
+      }
     }
   },
   "release": {

@@ -14,12 +14,14 @@ import { BillingContext, IBillingContext } from '@/contexts/BillingContext'
 import { handleApiError } from '@/lib/error-handling'
 import { suspend } from 'suspend-react'
 import { OrganizationUserRoleEnum } from '@daytonaio/api-client'
+import { useConfig } from '@/hooks/useConfig'
 
 interface BillingProviderProps {
   children: ReactNode
 }
 
 export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) => {
+  const config = useConfig()
   const { billingApi } = useApi()
   const { selectedOrganization, authenticatedUserOrganizationMember } = useSelectedOrganization()
 
@@ -30,7 +32,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   const getWallet = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
+      if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return null
       }
       try {
@@ -40,21 +42,21 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
         throw error
       }
     },
-    [billingApi, isOwner],
+    [billingApi, isOwner, config.billingApiUrl],
   )
 
   const getOrganizationTier = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
+      if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return null
       }
       return await billingApi.getOrganizationTier(selectedOrganizationId)
     },
-    [billingApi, isOwner],
+    [billingApi, isOwner, config.billingApiUrl],
   )
 
   const getTiers = useCallback(async () => {
-    if (!import.meta.env.VITE_BILLING_API_URL) {
+    if (!config.billingApiUrl) {
       return []
     }
     try {
@@ -63,26 +65,26 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
       handleApiError(error, 'Failed to fetch tiers')
       throw error
     }
-  }, [billingApi])
+  }, [billingApi, config.billingApiUrl])
 
   const getOrganizationEmails = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
+      if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return []
       }
       return await billingApi.listOrganizationEmails(selectedOrganizationId)
     },
-    [billingApi, isOwner],
+    [billingApi, isOwner, config.billingApiUrl],
   )
 
   const getBillingPortalUrl = useCallback(
     async (selectedOrganizationId?: string) => {
-      if (!import.meta.env.VITE_BILLING_API_URL || !selectedOrganizationId || !isOwner()) {
+      if (!config.billingApiUrl || !selectedOrganizationId || !isOwner()) {
         return null
       }
       return await billingApi.getOrganizationBillingPortalUrl(selectedOrganizationId)
     },
-    [billingApi, isOwner],
+    [billingApi, isOwner, config.billingApiUrl],
   )
 
   // Wallet state
@@ -192,7 +194,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
 
   // Initialize data when organization changes
   useEffect(() => {
-    if (!import.meta.env.VITE_BILLING_API_URL) {
+    if (!config.billingApiUrl) {
       return
     }
 
@@ -212,6 +214,7 @@ export const BillingProvider: React.FC<BillingProviderProps> = ({ children }) =>
     }
   }, [
     selectedOrganization,
+    config.billingApiUrl,
     isOwner,
     refreshWallet,
     refreshTier,

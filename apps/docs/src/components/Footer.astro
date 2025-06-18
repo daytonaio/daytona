@@ -3,8 +3,9 @@ import { Image } from 'astro:assets'
 import textArrowIcon from '@assets/icons/text-arrow.svg?raw'
 import Default from '@astrojs/starlight/components/Footer.astro'
 import ThemeSelect from './ThemeSelect.astro'
-import { version } from '../../../../package.json'
 import { major, minor, patch } from 'semver'
+
+const version = import.meta.env.VERSION || '0.0.1'
 const [maj, min] = [major(version), minor(version)]
 const release = `${maj}.${min}`
 // TODO: switch to SDK
