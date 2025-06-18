@@ -114,12 +114,28 @@ func updateProfileWithLogin(tokenConfig *config.Token, apiKey *string) error {
 		}
 
 		if activeProfile.Api.Key == nil {
-			personalOrganizationId, err := common.GetPersonalOrganizationId(activeProfile)
-			if err != nil {
-				return err
-			}
+			// Check if user has an organization set and validate it still belongs to them
+			if activeProfile.ActiveOrganizationId != nil {
+				isValid, err := common.ValidateActiveOrganization(activeProfile, *activeProfile.ActiveOrganizationId)
+				if err != nil {
+					return err
+				}
 
-			activeProfile.ActiveOrganizationId = &personalOrganizationId
+				if !isValid {
+					selectedOrganizationId, err := common.SelectOrganizationForFirstTimeLogin(activeProfile)
+					if err != nil {
+						return err
+					}
+					activeProfile.ActiveOrganizationId = &selectedOrganizationId
+				}
+			} else {
+				// No organization set, prompt for selection
+				selectedOrganizationId, err := common.SelectOrganizationForFirstTimeLogin(activeProfile)
+				if err != nil {
+					return err
+				}
+				activeProfile.ActiveOrganizationId = &selectedOrganizationId
+			}
 		}
 	}
 
