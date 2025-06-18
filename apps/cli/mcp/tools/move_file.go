@@ -13,40 +13,46 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func MoveFile(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+type MoveFileArgs struct {
+	Id         *string `json:"id,omitempty"`
+	SourcePath *string `json:"source_path,omitempty"`
+	DestPath   *string `json:"dest_path,omitempty"`
+}
+
+func GetMoveFileTool() mcp.Tool {
+	return mcp.NewTool("move_file",
+		mcp.WithDescription("Move or rename a file in the Daytona sandbox."),
+		mcp.WithString("source_path", mcp.Required(), mcp.Description("Source path of the file to move.")),
+		mcp.WithString("dest_path", mcp.Required(), mcp.Description("Destination path where to move the file.")),
+		mcp.WithString("id", mcp.Required(), mcp.Description("ID of the sandbox to move the file in.")),
+	)
+}
+
+func MoveFile(ctx context.Context, request mcp.CallToolRequest, args MoveFileArgs) (*mcp.CallToolResult, error) {
 	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
 
-	sandboxId := ""
-	if id, ok := request.Params.Arguments["id"]; ok && id != nil {
-		if idStr, ok := id.(string); ok && idStr != "" {
-			sandboxId = idStr
-		}
-	}
-
-	if sandboxId == "" {
+	if args.Id == nil || *args.Id == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("sandbox ID is required")
 	}
 
 	// Get source and destination paths from request arguments
-	sourcePath, ok := request.Params.Arguments["source_path"].(string)
-	if !ok {
+	if args.SourcePath == nil || *args.SourcePath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("source_path parameter is required")
 	}
 
-	destPath, ok := request.Params.Arguments["dest_path"].(string)
-	if !ok {
+	if args.DestPath == nil || *args.DestPath == "" {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("dest_path parameter is required")
 	}
 
-	_, err = apiClient.ToolboxAPI.MoveFile(ctx, sandboxId).Source(sourcePath).Destination(destPath).Execute()
+	_, err = apiClient.ToolboxAPI.MoveFile(ctx, *args.Id).Source(*args.SourcePath).Destination(*args.DestPath).Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error moving file: %v", err)
 	}
 
-	log.Infof("Moved file from %s to %s", sourcePath, destPath)
+	log.Infof("Moved file from %s to %s", *args.SourcePath, *args.DestPath)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Moved file from %s to %s", sourcePath, destPath)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Moved file from %s to %s", *args.SourcePath, *args.DestPath)), nil
 }
