@@ -887,7 +887,11 @@ export class SandboxManager {
         throw new Error('No registry found for snapshot')
       }
 
-      const existingSnapshots = sandbox.existingBackupSnapshots.map((existingSnapshot) => existingSnapshot.snapshotName)
+      const existingSnapshots = sandbox.existingBackupSnapshots.map((existingSnapshot) =>
+        !existingSnapshot.snapshotName || existingSnapshot.snapshotName === ''
+          ? existingSnapshot.imageName
+          : existingSnapshot.snapshotName,
+      )
       let validBackupSnapshot
       let exists = false
 

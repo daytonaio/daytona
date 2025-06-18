@@ -119,6 +119,7 @@ export class Sandbox {
   })
   existingBackupSnapshots: Array<{
     snapshotName: string
+    imageName?: string
     createdAt: Date
   }>
 
