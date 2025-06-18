@@ -1,0 +1,9 @@
+node_modules
+.env.local
+dist
+docker
+.tmp
+libs/sdk-python
+libs/sdk-typescript
+libs/api-client-python
+libs/api-client-python-async
