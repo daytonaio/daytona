@@ -12,7 +12,11 @@
       "!{projectRoot}/src/test-setup.[jt]s",
       "!{projectRoot}/test-setup.[jt]s"
     ],
-    "sharedGlobals": ["{workspaceRoot}/.github/workflows/ci.yml", "{workspaceRoot}/go.work"]
+    "sharedGlobals": [
+      "{workspaceRoot}/.github/workflows/ci.yml",
+      "{workspaceRoot}/go.work",
+      "{workspaceRoot}/go.work.sum"
+    ]
   },
   "neverConnectToCloud": true,
   "plugins": [
@@ -92,6 +96,26 @@
       "cache": true,
       "dependsOn": ["^build"],
       "inputs": ["production", "^production"]
+    },
+    "docker": {
+      "executor": "@nx-tools/nx-container:build",
+      "options": {
+        "context": "{workspaceRoot}",
+        "platforms": ["linux/amd64", "linux/arm64"],
+        "file": "docker/Dockerfile",
+        "tags": ["daytonaio/daytona-{projectName}:$VERSION"]
+      },
+      "configurations": {
+        "production": {
+          "push": true
+        }
+      },
+      "dependsOn": [
+        {
+          "target": "build-amd64",
+          "projects": "computer-use"
+        }
+      ]
     }
   },
   "release": {
