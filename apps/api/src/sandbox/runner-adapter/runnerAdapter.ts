@@ -9,6 +9,8 @@ import { RunnerAdapterV2 } from './runnerAdapter.v2'
 import { ModuleRef } from '@nestjs/core'
 import { RunnerAdapterV1 } from './runnerAdapter.v1'
 import { BuildInfo } from '../entities/build-info.entity'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
+import { Sandbox } from '../entities/sandbox.entity'
 
 export enum RunnerSandboxState {
   CREATING = 'creating',
@@ -37,15 +39,15 @@ export interface RunnerSandboxInfo {
 export interface RunnerAdapter {
   init(runner: Runner): Promise<void>
   info(sandboxId: string): Promise<RunnerSandboxInfo>
-  create(sandboxId: string): Promise<void>
-  createBackup(sandboxId: string, backupSnapshotName: string): Promise<void>
+  create(sandbox: Sandbox, registry: DockerRegistry): Promise<void>
+  createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void>
   start(sandboxId: string): Promise<void>
   stop(sandboxId: string): Promise<void>
   destroy(sandboxId: string): Promise<void>
   removeDestroyed(sandboxId: string): Promise<void>
-  snapshot(sandboxId: string, snapshotName: string): Promise<void>
+  snapshot(sandbox: Sandbox, snapshotName: string, registry: DockerRegistry): Promise<void>
   buildSnapshot(buildInfo: BuildInfo, organizationId?: string): Promise<void>
-  pullSnapshot(snapshotName: string): Promise<void>
+  pullSnapshot(snapshotName: string, registry: DockerRegistry): Promise<void>
   snapshotExists(snapshotName: string): Promise<boolean>
 }
 

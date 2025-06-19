@@ -243,10 +243,12 @@ export class SnapshotManager {
   async propagateSnapshotToRunner(internalSnapshotName: string, runner: Runner) {
     const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
+    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
+
     let retries = 0
     while (retries < 10) {
       try {
-        await runnerAdapter.pullSnapshot(internalSnapshotName)
+        await runnerAdapter.pullSnapshot(internalSnapshotName, registry)
       } catch (err) {
         if (err.code !== 'ECONNRESET') {
           throw err
@@ -763,10 +765,10 @@ export class SnapshotManager {
 
     const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
-    const dockerRegistry = await this.dockerRegistryService.getDefaultInternalRegistry()
+    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
     //  await this.redis.setex(lockKey, 360, this.instanceId)
 
-    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef)
+    await runnerAdapter.pullSnapshot(snapshotRunner.snapshotRef, registry)
   }
 
   private async updateSnapshotState(snapshotId: string, state: SnapshotState, errorReason?: string) {
