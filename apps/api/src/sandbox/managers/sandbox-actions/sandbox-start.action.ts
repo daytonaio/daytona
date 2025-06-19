@@ -335,10 +335,11 @@ export class SandboxStartAction extends SandboxAction {
       const runnerId = availableRunners[randomRunnerIndex(0, availableRunners.length - 1)].id
 
       const runner = await this.runnerService.findOne(runnerId)
-
       const runnerAdapter = await this.runnerSandboxAdapterFactory.create(runner)
 
-      await runnerAdapter.create(sandbox.id)
+      const snapshotRegistry = await this.dockerRegistryService.findOneBySnapshotImageName(sandbox.snapshot)
+
+      await runnerAdapter.create(sandbox, snapshotRegistry)
 
       await this.updateSandboxState(sandbox.id, SandboxState.RESTORING, runnerId)
     } else {

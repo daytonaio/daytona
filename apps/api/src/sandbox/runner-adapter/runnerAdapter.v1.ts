@@ -10,25 +10,14 @@ import { Injectable, Logger } from '@nestjs/common'
 import { RunnerAdapter, RunnerSandboxInfo, RunnerSandboxState } from './runnerAdapter'
 import { Runner } from '../entities/runner.entity'
 import { Configuration, SandboxApi, EnumsSandboxState, SnapshotsApi } from '@daytonaio/runner-api-client'
-import { DockerRegistryService } from '../../docker-registry/services/docker-registry.service'
-import { InjectRepository } from '@nestjs/typeorm'
 import { Sandbox } from '../entities/sandbox.entity'
-import { Repository } from 'typeorm'
-import { Snapshot } from '../entities/snapshot.entity'
 import { BuildInfo } from '../entities/build-info.entity'
+import { DockerRegistry } from '../../docker-registry/entities/docker-registry.entity'
 
 const isDebugEnabled = process.env.DEBUG === 'true'
 
 @Injectable()
 export class RunnerAdapterV1 implements RunnerAdapter {
-  constructor(
-    @InjectRepository(Sandbox)
-    private readonly sandboxRepository: Repository<Sandbox>,
-    @InjectRepository(Snapshot)
-    private readonly snapshotRepository: Repository<Snapshot>,
-    private readonly dockerRegistryService: DockerRegistryService,
-  ) {}
-
   private readonly logger = new Logger(RunnerAdapterV1.name)
   private apiClientSandbox: SandboxApi
   private apiClientSnapshot: SnapshotsApi
@@ -101,15 +90,9 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     })
   }
 
-  async create(sandboxId: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-
-    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
-
+  async create(sandbox: Sandbox, registry: DockerRegistry): Promise<void> {
     await this.apiClientSandbox.create({
-      id: sandboxId,
+      id: sandbox.id,
       snapshot: sandbox.snapshot,
       osUser: sandbox.osUser,
       userId: sandbox.organizationId,
@@ -125,14 +108,8 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     })
   }
 
-  async createBackup(sandboxId: string, backupSnapshotName: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-
-    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
-
-    await this.apiClientSandbox.createBackup(sandboxId, {
+  async createBackup(sandbox: Sandbox, backupSnapshotName: string, registry: DockerRegistry): Promise<void> {
+    await this.apiClientSandbox.createBackup(sandbox.id, {
       registry: {
         url: registry.url,
         username: registry.username,
@@ -165,14 +142,8 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     await this.apiClientSandbox.removeDestroyed(sandboxId)
   }
 
-  async snapshot(sandboxId: string, snapshotName: string): Promise<void> {
-    const sandbox = await this.sandboxRepository.findOneByOrFail({
-      id: sandboxId,
-    })
-
-    const registry = await this.dockerRegistryService.findOne(sandbox.backupRegistryId)
-
-    await this.apiClientSandbox.createBackup(sandboxId, {
+  async snapshot(sandbox: Sandbox, snapshotName: string, registry: DockerRegistry): Promise<void> {
+    await this.apiClientSandbox.createBackup(sandbox.id, {
       registry: {
         url: registry.url,
         username: registry.username,
@@ -187,15 +158,7 @@ export class RunnerAdapterV1 implements RunnerAdapter {
     return response.data.exists
   }
 
-  async pullSnapshot(snapshotName: string): Promise<void> {
-    const snapshot = await this.snapshotRepository.findOneByOrFail({
-      name: snapshotName,
-    })
-
-    //  TODO: get registry from snapshot
-
-    const registry = await this.dockerRegistryService.getDefaultInternalRegistry()
-
+  async pullSnapshot(snapshotName: string, registry: DockerRegistry): Promise<void> {
     await this.apiClientSnapshot.pullSnapshot({
       snapshot: snapshotName,
       registry: {
