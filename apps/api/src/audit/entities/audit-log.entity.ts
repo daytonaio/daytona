@@ -5,6 +5,8 @@
 
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, Index } from 'typeorm'
 
+export type AuditLogMetadata = Record<string, any>
+
 @Entity()
 @Index(['createdAt'])
 @Index(['userId', 'createdAt'])
@@ -47,6 +49,9 @@ export class AuditLog {
 
   @Column({ nullable: true })
   source?: string
+
+  @Column({ type: 'jsonb', nullable: true })
+  metadata?: AuditLogMetadata
 
   @CreateDateColumn()
   createdAt: Date

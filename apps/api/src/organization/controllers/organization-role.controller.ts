@@ -13,6 +13,9 @@ import { OrganizationRoleDto } from '../dto/organization-role.dto'
 import { OrganizationMemberRole } from '../enums/organization-member-role.enum'
 import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationRoleService } from '../services/organization-role.service'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/roles')
@@ -23,6 +26,17 @@ import { OrganizationRoleService } from '../services/organization-role.service'
 export class OrganizationRoleController {
   constructor(private readonly organizationRoleService: OrganizationRoleService) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateOrganizationRoleDto>) => {
+        const { name, description, permissions } = req.body
+        return { name, description, permissions }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create organization role',
@@ -66,6 +80,17 @@ export class OrganizationRoleController {
     return roles.map(OrganizationRoleDto.fromOrganizationRole)
   }
 
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdParam: 'roleId',
+    metadata: {
+      payload: (req: TypedRequest<UpdateOrganizationRoleDto>) => {
+        const { name, description, permissions } = req.body
+        return { name, description, permissions }
+      },
+    },
+  })
   @Put('/:roleId')
   @ApiOperation({
     summary: 'Update organization role',
@@ -95,6 +120,11 @@ export class OrganizationRoleController {
     return OrganizationRoleDto.fromOrganizationRole(updatedRole)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_ROLE,
+    targetIdParam: 'roleId',
+  })
   @Delete('/:roleId')
   @ApiOperation({
     summary: 'Delete organization role',

@@ -30,6 +30,7 @@ export class AuditService {
     auditLog.ipAddress = createDto.ipAddress
     auditLog.userAgent = createDto.userAgent
     auditLog.source = createDto.source
+    auditLog.metadata = createDto.metadata
 
     return await this.auditLogRepository.save(auditLog)
   }

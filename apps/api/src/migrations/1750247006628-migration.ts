@@ -1,16 +1,11 @@
-/*
- * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
- */
-
 import { MigrationInterface, QueryRunner } from 'typeorm'
 
-export class Migration1749740909978 implements MigrationInterface {
-  name = 'Migration1749740909978'
+export class Migration1750247006628 implements MigrationInterface {
+  name = 'Migration1750247006628'
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "audit_log" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying NOT NULL, "userEmail" character varying NOT NULL, "organizationId" character varying, "action" character varying NOT NULL, "targetType" character varying, "targetId" character varying, "outcome" character varying NOT NULL, "errorMessage" character varying, "ipAddress" character varying, "userAgent" text, "source" character varying, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "audit_log_id_pk" PRIMARY KEY ("id"))`,
+      `CREATE TABLE "audit_log" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" character varying NOT NULL, "userEmail" character varying NOT NULL, "organizationId" character varying, "action" character varying NOT NULL, "targetType" character varying, "targetId" character varying, "outcome" character varying NOT NULL, "errorMessage" character varying, "ipAddress" character varying, "userAgent" text, "source" character varying, "metadata" jsonb, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "audit_log_id_pk" PRIMARY KEY ("id"))`,
     )
     await queryRunner.query(
       `CREATE INDEX "audit_log_targetId_createdAt_index" ON "audit_log" ("targetId", "createdAt") `,

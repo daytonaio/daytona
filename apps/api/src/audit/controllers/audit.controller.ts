@@ -16,7 +16,6 @@ import { CustomHeaders } from '../../common/constants/header.constants'
 import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
 
-// TODO: querying
 @ApiTags('audit')
 @Controller('audit')
 @UseGuards(CombinedAuthGuard, SystemActionGuard)

@@ -15,8 +15,8 @@ import {
 import { Reflector } from '@nestjs/core'
 import { Request } from 'express'
 import { Observable, Subscriber, firstValueFrom } from 'rxjs'
-import { AuditLog } from '../entities/audit-log.entity'
-import { AUDIT_METADATA_KEY, AuditMetadata } from '../decorators/audit.decorator'
+import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
+import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuthContext } from '../../common/interfaces/auth-context.interface'
 import { AuditService } from '../services/audit.service'
 import { CustomHeaders } from '../../common/constants/header.constants'
@@ -38,9 +38,9 @@ export class AuditInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<RequestWithUser>()
 
-    const auditMetadata = this.reflector.get<AuditMetadata>(AUDIT_METADATA_KEY, context.getHandler())
+    const auditContext = this.reflector.get<AuditContext>(AUDIT_CONTEXT_KEY, context.getHandler())
 
-    if (!auditMetadata) {
+    if (!auditContext) {
       this.logger.warn('Non-audited request:', request.url)
       return next.handle()
     }
@@ -51,14 +51,14 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     return new Observable((observer) => {
-      this.handleAuditedRequest(auditMetadata, request, next, observer)
+      this.handleAuditedRequest(auditContext, request, next, observer)
     })
   }
 
   // An audit log must be created before the request is handled
   // After the request is handled, the audit log is optimistically updated with the outcome
   private async handleAuditedRequest(
-    auditMetadata: AuditMetadata,
+    auditContext: AuditContext,
     request: RequestWithUser,
     next: CallHandler,
     observer: Subscriber<any>,
@@ -68,18 +68,19 @@ export class AuditInterceptor implements NestInterceptor {
         userId: request.user.userId,
         userEmail: request.user.email,
         organizationId: request.user.organizationId,
-        action: auditMetadata.action,
-        targetType: auditMetadata.targetType,
-        targetId: this.resolveTargetId(auditMetadata, request),
+        action: auditContext.action,
+        targetType: auditContext.targetType,
+        targetId: this.resolveTargetId(auditContext, request),
         ipAddress: request.ip,
         userAgent: request.get('user-agent'),
         source: request.get(CustomHeaders.SOURCE.name),
         outcome: AuditOutcome.UNKNOWN,
+        metadata: this.resolveMetadata(auditContext, request),
       })
 
       try {
         const result = await firstValueFrom(next.handle())
-        const targetId = this.resolveTargetId(auditMetadata, request, result)
+        const targetId = this.resolveTargetId(auditContext, request, result)
         await this.recordSuccessOutcome(auditLog, targetId)
         observer.next(result)
         observer.complete()
@@ -116,21 +117,44 @@ export class AuditInterceptor implements NestInterceptor {
     }
   }
 
-  private resolveTargetId(auditMetadata: AuditMetadata, request: RequestWithUser, result?: any): string | null {
-    if (auditMetadata.targetIdParam) {
-      const targetId = request.params[auditMetadata.targetIdParam]
+  private resolveTargetId(auditContext: AuditContext, request: RequestWithUser, result?: any): string | null {
+    if (auditContext.targetIdParam) {
+      const targetId = request.params[auditContext.targetIdParam]
       if (targetId) {
         return targetId
       }
     }
 
-    if (auditMetadata.targetIdResolver && result) {
-      const targetId = auditMetadata.targetIdResolver(result)
+    if (auditContext.targetIdResolver && result) {
+      const targetId = auditContext.targetIdResolver(result)
       if (targetId) {
         return targetId
       }
     }
 
     return null
+  }
+
+  private resolveMetadata(auditContext: AuditContext, request: RequestWithUser): AuditLogMetadata | null {
+    if (!auditContext.metadata) {
+      return null
+    }
+
+    const resolvedMetadata: AuditLogMetadata = {}
+
+    for (const [key, valueOrResolver] of Object.entries(auditContext.metadata)) {
+      try {
+        if (typeof valueOrResolver === 'function') {
+          resolvedMetadata[key] = valueOrResolver(request)
+        } else {
+          resolvedMetadata[key] = valueOrResolver
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to resolve audit log metadata key "${key}":`, error)
+        resolvedMetadata[key] = null
+      }
+    }
+
+    return Object.keys(resolvedMetadata).length > 0 ? resolvedMetadata : null
   }
 }

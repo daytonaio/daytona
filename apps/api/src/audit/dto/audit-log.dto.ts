@@ -4,7 +4,7 @@
  */
 
 import { ApiProperty, ApiPropertyOptional, ApiSchema } from '@nestjs/swagger'
-import { AuditLog } from '../entities/audit-log.entity'
+import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 
 @ApiSchema({ name: 'AuditLog' })
 export class AuditLogDto {
@@ -44,6 +44,9 @@ export class AuditLogDto {
   @ApiPropertyOptional()
   source?: string
 
+  @ApiPropertyOptional()
+  metadata?: AuditLogMetadata
+
   @ApiProperty()
   createdAt: Date
 
@@ -61,6 +64,7 @@ export class AuditLogDto {
       ipAddress: auditLog.ipAddress,
       userAgent: auditLog.userAgent,
       source: auditLog.source,
+      metadata: auditLog.metadata,
       createdAt: auditLog.createdAt,
     }
 

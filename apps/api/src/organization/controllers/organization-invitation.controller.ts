@@ -15,6 +15,9 @@ import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/invitations')
@@ -24,6 +27,17 @@ import { AuthContext as IAuthContext } from '../../common/interfaces/auth-contex
 export class OrganizationInvitationController {
   constructor(private readonly organizationInvitationService: OrganizationInvitationService) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateOrganizationInvitationDto>) => {
+        const { email, role, assignedRoleIds, expiresAt } = req.body
+        return { email, role, assignedRoleIds, expiresAt }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create organization invitation',
@@ -53,6 +67,17 @@ export class OrganizationInvitationController {
     return OrganizationInvitationDto.fromOrganizationInvitation(invitation)
   }
 
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdParam: 'invitationId',
+    metadata: {
+      payload: (req: TypedRequest<UpdateOrganizationInvitationDto>) => {
+        const { role, assignedRoleIds, expiresAt } = req.body
+        return { role, assignedRoleIds, expiresAt }
+      },
+    },
+  })
   @Put('/:invitationId')
   @ApiOperation({
     summary: 'Update organization invitation',
@@ -103,6 +128,11 @@ export class OrganizationInvitationController {
     return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdParam: 'invitationId',
+  })
   @Post('/:invitationId/cancel')
   @ApiOperation({
     summary: 'Cancel organization invitation',

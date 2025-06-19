@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: AGPL-3.0
  */
 
+import { AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditOutcome } from '../enums/audit-outcome-enum'
 import { AuditTarget } from '../enums/audit-target.enum'
@@ -19,4 +20,5 @@ export class CreateAuditLogInternalDto {
   source?: string
   outcome: AuditOutcome
   errorMessage?: string
+  metadata?: AuditLogMetadata
 }

@@ -18,7 +18,7 @@ import { OrganizationMemberRole } from '../organization/enums/organization-membe
 import { OrganizationResourcePermission } from '../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../organization/guards/organization-resource-action.guard'
 import { SystemRole } from '../user/enums/system-role.enum'
-import { Audit } from '../audit/decorators/audit.decorator'
+import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
 import { AuditAction } from '../audit/enums/audit-action.enum'
 import { AuditTarget } from '../audit/enums/audit-target.enum'
 
@@ -35,6 +35,12 @@ export class ApiKeyController {
     action: AuditAction.CREATE,
     targetType: AuditTarget.API_KEY,
     targetIdResolver: (result) => result?.name,
+    metadata: {
+      payload: (req: TypedRequest<CreateApiKeyDto>) => {
+        const { permissions, expiresAt } = req.body
+        return { permissions, expiresAt }
+      },
+    },
   })
   @Post()
   @ApiOperation({

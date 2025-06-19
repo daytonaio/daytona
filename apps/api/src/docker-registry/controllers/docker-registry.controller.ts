@@ -20,6 +20,9 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('docker-registry')
 @Controller('docker-registry')
@@ -30,6 +33,17 @@ import { OrganizationResourceActionGuard } from '../../organization/guards/organ
 export class DockerRegistryController {
   constructor(private readonly dockerRegistryService: DockerRegistryService) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateDockerRegistryDto>) => {
+        const { name, username, url, project, registryType, isDefault } = req.body
+        return { name, username, url, project, registryType, isDefault }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create registry',
@@ -98,6 +112,17 @@ export class DockerRegistryController {
     return registry
   }
 
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdParam: 'id',
+    metadata: {
+      payload: (req: TypedRequest<UpdateDockerRegistryDto>) => {
+        const { name, username } = req.body
+        return { name, username }
+      },
+    },
+  })
   @Patch(':id')
   @ApiOperation({
     summary: 'Update registry',
@@ -122,6 +147,11 @@ export class DockerRegistryController {
     return this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdParam: 'id',
+  })
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete registry',
@@ -143,6 +173,11 @@ export class DockerRegistryController {
     return this.dockerRegistryService.remove(registryId)
   }
 
+  @Audit({
+    action: AuditAction.DOCKER_REGISTRY_SET_DEFAULT,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdParam: 'id',
+  })
   @Post(':id/set-default')
   @ApiOperation({
     summary: 'Set default registry',

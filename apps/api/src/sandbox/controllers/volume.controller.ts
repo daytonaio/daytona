@@ -40,6 +40,9 @@ import { VolumeDto } from '../dto/volume.dto'
 import { InjectRedis } from '@nestjs-modules/ioredis'
 import Redis from 'ioredis'
 import { ForbiddenException } from '@nestjs/common'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('volumes')
 @Controller('volumes')
@@ -80,6 +83,17 @@ export class VolumeController {
     return volumes.map(VolumeDto.fromVolume)
   }
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.VOLUME,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateVolumeDto>) => {
+        const { name } = req.body
+        return { name }
+      },
+    },
+  })
   @Post()
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -138,6 +152,11 @@ export class VolumeController {
     return VolumeDto.fromVolume(volume)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.VOLUME,
+    targetIdParam: 'volumeId',
+  })
   @Delete(':volumeId')
   @ApiOperation({
     summary: 'Delete volume',

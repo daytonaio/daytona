@@ -34,6 +34,9 @@ import { AccountProviderDto } from './dto/account-provider.dto'
 import { ACCOUNT_PROVIDER_DISPLAY_NAME } from './constants/acount-provider-display-name.constant'
 import { AccountProvider } from './enums/account-provider.enum'
 import { CreateLinkedAccountDto } from './dto/create-linked-account.dto'
+import { Audit, TypedRequest } from '../audit/decorators/audit.decorator'
+import { AuditAction } from '../audit/enums/audit-action.enum'
+import { AuditTarget } from '../audit/enums/audit-target.enum'
 
 @ApiTags('users')
 @Controller('users')
@@ -67,6 +70,17 @@ export class UserController {
     return UserDto.fromUser(user)
   }
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.USER,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateUserDto>) => {
+        const { name, email, personalOrganizationQuota, role, emailVerified } = req.body
+        return { name, email, personalOrganizationQuota, role, emailVerified }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create user',
@@ -87,6 +101,11 @@ export class UserController {
     return this.userService.findAll()
   }
 
+  @Audit({
+    action: AuditAction.USER_REGENERATE_KEY_PAIR,
+    targetType: AuditTarget.USER,
+    targetIdParam: 'id',
+  })
   @Post('/:id/regenerate-key-pair')
   @ApiOperation({
     summary: 'Regenerate user key pair',
@@ -141,6 +160,15 @@ export class UserController {
     }
   }
 
+  @Audit({
+    action: AuditAction.USER_LINK_ACCOUNT,
+    metadata: {
+      payload: (req: TypedRequest<CreateLinkedAccountDto>) => {
+        const { provider, userId } = req.body
+        return { provider, userId }
+      },
+    },
+  })
   @Post('/linked-accounts')
   @ApiOperation({
     summary: 'Link account',
@@ -192,6 +220,13 @@ export class UserController {
     }
   }
 
+  @Audit({
+    action: AuditAction.USER_UNLINK_ACCOUNT,
+    metadata: {
+      provider: (req) => req.params.provider,
+      providerUserId: (req) => req.params.providerUserId,
+    },
+  })
   @Delete('/linked-accounts/:provider/:providerUserId')
   @ApiOperation({
     summary: 'Unlink account',

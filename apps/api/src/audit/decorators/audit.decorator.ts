@@ -4,17 +4,21 @@
  */
 
 import { SetMetadata } from '@nestjs/common'
+import { Request } from 'express'
 import { AuditAction } from '../enums/audit-action.enum'
 import { AuditTarget } from '../enums/audit-target.enum'
 
-// TODO: body param resolver
-export interface AuditMetadata {
+export type TypedRequest<T> = Omit<Request, 'body'> & { body: T }
+
+export interface AuditContext {
   action: AuditAction
-  targetType: AuditTarget
+  targetType?: AuditTarget
+  // TODO: also a resolver function?
   targetIdParam?: string
   targetIdResolver?: (result: any) => string | null | undefined
+  metadata?: Record<string, (req: Request) => any> | Record<string, any>
 }
 
-export const AUDIT_METADATA_KEY = 'audit_metadata'
+export const AUDIT_CONTEXT_KEY = 'audit_context'
 
-export const Audit = (metadata: AuditMetadata) => SetMetadata(AUDIT_METADATA_KEY, metadata)
+export const Audit = (context: AuditContext) => SetMetadata(AUDIT_CONTEXT_KEY, context)

@@ -12,6 +12,9 @@ import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('runners')
 @Controller('runners')
@@ -22,6 +25,17 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 export class RunnerController {
   constructor(private readonly runnerService: RunnerService) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.RUNNER,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateRunnerDto>) => {
+        const { domain, apiUrl, cpu, memory, disk, gpu, gpuType, class: runnerClass, capacity, region } = req.body
+        return { domain, apiUrl, cpu, memory, disk, gpu, gpuType, runnerClass, capacity, region }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create runner',
@@ -40,6 +54,17 @@ export class RunnerController {
     return this.runnerService.findAll()
   }
 
+  @Audit({
+    action: AuditAction.RUNNER_UPDATE_SCHEDULING,
+    targetType: AuditTarget.RUNNER,
+    targetIdParam: 'id',
+    metadata: {
+      payload: (req: TypedRequest<{ unschedulable: boolean }>) => {
+        const { unschedulable } = req.body
+        return { unschedulable }
+      },
+    },
+  })
   @Patch(':id/scheduling')
   @ApiOperation({
     summary: 'Update runner scheduling status',

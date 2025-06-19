@@ -59,6 +59,9 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('workspace')
 @Controller('workspace')
@@ -114,6 +117,47 @@ export class WorkspaceController {
     return await Promise.all(dtos)
   }
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateWorkspaceDto>) => {
+        const {
+          image,
+          user,
+          labels,
+          public: isPublic,
+          class: sandboxClass,
+          target,
+          cpu,
+          gpu,
+          memory,
+          disk,
+          autoStopInterval,
+          autoArchiveInterval,
+          volumes,
+          buildInfo,
+        } = req.body
+        return {
+          image,
+          user,
+          labels,
+          isPublic,
+          sandboxClass,
+          target,
+          cpu,
+          gpu,
+          memory,
+          disk,
+          autoStopInterval,
+          autoArchiveInterval,
+          volumes,
+          buildInfo,
+        }
+      },
+    },
+  })
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
@@ -197,6 +241,11 @@ export class WorkspaceController {
     return WorkspaceDto.fromSandbox(workspace, runner?.domain)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+  })
   @Delete(':workspaceId')
   @ApiOperation({
     summary: '[DEPRECATED] Delete workspace',
@@ -223,6 +272,11 @@ export class WorkspaceController {
     return this.workspaceService.destroy(workspaceId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+  })
   @Post(':workspaceId/start')
   @HttpCode(200)
   @ApiOperation({
@@ -249,6 +303,11 @@ export class WorkspaceController {
     return this.workspaceService.start(workspaceId, authContext.organization)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+  })
   @Post(':workspaceId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
   @ApiOperation({
@@ -272,6 +331,17 @@ export class WorkspaceController {
     return this.workspaceService.stop(workspaceId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_REPLACE_LABELS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+    metadata: {
+      payload: (req: TypedRequest<WorkspaceLabelsDto>) => {
+        const { labels } = req.body
+        return { labels }
+      },
+    },
+  })
   @Put(':workspaceId/labels')
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
@@ -299,6 +369,11 @@ export class WorkspaceController {
     return { labels }
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_CREATE_BACKUP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+  })
   @Post(':workspaceId/backup')
   @ApiOperation({
     summary: '[DEPRECATED] Create workspace backup',
@@ -321,6 +396,17 @@ export class WorkspaceController {
     await this.workspaceService.createBackup(workspaceId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+    metadata: {
+      payload: (req: TypedRequest<{ isPublic: boolean }>) => {
+        const { isPublic } = req.body
+        return { isPublic }
+      },
+    },
+  })
   @Post(':workspaceId/public/:isPublic')
   @ApiOperation({
     summary: '[DEPRECATED] Update public status',
@@ -346,6 +432,17 @@ export class WorkspaceController {
     await this.workspaceService.updatePublicStatus(workspaceId, isPublic)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+    metadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => {
+        const { interval } = req.body
+        return { interval }
+      },
+    },
+  })
   @Post(':workspaceId/autostop/:interval')
   @ApiOperation({
     summary: '[DEPRECATED] Set workspace auto-stop interval',
@@ -375,6 +472,17 @@ export class WorkspaceController {
     await this.workspaceService.setAutostopInterval(workspaceId, interval)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+    metadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => {
+        const { interval } = req.body
+        return { interval }
+      },
+    },
+  })
   @Post(':workspaceId/autoarchive/:interval')
   @ApiOperation({
     summary: '[DEPRECATED] Set workspace auto-archive interval',
@@ -404,6 +512,11 @@ export class WorkspaceController {
     await this.workspaceService.setAutoArchiveInterval(workspaceId, interval)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_ARCHIVE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'workspaceId',
+  })
   @Post(':workspaceId/archive')
   @HttpCode(200)
   @ApiOperation({

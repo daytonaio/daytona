@@ -78,6 +78,9 @@ import { RequiredOrganizationResourcePermissions } from '../../organization/deco
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import followRedirects from 'follow-redirects'
 import { UploadFileDto } from '../dto/upload-file.dto'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 followRedirects.maxRedirects = 10
 followRedirects.maxBodyLength = 50 * 1024 * 1024
@@ -201,6 +204,14 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_DELETE_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      path: (req) => req.query.path,
+    },
+  })
   @Delete(':sandboxId/toolbox/files')
   @ApiOperation({
     summary: 'Delete file',
@@ -221,6 +232,14 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_DOWNLOAD_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      path: (req) => req.query.path,
+    },
+  })
   @Get(':sandboxId/toolbox/files/download')
   @ApiOperation({
     summary: 'Download file',
@@ -267,6 +286,15 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_CREATE_FOLDER,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      path: (req) => req.query.path,
+      mode: (req) => req.query.mode,
+    },
+  })
   @Post(':sandboxId/toolbox/files/folder')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -311,6 +339,15 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_MOVE_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      destination: (req) => req.query.destination,
+      source: (req) => req.query.source,
+    },
+  })
   @Post(':sandboxId/toolbox/files/move')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -334,6 +371,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_SET_FILE_PERMISSIONS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      mode: (req) => req.query.mode,
+      group: (req) => req.query.group,
+      owner: (req) => req.query.owner,
+      path: (req) => req.query.path,
+    },
+  })
   @Post(':sandboxId/toolbox/files/permissions')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -359,6 +407,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_REPLACE_IN_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<ReplaceRequestDto>) => {
+        const { files, pattern, newValue } = req.body
+        return { files, pattern, newValue }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/files/replace')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -406,6 +465,14 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_UPLOAD_FILE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      path: (req) => req.query.path,
+    },
+  })
   @HttpCode(200)
   @Post(':sandboxId/toolbox/files/upload')
   @ApiOperation({
@@ -440,6 +507,17 @@ export class ToolboxController {
     return this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_BULK_UPLOAD_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<UploadFileDto[]>) => {
+        const paths = req.body.map((file) => file.path)
+        return { paths }
+      },
+    },
+  })
   @HttpCode(200)
   @Post(':sandboxId/toolbox/files/bulk-upload')
   @ApiOperation({
@@ -463,6 +541,17 @@ export class ToolboxController {
   }
 
   // Git operations
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_ADD_FILES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitAddRequestDto>) => {
+        const { path, files } = req.body
+        return { path, files }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/add')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -508,6 +597,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CREATE_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitBranchRequestDto>) => {
+        const { path, name } = req.body
+        return { path, name }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/branches')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -532,6 +632,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_DELETE_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitDeleteBranchRequestDto>) => {
+        const { path, name } = req.body
+        return { path, name }
+      },
+    },
+  })
   @Delete(':sandboxId/toolbox/git/branches')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -556,6 +667,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CLONE_REPOSITORY,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitCloneRequestDto>) => {
+        const { url, path, username, branch, commit_id } = req.body
+        return { url, path, username, branch, commit_id }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/clone')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -580,6 +702,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_COMMIT_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitCommitRequestDto>) => {
+        const { path, message, author, email } = req.body
+        return { path, message, author, email }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/commit')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -626,6 +759,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_PULL_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitRepoRequestDto>) => {
+        const { path, username } = req.body
+        return { path, username }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/pull')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -650,6 +794,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_PUSH_CHANGES,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitRepoRequestDto>) => {
+        const { path, username } = req.body
+        return { path, username }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/push')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -674,6 +829,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_GIT_CHECKOUT_BRANCH,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<GitCheckoutRequestDto>) => {
+        const { path, branch } = req.body
+        return { path, branch }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/git/checkout')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -719,6 +885,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_EXECUTE_COMMAND,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<ExecuteRequestDto>) => {
+        const { command, cwd, timeout } = req.body
+        return { command, cwd, timeout }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/process/execute')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -792,6 +969,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_CREATE_SESSION,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<CreateSessionRequestDto>) => {
+        const { sessionId } = req.body
+        return { sessionId }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/process/session')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -815,6 +1003,18 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_SESSION_EXECUTE_COMMAND,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      sessionId: (req) => req.params.sessionId,
+      payload: (req: TypedRequest<SessionExecuteRequestDto>) => {
+        const { command, runAsync, async } = req.body
+        return { command, runAsync, async }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/process/session/:sessionId/exec')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -846,6 +1046,14 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_DELETE_SESSION,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      sessionId: (req) => req.params.sessionId,
+    },
+  })
   @Delete(':sandboxId/toolbox/process/session/:sessionId')
   @ApiOperation({
     summary: 'Delete session',
@@ -1017,6 +1225,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_LSP_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<LspServerRequestDto>) => {
+        const { languageId, pathToProject } = req.body
+        return { languageId, pathToProject }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/lsp/start')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -1041,6 +1260,17 @@ export class ToolboxController {
     return await this.toolboxProxy(req, res, next)
   }
 
+  @Audit({
+    action: AuditAction.TOOLBOX_LSP_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<LspServerRequestDto>) => {
+        const { languageId, pathToProject } = req.body
+        return { languageId, pathToProject }
+      },
+    },
+  })
   @Post(':sandboxId/toolbox/lsp/stop')
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)

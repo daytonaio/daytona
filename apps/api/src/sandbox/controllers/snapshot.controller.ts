@@ -56,6 +56,9 @@ import { SetSnapshotGeneralStatusDto } from '../dto/update-snapshot.dto'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
 import { Snapshot } from '../entities/snapshot.entity'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('snapshots')
 @Controller('snapshots')
@@ -71,6 +74,17 @@ export class SnapshotController {
     private readonly runnerService: RunnerService,
   ) {}
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateSnapshotDto>) => {
+        const { name, imageName, entrypoint, general, cpu, memory, disk, gpu, buildInfo } = req.body
+        return { name, imageName, entrypoint, general, cpu, memory, disk, gpu, buildInfo }
+      },
+    },
+  })
   @Post()
   @HttpCode(200)
   @ApiOperation({
@@ -147,6 +161,17 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  @Audit({
+    action: AuditAction.SNAPSHOT_TOGGLE_STATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdParam: 'id',
+    metadata: {
+      payload: (req: TypedRequest<ToggleStateDto>) => {
+        const { enabled } = req.body
+        return { enabled }
+      },
+    },
+  })
   @Patch(':id/toggle')
   @ApiOperation({
     summary: 'Toggle snapshot state',
@@ -168,6 +193,11 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdParam: 'id',
+  })
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete snapshot',
@@ -223,6 +253,17 @@ export class SnapshotController {
     }
   }
 
+  @Audit({
+    action: AuditAction.SNAPSHOT_SET_GENERAL_STATUS,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdParam: 'id',
+    metadata: {
+      payload: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => {
+        const { general } = req.body
+        return { general }
+      },
+    },
+  })
   @Patch(':id/general')
   @ApiOperation({
     summary: 'Set snapshot general status',

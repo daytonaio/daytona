@@ -58,6 +58,9 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('sandbox')
 @Controller('sandbox')
@@ -112,6 +115,47 @@ export class SandboxController {
     return await Promise.all(dtos)
   }
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateSandboxDto>) => {
+        const {
+          snapshot,
+          user,
+          labels,
+          public: isPublic,
+          class: sandboxClass,
+          target,
+          cpu,
+          gpu,
+          memory,
+          disk,
+          autoStopInterval,
+          autoArchiveInterval,
+          volumes,
+          buildInfo,
+        } = req.body
+        return {
+          snapshot,
+          user,
+          labels,
+          isPublic,
+          sandboxClass,
+          target,
+          cpu,
+          gpu,
+          memory,
+          disk,
+          autoStopInterval,
+          autoArchiveInterval,
+          volumes,
+          buildInfo,
+        }
+      },
+    },
+  })
   @Post()
   @HttpCode(200) //  for Daytona Api compatibility
   @UseInterceptors(ContentTypeInterceptor)
@@ -191,6 +235,11 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox, runner?.domain)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+  })
   @Delete(':sandboxId')
   @ApiOperation({
     summary: 'Delete sandbox',
@@ -216,6 +265,11 @@ export class SandboxController {
     return this.sandboxService.destroy(sandboxId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+  })
   @Post(':sandboxId/start')
   @HttpCode(200)
   @ApiOperation({
@@ -241,6 +295,11 @@ export class SandboxController {
     return this.sandboxService.start(sandboxId, authContext.organization)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+  })
   @Post(':sandboxId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
   @ApiOperation({
@@ -263,6 +322,17 @@ export class SandboxController {
     return this.sandboxService.stop(sandboxId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_REPLACE_LABELS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<SandboxLabelsDto>) => {
+        const { labels } = req.body
+        return { labels }
+      },
+    },
+  })
   @Put(':sandboxId/labels')
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
@@ -289,6 +359,11 @@ export class SandboxController {
     return { labels }
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_CREATE_BACKUP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+  })
   @Post(':sandboxId/backup')
   @ApiOperation({
     summary: 'Create sandbox backup',
@@ -310,6 +385,17 @@ export class SandboxController {
     await this.sandboxService.createBackup(sandboxId)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<{ isPublic: boolean }>) => {
+        const { isPublic } = req.body
+        return { isPublic }
+      },
+    },
+  })
   @Post(':sandboxId/public/:isPublic')
   @ApiOperation({
     summary: 'Update public status',
@@ -331,6 +417,17 @@ export class SandboxController {
     await this.sandboxService.updatePublicStatus(sandboxId, isPublic)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => {
+        const { interval } = req.body
+        return { interval }
+      },
+    },
+  })
   @Post(':sandboxId/autostop/:interval')
   @ApiOperation({
     summary: 'Set sandbox auto-stop interval',
@@ -356,6 +453,17 @@ export class SandboxController {
     await this.sandboxService.setAutostopInterval(sandboxId, interval)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+    metadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => {
+        const { interval } = req.body
+        return { interval }
+      },
+    },
+  })
   @Post(':sandboxId/autoarchive/:interval')
   @ApiOperation({
     summary: 'Set sandbox auto-archive interval',
@@ -384,6 +492,11 @@ export class SandboxController {
     await this.sandboxService.setAutoArchiveInterval(sandboxId, interval)
   }
 
+  @Audit({
+    action: AuditAction.SANDBOX_ARCHIVE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdParam: 'sandboxId',
+  })
   @Post(':sandboxId/archive')
   @HttpCode(200)
   @ApiOperation({

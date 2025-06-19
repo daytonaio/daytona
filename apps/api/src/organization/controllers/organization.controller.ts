@@ -36,6 +36,9 @@ import { SystemRole } from '../../user/enums/system-role.enum'
 import { OrganizationSuspensionDto } from '../dto/organization-suspension.dto'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { UserService } from '../../user/user.service'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations')
@@ -82,6 +85,11 @@ export class OrganizationController {
     return this.organizationInvitationService.getCountByUser(authContext.userId)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_INVITATION_ACCEPT,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdParam: 'invitationId',
+  })
   @Post('/invitations/:invitationId/accept')
   @ApiOperation({
     summary: 'Accept organization invitation',
@@ -113,6 +121,11 @@ export class OrganizationController {
     return this.organizationInvitationService.accept(invitationId, authContext.userId)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_INVITATION_DECLINE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdParam: 'invitationId',
+  })
   @Post('/invitations/:invitationId/decline')
   @ApiOperation({
     summary: 'Decline organization invitation',
@@ -144,6 +157,17 @@ export class OrganizationController {
     return this.organizationInvitationService.decline(invitationId)
   }
 
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdResolver: (result) => result?.id,
+    metadata: {
+      payload: (req: TypedRequest<CreateOrganizationDto>) => {
+        const { name } = req.body
+        return { name }
+      },
+    },
+  })
   @Post()
   @ApiOperation({
     summary: 'Create organization',
@@ -209,6 +233,11 @@ export class OrganizationController {
     return OrganizationDto.fromOrganization(organization)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdParam: 'organizationId',
+  })
   @Delete('/:organizationId')
   @ApiOperation({
     summary: 'Delete organization',
@@ -249,6 +278,37 @@ export class OrganizationController {
     return this.organizationService.getUsageOverview(organizationId)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_UPDATE_QUOTA,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdParam: 'organizationId',
+    metadata: {
+      payload: (req: TypedRequest<UpdateOrganizationQuotaDto>) => {
+        const {
+          totalCpuQuota,
+          totalMemoryQuota,
+          totalDiskQuota,
+          maxCpuPerSandbox,
+          maxMemoryPerSandbox,
+          maxDiskPerSandbox,
+          snapshotQuota,
+          maxSnapshotSize,
+          volumeQuota,
+        } = req.body
+        return {
+          totalCpuQuota,
+          totalMemoryQuota,
+          totalDiskQuota,
+          maxCpuPerSandbox,
+          maxMemoryPerSandbox,
+          maxDiskPerSandbox,
+          snapshotQuota,
+          maxSnapshotSize,
+          volumeQuota,
+        }
+      },
+    },
+  })
   @Patch('/:organizationId/quota')
   @ApiOperation({
     summary: 'Update organization quota',
@@ -274,6 +334,9 @@ export class OrganizationController {
     return OrganizationDto.fromOrganization(organization)
   }
 
+  @Audit({
+    action: AuditAction.USER_LEAVE_ORGANIZATION,
+  })
   @Post('/:organizationId/leave')
   @ApiOperation({
     summary: 'Leave organization',
@@ -296,6 +359,17 @@ export class OrganizationController {
     return this.organizationUserService.delete(organizationId, authContext.userId)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_SUSPEND,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdParam: 'organizationId',
+    metadata: {
+      payload: (req: TypedRequest<OrganizationSuspensionDto>) => {
+        const { reason, until } = req.body
+        return { reason, until }
+      },
+    },
+  })
   @Post('/:organizationId/suspend')
   @ApiOperation({
     summary: 'Suspend organization',
@@ -327,6 +401,11 @@ export class OrganizationController {
     )
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_UNSUSPEND,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdParam: 'organizationId',
+  })
   @Post('/:organizationId/unsuspend')
   @ApiOperation({
     summary: 'Unsuspend organization',

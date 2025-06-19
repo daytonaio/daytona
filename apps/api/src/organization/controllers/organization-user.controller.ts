@@ -15,6 +15,9 @@ import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationUserService } from '../services/organization-user.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/users')
@@ -43,6 +46,17 @@ export class OrganizationUserController {
     return this.organizationUserService.findAll(organizationId)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_USER_UPDATE_ROLE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdParam: 'userId',
+    metadata: {
+      payload: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => {
+        const { role } = req.body
+        return { role }
+      },
+    },
+  })
   @Post('/:userId/role')
   @ApiOperation({
     summary: 'Update role for organization member',
@@ -77,6 +91,17 @@ export class OrganizationUserController {
     return this.organizationUserService.updateRole(organizationId, userId, dto.role)
   }
 
+  @Audit({
+    action: AuditAction.ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdParam: 'userId',
+    metadata: {
+      payload: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => {
+        const { roleIds } = req.body
+        return { roleIds }
+      },
+    },
+  })
   @Post('/:userId/assigned-roles')
   @ApiOperation({
     summary: 'Update assigned roles to organization member',
@@ -106,6 +131,11 @@ export class OrganizationUserController {
     return this.organizationUserService.updateAssignedRoles(organizationId, userId, dto.roleIds)
   }
 
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdParam: 'userId',
+  })
   @Delete('/:userId')
   @ApiOperation({
     summary: 'Delete organization member',
