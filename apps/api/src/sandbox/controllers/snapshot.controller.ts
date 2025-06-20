@@ -77,12 +77,19 @@ export class SnapshotController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SNAPSHOT,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateSnapshotDto>) => {
-        const { name, imageName, entrypoint, general, cpu, memory, disk, gpu, buildInfo } = req.body
-        return { name, imageName, entrypoint, general, cpu, memory, disk, gpu, buildInfo }
-      },
+    targetIdFromResult: (result: SnapshotDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateSnapshotDto>) => ({
+        name: req.body?.name,
+        imageName: req.body?.imageName,
+        entrypoint: req.body?.entrypoint,
+        general: req.body?.general,
+        cpu: req.body?.cpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+        gpu: req.body?.gpu,
+        buildInfo: req.body?.buildInfo,
+      }),
     },
   })
   @Post()
@@ -164,12 +171,11 @@ export class SnapshotController {
   @Audit({
     action: AuditAction.SNAPSHOT_TOGGLE_STATE,
     targetType: AuditTarget.SNAPSHOT,
-    targetIdParam: 'id',
-    metadata: {
-      payload: (req: TypedRequest<ToggleStateDto>) => {
-        const { enabled } = req.body
-        return { enabled }
-      },
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<ToggleStateDto>) => ({
+        enabled: req.body?.enabled,
+      }),
     },
   })
   @Patch(':id/toggle')
@@ -196,7 +202,7 @@ export class SnapshotController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.SNAPSHOT,
-    targetIdParam: 'id',
+    targetIdFromRequest: (req) => req.params.id,
   })
   @Delete(':id')
   @ApiOperation({
@@ -256,12 +262,11 @@ export class SnapshotController {
   @Audit({
     action: AuditAction.SNAPSHOT_SET_GENERAL_STATUS,
     targetType: AuditTarget.SNAPSHOT,
-    targetIdParam: 'id',
-    metadata: {
-      payload: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => {
-        const { general } = req.body
-        return { general }
-      },
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => ({
+        general: req.body?.general,
+      }),
     },
   })
   @Patch(':id/general')

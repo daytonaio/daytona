@@ -29,12 +29,13 @@ export class OrganizationRoleController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.ORGANIZATION_ROLE,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateOrganizationRoleDto>) => {
-        const { name, description, permissions } = req.body
-        return { name, description, permissions }
-      },
+    targetIdFromResult: (result: OrganizationRoleDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateOrganizationRoleDto>) => ({
+        name: req.body?.name,
+        description: req.body?.description,
+        permissions: req.body?.permissions,
+      }),
     },
   })
   @Post()
@@ -83,12 +84,13 @@ export class OrganizationRoleController {
   @Audit({
     action: AuditAction.UPDATE,
     targetType: AuditTarget.ORGANIZATION_ROLE,
-    targetIdParam: 'roleId',
-    metadata: {
-      payload: (req: TypedRequest<UpdateOrganizationRoleDto>) => {
-        const { name, description, permissions } = req.body
-        return { name, description, permissions }
-      },
+    targetIdFromRequest: (req) => req.params.roleId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationRoleDto>) => ({
+        name: req.body?.name,
+        description: req.body?.description,
+        permissions: req.body?.permissions,
+      }),
     },
   })
   @Put('/:roleId')
@@ -123,7 +125,7 @@ export class OrganizationRoleController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.ORGANIZATION_ROLE,
-    targetIdParam: 'roleId',
+    targetIdFromRequest: (req) => req.params.roleId,
   })
   @Delete('/:roleId')
   @ApiOperation({

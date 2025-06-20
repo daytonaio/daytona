@@ -86,12 +86,11 @@ export class VolumeController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.VOLUME,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateVolumeDto>) => {
-        const { name } = req.body
-        return { name }
-      },
+    targetIdFromResult: (result: VolumeDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateVolumeDto>) => ({
+        name: req.body?.name,
+      }),
     },
   })
   @Post()
@@ -155,7 +154,7 @@ export class VolumeController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.VOLUME,
-    targetIdParam: 'volumeId',
+    targetIdFromRequest: (req) => req.params.volumeId,
   })
   @Delete(':volumeId')
   @ApiOperation({

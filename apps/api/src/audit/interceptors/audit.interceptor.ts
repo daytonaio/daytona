@@ -75,7 +75,7 @@ export class AuditInterceptor implements NestInterceptor {
         userAgent: request.get('user-agent'),
         source: request.get(CustomHeaders.SOURCE.name),
         outcome: AuditOutcome.UNKNOWN,
-        metadata: this.resolveMetadata(auditContext, request),
+        metadata: this.resolveRequestMetadata(auditContext, request),
       })
 
       try {
@@ -118,15 +118,15 @@ export class AuditInterceptor implements NestInterceptor {
   }
 
   private resolveTargetId(auditContext: AuditContext, request: RequestWithUser, result?: any): string | null {
-    if (auditContext.targetIdParam) {
-      const targetId = request.params[auditContext.targetIdParam]
+    if (auditContext.targetIdFromRequest) {
+      const targetId = auditContext.targetIdFromRequest(request)
       if (targetId) {
         return targetId
       }
     }
 
-    if (auditContext.targetIdResolver && result) {
-      const targetId = auditContext.targetIdResolver(result)
+    if (auditContext.targetIdFromResult && result) {
+      const targetId = auditContext.targetIdFromResult(result)
       if (targetId) {
         return targetId
       }
@@ -135,14 +135,14 @@ export class AuditInterceptor implements NestInterceptor {
     return null
   }
 
-  private resolveMetadata(auditContext: AuditContext, request: RequestWithUser): AuditLogMetadata | null {
-    if (!auditContext.metadata) {
+  private resolveRequestMetadata(auditContext: AuditContext, request: RequestWithUser): AuditLogMetadata | null {
+    if (!auditContext.requestMetadata) {
       return null
     }
 
     const resolvedMetadata: AuditLogMetadata = {}
 
-    for (const [key, valueOrResolver] of Object.entries(auditContext.metadata)) {
+    for (const [key, valueOrResolver] of Object.entries(auditContext.requestMetadata)) {
       try {
         if (typeof valueOrResolver === 'function') {
           resolvedMetadata[key] = valueOrResolver(request)

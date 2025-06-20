@@ -30,12 +30,14 @@ export class OrganizationInvitationController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateOrganizationInvitationDto>) => {
-        const { email, role, assignedRoleIds, expiresAt } = req.body
-        return { email, role, assignedRoleIds, expiresAt }
-      },
+    targetIdFromResult: (result: OrganizationInvitationDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateOrganizationInvitationDto>) => ({
+        email: req.body?.email,
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
     },
   })
   @Post()
@@ -70,12 +72,13 @@ export class OrganizationInvitationController {
   @Audit({
     action: AuditAction.UPDATE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdParam: 'invitationId',
-    metadata: {
-      payload: (req: TypedRequest<UpdateOrganizationInvitationDto>) => {
-        const { role, assignedRoleIds, expiresAt } = req.body
-        return { role, assignedRoleIds, expiresAt }
-      },
+    targetIdFromRequest: (req) => req.params.invitationId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationInvitationDto>) => ({
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
     },
   })
   @Put('/:invitationId')
@@ -131,7 +134,7 @@ export class OrganizationInvitationController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdParam: 'invitationId',
+    targetIdFromRequest: (req) => req.params.invitationId,
   })
   @Post('/:invitationId/cancel')
   @ApiOperation({

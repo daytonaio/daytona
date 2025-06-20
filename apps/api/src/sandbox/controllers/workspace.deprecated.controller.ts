@@ -59,7 +59,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { CreateWorkspaceDto } from '../dto/create-workspace.deprecated.dto'
-import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
@@ -120,42 +120,27 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SANDBOX,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateWorkspaceDto>) => {
-        const {
-          image,
-          user,
-          labels,
-          public: isPublic,
-          class: sandboxClass,
-          target,
-          cpu,
-          gpu,
-          memory,
-          disk,
-          autoStopInterval,
-          autoArchiveInterval,
-          volumes,
-          buildInfo,
-        } = req.body
-        return {
-          image,
-          user,
-          labels,
-          isPublic,
-          sandboxClass,
-          target,
-          cpu,
-          gpu,
-          memory,
-          disk,
-          autoStopInterval,
-          autoArchiveInterval,
-          volumes,
-          buildInfo,
-        }
-      },
+    targetIdFromResult: (result: WorkspaceDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateWorkspaceDto>) => ({
+        image: req.body?.image,
+        user: req.body?.user,
+        env: req.body?.env
+          ? Object.fromEntries(Object.keys(req.body?.env).map((key) => [key, MASKED_AUDIT_VALUE]))
+          : undefined,
+        labels: req.body?.labels,
+        public: req.body?.public,
+        class: req.body?.class,
+        target: req.body?.target,
+        cpu: req.body?.cpu,
+        gpu: req.body?.gpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+        autoStopInterval: req.body?.autoStopInterval,
+        autoArchiveInterval: req.body?.autoArchiveInterval,
+        volumes: req.body?.volumes,
+        buildInfo: req.body?.buildInfo,
+      }),
     },
   })
   @Post()
@@ -244,7 +229,12 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      query: (req) => ({
+        force: req.query.force,
+      }),
+    },
   })
   @Delete(':workspaceId')
   @ApiOperation({
@@ -275,7 +265,7 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_START,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
+    targetIdFromRequest: (req) => req.params.workspaceId,
   })
   @Post(':workspaceId/start')
   @HttpCode(200)
@@ -306,7 +296,7 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_STOP,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
+    targetIdFromRequest: (req) => req.params.workspaceId,
   })
   @Post(':workspaceId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
@@ -334,12 +324,11 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_REPLACE_LABELS,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
-    metadata: {
-      payload: (req: TypedRequest<WorkspaceLabelsDto>) => {
-        const { labels } = req.body
-        return { labels }
-      },
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      payload: (req: TypedRequest<WorkspaceLabelsDto>) => ({
+        labels: req.body?.labels,
+      }),
     },
   })
   @Put(':workspaceId/labels')
@@ -372,7 +361,7 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_CREATE_BACKUP,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
+    targetIdFromRequest: (req) => req.params.workspaceId,
   })
   @Post(':workspaceId/backup')
   @ApiOperation({
@@ -399,12 +388,11 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
-    metadata: {
-      payload: (req: TypedRequest<{ isPublic: boolean }>) => {
-        const { isPublic } = req.body
-        return { isPublic }
-      },
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ isPublic: boolean }>) => ({
+        isPublic: req.body?.isPublic,
+      }),
     },
   })
   @Post(':workspaceId/public/:isPublic')
@@ -435,12 +423,11 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
-    metadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => {
-        const { interval } = req.body
-        return { interval }
-      },
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => ({
+        interval: req.body?.interval,
+      }),
     },
   })
   @Post(':workspaceId/autostop/:interval')
@@ -475,12 +462,11 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
-    metadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => {
-        const { interval } = req.body
-        return { interval }
-      },
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => ({
+        interval: req.body?.interval,
+      }),
     },
   })
   @Post(':workspaceId/autoarchive/:interval')
@@ -515,7 +501,7 @@ export class WorkspaceController {
   @Audit({
     action: AuditAction.SANDBOX_ARCHIVE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'workspaceId',
+    targetIdFromRequest: (req) => req.params.workspaceId,
   })
   @Post(':workspaceId/archive')
   @HttpCode(200)

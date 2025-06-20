@@ -20,7 +20,7 @@ import { OrganizationAuthContext } from '../../common/interfaces/auth-context.in
 import { RequiredOrganizationResourcePermissions } from '../../organization/decorators/required-organization-resource-permissions.decorator'
 import { OrganizationResourcePermission } from '../../organization/enums/organization-resource-permission.enum'
 import { OrganizationResourceActionGuard } from '../../organization/guards/organization-resource-action.guard'
-import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
@@ -36,12 +36,17 @@ export class DockerRegistryController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateDockerRegistryDto>) => {
-        const { name, username, url, project, registryType, isDefault } = req.body
-        return { name, username, url, project, registryType, isDefault }
-      },
+    targetIdFromResult: (result: DockerRegistryDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateDockerRegistryDto>) => ({
+        name: req.body?.name,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+        url: req.body?.url,
+        project: req.body?.project,
+        registryType: req.body?.registryType,
+        isDefault: req.body?.isDefault,
+      }),
     },
   })
   @Post()
@@ -115,12 +120,13 @@ export class DockerRegistryController {
   @Audit({
     action: AuditAction.UPDATE,
     targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdParam: 'id',
-    metadata: {
-      payload: (req: TypedRequest<UpdateDockerRegistryDto>) => {
-        const { name, username } = req.body
-        return { name, username }
-      },
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateDockerRegistryDto>) => ({
+        name: req.body?.name,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
     },
   })
   @Patch(':id')
@@ -150,7 +156,7 @@ export class DockerRegistryController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdParam: 'id',
+    targetIdFromRequest: (req) => req.params.id,
   })
   @Delete(':id')
   @ApiOperation({
@@ -176,7 +182,7 @@ export class DockerRegistryController {
   @Audit({
     action: AuditAction.DOCKER_REGISTRY_SET_DEFAULT,
     targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdParam: 'id',
+    targetIdFromRequest: (req) => req.params.id,
   })
   @Post(':id/set-default')
   @ApiOperation({

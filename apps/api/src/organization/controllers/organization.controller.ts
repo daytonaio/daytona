@@ -88,7 +88,7 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.ORGANIZATION_INVITATION_ACCEPT,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdParam: 'invitationId',
+    targetIdFromRequest: (req) => req.params.invitationId,
   })
   @Post('/invitations/:invitationId/accept')
   @ApiOperation({
@@ -124,7 +124,7 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.ORGANIZATION_INVITATION_DECLINE,
     targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdParam: 'invitationId',
+    targetIdFromRequest: (req) => req.params.invitationId,
   })
   @Post('/invitations/:invitationId/decline')
   @ApiOperation({
@@ -160,12 +160,11 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.ORGANIZATION,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateOrganizationDto>) => {
-        const { name } = req.body
-        return { name }
-      },
+    targetIdFromResult: (result: OrganizationDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateOrganizationDto>) => ({
+        name: req.body?.name,
+      }),
     },
   })
   @Post()
@@ -236,7 +235,7 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.ORGANIZATION,
-    targetIdParam: 'organizationId',
+    targetIdFromRequest: (req) => req.params.organizationId,
   })
   @Delete('/:organizationId')
   @ApiOperation({
@@ -281,32 +280,19 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.ORGANIZATION_UPDATE_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
-    targetIdParam: 'organizationId',
-    metadata: {
-      payload: (req: TypedRequest<UpdateOrganizationQuotaDto>) => {
-        const {
-          totalCpuQuota,
-          totalMemoryQuota,
-          totalDiskQuota,
-          maxCpuPerSandbox,
-          maxMemoryPerSandbox,
-          maxDiskPerSandbox,
-          snapshotQuota,
-          maxSnapshotSize,
-          volumeQuota,
-        } = req.body
-        return {
-          totalCpuQuota,
-          totalMemoryQuota,
-          totalDiskQuota,
-          maxCpuPerSandbox,
-          maxMemoryPerSandbox,
-          maxDiskPerSandbox,
-          snapshotQuota,
-          maxSnapshotSize,
-          volumeQuota,
-        }
-      },
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationQuotaDto>) => ({
+        totalCpuQuota: req.body?.totalCpuQuota,
+        totalMemoryQuota: req.body?.totalMemoryQuota,
+        totalDiskQuota: req.body?.totalDiskQuota,
+        maxCpuPerSandbox: req.body?.maxCpuPerSandbox,
+        maxMemoryPerSandbox: req.body?.maxMemoryPerSandbox,
+        maxDiskPerSandbox: req.body?.maxDiskPerSandbox,
+        snapshotQuota: req.body?.snapshotQuota,
+        maxSnapshotSize: req.body?.maxSnapshotSize,
+        volumeQuota: req.body?.volumeQuota,
+      }),
     },
   })
   @Patch('/:organizationId/quota')
@@ -362,12 +348,12 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.ORGANIZATION_SUSPEND,
     targetType: AuditTarget.ORGANIZATION,
-    targetIdParam: 'organizationId',
-    metadata: {
-      payload: (req: TypedRequest<OrganizationSuspensionDto>) => {
-        const { reason, until } = req.body
-        return { reason, until }
-      },
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      payload: (req: TypedRequest<OrganizationSuspensionDto>) => ({
+        reason: req.body?.reason,
+        until: req.body?.until,
+      }),
     },
   })
   @Post('/:organizationId/suspend')
@@ -404,7 +390,7 @@ export class OrganizationController {
   @Audit({
     action: AuditAction.ORGANIZATION_UNSUSPEND,
     targetType: AuditTarget.ORGANIZATION,
-    targetIdParam: 'organizationId',
+    targetIdFromRequest: (req) => req.params.organizationId,
   })
   @Post('/:organizationId/unsuspend')
   @ApiOperation({

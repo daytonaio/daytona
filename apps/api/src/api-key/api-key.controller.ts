@@ -34,12 +34,12 @@ export class ApiKeyController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.API_KEY,
-    targetIdResolver: (result) => result?.name,
-    metadata: {
-      payload: (req: TypedRequest<CreateApiKeyDto>) => {
-        const { permissions, expiresAt } = req.body
-        return { permissions, expiresAt }
-      },
+    targetIdFromResult: (result: ApiKeyResponseDto) => result?.name,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateApiKeyDto>) => ({
+        permissions: req.body?.permissions,
+        expiresAt: req.body?.expiresAt,
+      }),
     },
   })
   @Post()
@@ -124,7 +124,7 @@ export class ApiKeyController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.API_KEY,
-    targetIdParam: 'name',
+    targetIdFromRequest: (req) => req.params.name,
   })
   @Delete(':name')
   @ApiOperation({

@@ -49,12 +49,11 @@ export class OrganizationUserController {
   @Audit({
     action: AuditAction.ORGANIZATION_USER_UPDATE_ROLE,
     targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdParam: 'userId',
-    metadata: {
-      payload: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => {
-        const { role } = req.body
-        return { role }
-      },
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => ({
+        role: req.body?.role,
+      }),
     },
   })
   @Post('/:userId/role')
@@ -94,12 +93,11 @@ export class OrganizationUserController {
   @Audit({
     action: AuditAction.ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES,
     targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdParam: 'userId',
-    metadata: {
-      payload: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => {
-        const { roleIds } = req.body
-        return { roleIds }
-      },
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => ({
+        roleIds: req.body?.roleIds,
+      }),
     },
   })
   @Post('/:userId/assigned-roles')
@@ -134,7 +132,7 @@ export class OrganizationUserController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdParam: 'userId',
+    targetIdFromRequest: (req) => req.params.userId,
   })
   @Delete('/:userId')
   @ApiOperation({

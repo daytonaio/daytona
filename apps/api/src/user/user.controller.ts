@@ -73,12 +73,15 @@ export class UserController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.USER,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateUserDto>) => {
-        const { name, email, personalOrganizationQuota, role, emailVerified } = req.body
-        return { name, email, personalOrganizationQuota, role, emailVerified }
-      },
+    targetIdFromResult: (result: User) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateUserDto>) => ({
+        name: req.body?.name,
+        email: req.body?.email,
+        personalOrganizationQuota: req.body?.personalOrganizationQuota,
+        role: req.body?.role,
+        emailVerified: req.body?.emailVerified,
+      }),
     },
   })
   @Post()
@@ -104,7 +107,7 @@ export class UserController {
   @Audit({
     action: AuditAction.USER_REGENERATE_KEY_PAIR,
     targetType: AuditTarget.USER,
-    targetIdParam: 'id',
+    targetIdFromRequest: (req) => req.params.id,
   })
   @Post('/:id/regenerate-key-pair')
   @ApiOperation({
@@ -162,11 +165,11 @@ export class UserController {
 
   @Audit({
     action: AuditAction.USER_LINK_ACCOUNT,
-    metadata: {
-      payload: (req: TypedRequest<CreateLinkedAccountDto>) => {
-        const { provider, userId } = req.body
-        return { provider, userId }
-      },
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateLinkedAccountDto>) => ({
+        provider: req.body?.provider,
+        userId: req.body?.userId,
+      }),
     },
   })
   @Post('/linked-accounts')
@@ -222,9 +225,11 @@ export class UserController {
 
   @Audit({
     action: AuditAction.USER_UNLINK_ACCOUNT,
-    metadata: {
-      provider: (req) => req.params.provider,
-      providerUserId: (req) => req.params.providerUserId,
+    requestMetadata: {
+      params: (req) => ({
+        provider: req.params.provider,
+        providerUserId: req.params.providerUserId,
+      }),
     },
   })
   @Delete('/linked-accounts/:provider/:providerUserId')

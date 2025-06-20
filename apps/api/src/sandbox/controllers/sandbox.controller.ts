@@ -58,7 +58,7 @@ import { IncomingMessage, ServerResponse } from 'http'
 import { NextFunction } from 'http-proxy-middleware/dist/types'
 import { LogProxy } from '../proxy/log-proxy'
 import { BadRequestError } from '../../exceptions/bad-request.exception'
-import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
@@ -118,42 +118,27 @@ export class SandboxController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SANDBOX,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateSandboxDto>) => {
-        const {
-          snapshot,
-          user,
-          labels,
-          public: isPublic,
-          class: sandboxClass,
-          target,
-          cpu,
-          gpu,
-          memory,
-          disk,
-          autoStopInterval,
-          autoArchiveInterval,
-          volumes,
-          buildInfo,
-        } = req.body
-        return {
-          snapshot,
-          user,
-          labels,
-          isPublic,
-          sandboxClass,
-          target,
-          cpu,
-          gpu,
-          memory,
-          disk,
-          autoStopInterval,
-          autoArchiveInterval,
-          volumes,
-          buildInfo,
-        }
-      },
+    targetIdFromResult: (result: SandboxDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateSandboxDto>) => ({
+        snapshot: req.body?.snapshot,
+        user: req.body?.user,
+        env: req.body?.env
+          ? Object.fromEntries(Object.keys(req.body?.env).map((key) => [key, MASKED_AUDIT_VALUE]))
+          : undefined,
+        labels: req.body?.labels,
+        public: req.body?.public,
+        class: req.body?.class,
+        target: req.body?.target,
+        cpu: req.body?.cpu,
+        gpu: req.body?.gpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+        autoStopInterval: req.body?.autoStopInterval,
+        autoArchiveInterval: req.body?.autoArchiveInterval,
+        volumes: req.body?.volumes,
+        buildInfo: req.body?.buildInfo,
+      }),
     },
   })
   @Post()
@@ -238,7 +223,12 @@ export class SandboxController {
   @Audit({
     action: AuditAction.DELETE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        force: req.query.force,
+      }),
+    },
   })
   @Delete(':sandboxId')
   @ApiOperation({
@@ -268,7 +258,7 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_START,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
+    targetIdFromRequest: (req) => req.params.sandboxId,
   })
   @Post(':sandboxId/start')
   @HttpCode(200)
@@ -298,7 +288,7 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_STOP,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
+    targetIdFromRequest: (req) => req.params.sandboxId,
   })
   @Post(':sandboxId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
@@ -325,12 +315,11 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_REPLACE_LABELS,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<SandboxLabelsDto>) => {
-        const { labels } = req.body
-        return { labels }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<SandboxLabelsDto>) => ({
+        labels: req.body?.labels,
+      }),
     },
   })
   @Put(':sandboxId/labels')
@@ -362,7 +351,7 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_CREATE_BACKUP,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
+    targetIdFromRequest: (req) => req.params.sandboxId,
   })
   @Post(':sandboxId/backup')
   @ApiOperation({
@@ -388,12 +377,11 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<{ isPublic: boolean }>) => {
-        const { isPublic } = req.body
-        return { isPublic }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ isPublic: boolean }>) => ({
+        isPublic: req.body?.isPublic,
+      }),
     },
   })
   @Post(':sandboxId/public/:isPublic')
@@ -420,12 +408,11 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => {
-        const { interval } = req.body
-        return { interval }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => ({
+        interval: req.body?.interval,
+      }),
     },
   })
   @Post(':sandboxId/autostop/:interval')
@@ -456,12 +443,11 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => {
-        const { interval } = req.body
-        return { interval }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ interval: number }>) => ({
+        interval: req.body?.interval,
+      }),
     },
   })
   @Post(':sandboxId/autoarchive/:interval')
@@ -495,7 +481,7 @@ export class SandboxController {
   @Audit({
     action: AuditAction.SANDBOX_ARCHIVE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
+    targetIdFromRequest: (req) => req.params.sandboxId,
   })
   @Post(':sandboxId/archive')
   @HttpCode(200)

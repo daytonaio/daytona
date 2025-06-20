@@ -12,7 +12,7 @@ import { ApiOAuth2, ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger
 import { SystemActionGuard } from '../../auth/system-action.guard'
 import { RequiredSystemRole } from '../../common/decorators/required-system-role.decorator'
 import { SystemRole } from '../../user/enums/system-role.enum'
-import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
@@ -28,12 +28,21 @@ export class RunnerController {
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.RUNNER,
-    targetIdResolver: (result) => result?.id,
-    metadata: {
-      payload: (req: TypedRequest<CreateRunnerDto>) => {
-        const { domain, apiUrl, cpu, memory, disk, gpu, gpuType, class: runnerClass, capacity, region } = req.body
-        return { domain, apiUrl, cpu, memory, disk, gpu, gpuType, runnerClass, capacity, region }
-      },
+    targetIdFromResult: (result: Runner) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateRunnerDto>) => ({
+        domain: req.body?.domain,
+        apiUrl: req.body?.apiUrl,
+        apiKey: MASKED_AUDIT_VALUE,
+        cpu: req.body?.cpu,
+        memory: req.body?.memory,
+        disk: req.body?.disk,
+        gpu: req.body?.gpu,
+        gpuType: req.body?.gpuType,
+        class: req.body?.class,
+        capacity: req.body?.capacity,
+        region: req.body?.region,
+      }),
     },
   })
   @Post()
@@ -57,12 +66,11 @@ export class RunnerController {
   @Audit({
     action: AuditAction.RUNNER_UPDATE_SCHEDULING,
     targetType: AuditTarget.RUNNER,
-    targetIdParam: 'id',
-    metadata: {
-      payload: (req: TypedRequest<{ unschedulable: boolean }>) => {
-        const { unschedulable } = req.body
-        return { unschedulable }
-      },
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<{ unschedulable: boolean }>) => ({
+        unschedulable: req.body?.unschedulable,
+      }),
     },
   })
   @Patch(':id/scheduling')

@@ -79,7 +79,7 @@ import { OrganizationResourcePermission } from '../../organization/enums/organiz
 import followRedirects from 'follow-redirects'
 import { UploadFileDto } from '../dto/upload-file.dto'
 import { AuditAction } from '../../audit/enums/audit-action.enum'
-import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { Audit, MASKED_AUDIT_VALUE, TypedRequest } from '../../audit/decorators/audit.decorator'
 import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 followRedirects.maxRedirects = 10
@@ -207,9 +207,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_DELETE_FILE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      path: (req) => req.query.path,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
     },
   })
   @Delete(':sandboxId/toolbox/files')
@@ -235,9 +237,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_DOWNLOAD_FILE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      path: (req) => req.query.path,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
     },
   })
   @Get(':sandboxId/toolbox/files/download')
@@ -289,10 +293,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_CREATE_FOLDER,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      path: (req) => req.query.path,
-      mode: (req) => req.query.mode,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+        mode: req.query.mode,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/files/folder')
@@ -342,10 +348,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_MOVE_FILE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      destination: (req) => req.query.destination,
-      source: (req) => req.query.source,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        destination: req.query.destination,
+        source: req.query.source,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/files/move')
@@ -374,12 +382,14 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_SET_FILE_PERMISSIONS,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      mode: (req) => req.query.mode,
-      group: (req) => req.query.group,
-      owner: (req) => req.query.owner,
-      path: (req) => req.query.path,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        mode: req.query.mode,
+        group: req.query.group,
+        owner: req.query.owner,
+        path: req.query.path,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/files/permissions')
@@ -410,12 +420,13 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_REPLACE_IN_FILES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<ReplaceRequestDto>) => {
-        const { files, pattern, newValue } = req.body
-        return { files, pattern, newValue }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<ReplaceRequestDto>) => ({
+        files: req.body?.files,
+        pattern: req.body?.pattern,
+        newValue: req.body?.newValue,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/files/replace')
@@ -468,9 +479,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_UPLOAD_FILE,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      path: (req) => req.query.path,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      query: (req) => ({
+        path: req.query.path,
+      }),
     },
   })
   @HttpCode(200)
@@ -510,12 +523,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_BULK_UPLOAD_FILES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<UploadFileDto[]>) => {
-        const paths = req.body.map((file) => file.path)
-        return { paths }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UploadFileDto[]>) => ({
+        paths: req.body?.map((file) => file.path),
+      }),
     },
   })
   @HttpCode(200)
@@ -544,12 +556,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_ADD_FILES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitAddRequestDto>) => {
-        const { path, files } = req.body
-        return { path, files }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitAddRequestDto>) => ({
+        path: req.body?.path,
+        files: req.body?.files,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/add')
@@ -600,12 +612,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_CREATE_BRANCH,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitBranchRequestDto>) => {
-        const { path, name } = req.body
-        return { path, name }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitBranchRequestDto>) => ({
+        path: req.body?.path,
+        name: req.body?.name,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/branches')
@@ -635,12 +647,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_DELETE_BRANCH,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitDeleteBranchRequestDto>) => {
-        const { path, name } = req.body
-        return { path, name }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitDeleteBranchRequestDto>) => ({
+        path: req.body?.path,
+        name: req.body?.name,
+      }),
     },
   })
   @Delete(':sandboxId/toolbox/git/branches')
@@ -670,12 +682,16 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_CLONE_REPOSITORY,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitCloneRequestDto>) => {
-        const { url, path, username, branch, commit_id } = req.body
-        return { url, path, username, branch, commit_id }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitCloneRequestDto>) => ({
+        url: req.body?.url,
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+        branch: req.body?.branch,
+        commit_id: req.body?.commit_id,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/clone')
@@ -705,12 +721,14 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_COMMIT_CHANGES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitCommitRequestDto>) => {
-        const { path, message, author, email } = req.body
-        return { path, message, author, email }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitCommitRequestDto>) => ({
+        path: req.body?.path,
+        message: req.body?.message,
+        author: req.body?.author,
+        email: req.body?.email,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/commit')
@@ -762,12 +780,13 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_PULL_CHANGES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitRepoRequestDto>) => {
-        const { path, username } = req.body
-        return { path, username }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitRepoRequestDto>) => ({
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/pull')
@@ -797,12 +816,13 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_PUSH_CHANGES,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitRepoRequestDto>) => {
-        const { path, username } = req.body
-        return { path, username }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitRepoRequestDto>) => ({
+        path: req.body?.path,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/push')
@@ -832,12 +852,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_GIT_CHECKOUT_BRANCH,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<GitCheckoutRequestDto>) => {
-        const { path, branch } = req.body
-        return { path, branch }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<GitCheckoutRequestDto>) => ({
+        path: req.body?.path,
+        branch: req.body?.branch,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/git/checkout')
@@ -888,12 +908,13 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_EXECUTE_COMMAND,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<ExecuteRequestDto>) => {
-        const { command, cwd, timeout } = req.body
-        return { command, cwd, timeout }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<ExecuteRequestDto>) => ({
+        command: req.body?.command,
+        cwd: req.body?.cwd,
+        timeout: req.body?.timeout,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/process/execute')
@@ -972,12 +993,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_CREATE_SESSION,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<CreateSessionRequestDto>) => {
-        const { sessionId } = req.body
-        return { sessionId }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateSessionRequestDto>) => ({
+        sessionId: req.body?.sessionId,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/process/session')
@@ -1006,13 +1026,16 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_SESSION_EXECUTE_COMMAND,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      sessionId: (req) => req.params.sessionId,
-      payload: (req: TypedRequest<SessionExecuteRequestDto>) => {
-        const { command, runAsync, async } = req.body
-        return { command, runAsync, async }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        sessionId: req.params.sessionId,
+      }),
+      payload: (req: TypedRequest<SessionExecuteRequestDto>) => ({
+        command: req.body?.command,
+        runAsync: req.body?.runAsync,
+        async: req.body?.async,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/process/session/:sessionId/exec')
@@ -1049,9 +1072,11 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_DELETE_SESSION,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      sessionId: (req) => req.params.sessionId,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        sessionId: req.params.sessionId,
+      }),
     },
   })
   @Delete(':sandboxId/toolbox/process/session/:sessionId')
@@ -1228,12 +1253,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_LSP_START,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<LspServerRequestDto>) => {
-        const { languageId, pathToProject } = req.body
-        return { languageId, pathToProject }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<LspServerRequestDto>) => ({
+        languageId: req.body?.languageId,
+        pathToProject: req.body?.pathToProject,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/lsp/start')
@@ -1263,12 +1288,12 @@ export class ToolboxController {
   @Audit({
     action: AuditAction.TOOLBOX_LSP_STOP,
     targetType: AuditTarget.SANDBOX,
-    targetIdParam: 'sandboxId',
-    metadata: {
-      payload: (req: TypedRequest<LspServerRequestDto>) => {
-        const { languageId, pathToProject } = req.body
-        return { languageId, pathToProject }
-      },
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<LspServerRequestDto>) => ({
+        languageId: req.body?.languageId,
+        pathToProject: req.body?.pathToProject,
+      }),
     },
   })
   @Post(':sandboxId/toolbox/lsp/stop')
