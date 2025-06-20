@@ -19,8 +19,8 @@ exports.onExecutePostLogin = async (event, api) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        userId: event.user.user_id,
-        userEmail: event.user.email,
+        actorId: event.user.user_id,
+        actorEmail: event.user.email,
         action: 'login',
       }),
     })

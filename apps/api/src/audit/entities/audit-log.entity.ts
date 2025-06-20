@@ -9,19 +9,21 @@ export type AuditLogMetadata = Record<string, any>
 
 @Entity()
 @Index(['createdAt'])
-@Index(['userId', 'createdAt'])
+@Index(['actorId', 'createdAt'])
 @Index(['organizationId', 'createdAt'])
-@Index(['organizationId', 'userId', 'createdAt'])
+@Index(['organizationId', 'actorId', 'createdAt'])
 @Index(['targetId', 'createdAt'])
 export class AuditLog {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Column()
-  userId: string
+  actorId: string
 
-  @Column()
-  userEmail: string
+  @Column({
+    default: '',
+  })
+  actorEmail: string
 
   @Column({ nullable: true })
   organizationId?: string

@@ -9,8 +9,8 @@ import { AuditOutcome } from '../enums/audit-outcome-enum'
 import { AuditTarget } from '../enums/audit-target.enum'
 
 export class CreateAuditLogInternalDto {
-  userId: string
-  userEmail: string
+  actorId: string
+  actorEmail: string
   organizationId?: string
   action: AuditAction
   targetType?: AuditTarget

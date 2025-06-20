@@ -37,8 +37,8 @@ export class AuditController {
   @RequiredSystemRole(SystemRole.ADMIN)
   async createLog(@Req() req: Request, @Body() createAuditLogDto: CreateAuditLogDto): Promise<AuditLogDto> {
     const auditLog = await this.auditService.createLog({
-      userId: createAuditLogDto.userId,
-      userEmail: createAuditLogDto.userEmail,
+      actorId: createAuditLogDto.actorId,
+      actorEmail: createAuditLogDto.actorEmail,
       organizationId: createAuditLogDto.organizationId,
       action: createAuditLogDto.action,
       targetType: createAuditLogDto.targetType,

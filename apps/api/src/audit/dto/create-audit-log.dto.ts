@@ -11,10 +11,10 @@ import { AuditTarget } from '../enums/audit-target.enum'
 @ApiSchema({ name: 'CreateAuditLog' })
 export class CreateAuditLogDto {
   @ApiProperty()
-  userId: string
+  actorId: string
 
   @ApiProperty()
-  userEmail: string
+  actorEmail: string
 
   @ApiPropertyOptional()
   @IsOptional()

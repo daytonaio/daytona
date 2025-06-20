@@ -19,8 +19,8 @@ export class AuditService {
 
   async createLog(createDto: CreateAuditLogInternalDto): Promise<AuditLog> {
     const auditLog = new AuditLog()
-    auditLog.userId = createDto.userId
-    auditLog.userEmail = createDto.userEmail
+    auditLog.actorId = createDto.actorId
+    auditLog.actorEmail = createDto.actorEmail
     auditLog.organizationId = createDto.organizationId
     auditLog.action = createDto.action
     auditLog.targetType = createDto.targetType

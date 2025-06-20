@@ -12,10 +12,10 @@ export class AuditLogDto {
   id: string
 
   @ApiProperty()
-  userId: string
+  actorId: string
 
   @ApiProperty()
-  userEmail: string
+  actorEmail: string
 
   @ApiPropertyOptional()
   organizationId?: string
@@ -53,8 +53,8 @@ export class AuditLogDto {
   static fromAuditLog(auditLog: AuditLog): AuditLogDto {
     const dto: AuditLogDto = {
       id: auditLog.id,
-      userId: auditLog.userId,
-      userEmail: auditLog.userEmail,
+      actorId: auditLog.actorId,
+      actorEmail: auditLog.actorEmail,
       organizationId: auditLog.organizationId,
       action: auditLog.action,
       targetType: auditLog.targetType,
