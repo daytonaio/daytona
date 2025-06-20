@@ -2,8 +2,27 @@ FROM mcr.microsoft.com/devcontainers/python
 
 # Update package list and install required dependencies
 RUN apt-get update && apt-get install -y \
-    curl sudo python3-pip python3-venv ripgrep && \
-    rm -rf /var/lib/apt/lists/*
+    sudo \
+    python3-pip \
+    python3-venv \
+    ripgrep \
+    # X11 libraries required for computer use plugin
+    libx11-6 \
+    libxrandr2 \
+    libxext6 \
+    libxrender1 \
+    libxfixes3 \
+    libxss1 \
+    libxtst6 \
+    libxi6 \
+    # VNC and desktop environment for computer use
+    xvfb \
+    x11vnc \
+    novnc \
+    xfce4 \
+    xfce4-terminal \
+    dbus-x11 \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install pipx and uv
 RUN python3 -m pip install pipx && pipx ensurepath && pipx install uv
@@ -26,64 +45,8 @@ RUN bash -c "source /usr/local/share/nvm/nvm.sh && nvm install node && nvm use n
 
 RUN npm install -g ts-node typescript typescript-language-server
 
-# Vnc Setup
-
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-ENV DISPLAY=:1
-ENV VNC_PORT=5901
-ENV NO_VNC_PORT=6901
-ENV VNC_RESOLUTION=1280x720
-
-# Install base packages
-RUN apt-get update && apt-get install -y \
-    wget \
-    git \
-    vim \
-    xfce4 \
-    xfce4-terminal \
-    dbus-x11 \
-    xfonts-base \
-    xfonts-100dpi \
-    xfonts-75dpi \
-    xfonts-scalable \
-    x11vnc \
-    novnc \
-    supervisor \
-    net-tools \
-    locales \
-    xvfb \
-    x11-utils \
-    x11-xserver-utils \
-    gnome-screenshot \
-    scrot \
-    imagemagick \
-    xdotool \
-    xautomation \
-    wmctrl \
-    build-essential \
-    libx11-dev \
-    libxext-dev \
-    libxtst-dev \
-    libxinerama-dev \
-    libx11-xcb-dev \
-    libxkbcommon-dev \
-    libxkbcommon-x11-dev \
-    libxcb-xkb-dev \
-    libpng-dev \
-    chromium \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Setup VNC
-RUN mkdir -p /home/daytona/.vnc && \
-    chown -R daytona:daytona /home/daytona/.vnc
-
-COPY launch.sh /usr/share/novnc/utils/launch.sh
-
-# NoVNC setup
-RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
-    sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh;
+# Create directory for computer use plugin
+RUN mkdir -p /usr/local/lib && chown daytona:daytona /usr/local/lib
 
 # Switch to Daytona user
 USER daytona

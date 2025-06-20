@@ -67,6 +67,12 @@ func main() {
 		return
 	}
 
+	pluginPath, err := daemon.WritePluginBinary()
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
 	dockerClient := docker.NewDockerClient(docker.DockerClientConfig{
 		ApiClient:          cli,
 		Cache:              runnerCache,
@@ -76,6 +82,7 @@ func main() {
 		AWSAccessKeyId:     cfg.AWSAccessKeyId,
 		AWSSecretAccessKey: cfg.AWSSecretAccessKey,
 		DaemonPath:         daemonPath,
+		PluginPath:         pluginPath,
 	})
 
 	sandboxService := services.NewSandboxService(runnerCache, dockerClient)
