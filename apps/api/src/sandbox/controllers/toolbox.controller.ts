@@ -1112,6 +1112,150 @@ export class ToolboxController {
 
   // Computer Use endpoints
 
+  // Computer use management endpoints
+  @Post(':sandboxId/toolbox/computeruse/start')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Start computer use processes',
+    description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
+    operationId: 'startComputerUse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use processes started successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async startComputerUse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/stop')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Stop computer use processes',
+    description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)',
+    operationId: 'stopComputerUse',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use processes stopped successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async stopComputerUse(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/status')
+  @ApiOperation({
+    summary: 'Get computer use status',
+    description: 'Get status of all VNC desktop processes',
+    operationId: 'getComputerUseStatus',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Computer use status retrieved successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  async getComputerUseStatus(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/status')
+  @ApiOperation({
+    summary: 'Get process status',
+    description: 'Get status of a specific VNC process',
+    operationId: 'getProcessStatus',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process status retrieved successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessStatus(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Post(':sandboxId/toolbox/computeruse/process/:processName/restart')
+  @HttpCode(200)
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Restart process',
+    description: 'Restart a specific VNC process',
+    operationId: 'restartProcess',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process restarted successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async restartProcess(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/logs')
+  @ApiOperation({
+    summary: 'Get process logs',
+    description: 'Get logs for a specific VNC process',
+    operationId: 'getProcessLogs',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process logs retrieved successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessLogs(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
+  @Get(':sandboxId/toolbox/computeruse/process/:processName/errors')
+  @ApiOperation({
+    summary: 'Get process errors',
+    description: 'Get error logs for a specific VNC process',
+    operationId: 'getProcessErrors',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Process errors retrieved successfully',
+  })
+  @ApiParam({ name: 'sandboxId', type: String, required: true })
+  @ApiParam({ name: 'processName', type: String, required: true })
+  async getProcessErrors(
+    @Request() req: RawBodyRequest<IncomingMessage>,
+    @Res() res: ServerResponse<IncomingMessage>,
+    @Next() next: NextFunction,
+  ): Promise<void> {
+    return await this.toolboxProxy(req, res, next)
+  }
+
   // Mouse endpoints
   @Get(':sandboxId/toolbox/computeruse/mouse/position')
   @ApiOperation({

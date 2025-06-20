@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/signal"
 	"path/filepath"
+	"syscall"
 
 	golog "log"
 
@@ -68,10 +70,25 @@ func main() {
 		}
 	}()
 
-	err = <-errChan
-	if err != nil {
-		log.Fatalf("Error: %v", err)
+	// Set up signal handling for graceful shutdown
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Wait for either an error or shutdown signal
+	select {
+	case err := <-errChan:
+		log.Errorf("Error: %v", err)
+	case sig := <-sigChan:
+		log.Infof("Received signal %v, shutting down gracefully...", sig)
 	}
+
+	// Graceful shutdown
+	log.Info("Stopping computer use processes...")
+	if toolBoxServer.ComputerUse != nil {
+		toolBoxServer.ComputerUse.Stop()
+	}
+
+	log.Info("Shutdown complete")
 }
 
 func initLogs(logWriter io.Writer) {
