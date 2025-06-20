@@ -13,6 +13,7 @@ import (
 
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
+	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
@@ -145,6 +146,33 @@ func (s *Server) Start() error {
 
 		lspController.GET("/document-symbols", lsp.DocumentSymbols)
 		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols)
+	}
+
+	computerUse := computeruse.NewComputerUse()
+
+	computerUseController := r.Group("/computer")
+	{
+		// Screenshot endpoints
+		computerUseController.GET("/screenshot", computerUse.TakeScreenshot)
+		computerUseController.GET("/screenshot/region", computerUse.TakeRegionScreenshot)
+		computerUseController.GET("/screenshot/compressed", computerUse.TakeCompressedScreenshot)
+		computerUseController.GET("/screenshot/region/compressed", computerUse.TakeCompressedRegionScreenshot)
+
+		// Mouse control endpoints
+		computerUseController.GET("/mouse/position", computerUse.GetMousePosition)
+		computerUseController.POST("/mouse/move", computerUse.MoveMouse)
+		computerUseController.POST("/mouse/click", computerUse.Click)
+		computerUseController.POST("/mouse/drag", computerUse.Drag)
+		computerUseController.POST("/mouse/scroll", computerUse.Scroll)
+
+		// Keyboard control endpoints
+		computerUseController.POST("/keyboard/type", computerUse.TypeText)
+		computerUseController.POST("/keyboard/key", computerUse.PressKey)
+		computerUseController.POST("/keyboard/hotkey", computerUse.PressHotkey)
+
+		// Display info endpoints
+		computerUseController.GET("/display/info", computerUse.GetDisplayInfo)
+		computerUseController.GET("/display/windows", computerUse.GetWindows)
 	}
 
 	portDetector := port.NewPortsDetector()

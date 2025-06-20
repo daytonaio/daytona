@@ -379,3 +379,301 @@ export class SessionDto {
   @IsOptional()
   commands?: CommandDto[] | null
 }
+
+// Computer Use DTOs
+@ApiSchema({ name: 'MousePosition' })
+export class MousePositionDto {
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+}
+
+@ApiSchema({ name: 'MouseMoveRequest' })
+export class MouseMoveRequestDto {
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+}
+
+@ApiSchema({ name: 'MouseMoveResponse' })
+export class MouseMoveResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+
+  @ApiProperty()
+  actual_x: number
+
+  @ApiProperty()
+  actual_y: number
+}
+
+@ApiSchema({ name: 'MouseClickRequest' })
+export class MouseClickRequestDto {
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+
+  @ApiPropertyOptional()
+  button?: string
+
+  @ApiPropertyOptional()
+  double?: boolean
+}
+
+@ApiSchema({ name: 'MouseClickResponse' })
+export class MouseClickResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  action: string
+
+  @ApiProperty()
+  button: string
+
+  @ApiProperty()
+  double: boolean
+
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+
+  @ApiProperty()
+  actual_x: number
+
+  @ApiProperty()
+  actual_y: number
+}
+
+@ApiSchema({ name: 'MouseDragRequest' })
+export class MouseDragRequestDto {
+  @ApiProperty()
+  startX: number
+
+  @ApiProperty()
+  startY: number
+
+  @ApiProperty()
+  endX: number
+
+  @ApiProperty()
+  endY: number
+
+  @ApiPropertyOptional()
+  button?: string
+}
+
+@ApiSchema({ name: 'MouseDragResponse' })
+export class MouseDragResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  action: string
+
+  @ApiProperty()
+  from: { x: number; y: number }
+
+  @ApiProperty()
+  to: { x: number; y: number }
+
+  @ApiProperty()
+  actual_x: number
+
+  @ApiProperty()
+  actual_y: number
+}
+
+@ApiSchema({ name: 'MouseScrollRequest' })
+export class MouseScrollRequestDto {
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+
+  @ApiProperty()
+  direction: string
+
+  @ApiPropertyOptional()
+  amount?: number
+}
+
+@ApiSchema({ name: 'MouseScrollResponse' })
+export class MouseScrollResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  action: string
+
+  @ApiProperty()
+  direction: string
+
+  @ApiProperty()
+  amount: number
+
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+}
+
+@ApiSchema({ name: 'KeyboardTypeRequest' })
+export class KeyboardTypeRequestDto {
+  @ApiProperty()
+  text: string
+
+  @ApiPropertyOptional()
+  delay?: number
+}
+
+@ApiSchema({ name: 'KeyboardTypeResponse' })
+export class KeyboardTypeResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  typed: string
+}
+
+@ApiSchema({ name: 'KeyboardPressRequest' })
+export class KeyboardPressRequestDto {
+  @ApiProperty()
+  key: string
+
+  @ApiPropertyOptional({ type: [String] })
+  modifiers?: string[]
+}
+
+@ApiSchema({ name: 'KeyboardPressResponse' })
+export class KeyboardPressResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  key: string
+
+  @ApiProperty()
+  modifiers: string[]
+}
+
+@ApiSchema({ name: 'KeyboardHotkeyRequest' })
+export class KeyboardHotkeyRequestDto {
+  @ApiProperty()
+  keys: string
+}
+
+@ApiSchema({ name: 'KeyboardHotkeyResponse' })
+export class KeyboardHotkeyResponseDto {
+  @ApiProperty()
+  success: boolean
+
+  @ApiProperty()
+  hotkey: string
+}
+
+@ApiSchema({ name: 'ScreenshotResponse' })
+export class ScreenshotResponseDto {
+  @ApiProperty()
+  screenshot: string
+
+  @ApiProperty()
+  width: number
+
+  @ApiProperty()
+  height: number
+
+  @ApiPropertyOptional()
+  cursor_position?: { x: number; y: number }
+}
+
+@ApiSchema({ name: 'RegionScreenshotRequest' })
+export class RegionScreenshotRequestDto {
+  @ApiProperty()
+  x: number
+
+  @ApiProperty()
+  y: number
+
+  @ApiProperty()
+  width: number
+
+  @ApiProperty()
+  height: number
+}
+
+@ApiSchema({ name: 'RegionScreenshotResponse' })
+export class RegionScreenshotResponseDto {
+  @ApiProperty()
+  screenshot: string
+
+  @ApiProperty()
+  region: { x: number; y: number; width: number; height: number }
+
+  @ApiPropertyOptional()
+  cursor_position?: { x: number; y: number }
+}
+
+@ApiSchema({ name: 'CompressedScreenshotResponse' })
+export class CompressedScreenshotResponseDto {
+  @ApiProperty()
+  screenshot: string
+
+  @ApiProperty()
+  width: number
+
+  @ApiProperty()
+  height: number
+
+  @ApiProperty()
+  format: string
+
+  @ApiProperty()
+  quality: number
+
+  @ApiProperty()
+  scale: number
+
+  @ApiProperty()
+  size_bytes: number
+
+  @ApiPropertyOptional()
+  cursor_position?: { x: number; y: number }
+}
+
+@ApiSchema({ name: 'DisplayInfoResponse' })
+export class DisplayInfoResponseDto {
+  @ApiProperty()
+  primary_display: { width: number; height: number }
+
+  @ApiProperty({ type: [Object] })
+  displays: Array<{ id: number; x: number; y: number; width: number; height: number }>
+
+  @ApiProperty()
+  total_displays: number
+}
+
+@ApiSchema({ name: 'WindowsResponse' })
+export class WindowsResponseDto {
+  @ApiProperty({ type: [Object] })
+  windows: Array<{ id: number; title: string }>
+
+  @ApiProperty()
+  count: number
+}
