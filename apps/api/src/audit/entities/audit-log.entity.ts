@@ -37,8 +37,8 @@ export class AuditLog {
   @Column({ nullable: true })
   targetId?: string
 
-  @Column()
-  outcome: string
+  @Column({ nullable: true })
+  statusCode?: number
 
   @Column({ nullable: true })
   errorMessage?: string

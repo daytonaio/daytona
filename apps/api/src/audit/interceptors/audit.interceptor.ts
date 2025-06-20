@@ -11,16 +11,17 @@ import {
   Logger,
   UnauthorizedException,
   InternalServerErrorException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common'
 import { Reflector } from '@nestjs/core'
-import { Request } from 'express'
+import { Request, Response } from 'express'
 import { Observable, Subscriber, firstValueFrom } from 'rxjs'
 import { AuditLog, AuditLogMetadata } from '../entities/audit-log.entity'
 import { AUDIT_CONTEXT_KEY, AuditContext } from '../decorators/audit.decorator'
 import { AuthContext } from '../../common/interfaces/auth-context.interface'
 import { AuditService } from '../services/audit.service'
 import { CustomHeaders } from '../../common/constants/header.constants'
-import { AuditOutcome } from '../enums/audit-outcome-enum'
 
 type RequestWithUser = Request & {
   user?: AuthContext
@@ -37,6 +38,7 @@ export class AuditInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<RequestWithUser>()
+    const response = context.switchToHttp().getResponse<Response>()
 
     const auditContext = this.reflector.get<AuditContext>(AUDIT_CONTEXT_KEY, context.getHandler())
 
@@ -51,7 +53,7 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     return new Observable((observer) => {
-      this.handleAuditedRequest(auditContext, request, next, observer)
+      this.handleAuditedRequest(auditContext, request, response, next, observer)
     })
   }
 
@@ -60,6 +62,7 @@ export class AuditInterceptor implements NestInterceptor {
   private async handleAuditedRequest(
     auditContext: AuditContext,
     request: RequestWithUser,
+    response: Response,
     next: CallHandler,
     observer: Subscriber<any>,
   ): Promise<void> {
@@ -74,46 +77,28 @@ export class AuditInterceptor implements NestInterceptor {
         ipAddress: request.ip,
         userAgent: request.get('user-agent'),
         source: request.get(CustomHeaders.SOURCE.name),
-        outcome: AuditOutcome.UNKNOWN,
         metadata: this.resolveRequestMetadata(auditContext, request),
       })
 
       try {
         const result = await firstValueFrom(next.handle())
+
         const targetId = this.resolveTargetId(auditContext, request, result)
-        await this.recordSuccessOutcome(auditLog, targetId)
+        const statusCode = response.statusCode || HttpStatus.NO_CONTENT
+        await this.recordHandlerSuccess(auditLog, targetId, statusCode)
+
         observer.next(result)
         observer.complete()
       } catch (handlerError) {
         const errorMessage = handlerError.message || 'Unknown error'
-        await this.recordErrorOutcome(auditLog, errorMessage)
+        const statusCode = this.resolveErrorStatusCode(handlerError)
+        await this.recordHandlerError(auditLog, errorMessage, statusCode)
+
         observer.error(handlerError)
       }
     } catch (createLogError) {
       this.logger.error('Failed to create audit log:', createLogError)
       observer.error(new InternalServerErrorException())
-    }
-  }
-
-  private async recordSuccessOutcome(auditLog: AuditLog, targetId: string | null): Promise<void> {
-    try {
-      await this.auditService.updateLog(auditLog.id, {
-        outcome: AuditOutcome.SUCCESS,
-        targetId,
-      })
-    } catch (error) {
-      this.logger.error('Failed to set "success" outcome for audit log:', error)
-    }
-  }
-
-  private async recordErrorOutcome(auditLog: AuditLog, errorMessage: string): Promise<void> {
-    try {
-      await this.auditService.updateLog(auditLog.id, {
-        outcome: AuditOutcome.ERROR,
-        errorMessage,
-      })
-    } catch (error) {
-      this.logger.error('Failed to set "error" outcome for audit log:', error)
     }
   }
 
@@ -156,5 +141,35 @@ export class AuditInterceptor implements NestInterceptor {
     }
 
     return Object.keys(resolvedMetadata).length > 0 ? resolvedMetadata : null
+  }
+
+  private async recordHandlerSuccess(auditLog: AuditLog, targetId: string | null, statusCode: number): Promise<void> {
+    try {
+      await this.auditService.updateLog(auditLog.id, {
+        targetId,
+        statusCode,
+      })
+    } catch (error) {
+      this.logger.error('Failed to record handler result:', error)
+    }
+  }
+
+  private async recordHandlerError(auditLog: AuditLog, errorMessage: string, statusCode: number): Promise<void> {
+    try {
+      await this.auditService.updateLog(auditLog.id, {
+        errorMessage,
+        statusCode,
+      })
+    } catch (error) {
+      this.logger.error('Failed to record handler error:', error)
+    }
+  }
+
+  private resolveErrorStatusCode(error: any): number {
+    if (error instanceof HttpException) {
+      return error.getStatus()
+    }
+
+    return HttpStatus.INTERNAL_SERVER_ERROR
   }
 }

@@ -6,7 +6,6 @@
 import { ForbiddenException, Logger } from '@nestjs/common'
 import { DataSource, EntitySubscriberInterface, EventSubscriber, UpdateEvent } from 'typeorm'
 import { AuditLog } from '../entities/audit-log.entity'
-import { AuditOutcome } from '../enums/audit-outcome-enum'
 
 @EventSubscriber()
 export class AuditLogSubscriber implements EntitySubscriberInterface<AuditLog> {
@@ -29,7 +28,7 @@ export class AuditLogSubscriber implements EntitySubscriberInterface<AuditLog> {
       throw new ForbiddenException()
     }
 
-    if (existingEntity.outcome !== AuditOutcome.UNKNOWN) {
+    if (existingEntity.statusCode) {
       throw new ForbiddenException('Finalized audit logs are immutable.')
     }
   }

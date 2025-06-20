@@ -29,8 +29,8 @@ export class AuditLogDto {
   @ApiPropertyOptional()
   targetId?: string
 
-  @ApiProperty()
-  outcome: string
+  @ApiPropertyOptional()
+  statusCode?: number
 
   @ApiPropertyOptional()
   errorMessage?: string
@@ -59,7 +59,7 @@ export class AuditLogDto {
       action: auditLog.action,
       targetType: auditLog.targetType,
       targetId: auditLog.targetId,
-      outcome: auditLog.outcome,
+      statusCode: auditLog.statusCode,
       errorMessage: auditLog.errorMessage,
       ipAddress: auditLog.ipAddress,
       userAgent: auditLog.userAgent,

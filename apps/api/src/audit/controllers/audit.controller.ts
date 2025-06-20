@@ -8,7 +8,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiOAuth2 } from '@n
 import { Request } from 'express'
 import { AuditLogDto } from '../dto/audit-log.dto'
 import { CreateAuditLogDto } from '../dto/create-audit-log.dto'
-import { AuditOutcome } from '../enums/audit-outcome-enum'
 import { AuditService } from '../services/audit.service'
 import { CombinedAuthGuard } from '../../auth/combined-auth.guard'
 import { SystemActionGuard } from '../../auth/system-action.guard'
@@ -46,7 +45,6 @@ export class AuditController {
       ipAddress: req.ip,
       userAgent: req.get('user-agent'),
       source: req.get(CustomHeaders.SOURCE.name),
-      outcome: AuditOutcome.UNKNOWN,
     })
     return AuditLogDto.fromAuditLog(auditLog)
   }

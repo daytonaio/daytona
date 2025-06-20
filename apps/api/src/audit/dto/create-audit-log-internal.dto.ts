@@ -5,7 +5,6 @@
 
 import { AuditLogMetadata } from '../entities/audit-log.entity'
 import { AuditAction } from '../enums/audit-action.enum'
-import { AuditOutcome } from '../enums/audit-outcome-enum'
 import { AuditTarget } from '../enums/audit-target.enum'
 
 export class CreateAuditLogInternalDto {
@@ -18,7 +17,7 @@ export class CreateAuditLogInternalDto {
   ipAddress?: string
   userAgent?: string
   source?: string
-  outcome: AuditOutcome
+  statusCode?: number
   errorMessage?: string
   metadata?: AuditLogMetadata
 }

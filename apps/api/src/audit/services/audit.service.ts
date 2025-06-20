@@ -25,7 +25,7 @@ export class AuditService {
     auditLog.action = createDto.action
     auditLog.targetType = createDto.targetType
     auditLog.targetId = createDto.targetId
-    auditLog.outcome = createDto.outcome
+    auditLog.statusCode = createDto.statusCode
     auditLog.errorMessage = createDto.errorMessage
     auditLog.ipAddress = createDto.ipAddress
     auditLog.userAgent = createDto.userAgent
