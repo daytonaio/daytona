@@ -16,7 +16,7 @@ import { InjectRedis } from '@nestjs-modules/ioredis'
 import { Redis } from 'ioredis'
 import { RedisLockProvider } from '../common/redis-lock.provider'
 import { SANDBOX_WARM_POOL_UNASSIGNED_ORGANIZATION } from '../constants/sandbox.constants'
-import { fromAxiosError } from '../../common/utils/from-axios-error'
+//  import { fromAxiosError } from '../../common/utils/from-axios-error'
 import { OnEvent } from '@nestjs/event-emitter'
 import { SandboxEvents } from '../constants/sandbox-events.constants'
 import { SandboxStoppedEvent } from '../events/sandbox-stopped.event'
@@ -137,7 +137,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+              this.logger.error(`Error processing auto-stop state for sandbox ${sandbox.id}:`)
             }
           }),
         )
@@ -193,7 +193,7 @@ export class SandboxManager {
               await this.redisLockProvider.unlock(lockKey)
               this.syncInstanceState(sandbox.id)
             } catch (error) {
-              this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, fromAxiosError(error))
+              this.logger.error(`Error processing auto-archive state for sandbox ${sandbox.id}:`, error)
             }
           }),
         )
@@ -313,22 +313,18 @@ export class SandboxManager {
         }
       }
     } catch (error) {
-      if (error.code === 'ECONNRESET') {
-        syncState = SYNC_AGAIN
-      } else {
-        this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, fromAxiosError(error))
+      this.logger.error(`Error processing desired state for sandbox ${sandboxId}:`, error)
 
-        const sandbox = await this.sandboxRepository.findOneBy({
-          id: sandboxId,
-        })
-        if (!sandbox) {
-          //  edge case where sandbox is deleted while desired state is being processed
-          return
-        }
-        sandbox.state = SandboxState.ERROR
-        sandbox.errorReason = error.message || String(error)
-        await this.sandboxRepository.save(sandbox)
+      const sandbox = await this.sandboxRepository.findOneBy({
+        id: sandboxId,
+      })
+      if (!sandbox) {
+        //  edge case where sandbox is deleted while desired state is being processed
+        return
       }
+      sandbox.state = SandboxState.ERROR
+      sandbox.errorReason = error.message || String(error)
+      await this.sandboxRepository.save(sandbox)
     }
 
     await this.redisLockProvider.unlock(lockKey)
