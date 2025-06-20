@@ -3424,6 +3424,930 @@ paths:
       summary: Call Lsp WorkspaceSymbols
       tags:
         - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/start:
+    post:
+      description: 'Start all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)'
+      operationId: startComputerUse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Computer use processes started successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Start computer use processes
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/stop:
+    post:
+      description: 'Stop all VNC desktop processes (Xvfb, xfce4, x11vnc, novnc)'
+      operationId: stopComputerUse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Computer use processes stopped successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Stop computer use processes
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/status:
+    get:
+      description: Get status of all VNC desktop processes
+      operationId: getComputerUseStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Computer use status retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get computer use status
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/status:
+    get:
+      description: Get status of a specific VNC process
+      operationId: getProcessStatus
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: processName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Process status retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get process status
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/restart:
+    post:
+      description: Restart a specific VNC process
+      operationId: restartProcess
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: processName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Process restarted successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Restart process
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/logs:
+    get:
+      description: Get logs for a specific VNC process
+      operationId: getProcessLogs
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: processName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Process logs retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get process logs
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/process/{processName}/errors:
+    get:
+      description: Get error logs for a specific VNC process
+      operationId: getProcessErrors
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: processName
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          description: Process errors retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get process errors
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/mouse/position:
+    get:
+      description: Get current mouse cursor position
+      operationId: getMousePosition
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MousePosition'
+          description: Mouse position retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get mouse position
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/mouse/move:
+    post:
+      description: Move mouse cursor to specified coordinates
+      operationId: moveMouse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MouseMoveRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MouseMoveResponse'
+          description: Mouse moved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Move mouse
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/mouse/click:
+    post:
+      description: Click mouse at specified coordinates
+      operationId: clickMouse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MouseClickRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MouseClickResponse'
+          description: Mouse clicked successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Click mouse
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/mouse/drag:
+    post:
+      description: Drag mouse from start to end coordinates
+      operationId: dragMouse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MouseDragRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MouseDragResponse'
+          description: Mouse dragged successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Drag mouse
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/mouse/scroll:
+    post:
+      description: Scroll mouse at specified coordinates
+      operationId: scrollMouse
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MouseScrollRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MouseScrollResponse'
+          description: Mouse scrolled successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Scroll mouse
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/keyboard/type:
+    post:
+      description: Type text using keyboard
+      operationId: typeText
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyboardTypeRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyboardTypeResponse'
+          description: Text typed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Type text
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/keyboard/press:
+    post:
+      description: Press a key with optional modifiers
+      operationId: pressKey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyboardPressRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyboardPressResponse'
+          description: Key pressed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Press key
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/keyboard/hotkey:
+    post:
+      description: Press a hotkey combination
+      operationId: pressHotkey
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyboardHotkeyRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyboardHotkeyResponse'
+          description: Hotkey pressed successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Press hotkey
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/screenshot:
+    get:
+      description: Take a screenshot of the entire screen
+      operationId: takeScreenshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: show_cursor
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScreenshotResponse'
+          description: Screenshot taken successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Take screenshot
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region:
+    get:
+      description: Take a screenshot of a specific region
+      operationId: takeRegionScreenshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: show_cursor
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - explode: true
+          in: query
+          name: height
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: width
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: 'y'
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: x
+          required: true
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegionScreenshotResponse'
+          description: Region screenshot taken successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Take region screenshot
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/screenshot/compressed:
+    get:
+      description: 'Take a compressed screenshot with format, quality, and scale options'
+      operationId: takeCompressedScreenshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: scale
+          required: false
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: quality
+          required: false
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: format
+          required: false
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: show_cursor
+          required: false
+          schema:
+            type: boolean
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompressedScreenshotResponse'
+          description: Compressed screenshot taken successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Take compressed screenshot
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/screenshot/region/compressed:
+    get:
+      description: Take a compressed screenshot of a specific region
+      operationId: takeCompressedRegionScreenshot
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+        - explode: true
+          in: query
+          name: scale
+          required: false
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: quality
+          required: false
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: format
+          required: false
+          schema:
+            type: string
+          style: form
+        - explode: true
+          in: query
+          name: show_cursor
+          required: false
+          schema:
+            type: boolean
+          style: form
+        - explode: true
+          in: query
+          name: height
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: width
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: 'y'
+          required: true
+          schema:
+            type: number
+          style: form
+        - explode: true
+          in: query
+          name: x
+          required: true
+          schema:
+            type: number
+          style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompressedScreenshotResponse'
+          description: Compressed region screenshot taken successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Take compressed region screenshot
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/display/info:
+    get:
+      description: Get information about displays
+      operationId: getDisplayInfo
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisplayInfoResponse'
+          description: Display info retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get display info
+      tags:
+        - toolbox
+  /toolbox/{sandboxId}/toolbox/computeruse/windows:
+    get:
+      description: Get list of open windows
+      operationId: getWindows
+      parameters:
+        - description: Use with JWT to specify the organization ID
+          explode: false
+          in: header
+          name: X-Daytona-Organization-ID
+          required: false
+          schema:
+            type: string
+          style: simple
+        - explode: false
+          in: path
+          name: sandboxId
+          required: true
+          schema:
+            type: string
+          style: simple
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WindowsResponse'
+          description: Windows list retrieved successfully
+      security:
+        - bearer: []
+        - oauth2:
+            - openid
+            - profile
+            - email
+      summary: Get windows
+      tags:
+        - toolbox
   /snapshots:
     get:
       operationId: getAllSnapshots
@@ -6874,6 +7798,409 @@ components:
       required:
         - languageId
         - pathToProject
+      type: object
+    MousePosition:
+      example:
+        x: 0.8008281904610115
+        'y': 6.027456183070403
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+      required:
+        - x
+        - 'y'
+      type: object
+    MouseMoveRequest:
+      example:
+        x: 0.8008281904610115
+        'y': 6.027456183070403
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+      required:
+        - x
+        - 'y'
+      type: object
+    MouseMoveResponse:
+      example:
+        actual_y: 5.962133916683182
+        success: true
+        x: 0.8008281904610115
+        'y': 6.027456183070403
+        actual_x: 1.4658129805029452
+      properties:
+        success:
+          type: boolean
+        x:
+          type: number
+        'y':
+          type: number
+        actual_x:
+          type: number
+        actual_y:
+          type: number
+      required:
+        - actual_x
+        - actual_y
+        - success
+        - x
+        - 'y'
+      type: object
+    MouseClickRequest:
+      example:
+        button: button
+        double: true
+        x: 0.8008281904610115
+        'y': 6.027456183070403
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+        button:
+          type: string
+        double:
+          type: boolean
+      required:
+        - x
+        - 'y'
+      type: object
+    MouseClickResponse:
+      example:
+        button: button
+        actual_y: 5.962133916683182
+        success: true
+        double: true
+        x: 0.8008281904610115
+        action: action
+        'y': 6.027456183070403
+        actual_x: 1.4658129805029452
+      properties:
+        success:
+          type: boolean
+        action:
+          type: string
+        button:
+          type: string
+        double:
+          type: boolean
+        x:
+          type: number
+        'y':
+          type: number
+        actual_x:
+          type: number
+        actual_y:
+          type: number
+      required:
+        - action
+        - actual_x
+        - actual_y
+        - button
+        - double
+        - success
+        - x
+        - 'y'
+      type: object
+    MouseDragRequest:
+      example:
+        button: button
+        endY: 5.962133916683182
+        endX: 1.4658129805029452
+        startY: 6.027456183070403
+        startX: 0.8008281904610115
+      properties:
+        startX:
+          type: number
+        startY:
+          type: number
+        endX:
+          type: number
+        endY:
+          type: number
+        button:
+          type: string
+      required:
+        - endX
+        - endY
+        - startX
+        - startY
+      type: object
+    MouseDragResponse:
+      example:
+        actual_y: 6.027456183070403
+        success: true
+        action: action
+        from: '{}'
+        to: '{}'
+        actual_x: 0.8008281904610115
+      properties:
+        success:
+          type: boolean
+        action:
+          type: string
+        from:
+          type: object
+        to:
+          type: object
+        actual_x:
+          type: number
+        actual_y:
+          type: number
+      required:
+        - action
+        - actual_x
+        - actual_y
+        - from
+        - success
+        - to
+      type: object
+    MouseScrollRequest:
+      example:
+        amount: 1.4658129805029452
+        x: 0.8008281904610115
+        'y': 6.027456183070403
+        direction: direction
+      properties:
+        x:
+          type: number
+        'y':
+          type: number
+        direction:
+          type: string
+        amount:
+          type: number
+      required:
+        - direction
+        - x
+        - 'y'
+      type: object
+    MouseScrollResponse:
+      example:
+        amount: 0.8008281904610115
+        success: true
+        x: 6.027456183070403
+        action: action
+        'y': 1.4658129805029452
+        direction: direction
+      properties:
+        success:
+          type: boolean
+        action:
+          type: string
+        direction:
+          type: string
+        amount:
+          type: number
+        x:
+          type: number
+        'y':
+          type: number
+      required:
+        - action
+        - amount
+        - direction
+        - success
+        - x
+        - 'y'
+      type: object
+    KeyboardTypeRequest:
+      example:
+        delay: 0.8008281904610115
+        text: text
+      properties:
+        text:
+          type: string
+        delay:
+          type: number
+      required:
+        - text
+      type: object
+    KeyboardTypeResponse:
+      example:
+        typed: typed
+        success: true
+      properties:
+        success:
+          type: boolean
+        typed:
+          type: string
+      required:
+        - success
+        - typed
+      type: object
+    KeyboardPressRequest:
+      example:
+        modifiers:
+          - modifiers
+          - modifiers
+        key: key
+      properties:
+        key:
+          type: string
+        modifiers:
+          items:
+            type: string
+          type: array
+      required:
+        - key
+      type: object
+    KeyboardPressResponse:
+      example:
+        success: true
+        modifiers:
+          - modifiers
+          - modifiers
+        key: key
+      properties:
+        success:
+          type: boolean
+        key:
+          type: string
+        modifiers:
+          items:
+            type: string
+          type: array
+      required:
+        - key
+        - modifiers
+        - success
+      type: object
+    KeyboardHotkeyRequest:
+      example:
+        keys: keys
+      properties:
+        keys:
+          type: string
+      required:
+        - keys
+      type: object
+    KeyboardHotkeyResponse:
+      example:
+        success: true
+        hotkey: hotkey
+      properties:
+        success:
+          type: boolean
+        hotkey:
+          type: string
+      required:
+        - hotkey
+        - success
+      type: object
+    ScreenshotResponse:
+      example:
+        cursor_position: '{}'
+        width: 0.8008281904610115
+        screenshot: screenshot
+        height: 6.027456183070403
+      properties:
+        screenshot:
+          type: string
+        width:
+          type: number
+        height:
+          type: number
+        cursor_position:
+          type: object
+      required:
+        - height
+        - screenshot
+        - width
+      type: object
+    RegionScreenshotResponse:
+      example:
+        cursor_position: '{}'
+        screenshot: screenshot
+        region: '{}'
+      properties:
+        screenshot:
+          type: string
+        region:
+          type: object
+        cursor_position:
+          type: object
+      required:
+        - region
+        - screenshot
+      type: object
+    CompressedScreenshotResponse:
+      example:
+        cursor_position: '{}'
+        size_bytes: 5.637376656633329
+        width: 0.8008281904610115
+        format: format
+        scale: 5.962133916683182
+        screenshot: screenshot
+        height: 6.027456183070403
+        quality: 1.4658129805029452
+      properties:
+        screenshot:
+          type: string
+        width:
+          type: number
+        height:
+          type: number
+        format:
+          type: string
+        quality:
+          type: number
+        scale:
+          type: number
+        size_bytes:
+          type: number
+        cursor_position:
+          type: object
+      required:
+        - format
+        - height
+        - quality
+        - scale
+        - screenshot
+        - size_bytes
+        - width
+      type: object
+    DisplayInfoResponse:
+      example:
+        total_displays: 0.8008281904610115
+        primary_display: '{}'
+        displays:
+          - '{}'
+          - '{}'
+      properties:
+        primary_display:
+          type: object
+        displays:
+          items:
+            type: object
+          type: array
+        total_displays:
+          type: number
+      required:
+        - displays
+        - primary_display
+        - total_displays
+      type: object
+    WindowsResponse:
+      example:
+        count: 0.8008281904610115
+        windows:
+          - '{}'
+          - '{}'
+      properties:
+        windows:
+          items:
+            type: object
+          type: array
+        count:
+          type: number
+      required:
+        - count
+        - windows
       type: object
     CreateSnapshot:
       example:

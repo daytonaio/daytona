@@ -1,6 +1,3 @@
-# Copyright 2025 Daytona Platforms Inc.
-# SPDX-License-Identifier: Apache-2.0
-
 # flake8: noqa
 
 # import apis into api package

@@ -153,19 +153,19 @@ import (
 func main() {
     // Create a new ComputerUse instance
     computerUse := computeruse.NewComputerUse()
-    
+
     // Start all processes
     computerUse.Start()
-    
+
     // Wait for processes to initialize
     time.Sleep(5 * time.Second)
-    
+
     // Check status
     status := computerUse.GetProcessStatus()
     log.Printf("Process status: %+v", status)
-    
+
     // Your application logic here...
-    
+
     // Stop all processes when done
     computerUse.Stop()
 }
@@ -182,9 +182,9 @@ if computerUse.IsProcessRunning("xvfb") {
 // Get status of all processes
 status := computerUse.GetProcessStatus()
 for processName, processStatus := range status {
-    log.Printf("%s: running=%v, priority=%d", 
-        processName, 
-        processStatus["running"], 
+    log.Printf("%s: running=%v, priority=%d",
+        processName,
+        processStatus["running"],
         processStatus["priority"])
 }
 ```
@@ -222,12 +222,12 @@ if errors, err := computerUse.GetProcessErrors("xfce4"); err == nil {
 
 The processes are configured with the following settings based on environment variables:
 
-| Process | Command | Priority | Auto-restart | Log Files | Environment |
-|---------|---------|----------|--------------|-----------|-------------|
-| xvfb | `/usr/bin/Xvfb $DISPLAY -screen 0 $VNC_RESOLUTIONx24` | 100 | Yes | No | `DISPLAY` |
-| xfce4 | `/usr/bin/startxfce4` | 200 | Yes | Yes | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
-| x11vnc | `/usr/bin/x11vnc -display $DISPLAY -forever -shared -rfbport $VNC_PORT` | 300 | Yes | No | `DISPLAY` |
-| novnc | `/usr/share/novnc/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT` | 400 | Yes | No | `DISPLAY` |
+| Process | Command                                                                            | Priority | Auto-restart | Log Files | Environment                                           |
+| ------- | ---------------------------------------------------------------------------------- | -------- | ------------ | --------- | ----------------------------------------------------- |
+| xvfb    | `/usr/bin/Xvfb $DISPLAY -screen 0 $VNC_RESOLUTIONx24`                              | 100      | Yes          | No        | `DISPLAY`                                             |
+| xfce4   | `/usr/bin/startxfce4`                                                              | 200      | Yes          | Yes       | `DISPLAY`, `HOME`, `USER`, `DBUS_SESSION_BUS_ADDRESS` |
+| x11vnc  | `/usr/bin/x11vnc -display $DISPLAY -forever -shared -rfbport $VNC_PORT`            | 300      | Yes          | No        | `DISPLAY`                                             |
+| novnc   | `/usr/share/novnc/utils/launch.sh --vnc localhost:$VNC_PORT --listen $NO_VNC_PORT` | 400      | Yes          | No        | `DISPLAY`                                             |
 
 **Default Values:**
 
