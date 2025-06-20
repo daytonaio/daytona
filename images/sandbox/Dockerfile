@@ -29,6 +29,62 @@ RUN npm install -g ts-node typescript typescript-language-server
 # Set locale
 ENV LANG=en_US.UTF-8 \
     LC_ALL=en_US.UTF-8
+# Vnc Setup
+
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV DISPLAY=:1
+ENV VNC_PORT=5901
+ENV NO_VNC_PORT=6901
+ENV VNC_RESOLUTION=1280x720
+
+# Install base packages
+RUN apt-get update && apt-get install -y \
+    wget \
+    git \
+    vim \
+    xfce4 \
+    xfce4-terminal \
+    dbus-x11 \
+    xfonts-base \
+    xfonts-100dpi \
+    xfonts-75dpi \
+    xfonts-scalable \
+    x11vnc \
+    novnc \
+    supervisor \
+    net-tools \
+    locales \
+    xvfb \
+    x11-utils \
+    x11-xserver-utils \
+    gnome-screenshot \
+    scrot \
+    imagemagick \
+    xdotool \
+    xautomation \
+    wmctrl \
+    build-essential \
+    libx11-dev \
+    libxext-dev \
+    libxtst-dev \
+    libxinerama-dev \
+    libx11-xcb-dev \
+    libxkbcommon-dev \
+    libxkbcommon-x11-dev \
+    libxcb-xkb-dev \
+    libpng-dev \
+    chromium \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup VNC
+RUN mkdir -p /home/daytona/.vnc && \
+    chown -R daytona:daytona /home/daytona/.vnc
+
+# NoVNC setup
+RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
+    sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh
 
 # Switch to Daytona user
 USER daytona
