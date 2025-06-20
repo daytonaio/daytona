@@ -10428,6 +10428,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"axios-retry@npm:^4.5.0":
+  version: 4.5.0
+  resolution: "axios-retry@npm:4.5.0"
+  dependencies:
+    is-retry-allowed: "npm:^2.2.0"
+  peerDependencies:
+    axios: 0.x || 1.x
+  checksum: 10c0/574e7b1bf24aad99b560042d232a932d51bfaa29b5a6d4612d748ed799a6f11a5afb2582792492c55d95842200cbdfbe3454027a8c1b9a2d3e895d13c3d03c10
+  languageName: node
+  linkType: hard
+
 "axios@npm:1.9.0, axios@npm:^1.6.1, axios@npm:^1.7.4, axios@npm:^1.8.2, axios@npm:^1.8.3":
   version: 1.9.0
   resolution: "axios@npm:1.9.0"
@@ -12738,6 +12749,7 @@ __metadata:
     autoprefixer: "npm:10.4.13"
     axios: "npm:^1.6.1"
     axios-debug-log: "npm:^1.0.0"
+    axios-retry: "npm:^4.5.0"
     cache-manager: "npm:^6.4.1"
     cache-manager-memcached-store: "npm:^6.0.1"
     cacheable-lookup: "npm:^7.0.0"
@@ -16862,6 +16874,13 @@ __metadata:
   version: 1.0.0
   resolution: "is-regexp@npm:1.0.0"
   checksum: 10c0/34cacda1901e00f6e44879378f1d2fa96320ea956c1bec27713130aaf1d44f6e7bd963eed28945bfe37e600cb27df1cf5207302680dad8bdd27b9baff8ecf611
+  languageName: node
+  linkType: hard
+
+"is-retry-allowed@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "is-retry-allowed@npm:2.2.0"
+  checksum: 10c0/013be4f8a0a06a49ed1fe495242952e898325d496202a018f6f9fb3fb9ac8fe3b957a9bd62463d68299ae35dbbda680473c85a9bcefca731b49d500d3ccc08ff
   languageName: node
   linkType: hard
 

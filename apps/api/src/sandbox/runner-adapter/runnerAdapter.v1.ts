@@ -5,6 +5,7 @@
 
 import axios from 'axios'
 import axiosDebug from 'axios-debug-log'
+import axiosRetry from 'axios-retry'
 
 import { Injectable, Logger } from '@nestjs/common'
 import { RunnerAdapter, RunnerSandboxInfo, RunnerSandboxState } from './runnerAdapter'
@@ -60,6 +61,25 @@ export class RunnerAdapterV1 implements RunnerAdapter {
         Authorization: `Bearer ${runner.apiKey}`,
       },
       timeout: 1 * 60 * 60 * 1000, // 1 hour
+    })
+
+    // Configure axios-retry to handle ECONNRESET errors
+    axiosRetry(axiosInstance, {
+      retries: 3,
+      retryDelay: axiosRetry.exponentialDelay,
+      retryCondition: (error) => {
+        // Retry on ECONNRESET errors
+        return (
+          (error as any).code === 'ECONNRESET' ||
+          error.message?.includes('ECONNRESET') ||
+          (error as any).cause?.code === 'ECONNRESET'
+        )
+      },
+      onRetry: (retryCount, error, requestConfig) => {
+        this.logger.warn(
+          `Retrying request due to ECONNRESET (attempt ${retryCount}): ${requestConfig.method?.toUpperCase()} ${requestConfig.url}`,
+        )
+      },
     })
 
     axiosInstance.interceptors.response.use(
