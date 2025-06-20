@@ -12,7 +12,6 @@ import {
   SandboxVolume,
   BuildInfo,
   SandboxBackupStateEnum,
-  SandboxLabels,
 } from '@daytonaio/api-client'
 import { FileSystem } from './FileSystem'
 import { Git } from './Git'
@@ -20,6 +19,7 @@ import { CodeRunParams, Process } from './Process'
 import { LspLanguageId, LspServer } from './LspServer'
 import { DaytonaError } from './errors/DaytonaError'
 import { prefixRelativePath } from './utils/Path'
+import { ComputerUse } from './ComputerUse'
 
 /**
  * Interface defining methods that a code toolbox must implement
@@ -36,6 +36,7 @@ export interface SandboxCodeToolbox {
  * @property {FileSystem} fs - File system operations interface
  * @property {Git} git - Git operations interface
  * @property {Process} process - Process execution interface
+ * @property {ComputerUse} computerUse - Computer use operations interface for desktop automation
  * @property {string} id - Unique identifier for the Sandbox
  * @property {string} organizationId - Organization ID of the Sandbox
  * @property {string} [snapshot] - Daytona snapshot used to create the Sandbox
@@ -66,6 +67,7 @@ export class Sandbox implements SandboxDto {
   public readonly fs: FileSystem
   public readonly git: Git
   public readonly process: Process
+  public readonly computerUse: ComputerUse
 
   public id!: string
   public organizationId!: string
@@ -112,6 +114,7 @@ export class Sandbox implements SandboxDto {
     this.fs = new FileSystem(this.id, this.toolboxApi, async () => await this.getRootDir())
     this.git = new Git(this.id, this.toolboxApi, async () => await this.getRootDir())
     this.process = new Process(this.id, this.codeToolbox, this.toolboxApi, async () => await this.getRootDir())
+    this.computerUse = new ComputerUse(this.id, this.toolboxApi)
   }
 
   /**

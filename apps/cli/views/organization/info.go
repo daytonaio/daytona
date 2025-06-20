@@ -8,13 +8,13 @@ import (
 	"os"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"golang.org/x/term"
 )
 
-func RenderInfo(organization *daytonaapiclient.Organization, forceUnstyled bool) {
+func RenderInfo(organization *apiclient.Organization, forceUnstyled bool) {
 	var output string
 	nameLabel := "Organization"
 

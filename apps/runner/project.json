@@ -8,12 +8,24 @@
     "copy-daemon-bin": {
       "executor": "nx:run-commands",
       "options": {
-        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static"
+        "command": "cp dist/apps/daemon-amd64 {projectRoot}/pkg/daemon/static/daemon-amd64"
       },
       "dependsOn": [
         {
           "target": "build",
           "projects": "daemon"
+        }
+      ]
+    },
+    "copy-computeruse-plugin": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "cp dist/libs/computer-use-amd64 {projectRoot}/pkg/daemon/static/daytona-computer-use"
+      },
+      "dependsOn": [
+        {
+          "target": "build",
+          "projects": "computer-use"
         }
       ]
     },
@@ -35,7 +47,8 @@
           "target": "build-amd64",
           "projects": "daemon"
         },
-        "copy-daemon-bin"
+        "copy-daemon-bin",
+        "copy-computeruse-plugin"
       ]
     },
     "serve": {
@@ -53,7 +66,8 @@
           "target": "build",
           "projects": "daemon"
         },
-        "copy-daemon-bin"
+        "copy-daemon-bin",
+        "copy-computeruse-plugin"
       ]
     },
     "format": {
@@ -75,5 +89,6 @@
         "command": "swag fmt && swag init --parseDependency --parseInternal --parseDepth 1 -o docs -g server.go"
       }
     }
-  }
+  },
+  "implicitDependencies": ["computer-use", "daemon"]
 }

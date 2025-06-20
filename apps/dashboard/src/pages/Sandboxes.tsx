@@ -30,7 +30,7 @@ import { getLocalStorageItem, setLocalStorageItem } from '@/lib/local-storage'
 import { DAYTONA_DOCS_URL } from '@/constants/ExternalLinks'
 
 const Sandboxes: React.FC = () => {
-  const { sandboxApi, apiKeyApi } = useApi()
+  const { sandboxApi, apiKeyApi, toolboxApi } = useApi()
   const { user } = useAuth()
   const { notificationSocket } = useNotificationSocket()
 
@@ -232,6 +232,108 @@ const Sandboxes: React.FC = () => {
     }
   }
 
+  const getVncUrl = (sandboxId: string) => {
+    const sandbox = sandboxes.find((s) => s.id === sandboxId)
+    if (!sandbox) {
+      return null
+    }
+
+    if (!sandbox.daemonVersion) {
+      return `https://6080-${sandbox.id}.${sandbox.runnerDomain}/vnc.html`
+    }
+
+    return (
+      import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '6080').replace('{{sandboxId}}', sandbox.id) +
+      '/vnc.html'
+    )
+  }
+
+  const handleVnc = async (id: string) => {
+    setLoadingSandboxes((prev) => ({ ...prev, [id]: true }))
+
+    // Notify user immediately that we're checking VNC status
+    toast.info('Checking VNC desktop status...')
+
+    try {
+      // First, check if computer use is already started
+      const statusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+      const status = statusResponse.data.status
+
+      // Check if computer use is active (all processes running)
+      if (status === 'active') {
+        const vncUrl = getVncUrl(id)
+        if (vncUrl) {
+          window.open(vncUrl, '_blank')
+          toast.success('Opening VNC desktop...')
+        } else {
+          toast.error('Failed to construct VNC URL')
+        }
+      } else {
+        // Computer use is not active, try to start it
+        try {
+          await toolboxApi.startComputerUse(id, selectedOrganization?.id)
+          toast.success('Starting VNC desktop...')
+
+          // Wait a moment for processes to start, then open VNC
+          await new Promise((resolve) => setTimeout(resolve, 5000))
+
+          try {
+            const newStatusResponse = await toolboxApi.getComputerUseStatus(id, selectedOrganization?.id)
+            const newStatus = newStatusResponse.data.status
+
+            if (newStatus === 'active') {
+              const vncUrl = getVncUrl(id)
+
+              if (vncUrl) {
+                window.open(vncUrl, '_blank')
+                toast.success('VNC desktop is ready!', {
+                  action: (
+                    <Button variant="secondary" onClick={() => window.open(vncUrl, '_blank')}>
+                      Open in new tab
+                    </Button>
+                  ),
+                })
+              }
+            } else {
+              toast.error(`VNC desktop failed to start. Status: ${newStatus}`)
+            }
+          } catch (error) {
+            handleApiError(error, 'Failed to check VNC status after start')
+          }
+        } catch (startError: any) {
+          // Check if this is a computer-use availability error
+          const errorMessage = startError?.response?.data?.message || startError?.message || String(startError)
+
+          if (errorMessage === 'Computer-use functionality is not available') {
+            toast.error('Computer-use functionality is not available', {
+              description: (
+                <div>
+                  <div>Computer-use dependencies are missing in the runtime environment.</div>
+                  <div className="mt-2">
+                    <a
+                      href={`${DAYTONA_DOCS_URL}/getting-started/computer-use`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      See documentation on how to configure the runtime for computer-use
+                    </a>
+                  </div>
+                </div>
+              ),
+            })
+          } else {
+            handleApiError(startError, 'Failed to start VNC desktop')
+          }
+        }
+      }
+    } catch (error) {
+      handleApiError(error, 'Failed to check VNC status')
+    } finally {
+      setLoadingSandboxes((prev) => ({ ...prev, [id]: false }))
+    }
+  }
+
   // Redirect user to the onboarding page if they haven't created an api key yet
   // Perform only once per user
   useEffect(() => {
@@ -292,6 +394,7 @@ const Sandboxes: React.FC = () => {
         }}
         handleBulkDelete={handleBulkDelete}
         handleArchive={handleArchive}
+        handleVnc={handleVnc}
         data={sandboxes}
         loading={loadingTable}
       />

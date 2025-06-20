@@ -19,5 +19,7 @@ header:
     - 'libs/api-client-go/**'
     - 'libs/api-client-python/**'
     - 'libs/api-client-python-async/**'
+    - 'libs/computer-use/**'
+    - 'hack/**'
 
   comment: on-failure

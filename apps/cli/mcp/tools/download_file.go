@@ -10,8 +10,8 @@ import (
 	"io"
 	"path/filepath"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
-	daytonaapiclient "github.com/daytonaio/daytona/daytonaapiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -22,7 +22,7 @@ type Content struct {
 }
 
 func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	apiClient, err := apiclient.GetApiClient(nil, daytonaMCPHeaders)
+	apiClient, err := apiclient_cli.GetApiClient(nil, daytonaMCPHeaders)
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, err
 	}
@@ -46,7 +46,7 @@ func DownloadCommand(ctx context.Context, request mcp.CallToolRequest) (*mcp.Cal
 
 	// Check if file exists using execute command
 	execResponse, _, err := apiClient.ToolboxAPI.ExecuteCommand(ctx, sandboxId).
-		ExecuteRequest(*daytonaapiclient.NewExecuteRequest(fmt.Sprintf("test -f %s && echo 'exists' || echo 'not exists'", filePath))).
+		ExecuteRequest(*apiclient.NewExecuteRequest(fmt.Sprintf("test -f %s && echo 'exists' || echo 'not exists'", filePath))).
 		Execute()
 	if err != nil {
 		return &mcp.CallToolResult{IsError: true}, fmt.Errorf("error checking file existence: %v", err)

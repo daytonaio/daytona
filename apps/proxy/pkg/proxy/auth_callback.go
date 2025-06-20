@@ -17,8 +17,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/oauth2"
 
+	"github.com/daytonaio/apiclient"
 	common_errors "github.com/daytonaio/common-go/pkg/errors"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 func (p *Proxy) AuthCallback(ctx *gin.Context) {
@@ -153,15 +153,15 @@ func (p *Proxy) getAuthUrl(ctx *gin.Context, sandboxId string) (string, error) {
 }
 
 func (p *Proxy) hasSandboxAccess(ctx context.Context, sandboxId string, authToken string) bool {
-	clientConfig := daytonaapiclient.NewConfiguration()
-	clientConfig.Servers = daytonaapiclient.ServerConfigurations{
+	clientConfig := apiclient.NewConfiguration()
+	clientConfig.Servers = apiclient.ServerConfigurations{
 		{
 			URL: p.config.DaytonaApiUrl,
 		},
 	}
 	clientConfig.AddDefaultHeader("Authorization", "Bearer "+authToken)
 
-	apiClient := daytonaapiclient.NewAPIClient(clientConfig)
+	apiClient := apiclient.NewAPIClient(clientConfig)
 
 	res, _ := apiClient.PreviewAPI.HasSandboxAccess(ctx, sandboxId).Execute()
 
