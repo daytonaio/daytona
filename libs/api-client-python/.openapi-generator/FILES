@@ -26,6 +26,10 @@ daytona_api_client/models/command.py
 daytona_api_client/models/completion_context.py
 daytona_api_client/models/completion_item.py
 daytona_api_client/models/completion_list.py
+daytona_api_client/models/compressed_screenshot_response.py
+daytona_api_client/models/computer_use_start_response.py
+daytona_api_client/models/computer_use_status_response.py
+daytona_api_client/models/computer_use_stop_response.py
 daytona_api_client/models/create_api_key.py
 daytona_api_client/models/create_build_info.py
 daytona_api_client/models/create_docker_registry.py
@@ -41,6 +45,7 @@ daytona_api_client/models/create_snapshot.py
 daytona_api_client/models/create_user.py
 daytona_api_client/models/create_volume.py
 daytona_api_client/models/create_workspace.py
+daytona_api_client/models/display_info_response.py
 daytona_api_client/models/docker_registry.py
 daytona_api_client/models/execute_request.py
 daytona_api_client/models/execute_response.py
@@ -56,6 +61,9 @@ daytona_api_client/models/git_commit_response.py
 daytona_api_client/models/git_delete_branch_request.py
 daytona_api_client/models/git_repo_request.py
 daytona_api_client/models/git_status.py
+daytona_api_client/models/keyboard_hotkey_request.py
+daytona_api_client/models/keyboard_press_request.py
+daytona_api_client/models/keyboard_type_request.py
 daytona_api_client/models/list_branch_response.py
 daytona_api_client/models/lsp_completion_params.py
 daytona_api_client/models/lsp_document_request.py
@@ -63,6 +71,15 @@ daytona_api_client/models/lsp_location.py
 daytona_api_client/models/lsp_server_request.py
 daytona_api_client/models/lsp_symbol.py
 daytona_api_client/models/match.py
+daytona_api_client/models/mouse_click_request.py
+daytona_api_client/models/mouse_click_response.py
+daytona_api_client/models/mouse_drag_request.py
+daytona_api_client/models/mouse_drag_response.py
+daytona_api_client/models/mouse_move_request.py
+daytona_api_client/models/mouse_move_response.py
+daytona_api_client/models/mouse_position.py
+daytona_api_client/models/mouse_scroll_request.py
+daytona_api_client/models/mouse_scroll_response.py
 daytona_api_client/models/organization.py
 daytona_api_client/models/organization_invitation.py
 daytona_api_client/models/organization_role.py
@@ -71,8 +88,13 @@ daytona_api_client/models/organization_user.py
 daytona_api_client/models/paginated_snapshots_dto.py
 daytona_api_client/models/port_preview_url.py
 daytona_api_client/models/position.py
+daytona_api_client/models/process_errors_response.py
+daytona_api_client/models/process_logs_response.py
+daytona_api_client/models/process_restart_response.py
+daytona_api_client/models/process_status_response.py
 daytona_api_client/models/project_dir_response.py
 daytona_api_client/models/range.py
+daytona_api_client/models/region_screenshot_response.py
 daytona_api_client/models/registry_push_access_dto.py
 daytona_api_client/models/replace_request.py
 daytona_api_client/models/replace_result.py
@@ -87,6 +109,7 @@ daytona_api_client/models/sandbox_info.py
 daytona_api_client/models/sandbox_labels.py
 daytona_api_client/models/sandbox_state.py
 daytona_api_client/models/sandbox_volume.py
+daytona_api_client/models/screenshot_response.py
 daytona_api_client/models/search_files_response.py
 daytona_api_client/models/session.py
 daytona_api_client/models/session_execute_request.py
@@ -107,6 +130,7 @@ daytona_api_client/models/user.py
 daytona_api_client/models/user_public_key.py
 daytona_api_client/models/volume_dto.py
 daytona_api_client/models/volume_state.py
+daytona_api_client/models/windows_response.py
 daytona_api_client/models/workspace.py
 daytona_api_client/py.typed
 daytona_api_client/rest.py

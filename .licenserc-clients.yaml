@@ -20,5 +20,7 @@ header:
     - 'libs/api-client-python/**'
     - 'libs/api-client-python-async/**'
     - 'apps/docs/**'
+    - 'libs/computer-use/**'
+    - 'hack/**'
 
   comment: on-failure

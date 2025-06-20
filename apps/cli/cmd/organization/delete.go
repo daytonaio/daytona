@@ -7,13 +7,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/daytonaio/daytona/cli/apiclient"
+	"github.com/daytonaio/apiclient"
+	apiclient_cli "github.com/daytonaio/daytona/cli/apiclient"
 	"github.com/daytonaio/daytona/cli/cmd/common"
 	"github.com/daytonaio/daytona/cli/config"
 	view_common "github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/organization"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 	"github.com/spf13/cobra"
 )
 
@@ -23,17 +23,17 @@ var DeleteCmd = &cobra.Command{
 	Args:    cobra.MaximumNArgs(1),
 	Aliases: common.GetAliases("delete"),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var chosenOrganization *daytonaapiclient.Organization
+		var chosenOrganization *apiclient.Organization
 		ctx := context.Background()
 
-		apiClient, err := apiclient.GetApiClient(nil, nil)
+		apiClient, err := apiclient_cli.GetApiClient(nil, nil)
 		if err != nil {
 			return err
 		}
 
 		orgList, res, err := apiClient.OrganizationsAPI.ListOrganizations(ctx).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		if len(orgList) == 0 {
@@ -65,7 +65,7 @@ var DeleteCmd = &cobra.Command{
 
 		res, err = apiClient.OrganizationsAPI.DeleteOrganization(ctx, chosenOrganization.Id).Execute()
 		if err != nil {
-			return apiclient.HandleErrorResponse(res, err)
+			return apiclient_cli.HandleErrorResponse(res, err)
 		}
 
 		view_common.RenderInfoMessageBold(fmt.Sprintf("Organization %s has been deleted", chosenOrganization.Name))

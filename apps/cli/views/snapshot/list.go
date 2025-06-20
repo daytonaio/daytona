@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 type RowData struct {
@@ -20,7 +20,7 @@ type RowData struct {
 	Created string
 }
 
-func ListSnapshots(snapshotList []daytonaapiclient.SnapshotDto, activeOrganizationName *string) {
+func ListSnapshots(snapshotList []apiclient.SnapshotDto, activeOrganizationName *string) {
 	if len(snapshotList) == 0 {
 		util.NotifyEmptySnapshotList(true)
 		return
@@ -48,7 +48,7 @@ func ListSnapshots(snapshotList []daytonaapiclient.SnapshotDto, activeOrganizati
 	fmt.Println(table)
 }
 
-func SortSnapshots(snapshotList *[]daytonaapiclient.SnapshotDto) {
+func SortSnapshots(snapshotList *[]apiclient.SnapshotDto) {
 	sort.Slice(*snapshotList, func(i, j int) bool {
 		pi, pj := getStateSortPriorities((*snapshotList)[i].State, (*snapshotList)[j].State)
 		if pi != pj {
@@ -60,7 +60,7 @@ func SortSnapshots(snapshotList *[]daytonaapiclient.SnapshotDto) {
 	})
 }
 
-func getTableRowData(snapshot daytonaapiclient.SnapshotDto) *RowData {
+func getTableRowData(snapshot apiclient.SnapshotDto) *RowData {
 	rowData := RowData{"", "", "", "", ""}
 	rowData.Name = snapshot.Name + util.AdditionalPropertyPadding
 	rowData.State = getStateLabel(snapshot.State)
@@ -81,7 +81,7 @@ func getTableRowData(snapshot daytonaapiclient.SnapshotDto) *RowData {
 	return &rowData
 }
 
-func renderUnstyledList(snapshotList []daytonaapiclient.SnapshotDto) {
+func renderUnstyledList(snapshotList []apiclient.SnapshotDto) {
 	for _, snapshot := range snapshotList {
 		RenderInfo(&snapshot, true)
 
@@ -103,7 +103,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 daytonaapiclient.SnapshotState) (int, int) {
+func getStateSortPriorities(state1, state2 apiclient.SnapshotState) (int, int) {
 	pi, ok := snapshotListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -117,11 +117,11 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.SnapshotState) (int,
 }
 
 // snapshots that have actions being performed on them have a higher priority when listing
-var snapshotListStatePriorities = map[daytonaapiclient.SnapshotState]int{
-	daytonaapiclient.SNAPSHOTSTATE_PENDING:    1,
-	daytonaapiclient.SNAPSHOTSTATE_PULLING:    1,
-	daytonaapiclient.SNAPSHOTSTATE_VALIDATING: 1,
-	daytonaapiclient.SNAPSHOTSTATE_ERROR:      2,
-	daytonaapiclient.SNAPSHOTSTATE_ACTIVE:     3,
-	daytonaapiclient.SNAPSHOTSTATE_REMOVING:   4,
+var snapshotListStatePriorities = map[apiclient.SnapshotState]int{
+	apiclient.SNAPSHOTSTATE_PENDING:    1,
+	apiclient.SNAPSHOTSTATE_PULLING:    1,
+	apiclient.SNAPSHOTSTATE_VALIDATING: 1,
+	apiclient.SNAPSHOTSTATE_ERROR:      2,
+	apiclient.SNAPSHOTSTATE_ACTIVE:     3,
+	apiclient.SNAPSHOTSTATE_REMOVING:   4,
 }

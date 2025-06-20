@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/daytonaio/apiclient"
 	"github.com/daytonaio/daytona/cli/views/common"
 	"github.com/daytonaio/daytona/cli/views/util"
-	"github.com/daytonaio/daytona/daytonaapiclient"
 )
 
 type RowData struct {
@@ -19,7 +19,7 @@ type RowData struct {
 	Created string
 }
 
-func ListVolumes(volumeList []daytonaapiclient.VolumeDto, activeOrganizationName *string) {
+func ListVolumes(volumeList []apiclient.VolumeDto, activeOrganizationName *string) {
 	if len(volumeList) == 0 {
 		util.NotifyEmptyVolumeList(true)
 		return
@@ -47,7 +47,7 @@ func ListVolumes(volumeList []daytonaapiclient.VolumeDto, activeOrganizationName
 	fmt.Println(table)
 }
 
-func SortVolumes(volumeList *[]daytonaapiclient.VolumeDto) {
+func SortVolumes(volumeList *[]apiclient.VolumeDto) {
 	sort.Slice(*volumeList, func(i, j int) bool {
 		if (*volumeList)[i].State != (*volumeList)[j].State {
 			pi, pj := getStateSortPriorities((*volumeList)[i].State, (*volumeList)[j].State)
@@ -59,7 +59,7 @@ func SortVolumes(volumeList *[]daytonaapiclient.VolumeDto) {
 	})
 }
 
-func getTableRowData(volume daytonaapiclient.VolumeDto) *RowData {
+func getTableRowData(volume apiclient.VolumeDto) *RowData {
 	rowData := RowData{"", "", "", ""}
 	rowData.Name = volume.Name + util.AdditionalPropertyPadding
 	rowData.State = getStateLabel(volume.State)
@@ -67,7 +67,7 @@ func getTableRowData(volume daytonaapiclient.VolumeDto) *RowData {
 	return &rowData
 }
 
-func renderUnstyledList(volumeList []daytonaapiclient.VolumeDto) {
+func renderUnstyledList(volumeList []apiclient.VolumeDto) {
 	for _, volume := range volumeList {
 		RenderInfo(&volume, true)
 
@@ -88,7 +88,7 @@ func getRowFromRowData(rowData RowData) []string {
 	return row
 }
 
-func getStateSortPriorities(state1, state2 daytonaapiclient.VolumeState) (int, int) {
+func getStateSortPriorities(state1, state2 apiclient.VolumeState) (int, int) {
 	pi, ok := volumeListStatePriorities[state1]
 	if !ok {
 		pi = 99
@@ -102,12 +102,12 @@ func getStateSortPriorities(state1, state2 daytonaapiclient.VolumeState) (int, i
 }
 
 // Volumes that have actions being performed on them have a higher priority when listing
-var volumeListStatePriorities = map[daytonaapiclient.VolumeState]int{
-	daytonaapiclient.VOLUMESTATE_PENDING_CREATE: 1,
-	daytonaapiclient.VOLUMESTATE_CREATING:       1,
-	daytonaapiclient.VOLUMESTATE_PENDING_DELETE: 1,
-	daytonaapiclient.VOLUMESTATE_DELETING:       1,
-	daytonaapiclient.VOLUMESTATE_READY:          2,
-	daytonaapiclient.VOLUMESTATE_ERROR:          3,
-	daytonaapiclient.VOLUMESTATE_DELETED:        4,
+var volumeListStatePriorities = map[apiclient.VolumeState]int{
+	apiclient.VOLUMESTATE_PENDING_CREATE: 1,
+	apiclient.VOLUMESTATE_CREATING:       1,
+	apiclient.VOLUMESTATE_PENDING_DELETE: 1,
+	apiclient.VOLUMESTATE_DELETING:       1,
+	apiclient.VOLUMESTATE_READY:          2,
+	apiclient.VOLUMESTATE_ERROR:          3,
+	apiclient.VOLUMESTATE_DELETED:        4,
 }

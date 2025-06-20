@@ -15,9 +15,11 @@ header:
 
   paths-ignore:
     - 'libs/**'
+    - '!libs/computer-use/**'
     - 'apps/api/src/generate-openapi.ts'
     - 'apps/runner/pkg/api/docs/docs.go'
     - 'examples/**'
     - 'apps/docs/**'
+    - 'hack/**'
 
   comment: on-failure

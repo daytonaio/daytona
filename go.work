@@ -7,4 +7,5 @@ use (
 	./apps/runner
 	./libs/api-client-go
 	./libs/common-go
+	./libs/computer-use
 )
