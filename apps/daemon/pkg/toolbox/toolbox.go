@@ -31,7 +31,8 @@ import (
 )
 
 type Server struct {
-	ProjectDir string
+	ProjectDir  string
+	ComputerUse *computeruse.ComputerUse
 }
 
 type ProjectDirResponse struct {
@@ -148,31 +149,40 @@ func (s *Server) Start() error {
 		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols)
 	}
 
-	computerUse := computeruse.NewComputerUse()
+	s.ComputerUse = computeruse.NewComputerUse()
 
 	computerUseController := r.Group("/computer")
 	{
+		// Computer use management endpoints
+		computerUseController.POST("/start", s.startComputerUse)
+		computerUseController.POST("/stop", s.stopComputerUse)
+		computerUseController.GET("/status", s.getComputerUseStatus)
+		computerUseController.GET("/process/:processName/status", s.getProcessStatus)
+		computerUseController.POST("/process/:processName/restart", s.restartProcess)
+		computerUseController.GET("/process/:processName/logs", s.getProcessLogs)
+		computerUseController.GET("/process/:processName/errors", s.getProcessErrors)
+
 		// Screenshot endpoints
-		computerUseController.GET("/screenshot", computerUse.TakeScreenshot)
-		computerUseController.GET("/screenshot/region", computerUse.TakeRegionScreenshot)
-		computerUseController.GET("/screenshot/compressed", computerUse.TakeCompressedScreenshot)
-		computerUseController.GET("/screenshot/region/compressed", computerUse.TakeCompressedRegionScreenshot)
+		computerUseController.GET("/screenshot", s.ComputerUse.TakeScreenshot)
+		computerUseController.GET("/screenshot/region", s.ComputerUse.TakeRegionScreenshot)
+		computerUseController.GET("/screenshot/compressed", s.ComputerUse.TakeCompressedScreenshot)
+		computerUseController.GET("/screenshot/region/compressed", s.ComputerUse.TakeCompressedRegionScreenshot)
 
 		// Mouse control endpoints
-		computerUseController.GET("/mouse/position", computerUse.GetMousePosition)
-		computerUseController.POST("/mouse/move", computerUse.MoveMouse)
-		computerUseController.POST("/mouse/click", computerUse.Click)
-		computerUseController.POST("/mouse/drag", computerUse.Drag)
-		computerUseController.POST("/mouse/scroll", computerUse.Scroll)
+		computerUseController.GET("/mouse/position", s.ComputerUse.GetMousePosition)
+		computerUseController.POST("/mouse/move", s.ComputerUse.MoveMouse)
+		computerUseController.POST("/mouse/click", s.ComputerUse.Click)
+		computerUseController.POST("/mouse/drag", s.ComputerUse.Drag)
+		computerUseController.POST("/mouse/scroll", s.ComputerUse.Scroll)
 
 		// Keyboard control endpoints
-		computerUseController.POST("/keyboard/type", computerUse.TypeText)
-		computerUseController.POST("/keyboard/key", computerUse.PressKey)
-		computerUseController.POST("/keyboard/hotkey", computerUse.PressHotkey)
+		computerUseController.POST("/keyboard/type", s.ComputerUse.TypeText)
+		computerUseController.POST("/keyboard/key", s.ComputerUse.PressKey)
+		computerUseController.POST("/keyboard/hotkey", s.ComputerUse.PressHotkey)
 
 		// Display info endpoints
-		computerUseController.GET("/display/info", computerUse.GetDisplayInfo)
-		computerUseController.GET("/display/windows", computerUse.GetWindows)
+		computerUseController.GET("/display/info", s.ComputerUse.GetDisplayInfo)
+		computerUseController.GET("/display/windows", s.ComputerUse.GetWindows)
 	}
 
 	portDetector := port.NewPortsDetector()
@@ -204,4 +214,88 @@ func (s *Server) Start() error {
 	}
 
 	return httpServer.Serve(listener)
+}
+
+// Computer use management handlers
+func (s *Server) startComputerUse(ctx *gin.Context) {
+	s.ComputerUse.Start()
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Computer use processes started successfully",
+		"status":  s.ComputerUse.GetProcessStatus(),
+	})
+}
+
+func (s *Server) stopComputerUse(ctx *gin.Context) {
+	s.ComputerUse.Stop()
+	ctx.JSON(http.StatusOK, gin.H{
+		"message": "Computer use processes stopped successfully",
+		"status":  s.ComputerUse.GetProcessStatus(),
+	})
+}
+
+func (s *Server) getComputerUseStatus(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"status": s.ComputerUse.GetProcessStatus(),
+	})
+}
+
+func (s *Server) getProcessStatus(ctx *gin.Context) {
+	processName := ctx.Param("processName")
+	isRunning := s.ComputerUse.IsProcessRunning(processName)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"processName": processName,
+		"running":     isRunning,
+	})
+}
+
+func (s *Server) restartProcess(ctx *gin.Context) {
+	processName := ctx.Param("processName")
+	err := s.ComputerUse.RestartProcess(processName)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message":     fmt.Sprintf("Process %s restarted successfully", processName),
+		"processName": processName,
+	})
+}
+
+func (s *Server) getProcessLogs(ctx *gin.Context) {
+	processName := ctx.Param("processName")
+	logs, err := s.ComputerUse.GetProcessLogs(processName)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"processName": processName,
+		"logs":        logs,
+	})
+}
+
+func (s *Server) getProcessErrors(ctx *gin.Context) {
+	processName := ctx.Param("processName")
+	errors, err := s.ComputerUse.GetProcessErrors(processName)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"processName": processName,
+		"errors":      errors,
+	})
 }

@@ -82,9 +82,11 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /home/daytona/.vnc && \
     chown -R daytona:daytona /home/daytona/.vnc
 
+COPY launch.sh /usr/share/novnc/utils/launch.sh
+
 # NoVNC setup
 RUN ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html && \
-    sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh
+    sed -i 's/websockify =/websockify = --heartbeat 30/' /usr/share/novnc/utils/launch.sh;
 
 # Switch to Daytona user
 USER daytona
