@@ -9,8 +9,11 @@ from typing import Callable, List, Optional
 
 from daytona_api_client import (
     GitAddRequest,
+    GitBranchRequest,
+    GitCheckoutRequest,
     GitCloneRequest,
     GitCommitRequest,
+    GitDeleteBranchRequest,
     GitRepoRequest,
     GitStatus,
     ListBranchResponse,
@@ -316,4 +319,73 @@ class Git:
         return self._toolbox_api.git_get_status(
             self._sandbox_id,
             path=prefix_relative_path(self._get_root_dir(), path),
+        )
+
+    @intercept_errors(message_prefix="Failed to checkout branch: ")
+    def checkout_branch(self, path: str, branch: str) -> None:
+        """Checkout branch in the repository.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
+                root directory.
+            branch (str): Name of the branch to checkout
+
+        Example:
+            ```python
+            # Checkout a branch
+            sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+            ```
+        """
+        self._toolbox_api.git_checkout_branch(
+            self._sandbox_id,
+            git_checkout_request=GitCheckoutRequest(
+                path=prefix_relative_path(self._get_root_dir(), path),
+                branch=branch,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to create branch: ")
+    def create_branch(self, path: str, name: str) -> None:
+        """Create branch in the repository.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
+                root directory.
+            name (str): Name of the new branch to create
+
+        Example:
+            ```python
+            # Create a new branch
+            sandbox.git.create_branch("workspace/repo", "new-feature")
+            ```
+        """
+        self._toolbox_api.git_create_branch(
+            self._sandbox_id,
+            git_branch_request=GitBranchRequest(
+                path=prefix_relative_path(self._get_root_dir(), path),
+                name=name,
+            ),
+        )
+
+    @intercept_errors(message_prefix="Failed to delete branch: ")
+    def delete_branch(self, path: str, name: str) -> None:
+        """Delete branch in the repository.
+
+        Args:
+            path (str): Path to the Git repository root. Relative paths are resolved based on the user's
+                root directory.
+            name (str): Name of the branch to delete
+
+        Example:
+            ```python
+            # Delete a branch
+            sandbox.git.delete_branch("workspace/repo", "old-feature")
+            ```
+        """
+        self._toolbox_api.git_delete_branch(
+            self._sandbox_id,
+            git_delete_branch_request=GitDeleteBranchRequest(
+                path=prefix_relative_path(self._get_root_dir(), path),
+                name=name,
+            ),
         )

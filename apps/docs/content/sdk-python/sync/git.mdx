@@ -289,6 +289,72 @@ print(f"Commits ahead: {status.ahead}")
 print(f"Commits behind: {status.behind}")
 ```
 
+#### Git.checkout_branch
+
+```python
+@intercept_errors(message_prefix="Failed to checkout branch: ")
+def checkout_branch(path: str, branch: str) -> None
+```
+
+Checkout branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `branch` _str_ - Name of the branch to checkout
+
+**Example**:
+
+```python
+# Checkout a branch
+sandbox.git.checkout_branch("workspace/repo", "feature-branch")
+```
+
+#### Git.create_branch
+
+```python
+@intercept_errors(message_prefix="Failed to create branch: ")
+def create_branch(path: str, name: str) -> None
+```
+
+Create branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the new branch to create
+
+**Example**:
+
+```python
+# Create a new branch
+sandbox.git.create_branch("workspace/repo", "new-feature")
+```
+
+#### Git.delete_branch
+
+```python
+@intercept_errors(message_prefix="Failed to delete branch: ")
+def delete_branch(path: str, name: str) -> None
+```
+
+Delete branch in the repository.
+
+**Arguments**:
+
+- `path` _str_ - Path to the Git repository root. Relative paths are resolved based on the user's
+  root directory.
+- `name` _str_ - Name of the branch to delete
+
+**Example**:
+
+```python
+# Delete a branch
+sandbox.git.delete_branch("workspace/repo", "old-feature")
+```
+
 ## GitCommitResponse
 
 ```python
