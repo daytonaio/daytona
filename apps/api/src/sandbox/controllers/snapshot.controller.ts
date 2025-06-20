@@ -74,6 +74,22 @@ export class SnapshotController {
     private readonly runnerService: RunnerService,
   ) {}
 
+  @Post()
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Create a new snapshot',
+    operationId: 'createSnapshot',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The snapshot has been successfully created.',
+    type: SnapshotDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Bad request - Snapshots with tag ":latest" are not allowed',
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SNAPSHOT,
@@ -92,22 +108,6 @@ export class SnapshotController {
       }),
     },
   })
-  @Post()
-  @HttpCode(200)
-  @ApiOperation({
-    summary: 'Create a new snapshot',
-    operationId: 'createSnapshot',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The snapshot has been successfully created.',
-    type: SnapshotDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Bad request - Snapshots with tag ":latest" are not allowed',
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   async createSnapshot(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createSnapshotDto: CreateSnapshotDto,
@@ -168,16 +168,6 @@ export class SnapshotController {
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
-  @Audit({
-    action: AuditAction.SNAPSHOT_TOGGLE_STATE,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<ToggleStateDto>) => ({
-        enabled: req.body?.enabled,
-      }),
-    },
-  })
   @Patch(':id/toggle')
   @ApiOperation({
     summary: 'Toggle snapshot state',
@@ -194,16 +184,21 @@ export class SnapshotController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @Audit({
+    action: AuditAction.SNAPSHOT_TOGGLE_STATE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<ToggleStateDto>) => ({
+        enabled: req.body?.enabled,
+      }),
+    },
+  })
   async toggleSnapshotState(@Param('id') snapshotId: string, @Body() toggleDto: ToggleStateDto): Promise<SnapshotDto> {
     const snapshot = await this.snapshotService.toggleSnapshotState(snapshotId, toggleDto.enabled)
     return SnapshotDto.fromSnapshot(snapshot)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-  })
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete snapshot',
@@ -219,6 +214,11 @@ export class SnapshotController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SNAPSHOTS])
   @UseGuards(SnapshotAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async removeSnapshot(@Param('id') snapshotId: string): Promise<void> {
     await this.snapshotService.removeSnapshot(snapshotId)
   }
@@ -259,16 +259,6 @@ export class SnapshotController {
     }
   }
 
-  @Audit({
-    action: AuditAction.SNAPSHOT_SET_GENERAL_STATUS,
-    targetType: AuditTarget.SNAPSHOT,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => ({
-        general: req.body?.general,
-      }),
-    },
-  })
   @Patch(':id/general')
   @ApiOperation({
     summary: 'Set snapshot general status',
@@ -284,6 +274,16 @@ export class SnapshotController {
     type: SnapshotDto,
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.SNAPSHOT_SET_GENERAL_STATUS,
+    targetType: AuditTarget.SNAPSHOT,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<SetSnapshotGeneralStatusDto>) => ({
+        general: req.body?.general,
+      }),
+    },
+  })
   async setSnapshotGeneralStatus(
     @Param('id') snapshotId: string,
     @Body() dto: SetSnapshotGeneralStatusDto,

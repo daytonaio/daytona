@@ -115,6 +115,20 @@ export class SandboxController {
     return await Promise.all(dtos)
   }
 
+  @Post()
+  @HttpCode(200) //  for Daytona Api compatibility
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: 'Create a new sandbox',
+    operationId: 'createSandbox',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The sandbox has been successfully created.',
+    type: SandboxDto,
+  })
+  @Throttle({ default: { limit: 100 } })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SANDBOX,
@@ -141,20 +155,6 @@ export class SandboxController {
       }),
     },
   })
-  @Post()
-  @HttpCode(200) //  for Daytona Api compatibility
-  @UseInterceptors(ContentTypeInterceptor)
-  @ApiOperation({
-    summary: 'Create a new sandbox',
-    operationId: 'createSandbox',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The sandbox has been successfully created.',
-    type: SandboxDto,
-  })
-  @Throttle({ default: { limit: 100 } })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   async createSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createSandboxDto: CreateSandboxDto,
@@ -220,16 +220,6 @@ export class SandboxController {
     return SandboxDto.fromSandbox(sandbox, runner?.domain)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      query: (req) => ({
-        force: req.query.force,
-      }),
-    },
-  })
   @Delete(':sandboxId')
   @ApiOperation({
     summary: 'Delete sandbox',
@@ -247,6 +237,11 @@ export class SandboxController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async removeSandbox(
     @Param('sandboxId') sandboxId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -255,11 +250,6 @@ export class SandboxController {
     return this.sandboxService.destroy(sandboxId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_START,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-  })
   @Post(':sandboxId/start')
   @HttpCode(200)
   @ApiOperation({
@@ -278,6 +268,11 @@ export class SandboxController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async startSandbox(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('sandboxId') sandboxId: string,
@@ -285,11 +280,6 @@ export class SandboxController {
     return this.sandboxService.start(sandboxId, authContext.organization)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_STOP,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-  })
   @Post(':sandboxId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
   @ApiOperation({
@@ -308,20 +298,15 @@ export class SandboxController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async stopSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.stop(sandboxId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_REPLACE_LABELS,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      payload: (req: TypedRequest<SandboxLabelsDto>) => ({
-        labels: req.body?.labels,
-      }),
-    },
-  })
   @Put(':sandboxId/labels')
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
@@ -340,6 +325,16 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_REPLACE_LABELS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      payload: (req: TypedRequest<SandboxLabelsDto>) => ({
+        labels: req.body?.labels,
+      }),
+    },
+  })
   async replaceLabels(
     @Param('sandboxId') sandboxId: string,
     @Body() labelsDto: SandboxLabelsDto,
@@ -348,11 +343,6 @@ export class SandboxController {
     return { labels }
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_CREATE_BACKUP,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-  })
   @Post(':sandboxId/backup')
   @ApiOperation({
     summary: 'Create sandbox backup',
@@ -370,20 +360,15 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_CREATE_BACKUP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async createBackup(@Param('sandboxId') sandboxId: string): Promise<void> {
     await this.sandboxService.createBackup(sandboxId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ isPublic: boolean }>) => ({
-        isPublic: req.body?.isPublic,
-      }),
-    },
-  })
   @Post(':sandboxId/public/:isPublic')
   @ApiOperation({
     summary: 'Update public status',
@@ -401,20 +386,20 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        isPublic: req.params.isPublic,
+      }),
+    },
+  })
   async updatePublicStatus(@Param('sandboxId') sandboxId: string, @Param('isPublic') isPublic: boolean): Promise<void> {
     await this.sandboxService.updatePublicStatus(sandboxId, isPublic)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => ({
-        interval: req.body?.interval,
-      }),
-    },
-  })
   @Post(':sandboxId/autostop/:interval')
   @ApiOperation({
     summary: 'Set sandbox auto-stop interval',
@@ -436,20 +421,20 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutostopInterval(@Param('sandboxId') sandboxId: string, @Param('interval') interval: number): Promise<void> {
     await this.sandboxService.setAutostopInterval(sandboxId, interval)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => ({
-        interval: req.body?.interval,
-      }),
-    },
-  })
   @Post(':sandboxId/autoarchive/:interval')
   @ApiOperation({
     summary: 'Set sandbox auto-archive interval',
@@ -471,6 +456,16 @@ export class SandboxController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutoArchiveInterval(
     @Param('sandboxId') sandboxId: string,
     @Param('interval') interval: number,
@@ -478,11 +473,6 @@ export class SandboxController {
     await this.sandboxService.setAutoArchiveInterval(sandboxId, interval)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_ARCHIVE,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.sandboxId,
-  })
   @Post(':sandboxId/archive')
   @HttpCode(200)
   @ApiOperation({
@@ -496,6 +486,11 @@ export class SandboxController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(SandboxAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_ARCHIVE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.sandboxId,
+  })
   async archiveSandbox(@Param('sandboxId') sandboxId: string): Promise<void> {
     return this.sandboxService.archive(sandboxId)
   }

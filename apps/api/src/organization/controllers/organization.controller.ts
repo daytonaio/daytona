@@ -85,11 +85,6 @@ export class OrganizationController {
     return this.organizationInvitationService.getCountByUser(authContext.userId)
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_INVITATION_ACCEPT,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-  })
   @Post('/invitations/:invitationId/accept')
   @ApiOperation({
     summary: 'Accept organization invitation',
@@ -105,6 +100,11 @@ export class OrganizationController {
     type: 'string',
   })
   @UseGuards(AuthGuard('jwt'))
+  @Audit({
+    action: AuditAction.ORGANIZATION_INVITATION_ACCEPT,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+  })
   async acceptInvitation(
     @AuthContext() authContext: IAuthContext,
     @Param('invitationId') invitationId: string,
@@ -121,11 +121,6 @@ export class OrganizationController {
     return this.organizationInvitationService.accept(invitationId, authContext.userId)
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_INVITATION_DECLINE,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-  })
   @Post('/invitations/:invitationId/decline')
   @ApiOperation({
     summary: 'Decline organization invitation',
@@ -141,6 +136,11 @@ export class OrganizationController {
     type: 'string',
   })
   @UseGuards(AuthGuard('jwt'))
+  @Audit({
+    action: AuditAction.ORGANIZATION_INVITATION_DECLINE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+  })
   async declineInvitation(
     @AuthContext() authContext: IAuthContext,
     @Param('invitationId') invitationId: string,
@@ -157,16 +157,6 @@ export class OrganizationController {
     return this.organizationInvitationService.decline(invitationId)
   }
 
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromResult: (result: OrganizationDto) => result?.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<CreateOrganizationDto>) => ({
-        name: req.body?.name,
-      }),
-    },
-  })
   @Post()
   @ApiOperation({
     summary: 'Create organization',
@@ -178,6 +168,16 @@ export class OrganizationController {
     type: OrganizationDto,
   })
   @UseGuards(AuthGuard('jwt'))
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromResult: (result: OrganizationDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateOrganizationDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
   async create(
     @AuthContext() authContext: IAuthContext,
     @Body() createOrganizationDto: CreateOrganizationDto,
@@ -232,11 +232,6 @@ export class OrganizationController {
     return OrganizationDto.fromOrganization(organization)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-  })
   @Delete('/:organizationId')
   @ApiOperation({
     summary: 'Delete organization',
@@ -253,6 +248,11 @@ export class OrganizationController {
   })
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
   async delete(@Param('organizationId') organizationId: string): Promise<void> {
     return this.organizationService.delete(organizationId)
   }
@@ -277,6 +277,23 @@ export class OrganizationController {
     return this.organizationService.getUsageOverview(organizationId)
   }
 
+  @Patch('/:organizationId/quota')
+  @ApiOperation({
+    summary: 'Update organization quota',
+    operationId: 'updateOrganizationQuota',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Organization details',
+    type: OrganizationDto,
+  })
+  @ApiParam({
+    name: 'organizationId',
+    description: 'Organization ID',
+    type: 'string',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
+  @UseGuards(CombinedAuthGuard, SystemActionGuard)
   @Audit({
     action: AuditAction.ORGANIZATION_UPDATE_QUOTA,
     targetType: AuditTarget.ORGANIZATION,
@@ -295,23 +312,6 @@ export class OrganizationController {
       }),
     },
   })
-  @Patch('/:organizationId/quota')
-  @ApiOperation({
-    summary: 'Update organization quota',
-    operationId: 'updateOrganizationQuota',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Organization details',
-    type: OrganizationDto,
-  })
-  @ApiParam({
-    name: 'organizationId',
-    description: 'Organization ID',
-    type: 'string',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
-  @UseGuards(CombinedAuthGuard, SystemActionGuard)
   async updateOrganizationQuota(
     @Param('organizationId') organizationId: string,
     @Body() updateOrganizationQuotaDto: UpdateOrganizationQuotaDto,
@@ -320,9 +320,6 @@ export class OrganizationController {
     return OrganizationDto.fromOrganization(organization)
   }
 
-  @Audit({
-    action: AuditAction.USER_LEAVE_ORGANIZATION,
-  })
   @Post('/:organizationId/leave')
   @ApiOperation({
     summary: 'Leave organization',
@@ -338,6 +335,9 @@ export class OrganizationController {
     type: 'string',
   })
   @UseGuards(AuthGuard('jwt'), OrganizationActionGuard)
+  @Audit({
+    action: AuditAction.USER_LEAVE_ORGANIZATION,
+  })
   async leave(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
@@ -345,17 +345,6 @@ export class OrganizationController {
     return this.organizationUserService.delete(organizationId, authContext.userId)
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_SUSPEND,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-    requestMetadata: {
-      payload: (req: TypedRequest<OrganizationSuspensionDto>) => ({
-        reason: req.body?.reason,
-        until: req.body?.until,
-      }),
-    },
-  })
   @Post('/:organizationId/suspend')
   @ApiOperation({
     summary: 'Suspend organization',
@@ -376,6 +365,17 @@ export class OrganizationController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.ORGANIZATION_SUSPEND,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+    requestMetadata: {
+      payload: (req: TypedRequest<OrganizationSuspensionDto>) => ({
+        reason: req.body?.reason,
+        until: req.body?.until,
+      }),
+    },
+  })
   async suspend(
     @Param('organizationId') organizationId: string,
     @Body() organizationSuspensionDto?: OrganizationSuspensionDto,
@@ -387,11 +387,6 @@ export class OrganizationController {
     )
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_UNSUSPEND,
-    targetType: AuditTarget.ORGANIZATION,
-    targetIdFromRequest: (req) => req.params.organizationId,
-  })
   @Post('/:organizationId/unsuspend')
   @ApiOperation({
     summary: 'Unsuspend organization',
@@ -408,6 +403,11 @@ export class OrganizationController {
   })
   @RequiredSystemRole(SystemRole.ADMIN)
   @UseGuards(CombinedAuthGuard, SystemActionGuard)
+  @Audit({
+    action: AuditAction.ORGANIZATION_UNSUSPEND,
+    targetType: AuditTarget.ORGANIZATION,
+    targetIdFromRequest: (req) => req.params.organizationId,
+  })
   async unsuspend(@Param('organizationId') organizationId: string): Promise<void> {
     return this.organizationService.unsuspend(organizationId)
   }

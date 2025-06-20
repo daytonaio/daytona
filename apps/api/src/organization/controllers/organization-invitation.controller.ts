@@ -27,19 +27,6 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 export class OrganizationInvitationController {
   constructor(private readonly organizationInvitationService: OrganizationInvitationService) {}
 
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromResult: (result: OrganizationInvitationDto) => result?.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<CreateOrganizationInvitationDto>) => ({
-        email: req.body?.email,
-        role: req.body?.role,
-        assignedRoleIds: req.body?.assignedRoleIds,
-        expiresAt: req.body?.expiresAt,
-      }),
-    },
-  })
   @Post()
   @ApiOperation({
     summary: 'Create organization invitation',
@@ -56,6 +43,19 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromResult: (result: OrganizationInvitationDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateOrganizationInvitationDto>) => ({
+        email: req.body?.email,
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
+  })
   async create(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
@@ -69,18 +69,6 @@ export class OrganizationInvitationController {
     return OrganizationInvitationDto.fromOrganizationInvitation(invitation)
   }
 
-  @Audit({
-    action: AuditAction.UPDATE,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-    requestMetadata: {
-      payload: (req: TypedRequest<UpdateOrganizationInvitationDto>) => ({
-        role: req.body?.role,
-        assignedRoleIds: req.body?.assignedRoleIds,
-        expiresAt: req.body?.expiresAt,
-      }),
-    },
-  })
   @Put('/:invitationId')
   @ApiOperation({
     summary: 'Update organization invitation',
@@ -102,6 +90,18 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationInvitationDto>) => ({
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
+  })
   async update(
     @Param('organizationId') organizationId: string,
     @Param('invitationId') invitationId: string,
@@ -131,11 +131,6 @@ export class OrganizationInvitationController {
     return invitations.map(OrganizationInvitationDto.fromOrganizationInvitation)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.ORGANIZATION_INVITATION,
-    targetIdFromRequest: (req) => req.params.invitationId,
-  })
   @Post('/:invitationId/cancel')
   @ApiOperation({
     summary: 'Cancel organization invitation',
@@ -156,6 +151,11 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+  })
   async cancel(
     @Param('organizationId') organizationId: string,
     @Param('invitationId') invitationId: string,

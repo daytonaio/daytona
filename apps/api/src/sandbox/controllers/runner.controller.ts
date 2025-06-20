@@ -25,6 +25,11 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 export class RunnerController {
   constructor(private readonly runnerService: RunnerService) {}
 
+  @Post()
+  @ApiOperation({
+    summary: 'Create runner',
+    operationId: 'createRunner',
+  })
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.RUNNER,
@@ -45,11 +50,6 @@ export class RunnerController {
       }),
     },
   })
-  @Post()
-  @ApiOperation({
-    summary: 'Create runner',
-    operationId: 'createRunner',
-  })
   async create(@Body() createRunnerDto: CreateRunnerDto): Promise<Runner> {
     return this.runnerService.create(createRunnerDto)
   }
@@ -63,6 +63,11 @@ export class RunnerController {
     return this.runnerService.findAll()
   }
 
+  @Patch(':id/scheduling')
+  @ApiOperation({
+    summary: 'Update runner scheduling status',
+    operationId: 'updateRunnerScheduling',
+  })
   @Audit({
     action: AuditAction.RUNNER_UPDATE_SCHEDULING,
     targetType: AuditTarget.RUNNER,
@@ -72,11 +77,6 @@ export class RunnerController {
         unschedulable: req.body?.unschedulable,
       }),
     },
-  })
-  @Patch(':id/scheduling')
-  @ApiOperation({
-    summary: 'Update runner scheduling status',
-    operationId: 'updateRunnerScheduling',
   })
   async updateSchedulingStatus(
     @Param('id') id: string,

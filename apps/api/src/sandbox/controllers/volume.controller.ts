@@ -83,16 +83,6 @@ export class VolumeController {
     return volumes.map(VolumeDto.fromVolume)
   }
 
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.VOLUME,
-    targetIdFromResult: (result: VolumeDto) => result?.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<CreateVolumeDto>) => ({
-        name: req.body?.name,
-      }),
-    },
-  })
   @Post()
   @HttpCode(200)
   @UseInterceptors(ContentTypeInterceptor)
@@ -106,6 +96,16 @@ export class VolumeController {
     type: VolumeDto,
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_VOLUMES])
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.VOLUME,
+    targetIdFromResult: (result: VolumeDto) => result?.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateVolumeDto>) => ({
+        name: req.body?.name,
+      }),
+    },
+  })
   async createVolume(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createVolumeDto: CreateVolumeDto,
@@ -151,11 +151,6 @@ export class VolumeController {
     return VolumeDto.fromVolume(volume)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.VOLUME,
-    targetIdFromRequest: (req) => req.params.volumeId,
-  })
   @Delete(':volumeId')
   @ApiOperation({
     summary: 'Delete volume',
@@ -171,6 +166,11 @@ export class VolumeController {
     description: 'Volume has been marked for deletion',
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_VOLUMES])
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.VOLUME,
+    targetIdFromRequest: (req) => req.params.volumeId,
+  })
   async deleteVolume(@Param('volumeId') volumeId: string): Promise<void> {
     return this.volumeService.delete(volumeId)
   }

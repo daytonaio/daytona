@@ -46,16 +46,6 @@ export class OrganizationUserController {
     return this.organizationUserService.findAll(organizationId)
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_USER_UPDATE_ROLE,
-    targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdFromRequest: (req) => req.params.userId,
-    requestMetadata: {
-      payload: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => ({
-        role: req.body?.role,
-      }),
-    },
-  })
   @Post('/:userId/role')
   @ApiOperation({
     summary: 'Update role for organization member',
@@ -77,6 +67,16 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.ORGANIZATION_USER_UPDATE_ROLE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateOrganizationMemberRoleDto>) => ({
+        role: req.body?.role,
+      }),
+    },
+  })
   async updateRole(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
@@ -90,16 +90,6 @@ export class OrganizationUserController {
     return this.organizationUserService.updateRole(organizationId, userId, dto.role)
   }
 
-  @Audit({
-    action: AuditAction.ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES,
-    targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdFromRequest: (req) => req.params.userId,
-    requestMetadata: {
-      payload: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => ({
-        roleIds: req.body?.roleIds,
-      }),
-    },
-  })
   @Post('/:userId/assigned-roles')
   @ApiOperation({
     summary: 'Update assigned roles to organization member',
@@ -121,6 +111,16 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.ORGANIZATION_USER_UPDATE_ASSIGNED_ROLES,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateAssignedOrganizationRolesDto>) => ({
+        roleIds: req.body?.roleIds,
+      }),
+    },
+  })
   async updateAssignedRoles(
     @Param('organizationId') organizationId: string,
     @Param('userId') userId: string,
@@ -129,11 +129,6 @@ export class OrganizationUserController {
     return this.organizationUserService.updateAssignedRoles(organizationId, userId, dto.roleIds)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.ORGANIZATION_USER,
-    targetIdFromRequest: (req) => req.params.userId,
-  })
   @Delete('/:userId')
   @ApiOperation({
     summary: 'Delete organization member',
@@ -154,6 +149,11 @@ export class OrganizationUserController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_USER,
+    targetIdFromRequest: (req) => req.params.userId,
+  })
   async delete(@Param('organizationId') organizationId: string, @Param('userId') userId: string): Promise<void> {
     return this.organizationUserService.delete(organizationId, userId)
   }

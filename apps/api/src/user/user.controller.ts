@@ -70,12 +70,19 @@ export class UserController {
     return UserDto.fromUser(user)
   }
 
+  @Post()
+  @ApiOperation({
+    summary: 'Create user',
+    operationId: 'createUser',
+  })
+  @RequiredSystemRole(SystemRole.ADMIN)
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.USER,
     targetIdFromResult: (result: User) => result?.id,
     requestMetadata: {
       payload: (req: TypedRequest<CreateUserDto>) => ({
+        id: req.body?.id,
         name: req.body?.name,
         email: req.body?.email,
         personalOrganizationQuota: req.body?.personalOrganizationQuota,
@@ -84,12 +91,6 @@ export class UserController {
       }),
     },
   })
-  @Post()
-  @ApiOperation({
-    summary: 'Create user',
-    operationId: 'createUser',
-  })
-  @RequiredSystemRole(SystemRole.ADMIN)
   async create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.create(createUserDto)
   }
@@ -104,17 +105,17 @@ export class UserController {
     return this.userService.findAll()
   }
 
-  @Audit({
-    action: AuditAction.USER_REGENERATE_KEY_PAIR,
-    targetType: AuditTarget.USER,
-    targetIdFromRequest: (req) => req.params.id,
-  })
   @Post('/:id/regenerate-key-pair')
   @ApiOperation({
     summary: 'Regenerate user key pair',
     operationId: 'regenerateKeyPair',
   })
   @RequiredSystemRole(SystemRole.ADMIN)
+  @Audit({
+    action: AuditAction.USER_REGENERATE_KEY_PAIR,
+    targetType: AuditTarget.USER,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async regenerateKeyPair(@Param('id') id: string): Promise<User> {
     return this.userService.regenerateKeyPair(id)
   }
@@ -163,15 +164,6 @@ export class UserController {
     }
   }
 
-  @Audit({
-    action: AuditAction.USER_LINK_ACCOUNT,
-    requestMetadata: {
-      payload: (req: TypedRequest<CreateLinkedAccountDto>) => ({
-        provider: req.body?.provider,
-        userId: req.body?.userId,
-      }),
-    },
-  })
   @Post('/linked-accounts')
   @ApiOperation({
     summary: 'Link account',
@@ -180,6 +172,15 @@ export class UserController {
   @ApiResponse({
     status: 204,
     description: 'Account linked successfully',
+  })
+  @Audit({
+    action: AuditAction.USER_LINK_ACCOUNT,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateLinkedAccountDto>) => ({
+        provider: req.body?.provider,
+        userId: req.body?.userId,
+      }),
+    },
   })
   async linkAccount(
     @AuthContext() authContext: IAuthContext,
@@ -223,15 +224,6 @@ export class UserController {
     }
   }
 
-  @Audit({
-    action: AuditAction.USER_UNLINK_ACCOUNT,
-    requestMetadata: {
-      params: (req) => ({
-        provider: req.params.provider,
-        providerUserId: req.params.providerUserId,
-      }),
-    },
-  })
   @Delete('/linked-accounts/:provider/:providerUserId')
   @ApiOperation({
     summary: 'Unlink account',
@@ -240,6 +232,15 @@ export class UserController {
   @ApiResponse({
     status: 204,
     description: 'Account unlinked successfully',
+  })
+  @Audit({
+    action: AuditAction.USER_UNLINK_ACCOUNT,
+    requestMetadata: {
+      params: (req) => ({
+        provider: req.params.provider,
+        providerUserId: req.params.providerUserId,
+      }),
+    },
   })
   async unlinkAccount(
     @AuthContext() authContext: IAuthContext,

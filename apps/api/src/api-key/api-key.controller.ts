@@ -31,17 +31,6 @@ import { AuditTarget } from '../audit/enums/audit-target.enum'
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}
 
-  @Audit({
-    action: AuditAction.CREATE,
-    targetType: AuditTarget.API_KEY,
-    targetIdFromResult: (result: ApiKeyResponseDto) => result?.name,
-    requestMetadata: {
-      payload: (req: TypedRequest<CreateApiKeyDto>) => ({
-        permissions: req.body?.permissions,
-        expiresAt: req.body?.expiresAt,
-      }),
-    },
-  })
   @Post()
   @ApiOperation({
     summary: 'Create API key',
@@ -51,6 +40,18 @@ export class ApiKeyController {
     status: 201,
     description: 'API key created successfully.',
     type: ApiKeyResponseDto,
+  })
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.API_KEY,
+    targetIdFromResult: (result: ApiKeyResponseDto) => result?.name,
+    requestMetadata: {
+      payload: (req: TypedRequest<CreateApiKeyDto>) => ({
+        name: req.body?.name,
+        permissions: req.body?.permissions,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
   })
   async createApiKey(
     @AuthContext() authContext: OrganizationAuthContext,
@@ -121,11 +122,6 @@ export class ApiKeyController {
     return ApiKeyListDto.fromApiKey(apiKey)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.API_KEY,
-    targetIdFromRequest: (req) => req.params.name,
-  })
   @Delete(':name')
   @ApiOperation({
     summary: 'Delete API key',
@@ -133,6 +129,11 @@ export class ApiKeyController {
   })
   @ApiResponse({ status: 204, description: 'API key deleted successfully.' })
   @HttpCode(204)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.API_KEY,
+    targetIdFromRequest: (req) => req.params.name,
+  })
   async deleteApiKey(@AuthContext() authContext: OrganizationAuthContext, @Param('name') name: string) {
     await this.apiKeyService.deleteApiKey(authContext.organizationId, authContext.userId, name)
   }

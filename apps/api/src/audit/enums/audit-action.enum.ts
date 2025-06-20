@@ -31,6 +31,7 @@ export enum AuditAction {
   USER_LINK_ACCOUNT = 'link_account',
   USER_UNLINK_ACCOUNT = 'unlink_account',
   USER_LEAVE_ORGANIZATION = 'leave_organization',
+  USER_REGENERATE_KEY_PAIR = 'regenerate_key_pair',
 
   // runner
   RUNNER_UPDATE_SCHEDULING = 'update_scheduling',
@@ -70,7 +71,4 @@ export enum AuditAction {
   TOOLBOX_CREATE_SESSION = 'create_session',
   TOOLBOX_SESSION_EXECUTE_COMMAND = 'session_execute_command',
   TOOLBOX_DELETE_SESSION = 'delete_session',
-  TOOLBOX_LSP_START = 'lsp_start',
-  TOOLBOX_LSP_STOP = 'lsp_stop',
-  USER_REGENERATE_KEY_PAIR = 'USER_REGENERATE_KEY_PAIR',
 }

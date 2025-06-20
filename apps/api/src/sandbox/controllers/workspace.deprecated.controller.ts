@@ -117,6 +117,21 @@ export class WorkspaceController {
     return await Promise.all(dtos)
   }
 
+  @Post()
+  @HttpCode(200) //  for Daytona Api compatibility
+  @UseInterceptors(ContentTypeInterceptor)
+  @ApiOperation({
+    summary: '[DEPRECATED] Create a new workspace',
+    operationId: 'createWorkspace_deprecated',
+    deprecated: true,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'The workspace has been successfully created.',
+    type: WorkspaceDto,
+  })
+  @Throttle({ default: { limit: 100 } })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.SANDBOX,
@@ -143,21 +158,6 @@ export class WorkspaceController {
       }),
     },
   })
-  @Post()
-  @HttpCode(200) //  for Daytona Api compatibility
-  @UseInterceptors(ContentTypeInterceptor)
-  @ApiOperation({
-    summary: '[DEPRECATED] Create a new workspace',
-    operationId: 'createWorkspace_deprecated',
-    deprecated: true,
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'The workspace has been successfully created.',
-    type: WorkspaceDto,
-  })
-  @Throttle({ default: { limit: 100 } })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   async createWorkspace(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createWorkspaceDto: CreateWorkspaceDto,
@@ -226,16 +226,6 @@ export class WorkspaceController {
     return WorkspaceDto.fromSandbox(workspace, runner?.domain)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-    requestMetadata: {
-      query: (req) => ({
-        force: req.query.force,
-      }),
-    },
-  })
   @Delete(':workspaceId')
   @ApiOperation({
     summary: '[DEPRECATED] Delete workspace',
@@ -254,6 +244,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async removeWorkspace(
     @Param('workspaceId') workspaceId: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -262,11 +257,6 @@ export class WorkspaceController {
     return this.workspaceService.destroy(workspaceId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_START,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-  })
   @Post(':workspaceId/start')
   @HttpCode(200)
   @ApiOperation({
@@ -286,6 +276,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_START,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async startWorkspace(
     @AuthContext() authContext: OrganizationAuthContext,
     @Param('workspaceId') workspaceId: string,
@@ -293,11 +288,6 @@ export class WorkspaceController {
     return this.workspaceService.start(workspaceId, authContext.organization)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_STOP,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-  })
   @Post(':workspaceId/stop')
   @HttpCode(200) //  for Daytona Api compatibility
   @ApiOperation({
@@ -317,20 +307,15 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_STOP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async stopWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
     return this.workspaceService.stop(workspaceId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_REPLACE_LABELS,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-    requestMetadata: {
-      payload: (req: TypedRequest<WorkspaceLabelsDto>) => ({
-        labels: req.body?.labels,
-      }),
-    },
-  })
   @Put(':workspaceId/labels')
   @UseInterceptors(ContentTypeInterceptor)
   @ApiOperation({
@@ -350,6 +335,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_REPLACE_LABELS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      payload: (req: TypedRequest<WorkspaceLabelsDto>) => ({
+        labels: req.body?.labels,
+      }),
+    },
+  })
   async replaceLabels(
     @Param('workspaceId') workspaceId: string,
     @Body() labelsDto: WorkspaceLabelsDto,
@@ -358,11 +353,6 @@ export class WorkspaceController {
     return { labels }
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_CREATE_BACKUP,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-  })
   @Post(':workspaceId/backup')
   @ApiOperation({
     summary: '[DEPRECATED] Create workspace backup',
@@ -381,20 +371,15 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_CREATE_BACKUP,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async createBackup(@Param('workspaceId') workspaceId: string): Promise<void> {
     await this.workspaceService.createBackup(workspaceId)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ isPublic: boolean }>) => ({
-        isPublic: req.body?.isPublic,
-      }),
-    },
-  })
   @Post(':workspaceId/public/:isPublic')
   @ApiOperation({
     summary: '[DEPRECATED] Update public status',
@@ -413,6 +398,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_UPDATE_PUBLIC_STATUS,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        isPublic: req.params.isPublic,
+      }),
+    },
+  })
   async updatePublicStatus(
     @Param('workspaceId') workspaceId: string,
     @Param('isPublic') isPublic: boolean,
@@ -420,16 +415,6 @@ export class WorkspaceController {
     await this.workspaceService.updatePublicStatus(workspaceId, isPublic)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => ({
-        interval: req.body?.interval,
-      }),
-    },
-  })
   @Post(':workspaceId/autostop/:interval')
   @ApiOperation({
     summary: '[DEPRECATED] Set workspace auto-stop interval',
@@ -452,6 +437,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_STOP_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutostopInterval(
     @Param('workspaceId') workspaceId: string,
     @Param('interval') interval: number,
@@ -459,16 +454,6 @@ export class WorkspaceController {
     await this.workspaceService.setAutostopInterval(workspaceId, interval)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-    requestMetadata: {
-      payload: (req: TypedRequest<{ interval: number }>) => ({
-        interval: req.body?.interval,
-      }),
-    },
-  })
   @Post(':workspaceId/autoarchive/:interval')
   @ApiOperation({
     summary: '[DEPRECATED] Set workspace auto-archive interval',
@@ -491,6 +476,16 @@ export class WorkspaceController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_SET_AUTO_ARCHIVE_INTERVAL,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+    requestMetadata: {
+      params: (req) => ({
+        interval: req.params.interval,
+      }),
+    },
+  })
   async setAutoArchiveInterval(
     @Param('workspaceId') workspaceId: string,
     @Param('interval') interval: number,
@@ -498,11 +493,6 @@ export class WorkspaceController {
     await this.workspaceService.setAutoArchiveInterval(workspaceId, interval)
   }
 
-  @Audit({
-    action: AuditAction.SANDBOX_ARCHIVE,
-    targetType: AuditTarget.SANDBOX,
-    targetIdFromRequest: (req) => req.params.workspaceId,
-  })
   @Post(':workspaceId/archive')
   @HttpCode(200)
   @ApiOperation({
@@ -517,6 +507,11 @@ export class WorkspaceController {
   @Throttle({ default: { limit: 100 } })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_SANDBOXES])
   @UseGuards(WorkspaceAccessGuard)
+  @Audit({
+    action: AuditAction.SANDBOX_ARCHIVE,
+    targetType: AuditTarget.SANDBOX,
+    targetIdFromRequest: (req) => req.params.workspaceId,
+  })
   async archiveWorkspace(@Param('workspaceId') workspaceId: string): Promise<void> {
     return this.workspaceService.archive(workspaceId)
   }

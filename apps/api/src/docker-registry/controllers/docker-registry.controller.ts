@@ -33,6 +33,17 @@ import { AuditTarget } from '../../audit/enums/audit-target.enum'
 export class DockerRegistryController {
   constructor(private readonly dockerRegistryService: DockerRegistryService) {}
 
+  @Post()
+  @ApiOperation({
+    summary: 'Create registry',
+    operationId: 'createRegistry',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'The docker registry has been successfully created.',
+    type: DockerRegistryDto,
+  })
+  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGISTRIES])
   @Audit({
     action: AuditAction.CREATE,
     targetType: AuditTarget.DOCKER_REGISTRY,
@@ -49,17 +60,6 @@ export class DockerRegistryController {
       }),
     },
   })
-  @Post()
-  @ApiOperation({
-    summary: 'Create registry',
-    operationId: 'createRegistry',
-  })
-  @ApiResponse({
-    status: 201,
-    description: 'The docker registry has been successfully created.',
-    type: DockerRegistryDto,
-  })
-  @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGISTRIES])
   create(
     @AuthContext() authContext: OrganizationAuthContext,
     @Body() createDockerRegistryDto: CreateDockerRegistryDto,
@@ -117,18 +117,6 @@ export class DockerRegistryController {
     return registry
   }
 
-  @Audit({
-    action: AuditAction.UPDATE,
-    targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdFromRequest: (req) => req.params.id,
-    requestMetadata: {
-      payload: (req: TypedRequest<UpdateDockerRegistryDto>) => ({
-        name: req.body?.name,
-        username: req.body?.username,
-        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
-      }),
-    },
-  })
   @Patch(':id')
   @ApiOperation({
     summary: 'Update registry',
@@ -146,6 +134,18 @@ export class DockerRegistryController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGISTRIES])
   @UseGuards(DockerRegistryAccessGuard)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdFromRequest: (req) => req.params.id,
+    requestMetadata: {
+      payload: (req: TypedRequest<UpdateDockerRegistryDto>) => ({
+        name: req.body?.name,
+        username: req.body?.username,
+        password: req.body?.password ? MASKED_AUDIT_VALUE : undefined,
+      }),
+    },
+  })
   async update(
     @Param('id') registryId: string,
     @Body() updateDockerRegistryDto: UpdateDockerRegistryDto,
@@ -153,11 +153,6 @@ export class DockerRegistryController {
     return this.dockerRegistryService.update(registryId, updateDockerRegistryDto)
   }
 
-  @Audit({
-    action: AuditAction.DELETE,
-    targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdFromRequest: (req) => req.params.id,
-  })
   @Delete(':id')
   @ApiOperation({
     summary: 'Delete registry',
@@ -175,15 +170,15 @@ export class DockerRegistryController {
   @HttpCode(204)
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.DELETE_REGISTRIES])
   @UseGuards(DockerRegistryAccessGuard)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async remove(@Param('id') registryId: string): Promise<void> {
     return this.dockerRegistryService.remove(registryId)
   }
 
-  @Audit({
-    action: AuditAction.DOCKER_REGISTRY_SET_DEFAULT,
-    targetType: AuditTarget.DOCKER_REGISTRY,
-    targetIdFromRequest: (req) => req.params.id,
-  })
   @Post(':id/set-default')
   @ApiOperation({
     summary: 'Set default registry',
@@ -201,6 +196,11 @@ export class DockerRegistryController {
   })
   @RequiredOrganizationResourcePermissions([OrganizationResourcePermission.WRITE_REGISTRIES])
   @UseGuards(DockerRegistryAccessGuard)
+  @Audit({
+    action: AuditAction.DOCKER_REGISTRY_SET_DEFAULT,
+    targetType: AuditTarget.DOCKER_REGISTRY,
+    targetIdFromRequest: (req) => req.params.id,
+  })
   async setDefault(@Param('id') registryId: string): Promise<DockerRegistryDto> {
     return this.dockerRegistryService.setDefault(registryId)
   }
