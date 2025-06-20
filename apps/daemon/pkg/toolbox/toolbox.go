@@ -13,12 +13,12 @@ import (
 
 	common_proxy "github.com/daytonaio/common-go/pkg/proxy"
 	"github.com/daytonaio/daemon/internal"
-	"github.com/daytonaio/daemon/pkg/toolbox/computeruse"
 	"github.com/daytonaio/daemon/pkg/toolbox/config"
 	"github.com/daytonaio/daemon/pkg/toolbox/fs"
 	"github.com/daytonaio/daemon/pkg/toolbox/git"
 	"github.com/daytonaio/daemon/pkg/toolbox/lsp"
 	"github.com/daytonaio/daemon/pkg/toolbox/middlewares"
+	"github.com/daytonaio/daemon/pkg/toolbox/plugin_loader"
 	"github.com/daytonaio/daemon/pkg/toolbox/port"
 	"github.com/daytonaio/daemon/pkg/toolbox/process"
 	"github.com/daytonaio/daemon/pkg/toolbox/process/session"
@@ -32,7 +32,7 @@ import (
 
 type Server struct {
 	ProjectDir  string
-	ComputerUse *computeruse.ComputerUse
+	ComputerUse *plugin_loader.PluginLoader
 }
 
 type ProjectDirResponse struct {
@@ -149,14 +149,23 @@ func (s *Server) Start() error {
 		lspController.GET("/workspacesymbols", lsp.WorkspaceSymbols)
 	}
 
-	s.ComputerUse = computeruse.NewComputerUse()
+	// Initialize plugin-based computer use
+	pluginPath := "/usr/local/lib/computeruse.so"
+	// Fallback to local config directory for development
+	if _, err := os.Stat(pluginPath); os.IsNotExist(err) {
+		pluginPath = path.Join(configDir, "computeruse.so")
+	}
+	s.ComputerUse = plugin_loader.NewPluginLoader(pluginPath)
 
 	computerUseController := r.Group("/computer")
 	{
+		// Computer use status endpoint
+		computerUseController.GET("/status", s.ComputerUse.GetStatus)
+
 		// Computer use management endpoints
 		computerUseController.POST("/start", s.startComputerUse)
 		computerUseController.POST("/stop", s.stopComputerUse)
-		computerUseController.GET("/status", s.getComputerUseStatus)
+		computerUseController.GET("/process-status", s.getComputerUseStatus)
 		computerUseController.GET("/process/:processName/status", s.getProcessStatus)
 		computerUseController.POST("/process/:processName/restart", s.restartProcess)
 		computerUseController.GET("/process/:processName/logs", s.getProcessLogs)
@@ -218,7 +227,15 @@ func (s *Server) Start() error {
 
 // Computer use management handlers
 func (s *Server) startComputerUse(ctx *gin.Context) {
-	s.ComputerUse.Start()
+	err := s.ComputerUse.Start()
+	if err != nil {
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
+			"error":   "Failed to start computer use",
+			"details": err.Error(),
+		})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Computer use processes started successfully",
 		"status":  s.ComputerUse.GetProcessStatus(),

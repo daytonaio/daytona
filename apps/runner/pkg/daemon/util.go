@@ -45,3 +45,41 @@ func WriteDaemonBinary() (string, error) {
 
 	return daemonPath, nil
 }
+
+func WritePluginBinary() (string, error) {
+	pluginBinary, err := static.ReadFile("static/computeruse.so")
+	if err != nil {
+		return "", err
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	tmpBinariesDir := filepath.Join(pwd, ".tmp", "binaries")
+	err = os.MkdirAll(tmpBinariesDir, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	pluginPath := filepath.Join(tmpBinariesDir, "computeruse.so")
+	_, err = os.Stat(pluginPath)
+	if err != nil && !os.IsNotExist(err) {
+		return "", err
+	}
+
+	if err == nil {
+		err = os.Remove(pluginPath)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	err = os.WriteFile(pluginPath, pluginBinary, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	return pluginPath, nil
+}

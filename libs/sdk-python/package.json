@@ -7,8 +7,8 @@
     "build": "python -m build",
     "docs": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/!(index.mdx)' && npm run docs:common && npm run docs:sync && npm run docs:async",
     "docs:common": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/common' && npm run docs:errors && npm run docs:charts && npm run docs:image",
-    "docs:sync": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/sync' && npm run docs:daytona && npm run docs:sandbox && npm run docs:filesystem && npm run docs:git && npm run docs:process && npm run docs:lsp && npm run docs:volume && npm run docs:object_storage && npm run docs:snapshot",
-    "docs:async": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/async' && npm run docs:async-daytona && npm run docs:async-sandbox && npm run docs:async-filesystem && npm run docs:async-git && npm run docs:async-lsp && npm run docs:async-volume && npm run docs:async-object_storage && npm run docs:async-snapshot",
+    "docs:sync": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/sync' && npm run docs:daytona && npm run docs:sandbox && npm run docs:filesystem && npm run docs:git && npm run docs:process && npm run docs:lsp && npm run docs:volume && npm run docs:object_storage && npm run docs:snapshot && npm run docs:computer_use",
+    "docs:async": "bash -O extglob -c 'rm -rf $npm_package_config_docsDir/async' && npm run docs:async-daytona && npm run docs:async-sandbox && npm run docs:async-filesystem && npm run docs:async-git && npm run docs:async-lsp && npm run docs:async-volume && npm run docs:async-object_storage && npm run docs:async-snapshot && npm run docs:async-computer_use",
     "docs:errors": "FIRST_SECTION='DaytonaError' OUTPUT_FILE=\"$npm_package_config_docsDir/common/errors.mdx\" pydoc-markdown -m daytona.common.errors pydoc-markdown.yml",
     "docs:charts": "FIRST_SECTION='Chart' OUTPUT_FILE=\"$npm_package_config_docsDir/common/charts.mdx\" pydoc-markdown -m daytona.common.charts pydoc-markdown.yml",
     "docs:image": "FIRST_SECTION='Image' OUTPUT_FILE=\"$npm_package_config_docsDir/common/image.mdx\" pydoc-markdown -m daytona.common.image pydoc-markdown.yml",
@@ -21,6 +21,7 @@
     "docs:volume": "FIRST_SECTION='Volume' OUTPUT_FILE=\"$npm_package_config_docsDir/sync/volume.mdx\" pydoc-markdown -m daytona._sync.volume -m daytona.common.volume pydoc-markdown.yml",
     "docs:object_storage": "FIRST_SECTION='ObjectStorage' OUTPUT_FILE=\"$npm_package_config_docsDir/sync/object-storage.mdx\" pydoc-markdown -m daytona._sync.object_storage pydoc-markdown.yml",
     "docs:snapshot": "FIRST_SECTION='Snapshot' OUTPUT_FILE=\"$npm_package_config_docsDir/sync/snapshot.mdx\" pydoc-markdown -m daytona._sync.snapshot -m daytona.common.snapshot pydoc-markdown.yml",
+    "docs:computer_use": "FIRST_SECTION='ComputerUse' OUTPUT_FILE=\"$npm_package_config_docsDir/sync/computer-use.mdx\" pydoc-markdown -m daytona._sync.computer_use -m daytona.common.computer_use pydoc-markdown.yml",
     "docs:async-daytona": "FIRST_SECTION='AsyncDaytona' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-daytona.mdx\" pydoc-markdown -m daytona._async.daytona -m daytona.common.daytona pydoc-markdown.yml",
     "docs:async-sandbox": "FIRST_SECTION='AsyncSandbox' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-sandbox.mdx\" pydoc-markdown -m daytona._async.sandbox -m daytona.common.sandbox pydoc-markdown.yml",
     "docs:async-filesystem": "FIRST_SECTION='AsyncFileSystem' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-file-system.mdx\" pydoc-markdown -m daytona._async.filesystem -m daytona.common.filesystem pydoc-markdown.yml",
@@ -29,6 +30,7 @@
     "docs:async-lsp": "FIRST_SECTION='AsyncLspServer' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-lsp-server.mdx\" pydoc-markdown -m daytona._async.lsp_server -m daytona.common.lsp_server pydoc-markdown.yml",
     "docs:async-volume": "FIRST_SECTION='Volume' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-volume.mdx\" pydoc-markdown -m daytona._async.volume -m daytona.common.volume pydoc-markdown.yml",
     "docs:async-object_storage": "FIRST_SECTION='AsyncObjectStorage' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-object-storage.mdx\" pydoc-markdown -m daytona._async.object_storage pydoc-markdown.yml",
-    "docs:async-snapshot": "FIRST_SECTION='Snapshot' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-snapshot.mdx\" pydoc-markdown -m daytona._async.snapshot -m daytona.common.snapshot pydoc-markdown.yml"
+    "docs:async-snapshot": "FIRST_SECTION='Snapshot' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-snapshot.mdx\" pydoc-markdown -m daytona._async.snapshot -m daytona.common.snapshot pydoc-markdown.yml",
+    "docs:async-computer_use": "FIRST_SECTION='AsyncComputerUse' OUTPUT_FILE=\"$npm_package_config_docsDir/async/async-computer-use.mdx\" pydoc-markdown -m daytona._async.computer_use -m daytona.common.computer_use pydoc-markdown.yml"
   }
 }
