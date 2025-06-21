@@ -1,9 +1,6 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-L  const { sorting, setSorting } = usePersistedTableSorting({
-    tableId: 'registry',
-    defaultSorting: [{ id: 'name', desc: false }], // alphabetical by name
-  })se-Identifier: AGPL-3.0
+ * SPDX-License-Identifier: AGPL-3.0
  */
 
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
