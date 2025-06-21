@@ -8,6 +8,7 @@ import { useApi } from '@/hooks/useApi'
 import { OrganizationSuspendedError } from '@/api/errors'
 import { OrganizationUserRoleEnum, Sandbox, SandboxState } from '@daytonaio/api-client'
 import { SandboxTable } from '@/components/SandboxTable'
+import { SandboxInfoDialog } from '@/components/SandboxInfoDialog'
 import {
   Dialog,
   DialogClose,
@@ -39,6 +40,8 @@ const Sandboxes: React.FC = () => {
   const [loadingTable, setLoadingTable] = useState(true)
   const [sandboxToDelete, setSandboxToDelete] = useState<string | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [selectedSandbox, setSelectedSandbox] = useState<Sandbox | null>(null)
+  const [showInfoModal, setShowInfoModal] = useState(false)
 
   const navigate = useNavigate()
 
@@ -264,6 +267,11 @@ const Sandboxes: React.FC = () => {
     onboardIfNeeded()
   }, [navigate, user, selectedOrganization, apiKeyApi])
 
+  const handleRowClick = (sandbox: Sandbox) => {
+    setSelectedSandbox(sandbox)
+    setShowInfoModal(true)
+  }
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -294,6 +302,7 @@ const Sandboxes: React.FC = () => {
         handleArchive={handleArchive}
         data={sandboxes}
         loading={loadingTable}
+        onRowClick={handleRowClick}
       />
 
       {sandboxToDelete && (
@@ -329,6 +338,19 @@ const Sandboxes: React.FC = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+      )}
+
+      {selectedSandbox && (
+        <SandboxInfoDialog
+          open={showInfoModal}
+          onOpenChange={(isOpen) => {
+            setShowInfoModal(isOpen)
+            if (!isOpen) {
+              setSelectedSandbox(null)
+            }
+          }}
+          sandbox={selectedSandbox}
+        />
       )}
     </div>
   )
