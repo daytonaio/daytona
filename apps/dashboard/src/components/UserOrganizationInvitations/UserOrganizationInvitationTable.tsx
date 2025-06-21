@@ -21,6 +21,7 @@ import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@
 import { DeclineOrganizationInvitationDialog } from '@/components/UserOrganizationInvitations/DeclineOrganizationInvitationDialog'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 
 interface DataTableProps {
   data: OrganizationInvitation[]
@@ -37,7 +38,10 @@ export function UserOrganizationInvitationTable({
   onDeclineInvitation,
   loadingInvitationAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'invitation-table',
+    defaultSorting: [{ id: 'createdAt', desc: true }],
+  })
   const [invitationToDecline, setInvitationToDecline] = useState<OrganizationInvitation | null>(null)
   const [isDeclineDialogOpen, setIsDeclineDialogOpen] = useState(false)
 

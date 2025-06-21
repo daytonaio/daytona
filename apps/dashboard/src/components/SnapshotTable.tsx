@@ -32,6 +32,7 @@ import { getRelativeTimeString } from '@/lib/utils'
 import { TableEmptyState } from './TableEmptyState'
 import { Loader2 } from 'lucide-react'
 import { Badge } from './ui/badge'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 
 interface DataTableProps {
   data: SnapshotDto[]
@@ -71,7 +72,10 @@ export function SnapshotTable({
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'snapshot-table',
+    defaultSorting: [{ id: 'createdAt', desc: true }],
+  })
 
   const columns = useMemo(
     () =>

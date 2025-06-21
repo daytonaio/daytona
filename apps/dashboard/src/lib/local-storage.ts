@@ -19,3 +19,22 @@ export const setLocalStorageItem = (key: string, value: string): void => {
     console.error('Failed to write to localStorage:', error)
   }
 }
+
+/**
+ * Remove localStorage items by key prefix
+ * Useful for cleaning up related items
+ */
+export const removeLocalStorageItemsByPrefix = (prefix: string): void => {
+  try {
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      if (key && key.startsWith(prefix)) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key))
+  } catch (error) {
+    console.error(`Failed to remove localStorage items with prefix ${prefix}:`, error)
+  }
+}

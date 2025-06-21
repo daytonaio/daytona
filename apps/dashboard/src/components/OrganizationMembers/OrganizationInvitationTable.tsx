@@ -21,6 +21,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { CancelOrganizationInvitationDialog } from '@/components/OrganizationMembers/CancelOrganizationInvitationDialog'
 import { UpdateOrganizationInvitationDialog } from './UpdateOrganizationInvitationDialog'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import { DEFAULT_PAGE_SIZE } from '@/constants/Pagination'
 import { TableEmptyState } from '../TableEmptyState'
 
@@ -47,7 +48,10 @@ export function OrganizationInvitationTable({
   onUpdateInvitation,
   loadingInvitationAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'organization-invitations',
+    defaultSorting: [{ id: 'sentAt', desc: true }], // newest first
+  })
   const [invitationToCancel, setInvitationToCancel] = useState<string | null>(null)
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false)
   const [invitationToUpdate, setInvitationToUpdate] = useState<OrganizationInvitation | null>(null)
