@@ -34,6 +34,8 @@ interface UsePersistedTableSortingReturn {
   clearPersistedSorting: () => void
 }
 
+export type { UsePersistedTableSortingReturn }
+
 /**
  * Custom hook to manage persistent table sorting state using localStorage
  *
@@ -83,28 +85,36 @@ export function usePersistedTableSorting({
     return defaultSorting
   })
 
+  // Function to persist to localStorage immediately
+  const persistSorting = useCallback(
+    (sortingState: SortingState) => {
+      try {
+        if (sortingState.length === 0) {
+          // If sorting is cleared, remove from localStorage
+          localStorage.removeItem(storageKey)
+        } else {
+          setLocalStorageItem(storageKey, JSON.stringify(sortingState))
+        }
+      } catch (error) {
+        console.error(`Failed to persist sorting state for table ${tableId}:`, error)
+      }
+    },
+    [storageKey, tableId],
+  )
+
   // Update sorting state and persist to localStorage
   const setSorting = useCallback(
     (updater: SortingState | ((prev: SortingState) => SortingState)) => {
       setSortingState((prevSorting) => {
         const newSorting = typeof updater === 'function' ? updater(prevSorting) : updater
 
-        // Persist to localStorage
-        try {
-          if (newSorting.length === 0) {
-            // If sorting is cleared, remove from localStorage
-            localStorage.removeItem(storageKey)
-          } else {
-            setLocalStorageItem(storageKey, JSON.stringify(newSorting))
-          }
-        } catch (error) {
-          console.error(`Failed to persist sorting state for table ${tableId}:`, error)
-        }
+        // Persist to localStorage immediately
+        persistSorting(newSorting)
 
         return newSorting
       })
     },
-    [storageKey, tableId],
+    [persistSorting],
   )
 
   // Function to clear persisted sorting state

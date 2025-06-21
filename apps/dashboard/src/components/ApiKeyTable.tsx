@@ -16,6 +16,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useState } from 'react'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import {
   Dialog,
   DialogClose,
@@ -41,7 +42,10 @@ interface DataTableProps {
 }
 
 export function ApiKeyTable({ data, loading, loadingKeys, onRevoke }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'api-keys',
+    defaultSorting: [{ id: 'createdAt', desc: true }], // newest first
+  })
   const columns = getColumns({ onRevoke, loadingKeys })
   const table = useReactTable({
     data,

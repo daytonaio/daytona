@@ -18,6 +18,7 @@ import { OrganizationRole, OrganizationRolePermissionsEnum } from '@daytonaio/ap
 import { Pagination } from '@/components/Pagination'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { DeleteOrganizationRoleDialog } from '@/components/OrganizationRoles/DeleteOrganizationRoleDialog'
@@ -45,7 +46,10 @@ export function OrganizationRoleTable({
   onDeleteRole,
   loadingRoleAction,
 }: DataTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'organization-roles',
+    defaultSorting: [{ id: 'name', desc: false }], // alphabetical by name
+  })
   const [roleToDelete, setRoleToDelete] = useState<string | null>(null)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const [roleToUpdate, setRoleToUpdate] = useState<OrganizationRole | null>(null)

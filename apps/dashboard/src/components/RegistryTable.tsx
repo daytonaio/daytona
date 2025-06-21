@@ -1,6 +1,9 @@
 /*
  * Copyright 2025 Daytona Platforms Inc.
- * SPDX-License-Identifier: AGPL-3.0
+ * SPDX-L  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'registry',
+    defaultSorting: [{ id: 'name', desc: false }], // alphabetical by name
+  })se-Identifier: AGPL-3.0
  */
 
 import { DockerRegistry, OrganizationRolePermissionsEnum } from '@daytonaio/api-client'
@@ -16,6 +19,7 @@ import {
 import { TableHeader, TableRow, TableHead, TableBody, TableCell, Table } from './ui/table'
 import { Button } from './ui/button'
 import { useMemo, useState } from 'react'
+import { usePersistedTableSorting } from '@/hooks/usePersistedTableSorting'
 import { MoreHorizontal } from 'lucide-react'
 import {
   DropdownMenu,
@@ -50,7 +54,10 @@ export function RegistryTable({ data, loading, onDelete, onEdit }: DataTableProp
     [authenticatedUserHasPermission],
   )
 
-  const [sorting, setSorting] = useState<SortingState>([])
+  const { sorting, setSorting } = usePersistedTableSorting({
+    tableId: 'registry-table',
+    defaultSorting: [{ id: 'name', desc: false }], // alphabetical ascending
+  })
   const columns = getColumns({ onDelete, onEdit, loading, writePermitted, deletePermitted })
   const table = useReactTable({
     data,
