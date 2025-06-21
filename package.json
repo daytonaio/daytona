@@ -35,6 +35,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.787.0",
     "@aws-sdk/client-sts": "^3.803.0",
+    "@daytonaio/sdk": "workspace:^",
     "@esm2cjs/cacheable-lookup": "^7.0.0",
     "@nestjs-modules/ioredis": "^2.0.2",
     "@nestjs/axios": "^4.0.0",
@@ -143,6 +144,10 @@
     "@swc/cli": "~0.3.12",
     "@swc/core": "~1.5.7",
     "@swc/helpers": "~0.5.11",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/dockerode": "^3.3.34",
     "@types/ejs": "^3.1.5",
     "@types/jest": "^29.5.12",

@@ -96,6 +96,11 @@ export function SandboxTable({
   ])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
+  // Enhanced selection state
+  const [crossPageSelection, setCrossPageSelection] = useState<Set<string>>(new Set())
+  const [crossPageSelectionPopoverOpen, setCrossPageSelectionPopoverOpen] = useState(false)
+  const [isAllPagesSelected, setIsAllPagesSelected] = useState(false)
+
   const labelOptions: FacetedFilterOption[] = useMemo(() => {
     const labels = new Set<string>()
     data.forEach((sandbox) => {
@@ -114,6 +119,13 @@ export function SandboxTable({
     loadingSandboxes,
     writePermitted,
     deletePermitted,
+    data,
+    crossPageSelection,
+    setCrossPageSelection,
+    crossPageSelectionPopoverOpen,
+    setCrossPageSelectionPopoverOpen,
+    isAllPagesSelected,
+    setIsAllPagesSelected,
   })
   const table = useReactTable({
     data,
@@ -203,10 +215,33 @@ export function SandboxTable({
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
-          {table.getRowModel().rows.some((row) => row.getIsSelected()) && (
+          {(table.getRowModel().rows.some((row) => row.getIsSelected()) || isAllPagesSelected) && (
             <div className="flex items-center space-x-2">
+              {/* Selection Counter with Undo Button */}
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                <span>
+                  {isAllPagesSelected
+                    ? `${crossPageSelection.size} of ${data.length} row(s) selected.`
+                    : `${table.getSelectedRowModel().rows.length} of ${table.getRowModel().rows.length} row(s) selected.`}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    // Clear all selections
+                    table.resetRowSelection()
+                    setIsAllPagesSelected(false)
+                    setCrossPageSelection(new Set())
+                  }}
+                  aria-label="Undo selection"
+                  className="h-6 px-2 text-xs"
+                >
+                  Undo
+                </Button>
+              </div>
+
               <Popover open={bulkDeleteConfirmationOpen} onOpenChange={setBulkDeleteConfirmationOpen}>
-                <PopoverTrigger>
+                <PopoverTrigger asChild>
                   <Button variant="destructive" size="sm" className="h-8">
                     Bulk Delete
                   </Button>
@@ -218,13 +253,23 @@ export function SandboxTable({
                       <Button
                         variant="destructive"
                         onClick={() => {
-                          handleBulkDelete(
-                            table
-                              .getRowModel()
-                              .rows.filter((row) => row.getIsSelected())
-                              .map((row) => row.original.id),
-                          )
+                          if (isAllPagesSelected) {
+                            // Delete all selected across pages
+                            handleBulkDelete(Array.from(crossPageSelection))
+                          } else {
+                            // Delete current page selection
+                            handleBulkDelete(
+                              table
+                                .getRowModel()
+                                .rows.filter((row) => row.getIsSelected())
+                                .map((row) => row.original.id),
+                            )
+                          }
                           setBulkDeleteConfirmationOpen(false)
+                          // Clear selections after delete
+                          table.resetRowSelection()
+                          setIsAllPagesSelected(false)
+                          setCrossPageSelection(new Set())
                         }}
                       >
                         Delete
@@ -323,6 +368,13 @@ const getColumns = ({
   loadingSandboxes,
   writePermitted,
   deletePermitted,
+  data,
+  crossPageSelection,
+  setCrossPageSelection,
+  crossPageSelectionPopoverOpen,
+  setCrossPageSelectionPopoverOpen,
+  isAllPagesSelected,
+  setIsAllPagesSelected,
 }: {
   handleStart: (id: string) => void
   handleStop: (id: string) => void
@@ -331,26 +383,32 @@ const getColumns = ({
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
+  data: Sandbox[]
+  crossPageSelection: Set<string>
+  setCrossPageSelection: (selection: Set<string>) => void
+  crossPageSelectionPopoverOpen: boolean
+  setCrossPageSelectionPopoverOpen: (open: boolean) => void
+  isAllPagesSelected: boolean
+  setIsAllPagesSelected: (selected: boolean) => void
 }): ColumnDef<Sandbox>[] => {
   const columns: ColumnDef<Sandbox>[] = [
     {
       id: 'select',
-      header: ({ table }) => (
-        <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')}
-          onCheckedChange={(value) => {
-            for (const row of table.getRowModel().rows) {
-              if (loadingSandboxes[row.original.id]) {
-                row.toggleSelected(false)
-              } else {
-                row.toggleSelected(!!value)
-              }
-            }
-          }}
-          aria-label="Select all"
-          className="translate-y-[2px]"
-        />
-      ),
+      header: ({ table }) => {
+        return (
+          <SelectAllCheckbox
+            table={table}
+            data={data}
+            loadingSandboxes={loadingSandboxes}
+            crossPageSelection={crossPageSelection}
+            setCrossPageSelection={setCrossPageSelection}
+            crossPageSelectionPopoverOpen={crossPageSelectionPopoverOpen}
+            setCrossPageSelectionPopoverOpen={setCrossPageSelectionPopoverOpen}
+            isAllPagesSelected={isAllPagesSelected}
+            setIsAllPagesSelected={setIsAllPagesSelected}
+          />
+        )
+      },
       cell: ({ row }) => {
         if (loadingSandboxes[row.original.id]) {
           return <Loader2 className="w-4 h-4 animate-spin" />
@@ -668,4 +726,102 @@ const getColumns = ({
   ]
 
   return columns
+}
+
+// Component for the select all checkbox with cross-page selection support
+interface SelectAllCheckboxProps {
+  table: any
+  data: Sandbox[]
+  loadingSandboxes: Record<string, boolean>
+  crossPageSelection: Set<string>
+  setCrossPageSelection: (selection: Set<string>) => void
+  crossPageSelectionPopoverOpen: boolean
+  setCrossPageSelectionPopoverOpen: (open: boolean) => void
+  isAllPagesSelected: boolean
+  setIsAllPagesSelected: (selected: boolean) => void
+}
+
+const SelectAllCheckbox = ({
+  table,
+  data,
+  loadingSandboxes,
+  crossPageSelection,
+  setCrossPageSelection,
+  crossPageSelectionPopoverOpen,
+  setCrossPageSelectionPopoverOpen,
+  isAllPagesSelected,
+  setIsAllPagesSelected,
+}: SelectAllCheckboxProps) => {
+  const totalPages = table.getPageCount()
+  const isMultiPage = totalPages > 1
+
+  return (
+    <Popover open={crossPageSelectionPopoverOpen} onOpenChange={setCrossPageSelectionPopoverOpen}>
+      <PopoverTrigger asChild>
+        <Checkbox
+          checked={
+            isAllPagesSelected ||
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(value) => {
+            if (isMultiPage && value && !isAllPagesSelected) {
+              // Show popover for cross-page selection
+              setCrossPageSelectionPopoverOpen(true)
+              // Select current page
+              for (const row of table.getRowModel().rows) {
+                if (!loadingSandboxes[row.original.id]) {
+                  row.toggleSelected(true)
+                }
+              }
+            } else {
+              // Normal selection behavior
+              for (const row of table.getRowModel().rows) {
+                if (loadingSandboxes[row.original.id]) {
+                  row.toggleSelected(false)
+                } else {
+                  row.toggleSelected(!!value)
+                }
+              }
+
+              if (!value) {
+                setIsAllPagesSelected(false)
+                setCrossPageSelection(new Set())
+              }
+            }
+          }}
+          aria-label="Select all"
+          className="translate-y-[2px]"
+        />
+      </PopoverTrigger>
+      <PopoverContent side="bottom" className="w-80">
+        <div className="flex flex-col gap-4">
+          <p className="text-sm">{table.getSelectedRowModel().rows.length} selected on the current page.</p>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={() => {
+              // Select all pages
+              const allSelectableIds = data
+                .filter((sandbox) => !loadingSandboxes[sandbox.id])
+                .map((sandbox) => sandbox.id)
+
+              setCrossPageSelection(new Set(allSelectableIds))
+              setIsAllPagesSelected(true)
+              setCrossPageSelectionPopoverOpen(false)
+
+              // Also select all on current page
+              for (const row of table.getRowModel().rows) {
+                if (!loadingSandboxes[row.original.id]) {
+                  row.toggleSelected(true)
+                }
+              }
+            }}
+          >
+            Select all {data.filter((sandbox) => !loadingSandboxes[sandbox.id]).length} sandboxes?
+          </Button>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
 }
