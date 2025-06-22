@@ -75,6 +75,9 @@ const configuration = {
     protocol: process.env.PROXY_PROTOCOL,
     apiKey: process.env.PROXY_API_KEY,
   },
+  audit: {
+    logToolboxRequestMetadata: process.env.AUDIT_LOG_TOOLBOX_REQUEST_METADATA === 'true',
+  },
 }
 
 export { configuration }

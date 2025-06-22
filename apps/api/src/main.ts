@@ -22,6 +22,7 @@ import { RunnerRegion } from './sandbox/enums/runner-region.enum'
 import { SandboxClass } from './sandbox/enums/sandbox-class.enum'
 import { getOpenApiConfig } from './openapi.config'
 import { SchedulerRegistry } from '@nestjs/schedule'
+import { AuditInterceptor } from './audit/interceptors/audit.interceptor'
 
 // https options
 const httpsEnabled = process.env.CERT_PATH && process.env.CERT_KEY_PATH
@@ -55,6 +56,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter(httpAdapter))
   app.useGlobalFilters(new NotFoundExceptionFilter())
   app.useGlobalInterceptors(new MetricsInterceptor())
+  app.useGlobalInterceptors(app.get(AuditInterceptor))
   app.useGlobalPipes(new ValidationPipe())
 
   // Runtime flags for migrations for run and revert migrations
