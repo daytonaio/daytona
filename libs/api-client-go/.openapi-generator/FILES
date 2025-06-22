@@ -1,6 +1,7 @@
 .gitignore
 api/openapi.yaml
 api_api_keys.go
+api_audit.go
 api_docker_registry.go
 api_object_storage.go
 api_organizations.go
@@ -19,12 +20,14 @@ go.sum
 model_account_provider.go
 model_api_key_list.go
 model_api_key_response.go
+model_audit_log.go
 model_build_info.go
 model_command.go
 model_completion_context.go
 model_completion_item.go
 model_completion_list.go
 model_create_api_key.go
+model_create_audit_log.go
 model_create_build_info.go
 model_create_docker_registry.go
 model_create_linked_account.go
@@ -66,6 +69,7 @@ model_organization_invitation.go
 model_organization_role.go
 model_organization_suspension.go
 model_organization_user.go
+model_paginated_audit_logs.go
 model_paginated_snapshots_dto.go
 model_port_preview_url.go
 model_position.go

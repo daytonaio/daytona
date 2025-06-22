@@ -15,6 +15,9 @@ import { OrganizationActionGuard } from '../guards/organization-action.guard'
 import { OrganizationInvitationService } from '../services/organization-invitation.service'
 import { AuthContext } from '../../common/decorators/auth-context.decorator'
 import { AuthContext as IAuthContext } from '../../common/interfaces/auth-context.interface'
+import { Audit, TypedRequest } from '../../audit/decorators/audit.decorator'
+import { AuditAction } from '../../audit/enums/audit-action.enum'
+import { AuditTarget } from '../../audit/enums/audit-target.enum'
 
 @ApiTags('organizations')
 @Controller('organizations/:organizationId/invitations')
@@ -40,6 +43,19 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.CREATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromResult: (result: OrganizationInvitationDto) => result?.id,
+    requestMetadata: {
+      body: (req: TypedRequest<CreateOrganizationInvitationDto>) => ({
+        email: req.body?.email,
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
+  })
   async create(
     @AuthContext() authContext: IAuthContext,
     @Param('organizationId') organizationId: string,
@@ -74,6 +90,18 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.UPDATE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+    requestMetadata: {
+      body: (req: TypedRequest<UpdateOrganizationInvitationDto>) => ({
+        role: req.body?.role,
+        assignedRoleIds: req.body?.assignedRoleIds,
+        expiresAt: req.body?.expiresAt,
+      }),
+    },
+  })
   async update(
     @Param('organizationId') organizationId: string,
     @Param('invitationId') invitationId: string,
@@ -123,6 +151,11 @@ export class OrganizationInvitationController {
     type: 'string',
   })
   @RequiredOrganizationMemberRole(OrganizationMemberRole.OWNER)
+  @Audit({
+    action: AuditAction.DELETE,
+    targetType: AuditTarget.ORGANIZATION_INVITATION,
+    targetIdFromRequest: (req) => req.params.invitationId,
+  })
   async cancel(
     @Param('organizationId') organizationId: string,
     @Param('invitationId') invitationId: string,

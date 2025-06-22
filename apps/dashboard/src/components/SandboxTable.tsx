@@ -63,6 +63,7 @@ interface DataTableProps {
   handleDelete: (id: string) => void
   handleBulkDelete: (ids: string[]) => void
   handleArchive: (id: string) => void
+  handleOpenWebTerminal: (id: string) => void
 }
 
 export function SandboxTable({
@@ -74,6 +75,7 @@ export function SandboxTable({
   handleDelete,
   handleBulkDelete,
   handleArchive,
+  handleOpenWebTerminal,
 }: DataTableProps) {
   const { authenticatedUserHasPermission } = useSelectedOrganization()
   const navigate = useNavigate()
@@ -115,6 +117,7 @@ export function SandboxTable({
     handleStop,
     handleDelete,
     handleArchive,
+    handleOpenWebTerminal,
     loadingSandboxes,
     writePermitted,
     deletePermitted,
@@ -343,6 +346,7 @@ const getColumns = ({
   handleStop,
   handleDelete,
   handleArchive,
+  handleOpenWebTerminal,
   loadingSandboxes,
   writePermitted,
   deletePermitted,
@@ -351,6 +355,7 @@ const getColumns = ({
   handleStop: (id: string) => void
   handleDelete: (id: string) => void
   handleArchive: (id: string) => void
+  handleOpenWebTerminal: (id: string) => void
   loadingSandboxes: Record<string, boolean>
   writePermitted: boolean
   deletePermitted: boolean
@@ -609,29 +614,10 @@ const getColumns = ({
       cell: ({ row }) => {
         if (row.original.state !== SandboxState.STARTED) return ''
 
-        if (!row.original.daemonVersion) {
-          return (
-            <a
-              href={`https://22222-${row.original.id}.${row.original.runnerDomain}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Terminal className="w-4 h-4" />
-            </a>
-          )
-        }
-
-        const terminalUrl = import.meta.env.VITE_PROXY_TEMPLATE_URL?.replace('{{PORT}}', '22222').replace(
-          '{{sandboxId}}',
-          row.original.id,
-        )
-        if (!terminalUrl) {
-          return null
-        }
         return (
-          <a href={terminalUrl} target="_blank" rel="noopener noreferrer">
+          <button onClick={() => handleOpenWebTerminal(row.original.id)} className="flex">
             <Terminal className="w-4 h-4" />
-          </a>
+          </button>
         )
       },
     },
